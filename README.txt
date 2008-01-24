@@ -53,7 +53,7 @@ License:
 
 Knowns Issues:
 
-  There are currently three known scalability issues that are currently being resolved.
+  There are currently one known scalability issues that are currently being resolved.
 
    * Large co-groupings will fail if there is insufficient memory.
 
