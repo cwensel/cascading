@@ -222,6 +222,22 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
+   * Method getShort returns the element at the given position i as an long.
+   *
+   * @param i of type int
+   * @return long
+   */
+  public short getShort( int i )
+    {
+    Comparable value = get( i );
+
+    if( value instanceof Number )
+      return ( (Number) value ).shortValue();
+    else
+      return Short.parseShort( value.toString() );
+    }
+
+  /**
    * Method get will return a new Tuple instace populated with element values from the given array of positions.
    *
    * @param pos of type int[]
@@ -450,14 +466,19 @@ public class Tuple implements WritableComparable, Iterable, Serializable
         WritableUtils.writeVInt( out, 5 );
         WritableUtils.writeVLong( out, (Long) element );
         }
-      else if( element instanceof Tuple )
+      else if( element instanceof Short )
         {
         WritableUtils.writeVInt( out, 6 );
+        out.writeShort( (Short) element );
+        }
+      else if( element instanceof Tuple )
+        {
+        WritableUtils.writeVInt( out, 7 );
         ( (Tuple) element ).write( out );
         }
       else if( element instanceof WritableComparable )
         {
-        WritableUtils.writeVInt( out, 7 );
+        WritableUtils.writeVInt( out, 8 );
         WritableUtils.writeString( out, element.getClass().getName() );
         ( (WritableComparable) element ).write( out );
         }
@@ -496,8 +517,10 @@ public class Tuple implements WritableComparable, Iterable, Serializable
       else if( type == 5 )
         elements.add( WritableUtils.readVLong( in ) );
       else if( type == 6 )
-        elements.add( readNewTuple( in ) );
+        elements.add( in.readShort() );
       else if( type == 7 )
+        elements.add( readNewTuple( in ) );
+      else if( type == 8 )
         elements.add( readNewWritable( in ) );
       else
         throw new IOException( "could not read unknown element type: " + type );

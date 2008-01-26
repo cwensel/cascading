@@ -22,17 +22,45 @@
 package cascading.operation;
 
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryListIterator;
 
-/** Class Identity ... */
+/**
+ * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
+ * coerced into specfic types to save storage space.
+ */
 public class Identity extends Operation implements Function
   {
+  /** Field types */
+  private Class[] types = null;
+
+  /**
+   * Constructor Identity creates a new Identity instance that will pass the argument values to its output. Use this
+   * constructor for a simple copy Pipe.
+   */
   public Identity()
     {
     super( Fields.ALL );
     }
 
+  /**
+   * Constructor Identity creates a new Identity instance that will coerce the values to the give types.
+   *
+   * @param types of type Class...
+   */
+  public Identity( Class... types )
+    {
+    super( Fields.ALL );
+    this.types = types;
+    }
+
+  /**
+   * Constructor Identity creates a new Identity instance that will rename the argument fields to the given
+   * fieldDeclaration.
+   *
+   * @param fieldDeclaration of type Fields
+   */
   public Identity( Fields fieldDeclaration )
     {
     super( fieldDeclaration ); // don't need to set size, default is ANY
@@ -43,8 +71,54 @@ public class Identity extends Operation implements Function
     super( numArgs, fieldDeclaration );
     }
 
+  /**
+   * Constructor Identity creates a new Identity instance that will rename the argument fields to the given
+   * fieldDeclaration, and coerce the values to the give types.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param types            of type Class...
+   */
+  public Identity( Fields fieldDeclaration, Class... types )
+    {
+    super( fieldDeclaration );
+    this.types = types;
+
+    if( fieldDeclaration.size() != types.length )
+      throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
+    }
+
   public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
     {
+    if( types == null )
+      {
+      outputCollector.add( input );
+      return;
+      }
+
+    Tuple result = new Tuple();
+
+    for( int i = 0; i < types.length; i++ )
+      {
+      Class type = types[ i ];
+
+      if( type == Object.class )
+        result.add( input.get( i ) );
+      else if( type == String.class )
+        result.add( input.getTuple().getString( i ) );
+      else if( type == Float.class )
+        result.add( input.getTuple().getFloat( i ) );
+      else if( type == Double.class )
+        result.add( input.getTuple().getDouble( i ) );
+      else if( type == Integer.class )
+        result.add( input.getTuple().getInteger( i ) );
+      else if( type == Long.class )
+        result.add( input.getTuple().getLong( i ) );
+      else if( type == Short.class )
+        result.add( input.getTuple().getShort( i ) );
+      else
+        throw new OperationException( "could not coerce value, " + input.get( i ) + " to type: " + type.getName() );
+      }
+
     outputCollector.add( input );
     }
   }

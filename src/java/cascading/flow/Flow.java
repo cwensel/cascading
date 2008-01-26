@@ -189,7 +189,7 @@ public class Flow implements Runnable
 
     for( Tap sink : sinks.values() )
       {
-      if( sink.isDeleteOnInit() )
+      if( sink.isDeleteOnSinkInit() )
         sinkMod = -1L;
       else if( !sink.pathExists( jobConf ) )
         sinkMod = 0L;

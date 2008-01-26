@@ -46,8 +46,8 @@ public class Hfs extends Tap
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
 
-  /** Field deleteOnInit */
-  boolean deleteOnInit = false;
+  /** Field deleteOnSinkInit */
+  boolean deleteOnSinkInit = false;
   /** Field stringPath */
   String stringPath;
   /** Field path */
@@ -89,13 +89,13 @@ public class Hfs extends Tap
    *
    * @param scheme       of type Scheme
    * @param stringPath   of type String
-   * @param deleteOnInit of type boolean
+   * @param deleteOnSinkInit of type boolean
    */
-  public Hfs( Scheme scheme, String stringPath, boolean deleteOnInit )
+  public Hfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
     super( scheme );
     this.stringPath = stringPath;
-    this.deleteOnInit = deleteOnInit;
+    this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
   protected FileSystem getFileSystem( JobConf conf ) throws IOException
@@ -130,11 +130,11 @@ public class Hfs extends Tap
     return getPath().makeQualified( getFileSystem( conf ) );
     }
 
-  /** @see Tap#isDeleteOnInit() */
+  /** @see Tap#isDeleteOnSinkInit() */
   @Override
-  public boolean isDeleteOnInit()
+  public boolean isDeleteOnSinkInit()
     {
-    return deleteOnInit;
+    return deleteOnSinkInit;
     }
 
   @Override
@@ -149,7 +149,7 @@ public class Hfs extends Tap
     {
     super.sinkInit( conf );
 
-    if( deleteOnInit )
+    if( deleteOnSinkInit )
       deletePath( conf );
 
     conf.setOutputPath( getQualifiedPath( conf ) );

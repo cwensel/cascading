@@ -265,12 +265,12 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract long getPathModified( JobConf conf ) throws IOException;
 
   /**
-   * Method isDeleteOnInit indicates whether the resource represented by this instance should be deleted if it
+   * Method isDeleteOnSinkInit indicates whether the resource represented by this instance should be deleted if it
    * already exists when the tap is initialized.
    *
    * @return boolean
    */
-  public boolean isDeleteOnInit()
+  public boolean isDeleteOnSinkInit()
     {
     return false;
     }

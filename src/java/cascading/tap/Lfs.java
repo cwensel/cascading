@@ -72,7 +72,7 @@ public class Lfs extends Hfs
     {
     super( scheme );
     this.stringPath = stringPath;
-    this.deleteOnInit = deleteOnInit;
+    this.deleteOnSinkInit = deleteOnInit;
     }
 
   protected FileSystem getFileSystem( JobConf conf ) throws IOException
