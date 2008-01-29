@@ -45,7 +45,7 @@ public class Count extends Operation implements Aggregator
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor Count creates a new Count instance and returns a field with the given fieldDeclaration name.
    *
    * @param fieldDeclaration of type Fields
    */

@@ -38,20 +38,23 @@ public class Sum extends Operation implements Aggregator
   /** Field FIELD_NAME */
   private static final String FIELD_NAME = "sum";
 
-  /** Constructor */
+  /**
+   * Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum".
+   */
   public Sum()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
   /**
-   * Constructor
+   * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts
+   * only 1 argument.
    *
-   * @param declaredFields
+   * @param fieldDeclaration of type Fields
    */
-  protected Sum( Fields declaredFields )
+  public Sum( Fields fieldDeclaration )
     {
-    super( 1, declaredFields );
+    super( 1, fieldDeclaration );
     }
 
   /** @see Aggregator#start(Map) */
