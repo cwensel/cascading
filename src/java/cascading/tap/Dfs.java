@@ -38,6 +38,18 @@ public class Dfs extends Hfs
     super( sourceFields, stringPath );
     }
 
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param sourceFields of type Fields
+   * @param stringPath of type String
+   * @param deleteOnSinkInit of type boolean
+   */
+  public Dfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
+    {
+    super( sourceFields, stringPath, deleteOnSinkInit );
+    }
+
   Dfs( Scheme scheme )
     {
     super( scheme );
@@ -59,10 +71,10 @@ public class Dfs extends Hfs
    *
    * @param scheme       of type Scheme
    * @param stringPath   of type String
-   * @param deleteOnInit of type boolean
+   * @param deleteOnSinkInit of type boolean
    */
-  public Dfs( Scheme scheme, String stringPath, boolean deleteOnInit )
+  public Dfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
-    super( scheme, stringPath, deleteOnInit );
+    super( scheme, stringPath, deleteOnSinkInit );
     }
   }

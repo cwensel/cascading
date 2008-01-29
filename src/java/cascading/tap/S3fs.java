@@ -50,6 +50,39 @@ public class S3fs extends Hfs
    * Constructor S3fs creates a new S3fs instance.
    *
    * @param sourceFields of type Fields
+   * @param uri          of type URI
+   */
+  public S3fs( Fields sourceFields, URI uri )
+    {
+    super( sourceFields, uri.getPath() );
+
+    if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
+      throw new IllegalArgumentException( "uri must use the s3 scheme" );
+
+    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
+   * @param sourceFields of type Fields
+   * @param uri of type URI
+   * @param deleteOnSinkInit of type boolean
+   */
+  public S3fs( Fields sourceFields, URI uri, boolean deleteOnSinkInit )
+    {
+    super( sourceFields, uri.getPath(), deleteOnSinkInit );
+
+    if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
+      throw new IllegalArgumentException( "uri must use the s3 scheme" );
+
+    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
+   * @param sourceFields of type Fields
    * @param stringPath   of type String
    */
   public S3fs( Fields sourceFields, String stringPath )
@@ -85,6 +118,22 @@ public class S3fs extends Hfs
     {
     super( scheme, stringPath );
     this.uri = makeURI( id, secret, bucket );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
+   * @param scheme of type Scheme
+   * @param uri of type URI
+   */
+  public S3fs( Scheme scheme, URI uri )
+    {
+    super( scheme, uri.getPath() );
+
+    if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
+      throw new IllegalArgumentException( "uri must use the s3 scheme" );
+
+    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
     }
 
   /**

@@ -75,6 +75,20 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
+   * @param sourceFields of type Fields
+   * @param stringPath of type String
+   * @param deleteOnSinkInit of type boolean
+   */
+  public Hfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
+    {
+    super( new SequenceFile( sourceFields ) );
+    this.stringPath = stringPath;
+    this.deleteOnSinkInit = deleteOnSinkInit;
+    }
+
+  /**
+   * Constructor Hfs creates a new Hfs instance.
+   *
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
