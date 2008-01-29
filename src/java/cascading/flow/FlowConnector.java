@@ -289,6 +289,9 @@ public class FlowConnector
 
   private void verifyGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
+    if( pipeGraph.vertexSet().isEmpty() )
+      return;
+
     // need to verify that only EndPipe instances are origins in this graph. Otherwise a Tap was not properly connected
     TopologicalOrderIterator<FlowElement, Scope> iterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
 
