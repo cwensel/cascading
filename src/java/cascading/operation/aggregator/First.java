@@ -55,7 +55,7 @@ public class First extends Operation implements Aggregator
     }
 
   @SuppressWarnings("unchecked")
-  public void start( Map context )
+  public void start( Map context, TupleEntry groupEntry )
     {
     // no-op
     }

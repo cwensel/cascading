@@ -63,12 +63,12 @@ public class MaxTest
     assertEquals( "Got expected fields", fields, max.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Max#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    max.start( context );
+    max.start( context, null );
 
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     max.complete( context, resultEntryCollector.iterator() );
@@ -85,7 +85,7 @@ public class MaxTest
   public final void testAggregateComplete()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    max.start( context );
+    max.start( context, null );
     max.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
     max.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
     max.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );

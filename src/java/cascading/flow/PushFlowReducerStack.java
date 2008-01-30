@@ -74,7 +74,7 @@ public class PushFlowReducerStack extends FlowReducerStack
       List<Every.EveryHandler> everyHandlers = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new FlowReducerStackElement( stackTail, everyHandlers );
+      stackTail = new FlowReducerStackElement( stackTail, incomingScope, everyHandlers );
 
       while( operator instanceof Every )
         {
@@ -107,8 +107,8 @@ public class PushFlowReducerStack extends FlowReducerStack
     {
     if( LOG.isDebugEnabled() )
       {
+      LOG.debug( "reduce fields: " + stackHead.getOutGroupingFields() );
       LOG.debug( "reduce key: " + ( (Tuple) key ).print() );
-      LOG.debug( "reduce group: " + stackHead.getOutGroupingFields() );
       }
 
     stackTail.setLastOutput( output );
@@ -140,9 +140,10 @@ public class PushFlowReducerStack extends FlowReducerStack
       this.outGroupingFields = outGroupingFields;
       }
 
-    public FlowReducerStackElement( FlowReducerStackElement previous, List<Every.EveryHandler> everyHandlers )
+    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, List<Every.EveryHandler> everyHandlers )
       {
       this.previous = previous;
+      this.incomingScope = incomingScope;
       this.everyHandlers = everyHandlers;
       }
 
@@ -231,7 +232,7 @@ public class PushFlowReducerStack extends FlowReducerStack
       if( flowElement instanceof Group )
         operateGroup( key, values );
       else if( everyHandlers != null )
-        operateEveryHandlers( key, values );
+        operateEveryHandlers( getGroupingTupleEntry( key ), values );
       else if( flowElement instanceof Each )
         operateEach( key, values );
       else if( flowElement instanceof Tap )
@@ -287,10 +288,10 @@ public class PushFlowReducerStack extends FlowReducerStack
       next.collect( key, values );
       }
 
-    private void operateEveryHandlers( Tuple key, Iterator values )
+    private void operateEveryHandlers( TupleEntry keyEntry, Iterator values )
       {
       for( Every.EveryHandler everyHandler : everyHandlers )
-        everyHandler.start();
+        everyHandler.start( keyEntry );
 
       while( values.hasNext() )
         {
@@ -300,7 +301,7 @@ public class PushFlowReducerStack extends FlowReducerStack
           handler.operate( valueEntry );
         }
 
-      next.collect( key );
+      next.collect( keyEntry.getTuple() );
       }
 
     private void operateEveryHandler( TupleEntry keyEntry )

@@ -72,12 +72,12 @@ public class FirstTest
     assertEquals( "Got expected fields ", fields, first.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.First#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    first.start( context );
+    first.start( context, null );
 
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     first.complete( context, resultEntryCollector.iterator() );
@@ -93,7 +93,7 @@ public class FirstTest
   public final void testAggregateComplete()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    first.start( context );
+    first.start( context, null );
     first.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
     first.aggregate( context, new TupleEntry( new Tuple( new Double( 0.0 ) ) ) );
 

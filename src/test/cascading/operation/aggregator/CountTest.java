@@ -63,12 +63,12 @@ public class CountTest
     assertEquals( "Got expected fields", fields, count.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Count#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    count.start( context );
+    count.start( context, null );
 
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     count.complete( context, resultEntryCollector.iterator() );
@@ -85,7 +85,7 @@ public class CountTest
   public final void testAggregateComplete()
     {
     Map<String, Integer> context = new HashMap<String, Integer>();
-    count.start( context );
+    count.start( context, null );
     count.aggregate( context, new TupleEntry() );
     count.aggregate( context, new TupleEntry() );
 

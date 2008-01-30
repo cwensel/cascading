@@ -63,12 +63,12 @@ public class MinTest
     assertEquals( "Got expected fields", fields, min.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Min#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    min.start( context );
+    min.start( context, null );
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     min.complete( context, resultEntryCollector.iterator() );
     Tuple tuple = resultEntryCollector.iterator().next().getTuple();
@@ -84,7 +84,7 @@ public class MinTest
   public final void testAggregateComplete()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    min.start( context );
+    min.start( context, null );
     min.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );
     min.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
     min.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );

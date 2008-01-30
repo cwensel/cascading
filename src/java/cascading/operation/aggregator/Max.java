@@ -48,9 +48,9 @@ public class Max extends Operation implements Aggregator
     super( 1, new Fields( FIELD_NAME ) );
     }
 
-  /** @see Aggregator#start(Map) */
+  /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
-  public void start( Map context )
+  public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, Double.MIN_VALUE );
     }

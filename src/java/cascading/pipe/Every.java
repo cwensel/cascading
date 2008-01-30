@@ -200,11 +200,15 @@ public class Every extends Operator
       this.outgoingScope = outgoingScope;
       }
 
-    /** Method start calls the aggregator start method. */
-    public void start()
+    /**
+     * Method start calls the aggregator start method.
+     *
+     * @param groupEntry the group TupleEntry
+     */
+    public void start( TupleEntry groupEntry )
       {
       context.clear();
-      getAggregator().start( context );
+      getAggregator().start( context, groupEntry );
       }
 
     /**

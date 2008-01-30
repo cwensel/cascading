@@ -73,9 +73,9 @@ public class EuclideanDistance extends CrossTab
       super( new Fields( "euclidean" ) );
       }
 
-    /** @see Aggregator#start(Map) */
+    /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
     @SuppressWarnings("unchecked")
-    public void start( Map context )
+    public void start( Map context, TupleEntry groupEntry )
       {
       context.put( SUMSQR, 0d );
       }

@@ -72,12 +72,12 @@ public class SumTest
     assertEquals( "Got expected fields", fields, sum.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Sum#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    sum.start( context );
+    sum.start( context, null );
 
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     sum.complete( context, resultEntryCollector.iterator() );
@@ -94,7 +94,7 @@ public class SumTest
   public final void testAggregateComplete()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    sum.start( context );
+    sum.start( context, null );
     sum.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
     sum.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
     sum.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );

@@ -54,9 +54,9 @@ public class Count extends Operation implements Aggregator
     super( fieldDeclaration );
     }
 
-  /** @see cascading.operation.Aggregator#start(Map) */
+  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
-  public void start( Map context )
+  public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, 0L );
     }

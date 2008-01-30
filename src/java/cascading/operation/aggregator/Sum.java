@@ -38,9 +38,7 @@ public class Sum extends Operation implements Aggregator
   /** Field FIELD_NAME */
   private static final String FIELD_NAME = "sum";
 
-  /**
-   * Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum".
-   */
+  /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()
     {
     super( 1, new Fields( FIELD_NAME ) );
@@ -57,9 +55,9 @@ public class Sum extends Operation implements Aggregator
     super( 1, fieldDeclaration );
     }
 
-  /** @see Aggregator#start(Map) */
+  /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
-  public void start( Map context )
+  public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, 0.0d );
     }

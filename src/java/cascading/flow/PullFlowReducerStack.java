@@ -66,8 +66,8 @@ public class PullFlowReducerStack extends FlowReducerStack
 
     if( LOG.isDebugEnabled() )
       {
-      LOG.debug( "reduce key: " + ( (Tuple) key ).print() );
       LOG.debug( "reduce group: " + nextScope.getOutGroupingFields() );
+      LOG.debug( "reduce key: " + ( (Tuple) key ).print() );
       }
 
     // if a cogroup group instance...
@@ -91,7 +91,7 @@ public class PullFlowReducerStack extends FlowReducerStack
         }
 
       for( Every.EveryHandler everyHandler : everyHandlers )
-        everyHandler.start();
+        everyHandler.start( groupEntry );
 
       while( values.hasNext() )
         {

@@ -47,9 +47,9 @@ public class TestAggregator extends Operation implements Aggregator
     this.value = value;
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map) */
+  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
-  public void start( Map context )
+  public void start( Map context, TupleEntry groupEntry )
     {
     // no-op
     }

@@ -40,9 +40,10 @@ public interface Aggregator
    * holds values to be aggregated.  If an initial value should be set here, this
    * method should be called before {@link #aggregate(Map, TupleEntry)} and {@link #complete(Map, TupleEntryListIterator)}.
    *
-   * @param context the map to be initialized (if necessary)
+   * @param context    the map to be initialized (if necessary)
+   * @param groupEntry is the current grouping tuple
    */
-  void start( Map context );
+  void start( Map context, TupleEntry groupEntry );
 
   /**
    * Adds a {@link TupleEntry} to the aggregation operation.  This is issued by

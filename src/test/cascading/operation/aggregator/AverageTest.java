@@ -63,12 +63,12 @@ public class AverageTest
     assertEquals( "Got expected fields", fields, average.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Average#start(java.util.Map)}. */
+  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
   @Test
   public final void testStart()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    average.start( context );
+    average.start( context, null );
 
     TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
     average.complete( context, resultEntryCollector.iterator() );
@@ -85,7 +85,7 @@ public class AverageTest
   public final void testAggregateComplete()
     {
     Map<String, Double> context = new HashMap<String, Double>();
-    average.start( context );
+    average.start( context, null );
     average.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
     average.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
     average.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );

@@ -60,7 +60,7 @@ public class PearsonDistance extends CrossTab
       super( new Fields( "pearson" ) );
       }
 
-    public void start( Map context )
+    public void start( Map context, TupleEntry groupEntry )
       {
       context.put( COUNT, 0d );
       context.put( SUM1, 0d );
