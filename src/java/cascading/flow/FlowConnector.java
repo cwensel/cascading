@@ -255,6 +255,15 @@ public class FlowConnector
         throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
         }
       }
+
+    for( Pipe pipe : pipes )
+      {
+      for( Pipe head : pipe.getHeads() )
+        {
+        if( !names.contains( head.getName() ) )
+          throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+        }
+      }
     }
 
   private String makeName( Pipe[] pipes )
@@ -644,7 +653,16 @@ public class FlowConnector
       if( LOG.isDebugEnabled() )
         LOG.debug( "adding edge: " + previous + " -> " + current );
 
-      graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
+      if( previous instanceof PipeAssembly )
+        {
+        // handle PipeAssembly instances, they are not part of the graph
+        for( Pipe pipe : previous.getPrevious() )
+          graph.addEdge( pipe, current ).setName( pipe.getName() ); // name scope after previous pipe
+        }
+      else
+        {
+        graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
+        }
       }
     }
 
