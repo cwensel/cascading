@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import cascading.CascadingException;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -332,9 +333,12 @@ public class PushFlowReducerStack extends FlowReducerStack
         {
         ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
         }
-      catch( IOException exception )
+      catch( Throwable throwable )
         {
-        throw new FlowException( "failed writing output", exception );
+        if( throwable instanceof CascadingException )
+          throw (CascadingException) throwable;
+
+        throw new FlowException( "internal error: " + tupleEntry.getTuple().print(), throwable );
         }
       }
     }

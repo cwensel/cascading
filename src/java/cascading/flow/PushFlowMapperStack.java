@@ -24,6 +24,7 @@ package cascading.flow;
 import java.io.IOException;
 import java.util.Iterator;
 
+import cascading.CascadingException;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
@@ -58,6 +59,9 @@ public class PushFlowMapperStack extends FlowMapperStack
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
     currentSource = step.findCurrentSource( jobConf );
 
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "map current source: " + currentSource );
+
     buildStack();
     }
 
@@ -76,9 +80,12 @@ public class PushFlowMapperStack extends FlowMapperStack
       operator = step.getNextFlowElement( incomingScope );
       }
 
+    if( !( operator instanceof Group ) )
+      throw new IllegalStateException( "operator should be group, is instead: " + operator.getClass().getName() );
+
     Scope outgoingScope = step.getNextScope( operator ); // is always Group
 
-    stackTail = new FlowMapperStackElement( this.stackTail, incomingScope, (Group) operator, outgoingScope );
+    stackTail = new FlowMapperStackElement( stackTail, incomingScope, (Group) operator, outgoingScope );
     stackHead = stackTail.resolveStack();
     }
 
@@ -199,6 +206,9 @@ public class PushFlowMapperStack extends FlowMapperStack
 
     public void collect( Tuple tuple )
       {
+      if( tuple.isEmpty() )
+        throw new FlowException( "may not collect an empty tuple" );
+
       if( each != null )
         operateEach( getTupleEntry( tuple ) );
       else
@@ -207,7 +217,7 @@ public class PushFlowMapperStack extends FlowMapperStack
 
     public void collect( Tuple key, Iterator tupleIterator )
       {
-
+      throw new UnsupportedOperationException( "collect should never be called" );
       }
 
     private void operateEach( TupleEntry tupleEntry )
@@ -225,8 +235,20 @@ public class PushFlowMapperStack extends FlowMapperStack
         }
       catch( IOException exception )
         {
-        throw new FlowException( "failed writing output tuple", exception );
+        throw new FlowException( "failed writing output", exception );
         }
+      catch( Throwable throwable )
+        {
+        if( throwable instanceof CascadingException )
+          throw (CascadingException) throwable;
+
+        throw new FlowException( "internal error at grouping: " + grouping[ 0 ].print() + " values: " + grouping[ 1 ].print(), throwable );
+        }
+      }
+
+    public String toString()
+      {
+      return each != null ? each.toString() : group.toString();
       }
     }
   }

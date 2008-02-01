@@ -23,6 +23,7 @@ package cascading.flow;
 
 import java.io.IOException;
 
+import cascading.CascadingException;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -45,13 +46,37 @@ public class FlowMapper extends MapReduceBase implements Mapper
   @Override
   public void configure( JobConf jobConf )
     {
-    super.configure( jobConf );
-    flowMapperStack = new PushFlowMapperStack( jobConf );
+    try
+      {
+      super.configure( jobConf );
+      flowMapperStack = new PushFlowMapperStack( jobConf );
+      }
+    catch( Throwable throwable )
+      {
+      if( throwable instanceof CascadingException )
+        throw (CascadingException) throwable;
+
+      throw new FlowException( "internal error during mapper configuration", throwable );
+      }
     }
 
   public void map( WritableComparable key, Writable value, OutputCollector output, Reporter reporter ) throws IOException
     {
-    flowMapperStack.map( key, value, output );
+    try
+      {
+      flowMapperStack.map( key, value, output );
+      }
+    catch( IOException exception )
+      {
+      throw exception;
+      }
+    catch( Throwable throwable )
+      {
+      if( throwable instanceof CascadingException )
+        throw (CascadingException) throwable;
+
+      throw new FlowException( "internal error during mapper execution", throwable );
+      }
     }
 
   }

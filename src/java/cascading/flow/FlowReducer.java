@@ -24,6 +24,7 @@ package cascading.flow;
 import java.io.IOException;
 import java.util.Iterator;
 
+import cascading.CascadingException;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -44,13 +45,36 @@ public class FlowReducer extends MapReduceBase implements Reducer
   @Override
   public void configure( JobConf jobConf )
     {
-    super.configure( jobConf );
+    try
+      {
+      super.configure( jobConf );
+      flowReducerStack = new PushFlowReducerStack( jobConf );
+      }
+    catch( Throwable throwable )
+      {
+      if( throwable instanceof CascadingException )
+        throw (CascadingException) throwable;
 
-    flowReducerStack = new PushFlowReducerStack( jobConf );
+      throw new FlowException( "internal error during reducer configuration", throwable );
+      }
     }
 
   public void reduce( WritableComparable key, Iterator values, OutputCollector output, Reporter reporter ) throws IOException
     {
-    flowReducerStack.reduce( key, values, output );
+    try
+      {
+      flowReducerStack.reduce( key, values, output );
+      }
+    catch( IOException exception )
+      {
+      throw exception;
+      }
+    catch( Throwable throwable )
+      {
+      if( throwable instanceof CascadingException )
+        throw (CascadingException) throwable;
+
+      throw new FlowException( "internal error during reducer execution", throwable );
+      }
     }
   }
