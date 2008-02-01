@@ -89,7 +89,7 @@ public class Identity extends Operation implements Function
 
   public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
     {
-    if( types == null )
+    if( types == null || types.length == 0 )
       {
       outputCollector.add( input );
       return;
@@ -119,6 +119,6 @@ public class Identity extends Operation implements Function
         throw new OperationException( "could not coerce value, " + input.get( i ) + " to type: " + type.getName() );
       }
 
-    outputCollector.add( input );
+    outputCollector.add( result );
     }
   }
