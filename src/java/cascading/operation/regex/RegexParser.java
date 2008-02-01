@@ -24,6 +24,7 @@ package cascading.operation.regex;
 import java.util.regex.Matcher;
 
 import cascading.operation.Function;
+import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -94,11 +95,11 @@ public class RegexParser extends RegexOperation implements Function
     // todo: reuse the matcher via the .reset() method. need to confirm only one thread will fire through this
     Matcher matcher = getPattern().matcher( value );
 
-    if( matcher.find() )
-      {
-      for( int pos : groups )
-        output.add( matcher.group( pos ) );
-      }
+    if( !matcher.find() )
+      throw new OperationException( "could not match pattern: " + getPattern() + " with value: " + value );
+
+    for( int pos : groups )
+      output.add( matcher.group( pos ) );
 
     outputCollector.add( output );
     }
