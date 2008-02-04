@@ -112,7 +112,6 @@ public abstract class Tap implements FlowElement, Serializable
     scheme.sinkInit( conf );
     }
 
-
   /**
    * Method getPath returns the Hadoop path to the resource represented by this Tap instance.
    *
@@ -273,6 +272,26 @@ public abstract class Tap implements FlowElement, Serializable
   public boolean isDeleteOnSinkInit()
     {
     return false;
+    }
+
+  /**
+   * Method isSink returns true if this Tap instance can be used as a sink.
+   *
+   * @return the sink (type boolean) of this Tap object.
+   */
+  public boolean isSink()
+    {
+    return true;
+    }
+
+  /**
+   * Method isSource returns true if this Tap instance can be used as a source.
+   *
+   * @return the source (type boolean) of this Tap object.
+   */
+  public boolean isSource()
+    {
+    return true;
     }
 
   @Override

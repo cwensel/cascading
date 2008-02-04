@@ -75,8 +75,8 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param sourceFields of type Fields
-   * @param stringPath of type String
+   * @param sourceFields     of type Fields
+   * @param stringPath       of type String
    * @param deleteOnSinkInit of type boolean
    */
   public Hfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
@@ -101,8 +101,8 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param scheme       of type Scheme
-   * @param stringPath   of type String
+   * @param scheme           of type Scheme
+   * @param stringPath       of type String
    * @param deleteOnSinkInit of type boolean
    */
   public Hfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
@@ -270,9 +270,9 @@ public class Hfs extends Tap
     if( !super.equals( object ) )
       return false;
 
-    Dfs dfs = (Dfs) object;
+    Hfs hfs = (Hfs) object;
 
-    if( stringPath != null ? !stringPath.equals( dfs.stringPath ) : dfs.stringPath != null )
+    if( stringPath != null ? !stringPath.equals( hfs.stringPath ) : hfs.stringPath != null )
       return false;
 
     return true;

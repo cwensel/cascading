@@ -208,4 +208,34 @@ public abstract class Scheme implements Serializable
    * @throws IOException when
    */
   public abstract void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException;
+
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+
+    Scheme scheme = (Scheme) object;
+
+    if( numSinkParts != scheme.numSinkParts )
+      return false;
+    if( sinkFields != null ? !sinkFields.equals( scheme.sinkFields ) : scheme.sinkFields != null )
+      return false;
+    if( sourceFields != null ? !sourceFields.equals( scheme.sourceFields ) : scheme.sourceFields != null )
+      return false;
+
+    return true;
+    }
+
+  public int hashCode()
+    {
+    int result;
+    result = ( sinkFields != null ? sinkFields.hashCode() : 0 );
+    result = 31 * result + ( sourceFields != null ? sourceFields.hashCode() : 0 );
+    result = 31 * result + numSinkParts;
+    return result;
+    }
   }

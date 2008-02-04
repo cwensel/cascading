@@ -35,13 +35,16 @@ import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.Join;
 import cascading.scheme.TextLine;
 import cascading.tap.Dfs;
+import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
@@ -150,7 +153,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Group( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
 
@@ -412,6 +415,38 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 1, "left" );
     validateLength( flow, 1, "right" );
+    }
+
+  public void testConcatentation() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Tap source = new MultiTap( sourceLower, sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/concat/", true );
+
+    Pipe pipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new GroupBy( pipe, new Fields( "num" ) );
+
+    Flow countFlow = new FlowConnector( jobConf ).connect( source, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 10, null );
     }
 
   private void validateLength( Flow flow, int length, String name ) throws IOException

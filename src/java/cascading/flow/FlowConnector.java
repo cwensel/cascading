@@ -216,6 +216,9 @@ public class FlowConnector
    */
   private Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
+    verifyTaps( sources, true );
+    verifyTaps( sinks, false );
+
     verifyNames( sources, sinks, pipes );
 
     SimpleDirectedGraph<FlowElement, Scope> pipeGraph = makePipeGraph( pipes, sources, sinks );
@@ -231,6 +234,17 @@ public class FlowConnector
     SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
 
     return new Flow( jobConf, name, pipeGraph, buildSteps( pipeGraph, tapGraph ), new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
+    }
+
+  private void verifyTaps( final Map<String, Tap> taps, final boolean areSources )
+    {
+    for( String tapName : taps.keySet() )
+      {
+      if( areSources && !taps.get( tapName ).isSource() )
+        throw new FlowException( "tap named: " + tapName + " is not a source: " + taps.get( tapName ) );
+      else if( !areSources && !taps.get( tapName ).isSink() )
+        throw new FlowException( "tap named: " + tapName + " is not a sink: " + taps.get( tapName ) );
+      }
     }
 
   private void verifyNames( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
