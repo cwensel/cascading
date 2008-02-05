@@ -33,7 +33,7 @@ import cascading.flow.Scope;
 import cascading.pipe.cogroup.CoGroupClosure;
 import cascading.pipe.cogroup.CoGrouper;
 import cascading.pipe.cogroup.GroupClosure;
-import cascading.pipe.cogroup.Join;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -231,7 +231,7 @@ public class Group extends Pipe
     {
     addPipe( pipe );
     this.groupFieldsMap.put( pipe.getName(), Fields.FIRST ); // group on first element. this is more efficient that ALL
-    this.coGrouper = new Join();
+    this.coGrouper = new InnerJoin();
     }
 
   /**
@@ -244,7 +244,7 @@ public class Group extends Pipe
     {
     addPipe( pipe );
     this.groupFieldsMap.put( pipe.getName(), groupFields );
-    this.coGrouper = new Join();
+    this.coGrouper = new InnerJoin();
     }
 
   /**
@@ -259,7 +259,7 @@ public class Group extends Pipe
     addPipe( pipe );
     this.groupName = groupName;
     this.groupFieldsMap.put( pipe.getName(), groupFields );
-    this.coGrouper = new Join();
+    this.coGrouper = new InnerJoin();
     }
 
   /**
@@ -379,7 +379,7 @@ public class Group extends Pipe
       closure = new CoGroupClosure( getPipePos(), repeat, (Tuple) key, values );
 
     if( coGrouper == null )
-      return new Join().getIterator( closure );
+      return new InnerJoin().getIterator( closure );
     else
       return coGrouper.getIterator( closure );
     }

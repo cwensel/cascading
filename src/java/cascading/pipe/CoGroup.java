@@ -22,6 +22,7 @@
 package cascading.pipe;
 
 import cascading.pipe.cogroup.CoGrouper;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
 
 /**
@@ -30,6 +31,8 @@ import cascading.tuple.Fields;
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields.
+ * <p/>
+ * By default CoGroup performs an Inner Join via the {@link InnerJoin} {@link CoGrouper} class.
  */
 public class CoGroup extends Group
   {

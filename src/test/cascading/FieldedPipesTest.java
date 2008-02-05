@@ -41,7 +41,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.Join;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.TextLine;
 import cascading.tap.Dfs;
 import cascading.tap.MultiTap;
@@ -59,6 +59,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   String inputFileUpper = "build/test/data/upper.txt";
   String inputFileLower = "build/test/data/lower.txt";
+  String inputFileLowerOffset = "build/test/data/lower-offset.txt";
   String inputFileJoined = "build/test/data/lower+upper.txt";
 
   String inputFileLhs = "build/test/data/lhs.txt";
@@ -168,6 +169,68 @@ public class FieldedPipesTest extends ClusterTestCase
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
+  /**
+   * 1 A
+   * 2 B
+   * 3 C
+   * 4 D
+   * 5 E
+   * <p/>
+   * 1 a
+   * 5 b
+   * 6 c
+   * 5 e
+   * <p/>
+   * 1	a	1	A
+   * 5	b	5	E
+   * 5	e	5	E
+   *
+   * @throws Exception
+   */
+  public void testCoGroupInner() throws Exception
+    {
+    if( !new File( inputFileLowerOffset ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLowerOffset );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroupinner/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 3, null );
+
+    TapIterator iterator = countFlow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "5\te\t5\tE", iterator.next().get( 1 ) );
 
     iterator.close();
     }
@@ -319,7 +382,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
     Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
 
-    Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new Join() );
+    Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 
     // using null pos so all fields are written
     Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cross/", true );

@@ -84,7 +84,7 @@ public class CoGroupClosure extends GroupClosure
       groups[ pos ].add( (Tuple) current.get( 1 ) ); // get the value tuple, skipping over the name
       }
 
-    // juct clone the tuple for additional repeats
+    // just clone the tuple for additional repeats
     // not copying the tuple in case they are modified
     for( int i = 1; i < repeat; i++ )
       groups[ i ] = new CopyOnWriteArrayList<Tuple>( groups[ 0 ] );
