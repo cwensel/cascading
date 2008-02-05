@@ -24,11 +24,13 @@ package cascading.flow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import cascading.pipe.Every;
@@ -65,13 +67,47 @@ public class FlowConnector
   /** Field jobConf */
   private JobConf jobConf;
 
+  /** Constructor FlowConnector creates a new FlowConnector instance. */
   public FlowConnector()
     {
     }
 
+  /**
+   * Constructor FlowConnector creates a new FlowConnector instance using the given {@link JobConf} instance as
+   * default values for the underlying jobs.
+   *
+   * @param jobConf of type JobConf
+   */
   public FlowConnector( JobConf jobConf )
     {
     this.jobConf = jobConf;
+    }
+
+  /**
+   * Constructor FlowConnector creates a new FlowConnector instance using the given {@link Properties} instance as
+   * default value for the underlying jobs. All properties are copied to a new {@link JobConf} instance.
+   *
+   * @param properties of type Properties
+   */
+  public FlowConnector( Properties properties )
+    {
+    copyProperties( properties );
+    }
+
+  private void copyProperties( Properties properties )
+    {
+    if( properties == null )
+      return;
+
+    jobConf = new JobConf();
+
+    Enumeration enumeration = properties.propertyNames();
+
+    while( enumeration.hasMoreElements() )
+      {
+      String key = (String) enumeration.nextElement();
+      jobConf.set( key, properties.getProperty( key ) );
+      }
     }
 
   /**
