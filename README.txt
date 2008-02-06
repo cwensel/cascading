@@ -53,10 +53,6 @@ License:
 
 Knowns Issues:
 
-  There are currently one known scalability issues that are currently being resolved.
-
-   * Large co-groupings will fail if there is insufficient memory.
-
   There is one current limitation that will be resolved:
 
    * With an Every -> Every chain, the second Every cannot reference a field created by the previous.

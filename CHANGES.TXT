@@ -1,0 +1,25 @@
+Cascading Change Log
+
+0.2.0
+
+  CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.threshold".
+  Defaults to 10k elements.
+
+  java.util.Properties instances can be used to set defauls for FlowConnectors.
+
+  Fix for InnerJoin, the default join for CoGroup.
+
+  Introduced MultiTap to support concatenation of files into a pipe assembly.
+
+  RegexParser now fails on a failed match. Prevents it being used or behaving as a filter.
+
+  Fixed bug with PipeAssembly instances not properly being assimiliated into the pipeGraph.
+
+  Fixed assertion error thrown by JGraphT.
+
+  Renamed Tap method deleteOnInit to deleteOnSinkInit.
+
+
+0.1.0
+
+  First release.
