@@ -38,6 +38,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /** The base class for {@link GroupBy} and {@link CoGroup}. */
@@ -363,7 +364,7 @@ public class Group extends Pipe
    * @param values of type Iterator
    * @return Iterator<Tuple>
    */
-  public Iterator<Tuple> makeReduceValues( WritableComparable key, Iterator values )
+  public Iterator<Tuple> makeReduceValues( JobConf jobConf, WritableComparable key, Iterator values )
     {
     /*
     * todo: support unlimited sized cogroupings
@@ -376,7 +377,7 @@ public class Group extends Pipe
     if( isGroupBy() )
       closure = new GroupClosure( (Tuple) key, values );
     else
-      closure = new CoGroupClosure( getPipePos(), repeat, (Tuple) key, values );
+      closure = new CoGroupClosure( jobConf, getPipePos(), repeat, (Tuple) key, values );
 
     if( coGrouper == null )
       return new InnerJoin().getIterator( closure );

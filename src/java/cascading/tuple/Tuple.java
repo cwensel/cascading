@@ -552,10 +552,16 @@ public class Tuple implements WritableComparable, Iterable, Serializable
       {
       throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
       }
-
     }
 
-  private Tuple readNewTuple( DataInput in ) throws IOException
+  /**
+   * Read a new Tuple instance from the given DataInput stream.
+   *
+   * @param in of type DataInput
+   * @return Tuple
+   * @throws IOException
+   */
+  public static Tuple readNewTuple( DataInput in ) throws IOException
     {
     Tuple tuple = new Tuple();
 

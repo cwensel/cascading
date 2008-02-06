@@ -31,6 +31,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /** Class Uniq ... */
@@ -64,7 +65,7 @@ public class Uniq extends Group
     }
 
   @Override
-  public Iterator<Tuple> makeReduceValues( WritableComparable key, Iterator values )
+  public Iterator<Tuple> makeReduceValues( JobConf jobConf, WritableComparable key, Iterator values )
     {
     // we must walk all the values, otherwise we will get dupe keys
     while( values.hasNext() )

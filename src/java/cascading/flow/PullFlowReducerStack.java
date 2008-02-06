@@ -47,6 +47,8 @@ public class PullFlowReducerStack extends FlowReducerStack
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( PullFlowReducerStack.class );
 
+  /** Field jobConf */
+  private final JobConf jobConf;
   /** Field step */
   private FlowStep step;
   /** Field currentSink */
@@ -54,6 +56,7 @@ public class PullFlowReducerStack extends FlowReducerStack
 
   public PullFlowReducerStack( JobConf jobConf )
     {
+    this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
     currentSink = step.sink;
     }
@@ -75,7 +78,7 @@ public class PullFlowReducerStack extends FlowReducerStack
     // this can be one big tuple. the values iterator will have one Tuple of the format:
     // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
     // this can be nasty
-    values = step.group.makeReduceValues( key, values );
+    values = step.group.makeReduceValues( jobConf, key, values );
 
     values = new TupleEntryIterator( operator.resolveIncomingOperationFields( nextScope ), values );
 

@@ -111,7 +111,7 @@ public class PushFlowMapperStack extends FlowMapperStack
   /**
    *
    */
-  static class FlowMapperStackElement implements FlowCollector
+  class FlowMapperStackElement implements FlowCollector
     {
     protected FlowMapperStackElement previous;
     protected FlowMapperStackElement next;

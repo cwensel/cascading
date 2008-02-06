@@ -22,27 +22,29 @@
 package cascading.pipe.cogroup;
 
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /** Class CoGroupClosure ... */
 public class CoGroupClosure extends GroupClosure
   {
+  public static final String SPILL_THRESHOLD = "cascading.spill.threshold";
+  private static final int defaultThreshold = 10 * 1000;
+
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( CoGroupClosure.class );
 
   /** Field groups */
-  List<Tuple>[] groups;
+  SpillableTupleList[] groups;
 
-  public CoGroupClosure( Map<String, Integer> pipePos, int repeat, Tuple key, Iterator values )
+  public CoGroupClosure( JobConf jobConf, Map<String, Integer> pipePos, int repeat, Tuple key, Iterator values )
     {
     super( key, values );
-    build( pipePos, repeat );
+    build( jobConf, pipePos, repeat );
     }
 
   @Override
@@ -60,12 +62,12 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ].iterator();
     }
 
-  public void build( Map<String, Integer> pipePos, int repeat )
+  public void build( JobConf jobConf, Map<String, Integer> pipePos, int repeat )
     {
-    groups = new List[Math.max( pipePos.size(), repeat )];
+    groups = new SpillableTupleList[Math.max( pipePos.size(), repeat )];
 
     for( int i = 0; i < pipePos.size(); i++ )
-      groups[ i ] = new LinkedList<Tuple>();
+      groups[ i ] = new SpillableTupleList( jobConf.getInt( SPILL_THRESHOLD, defaultThreshold ) );
 
     while( values.hasNext() )
       {
@@ -84,9 +86,7 @@ public class CoGroupClosure extends GroupClosure
       groups[ pos ].add( (Tuple) current.get( 1 ) ); // get the value tuple, skipping over the name
       }
 
-    // just clone the tuple for additional repeats
-    // not copying the tuple in case they are modified
     for( int i = 1; i < repeat; i++ )
-      groups[ i ] = new CopyOnWriteArrayList<Tuple>( groups[ 0 ] );
+      groups[ i ] = groups[ 0 ];
     }
   }

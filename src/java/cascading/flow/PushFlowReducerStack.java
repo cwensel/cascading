@@ -52,11 +52,13 @@ public class PushFlowReducerStack extends FlowReducerStack
   /** Field step */
   private FlowStep step;
 
+  private final JobConf jobConf;
   private FlowReducerStackElement stackHead;
   private FlowReducerStackElement stackTail;
 
   public PushFlowReducerStack( JobConf jobConf )
     {
+    this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
 
     buildStack();
@@ -119,7 +121,7 @@ public class PushFlowReducerStack extends FlowReducerStack
   /**
    *
    */
-  public static class FlowReducerStackElement implements FlowCollector
+  class FlowReducerStackElement implements FlowCollector
     {
     protected FlowReducerStackElement previous;
     protected FlowReducerStackElement next;
@@ -282,7 +284,7 @@ public class PushFlowReducerStack extends FlowReducerStack
       // this can be one big tuple. the values iterator will have one Tuple of the format:
       // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
       // this can be nasty
-      values = ( (Group) flowElement ).makeReduceValues( key, values );
+      values = ( (Group) flowElement ).makeReduceValues( jobConf, key, values );
 
       values = new TupleEntryIterator( next.resolveIncomingOperationFields(), values );
 
