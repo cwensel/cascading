@@ -264,7 +264,7 @@
   <target name="tar" depends="dist">
     <tar destfile="${tar.cascading}"
          compression="gzip">
-      <tarfileset dir="dist/" prefix="cascading">
+      <tarfileset dir="dist/" prefix="cascading-${release.version}">
         <include name="**/**"/>
       </tarfileset>
     </tar>
