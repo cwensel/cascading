@@ -28,7 +28,7 @@ import cascading.tuple.TupleEntryListIterator;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
- * coerced into specfic types to save storage space.
+ * coerced into specfic types.
  */
 public class Identity extends Operation implements Function
   {
