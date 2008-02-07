@@ -23,12 +23,12 @@ package cascading.tuple;
 
 import java.util.Iterator;
 
-import junit.framework.TestCase;
+import cascading.CascadingTestCase;
 
 /**
  *
  */
-public class SpillableTupleTest extends TestCase
+public class SpillableTupleTest extends CascadingTestCase
   {
   public SpillableTupleTest()
     {

@@ -21,15 +21,15 @@
 
 package cascading.operation.expression;
 
+import cascading.CascadingTestCase;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import junit.framework.TestCase;
 
 /**
  *
  */
-public class ExpressionTest extends TestCase
+public class ExpressionTest extends CascadingTestCase
   {
   public ExpressionTest()
     {

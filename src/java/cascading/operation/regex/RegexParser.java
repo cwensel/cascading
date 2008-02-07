@@ -50,6 +50,9 @@ public class RegexParser extends RegexOperation implements Function
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the patternString is a simple regular expression
    * whose match value is stored in the new field named by the given fieldDeclaration.
+   * <p/>
+   * If the fieldDeclaration declares more tha one field, it will be assumed the pattrnString defines the same number
+   * of sub-groups. Subsequently each sub-group will be returned in its corresponding field.
    *
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
@@ -57,6 +60,14 @@ public class RegexParser extends RegexOperation implements Function
   public RegexParser( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );
+
+    if( fieldDeclaration.size() == 1 )
+      return;
+
+    groups = new int[fieldDeclaration.size()];
+
+    for( int i = 0; i < fieldDeclaration.size(); i++ )
+      groups[ i ] = i + 1;
     }
 
   /**
@@ -64,12 +75,12 @@ public class RegexParser extends RegexOperation implements Function
    * with match groups and whose groups designated by groupPos are stored in the appropriate number of new fields.
    *
    * @param patternString of type String
-   * @param groupPos      of type int[]
+   * @param groups        of type int[]
    */
-  public RegexParser( String patternString, int[] groupPos )
+  public RegexParser( String patternString, int[] groups )
     {
     super( 1, patternString );
-    this.groups = groupPos;
+    this.groups = groups;
     }
 
   /**

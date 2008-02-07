@@ -27,10 +27,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import cascading.CascadingTestCase;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/tuple/TupleTest.java#2 $ */
-public class TupleTest extends TestCase
+public class TupleTest extends CascadingTestCase
   {
   private Tuple tuple;
 

@@ -36,12 +36,10 @@ import cascading.scheme.TextLine;
 import cascading.tap.Dfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import junit.framework.TestCase;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/CascadeTest.java#2 $ */
-public class CascadeTest extends TestCase
+public class CascadeTest extends CascadingTestCase
   {
-
   String inputFileApache = "build/test/data/apache.200.txt";
   String outputPath = "build/test/output/cascade/";
 
@@ -69,7 +67,8 @@ public class CascadeTest extends TestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second", true );
+    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second",
+      true );
 
     return new FlowConnector().connect( source, sink, pipe );
     }
@@ -108,6 +107,5 @@ public class CascadeTest extends TestCase
     cascade.start();
 
     cascade.complete();
-
     }
   }

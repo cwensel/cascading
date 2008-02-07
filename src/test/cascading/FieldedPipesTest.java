@@ -22,7 +22,6 @@
 package cascading;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -330,7 +329,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ) ) );
 
-    pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
+    pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ),
+      Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
@@ -379,8 +379,10 @@ public class FieldedPipesTest extends ClusterTestCase
     sources.put( "lhs", new Dfs( new TextLine(), inputFileLhs ) );
     sources.put( "rhs", new Dfs( new TextLine(), inputFileRhs ) );
 
-    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
-    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ),
+      new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ),
+      new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
 
     Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 
@@ -511,20 +513,4 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 10, null );
     }
-
-  private void validateLength( Flow flow, int length, String name ) throws IOException
-    {
-    TapIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
   }

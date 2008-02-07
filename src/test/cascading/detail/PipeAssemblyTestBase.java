@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import cascading.CascadingTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
@@ -39,12 +40,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
-public abstract class PipeAssemblyTestBase extends TestCase
+public abstract class PipeAssemblyTestBase extends CascadingTestCase
   {
   private static final Logger LOG = Logger.getLogger( PipeAssemblyTestBase.class );
 
@@ -64,7 +64,8 @@ public abstract class PipeAssemblyTestBase extends TestCase
 
   static Fields[] RHS_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] RHS_DECL_FIELDS = new Fields[]{new Fields( "field2" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
-  static Fields[] RHS_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field2" ), new Fields( "field" ), Fields.RESULTS, Fields.ALL};
+  static Fields[] RHS_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field2" ), new Fields( "field" ),
+                                                   Fields.RESULTS, Fields.ALL};
   static final String RHS_VALUE = "value2";
 
   public static void makeSuites( Properties properties, Map<String, Pipe> pipes, TestSuite suite, Class type ) throws IllegalAccessException, InvocationTargetException, InstantiationException
@@ -164,7 +165,8 @@ public abstract class PipeAssemblyTestBase extends TestCase
 
   int getResultLength()
     {
-    return Integer.parseInt( properties.getProperty( getName() + ".length", properties.getProperty( "default.length" ) ) );
+    return Integer.parseInt(
+      properties.getProperty( getName() + ".length", properties.getProperty( "default.length" ) ) );
     }
 
   boolean isError()
@@ -210,21 +212,4 @@ public abstract class PipeAssemblyTestBase extends TestCase
     else if( resultTuple == null )
       fail( "no result assertion made for:" + getName() + " with result: " + result );
     }
-
-  private void validateLength( Flow flow, int length, String name ) throws IOException
-    {
-    TapIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
-
   }

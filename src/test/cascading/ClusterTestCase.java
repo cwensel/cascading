@@ -24,7 +24,6 @@ package cascading;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.dfs.MiniDFSCluster;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,7 +35,7 @@ import org.apache.hadoop.mapred.MiniMRCluster;
 /**
  *
  */
-public class ClusterTestCase extends TestCase
+public class ClusterTestCase extends CascadingTestCase
   {
   transient private MiniDFSCluster dfs;
   transient private FileSystem fileSys;
@@ -44,14 +43,19 @@ public class ClusterTestCase extends TestCase
   transient protected JobConf jobConf;
   transient private boolean enableCluster;
 
-  public ClusterTestCase()
-    {
-    }
-
   public ClusterTestCase( String string, boolean enableCluster )
     {
     super( string );
     this.enableCluster = enableCluster;
+    }
+
+  public ClusterTestCase( String string )
+    {
+    super( string );
+    }
+
+  public ClusterTestCase()
+    {
     }
 
   public void setUp() throws IOException

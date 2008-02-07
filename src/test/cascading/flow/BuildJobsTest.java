@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import cascading.CascadingTestCase;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
@@ -43,14 +44,12 @@ import cascading.tap.Dfs;
 import cascading.tap.Tap;
 import cascading.tap.TempDfs;
 import cascading.tuple.Fields;
-import junit.framework.TestCase;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/flow/BuildJobsTest.java#2 $ */
-public class BuildJobsTest extends TestCase
+public class BuildJobsTest extends CascadingTestCase
   {
-
   public BuildJobsTest()
     {
     super( "build jobs" );
@@ -319,7 +318,8 @@ public class BuildJobsTest extends TestCase
       {
       Pipe pipe = new Pipe( name );
 
-      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ),
+        new Fields( "ip" ) );
 
       setTails( pipe );
       }

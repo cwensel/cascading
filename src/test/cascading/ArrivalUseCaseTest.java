@@ -22,7 +22,6 @@
 package cascading;
 
 import java.io.File;
-import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -36,12 +35,10 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
-import junit.framework.TestCase;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/ArrivalUseCaseTest.java#2 $ */
-public class ArrivalUseCaseTest extends TestCase
+public class ArrivalUseCaseTest extends CascadingTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";
 
@@ -111,20 +108,4 @@ public class ArrivalUseCaseTest extends TestCase
 
     validateLength( flow, 161 );
     }
-
-  private void validateLength( Flow flow, int length ) throws IOException
-    {
-    TapIterator iterator = flow.openSink();
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
   }

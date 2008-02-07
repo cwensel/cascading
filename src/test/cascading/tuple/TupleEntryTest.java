@@ -21,10 +21,10 @@
 
 package cascading.tuple;
 
-import junit.framework.TestCase;
+import cascading.CascadingTestCase;
 
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
-public class TupleEntryTest extends TestCase
+public class TupleEntryTest extends CascadingTestCase
   {
   public TupleEntryTest()
     {

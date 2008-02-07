@@ -1,5 +1,11 @@
 Cascading Change Log
 
+Unreleased
+
+  Added CascadingTestCase base test class
+
+  Added Insert Function that allows for literal values to be inserted into the Tuple stream.
+
 0.2.0
 
   CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.threshold".

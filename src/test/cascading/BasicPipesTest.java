@@ -48,10 +48,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import junit.framework.TestCase;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
-public class BasicPipesTest extends TestCase
+public class BasicPipesTest extends CascadingTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";
   String inputFileIps = "build/test/data/ips.20.txt";
@@ -259,7 +258,8 @@ public class BasicPipesTest extends TestCase
 
     pipe = new Each( pipe, new Fields( 1 ), new RegexSplitter( Fields.size( 3 ) ) );
 
-    pipe = new Each( pipe, new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
+    pipe = new Each( pipe,
+      new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
@@ -341,20 +341,4 @@ public class BasicPipesTest extends TestCase
 
     validateLength( flow, 131 );
     }
-
-  private void validateLength( Flow flow, int length ) throws IOException
-    {
-    TapIterator iterator = flow.openSink();
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
   }

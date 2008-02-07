@@ -21,10 +21,10 @@
 
 package cascading.tuple;
 
-import junit.framework.TestCase;
+import cascading.CascadingTestCase;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/tuple/FieldsTest.java#2 $ */
-public class FieldsTest extends TestCase
+public class FieldsTest extends CascadingTestCase
   {
   public FieldsTest()
     {

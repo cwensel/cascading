@@ -22,7 +22,6 @@
 package cascading;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -91,7 +90,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), new Fields( 0 ), 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 2,
+      new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ), Fields.RESULTS );
@@ -111,7 +111,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     {
     public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
       {
-      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      outputCollector.add(
+        new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -180,7 +181,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 2,
+      new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ) );
@@ -199,7 +201,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     {
     public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
       {
-      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      outputCollector.add(
+        new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -263,7 +266,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
+    pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ),
+      new Fields( "name1", "name2", "distance" ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
@@ -305,7 +309,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
+    pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ),
+      new Fields( "name1", "name2", "distance" ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
@@ -329,20 +334,4 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     assertTrue( "did not calculate score", found );
     }
-
-  private void validateLength( Flow flow, int length ) throws IOException
-    {
-    TapIterator iterator = flow.openSink();
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
   }

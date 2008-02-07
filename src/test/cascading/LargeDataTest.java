@@ -22,7 +22,6 @@
 package cascading;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 import cascading.flow.Flow;
@@ -42,7 +41,6 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Dfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/LargeDataTest.java#3 $ */
@@ -73,11 +71,17 @@ public class LargeDataTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "url", "raw" ) ) );
     pipe = new Each( pipe, new Fields( "url" ), new RegexFilter( ".*\\.pdf$", true ) );
-    pipe = new Each( pipe, new Fields( "raw" ), new RegexReplace( new Fields( "page" ), ":nl:", "\n" ), new Fields( "url", "page" ) );
+    pipe = new Each( pipe, new Fields( "raw" ), new RegexReplace( new Fields( "page" ), ":nl:", "\n" ),
+      new Fields( "url", "page" ) );
     pipe = new Each( pipe, new Fields( "page" ), new TagSoupParser( new Fields( "xml" ) ), new Fields( "url", "xml" ) );
-    pipe = new Each( pipe, new Fields( "xml" ), new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ), new Fields( "url", "body" ) );
-    pipe = new Each( pipe, new Fields( "body" ), new XPathGenerator( new Fields( "words" ), XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ), new Fields( "url", "words" ) );
-    pipe = new Each( pipe, new Fields( "words" ), new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ), new Fields( "url", "word" ) );
+    pipe = new Each( pipe, new Fields( "xml" ),
+      new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ),
+      new Fields( "url", "body" ) );
+    pipe = new Each( pipe, new Fields( "body" ), new XPathGenerator( new Fields( "words" ),
+      XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ), new Fields( "url", "words" ) );
+    pipe = new Each( pipe, new Fields( "words" ),
+      new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ),
+      new Fields( "url", "word" ) );
 
     Pipe pipeUrl = new GroupBy( "url", pipe, new Fields( "url", "word" ) );
     pipeUrl = new Every( pipeUrl, new Fields( "url", "word" ), new Count(), new Fields( "url", "word", "count" ) );
@@ -96,20 +100,4 @@ public class LargeDataTest extends ClusterTestCase
 
     validateLength( flow, 23950 );
     }
-
-  private void validateLength( Flow flow, int length ) throws IOException
-    {
-    TapIterator iterator = flow.openSink();
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      iterator.next();
-      count++;
-      }
-
-    iterator.close();
-
-    assertEquals( "wrong number of items", length, count );
-    }
-
   }
