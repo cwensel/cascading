@@ -90,37 +90,37 @@ public class Scope implements Serializable
   /**
    * Constructor Scope creates a new Scope instance. Used by classes Each and Every.
    *
-   * @param name             of type String
-   * @param kind             of type Kind
-   * @param argumentSelector of type Fields
-   * @param declaredFields   of type Fields
-   * @param outGrouping      of type Fields
-   * @param outValues        of type Fields
+   * @param name              of type String
+   * @param kind              of type Kind
+   * @param argumentSelector  of type Fields
+   * @param declaredFields    of type Fields
+   * @param outGroupingFields of type Fields
+   * @param outValuesFields   of type Fields
    */
-  public Scope( String name, Kind kind, Fields argumentSelector, Fields declaredFields, Fields outGrouping, Fields outValues )
+  public Scope( String name, Kind kind, Fields argumentSelector, Fields declaredFields, Fields outGroupingFields, Fields outValuesFields )
     {
     this.name = name;
     this.kind = kind;
     this.argumentSelector = argumentSelector;
     this.declaredFields = declaredFields;
 
-    if( outGrouping == null )
+    if( outGroupingFields == null )
       throw new IllegalArgumentException( "grouping may not be null" );
 
-    if( outValues == null )
+    if( outValuesFields == null )
       throw new IllegalArgumentException( "values may not be null" );
 
     if( kind == Kind.EACH )
       {
-      this.outGroupingFields = Fields.asDeclaration( outGrouping );
-      this.outValuesSelector = outValues;
-      this.outValuesFields = Fields.asDeclaration( outValues );
+      this.outGroupingFields = Fields.asDeclaration( outGroupingFields );
+      this.outValuesSelector = outValuesFields;
+      this.outValuesFields = Fields.asDeclaration( outValuesFields );
       }
     else if( kind == Kind.EVERY )
       {
-      this.outGroupingSelector = outGrouping;
-      this.outGroupingFields = Fields.asDeclaration( outGrouping );
-      this.outValuesFields = outValues;
+      this.outGroupingSelector = outGroupingFields;
+      this.outGroupingFields = Fields.asDeclaration( outGroupingFields );
+      this.outValuesFields = outValuesFields;
       }
     else
       {

@@ -29,11 +29,13 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Filter;
 import cascading.operation.Function;
+import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
+import cascading.operation.regex.Regexes;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -69,7 +71,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true );
+    super( "fielded pipes", false );
     }
 
   public void testSimpleGroup() throws Exception
@@ -329,8 +331,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ) ) );
 
-    pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ),
-      Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
+    pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
@@ -366,6 +367,40 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 12, null );
     }
 
+  public void testFilterComplex() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Dfs( new TextLine(), outputPath + "/filtercomplex", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+//    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_PARSER );
+
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
+
+    pipe = new Each( pipe, new Fields( "method" ), new Identity( new Fields( "value" ) ), Fields.ALL );
+
+    pipe = new Group( pipe, new Fields( "value" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
+
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "filter.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 1, null );
+    }
+
   public void testCross() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )
@@ -379,10 +414,8 @@ public class FieldedPipesTest extends ClusterTestCase
     sources.put( "lhs", new Dfs( new TextLine(), inputFileLhs ) );
     sources.put( "rhs", new Dfs( new TextLine(), inputFileRhs ) );
 
-    Pipe pipeLower = new Each( "lhs", new Fields( "line" ),
-      new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
-    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ),
-      new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
 
     Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 

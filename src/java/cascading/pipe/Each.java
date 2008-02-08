@@ -241,10 +241,15 @@ public class Each extends Operator
     if( LOG.isDebugEnabled() )
       LOG.debug( operation + " arg entry: " + arguments );
 
-    if( operation instanceof Function )
+    if( isFunction() )
       applyFunction( flowCollector, input, arguments, scope.getDeclaredFields(), scope.getOutValuesSelector() );
     else
       applyFilter( flowCollector, input, arguments );
+    }
+
+  private boolean isFunction()
+    {
+    return operation instanceof Function;
     }
 
   private void applyFilter( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )

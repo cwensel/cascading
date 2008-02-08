@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryListIterator;
 
-/** Interface Function ... */
+/** Interface Function marks a given {@link Operation} as a function, as opposed to being a {@link Filter}. */
 public interface Function
   {
   /**
