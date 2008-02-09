@@ -12,7 +12,7 @@
   <property file="${user.home}/build.properties"/>
   <property file="${cascading.basedir}/version.properties"/>
 
-  <property name="release.version" value="x.y.z"/>
+  <property name="cascading.release.version" value="x.y.z"/>
 
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.java" location="${src}/java"/>
@@ -36,11 +36,11 @@
 
   <property name="hadoop.home" location="${cascading.basedir}/../hadoop"/>
 
-  <property name="jar.cascading" value="cascading-${release.version}.jar"/>
-  <property name="jar.cascading-lib" value="cascading-lib-${release.version}.jar"/>
-  <property name="jar.cascading-examples" value="cascading-examples-${release.version}.jar"/>
+  <property name="jar.cascading" value="cascading-${cascading.release.version}.jar"/>
+  <property name="jar.cascading-lib" value="cascading-lib-${cascading.release.version}.jar"/>
+  <property name="jar.cascading-examples" value="cascading-examples-${cascading.release.version}.jar"/>
 
-  <property name="tar.cascading" value="cascading-${release.version}.tgz"/>
+  <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
 
   <path id="project.class.path">
     <pathelement location="${build.java}"/>
@@ -264,7 +264,7 @@
   <target name="tar" depends="dist">
     <tar destfile="${tar.cascading}"
          compression="gzip">
-      <tarfileset dir="dist/" prefix="cascading-${release.version}">
+      <tarfileset dir="dist/" prefix="cascading-${cascading.release.version}">
         <include name="**/**"/>
       </tarfileset>
     </tar>

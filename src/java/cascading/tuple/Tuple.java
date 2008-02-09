@@ -154,6 +154,9 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     {
     Comparable value = get( i );
 
+    if( value == null )
+      return null;
+
     return value.toString();
     }
 

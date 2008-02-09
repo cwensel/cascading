@@ -95,6 +95,9 @@ public class Identity extends Operation implements Function
       return;
       }
 
+    if( input.size() != types.length )
+      throw new OperationException( "number of input tuple values: " + input.size() + ", does not match number of coercion types: " + types.length );
+
     Tuple result = new Tuple();
 
     for( int i = 0; i < types.length; i++ )
