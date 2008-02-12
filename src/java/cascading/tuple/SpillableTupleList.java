@@ -35,7 +35,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
+ * excess to a temporary disk file.
  */
 public class SpillableTupleList implements Iterable<Tuple>
   {
