@@ -2,6 +2,8 @@ Cascading Change Log
 
 Unreleased
 
+  Can retrieve Tuple values by field name through the TupleEntry class via the get(String) method.
+
   Added c.t.TupleCollector interface to simplify the operation interfaces.
 
   Added a Debug filter that will print to either stderr or stdout. Useful for debugging stream transformations.

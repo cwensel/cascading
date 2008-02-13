@@ -185,6 +185,17 @@ public class TupleEntry
     }
 
   /**
+   * Method get returns the value in the given field.
+   *
+   * @param field of type String
+   * @return Comparable
+   */
+  public Comparable get( String field )
+    {
+    return tuple.get( fields.getPos( field ) );
+    }
+
+  /**
    * Method selectEntry selects the fields specified in selector from this instance.
    *
    * @param selector of type Fields

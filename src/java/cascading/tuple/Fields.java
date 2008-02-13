@@ -541,6 +541,18 @@ public final class Fields implements Comparable, Serializable
     return integer;
     }
 
+  /**
+   * Method getPos returns the index of the give field value in this Fields instance. The index corresponds to the
+   * Tuple value index in an associated Tuple instance.
+   *
+   * @param field of type Comparable
+   * @return int
+   */
+  public int getPos( Comparable field )
+    {
+    return indexOf( field );
+    }
+
   private int indexOf( Comparable field )
     {
     for( int i = 0; i < size(); i++ )
