@@ -49,9 +49,9 @@ import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryListIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
 public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
@@ -90,8 +90,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), new Fields( 0 ), 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2,
-      new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ), Fields.RESULTS );
@@ -109,10 +108,9 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+    public void operate( TupleEntry input, TupleCollector outputCollector )
       {
-      outputCollector.add(
-        new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -124,7 +122,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( Map context, TupleEntryListIterator outputCollector )
+    public void complete( Map context, TupleCollector outputCollector )
       {
       TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "result" ) );
       super.complete( context, resultEntryCollector.iterator() );
@@ -181,8 +179,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2,
-      new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ) );
@@ -199,10 +196,9 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+    public void operate( TupleEntry input, TupleCollector outputCollector )
       {
-      outputCollector.add(
-        new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -214,7 +210,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( Map context, TupleEntryListIterator outputCollector )
+    public void complete( Map context, TupleCollector outputCollector )
       {
       TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
       super.complete( context, resultEntryCollector.iterator() );
@@ -266,8 +262,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ),
-      new Fields( "name1", "name2", "distance" ) );
+    pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
@@ -309,8 +304,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ),
-      new Fields( "name1", "name2", "distance" ) );
+    pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 

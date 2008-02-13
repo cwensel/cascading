@@ -26,8 +26,8 @@ import java.util.Map;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * Computes the pearson distance between every unique set of first fields, with using the label and value of each element.
@@ -83,14 +83,15 @@ public class PearsonDistance extends CrossTab
       context.put( SUMPROD, ( (Double) context.get( SUMPROD ) ) + ( entry.getTuple().getDouble( 0 ) * entry.getTuple().getDouble( 1 ) ) );
       }
 
-    public void complete( Map context, TupleEntryListIterator outputCollector )
+    public void complete( Map context, TupleCollector outputCollector )
       {
       Double count = (Double) context.get( COUNT );
       Double sum1 = (Double) context.get( SUM1 );
       Double sum2 = (Double) context.get( SUM2 );
 
       double num = (Double) context.get( SUMPROD ) - ( sum1 * sum2 / count );
-      double den = Math.sqrt( ( (Double) context.get( SUMSQRS1 ) - Math.pow( sum1, 2 ) / count ) * ( (Double) context.get( SUMSQRS2 ) - Math.pow( sum2, 2 ) / count ) );
+      double den = Math.sqrt(
+        ( (Double) context.get( SUMSQRS1 ) - Math.pow( sum1, 2 ) / count ) * ( (Double) context.get( SUMSQRS2 ) - Math.pow( sum2, 2 ) / count ) );
 
       if( den == 0 )
         outputCollector.add( new Tuple( 0 ) );

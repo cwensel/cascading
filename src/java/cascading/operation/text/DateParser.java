@@ -33,8 +33,8 @@ import cascading.operation.Operation;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds since January 1, 1970, 00:00:00 GMT.
@@ -115,7 +115,8 @@ public class DateParser extends Operation implements Function
     this.dateFormatString = dateFormatString;
 
     if( fieldDeclaration.size() != calendarFields.length )
-      throw new IllegalArgumentException( "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
+      throw new IllegalArgumentException(
+        "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
     }
 
   /**
@@ -131,8 +132,8 @@ public class DateParser extends Operation implements Function
     return dateFormat;
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     Tuple output = new Tuple();
 

@@ -27,8 +27,8 @@ import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * Computes the euclidean distance between every unique set of first fields,
@@ -87,9 +87,9 @@ public class EuclideanDistance extends CrossTab
       context.put( SUMSQR, ( (Double) context.get( SUMSQR ) ) + Math.pow( entry.getTuple().getDouble( 0 ) - entry.getTuple().getDouble( 1 ), 2 ) );
       }
 
-    /** @see Aggregator#complete(Map, TupleEntryListIterator) */
+    /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
     @SuppressWarnings("unchecked")
-    public void complete( Map context, TupleEntryListIterator outputCollector )
+    public void complete( Map context, TupleCollector outputCollector )
       {
       outputCollector.add( new Tuple( 1 / ( 1 + (Double) context.get( SUMSQR ) ) ) );
       }

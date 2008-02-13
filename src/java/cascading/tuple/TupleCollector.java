@@ -19,40 +19,24 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.examples;
+package cascading.tuple;
 
-import java.util.Set;
-import java.util.TreeSet;
-
-import cascading.operation.Function;
 import cascading.operation.Operation;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
-/** Class SortElements ... */
-public class SortElements extends Operation implements Function
+/** Interface TupleCollector is used to allow {@link Operation} instances to emit result {@link Tuple} values. */
+public interface TupleCollector
   {
-  private final Fields[] fields;
+  /**
+   * Method add inserts the given {@link TupleEntry} into the outgoing stream.
+   *
+   * @param entry of type TupleEntry
+   */
+  void add( TupleEntry entry );
 
-  public SortElements( Fields... fields )
-    {
-    super( Fields.ARGS );
-    this.fields = fields;
-    }
-
-  public void operate( TupleEntry input, TupleCollector outputCollector )
-    {
-    Set<Tuple> set = new TreeSet<Tuple>();
-
-    for( Fields field : fields )
-      set.add( input.selectTuple( field ) );
-
-    int i = 0;
-    for( Tuple tuple : set )
-      input.getTuple().put( input.getFields(), fields[ i++ ], tuple );
-
-    outputCollector.add( input );
-    }
+  /**
+   * Method add inserts the given {@link Tuple} into the outgoing stream.
+   *
+   * @param tuple of type Tuple
+   */
+  void add( Tuple tuple );
   }

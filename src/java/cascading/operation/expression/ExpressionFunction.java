@@ -30,8 +30,8 @@ import cascading.operation.Operation;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 import cascading.tuple.Tuples;
 import org.codehaus.janino.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
@@ -182,8 +182,8 @@ public class ExpressionFunction extends Operation implements Function
     return value;
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( evaluate( input ) ) );
     }

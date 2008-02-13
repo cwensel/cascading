@@ -27,8 +27,8 @@ import cascading.operation.Function;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class RegexParser ... */
 public class RegexParser extends RegexOperation implements Function
@@ -97,8 +97,8 @@ public class RegexParser extends RegexOperation implements Function
     this.groups = groups;
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = (String) input.get( 0 );
     Tuple output = new Tuple();

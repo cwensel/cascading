@@ -27,8 +27,8 @@ import cascading.operation.Function;
 import cascading.operation.generator.Generator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class RegexGenerator will emit a new Tuple for every matched regex group. */
 public class RegexGenerator extends RegexOperation implements Generator
@@ -54,8 +54,8 @@ public class RegexGenerator extends RegexOperation implements Generator
     super( 1, fieldDeclaration, patternString );
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = (String) input.get( 0 );
 

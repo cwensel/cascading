@@ -28,8 +28,8 @@ import cascading.operation.Operation;
 import cascading.pipe.Operator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * Concrete implementation of {@link Operator} that acts as an {@link Aggregator} by
@@ -65,9 +65,9 @@ public class Max extends Operation implements Aggregator
       context.put( FIELD_NAME, val );
     }
 
-  /** @see Aggregator#complete(Map, TupleEntryListIterator) */
+  /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
   @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleEntryListIterator outputCollector )
+  public void complete( Map context, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) ) );
     }

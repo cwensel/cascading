@@ -46,6 +46,10 @@ public class SpillableTupleList implements Iterable<Tuple>
   private List<Tuple> current = new LinkedList<Tuple>();
   private long size = 0;
 
+  public SpillableTupleList()
+    {
+    }
+
   public SpillableTupleList( long threshold )
     {
     this.threshold = threshold;

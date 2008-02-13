@@ -23,8 +23,8 @@ package cascading.operation;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
@@ -87,7 +87,7 @@ public class Identity extends Operation implements Function
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
     }
 
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     if( types == null || types.length == 0 )
       {

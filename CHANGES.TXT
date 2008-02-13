@@ -2,6 +2,8 @@ Cascading Change Log
 
 Unreleased
 
+  Added c.t.TupleCollector interface to simplify the operation interfaces.
+
   Added a Debug filter that will print to either stderr or stdout. Useful for debugging stream transformations.
 
   Added CascadingTestCase base test class

@@ -25,8 +25,8 @@ import cascading.operation.Function;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
 public class TestFunction extends Operation implements Function
@@ -39,7 +39,7 @@ public class TestFunction extends Operation implements Function
     this.value = value;
     }
 
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( value );
     }

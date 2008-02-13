@@ -27,8 +27,8 @@ import cascading.operation.Aggregator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class Sum ... */
 public class Sum extends Operation implements Aggregator
@@ -69,9 +69,9 @@ public class Sum extends Operation implements Aggregator
     context.put( FIELD_NAME, ( (Double) context.get( FIELD_NAME ) ) + entry.getTuple().getDouble( 0 ) );
     }
 
-  /** @see Aggregator#complete(Map, TupleEntryListIterator) */
+  /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
   @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleEntryListIterator outputCollector )
+  public void complete( Map context, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) ) );
     }

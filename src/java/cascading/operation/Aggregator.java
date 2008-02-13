@@ -24,8 +24,8 @@ package cascading.operation;
 import java.util.Map;
 
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * An Aggregator takes the set of all values associated with a grouping and returns
@@ -38,7 +38,7 @@ public interface Aggregator
   /**
    * Initializes the aggregation procedure.  The {@link Map} is the utility that
    * holds values to be aggregated.  If an initial value should be set here, this
-   * method should be called before {@link #aggregate(Map, TupleEntry)} and {@link #complete(Map, TupleEntryListIterator)}.
+   * method should be called before {@link #aggregate(Map, TupleEntry)} and {@link #complete(java.util.Map,cascading.tuple.TupleCollector)}.
    *
    * @param context    the map to be initialized (if necessary)
    * @param groupEntry is the current grouping tuple
@@ -63,5 +63,5 @@ public interface Aggregator
    * @param context         the aggregate map @return the final aggregate value
    * @param outputCollector
    */
-  void complete( Map context, TupleEntryListIterator outputCollector );
+  void complete( Map context, TupleCollector outputCollector );
   }

@@ -25,8 +25,8 @@ import cascading.operation.Function;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class FieldJoiner joins the values in a Tuple with a given delimiter and stuffs the result into a new field. */
 public class FieldJoiner extends Operation implements Function
@@ -80,8 +80,8 @@ public class FieldJoiner extends Operation implements Function
     return delimiter;
     }
 
-  /** @see cascading.operation.Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see cascading.operation.Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( input.getTuple().toString( delimiter ) ) );
     }

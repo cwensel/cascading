@@ -23,8 +23,8 @@ package cascading.operation;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class Insert adds literal values to the Tuple stream. */
 public class Insert extends Operation implements Function
@@ -40,7 +40,7 @@ public class Insert extends Operation implements Function
       throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
     }
 
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( values );
     }

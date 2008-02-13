@@ -24,8 +24,8 @@ package cascading.operation.regex;
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class RegexSplitter will split an incoming argument value by the given regex delimiter patternString. */
 public class RegexSplitter extends RegexOperation implements Function
@@ -61,8 +61,8 @@ public class RegexSplitter extends RegexOperation implements Function
     super( 1, fieldDeclaration, patternString );
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = (String) input.get( 0 );
     Tuple output = new Tuple();

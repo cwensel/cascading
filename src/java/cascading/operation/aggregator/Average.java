@@ -27,8 +27,8 @@ import cascading.operation.Aggregator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /**
  * A concrete type of {@link Aggregator} that considers the set of all values associated
@@ -64,9 +64,9 @@ public class Average extends Operation implements Aggregator
     cnt++;
     }
 
-  /** @see cascading.operation.Aggregator#complete(Map, TupleEntryListIterator) */
+  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
   @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleEntryListIterator outputCollector )
+  public void complete( Map context, TupleCollector outputCollector )
     {
     // avoid Double.NaN
     if( cnt == 0 )

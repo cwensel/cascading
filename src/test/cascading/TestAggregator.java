@@ -27,8 +27,8 @@ import cascading.operation.Aggregator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/TestAggregator.java#2 $ */
 public class TestAggregator extends Operation implements Aggregator
@@ -60,9 +60,9 @@ public class TestAggregator extends Operation implements Aggregator
     {
     }
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map, cascading.tuple.TupleEntryListIterator) */
+  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
   @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleEntryListIterator outputCollector )
+  public void complete( Map context, TupleCollector outputCollector )
     {
     outputCollector.add( value );
     }

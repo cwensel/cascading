@@ -22,8 +22,8 @@
 package cascading.operation;
 
 import cascading.tuple.Fields;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class Cut ... */
 public class Cut extends Operation implements Function
@@ -37,7 +37,7 @@ public class Cut extends Operation implements Function
     this.fieldSelector = fieldDeclaration;
     }
 
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( input.selectEntry( fieldSelector ) );
     }

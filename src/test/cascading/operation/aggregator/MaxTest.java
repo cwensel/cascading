@@ -79,7 +79,7 @@ public class MaxTest
 
   /**
    * Test method for {@link cascading.operation.aggregator.Max#aggregate(java.util.Map, cascading.tuple.TupleEntry)}.
-   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map, cascading.tuple.TupleEntryListIterator)}.
+   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector)}.
    */
   @Test
   public final void testAggregateComplete()

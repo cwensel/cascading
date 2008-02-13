@@ -29,8 +29,8 @@ import cascading.operation.Function;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -72,8 +72,8 @@ public class XPathParser extends XPathOperation implements Function
     super( 1, fieldDeclaration, null, paths );
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     Tuple tuple = new Tuple();
     InputSource source = new InputSource( new StringReader( (String) input.get( 0 ) ) );

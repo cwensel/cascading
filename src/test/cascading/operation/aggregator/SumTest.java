@@ -88,7 +88,7 @@ public class SumTest
 
   /**
    * Test method for {@link cascading.operation.aggregator.Sum#aggregate(java.util.Map, cascading.tuple.TupleEntry)}.
-   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map, cascading.tuple.TupleEntryListIterator)}.
+   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector)}.
    */
   @Test
   public final void testAggregateComplete()

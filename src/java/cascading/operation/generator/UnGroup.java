@@ -24,8 +24,8 @@ package cascading.operation.generator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -63,7 +63,8 @@ public class UnGroup extends Operation implements Generator
       numArgs = groupFieldSelector.size() + size;
 
       if( fieldDeclaration.size() != numArgs )
-        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException(
+          "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
     this.groupFieldSelector = groupFieldSelector;
@@ -80,7 +81,8 @@ public class UnGroup extends Operation implements Generator
       numArgs = groupFieldSelector.size() + resultFieldSelector.size();
 
       if( fieldDeclaration.size() != numArgs )
-        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException(
+          "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
     this.groupFieldSelector = groupFieldSelector;
@@ -94,7 +96,7 @@ public class UnGroup extends Operation implements Generator
     this.size = size;
     }
 
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     if( resultFieldSelectors != null )
       useResultSelectors( input, outputCollector );
@@ -102,7 +104,7 @@ public class UnGroup extends Operation implements Generator
       useSize( input, outputCollector );
     }
 
-  private void useSize( TupleEntry input, TupleEntryListIterator outputCollector )
+  private void useSize( TupleEntry input, TupleCollector outputCollector )
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "using size: " + size );
@@ -118,7 +120,7 @@ public class UnGroup extends Operation implements Generator
       }
     }
 
-  private void useResultSelectors( TupleEntry input, TupleEntryListIterator outputCollector )
+  private void useResultSelectors( TupleEntry input, TupleCollector outputCollector )
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "using result selectors: " + resultFieldSelectors.length );

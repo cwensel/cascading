@@ -26,8 +26,8 @@ import java.util.regex.Matcher;
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class RegexReplace is used to replace a matched regex with a replacement value. */
 public class RegexReplace extends RegexOperation implements Function
@@ -64,8 +64,8 @@ public class RegexReplace extends RegexOperation implements Function
     this.replacement = replacement;
     }
 
-  /** @see Function#operate(TupleEntry, TupleEntryListIterator) */
-  public void operate( TupleEntry input, TupleEntryListIterator outputCollector )
+  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = (String) input.get( 0 );
     Tuple output = new Tuple();

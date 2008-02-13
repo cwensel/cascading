@@ -27,8 +27,8 @@ import cascading.operation.Aggregator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Class Count ... */
 public class Count extends Operation implements Aggregator
@@ -68,9 +68,9 @@ public class Count extends Operation implements Aggregator
     context.put( FIELD_NAME, ( (Long) context.get( FIELD_NAME ) ) + 1L );
     }
 
-  /** @see cascading.operation.Aggregator#complete(Map, TupleEntryListIterator) */
+  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
   @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleEntryListIterator outputCollector )
+  public void complete( Map context, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( context.get( FIELD_NAME ).toString() ) );
     }

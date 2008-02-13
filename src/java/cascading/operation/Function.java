@@ -21,8 +21,8 @@
 
 package cascading.operation;
 
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
 
 /** Interface Function marks a given {@link Operation} as a function, as opposed to being a {@link Filter}. */
 public interface Function
@@ -33,5 +33,5 @@ public interface Function
    * @param input           of type TupleEntry
    * @param outputCollector of type TupleEntryListIterator
    */
-  void operate( TupleEntry input, TupleEntryListIterator outputCollector );
+  void operate( TupleEntry input, TupleCollector outputCollector );
   }

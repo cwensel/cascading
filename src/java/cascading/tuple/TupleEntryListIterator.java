@@ -29,7 +29,7 @@ import cascading.flow.FlowCollector;
 /**
  *
  */
-public class TupleEntryListIterator implements ListIterator<TupleEntry>, FlowCollector
+public class TupleEntryListIterator implements ListIterator<TupleEntry>, FlowCollector, TupleCollector
   {
   final TupleEntry entry;
   final ListIterator<Tuple> iterator;
