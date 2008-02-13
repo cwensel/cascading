@@ -610,4 +610,19 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  public void testJoin()
+    {
+    Fields fieldA = new Fields( "a", "b" );
+    Fields fieldB = new Fields( "c", "d" );
+
+    Fields join = Fields.join( fieldA, fieldB );
+
+    assertEquals( "not equal: ", 4, join.size() );
+    assertEquals( "not equal: ", "a", join.get( 0 ) );
+    assertEquals( "not equal: ", "b", join.get( 1 ) );
+    assertEquals( "not equal: ", "c", join.get( 2 ) );
+    assertEquals( "not equal: ", "d", join.get( 3 ) );
+    }
+
+
   }

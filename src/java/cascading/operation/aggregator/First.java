@@ -30,7 +30,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class First ... */
+/**
+ * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered.
+ * <p/>
+ * By default, it returns the first Tuple of {@link Fields} ARGS found.
+ */
 public class First extends Operation implements Aggregator
   {
   /** Field serialVersionUID */
@@ -38,20 +42,10 @@ public class First extends Operation implements Aggregator
   /** Field FIELD_NAME */
   private static final String FIELD_NAME = "first";
 
-  /** Constructor */
+  /** Selects and returns the first argument Tuple encountered. */
   public First()
     {
-    super( new Fields( FIELD_NAME ) );
-    }
-
-  /**
-   * Constructor
-   *
-   * @param fields the fields to operate on
-   */
-  public First( Fields fields )
-    {
-    super( fields );
+    super( Fields.ARGS );
     }
 
   @SuppressWarnings("unchecked")

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -123,6 +124,45 @@ public final class Fields implements Comparable, Serializable
     }
 
   /**
+   * Method join joins all given Fields instances into a new Fields instance.
+   * <p/>
+   * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
+   *
+   * @param fields of type Fields
+   * @return Fields
+   */
+  public static Fields join( Fields... fields )
+    {
+    int size = 0;
+
+    for( Fields field : fields )
+      {
+      if( field.isSubstitution() || field.isUnknown() )
+        throw new TupleException( "cannot join fields if one is a substitution or is unknown" );
+
+      size += field.size();
+      }
+
+    Comparable[] elements = join( size, fields );
+
+    return new Fields( elements );
+    }
+
+  private static Comparable[] join( int size, Fields... fields )
+    {
+    Comparable[] elements = expand( size, 0 );
+
+    int pos = 0;
+    for( Fields field : fields )
+      {
+      System.arraycopy( field.fields, 0, elements, pos, field.size() );
+      pos += field.size();
+      }
+
+    return elements;
+    }
+
+  /**
    * Method offsetSelector is a factory that makes new instances of Fields the given size but offset by startPos.
    * The result Fields instance can only be used as a selector.
    *
@@ -187,7 +227,7 @@ public final class Fields implements Comparable, Serializable
     if( !selector.isDefined() )
       throw new TupleException( "unable to use given selector: " + selector );
 
-    Set<String> notFound = new HashSet<String>();
+    Set<String> notFound = new LinkedHashSet<String>();
     Set<String> found = new HashSet<String>();
     Fields result = size( selector.size() );
 
@@ -201,7 +241,7 @@ public final class Fields implements Comparable, Serializable
     notFound.removeAll( found );
 
     if( !notFound.isEmpty() )
-      throw new TupleException( "selector did not find fields: [" + Util.join( notFound, ", " ) + "]" );
+      throw new TupleException( "selector did not find fields: [" + Util.join( notFound, ", " ) + "] in [" + Util.join( join( size, fields ), ", " ) + "]" );
 
     if( hasUnknowns )
       return selector;

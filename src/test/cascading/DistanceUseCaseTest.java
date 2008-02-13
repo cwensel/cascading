@@ -103,7 +103,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     // unique the pipe
     pipe = new Group( pipe, Fields.ALL );
-    pipe = new Every( pipe, Fields.ALL, new First( Fields.ARGS ), Fields.RESULTS );
+    pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )

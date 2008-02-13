@@ -59,17 +59,7 @@ public class FirstTest
   public final void testFirst()
     {
     assertEquals( "Got expected number of args", Integer.MAX_VALUE, first.getNumArgs() );
-    final Fields fields = new Fields( "first" );
-    assertEquals( "Got expected fields", fields, first.getFieldDeclaration() );
-    }
-
-  /** Test method for {@link cascading.operation.aggregator.First#First(cascading.tuple.Fields)}. */
-  @Test
-  public final void testFirstFields()
-    {
-    final Fields fields = new Fields( "first", "col1", "col2" );
-    first = new First( fields );
-    assertEquals( "Got expected fields ", fields, first.getFieldDeclaration() );
+    assertEquals( "Got expected fields", Fields.ARGS, first.getFieldDeclaration() );
     }
 
   /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
