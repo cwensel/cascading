@@ -67,7 +67,7 @@ public class SumTest
   @Test
   public final void testSumFields()
     {
-    final Fields fields = new Fields( "sum", "col1", "col2" );
+    final Fields fields = new Fields( "sum" );
     sum = new Sum( fields );
     assertEquals( "Got expected fields", fields, sum.getFieldDeclaration() );
     }

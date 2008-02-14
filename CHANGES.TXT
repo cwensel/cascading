@@ -2,6 +2,8 @@ Cascading Change Log
 
 Unreleased
 
+  Changed c.o.a.Max and c.o.a.Min to maintain original value type. Will return null if no values are encountered.
+
   Changed c.o.a.First to use Fields.ARG by default. Removed Fields constructor.
 
   Added c.t.Fields.join(Fields...) method to allow for joining multiple Fields instances into a new instance.

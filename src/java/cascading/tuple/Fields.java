@@ -481,7 +481,7 @@ public final class Fields implements Comparable, Serializable
 
     for( int i = 0; i < fields.length; i++ )
       {
-      if( fields[ i ] instanceof Number && ( (Integer) fields[ i ] ) != i )
+      if( fields[ i ] instanceof Number && (Integer) fields[ i ] != i )
         {
         isOrdered = false;
         break;
@@ -496,7 +496,13 @@ public final class Fields implements Comparable, Serializable
     return fields;
     }
 
-  final Comparable get( int i )
+  /**
+   * Method get returns the field name or position at the given index i.
+   *
+   * @param i is of type int
+   * @return Comparable
+   */
+  public final Comparable get( int i )
     {
     return fields[ i ];
     }

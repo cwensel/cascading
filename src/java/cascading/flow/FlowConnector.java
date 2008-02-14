@@ -174,6 +174,9 @@ public class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
+   * <p/>
+   * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
+   * So the head pipe does not need to be included as an argument.
    *
    * @param source of type Tap
    * @param sinks  of type Map<String, Tap>
@@ -187,6 +190,9 @@ public class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
+   * <p/>
+   * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
+   * So the head pipe does not need to be included as an argument.
    *
    * @param name   of type String
    * @param source of type Tap

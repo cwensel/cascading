@@ -30,48 +30,59 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/**
- * A concrete type of {@link Aggregator} that considers the set of all values associated
- * with a grouping and returns a single value that represents the average.
- */
+/** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
 public class Average extends Operation implements Aggregator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field FIELD_NAME */
-  private static final String FIELD_NAME = "average";
-  /** Field cnt */
-  private int cnt = 0;
+  public static final String FIELD_NAME = "average";
+  /** Field KEY_COUNT */
+  private static final String KEY_COUNT = "count";
 
-  /** Constructor */
+  /** Constructs a new instance that returns the average of the values encoutered in the field name "average". */
   public Average()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
+  /**
+   * Constructs a new instance that returns the average of the values encoutered in the given fieldDeclaration field name.
+   *
+   * @param fieldDeclaration of type Fields
+   */
+  public Average( Fields fieldDeclaration )
+    {
+    super( 1, fieldDeclaration );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+    }
+
+  /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, new Double( 0.0 ) );
+    context.put( KEY_COUNT, 0l );
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(Map, TupleEntry) */
+  /** @see Aggregator#aggregate(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    context.put( FIELD_NAME, ( (Double) context.get( FIELD_NAME ) + entry.getTuple().getDouble( 0 ) ) );
-    cnt++;
+    context.put( FIELD_NAME, (Double) context.get( FIELD_NAME ) + entry.getTuple().getDouble( 0 ) );
+    context.put( KEY_COUNT, (Long) context.get( KEY_COUNT ) + 1 );
     }
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
+  /** @see Aggregator#complete(Map, TupleCollector) */
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
+    long count = (Long) context.get( KEY_COUNT );
+
     // avoid Double.NaN
-    if( cnt == 0 )
+    if( count == 0 )
       outputCollector.add( new Tuple( new Double( 0.0 ) ) );
     else
-      outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / cnt ) );
+      outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / count ) );
     }
   }

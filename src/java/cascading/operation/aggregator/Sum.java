@@ -30,13 +30,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class Sum ... */
+/** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
 public class Sum extends Operation implements Aggregator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field FIELD_NAME */
-  private static final String FIELD_NAME = "sum";
+  public static final String FIELD_NAME = "sum";
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()
@@ -53,9 +51,12 @@ public class Sum extends Operation implements Aggregator
   public Sum( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
+  /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
@@ -66,13 +67,13 @@ public class Sum extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    context.put( FIELD_NAME, ( (Double) context.get( FIELD_NAME ) ) + entry.getTuple().getDouble( 0 ) );
+    context.put( FIELD_NAME, (Double) context.get( FIELD_NAME ) + entry.getTuple().getDouble( 0 ) );
     }
 
-  /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
+  /** @see Aggregator#complete(Map, TupleCollector) */
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) ) );
+    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
     }
   }

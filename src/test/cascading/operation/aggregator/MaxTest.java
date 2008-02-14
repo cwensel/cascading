@@ -74,7 +74,7 @@ public class MaxTest
     max.complete( context, resultEntryCollector.iterator() );
     Tuple tuple = resultEntryCollector.iterator().next().getTuple();
 
-    assertEquals( "Got expected initial value on start", Double.MIN_VALUE, tuple.getDouble( 0 ), 0.0d );
+    assertEquals( "Got expected initial value on start", null, tuple.get( 0 ) );
     }
 
   /**

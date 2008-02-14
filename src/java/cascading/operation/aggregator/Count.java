@@ -30,11 +30,9 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class Count ... */
+/** Class Count is an {@link Aggregator} that calculates the number of items in the current group */
 public class Count extends Operation implements Aggregator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field COUNT */
   public static final String FIELD_NAME = "count";
 
@@ -51,24 +49,27 @@ public class Count extends Operation implements Aggregator
    */
   public Count( Fields fieldDeclaration )
     {
-    super( fieldDeclaration );
+    super( 1, fieldDeclaration );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
+  /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, 0L );
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(Map, TupleEntry) */
+  /** @see Aggregator#aggregate(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    context.put( FIELD_NAME, ( (Long) context.get( FIELD_NAME ) ) + 1L );
+    context.put( FIELD_NAME, (Long) context.get( FIELD_NAME ) + 1L );
     }
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
+  /** @see Aggregator#complete(Map, TupleCollector) */
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {

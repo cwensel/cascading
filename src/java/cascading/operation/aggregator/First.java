@@ -37,8 +37,6 @@ import cascading.tuple.TupleEntry;
  */
 public class First extends Operation implements Aggregator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field FIELD_NAME */
   private static final String FIELD_NAME = "first";
 
@@ -62,7 +60,7 @@ public class First extends Operation implements Aggregator
       context.put( FIELD_NAME, entry.getTuple() );
     }
 
-  /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
+  /** @see Aggregator#complete(Map, TupleCollector) */
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {

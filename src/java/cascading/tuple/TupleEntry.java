@@ -187,10 +187,10 @@ public class TupleEntry
   /**
    * Method get returns the value in the given field.
    *
-   * @param field of type String
+   * @param field of type Comparable
    * @return Comparable
    */
-  public Comparable get( String field )
+  public Comparable get( Comparable field )
     {
     return tuple.get( fields.getPos( field ) );
     }

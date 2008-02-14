@@ -25,50 +25,67 @@ import java.util.Map;
 
 import cascading.operation.Aggregator;
 import cascading.operation.Operation;
-import cascading.pipe.Operator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/**
- * Concrete implementation of {@link Operator} that acts as an {@link Aggregator} by
- * returning the minimum value over a set of {@link TupleEntry}
- */
+/** Class Min is an {@link Aggregator} that returns the minimum value encountered in the current group. */
 public class Min extends Operation implements Aggregator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field FIELD_NAME */
-  private static final String FIELD_NAME = "min";
+  public static final String FIELD_NAME = "min";
+  /** Field KEY_VALUE */
+  private static final String KEY_VALUE = "value";
 
-  /** Constructor */
+  /** Constructs a new instance that returns the min value encoutered in the field name "min". */
   public Min()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
-  /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
+  /**
+   * Constructs a new instance that returns the min value encoutered in the given fieldDeclaration field name.
+   *
+   * @param fieldDeclaration of type Fields
+   */
+  public Min( Fields fieldDeclaration )
+    {
+    super( 1, fieldDeclaration );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+    }
+
+  /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
-    context.put( FIELD_NAME, Double.MAX_VALUE );
+    context.put( KEY_VALUE, Double.MAX_VALUE );
     }
 
   /** @see Aggregator#aggregate(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    final Double val = entry.getTuple().getDouble( 0 );
+    Number value = null;
 
-    if( (Double) context.get( FIELD_NAME ) > val )
-      context.put( FIELD_NAME, val );
+    if( entry.getTuple().get( 0 ) instanceof Number )
+      value = (Number) entry.getTuple().get( 0 );
+    else
+      value = entry.getTuple().getDouble( 0 );
+
+    if( ( (Number) context.get( KEY_VALUE ) ).doubleValue() > value.doubleValue() )
+      {
+      context.put( FIELD_NAME, entry.getTuple().get( 0 ) ); // keep and return original value
+      context.put( KEY_VALUE, value );
+      }
     }
 
-  /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
+  /** @see Aggregator#complete(Map, TupleCollector) */
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) ) );
+    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
     }
   }
