@@ -28,6 +28,8 @@ import cascading.CascadingTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Insert;
+import cascading.operation.regex.RegexSplitter;
+import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -43,6 +45,8 @@ import cascading.tuple.Fields;
 public class FunctionTest extends CascadingTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";
+  String inputFileUpper = "build/test/data/upper.txt";
+
   String outputPath = "build/test/output/function/";
 
   public FunctionTest()
@@ -56,7 +60,7 @@ public class FunctionTest extends CascadingTestCase
       fail( "data file not found" );
 
     Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath, true );
+    Tap sink = new Lfs( new TextLine(), outputPath + "insert", true );
 
     Pipe pipe = new Pipe( "apache" );
 
@@ -76,4 +80,28 @@ public class FunctionTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "a\tb", iterator.next().get( 1 ) );
     }
 
+  public void testFieldFormatter() throws IOException
+    {
+    if( !new File( inputFileUpper ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileUpper );
+    Tap sink = new Lfs( new TextLine(), outputPath + "formatter", true );
+
+    Pipe pipe = new Pipe( "formatter" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "a", "b" ), "\\s" ) );
+    pipe = new Each( pipe, new FieldFormatter( new Fields( "result" ), "%s and %s" ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    TapIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1 and A", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2 and B", iterator.next().get( 1 ) );
+    }
   }

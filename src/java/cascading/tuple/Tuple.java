@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -413,6 +414,16 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
+   * Method elements returns a new Comparable[] array of this Tuple instances values.
+   *
+   * @return Comparable[]
+   */
+  private Object[] elements()
+    {
+    return elements.toArray();
+    }
+
+  /**
    * Method append appends all the values of the given Tuple instances to this instance.
    *
    * @param tuples of type Tuple...
@@ -666,6 +677,17 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   public String toString( String delim )
     {
     return Util.join( elements, delim );
+    }
+
+  /**
+   * Method format uses the {@link Formatter} class for formatting this tuples values into a new string.
+   *
+   * @param format of type String
+   * @return String
+   */
+  public String format( String format )
+    {
+    return String.format( format, elements() );
     }
 
   /**

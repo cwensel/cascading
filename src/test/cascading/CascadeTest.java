@@ -67,8 +67,7 @@ public class CascadeTest extends CascadingTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second",
-      true );
+    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second", true );
 
     return new FlowConnector().connect( source, sink, pipe );
     }
@@ -77,7 +76,7 @@ public class CascadeTest extends CascadingTestCase
     {
     Pipe pipe = new Pipe( "third" );
 
-    pipe = new Each( pipe, new FieldJoiner( "-", new Fields( "mangled" ) ) );
+    pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
     Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + "/third", true );
 

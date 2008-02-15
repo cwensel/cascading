@@ -21,6 +21,8 @@
 
 package cascading.operation.text;
 
+import java.util.Formatter;
+
 import cascading.operation.Function;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
@@ -28,61 +30,58 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class FieldJoiner joins the values in a Tuple with a given delimiter and stuffs the result into a new field. */
-public class FieldJoiner extends Operation implements Function
+/**
+ * Class FieldJoiner joins the values in a Tuple with a given format and stuffs the result into a new field.
+ * <p/>
+ * This function uses the {@link Formatter} class for formatting the argument tuple values into a new string.
+ */
+public class FieldFormatter extends Operation implements Function
   {
   /** Field FIELD_NAME */
-  public static final String FIELD_NAME = "joined";
+  public static final String FIELD_NAME = "formatted";
 
-  /** Field delimiter */
-  private String delimiter = "\t";
+  /** Field format */
+  private String format = null;
 
   /**
-   * Constructor FieldJoiner creates a new FieldJoiner instance.
+   * Constructor FieldJoiner creates a new FieldFormatter instance using the default field name "formatted".
    *
-   * @param delimiter of type String
+   * @param format of type String
    */
-  public FieldJoiner( String delimiter )
+  public FieldFormatter( String format )
     {
-    this( new Fields( FIELD_NAME ) );
-    this.delimiter = delimiter;
+    super( new Fields( FIELD_NAME ) );
+    this.format = format;
     }
 
   /**
    * Constructor FieldJoiner creates a new FieldJoiner instance.
    *
    * @param fieldDeclaration of type Fields
+   * @param format           of type String
    */
-  public FieldJoiner( Fields fieldDeclaration )
+  public FieldFormatter( Fields fieldDeclaration, String format )
     {
     super( fieldDeclaration );
+    this.format = format;
+
+    if( fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, got " + fieldDeclaration.print() );
     }
 
   /**
-   * Constructor FieldJoiner creates a new FieldJoiner instance.
+   * Method getFormat returns the format of this FieldJoiner object.
    *
-   * @param fieldDeclaration of type Fields
-   * @param delimiter        of type String
+   * @return the format (type String) of this FieldJoiner object.
    */
-  public FieldJoiner( Fields fieldDeclaration, String delimiter )
+  public String getFormat()
     {
-    super( fieldDeclaration );
-    this.delimiter = delimiter;
-    }
-
-  /**
-   * Method getFormat returns the delimiter of this FieldJoiner object.
-   *
-   * @return the delimiter (type String) of this FieldJoiner object.
-   */
-  public String getDelimiter()
-    {
-    return delimiter;
+    return format;
     }
 
   /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
-    outputCollector.add( new Tuple( input.getTuple().toString( delimiter ) ) );
+    outputCollector.add( new Tuple( input.getTuple().format( format ) ) );
     }
   }

@@ -54,7 +54,7 @@ public class RegexGenerator extends RegexOperation implements Generator
     super( 1, fieldDeclaration, patternString );
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = (String) input.get( 0 );

@@ -37,7 +37,8 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+ * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds since January 1, 1970, 00:00:00 GMT,  using the
+ * {@link SimpleDateFormat} syntax.
  * <p/>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
@@ -80,7 +81,7 @@ public class DateParser extends Operation implements Function
     this.dateFormatString = dateFormatString;
 
     if( fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, was " + fieldDeclaration.print() );
+      throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, got " + fieldDeclaration.print() );
     }
 
   /**
