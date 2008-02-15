@@ -83,7 +83,7 @@ public class Identity extends Operation implements Function
     super( fieldDeclaration );
     this.types = types;
 
-    if( fieldDeclaration.size() != types.length )
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != types.length )
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
     }
 

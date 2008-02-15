@@ -36,7 +36,7 @@ public class Insert extends Operation implements Function
     super( 0, fieldDeclaration );
     this.values = new Tuple( values );
 
-    if( fieldDeclaration.size() != values.length )
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != values.length )
       throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
     }
 

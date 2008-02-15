@@ -31,27 +31,27 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered.
+ * Class First is an {@link Aggregator} that returns the last {@link Tuple} encountered.
  * <p/>
  * By default, it returns the first Tuple of {@link Fields} ARGS found.
  */
-public class First extends Operation implements Aggregator
+public class Last extends Operation implements Aggregator
   {
   /** Field FIELD_NAME */
-  private static final String FIELD_NAME = "first";
+  private static final String FIELD_NAME = "last";
 
-  /** Selects and returns the first argument Tuple encountered. */
-  public First()
+  /** Selects and returns the last argument Tuple encountered. */
+  public Last()
     {
     super( Fields.ARGS );
     }
 
   /**
-   * Selects and returns the first argument Tuple encountered.
+   * Selects and returns the last argument Tuple encountered.
    *
    * @param fieldDeclaration of type Fields
    */
-  public First( Fields fieldDeclaration )
+  public Last( Fields fieldDeclaration )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
     }
@@ -66,8 +66,7 @@ public class First extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    if( !context.containsKey( FIELD_NAME ) )
-      context.put( FIELD_NAME, entry.getTuple() );
+    context.put( FIELD_NAME, entry.getTuple() );
     }
 
   /** @see Aggregator#complete(Map, TupleCollector) */
