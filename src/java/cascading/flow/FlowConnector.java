@@ -554,6 +554,13 @@ public class FlowConnector
    */
   private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
+    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
+    while( !handleGroupsInternal( pipeGraph, sources ) )
+      ;
+    }
+
+  private boolean handleGroupsInternal( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+    {
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
     List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
 
@@ -593,7 +600,12 @@ public class FlowConnector
 
       for( Pipe pipe : tapInsertions )
         insertTapAfter( pipeGraph, pipe );
+
+      if( !tapInsertions.isEmpty() || !groupInsertions.isEmpty() )
+        return false;
       }
+
+    return true;
     }
 
   private void insertGroupBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Tap tap )
