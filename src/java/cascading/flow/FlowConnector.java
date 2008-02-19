@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,10 @@ import cascading.tap.TempDfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
+import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.KShortestPaths;
-import org.jgrapht.alg.RankingPathElement;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -549,41 +550,51 @@ public class FlowConnector
   /**
    * Since all joins are at groups, depth first search is safe
    *
-   * @param graph   of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param sources of type Collection<Tap>
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param sources   of type Collection<Tap>
    */
-  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> graph, Collection<Tap> sources )
+  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
-    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( graph, head );
-    List<Tap> groupInsertions = new ArrayList<Tap>();
-    List<Group> tapInsertions = new ArrayList<Group>();
+    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
+    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
 
-    boolean foundGroup = false;
-
-    while( iterator.hasNext() )
+    for( GraphPath<FlowElement, Scope> path : paths )
       {
-      FlowElement flowElement = iterator.next();
+      Iterator<Scope> scopeIterator = path.getEdgeList().iterator();
 
-      if( flowElement instanceof EndPipe )
-        continue;
-      else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )
-        continue;
+      List<Tap> groupInsertions = new ArrayList<Tap>();
+      List<Pipe> tapInsertions = new ArrayList<Pipe>();
 
-      if( flowElement instanceof Group && !foundGroup )
-        foundGroup = true;
-      else if( flowElement instanceof Tap && !foundGroup )
-        groupInsertions.add( (Tap) flowElement );
-      else if( flowElement instanceof Group && foundGroup )
-        tapInsertions.add( (Group) flowElement );
-      else if( flowElement instanceof Tap )
-        foundGroup = false;
+      boolean foundGroup = false;
+
+      FlowElement previousFlowElement = null;
+      FlowElement flowElement = head;
+      while( scopeIterator.hasNext() )
+        {
+        previousFlowElement = flowElement;
+        flowElement = pipeGraph.getEdgeTarget( scopeIterator.next() );
+
+        if( flowElement instanceof EndPipe )
+          continue;
+        else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )
+          continue;
+
+        if( flowElement instanceof Group && !foundGroup )
+          foundGroup = true;
+        else if( flowElement instanceof Tap && !foundGroup )
+          groupInsertions.add( (Tap) flowElement );
+        else if( flowElement instanceof Group && foundGroup )
+          tapInsertions.add( (Pipe) previousFlowElement );
+        else if( flowElement instanceof Tap )
+          foundGroup = false;
+        }
+
+      for( Tap tap : groupInsertions )
+        insertGroupBefore( pipeGraph, tap );
+
+      for( Pipe pipe : tapInsertions )
+        insertTapAfter( pipeGraph, pipe );
       }
-
-    for( Tap tap : groupInsertions )
-      insertGroupBefore( graph, tap );
-
-    for( Group group : tapInsertions )
-      insertTapBefore( graph, group );
     }
 
   private void insertGroupBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Tap tap )
@@ -601,23 +612,6 @@ public class FlowConnector
 
     graph.addEdge( group, tap, new Scope( scope ) );
     graph.addEdge( source, group, new Scope( scope ) );
-    }
-
-  private void insertTapBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "inserting tap before: " + pipe );
-
-    Set<Scope> incomingScopes = new HashSet<Scope>( graph.incomingEdgesOf( pipe ) ); // will only be one, make copy
-    Scope scope = incomingScopes.iterator().next();
-
-    TempDfs tempDfs = makeTempDfs( pipe );
-    graph.addVertex( tempDfs );
-
-    FlowElement source = graph.getEdgeSource( scope );
-    graph.removeEdge( source, pipe ); // remove scope
-    graph.addEdge( tempDfs, pipe, new Scope( scope ) ); // copy scope
-    graph.addEdge( source, tempDfs, new Scope( scope ) );// add scope back
     }
 
   private void insertTapAfter( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
@@ -741,15 +735,15 @@ public class FlowConnector
     {
     SimpleDirectedGraph<Tap, Integer> tapGraph = new SimpleDirectedGraph<Tap, Integer>( Integer.class );
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
-    List<RankingPathElement<FlowElement, Scope>> paths = shortestPaths.getPathElements( tail );
+    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
     int count = 0;
 
     if( LOG.isDebugEnabled() )
       LOG.debug( "found num paths: " + paths.size() );
 
-    for( RankingPathElement<FlowElement, Scope> element : paths )
+    for( GraphPath<FlowElement, Scope> element : paths )
       {
-      List<Scope> path = element.createEdgeListPath();
+      List<Scope> path = element.getEdgeList();
       Tap lastTap = null;
 
       for( Scope scope : path )

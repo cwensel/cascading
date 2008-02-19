@@ -27,10 +27,12 @@ import java.util.Map;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowException;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
+import cascading.operation.aggregator.First;
 import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -173,6 +175,70 @@ public class FieldedPipesTest extends ClusterTestCase
 
     iterator.close();
     }
+
+  /**
+   * Method testCoGroupAfterEvery tests that a tmp tap is inserted after the Every in the cogroup join
+   *
+   * @throws Exception when
+   */
+  public void testCoGroupAfterEvery() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+    pipeLower = new Every( pipeLower, new Fields( "char" ), new First(), Fields.ALL );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
+    pipeUpper = new Every( pipeUpper, new Fields( "char" ), new First(), Fields.ALL );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow countFlow = null;
+
+    try
+      {
+      countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+      }
+    catch( FlowException exception )
+      {
+      exception.writeDOT( "cogroupedevery.dot" );
+      throw exception;
+      }
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 5, null );
+
+    TapIterator iterator = countFlow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
 
   /**
    * 1 A
