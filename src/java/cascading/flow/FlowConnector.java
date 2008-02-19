@@ -48,7 +48,6 @@ import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -452,7 +451,7 @@ public class FlowConnector
    */
   private void resolveFields( SimpleDirectedGraph<FlowElement, Scope> graph )
     {
-    BreadthFirstIterator<FlowElement, Scope> iterator = new BreadthFirstIterator<FlowElement, Scope>( graph, head );
+    TopologicalOrderIterator<FlowElement, Scope> iterator = new TopologicalOrderIterator<FlowElement, Scope>( graph );
 
     while( iterator.hasNext() )
       resolveFields( graph, iterator.next() );
