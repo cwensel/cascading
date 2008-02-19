@@ -136,7 +136,7 @@ public class FlowConnector
     {
     Map<String, Tap> sources = new HashMap<String, Tap>();
 
-    sources.put( pipe.getName(), source );
+    sources.put( pipe.getHeads()[ 0 ].getName(), source );
 
     return connect( name, sources, sink, pipe );
     }
@@ -258,24 +258,39 @@ public class FlowConnector
    */
   private Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
-    verifyTaps( sources, true );
-    verifyTaps( sinks, false );
+    SimpleDirectedGraph<FlowElement, Scope> pipeGraph = null;
 
-    verifyNames( sources, sinks, pipes );
+    try
+      {
+      verifyTaps( sources, true );
+      verifyTaps( sinks, false );
 
-    SimpleDirectedGraph<FlowElement, Scope> pipeGraph = makePipeGraph( pipes, sources, sinks );
+      verifyNames( sources, sinks, pipes );
 
-    addEndPipes( pipeGraph, sources, sinks );
-    verifyGraph( pipeGraph );
+      pipeGraph = makePipeGraph( pipes, sources, sinks );
 
-    handleSplits( pipeGraph );
-    handleGroups( pipeGraph, sources.values() );
-    removeEmptyPipes( pipeGraph ); // groups must be added before removing pipes
-    resolveFields( pipeGraph );
+      addEndPipes( pipeGraph, sources, sinks );
+      verifyGraph( pipeGraph );
 
-    SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
+      handleSplits( pipeGraph );
+      handleGroups( pipeGraph, sources.values() );
+      removeEmptyPipes( pipeGraph ); // groups must be added before removing pipes
+      resolveFields( pipeGraph );
 
-    return new Flow( jobConf, name, pipeGraph, buildSteps( pipeGraph, tapGraph ), new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
+      SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
+
+      return new Flow( jobConf, name, pipeGraph, buildSteps( pipeGraph, tapGraph ), new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
+      }
+    catch( FlowException exception )
+      {
+      exception.pipeGraph = pipeGraph;
+
+      throw exception;
+      }
+    catch( Exception exception )
+      {
+      throw new FlowException( "could not build flow from assembly", exception, pipeGraph );
+      }
     }
 
   private void verifyTaps( final Map<String, Tap> taps, final boolean areSources )
@@ -627,7 +642,7 @@ public class FlowConnector
   private TempDfs makeTempDfs( Pipe pipe )
     {
     // must give Taps unique names
-    return new TempDfs( pipe.getName().replace( ' ', '_' ) + "/" + ( (int) ( Math.random() * 100000 ) ) + "/" );
+    return new TempDfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
     }
 
   private SimpleDirectedGraph<FlowElement, Scope> makePipeGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )

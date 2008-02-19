@@ -62,10 +62,22 @@ public class Tuple implements WritableComparable, Iterable, Serializable
    */
   public static Tuple size( int size )
     {
+    return size( size, null );
+    }
+
+  /**
+   * Method size returns a new Tuple instance of the given size with the given Comparable as its element values.
+   *
+   * @param size  of type int
+   * @param value of type Comparable
+   * @return Tuple
+   */
+  public static Tuple size( int size, Comparable value )
+    {
     Tuple result = new Tuple();
 
     for( int i = 0; i < size; i++ )
-      result.add( null );
+      result.add( value );
 
     return result;
     }

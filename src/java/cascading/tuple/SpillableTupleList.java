@@ -45,6 +45,7 @@ public class SpillableTupleList implements Iterable<Tuple>
   private List<File> files = new LinkedList<File>();
   private List<Tuple> current = new LinkedList<Tuple>();
   private long size = 0;
+  private Fields fields;
 
   public SpillableTupleList()
     {
@@ -61,6 +62,16 @@ public class SpillableTupleList implements Iterable<Tuple>
     size++;
 
     doSpill();
+    }
+
+  public void add( TupleEntry tupleEntry )
+    {
+    if( fields == null )
+      fields = tupleEntry.fields;
+    else if( !fields.equals( tupleEntry.fields ) )
+      throw new IllegalArgumentException( "all entries must have same fields, have: " + fields.print() + " got: " + tupleEntry.fields.print() );
+
+    add( tupleEntry.getTuple() );
     }
 
   public long size()
@@ -199,6 +210,14 @@ public class SpillableTupleList implements Iterable<Tuple>
       return current.iterator();
 
     return new SpilledListIterator();
+    }
+
+  public Iterator<TupleEntry> entryIterator()
+    {
+    if( files.isEmpty() )
+      return new TupleEntryIterator( fields, current.iterator() );
+
+    return new TupleEntryIterator( fields, new SpilledListIterator() );
     }
 
   private class SpilledListIterator implements Iterator<Tuple>

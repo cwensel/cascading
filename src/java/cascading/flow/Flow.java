@@ -514,7 +514,7 @@ public class Flow implements Runnable
 
   // DOT WRITER
 
-  private static void printElementGraph( String filename, SimpleDirectedGraph<FlowElement, Scope> graph )
+  protected static void printElementGraph( String filename, SimpleDirectedGraph<FlowElement, Scope> graph )
     {
     try
       {
@@ -530,7 +530,7 @@ public class Flow implements Runnable
       }
     }
 
-  private static void printElementGraph( Writer writer, final SimpleDirectedGraph<FlowElement, Scope> graph )
+  protected static void printElementGraph( Writer writer, final SimpleDirectedGraph<FlowElement, Scope> graph )
     {
     DOTExporter dot = new DOTExporter<FlowElement, Scope>( new IntegerNameProvider<FlowElement>(), new VertexNameProvider<FlowElement>()
     {

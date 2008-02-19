@@ -22,10 +22,14 @@
 package cascading.flow;
 
 import cascading.CascadingException;
+import org.jgrapht.graph.SimpleDirectedGraph;
 
 /** FlowException instances are thrown on errors when building a Flow or when executing one. */
 public class FlowException extends CascadingException
   {
+  /** Field pipeGraph */
+  SimpleDirectedGraph<FlowElement, Scope> pipeGraph;
+
   /** Constructor FlowException creates a new FlowException instance. */
   public FlowException()
     {
@@ -60,5 +64,41 @@ public class FlowException extends CascadingException
   public FlowException( Throwable throwable )
     {
     super( throwable );
+    }
+
+  /**
+   * Constructor FlowException creates a new FlowException instance.
+   *
+   * @param string    of type String
+   * @param throwable of type Throwable
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   */
+  public FlowException( String string, Throwable throwable, SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    this( string, throwable );
+    this.pipeGraph = pipeGraph;
+    }
+
+  /**
+   * Method getPipeGraph returns the pipeGraph of this FlowException object.
+   *
+   * @return the pipeGraph (type SimpleDirectedGraph<FlowElement, Scope>) of this FlowException object.
+   */
+  public SimpleDirectedGraph<FlowElement, Scope> getPipeGraph()
+    {
+    return pipeGraph;
+    }
+
+  /**
+   * Method writeDOT writes the failed Flow instance to the given filename as a DOT file for import into a graphics package.
+   *
+   * @param filename of type String
+   */
+  public void writeDOT( String filename )
+    {
+    if( pipeGraph == null )
+      return;
+
+    Flow.printElementGraph( filename, pipeGraph );
     }
   }

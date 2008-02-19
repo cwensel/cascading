@@ -474,7 +474,8 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException(
+            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
@@ -562,16 +563,21 @@ public class Group extends Pipe
     super.printInternal( buffer, scope );
     buffer.append( "[by:" );
 
-    for( String name : scope.getGroupingSelectors().keySet() )
+    Map<String, Fields> map = scope.getGroupingSelectors();
+
+    if( map != null )
       {
-      if( scope.getGroupingSelectors().size() > 1 )
-        buffer.append( name ).append( ":" );
+      for( String name : map.keySet() )
+        {
+        if( map.size() > 1 )
+          buffer.append( name ).append( ":" );
 
-      buffer.append( scope.getGroupingSelectors().get( name ).print() );
+        buffer.append( map.get( name ).print() );
+        }
+
+      if( repeat != 1 )
+        buffer.append( "[repeat:" ).append( repeat ).append( "]" );
       }
-
-    if( repeat != 1 )
-      buffer.append( "[repeat:" ).append( repeat ).append( "]" );
 
     buffer.append( "]" );
     }

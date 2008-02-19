@@ -2,6 +2,10 @@ Cascading Change Log
 
 Unreleased
 
+  Changed c.t.SpillableTupleList allows for iteration across entries.
+
+  Changed c.f.FlowException to optionally allow for printing of underlying pipe graph for debugging.
+
   Added c.o.t.FieldFormatter function to format Tuples into complex strings using j.u.Formatter formatting.
 
   Added c.o.a.Last aggregator to find the last value encountered in a group.
