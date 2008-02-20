@@ -100,7 +100,7 @@ public class TupleEntryListIterator implements ListIterator<TupleEntry>, FlowCol
       return;
 
     if( this.entry.fields != null && !this.entry.fields.isUnknown() && this.entry.fields.size() != entry.tuple.size() )
-      throw new TupleException( "added the wrong number of fields, expected: " + this.entry.fields + ", got result size: " + entry.tuple.size() );
+      throw new TupleException( "operation added the wrong number of fields, expected: " + this.entry.fields + ", got result size: " + entry.tuple.size() );
 
     iterator.add( entry.tuple );
     }
@@ -111,7 +111,7 @@ public class TupleEntryListIterator implements ListIterator<TupleEntry>, FlowCol
       return;
 
     if( this.entry.fields != null && !entry.fields.isUnknown() && entry.fields.size() != tuple.size() )
-      throw new TupleException( "added the wrong number of fields, expected: " + entry.fields + ", got result size: " + tuple.size() );
+      throw new TupleException( "operation added the wrong number of fields, expected: " + entry.fields + ", got result size: " + tuple.size() );
 
     iterator.set( tuple );
     }
@@ -122,7 +122,7 @@ public class TupleEntryListIterator implements ListIterator<TupleEntry>, FlowCol
       return;
 
     if( !entry.fields.isUnknown() && entry.fields.size() != tuple.size() )
-      throw new TupleException( "added the wrong number of fields, expected: " + entry.fields + ", got result size: " + tuple.size() );
+      throw new TupleException( "operation added the wrong number of fields, expected: " + entry.fields + ", got result size: " + tuple.size() );
 
     iterator.add( tuple );
     }
