@@ -41,7 +41,7 @@ public class Identity extends Operation implements Function
    */
   public Identity()
     {
-    super( Fields.ALL );
+    super( Fields.ARGS );
     }
 
   /**
@@ -51,7 +51,7 @@ public class Identity extends Operation implements Function
    */
   public Identity( Class... types )
     {
-    super( Fields.ALL );
+    super( Fields.ARGS );
     this.types = types;
     }
 
@@ -87,6 +87,7 @@ public class Identity extends Operation implements Function
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
     }
 
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     if( types == null || types.length == 0 )
