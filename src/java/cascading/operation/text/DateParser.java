@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -42,21 +41,13 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
-public class DateParser extends Operation implements Function
+public class DateParser extends DateOperation implements Function
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "ts";
 
   /** Field calendarFields */
   private int[] calendarFields;
-  /** Field zone */
-  private TimeZone zone;
-  /** Field locale */
-  private Locale locale;
-  /** Field dateFormatString */
-  final String dateFormatString;
-  /** Field dateFormat */
-  SimpleDateFormat dateFormat;
 
   /**
    * Constructor DateParser creates a new DateParser instance that creates a simple long time stamp of the parsed date.
@@ -65,8 +56,7 @@ public class DateParser extends Operation implements Function
    */
   public DateParser( String dateFormatString )
     {
-    super( 1, new Fields( FIELD_NAME ) );
-    this.dateFormatString = dateFormatString;
+    super( 1, new Fields( FIELD_NAME ), dateFormatString );
     }
 
   /**
@@ -77,11 +67,7 @@ public class DateParser extends Operation implements Function
    */
   public DateParser( Fields fieldDeclaration, String dateFormatString )
     {
-    super( 1, fieldDeclaration );
-    this.dateFormatString = dateFormatString;
-
-    if( fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, got " + fieldDeclaration.print() );
+    super( 1, fieldDeclaration, dateFormatString );
     }
 
   /**
@@ -109,31 +95,15 @@ public class DateParser extends Operation implements Function
    */
   public DateParser( Fields fieldDeclaration, int[] calendarFields, TimeZone zone, Locale locale, String dateFormatString )
     {
-    super( 1, fieldDeclaration );
+    super( 1, fieldDeclaration, dateFormatString, zone, locale );
     this.calendarFields = calendarFields;
-    this.zone = zone;
-    this.locale = locale;
-    this.dateFormatString = dateFormatString;
 
     if( fieldDeclaration.size() != calendarFields.length )
       throw new IllegalArgumentException(
         "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
     }
 
-  /**
-   * Method getDateFormat returns the dateFormat of this DateParser object.
-   *
-   * @return the dateFormat (type SimpleDateFormat) of this DateParser object.
-   */
-  public SimpleDateFormat getDateFormat()
-    {
-    if( dateFormat == null )
-      dateFormat = new SimpleDateFormat( dateFormatString );
-
-    return dateFormat;
-    }
-
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     Tuple output = new Tuple();
@@ -157,7 +127,7 @@ public class DateParser extends Operation implements Function
 
   private void makeCalendarFields( Tuple output, Date date )
     {
-    Calendar calendar = Calendar.getInstance( zone, locale );
+    Calendar calendar = getCalendar();
     calendar.setTime( date );
 
     for( int i = 0; i < calendarFields.length; i++ )
