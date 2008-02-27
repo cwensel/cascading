@@ -22,6 +22,8 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
@@ -50,6 +52,8 @@ public class Hfs extends Tap
   boolean deleteOnSinkInit = false;
   /** Field stringPath */
   String stringPath;
+  /** Field uriScheme */
+  transient URI uriScheme;
   /** Field path */
   transient Path path;
   /** Field paths */
@@ -112,9 +116,35 @@ public class Hfs extends Tap
     this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
-  protected FileSystem getFileSystem( JobConf conf ) throws IOException
+  protected URI getURIScheme( JobConf jobConf )
     {
-    return FileSystem.get( conf );
+    if( uriScheme != null )
+      return uriScheme;
+
+    try
+      {
+      URI uri = new URI( stringPath );
+      String schemeString = uri.getScheme();
+      String authority = uri.getAuthority();
+
+      if( schemeString != null && authority != null )
+        uriScheme = new URI( schemeString + "://" + uri.getAuthority() );
+      else if( schemeString != null )
+        uriScheme = new URI( schemeString + ":///" );
+      else
+        uriScheme = new URI( jobConf.get( "fs.default.name", "file:///" ) );
+
+      return uriScheme;
+      }
+    catch( URISyntaxException exception )
+      {
+      throw new TapException( "could not determine scheme from path: " + getPath(), exception );
+      }
+    }
+
+  protected FileSystem getFileSystem( JobConf jobConf ) throws IOException
+    {
+    return FileSystem.get( getURIScheme( jobConf ), jobConf );
     }
 
   /** @see Tap#getPath() */

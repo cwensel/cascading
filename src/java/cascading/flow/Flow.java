@@ -41,6 +41,8 @@ import cascading.CascadingException;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
+import cascading.tap.hadoop.HttpFileSystem;
+import cascading.tap.hadoop.S3HttpFileSystem;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -94,7 +96,7 @@ public class Flow implements Runnable
 
   protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
-    this.jobConf = jobConf;
+    setJobConf( jobConf );
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
@@ -112,6 +114,18 @@ public class Flow implements Runnable
     return name;
     }
 
+  private void setJobConf( JobConf jobConf )
+    {
+    if( jobConf == null )
+      return;
+
+    this.jobConf = jobConf;
+
+    jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
+    jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
+    jobConf.set( "fs.s3http.impl", S3HttpFileSystem.class.getName() );
+    }
+
   /**
    * Method getJobConf returns the jobConf of this Flow object.
    *
@@ -120,7 +134,7 @@ public class Flow implements Runnable
   public JobConf getJobConf()
     {
     if( jobConf == null )
-      jobConf = new JobConf();
+      setJobConf( new JobConf() );
 
     return jobConf;
     }
@@ -259,7 +273,7 @@ public class Flow implements Runnable
    */
   public void start( JobConf jobConf )
     {
-    this.jobConf = jobConf;
+    setJobConf( jobConf );
     start();
     }
 

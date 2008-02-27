@@ -27,7 +27,6 @@ import java.util.Set;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.tap.Tap;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -52,8 +51,6 @@ public class Cascade implements Runnable
   private final Tap rootTap;
   /** Field graph */
   private final SimpleDirectedGraph<Tap, Flow.FlowHolder> graph;
-  /** Field jobConf */
-  private JobConf jobConf;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -81,19 +78,6 @@ public class Cascade implements Runnable
   public String getName()
     {
     return name;
-    }
-
-  /**
-   * Method getJobConf returns the JobConf of this Cascade object.
-   *
-   * @return the jobConf (type JobConf) of this Cascade object.
-   */
-  public JobConf getJobConf()
-    {
-    if( jobConf == null )
-      jobConf = new JobConf();
-
-    return jobConf;
     }
 
   /**
@@ -170,15 +154,15 @@ public class Cascade implements Runnable
         Set<Flow.FlowHolder> flows = graph.outgoingEdgesOf( source );
         Set<Flow> startable = new HashSet<Flow>();
 
-        for( Flow.FlowHolder flow : flows )
+        for( Flow.FlowHolder flowHolder : flows )
           {
-          if( completed.contains( flow.flow ) )
+          if( completed.contains( flowHolder.flow ) )
             continue;
 
-          if( flow.flow.areSinksStale( getJobConf() ) )
-            startable.add( flow.flow );
+          if( flowHolder.flow.areSinksStale( flowHolder.flow.getJobConf() ) )
+            startable.add( flowHolder.flow );
           else if( LOG.isInfoEnabled() )
-            LOG.info( "skipping flow: " + flow.flow.getName() );
+            LOG.info( "skipping flow: " + flowHolder.flow.getName() );
           }
 
         if( LOG.isDebugEnabled() )
@@ -189,8 +173,8 @@ public class Cascade implements Runnable
           if( LOG.isInfoEnabled() )
             LOG.info( "starting flow: " + flow.getName() );
 
-          flow.deleteSinks( getJobConf() );
-          flow.start( getJobConf() );
+          flow.deleteSinks( flow.getJobConf() );
+          flow.start();
           }
 
         for( Flow flow : startable )

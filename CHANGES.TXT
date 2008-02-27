@@ -2,6 +2,8 @@ Cascading Change Log
 
 Unreleased
 
+  Added http, https, and s3http read-only file systems to Hadoop.
+
   Added c.o.t.DateFormatter supporting text formatting of time stamps created by c.o.t.DateParser.
 
   Fixed bug where in complex assemblies, some Scopes were not resolved.
