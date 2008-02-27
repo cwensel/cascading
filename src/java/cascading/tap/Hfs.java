@@ -116,23 +116,35 @@ public class Hfs extends Tap
     this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
-  protected URI getURIScheme( JobConf jobConf )
+  protected URI getURIScheme( JobConf jobConf ) throws IOException
     {
     if( uriScheme != null )
       return uriScheme;
 
     try
       {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "handling path: " + stringPath );
+
       URI uri = new URI( stringPath );
       String schemeString = uri.getScheme();
       String authority = uri.getAuthority();
+
+      if( LOG.isDebugEnabled() )
+        {
+        LOG.debug( "found scheme: " + schemeString );
+        LOG.debug( "found authority: " + authority );
+        }
 
       if( schemeString != null && authority != null )
         uriScheme = new URI( schemeString + "://" + uri.getAuthority() );
       else if( schemeString != null )
         uriScheme = new URI( schemeString + ":///" );
       else
-        uriScheme = new URI( jobConf.get( "fs.default.name", "file:///" ) );
+        uriScheme = FileSystem.get( jobConf ).getUri();
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "using uri scheme: " + uriScheme );
 
       return uriScheme;
       }
