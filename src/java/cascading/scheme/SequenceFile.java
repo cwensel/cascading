@@ -79,7 +79,7 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public InputFormat getInputFormat()
+  public InputFormat getInputFormat( JobConf conf )
     {
     return new SequenceFileInputFormat();
     }

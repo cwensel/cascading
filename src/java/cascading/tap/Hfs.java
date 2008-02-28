@@ -196,19 +196,19 @@ public class Hfs extends Tap
   @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
-    super.sourceInit( conf );
     conf.addInputPath( getQualifiedPath( conf ) );
+    super.sourceInit( conf );
     }
 
   @Override
   public void sinkInit( JobConf conf ) throws IOException
     {
-    super.sinkInit( conf );
-
     if( deleteOnSinkInit )
       deletePath( conf );
 
     conf.setOutputPath( getQualifiedPath( conf ) );
+
+    super.sinkInit( conf );
     }
 
   @Override

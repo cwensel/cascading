@@ -23,8 +23,10 @@ package cascading.scheme;
 
 import java.io.IOException;
 
+import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.InputFormat;
@@ -37,6 +39,9 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
  * lines. Either line-feed or carriage-return are used to signal end of line. Keys are the
  * position in the file, and values are the line of text.
+ * <p/>
+ * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
+ * bi-directional, so zip files cannot be written.
  */
 public class TextLine extends Scheme
   {
@@ -95,12 +100,30 @@ public class TextLine extends Scheme
   @Override
   public void sourceInit( JobConf conf )
     {
-    conf.setInputFormat( TextInputFormat.class );
+    if( hasZippedFiles( conf.getInputPaths() ) )
+      conf.setInputFormat( ZipInputFormat.class );
+    else
+      conf.setInputFormat( TextInputFormat.class );
+    }
+
+  private boolean hasZippedFiles( Path[] paths )
+    {
+    boolean isZipped = paths[ 0 ].getName().endsWith( ".zip" );
+
+    for( int i = 1; i < paths.length; i++ )
+      {
+      if( isZipped != paths[ i ].getName().endsWith( ".zip" ) )
+        throw new IllegalStateException( "cannot mix zipped and upzippled files" );
+      }
+    return isZipped;
     }
 
   @Override
   public void sinkInit( JobConf conf )
     {
+    if( conf.getOutputPath().getName().endsWith( ".zip" ) )
+      throw new IllegalStateException( "cannot write zip files: " + conf.getOutputPath() );
+
     conf.setOutputFormat( TextOutputFormat.class );
     }
 
@@ -123,9 +146,12 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public InputFormat getInputFormat()
+  public InputFormat getInputFormat( JobConf conf )
     {
-    return new TextInputFormat();
+    if( hasZippedFiles( conf.getInputPaths() ) )
+      return new ZipInputFormat();
+    else
+      return new TextInputFormat();
     }
 
   @Override

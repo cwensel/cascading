@@ -2,6 +2,10 @@ Cascading Change Log
 
 Unreleased
 
+  Added c.t.h.ZipInputFormat (and ZipSplit) to support zip files. c.s.TextLine supports transparent
+  reading of zip files if the filename ends with .zip, but cannot write to them. This code is
+  based on HADOOP-1824 with some improvements.
+
   Added http, https, and s3http read-only file systems to Hadoop.
 
   Added c.o.t.DateFormatter supporting text formatting of time stamps created by c.o.t.DateParser.

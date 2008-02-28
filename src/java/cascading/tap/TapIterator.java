@@ -72,7 +72,7 @@ public class TapIterator implements Iterator<Tuple>
     this.input = input;
     this.conf = conf;
 
-    inputFormat = this.input.getInputFormat();
+    inputFormat = this.input.getInputFormat( conf );
 
     if( inputFormat instanceof JobConfigurable )
       ( (JobConfigurable) inputFormat ).configure( conf );

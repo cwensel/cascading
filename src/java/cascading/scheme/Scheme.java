@@ -195,9 +195,10 @@ public abstract class Scheme implements Serializable
   /**
    * Method getInputFormat returns the inputFormat of this Scheme object.
    *
+   * @param conf
    * @return the inputFormat (type InputFormat) of this Scheme object.
    */
-  public abstract InputFormat getInputFormat();
+  public abstract InputFormat getInputFormat( JobConf conf );
 
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.
