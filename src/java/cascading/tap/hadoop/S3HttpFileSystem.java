@@ -55,9 +55,8 @@ public class S3HttpFileSystem extends FileSystem
     {
     setConf( configuration );
 
-    s3Service = S3Util.getS3Service( uri );
-    s3Bucket = S3Util.getS3Bucket( uri );
-
+    this.s3Service = S3Util.getS3Service( uri );
+    this.s3Bucket = S3Util.getS3Bucket( uri );
     this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
     }
 
@@ -71,6 +70,7 @@ public class S3HttpFileSystem extends FileSystem
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.OBJECT );
     final InputStream in = S3Util.getObjectInputStream( object );
 
+    // ctor requires Seekable or PositionedReadable stream
     return new FSDataInputStream( new FSInputStream()
     {
     public int read() throws IOException
@@ -90,12 +90,12 @@ public class S3HttpFileSystem extends FileSystem
 
     public void seek( long pos ) throws IOException
       {
-      throw new IOException( "Can't seek!" );
+      throw new IOException( "not supported" );
       }
 
     public long getPos() throws IOException
       {
-      throw new IOException( "Position unknown!" );
+      throw new IOException( "not supported" );
       }
 
     public boolean seekToNewSource( long targetPos ) throws IOException
@@ -148,6 +148,9 @@ public class S3HttpFileSystem extends FileSystem
   public FileStatus getFileStatus( Path path ) throws IOException
     {
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "returning status for: " + path );
 
     return new FileStatus( object.getContentLength(), false, 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(), path );
     }

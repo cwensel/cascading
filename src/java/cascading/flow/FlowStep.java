@@ -118,6 +118,9 @@ public class FlowStep implements Serializable
     {
     String currentFile = jobConf.get( "map.input.file" );
 
+    if( currentFile == null || currentFile.length() == 0 )
+      throw new IllegalStateException( "map.input.file property returned null" );
+
     for( Tap source : sources.keySet() )
       {
       if( source.containsFile( jobConf, currentFile ) )

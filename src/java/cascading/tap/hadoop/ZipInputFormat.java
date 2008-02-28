@@ -21,8 +21,13 @@
 
 package cascading.tap.hadoop;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -40,9 +45,13 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * An {@link InputFormat} for zip files. Each file within a zip file is broken
- * into lines.Either line-feed or carriage-return are used to signal end of
+ * Class ZipInputFormat ia an {@link InputFormat} for zip files. Each file within a zip file is broken
+ * into lines. Either line-feed or carriage-return are used to signal end of
  * line. Keys are the position in the file, and values are the line of text.
+ * <p/>
+ * If the underlying {@link FileSystem} is HDFS or FILE, each {@link ZipEntry} is returned
+ * as a unique split. Otherwise this input format returns false for isSplitable, and will
+ * subsequently iterate over each ZipEntry and treat all internal files as the 'same' file.
  */
 public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implements JobConfigurable
   {
@@ -60,6 +69,9 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
    */
   protected boolean isSplitable( FileSystem fs, Path file )
     {
+    if( !isAllowSplits( fs ) )
+      return false;
+
     if( LOG.isDebugEnabled() )
       LOG.debug( "verifying ZIP format for file: " + file.toString() );
 
@@ -84,18 +96,29 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       }
     finally
       {
-      try
-        {
-        if( zipInputStream != null )
-          zipInputStream.close();
-        }
-      catch( IOException exception )
-        {
-        LOG.error( "exception while trying to close ZIP input stream", exception );
-        }
+      safeClose( zipInputStream );
       }
 
     return splitable;
+    }
+
+  @Override
+  protected Path[] listPaths( JobConf jobConf ) throws IOException
+    {
+    Path[] dirs = jobConf.getInputPaths();
+
+    if( dirs.length == 0 )
+      throw new IOException( "no input paths specified in job" );
+
+    for( Path dir : dirs )
+      {
+      FileSystem fs = dir.getFileSystem( jobConf );
+
+      if( !fs.isFile( dir ) )
+        throw new IOException( "does not support directories: " + dir );
+      }
+
+    return dirs;
     }
 
   /**
@@ -109,7 +132,6 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
    */
   public InputSplit[] getSplits( JobConf job, int numSplits ) throws IOException
     {
-
     if( LOG.isDebugEnabled() )
       LOG.debug( "start splitting input ZIP files" );
 
@@ -120,14 +142,12 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       Path file = files[ i ];
       FileSystem fs = file.getFileSystem( job );
 
-      if( fs.isDirectory( file ) || !fs.exists( file ) )
+      if( !fs.isFile( file ) || !fs.exists( file ) )
         throw new IOException( "not a file: " + files[ i ] );
       }
 
     // generate splits
     ArrayList<ZipSplit> splits = new ArrayList<ZipSplit>( numSplits );
-    ZipInputStream zipInputStream = null;
-    ZipEntry zipEntry = null;
 
     for( int i = 0; i < files.length; i++ )
       {
@@ -137,27 +157,10 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       if( LOG.isDebugEnabled() )
         LOG.debug( "opening zip file: " + file.toString() );
 
-      try
-        {
-        zipInputStream = new ZipInputStream( fs.open( file ) );
-
-        while( ( zipEntry = zipInputStream.getNextEntry() ) != null )
-          {
-          ZipSplit zipSplit = new ZipSplit( file, zipEntry.getName(), zipEntry.getSize(), job );
-
-          if( LOG.isDebugEnabled() )
-            LOG.debug( String.format( "creating split for zip entry: %s size: %d method: %s compressed size: %d", zipEntry.getName(), zipEntry.getSize(),
-              ZipEntry.DEFLATED == zipEntry.getMethod() ? "DEFLATED" : "STORED", zipEntry.getCompressedSize() ) );
-
-          splits.add( zipSplit );
-          }
-        }
-      finally
-        {
-        if( zipInputStream != null )
-          zipInputStream.close();
-        }
-
+      if( isAllowSplits( fs ) )
+        makeSplits( job, splits, fs, file );
+      else
+        makeSplit( job, splits, file );
       }
 
     if( LOG.isDebugEnabled() )
@@ -166,13 +169,46 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     return splits.toArray( new ZipSplit[splits.size()] );
     }
 
+  private void makeSplit( JobConf job, ArrayList<ZipSplit> splits, Path file ) throws IOException
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "creating split for zip: " + file );
+
+    // unknown uncompressed size. if set to compressed size, data will be truncated
+    splits.add( new ZipSplit( file, -1, job ) );
+    }
+
+  private void makeSplits( JobConf job, ArrayList<ZipSplit> splits, FileSystem fs, Path file ) throws IOException
+    {
+    ZipInputStream zipInputStream = new ZipInputStream( fs.open( file ) );
+
+    try
+      {
+      ZipEntry zipEntry;
+
+      while( ( zipEntry = zipInputStream.getNextEntry() ) != null )
+        {
+        ZipSplit zipSplit = new ZipSplit( file, zipEntry.getName(), zipEntry.getSize(), job );
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( String.format( "creating split for zip entry: %s size: %d method: %s compressed size: %d", zipEntry.getName(), zipEntry.getSize(),
+            ZipEntry.DEFLATED == zipEntry.getMethod() ? "DEFLATED" : "STORED", zipEntry.getCompressedSize() ) );
+
+        splits.add( zipSplit );
+        }
+      }
+    finally
+      {
+      safeClose( zipInputStream );
+      }
+    }
+
   public RecordReader<LongWritable, Text> getRecordReader( InputSplit genericSplit, JobConf job, Reporter reporter ) throws IOException
     {
     reporter.setStatus( genericSplit.toString() );
 
     ZipSplit split = (ZipSplit) genericSplit;
-    Path file = split.getFile();
-    String entryPath = split.getEntryPath();
+    Path file = split.getPath();
     long length = split.getLength();
 
     // Set it max value if length is unknown.
@@ -184,6 +220,89 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
 
     FileSystem fs = file.getFileSystem( job );
     ZipInputStream zipInputStream = new ZipInputStream( fs.open( file ) );
+
+    if( isAllowSplits( fs ) )
+      return getReaderForEntry( zipInputStream, split, length );
+    else
+      return getReaderForAll( zipInputStream, length );
+    }
+
+  private RecordReader<LongWritable, Text> getReaderForAll( final ZipInputStream zipInputStream, long length ) throws IOException
+    {
+    Enumeration<InputStream> enumeration = new Enumeration<InputStream>()
+    {
+    boolean returnCurrent = false;
+    ZipEntry nextEntry;
+
+    public boolean hasMoreElements()
+      {
+      if( returnCurrent )
+        return nextEntry != null;
+
+      getNext();
+
+      return nextEntry != null;
+      }
+
+    public InputStream nextElement()
+      {
+      if( returnCurrent )
+        {
+        returnCurrent = false;
+        return makeInputStream( zipInputStream );
+        }
+
+      getNext();
+
+      if( nextEntry == null )
+        throw new IllegalStateException( "no more zip entries in zip input stream" );
+
+      return makeInputStream( zipInputStream );
+      }
+
+    private void getNext()
+      {
+      try
+        {
+        nextEntry = zipInputStream.getNextEntry();
+
+        while( nextEntry != null && nextEntry.isDirectory() )
+          nextEntry = zipInputStream.getNextEntry();
+
+        returnCurrent = true;
+        }
+      catch( IOException exception )
+        {
+        throw new RuntimeException( "could not get next zip entry", exception );
+        }
+      finally
+        {
+        // i think, better than sending across a fake input stream that closes the zip
+        if( nextEntry == null )
+          safeClose( zipInputStream );
+        }
+      }
+
+    private InputStream makeInputStream( ZipInputStream zipInputStream )
+      {
+      return new FilterInputStream( zipInputStream )
+      {
+      @Override
+      public void close() throws IOException
+        {
+        // do nothing
+        }
+      };
+      }
+    };
+
+    return new LineRecordReader( new SequenceInputStream( enumeration ), 0, length );
+    }
+
+  private RecordReader<LongWritable, Text> getReaderForEntry( ZipInputStream zipInputStream, ZipSplit split, long length ) throws IOException
+    {
+    String entryPath = split.getEntryPath();
+
     ZipEntry zipEntry = zipInputStream.getNextEntry();
 
     while( zipEntry != null && !zipEntry.getName().equals( entryPath ) )
@@ -191,4 +310,27 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
 
     return new LineRecordReader( zipInputStream, 0, length );
     }
+
+  public boolean isAllowSplits( FileSystem fs )
+    {
+    // only allow if fs is local or dfs
+    URI uri = fs.getUri();
+    String scheme = uri.getScheme();
+
+    return scheme.equalsIgnoreCase( "hdfs" ) || scheme.equalsIgnoreCase( "file" );
+    }
+
+  private void safeClose( ZipInputStream zipInputStream )
+    {
+    try
+      {
+      if( zipInputStream != null )
+        zipInputStream.close();
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "exception while trying to close ZIP input stream", exception );
+      }
+    }
+
   }

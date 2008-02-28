@@ -64,10 +64,16 @@ public class RegexReplace extends RegexOperation implements Function
     this.replacement = replacement;
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
-    String value = (String) input.get( 0 );
+    // coerce to string
+    String value = (String) input.getTuple().getString( 0 );
+
+    // make safe
+    if( value == null )
+      value = "";
+
     Tuple output = new Tuple();
 
     // todo: reuse the matcher via the .reset() method. need to confirm only one thread will fire through this

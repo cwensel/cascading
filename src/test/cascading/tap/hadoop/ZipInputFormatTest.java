@@ -21,7 +21,9 @@
 
 package cascading.tap.hadoop;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.zip.ZipEntry;
@@ -31,6 +33,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.InMemoryFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -47,26 +50,26 @@ public class ZipInputFormatTest extends TestCase
   private static int MAX_LENGTH = 10000;
   private static int MAX_ENTRIES = 100;
 
-  private static JobConf defaultConf = new JobConf();
-  private static FileSystem localFs = null;
-
-  static
-    {
-    try
-      {
-      localFs = FileSystem.getLocal( defaultConf );
-      }
-    catch( IOException e )
-      {
-      throw new RuntimeException( "init failure", e );
-      }
-    }
-
   private static Path workDir = new Path( new Path( System.getProperty( "test.build.data", "build/test/output/" ), "data" ), "ZipInputFormatTest" );
 
-  public void testFormat() throws Exception
+  public void testSplits() throws Exception
+    {
+    test( new JobConf() );
+    }
+
+  public void testNoSplits() throws Exception
     {
     JobConf job = new JobConf();
+
+    job.set( "fs.default.name", "ramfs:///" );
+
+    test( job );
+    }
+
+  private void test( JobConf job ) throws IOException
+    {
+    FileSystem currentFs = FileSystem.get( job );
+
     Path file = new Path( workDir, "test.zip" );
 
     // A reporter that does nothing
@@ -75,17 +78,17 @@ public class ZipInputFormatTest extends TestCase
     int seed = new Random().nextInt();
     LOG.info( "seed = " + seed );
     Random random = new Random( seed );
-    job.setInputPath( workDir );
+    job.setInputPath( file );
 
     // for variety of zip file entries
-    for( int entries = 1; entries < MAX_ENTRIES; entries += random
-      .nextInt( MAX_ENTRIES / 10 ) + 1 )
+    for( int entries = 1; entries < MAX_ENTRIES; entries += random.nextInt( MAX_ENTRIES / 10 ) + 1 )
       {
-
-      localFs.delete( workDir );
-      ZipOutputStream zos = new ZipOutputStream( localFs.create( file ) );
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ZipOutputStream zos = new ZipOutputStream( byteArrayOutputStream );
       long length = 0;
+
       LOG.debug( "creating; zip file with entries = " + entries );
+
       // for each entry in the zip file
       for( int entryCounter = 0; entryCounter < entries; entryCounter++ )
         {
@@ -95,16 +98,28 @@ public class ZipInputFormatTest extends TestCase
         zipEntry.setMethod( ZipEntry.DEFLATED );
         zos.putNextEntry( zipEntry );
 
-        for( length = ( entryCounter * entryLength ); length < ( ( entryCounter + 1 ) * entryLength ); length++ )
+        for( length = entryCounter * entryLength; length < ( entryCounter + 1 ) * entryLength; length++ )
           {
           zos.write( Long.toString( length ).getBytes() );
           zos.write( "\n".getBytes() );
           }
+
         zos.flush();
         zos.closeEntry();
         }
+
       zos.flush();
       zos.close();
+
+      currentFs.delete( file );
+
+      if( currentFs instanceof InMemoryFileSystem )
+        ( (InMemoryFileSystem) currentFs ).reserveSpaceWithCheckSum( file, byteArrayOutputStream.size() );
+
+      OutputStream outputStream = currentFs.create( file );
+
+      byteArrayOutputStream.writeTo( outputStream );
+      outputStream.close();
 
       // try splitting the zip file, with 1 split per zip entry
       ZipInputFormat format = new ZipInputFormat();
@@ -128,21 +143,24 @@ public class ZipInputFormatTest extends TestCase
         {
         LOG.debug( "split[" + j + "]= " + splits[ j ] );
         RecordReader<LongWritable, Text> reader = format.getRecordReader( splits[ j ], job, reporter );
+
         try
           {
           int count = 0;
+
           while( reader.next( key, value ) )
             {
             int v = Integer.parseInt( value.toString() );
             LOG.debug( "read " + v );
+
             if( bits.get( v ) )
-              {
               LOG.warn( "conflict with " + v + " in split " + j + " at position " + reader.getPos() );
-              }
+
             assertFalse( "Key in multiple partitions.", bits.get( v ) );
             bits.set( v );
             count++;
             }
+
           totalCount += count;
           LOG.debug( "splits[" + j + "]=" + splits[ j ] + " count=" + count );
           }
@@ -151,6 +169,7 @@ public class ZipInputFormatTest extends TestCase
           reader.close();
           }
         }
+
       assertEquals( "Some keys in no partition.", length, bits.cardinality() );
       }
     }

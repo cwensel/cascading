@@ -107,7 +107,7 @@ public class RegexParser extends RegexOperation implements Function
     Matcher matcher = getPattern().matcher( value );
 
     if( !matcher.find() )
-      throw new OperationException( "could not match pattern: " + getPattern() + " with value: " + value );
+      throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );
 
     for( int pos : groups )
       output.add( matcher.group( pos ) );

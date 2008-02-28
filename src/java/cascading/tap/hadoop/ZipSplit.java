@@ -30,28 +30,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.UTF8;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Reporter;
 
 /**
  * A section of an input file in zip format. Returned by
- * {@link ZipInputFormat#getSplits(org.apache.hadoop.mapred.JobConf , int)} and passed to
- * {@link ZipInputFormat#getRecordReader(org.apache.hadoop.mapred.InputSplit , org.apache.hadoop.mapred.JobConf , org.apache.hadoop.mapred.Reporter)}.
+ * {@link ZipInputFormat#getSplits(JobConf , int)} and passed to
+ * {@link ZipInputFormat#getRecordReader(InputSplit , JobConf , Reporter)}.
  */
 
-public class ZipSplit implements InputSplit
+public class ZipSplit extends FileSplit
   {
+  public static final Log LOG = LogFactory.getLog( "org.apache.hadoop.mapred.ZipSplit" );
 
-  public static final Log LOG = LogFactory
-    .getLog( "org.apache.hadoop.mapred.ZipSplit" );
-
-  private Path file;
   private String entryPath;
-  private JobConf conf;
-  private long length;
 
   ZipSplit()
     {
+    super( null, 0, 0, null );
     }
 
   /**
@@ -60,20 +58,24 @@ public class ZipSplit implements InputSplit
    * @param file      the zip archive name
    * @param entryPath the path of the file to be read within the zip archive.
    * @param length    the uncompressed size of the file within the zip archive.
-   * @param conf      see {@link org.apache.hadoop.mapred.JobConf}
+   * @param conf      see {@link JobConf}
    */
   public ZipSplit( Path file, String entryPath, long length, JobConf conf )
     {
-    this.file = file;
+    super( file, 0, length, conf );
     this.entryPath = entryPath;
-    this.length = length;
-    this.conf = conf;
     }
 
-  /** The zip archive containing this split's data. */
-  public Path getFile()
+  /**
+   * Constructor ZipSplit creates a new ZipSplit instance.
+   *
+   * @param file   of type Path
+   * @param length of type long
+   * @param conf   of type JobConf
+   */
+  public ZipSplit( Path file, long length, JobConf conf )
     {
-    return file;
+    super( file, 0, length, conf );
     }
 
   /** The path of the file within the zip archive. */
@@ -82,37 +84,18 @@ public class ZipSplit implements InputSplit
     return entryPath;
     }
 
-  /** The uncompressed size of the file within the zip archive. */
-  public long getLength() throws IOException
-    {
-    return length;
-    }
-
   // //////////////////////////////////////////
   // Writable methods
   // //////////////////////////////////////////
   public void write( DataOutput out ) throws IOException
     {
-    UTF8.writeString( out, file.toString() );
-    UTF8.writeString( out, entryPath );
-    out.writeLong( length );
+    super.write( out );
+    UTF8.writeString( out, entryPath == null ? "" : entryPath );
     }
 
   public void readFields( DataInput in ) throws IOException
     {
-    file = new Path( UTF8.readString( in ) );
+    super.readFields( in );
     entryPath = UTF8.readString( in );
-    length = in.readLong();
     }
-
-  public String[] getLocations() throws IOException
-    {
-    String[][] hints = file.getFileSystem( conf ).getFileCacheHints( file, 0, length );
-    if( hints != null && hints.length > 0 )
-      {
-      return hints[ 0 ];
-      }
-    return new String[]{};
-    }
-
   }
