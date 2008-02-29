@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -219,20 +220,23 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     length = length == -1 ? Long.MAX_VALUE - 1 : length;
 
     FileSystem fs = file.getFileSystem( job );
-    ZipInputStream zipInputStream = new ZipInputStream( fs.open( file ) );
+
+    FSDataInputStream inputStream = fs.open( file );
 
     if( isAllowSplits( fs ) )
-      return getReaderForEntry( zipInputStream, split, length );
+      return getReaderForEntry( inputStream, split, length );
     else
-      return getReaderForAll( zipInputStream, length );
+      return getReaderForAll( inputStream, fs.getFileStatus( file ).getLen() ); // hopefully an efficient call
     }
 
-  private RecordReader<LongWritable, Text> getReaderForAll( final ZipInputStream zipInputStream, long length ) throws IOException
+  private RecordReader<LongWritable, Text> getReaderForAll( final FSDataInputStream inputStream, final long compressedLength ) throws IOException
     {
     Enumeration<InputStream> enumeration = new Enumeration<InputStream>()
     {
     boolean returnCurrent = false;
     ZipEntry nextEntry;
+    ZipInputStream zipInputStream = new ZipInputStream( inputStream );
+    InputStream closeableInputStream = makeInputStream( zipInputStream );
 
     public boolean hasMoreElements()
       {
@@ -249,7 +253,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       if( returnCurrent )
         {
         returnCurrent = false;
-        return makeInputStream( zipInputStream );
+        return closeableInputStream;
         }
 
       getNext();
@@ -257,7 +261,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       if( nextEntry == null )
         throw new IllegalStateException( "no more zip entries in zip input stream" );
 
-      return makeInputStream( zipInputStream );
+      return closeableInputStream;
       }
 
     private void getNext()
@@ -296,11 +300,36 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       }
     };
 
-    return new LineRecordReader( new SequenceInputStream( enumeration ), 0, length );
+    return new LineRecordReader( new SequenceInputStream( enumeration ), 0, Long.MAX_VALUE )
+    {
+    @Override
+    public float getProgress()
+      {
+      if( 0 == compressedLength )
+        return 0.0f;
+      else
+        return Math.min( 1.0f, getPosSafe( inputStream ) / (float) compressedLength );
+      }
+    };
     }
 
-  private RecordReader<LongWritable, Text> getReaderForEntry( ZipInputStream zipInputStream, ZipSplit split, long length ) throws IOException
+  private long getPosSafe( FSDataInputStream inputStream )
     {
+    try
+      {
+      return inputStream.getPos();
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "could not get pos from FSDataInputStream" );
+      }
+
+    return 0;
+    }
+
+  private RecordReader<LongWritable, Text> getReaderForEntry( FSDataInputStream inputStream, ZipSplit split, long length ) throws IOException
+    {
+    ZipInputStream zipInputStream = new ZipInputStream( inputStream );
     String entryPath = split.getEntryPath();
 
     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -311,7 +340,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     return new LineRecordReader( zipInputStream, 0, length );
     }
 
-  public boolean isAllowSplits( FileSystem fs )
+  protected boolean isAllowSplits( FileSystem fs )
     {
     // only allow if fs is local or dfs
     URI uri = fs.getUri();
