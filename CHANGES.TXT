@@ -4,7 +4,9 @@ Unreleased
 
   Added c.t.h.ZipInputFormat (and ZipSplit) to support zip files. c.s.TextLine supports transparent
   reading of zip files if the filename ends with .zip, but cannot write to them. This code is
-  based on HADOOP-1824 with some improvements.
+  loosely based on HADOOP-1824. If the underlying filesystem is hdfs or file, splits will be created
+  for each ZipEntry. Otherwise ZipEntries are iterated over to be more stream friendly. Progress status is
+  supported.
 
   Added http, https, and s3http read-only file systems to Hadoop.
 

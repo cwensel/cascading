@@ -226,11 +226,14 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     if( isAllowSplits( fs ) )
       return getReaderForEntry( inputStream, split, length );
     else
-      return getReaderForAll( inputStream, fs.getFileStatus( file ).getLen() ); // hopefully an efficient call
+      return getReaderForAll( inputStream );
     }
 
-  private RecordReader<LongWritable, Text> getReaderForAll( final FSDataInputStream inputStream, final long compressedLength ) throws IOException
+  private RecordReader<LongWritable, Text> getReaderForAll( final FSDataInputStream inputStream ) throws IOException
     {
+    final long bytesSize[] = new long[]{0};
+    final long bytesRead[] = new long[]{0};
+
     Enumeration<InputStream> enumeration = new Enumeration<InputStream>()
     {
     boolean returnCurrent = false;
@@ -273,6 +276,9 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
         while( nextEntry != null && nextEntry.isDirectory() )
           nextEntry = zipInputStream.getNextEntry();
 
+        if( nextEntry != null )
+          bytesSize[ 0 ] += nextEntry.getSize();
+
         returnCurrent = true;
         }
       catch( IOException exception )
@@ -292,6 +298,37 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       return new FilterInputStream( zipInputStream )
       {
       @Override
+      public int read() throws IOException
+        {
+        bytesRead[ 0 ]++;
+        return super.read();
+        }
+
+      @Override
+      public int read( byte[] bytes ) throws IOException
+        {
+        int result = super.read( bytes );
+        bytesRead[ 0 ] += result;
+        return result;
+        }
+
+      @Override
+      public int read( byte[] bytes, int i, int i1 ) throws IOException
+        {
+        int result = super.read( bytes, i, i1 );
+        bytesRead[ 0 ] += result;
+        return result;
+        }
+
+      @Override
+      public long skip( long l ) throws IOException
+        {
+        long result = super.skip( l );
+        bytesRead[ 0 ] += result;
+        return result;
+        }
+
+      @Override
       public void close() throws IOException
         {
         // do nothing
@@ -305,26 +342,12 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     @Override
     public float getProgress()
       {
-      if( 0 == compressedLength )
+      if( 0 == bytesSize[ 0 ] )
         return 0.0f;
       else
-        return Math.min( 1.0f, getPosSafe( inputStream ) / (float) compressedLength );
+        return Math.min( 1.0f, bytesRead[ 0 ] / (float) bytesSize[ 0 ] );
       }
     };
-    }
-
-  private long getPosSafe( FSDataInputStream inputStream )
-    {
-    try
-      {
-      return inputStream.getPos();
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "could not get pos from FSDataInputStream" );
-      }
-
-    return 0;
     }
 
   private RecordReader<LongWritable, Text> getReaderForEntry( FSDataInputStream inputStream, ZipSplit split, long length ) throws IOException
