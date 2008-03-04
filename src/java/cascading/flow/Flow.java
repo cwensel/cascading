@@ -119,11 +119,10 @@ public class Flow implements Runnable
     if( jobConf == null )
       return;
 
-    this.jobConf = jobConf;
-
-    jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
-    jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
-    jobConf.set( "fs.s3http.impl", S3HttpFileSystem.class.getName() );
+    this.jobConf = new JobConf( jobConf ); // prevent local values from being shared
+    this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
+    this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
+    this.jobConf.set( "fs.s3tp.impl", S3HttpFileSystem.class.getName() );
     }
 
   /**
@@ -193,22 +192,25 @@ public class Flow implements Runnable
   /**
    * Method areSinksStale returns true if any of the sinks referenced are out of date in relation to the sources.
    *
-   * @param jobConf of type JobConf
    * @return boolean
    * @throws IOException when
    */
-  public boolean areSinksStale( JobConf jobConf ) throws IOException
+  public boolean areSinksStale() throws IOException
     {
     long sinkMod = Long.MAX_VALUE;
+    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
 
     for( Tap sink : sinks.values() )
       {
       if( sink.isDeleteOnSinkInit() )
         sinkMod = -1L;
-      else if( !sink.pathExists( jobConf ) )
-        sinkMod = 0L;
       else
-        sinkMod = Math.min( sinkMod, sink.getPathModified( jobConf ) );
+        {
+        if( !sink.pathExists( confCopy ) )
+          sinkMod = 0L;
+        else
+          sinkMod = Math.min( sinkMod, sink.getPathModified( confCopy ) );
+        }
       }
 
     if( LOG.isInfoEnabled() )
@@ -227,10 +229,10 @@ public class Flow implements Runnable
       {
       for( Tap source : sources.values() )
         {
-        if( !source.pathExists( jobConf ) )
+        if( !source.pathExists( confCopy ) )
           throw new FlowException( "source does not exist: " + source );
 
-        sourceMod = source.getPathModified( jobConf );
+        sourceMod = source.getPathModified( confCopy );
 
         if( sinkMod < sourceMod )
           return true;
@@ -370,13 +372,12 @@ public class Flow implements Runnable
    * Method deleteSinks deletes all sinks. Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
    * Use with caution.
    *
-   * @param conf of type JobConf
    * @throws IOException when
    */
-  public void deleteSinks( JobConf conf ) throws IOException
+  public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
-      tap.deletePath( conf );
+      tap.deletePath( getJobConf() );
     }
 
   /**

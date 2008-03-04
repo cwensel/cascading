@@ -67,7 +67,6 @@ public class Util
     return null;
     }
 
-
   public static Object deserializeBase64( String string )
     {
     if( string == null || string.length() == 0 )

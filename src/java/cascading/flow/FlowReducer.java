@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.CascadingException;
+import cascading.flow.hadoop.HadoopUtil;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -48,6 +49,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     try
       {
       super.configure( jobConf );
+      HadoopUtil.initLog4j( jobConf );
       flowReducerStack = new PushFlowReducerStack( jobConf );
       }
     catch( Throwable throwable )

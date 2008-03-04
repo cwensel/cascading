@@ -29,7 +29,7 @@ import cascading.flow.FlowException;
 import cascading.tap.Tap;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
  * A Cascade is an assembly of {@link Flow} instances that share or depend the same {@link Tap} instances and are executed as
@@ -139,7 +139,7 @@ public class Cascade implements Runnable
     try
       {
       Set<Flow> completed = new HashSet<Flow>();
-      BreadthFirstIterator<Tap, Flow.FlowHolder> iterator = new BreadthFirstIterator<Tap, Flow.FlowHolder>( graph, rootTap );
+      TopologicalOrderIterator<Tap, Flow.FlowHolder> iterator = new TopologicalOrderIterator<Tap, Flow.FlowHolder>( graph );
 
       while( iterator.hasNext() )
         {
@@ -159,7 +159,7 @@ public class Cascade implements Runnable
           if( completed.contains( flowHolder.flow ) )
             continue;
 
-          if( flowHolder.flow.areSinksStale( flowHolder.flow.getJobConf() ) )
+          if( flowHolder.flow.areSinksStale() )
             startable.add( flowHolder.flow );
           else if( LOG.isInfoEnabled() )
             LOG.info( "skipping flow: " + flowHolder.flow.getName() );
@@ -173,7 +173,7 @@ public class Cascade implements Runnable
           if( LOG.isInfoEnabled() )
             LOG.info( "starting flow: " + flow.getName() );
 
-          flow.deleteSinks( flow.getJobConf() );
+          flow.deleteSinks();
           flow.start();
           }
 

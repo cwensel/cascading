@@ -98,19 +98,19 @@ public class CascadeConnector
     {
     for( Flow flow : flows )
       {
-      Collection sources = flow.getSources().values();
-      Collection sinks = flow.getSinks().values();
+      Collection<Tap> sources = flow.getSources().values();
+      Collection<Tap> sinks = flow.getSinks().values();
 
-      for( Object source : sources )
-        graph.addVertex( (Tap) source );
+      for( Tap source : sources )
+        graph.addVertex( source );
 
-      for( Object sink : sinks )
-        graph.addVertex( (Tap) sink );
+      for( Tap sink : sinks )
+        graph.addVertex( sink );
 
-      for( Object source : sources )
+      for( Tap source : sources )
         {
-        for( Object sink : sinks )
-          graph.addEdge( (Tap) source, (Tap) sink, flow.getHolder() );
+        for( Tap sink : sinks )
+          graph.addEdge( source, sink, flow.getHolder() );
         }
       }
     }

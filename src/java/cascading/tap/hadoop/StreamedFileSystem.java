@@ -31,41 +31,45 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
-/**
- *
- */
+/** Class StreamedFileSystem is a base class for {@link FileSystem} implementations that manage remote resources. */
 public abstract class StreamedFileSystem extends FileSystem
   {
+  @Override
   public FSDataOutputStream create( Path path, FsPermission fsPermission, boolean b, int i, short i1, long l, Progressable progressable ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }
 
+  @Override
   public boolean rename( Path path, Path path1 ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }
 
+  @Override
   public boolean delete( Path path ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }
 
-  public void setWorkingDirectory( Path path )
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
+  @Override
   public Path getWorkingDirectory()
     {
-    throw new UnsupportedOperationException( "not supported" );
+    return new Path( "/" ).makeQualified( this );
     }
 
+  @Override
+  public void setWorkingDirectory( Path f )
+    {
+    }
+
+  @Override
   public boolean mkdirs( Path path, FsPermission fsPermission ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }
 
+  @Override
   public FileStatus[] listStatus( Path path ) throws IOException
     {
     return new FileStatus[]{getFileStatus( path )};
@@ -83,5 +87,4 @@ public abstract class StreamedFileSystem extends FileSystem
 
     conf.set( path.toString() + ".md5", md5Hex );
     }
-
   }

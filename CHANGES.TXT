@@ -2,6 +2,11 @@ Cascading Change Log
 
 Unreleased
 
+  Added ability to push Log4j logger properties to mapper/reducer via JobConf.
+  Use jobConf.set("log4j.logger","logger1=LEVEL,logger2=LEVEL")
+
+  Added missing equals() and hashCode() in c.t.MultiTap.
+
   Added c.t.h.ZipInputFormat (and ZipSplit) to support zip files. c.s.TextLine supports transparent
   reading of zip files if the filename ends with .zip, but cannot write to them. This code is
   loosely based on HADOOP-1824. If the underlying filesystem is hdfs or file, splits will be created

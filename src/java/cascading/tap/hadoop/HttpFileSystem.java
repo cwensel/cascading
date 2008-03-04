@@ -30,13 +30,16 @@ import java.net.URL;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Logger;
 
-/**
- *
- */
+/** Class HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote HTTP and HTTPS data. */
 public class HttpFileSystem extends StreamedFileSystem
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( HttpFileSystem.class );
+
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
 
@@ -47,6 +50,7 @@ public class HttpFileSystem extends StreamedFileSystem
 
   private String scheme;
 
+  @Override
   public void initialize( URI uri, Configuration configuration ) throws IOException
     {
     setConf( configuration );
@@ -54,6 +58,7 @@ public class HttpFileSystem extends StreamedFileSystem
     scheme = uri.getScheme();
     }
 
+  @Override
   public URI getUri()
     {
     try
@@ -66,6 +71,7 @@ public class HttpFileSystem extends StreamedFileSystem
       }
     }
 
+  @Override
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
     URL url = path.toUri().toURL();
@@ -77,6 +83,7 @@ public class HttpFileSystem extends StreamedFileSystem
     return new FSDataInputStream( new FSDigestInputStream( connection.getInputStream(), getMD5SumFor( getConf(), path ) ) );
     }
 
+  @Override
   public boolean exists( Path path ) throws IOException
     {
     URL url = path.toUri().toURL();
@@ -85,12 +92,16 @@ public class HttpFileSystem extends StreamedFileSystem
     connection.setRequestMethod( "HEAD" );
     connection.connect();
 
-    System.out.println( "connection.getResponseCode() = " + connection.getResponseCode() );
-    System.out.println( "connection.getResponseMessage() = " + connection.getResponseMessage() );
+    if( LOG.isDebugEnabled() )
+      {
+      LOG.debug( "connection.getResponseCode() = " + connection.getResponseCode() );
+      LOG.debug( "connection.getResponseMessage() = " + connection.getResponseMessage() );
+      }
 
     return connection.getResponseCode() == 200;
     }
 
+  @Override
   public FileStatus getFileStatus( Path path ) throws IOException
     {
     URL url = path.toUri().toURL();

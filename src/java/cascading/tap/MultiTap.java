@@ -22,6 +22,7 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
@@ -68,6 +69,11 @@ public class MultiTap extends SourceTap
       }
     }
 
+  public Tap[] getTaps()
+    {
+    return taps;
+    }
+
   public Path getPath()
     {
     return null;
@@ -76,19 +82,19 @@ public class MultiTap extends SourceTap
   @Override
   public Fields getSourceFields()
     {
-    return taps[ 0 ].getSourceFields();
+    return getTaps()[ 0 ].getSourceFields();
     }
 
   @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
-    for( Tap tap : taps )
+    for( Tap tap : getTaps() )
       tap.sourceInit( conf );
     }
 
   public Tap findTapFor( JobConf conf, String currentFile )
     {
-    for( Tap tap : taps )
+    for( Tap tap : getTaps() )
       {
       if( tap.containsFile( conf, currentFile ) )
         return tap;
@@ -105,12 +111,12 @@ public class MultiTap extends SourceTap
   @Override
   public Tuple source( WritableComparable key, Writable value )
     {
-    return taps[ 0 ].source( key, value );
+    return getTaps()[ 0 ].source( key, value );
     }
 
   public boolean pathExists( JobConf conf ) throws IOException
     {
-    for( Tap tap : taps )
+    for( Tap tap : getTaps() )
       {
       if( tap.pathExists( conf ) )
         return true;
@@ -122,11 +128,35 @@ public class MultiTap extends SourceTap
   /** Returns the most current modified time. */
   public long getPathModified( JobConf conf ) throws IOException
     {
-    long modified = taps[ 0 ].getPathModified( conf );
+    long modified = getTaps()[ 0 ].getPathModified( conf );
 
-    for( int i = 1; i < taps.length; i++ )
-      modified = Math.max( taps[ i ].getPathModified( conf ), modified );
+    for( int i = 1; i < getTaps().length; i++ )
+      modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
 
     return modified;
+    }
+
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    MultiTap multiTap = (MultiTap) object;
+
+    if( !Arrays.equals( taps, multiTap.taps ) )
+      return false;
+
+    return true;
+    }
+
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( taps != null ? Arrays.hashCode( taps ) : 0 );
+    return result;
     }
   }

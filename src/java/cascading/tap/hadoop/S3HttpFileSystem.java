@@ -28,14 +28,13 @@ import cascading.util.S3Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 
-/**
- *
- */
+/** Class S3HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote S3 data. */
 public class S3HttpFileSystem extends StreamedFileSystem
   {
   public static final String S3TP_SCHEME = "s3tp";
@@ -44,7 +43,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
   private RestS3Service s3Service;
   private S3Bucket s3Bucket;
 
-
+  @Override
   public void initialize( URI uri, Configuration configuration ) throws IOException
     {
     setConf( configuration );
@@ -54,11 +53,13 @@ public class S3HttpFileSystem extends StreamedFileSystem
     this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
     }
 
+  @Override
   public URI getUri()
     {
     return uri;
     }
 
+  @Override
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.OBJECT );
@@ -68,11 +69,13 @@ public class S3HttpFileSystem extends StreamedFileSystem
     return new FSDataInputStream( inputStream );
     }
 
+  @Override
   public boolean exists( Path path ) throws IOException
     {
     return S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS ) != null;
     }
 
+  @Override
   public FileStatus getFileStatus( Path path ) throws IOException
     {
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS );

@@ -253,6 +253,9 @@ public class Hfs extends Tap
       {
       Path qualified = getQualifiedPath( conf );
 
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "comparing: " + qualified + " with: " + currentFilePath );
+
       if( qualified.equals( currentFilePath ) )
         return true;
 

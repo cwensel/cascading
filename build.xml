@@ -14,6 +14,8 @@
 
   <property name="cascading.release.version" value="x.y.z"/>
 
+  <property name="javac.debug" value="false"/>
+
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.java" location="${src}/java"/>
   <property name="src.test" location="${src}/test"/>
@@ -112,7 +114,7 @@
       </fileset>
     </copy>
 
-    <javac srcdir="${src.examples}" destdir="${build.examples}" verbose="off">
+    <javac srcdir="${src.examples}" destdir="${build.examples}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
     </javac>
 
@@ -122,7 +124,7 @@
       </fileset>
     </copy>
 
-    <javac srcdir="${src.test}" destdir="${build.test}" verbose="off">
+    <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
     </javac>
 
