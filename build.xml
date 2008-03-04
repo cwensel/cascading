@@ -268,7 +268,7 @@
 
   </target>
 
-  <target name="tar" depends="dist">
+  <target name="package" depends="nuke,dist">
     <tar destfile="${tar.cascading}"
          compression="gzip">
       <tarfileset dir="dist/" prefix="cascading-${cascading.release.version}">
