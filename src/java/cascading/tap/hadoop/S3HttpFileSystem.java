@@ -22,19 +22,13 @@
 package cascading.tap.hadoop;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 
 import cascading.util.S3Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FSInputStream;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.hadoop.util.Progressable;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
@@ -42,9 +36,9 @@ import org.jets3t.service.model.S3Object;
 /**
  *
  */
-public class S3HttpFileSystem extends FileSystem
+public class S3HttpFileSystem extends StreamedFileSystem
   {
-  public static final String S3HTTP_SCHEME = "s3http";
+  public static final String S3TP_SCHEME = "s3tp";
 
   private URI uri;
   private RestS3Service s3Service;
@@ -68,81 +62,15 @@ public class S3HttpFileSystem extends FileSystem
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.OBJECT );
-    final InputStream in = S3Util.getObjectInputStream( object );
+    FSDigestInputStream inputStream = new FSDigestInputStream( S3Util.getObjectInputStream( object ), getMD5SumFor( getConf(), path ) );
 
     // ctor requires Seekable or PositionedReadable stream
-    return new FSDataInputStream( new FSInputStream()
-    {
-    public int read() throws IOException
-      {
-      return in.read();
-      }
-
-    public int read( byte[] b, int off, int len ) throws IOException
-      {
-      return in.read( b, off, len );
-      }
-
-    public void close() throws IOException
-      {
-      in.close();
-      }
-
-    public void seek( long pos ) throws IOException
-      {
-      throw new IOException( "not supported" );
-      }
-
-    public long getPos() throws IOException
-      {
-      throw new IOException( "not supported" );
-      }
-
-    public boolean seekToNewSource( long targetPos ) throws IOException
-      {
-      return false;
-      }
-    } );
-    }
-
-  public FSDataOutputStream create( Path path, FsPermission fsPermission, boolean b, int i, short i1, long l, Progressable progressable ) throws IOException
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
-  public boolean rename( Path path, Path path1 ) throws IOException
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
-  public boolean delete( Path path ) throws IOException
-    {
-    throw new UnsupportedOperationException( "not supported" );
+    return new FSDataInputStream( inputStream );
     }
 
   public boolean exists( Path path ) throws IOException
     {
     return S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS ) != null;
-    }
-
-  public FileStatus[] listStatus( Path path ) throws IOException
-    {
-    return new FileStatus[]{getFileStatus( path )};
-    }
-
-  public void setWorkingDirectory( Path path )
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
-  public Path getWorkingDirectory()
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
-  public boolean mkdirs( Path path, FsPermission fsPermission ) throws IOException
-    {
-    throw new UnsupportedOperationException( "not supported" );
     }
 
   public FileStatus getFileStatus( Path path ) throws IOException

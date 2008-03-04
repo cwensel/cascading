@@ -23,13 +23,13 @@ package cascading.tap;
 
 import java.io.IOException;
 
+import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  * Class MultiTap is used to tie multipe {@link Tap} instances into a single resource. Effectively this will allow
@@ -38,9 +38,14 @@ import org.apache.hadoop.mapred.OutputCollector;
  * Note that order is not maintained by virtue of the underlying model. If order is necessary, use a unique sequence key
  * to span the resources, like a line number.
  */
-public class MultiTap extends Tap
+public class MultiTap extends SourceTap
   {
-  private final Tap[] taps;
+  protected Tap[] taps;
+
+  protected MultiTap( Scheme scheme )
+    {
+    super( scheme );
+    }
 
   public MultiTap( Tap... taps )
     {
@@ -75,12 +80,6 @@ public class MultiTap extends Tap
     }
 
   @Override
-  public Fields getSinkFields()
-    {
-    throw new UnsupportedOperationException( "unable to sink tuple streams via a MultiTap instance" );
-    }
-
-  @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
     for( Tap tap : taps )
@@ -107,23 +106,6 @@ public class MultiTap extends Tap
   public Tuple source( WritableComparable key, Writable value )
     {
     return taps[ 0 ].source( key, value );
-    }
-
-  @Override
-  public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
-    {
-    throw new UnsupportedOperationException( "unable to sink tuple streams via a MultiTap instance" );
-    }
-
-  @Override
-  public boolean isSink()
-    {
-    return false;
-    }
-
-  public boolean deletePath( JobConf conf ) throws IOException
-    {
-    throw new UnsupportedOperationException( "unable to delete files in via a MultiTap instance" );
     }
 
   public boolean pathExists( JobConf conf ) throws IOException
