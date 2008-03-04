@@ -13,7 +13,8 @@ Unreleased
   for each ZipEntry. Otherwise ZipEntries are iterated over to be more stream friendly. Progress status is
   supported.
 
-  Added http, https, and s3http read-only file systems to Hadoop.
+  Added http, https, and s3tp read-only file systems to Hadoop. Use these URLs, respectively:
+  http://, https://, and s3tp://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@bucket-name/key
 
   Added c.o.t.DateFormatter supporting text formatting of time stamps created by c.o.t.DateParser.
 
