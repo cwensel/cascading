@@ -34,7 +34,12 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 
-/** Class S3HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote S3 data. */
+/**
+ * Class S3HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote S3 data.
+ * <p/>
+ * To use this FileSystem, reference your S3 resources with the following URI pattern:<br/>
+ * s3tp://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@bucketname/key
+ */
 public class S3HttpFileSystem extends StreamedFileSystem
   {
   public static final String S3TP_SCHEME = "s3tp";

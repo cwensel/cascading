@@ -29,21 +29,43 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.fs.FSInputStream;
+import org.apache.log4j.Logger;
 
 /**
- *
+ * Class FSDigestInputStream is an {@link FSInputStream} implementation that can verify a {@link MessageDigest} and will count
+ * the number of bytes read for use in progress status.
  */
 public class FSDigestInputStream extends FSInputStream
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( FSDigestInputStream.class );
+
+  /** Field count */
   int count = 0;
+  /** Field inputStream */
   InputStream inputStream;
+  /** Field digestHex */
   String digestHex;
 
+  /**
+   * Constructor FSDigestInputStream creates a new FSDigestInputStream instance.
+   *
+   * @param inputStream of type InputStream
+   * @param digestHex   of type String
+   * @throws IOException when
+   */
   public FSDigestInputStream( InputStream inputStream, String digestHex ) throws IOException
     {
     this( inputStream, getMD5Digest(), digestHex );
     }
 
+  /**
+   * Constructor FSDigestInputStream creates a new FSDigestInputStream instance.
+   *
+   * @param inputStream   of type InputStream
+   * @param messageDigest of type MessageDigest
+   * @param digestHex     of type String
+   */
   public FSDigestInputStream( InputStream inputStream, MessageDigest messageDigest, String digestHex )
     {
     this.inputStream = digestHex == null ? inputStream : new DigestInputStream( inputStream, messageDigest );
@@ -62,12 +84,14 @@ public class FSDigestInputStream extends FSInputStream
       }
     }
 
+  @Override
   public int read() throws IOException
     {
     count++;
     return inputStream.read();
     }
 
+  @Override
   public int read( byte[] b, int off, int len ) throws IOException
     {
     int result = inputStream.read( b, off, len );
@@ -75,9 +99,12 @@ public class FSDigestInputStream extends FSInputStream
     return result;
     }
 
+  @Override
   public void close() throws IOException
     {
     inputStream.close();
+
+    LOG.info( "closing stream, testing digest: [" + digestHex == null ? "none" : digestHex + "]" );
 
     if( digestHex == null )
       return;
@@ -85,19 +112,26 @@ public class FSDigestInputStream extends FSInputStream
     String digestHex = new String( Hex.encodeHex( ( (DigestInputStream) inputStream ).getMessageDigest().digest() ) );
 
     if( !digestHex.equals( this.digestHex ) )
-      throw new IOException( "given digest: [" + this.digestHex + "], does not match input stream digest: [" + digestHex + "]" );
+      {
+      String message = "given digest: [" + this.digestHex + "], does not match input stream digest: [" + digestHex + "]";
+      LOG.error( message );
+      throw new IOException( message );
+      }
     }
 
+  @Override
   public void seek( long pos ) throws IOException
     {
     throw new IOException( "not supported" );
     }
 
+  @Override
   public long getPos() throws IOException
     {
     return count;
     }
 
+  @Override
   public boolean seekToNewSource( long targetPos ) throws IOException
     {
     return false;

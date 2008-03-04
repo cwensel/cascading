@@ -34,13 +34,19 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
-/** Class HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote HTTP and HTTPS data. */
+/**
+ * Class HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote HTTP and HTTPS data.
+ * <p/>
+ * To use this FileSystem, just use regular http:// or https:// URLs.
+ */
 public class HttpFileSystem extends StreamedFileSystem
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( HttpFileSystem.class );
 
+  /** Field HTTP_SCHEME */
   public static final String HTTP_SCHEME = "http";
+  /** Field HTTPS_SCHEME */
   public static final String HTTPS_SCHEME = "https";
 
   static
@@ -48,6 +54,7 @@ public class HttpFileSystem extends StreamedFileSystem
     HttpURLConnection.setFollowRedirects( true );
     }
 
+  /** Field scheme */
   private String scheme;
 
   @Override
