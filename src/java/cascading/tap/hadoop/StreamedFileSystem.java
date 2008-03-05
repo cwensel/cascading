@@ -77,14 +77,24 @@ public abstract class StreamedFileSystem extends FileSystem
 
   public static String getMD5SumFor( Configuration conf, Path path )
     {
-    return conf.get( path.toString() + ".md5" );
+    return getMD5SumFor( conf, path.toString() );
+    }
+
+  public static String getMD5SumFor( Configuration conf, String path )
+    {
+    return conf.get( path + ".md5" );
     }
 
   public static void setMD5SumFor( Configuration conf, Path path, String md5Hex )
     {
+    setMD5SumFor( conf, path.toString(), md5Hex );
+    }
+
+  public static void setMD5SumFor( Configuration conf, String path, String md5Hex )
+    {
     if( md5Hex == null || md5Hex.length() == 0 )
       return;
 
-    conf.set( path.toString() + ".md5", md5Hex );
+    conf.set( path + ".md5", md5Hex );
     }
   }
