@@ -39,6 +39,9 @@ import org.jets3t.service.model.S3Object;
  * <p/>
  * To use this FileSystem, reference your S3 resources with the following URI pattern:<br/>
  * s3tp://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@bucketname/key
+ * <p/>
+ * Optionally these configuration properties can be set, instead of stuffing values into the URL authority:
+ * "fs.s3tp.awsAccessKeyId" and "fs.s3tp.awsSecretAccessKey".
  */
 public class S3HttpFileSystem extends StreamedFileSystem
   {
@@ -49,11 +52,11 @@ public class S3HttpFileSystem extends StreamedFileSystem
   private S3Bucket s3Bucket;
 
   @Override
-  public void initialize( URI uri, Configuration configuration ) throws IOException
+  public void initialize( URI uri, Configuration conf ) throws IOException
     {
-    setConf( configuration );
+    setConf( conf );
 
-    this.s3Service = S3Util.getS3Service( uri );
+    this.s3Service = S3Util.getS3Service( uri, conf.get( "fs.s3tp.awsAccessKeyId" ), conf.get( "fs.s3tp.awsSecretAccessKey" ) );
     this.s3Bucket = S3Util.getS3Bucket( uri );
     this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
     }

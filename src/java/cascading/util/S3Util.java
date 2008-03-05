@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import cascading.operation.OperationException;
+import cascading.CascadingException;
 import org.apache.hadoop.fs.Path;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -46,6 +46,11 @@ public class S3Util
 
   public static RestS3Service getS3Service( URI uri )
     {
+    return getS3Service( uri, null, null );
+    }
+
+  public static RestS3Service getS3Service( URI uri, String defaultAccessKey, String defaultSecretAccessKey )
+    {
     try
       {
       String accessKey = null;
@@ -56,7 +61,6 @@ public class S3Util
       if( userInfo == null )
         {
         String authority = uri.getAuthority();
-
         String split[] = authority.split( "[:@]" );
 
         userInfo = split[ 0 ] + ":" + split[ 1 ];
@@ -77,9 +81,14 @@ public class S3Util
           }
         }
 
+      if( accessKey == null )
+        accessKey = defaultAccessKey;
+
+      if( secretAccessKey == null )
+        secretAccessKey = defaultSecretAccessKey;
+
       if( accessKey == null && secretAccessKey == null )
-        throw new IllegalArgumentException(
-          "AWS Access Key ID and Secret Access Key must be specified as the username or password (respectively) of a s3 URL" );
+        throw new IllegalArgumentException( "AWS Access Key ID and Secret Access Key must be specified as the username or password of a s3 URL" );
       else if( accessKey == null )
         throw new IllegalArgumentException( "AWS Access Key ID must be specified as the username of a s3 URL" );
       else if( secretAccessKey == null )
@@ -90,9 +99,9 @@ public class S3Util
     catch( S3ServiceException exception )
       {
       if( exception.getCause() instanceof IOException )
-        throw new OperationException( exception.getCause() );
+        throw new CascadingException( exception.getCause() );
 
-      throw new OperationException( exception );
+      throw new CascadingException( exception );
       }
     }
 
