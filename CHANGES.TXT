@@ -1,6 +1,6 @@
 Cascading Change Log
 
-Unreleased
+0.3.0
 
   Added ability to push Log4j logger properties to mapper/reducer via JobConf.
   Use jobConf.set("log4j.logger","logger1=LEVEL,logger2=LEVEL")
