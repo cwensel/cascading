@@ -34,28 +34,48 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
  * excess to a temporary disk file.
  */
 public class SpillableTupleList implements Iterable<Tuple>
   {
-  private long threshold = 10000;
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( SpillableTupleList.class );
 
+  /** Field threshold */
+  private long threshold = 10000;
+  /** Field files */
   private List<File> files = new LinkedList<File>();
+  /** Field current */
   private List<Tuple> current = new LinkedList<Tuple>();
+  /** Field size */
   private long size = 0;
+  /** Field fields */
   private Fields fields;
 
+  /** Constructor SpillableTupleList creates a new SpillableTupleList instance. */
   public SpillableTupleList()
     {
     }
 
+  /**
+   * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value.
+   *
+   * @param threshold of type long
+   */
   public SpillableTupleList( long threshold )
     {
     this.threshold = threshold;
     }
 
+  /**
+   * Method add will add the given {@link Tuple} to this list.
+   *
+   * @param tuple of type Tuple
+   */
   public void add( Tuple tuple )
     {
     current.add( tuple );
@@ -64,6 +84,11 @@ public class SpillableTupleList implements Iterable<Tuple>
     doSpill();
     }
 
+  /**
+   * Method add the given {@link TupleEntry} to this list. All TupleEntry instances added must declare the same {@link Fields}.
+   *
+   * @param tupleEntry of type TupleEntry
+   */
   public void add( TupleEntry tupleEntry )
     {
     if( fields == null )
@@ -74,11 +99,21 @@ public class SpillableTupleList implements Iterable<Tuple>
     add( tupleEntry.getTuple() );
     }
 
+  /**
+   * Method size returns the size of this list.
+   *
+   * @return long
+   */
   public long size()
     {
     return size;
     }
 
+  /**
+   * Method getNumFiles returns the number of files this list has spilled to.
+   *
+   * @return the numFiles (type int) of this SpillableTupleList object.
+   */
   public int getNumFiles()
     {
     return files.size();
@@ -89,8 +124,9 @@ public class SpillableTupleList implements Iterable<Tuple>
     if( current.size() != threshold )
       return;
 
-    File file = createTempFile();
+    LOG.info( "spilling tuple list to file number " + ( getNumFiles() + 1 ) );
 
+    File file = createTempFile();
     DataOutputStream dataOutputStream = createDataOutputStream( file );
 
     try
@@ -204,6 +240,7 @@ public class SpillableTupleList implements Iterable<Tuple>
     }
 
 
+  @Override
   public Iterator<Tuple> iterator()
     {
     if( files.isEmpty() )
@@ -255,6 +292,7 @@ public class SpillableTupleList implements Iterable<Tuple>
         }
       }
 
+    @Override
     public boolean hasNext()
       {
       if( currentList == current )
@@ -268,6 +306,7 @@ public class SpillableTupleList implements Iterable<Tuple>
       return hasNext();
       }
 
+    @Override
     public Tuple next()
       {
       if( currentList == current || iterator.hasNext() )
@@ -278,6 +317,7 @@ public class SpillableTupleList implements Iterable<Tuple>
       return next();
       }
 
+    @Override
     public void remove()
       {
       throw new UnsupportedOperationException( "remove is not supported" );
