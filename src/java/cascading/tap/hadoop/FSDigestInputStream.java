@@ -104,7 +104,7 @@ public class FSDigestInputStream extends FSInputStream
     {
     inputStream.close();
 
-    LOG.info( "closing stream, testing digest: [" + digestHex == null ? "none" : digestHex + "]" );
+    LOG.info( "closing stream, testing digest: [" + ( digestHex == null ? "none" : digestHex ) + "]" );
 
     if( digestHex == null )
       return;
