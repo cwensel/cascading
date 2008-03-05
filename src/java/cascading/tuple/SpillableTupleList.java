@@ -240,7 +240,6 @@ public class SpillableTupleList implements Iterable<Tuple>
     }
 
 
-  @Override
   public Iterator<Tuple> iterator()
     {
     if( files.isEmpty() )
@@ -292,7 +291,6 @@ public class SpillableTupleList implements Iterable<Tuple>
         }
       }
 
-    @Override
     public boolean hasNext()
       {
       if( currentList == current )
@@ -306,7 +304,6 @@ public class SpillableTupleList implements Iterable<Tuple>
       return hasNext();
       }
 
-    @Override
     public Tuple next()
       {
       if( currentList == current || iterator.hasNext() )
@@ -317,7 +314,6 @@ public class SpillableTupleList implements Iterable<Tuple>
       return next();
       }
 
-    @Override
     public void remove()
       {
       throw new UnsupportedOperationException( "remove is not supported" );
