@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Added support in c.t.h.S3HttpFileSystem for these properties: fs.s3tp.awsAccessKeyId and fs.s3tp.awsSecretAccessKey
+
 0.3.0
 
   Added ability to push Log4j logger properties to mapper/reducer via JobConf.
