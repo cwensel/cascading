@@ -23,6 +23,8 @@ package cascading.cascade;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.Flow;
@@ -30,11 +32,16 @@ import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /** Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance. */
 public class CascadeConnector
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( CascadeConnector.class );
 
   /**
    * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
@@ -57,14 +64,29 @@ public class CascadeConnector
    */
   public Cascade connect( String name, Flow... flows )
     {
+    verifyUniqueFlowNames( flows );
     name = name == null ? makeName( flows ) : name;
 
-    SimpleDirectedGraph<Tap, Flow.FlowHolder> graph = new SimpleDirectedGraph<Tap, Flow.FlowHolder>( Flow.FlowHolder.class );
+    SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<Tap, Flow.FlowHolder>( Flow.FlowHolder.class );
+    SimpleDirectedGraph<Flow, Integer> jobGraph = new SimpleDirectedGraph<Flow, Integer>( Integer.class );
 
-    makeGraph( graph, flows );
-    Tap rootTap = getRoots( graph );
+    makeTapGraph( tapGraph, flows );
+    makeFlowGraph( jobGraph, tapGraph );
 
-    return new Cascade( name, rootTap, graph );
+    return new Cascade( name, jobGraph );
+    }
+
+  private void verifyUniqueFlowNames( Flow[] flows )
+    {
+    Set<String> set = new HashSet<String>();
+
+    for( Flow flow : flows )
+      {
+      if( set.contains( flow.getName() ) )
+        throw new CascadeException( "all flow names must be unique, found duplicate: " + flow.getName() );
+
+      set.add( flow.getName() );
+      }
     }
 
   private String makeName( Flow[] flows )
@@ -94,7 +116,7 @@ public class CascadeConnector
     return rootTap;
     }
 
-  private void makeGraph( SimpleDirectedGraph<Tap, Flow.FlowHolder> graph, Flow[] flows )
+  private void makeTapGraph( SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph, Flow[] flows )
     {
     for( Flow flow : flows )
       {
@@ -102,15 +124,46 @@ public class CascadeConnector
       Collection<Tap> sinks = flow.getSinks().values();
 
       for( Tap source : sources )
-        graph.addVertex( source );
+        tapGraph.addVertex( source );
 
       for( Tap sink : sinks )
-        graph.addVertex( sink );
+        tapGraph.addVertex( sink );
 
       for( Tap source : sources )
         {
         for( Tap sink : sinks )
-          graph.addEdge( source, sink, flow.getHolder() );
+          tapGraph.addEdge( source, sink, flow.getHolder() );
+        }
+      }
+    }
+
+  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+    {
+    TopologicalOrderIterator<Tap, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<Tap, Flow.FlowHolder>( tapGraph );
+    int count = 0;
+
+    while( topoIterator.hasNext() )
+      {
+      Tap source = topoIterator.next();
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "handling flow source: " + source );
+
+      List<Tap> sinks = Graphs.successorListOf( tapGraph, (Tap) source );
+
+      for( Tap sink : sinks )
+        {
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "handling flow path: " + source + " -> " + sink );
+
+        Flow flow = tapGraph.getEdge( source, sink ).flow;
+
+        jobGraph.addVertex( flow );
+
+        Set<Flow.FlowHolder> previous = tapGraph.incomingEdgesOf( source );
+
+        for( Flow.FlowHolder previousFlow : previous )
+          jobGraph.addEdge( previousFlow.flow, flow, count++ );
         }
       }
     }

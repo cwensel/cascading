@@ -90,6 +90,8 @@ public class Flow implements Runnable
   private Map<String, Tap> sinks;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
+  /** Field stop */
+  private boolean stop = false;
 
   /** Field steps */
   private transient List<FlowStep> steps;
@@ -293,6 +295,12 @@ public class Flow implements Runnable
     thread.start();
     }
 
+  /** Method stop suggests to the flow to stop execution. It does not kill running jobs. */
+  public void stop()
+    {
+    this.stop = true;
+    }
+
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
   public void complete()
     {
@@ -443,7 +451,7 @@ public class Flow implements Runnable
         {
         throwable = future.get();
 
-        if( throwable != null )
+        if( throwable != null || stop )
           {
           LOG.warn( "stopping jobs" );
 
@@ -502,7 +510,7 @@ public class Flow implements Runnable
 
   /**
    * Used to return a simple wrapper for use as an edge in a graph where there can only be
-   * on instance of every edge.
+   * one instance of every edge.
    *
    * @return FlowHolder
    */

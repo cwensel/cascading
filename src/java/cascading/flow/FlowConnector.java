@@ -278,8 +278,9 @@ public class FlowConnector
       resolveFields( pipeGraph );
 
       SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
+      SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph );
 
-      return new Flow( jobConf, name, pipeGraph, buildSteps( pipeGraph, tapGraph ), new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
+      return new Flow( jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
       }
     catch( FlowException exception )
       {
@@ -289,11 +290,12 @@ public class FlowConnector
       }
     catch( Exception exception )
       {
+      // captures pipegraph for debugging
       throw new FlowException( "could not build flow from assembly", exception, pipeGraph );
       }
     }
 
-  private void verifyTaps( final Map<String, Tap> taps, final boolean areSources )
+  private void verifyTaps( Map<String, Tap> taps, boolean areSources )
     {
     for( String tapName : taps.keySet() )
       {
@@ -359,7 +361,13 @@ public class FlowConnector
     graph.addVertex( head );
 
     for( String source : sources.keySet() )
-      graph.addEdge( head, sources.get( source ) ).setName( source );
+      {
+      Scope scope = graph.addEdge( head, sources.get( source ) );
+
+      // edge may already exist, if so, above returns null
+      if( scope != null )
+        scope.setName( source );
+      }
 
     graph.addVertex( tail );
 
@@ -785,7 +793,7 @@ public class FlowConnector
     return tapGraph;
     }
 
-  private SimpleDirectedGraph<FlowStep, Integer> buildSteps( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph )
+  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
     SimpleDirectedGraph<FlowStep, Integer> stepGraph = new SimpleDirectedGraph<FlowStep, Integer>( Integer.class );

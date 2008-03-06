@@ -21,14 +21,24 @@
 
 package cascading.cascade;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.tap.Tap;
 import org.apache.log4j.Logger;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -48,27 +58,17 @@ public class Cascade implements Runnable
 
   /** Field name */
   private String name;
-  /** Field rootTap */
-  private final Tap rootTap;
-  /** Field graph */
-  private final SimpleDirectedGraph<Tap, Flow.FlowHolder> graph;
+  /** Field jobGraph */
+  private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
   private Throwable throwable;
 
-  /**
-   * Constructor Cascade creates a new Cascade instance.
-   *
-   * @param name    of type String
-   * @param rootTap of type Tap
-   * @param graph   of type SimpleDirectedGraph<Tap, FlowHolder>
-   */
-  Cascade( String name, Tap rootTap, SimpleDirectedGraph<Tap, Flow.FlowHolder> graph )
+  public Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
     {
     this.name = name;
-    this.rootTap = rootTap;
-    this.graph = graph;
+    this.jobGraph = jobGraph;
     }
 
   /**
@@ -136,57 +136,61 @@ public class Cascade implements Runnable
     if( LOG.isInfoEnabled() )
       LOG.info( "starting cascade: " + getName() );
 
-    // todo: test for writing to same path
     try
       {
-      Set<Flow> completed = new HashSet<Flow>();
-      TopologicalOrderIterator<Tap, Flow.FlowHolder> iterator = new TopologicalOrderIterator<Tap, Flow.FlowHolder>( graph );
+      // keep topo order
+      Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
+      TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
 
-      while( iterator.hasNext() )
+      Flow flow = null;
+      while( topoIterator.hasNext() )
         {
-        Tap source = iterator.next();
+        flow = topoIterator.next();
+        CascadeJob job = new CascadeJob( flow );
 
-        if( source instanceof CascadeConnector.RootTap )
-          continue;
+        jobsMap.put( flow.getName(), job );
 
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "evaluating source: " + source );
+        List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
 
-        Set<Flow.FlowHolder> flows = graph.outgoingEdgesOf( source );
-        Set<Flow> startable = new HashSet<Flow>();
+        for( Flow predecessor : Graphs.predecessorListOf( jobGraph, flow ) )
+          predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
 
-        for( Flow.FlowHolder flowHolder : flows )
+        job.init( predecessors );
+        }
+
+      // if jobs are run local, then only use one thread to force execution serially
+      int numThreads = flow.jobsAreLocal() ? 1 : jobsMap.size();
+
+      if( LOG.isDebugEnabled() )
+        {
+        LOG.debug( "is running all local: " + flow.jobsAreLocal() );
+        LOG.debug( "num flows: " + jobsMap.size() );
+        LOG.debug( "allocating num threads: " + numThreads );
+        }
+
+      ExecutorService executor = Executors.newFixedThreadPool( numThreads );
+      List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
+
+      executor.shutdown(); // don't accept any more work
+
+      for( Future<Throwable> future : futures )
+        {
+        throwable = future.get();
+
+        if( throwable != null )
           {
-          if( completed.contains( flowHolder.flow ) )
-            continue;
+          LOG.warn( "stopping flows" );
 
-          if( flowHolder.flow.areSinksStale() )
-            startable.add( flowHolder.flow );
-          else if( LOG.isInfoEnabled() )
-            LOG.info( "skipping flow: " + flowHolder.flow.getName() );
+          for( Callable<Throwable> callable : jobsMap.values() )
+            ( (CascadeJob) callable ).stop();
+
+          LOG.warn( "shutting down flow executor" );
+
+          executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+
+          LOG.warn( "shutdown complete" );
+          break;
           }
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "starting flows: " + startable.size() );
-
-        for( Flow flow : startable )
-          {
-          if( LOG.isInfoEnabled() )
-            LOG.info( "starting flow: " + flow.getName() );
-
-          flow.deleteSinks();
-          flow.start();
-          }
-
-        for( Flow flow : startable )
-          {
-          flow.complete();
-
-          if( LOG.isInfoEnabled() )
-            LOG.info( "completed flow: " + flow.getName() );
-          }
-
-        completed.addAll( startable );
         }
       }
     catch( Throwable throwable )
@@ -200,4 +204,111 @@ public class Cascade implements Runnable
     {
     return getName();
     }
+
+  protected static class CascadeJob implements Callable<Throwable>
+    {
+    Flow flow;
+    private List<CascadeJob> predecessors;
+
+    private CountDownLatch latch = new CountDownLatch( 1 );
+    private boolean stop = false;
+    private boolean failed = false;
+
+    public CascadeJob( Flow flow )
+      {
+      this.flow = flow;
+      }
+
+    public String getName()
+      {
+      return flow.getName();
+      }
+
+    public boolean start() throws IOException
+      {
+      if( !flow.areSinksStale() )
+        return false;
+
+      flow.deleteSinks();
+      flow.start();
+
+      return true;
+      }
+
+    public Throwable call()
+      {
+      try
+        {
+        for( CascadeJob predecessor : predecessors )
+          {
+          if( !predecessor.isSuccessful() )
+            return null;
+          }
+
+        if( stop )
+          return null;
+
+        try
+          {
+          if( LOG.isInfoEnabled() )
+            LOG.info( "starting flow: " + flow.getName() );
+
+          flow.complete();
+
+          if( LOG.isInfoEnabled() )
+            LOG.info( "completed flow: " + flow.getName() );
+          }
+        catch( Throwable exception )
+          {
+          LOG.info( "flow failed: " + flow.getName(), exception );
+          failed = true;
+          return new CascadeException( "flow failed: " + flow.getName(), exception );
+          }
+        }
+      catch( Throwable throwable )
+        {
+        failed = true;
+        return throwable;
+        }
+      finally
+        {
+        latch.countDown();
+        }
+
+      return null;
+      }
+
+    public void init( List<CascadeJob> predecessors )
+      {
+      this.predecessors = predecessors;
+      }
+
+    public void stop()
+      {
+      if( LOG.isInfoEnabled() )
+        LOG.info( "stopping flow: " + flow.getName() );
+
+      stop = true;
+
+      if( flow != null )
+        flow.stop();
+      }
+
+    public boolean isSuccessful()
+      {
+      try
+        {
+        latch.await();
+
+        return flow != null && !failed;
+        }
+      catch( InterruptedException exception )
+        {
+        LOG.warn( "latch interrupted", exception );
+        }
+
+      return false;
+      }
+    }
+
   }

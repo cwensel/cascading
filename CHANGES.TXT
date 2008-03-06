@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.c.Cascade so it now runs Flows in parallel if Hadoop is clustered, and there are no dependencies between the Flows.
+
   Moved c.Cascade and related classed to c.cascade package. Wanted to preempt any future ugliness.
 
   Added support in c.t.h.S3HttpFileSystem for these properties: fs.s3tp.awsAccessKeyId and fs.s3tp.awsSecretAccessKey
