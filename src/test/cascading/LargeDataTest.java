@@ -24,6 +24,7 @@ package cascading;
 import java.io.File;
 import java.util.Map;
 
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.aggregator.Count;
@@ -71,16 +72,14 @@ public class LargeDataTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "url", "raw" ) ) );
     pipe = new Each( pipe, new Fields( "url" ), new RegexFilter( ".*\\.pdf$", true ) );
-    pipe = new Each( pipe, new Fields( "raw" ), new RegexReplace( new Fields( "page" ), ":nl:", "\n" ),
-      new Fields( "url", "page" ) );
+    pipe = new Each( pipe, new Fields( "raw" ), new RegexReplace( new Fields( "page" ), ":nl:", "\n" ), new Fields( "url", "page" ) );
     pipe = new Each( pipe, new Fields( "page" ), new TagSoupParser( new Fields( "xml" ) ), new Fields( "url", "xml" ) );
-    pipe = new Each( pipe, new Fields( "xml" ),
-      new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ),
+    pipe = new Each( pipe, new Fields( "xml" ), new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ),
       new Fields( "url", "body" ) );
-    pipe = new Each( pipe, new Fields( "body" ), new XPathGenerator( new Fields( "words" ),
-      XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ), new Fields( "url", "words" ) );
-    pipe = new Each( pipe, new Fields( "words" ),
-      new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ),
+    pipe = new Each( pipe, new Fields( "body" ),
+      new XPathGenerator( new Fields( "words" ), XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ),
+      new Fields( "url", "words" ) );
+    pipe = new Each( pipe, new Fields( "words" ), new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ),
       new Fields( "url", "word" ) );
 
     Pipe pipeUrl = new GroupBy( "url", pipe, new Fields( "url", "word" ) );

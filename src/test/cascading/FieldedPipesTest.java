@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowException;

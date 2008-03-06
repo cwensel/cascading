@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Moved c.Cascade and related classed to c.cascade package. Wanted to preempt any future ugliness.
+
   Added support in c.t.h.S3HttpFileSystem for these properties: fs.s3tp.awsAccessKeyId and fs.s3tp.awsSecretAccessKey
 
 0.3.0

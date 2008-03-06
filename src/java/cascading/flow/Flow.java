@@ -36,8 +36,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import cascading.Cascade;
 import cascading.CascadingException;
+import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
