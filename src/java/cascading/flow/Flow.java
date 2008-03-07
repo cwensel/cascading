@@ -435,11 +435,11 @@ public class Flow implements Runnable
       // if jobs are run local, then only use one thread to force execution serially
       int numThreads = jobsAreLocal() ? 1 : jobsMap.size();
 
-      if( LOG.isDebugEnabled() )
+      if( LOG.isInfoEnabled() )
         {
-        LOG.debug( "is running all local: " + jobsAreLocal() );
-        LOG.debug( "num jobs: " + jobsMap.size() );
-        LOG.debug( "allocating num threads: " + numThreads );
+        LOG.info( " parallel execution is enabled: " + !jobsAreLocal() );
+        LOG.info( " starting jobs: " + jobsMap.size() );
+        LOG.info( " allocating threads: " + numThreads );
         }
 
       ExecutorService executor = Executors.newFixedThreadPool( numThreads );
@@ -458,7 +458,7 @@ public class Flow implements Runnable
           for( Callable<Throwable> callable : jobsMap.values() )
             ( (FlowStep.FlowStepJob) callable ).stop();
 
-          LOG.warn( "shutting down executor" );
+          LOG.warn( "shutting down job executor" );
 
           executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
 

@@ -21,7 +21,6 @@
 
 package cascading.cascade;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +36,7 @@ import cascading.CascadingException;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.tap.Tap;
+import cascading.util.Util;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -90,8 +90,7 @@ public class Cascade implements Runnable
     if( thread != null )
       return;
 
-    // todo: thread pooling might be smart
-    thread = new Thread( this, "flow" );
+    thread = new Thread( this, ( "cascade " + Util.toNull( getName() ) ).trim() );
 
     thread.start();
     }
@@ -134,7 +133,7 @@ public class Cascade implements Runnable
   public void run()
     {
     if( LOG.isInfoEnabled() )
-      LOG.info( "starting cascade: " + getName() );
+      LOG.info( "starting cascade: " + Util.toNull( getName() ) );
 
     try
       {
@@ -161,11 +160,11 @@ public class Cascade implements Runnable
       // if jobs are run local, then only use one thread to force execution serially
       int numThreads = flow.jobsAreLocal() ? 1 : jobsMap.size();
 
-      if( LOG.isDebugEnabled() )
+      if( LOG.isInfoEnabled() )
         {
-        LOG.debug( "is running all local: " + flow.jobsAreLocal() );
-        LOG.debug( "num flows: " + jobsMap.size() );
-        LOG.debug( "allocating num threads: " + numThreads );
+        LOG.info( " parallel execution is enabled: " + !flow.jobsAreLocal() );
+        LOG.info( " starting flows: " + jobsMap.size() );
+        LOG.info( " allocating threads: " + numThreads );
         }
 
       ExecutorService executor = Executors.newFixedThreadPool( numThreads );
@@ -205,13 +204,18 @@ public class Cascade implements Runnable
     return getName();
     }
 
+  /** Class CascadeJob manages Flow execution in the current Cascade instance. */
   protected static class CascadeJob implements Callable<Throwable>
     {
+    /** Field flow */
     Flow flow;
+    /** Field predecessors */
     private List<CascadeJob> predecessors;
-
+    /** Field latch */
     private CountDownLatch latch = new CountDownLatch( 1 );
+    /** Field stop */
     private boolean stop = false;
+    /** Field failed */
     private boolean failed = false;
 
     public CascadeJob( Flow flow )
@@ -222,17 +226,6 @@ public class Cascade implements Runnable
     public String getName()
       {
       return flow.getName();
-      }
-
-    public boolean start() throws IOException
-      {
-      if( !flow.areSinksStale() )
-        return false;
-
-      flow.deleteSinks();
-      flow.start();
-
-      return true;
       }
 
     public Throwable call()
@@ -253,6 +246,10 @@ public class Cascade implements Runnable
           if( LOG.isInfoEnabled() )
             LOG.info( "starting flow: " + flow.getName() );
 
+          if( !flow.areSinksStale() )
+            return null;
+
+          flow.deleteSinks();
           flow.complete();
 
           if( LOG.isInfoEnabled() )
