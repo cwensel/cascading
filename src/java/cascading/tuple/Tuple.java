@@ -47,7 +47,7 @@ import org.apache.hadoop.io.WritableUtils;
  * Tuples are mutable for sake of efficiency. They are also Hadoop Writable so they can be streamed in/out as binary.
  * The obvious limitation here is that what are streamed via Hadoop must also be Hadoop Writable, or simply primitive types.
  */
-public class Tuple implements WritableComparable, Iterable, Serializable
+public final class Tuple implements WritableComparable, Iterable, Serializable
   {
   /** Field elements */
   private List<Comparable> elements = new ArrayList<Comparable>();

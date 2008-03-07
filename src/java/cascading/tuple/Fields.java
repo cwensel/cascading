@@ -84,6 +84,7 @@ public final class Fields implements Comparable, Serializable
   public static final Fields FIRST = new Fields( 0 );
   /** Field LAST represents the last field postition, -1 */
   public static final Fields LAST = new Fields( -1 );
+  private static final int[] EMPTY_INT = new int[0];
 
   /**
    */
@@ -120,7 +121,11 @@ public final class Fields implements Comparable, Serializable
    */
   public static Fields size( int size )
     {
-    return new Fields( expand( size, 0 ) );
+    Fields fields = new Fields();
+
+    fields.fields = expand( size, 0 );
+
+    return fields;
     }
 
   /**
@@ -172,7 +177,12 @@ public final class Fields implements Comparable, Serializable
    */
   public static Fields offsetSelector( int size, int startPos )
     {
-    return new Fields( expand( size, startPos ) );
+    Fields fields = new Fields();
+
+    fields.isOrdered = false;
+    fields.fields = expand( size, startPos );
+
+    return fields;
     }
 
   private static Comparable[] expand( int size, int startPos )
@@ -302,11 +312,11 @@ public final class Fields implements Comparable, Serializable
    */
   public static Fields asDeclaration( Fields fields )
     {
-    if( fields.isUnknown() )
-      return fields;
-
     if( !fields.isDefined() )
       return UNKNOWN;
+
+    if( fields.isOrdered() )
+      return fields;
 
     Fields result = size( fields.size() );
 
@@ -519,10 +529,12 @@ public final class Fields implements Comparable, Serializable
    */
   public int[] getPos()
     {
-    if( isAll() || isUnknown() )
-      return new int[0];
+    if( thisPos != null )
+      return thisPos;
 
-    if( thisPos == null )
+    if( isAll() || isUnknown() )
+      thisPos = EMPTY_INT;
+    else
       thisPos = makeThisPos();
 
     return thisPos;
@@ -571,12 +583,12 @@ public final class Fields implements Comparable, Serializable
     return pos;
     }
 
-  int translatePos( Integer integer )
+  final int translatePos( Integer integer )
     {
     return translatePos( integer, size() );
     }
 
-  int translatePos( Integer integer, int size )
+  final int translatePos( Integer integer, int size )
     {
     if( integer < 0 )
       integer = size + integer;
@@ -697,7 +709,7 @@ public final class Fields implements Comparable, Serializable
       throw new TupleException( "cannot append fields: " + this.print() + " + " + fields.print() );
 
     if( ( this.isUnknown() || this.size() == 0 ) && fields.isUnknown() )
-      return Fields.UNKNOWN;
+      return UNKNOWN;
 
     Set<String> names = new HashSet<String>();
 
@@ -915,7 +927,7 @@ public final class Fields implements Comparable, Serializable
    *
    * @return int
    */
-  public int size()
+  public final int size()
     {
     return fields.length;
     }

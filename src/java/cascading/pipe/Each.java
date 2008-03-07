@@ -278,7 +278,7 @@ public class Each extends Operator
         return;
 
       if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
-        throw new TupleException( "operation added the wrong number of fields, expected: " + declared + ", got result size: " + tuple.size() );
+        throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
 
       flowCollector.collect( makeResult( outgoingSelector, input, new TupleEntry( declared, tuple ) ) );
       }
