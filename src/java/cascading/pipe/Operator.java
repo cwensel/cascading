@@ -143,15 +143,17 @@ public abstract class Operator extends Pipe
     return outputSelector;
     }
 
-  protected Tuple makeResult( Fields outgoingSelector, TupleEntry input, TupleEntry output )
+  protected Tuple makeResult( Fields outgoingSelector, TupleEntry input, TupleEntry declaredEntry, Tuple output )
     {
     if( getOutputSelector().isResults() )
-      return output.getTuple();
+      return output;
 
     if( getOutputSelector().isAll() )
-      return input.getTuple().append( output.getTuple() );
+      return input.getTuple().append( output );
 
-    return TupleEntry.select( outgoingSelector, input, output );
+    declaredEntry.setTuple( output );
+
+    return TupleEntry.select( outgoingSelector, input, declaredEntry );
     }
 
   // FIELDS

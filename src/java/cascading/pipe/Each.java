@@ -237,13 +237,13 @@ public class Each extends Operator
     if( LOG.isDebugEnabled() )
       LOG.debug( operation + " incoming entry: " + input );
 
-    TupleEntry arguments = input.selectEntry( scope.getArgumentSelector() );
+    TupleEntry arguments = scope.getArgumentsEntry( input );
 
     if( LOG.isDebugEnabled() )
       LOG.debug( operation + " arg entry: " + arguments );
 
     if( isFunction() )
-      applyFunction( flowCollector, input, arguments, scope.getDeclaredFields(), scope.getOutValuesSelector() );
+      applyFunction( flowCollector, input, arguments, scope.getDeclaredEntry(), scope.getOutValuesSelector() );
     else
       applyFilter( flowCollector, input, arguments );
     }
@@ -263,8 +263,10 @@ public class Each extends Operator
       flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFunction( final FlowCollector flowCollector, final TupleEntry input, TupleEntry arguments, final Fields declared, final Fields outgoingSelector )
+  private void applyFunction( final FlowCollector flowCollector, final TupleEntry input, TupleEntry arguments, final TupleEntry declaredEntry, final Fields outgoingSelector )
     {
+    final Fields declared = declaredEntry.getFields();
+
     TupleCollector tupleCollector = new TupleCollector()
     {
     public void add( TupleEntry entry )
@@ -280,7 +282,7 @@ public class Each extends Operator
       if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
         throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
 
-      flowCollector.collect( makeResult( outgoingSelector, input, new TupleEntry( declared, tuple ) ) );
+      flowCollector.collect( makeResult( outgoingSelector, input, declaredEntry, tuple ) );
       }
     };
 

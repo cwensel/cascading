@@ -24,10 +24,12 @@ package cascading.tuple;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.operation.Operation;
@@ -84,6 +86,8 @@ public final class Fields implements Comparable, Serializable
   public static final Fields FIRST = new Fields( 0 );
   /** Field LAST represents the last field postition, -1 */
   public static final Fields LAST = new Fields( -1 );
+
+  /** Field EMPTY_INT */
   private static final int[] EMPTY_INT = new int[0];
 
   /**
@@ -611,26 +615,39 @@ public final class Fields implements Comparable, Serializable
     return indexOf( field );
     }
 
+  private transient Map<Comparable, Integer> index;
+
+  private final Map<Comparable, Integer> getIndex()
+    {
+    if( index != null )
+      return index;
+
+    index = new HashMap<Comparable, Integer>();
+
+    for( int i = 0; i < size(); i++ )
+      index.put( get( i ), i );
+
+    return index;
+    }
+
   private int indexOf( Comparable field )
     {
-    for( int i = 0; i < size(); i++ )
-      {
-      if( field.equals( get( i ) ) )
-        return i;
-      }
+    Integer result = getIndex().get( field );
 
-    throw new TupleException( "field not found: '" + field + "', available fields: " + this.print() );
+    if( result == null )
+      throw new TupleException( "field not found: '" + field + "', available fields: " + this.print() );
+
+    return result;
     }
 
   int indexOfSafe( Comparable field )
     {
-    for( int i = 0; i < size(); i++ )
-      {
-      if( field.equals( get( i ) ) )
-        return i;
-      }
+    Integer result = getIndex().get( field );
 
-    return -1;
+    if( result == null )
+      return -1;
+
+    return result;
     }
 
   /**
@@ -771,7 +788,7 @@ public final class Fields implements Comparable, Serializable
     }
 
   /**
-   * Method verifyContains returns true if this instance contains the field names and positions specified in the given
+   * Method contains returns true if this instance contains the field names and positions specified in the given
    * fields instance.
    *
    * @param fields of type Fields

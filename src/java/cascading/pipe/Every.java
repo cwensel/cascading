@@ -220,7 +220,7 @@ public class Every extends Operator
      */
     public void operate( TupleEntry inputEntry )
       {
-      TupleEntry arguments = inputEntry.selectEntry( outgoingScope.getArgumentSelector() );
+      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
       try
         {
@@ -268,7 +268,7 @@ public class Every extends Operator
         if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
           throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
 
-        outputCollector.collect( makeResult( outgoingSelector, value, new TupleEntry( declared, tuple ) ) );
+        outputCollector.collect( makeResult( outgoingSelector, value, outgoingScope.getDeclaredEntry(), tuple ) );
         }
       };
 

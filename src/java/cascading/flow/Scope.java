@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
 
 /** Class Scope ... */
 public class Scope implements Serializable
@@ -54,6 +55,11 @@ public class Scope implements Serializable
   private Fields outValuesSelector;
   /** Field outValuesFields */
   private Fields outValuesFields; // all value fields, includes keys
+
+  /** Field argumentsEntry */
+  private transient TupleEntry argumentsEntry; // caches entry
+  /** Field declaredEntry */
+  private transient TupleEntry declaredEntry; // caches entry
 
   /** Default constructor. */
   public Scope()
@@ -244,6 +250,36 @@ public class Scope implements Serializable
     }
 
   /**
+   * Method getArgumentsEntry returns the argumentsEntry of this Scope object.
+   *
+   * @return the argumentsEntry (type TupleEntry) of this Scope object.
+   */
+  public TupleEntry getArgumentsEntry()
+    {
+    if( argumentsEntry != null )
+      return argumentsEntry;
+
+    argumentsEntry = new TupleEntry( getArguments() );
+
+    return argumentsEntry;
+    }
+
+  /**
+   * Method getArgumentsEntry returns a cached {@link TupleEntry} for the declared arguments of this scope.
+   *
+   * @param input of type TupleEntry
+   * @return TupleEntry
+   */
+  public TupleEntry getArgumentsEntry( TupleEntry input )
+    {
+    TupleEntry entry = getArgumentsEntry();
+
+    entry.setTuple( input.selectTuple( getArgumentSelector() ) );
+
+    return entry;
+    }
+
+  /**
    * Method getDeclaredFields returns the declaredFields of this Scope object.
    *
    * @return the declaredFields (type Fields) of this Scope object.
@@ -251,6 +287,21 @@ public class Scope implements Serializable
   public Fields getDeclaredFields()
     {
     return declaredFields;
+    }
+
+  /**
+   * Method getDeclaredEntry returns the declaredEntry of this Scope object.
+   *
+   * @return the declaredEntry (type TupleEntry) of this Scope object.
+   */
+  public TupleEntry getDeclaredEntry()
+    {
+    if( declaredEntry != null )
+      return declaredEntry;
+
+    declaredEntry = new TupleEntry( getDeclaredFields() );
+
+    return declaredEntry;
     }
 
   /**
