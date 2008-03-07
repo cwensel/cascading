@@ -31,8 +31,10 @@ import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleException;
 
 /**
  * The Every operator applies an {@link Aggregator} to every grouping. Any number of Every instances may follow other
@@ -246,14 +248,31 @@ public class Every extends Operator
         }
       }
 
-    public void complete( TupleEntry value, FlowCollector outputCollector )
+    public void complete( final TupleEntry value, final FlowCollector outputCollector )
       {
-      TupleEntryCollector resultEntryCollector = new TupleEntryCollector( outgoingScope.getDeclaredFields() );
+      final Fields declared = outgoingScope.getDeclaredFields();
+      final Fields outgoingSelector = outgoingScope.getOutGroupingSelector();
 
-      getAggregator().complete( context, resultEntryCollector.iterator() );
+      TupleCollector tupleCollector = new TupleCollector()
+      {
+      public void add( TupleEntry entry )
+        {
+        add( entry.getTuple() );
+        }
 
-      for( Object resultEntry : resultEntryCollector )
-        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, (TupleEntry) resultEntry ) );
+      public void add( Tuple tuple )
+        {
+        if( tuple.isEmpty() )
+          return;
+
+        if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
+          throw new TupleException( "operation added the wrong number of fields, expected: " + declared + ", got result size: " + tuple.size() );
+
+        outputCollector.collect( makeResult( outgoingSelector, value, new TupleEntry( declared, tuple ) ) );
+        }
+      };
+
+      getAggregator().complete( context, tupleCollector );
       }
 
     @Override

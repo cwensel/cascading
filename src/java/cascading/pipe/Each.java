@@ -31,9 +31,10 @@ import cascading.operation.Function;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryListIterator;
+import cascading.tuple.TupleException;
 import org.apache.log4j.Logger;
 
 /**
@@ -262,14 +263,28 @@ public class Each extends Operator
       flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFunction( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments, Fields declared, Fields outgoingSelector )
+  private void applyFunction( final FlowCollector flowCollector, final TupleEntry input, TupleEntry arguments, final Fields declared, final Fields outgoingSelector )
     {
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( declared );
+    TupleCollector tupleCollector = new TupleCollector()
+    {
+    public void add( TupleEntry entry )
+      {
+      add( entry.getTuple() );
+      }
 
-    getFunction().operate( arguments, resultEntryCollector.iterator() ); // adds results to collector
+    public void add( Tuple tuple )
+      {
+      if( tuple.isEmpty() )
+        return;
 
-    for( Object resultEntry : resultEntryCollector )
-      flowCollector.collect( makeResult( outgoingSelector, input, (TupleEntry) resultEntry ) );
+      if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
+        throw new TupleException( "operation added the wrong number of fields, expected: " + declared + ", got result size: " + tuple.size() );
+
+      flowCollector.collect( makeResult( outgoingSelector, input, new TupleEntry( declared, tuple ) ) );
+      }
+    };
+
+    getFunction().operate( arguments, tupleCollector ); // adds results to collector
     }
 
   // FIELDS

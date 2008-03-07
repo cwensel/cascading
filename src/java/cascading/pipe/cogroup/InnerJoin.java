@@ -26,7 +26,10 @@ import java.util.Iterator;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
-/** Class InnerJoin ... */
+/**
+ * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link CoGrouper} and return tuples that represent
+ * and inner join of the CoGrouper internal grouped tuple collections.
+ */
 public class InnerJoin implements CoGrouper
   {
   private static final Logger LOG = Logger.getLogger( InnerJoin.class );
@@ -47,7 +50,7 @@ public class InnerJoin implements CoGrouper
       this.closure = closure;
 
       if( LOG.isDebugEnabled() )
-        LOG.debug( "cogrouped size: " + ( closure.size() ) );
+        LOG.debug( "cogrouped size: " + closure.size() );
 
       init();
       }

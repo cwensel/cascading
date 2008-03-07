@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.p.Operators to push c.o.Operation results directly through to next operation without intermediate collection. This should
+  improve pipelining of large result streams and lower runtime memory footprint.
+
   Changed c.c.Cascade so it now runs Flows in parallel if Hadoop is clustered, and there are no dependencies between the Flows.
 
   Moved c.Cascade and related classed to c.cascade package. Wanted to preempt any future ugliness.
