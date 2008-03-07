@@ -436,9 +436,9 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
-   * Method append appends all the values of the given Tuple instances to this instance.
+   * Method append appends all the values of the given Tuple instances to a copy of this instance.
    *
-   * @param tuples of type Tuple...
+   * @param tuples of type Tuple
    * @return Tuple
    */
   public Tuple append( Tuple... tuples )

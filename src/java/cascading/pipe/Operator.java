@@ -148,9 +148,8 @@ public abstract class Operator extends Pipe
     if( getOutputSelector().isResults() )
       return output.getTuple();
 
-    // appendNew checks for duplicate fields and fails accordingly
     if( getOutputSelector().isAll() )
-      return input.appendNew( output ).getTuple();
+      return input.getTuple().append( output.getTuple() );
 
     return TupleEntry.select( outgoingSelector, input, output );
     }
@@ -168,7 +167,8 @@ public abstract class Operator extends Pipe
   void verifyDeclared( Fields declared )
     {
     if( declared.isDefined() && declared.size() == 0 )
-      throw new OperatorException( "field declaration: " + getFieldDeclaration().print() + ", resolves to an empty field set, current grouping is on all fields" );
+      throw new OperatorException(
+        "field declaration: " + getFieldDeclaration().print() + ", resolves to an empty field set, current grouping is on all fields" );
     }
 
   void verifyOutputSelector( Fields outputSelector )
