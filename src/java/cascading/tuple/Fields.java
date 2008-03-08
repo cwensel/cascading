@@ -103,8 +103,15 @@ public final class Fields implements Comparable, Serializable
   boolean isOrdered = true;
   /** Field kind */
   Kind kind;
+
   /** Field thisPos */
   transient int[] thisPos;
+  /** Field index */
+  transient Map<Comparable, Integer> index;
+  /** Field posCache */
+  transient Map<Fields, int[]> posCache;
+  /** Field hashCode */
+  transient int hashCode; // need to cache this
 
   /**
    * Method fields is a convenience method to create an array of Fields instances.
@@ -561,16 +568,34 @@ public final class Fields implements Comparable, Serializable
     return pos;
     }
 
+  private final Map<Fields, int[]> getPosCache()
+    {
+    if( posCache == null )
+      posCache = new HashMap<Fields, int[]>();
+
+    return posCache;
+    }
+
+  private final int[] putReturn( Fields fields, int[] pos )
+    {
+    getPosCache().put( fields, pos );
+
+    return pos;
+    }
+
   final int[] getPos( Fields fields )
     {
+    if( getPosCache().containsKey( fields ) )
+      return getPosCache().get( fields );
+
     if( fields.isAll() )
-      return null; // return null, not getPos()
+      return putReturn( fields, null ); // return null, not getPos()
 
     if( isAll() )
-      return fields.getPos();
+      return putReturn( fields, fields.getPos() );
 
     if( size() == 0 && isUnknown() )
-      return fields.getPos();
+      return putReturn( fields, fields.getPos() );
 
     int[] pos = new int[fields.size()];
 
@@ -584,7 +609,7 @@ public final class Fields implements Comparable, Serializable
         pos[ i ] = indexOf( field );
       }
 
-    return pos;
+    return putReturn( fields, pos );
     }
 
   final int translatePos( Integer integer )
@@ -614,8 +639,6 @@ public final class Fields implements Comparable, Serializable
     {
     return indexOf( field );
     }
-
-  private transient Map<Comparable, Integer> index;
 
   private final Map<Comparable, Integer> getIndex()
     {
@@ -821,9 +844,11 @@ public final class Fields implements Comparable, Serializable
     for( int i = 0; i < size(); i++ )
       {
       int c = get( i ).compareTo( other.get( i ) );
+
       if( c != 0 )
         return c;
       }
+
     return 0;
     }
 
@@ -965,7 +990,10 @@ public final class Fields implements Comparable, Serializable
   @Override
   public int hashCode()
     {
-    return get() != null ? Arrays.hashCode( get() ) : 0;
+    if( hashCode == 0 )
+      hashCode = get() != null ? Arrays.hashCode( get() ) : 0;
+
+    return hashCode;
     }
 
   }
