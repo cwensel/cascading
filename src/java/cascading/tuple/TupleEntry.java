@@ -238,6 +238,57 @@ public class TupleEntry
     }
 
   /**
+   * Method extractTuple returns a new Tuple based on the given selector. But sets the values of this entries Tuple to null.
+   *
+   * @param selector of type Fields
+   * @return Tuple
+   */
+  public Tuple extractTuple( Fields selector )
+    {
+    if( selector == null || selector.isAll() )
+      {
+      Tuple result = this.tuple;
+
+      this.tuple = Tuple.size( result.size() );
+
+      return result;
+      }
+
+    try
+      {
+      return tuple.extract( fields, selector );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  /**
+   * Method setTuple sets the values specified by the selector to the values given by the given tuple.
+   *
+   * @param selector of type Fields
+   * @param tuple    of type Tuple
+   */
+  public void setTuple( Fields selector, Tuple tuple )
+    {
+    if( selector == null || selector.isAll() )
+      {
+      this.tuple = tuple;
+      return;
+      }
+
+    try
+      {
+      this.tuple.set( fields, selector, tuple );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  /**
    * Method appendNew appends the given TupleEntry instance to this instance.
    *
    * @param entry of type TupleEntry

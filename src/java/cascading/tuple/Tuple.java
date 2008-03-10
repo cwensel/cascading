@@ -396,6 +396,48 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
+   * Creates a new Tuple from the given positions, but sets the values in the current tuple to null.
+   *
+   * @param pos of type int[]
+   * @return Tuple
+   */
+  Tuple extract( int[] pos )
+    {
+    Tuple results = new Tuple();
+
+    for( int i : pos )
+      results.add( elements.set( i, null ) );
+
+    return results;
+    }
+
+  Tuple extract( Fields declarator, Fields selector )
+    {
+    return extract( declarator.getPos( selector ) );
+    }
+
+  /**
+   * Sets the values in the given positions to the values from the given Tuple.
+   *
+   * @param pos   of type int[]
+   * @param tuple of type Tuple
+   */
+  void set( int[] pos, Tuple tuple )
+    {
+    if( pos.length != tuple.size() )
+      throw new TupleException( "given tuple not same size as position array, tuple: " + tuple.print() );
+
+    int count = 0;
+    for( int i : pos )
+      elements.set( i, tuple.elements.get( count++ ) );
+    }
+
+  void set( Fields declarator, Fields selector, Tuple tuple )
+    {
+    set( declarator.getPos( selector ), tuple );
+    }
+
+  /**
    * Method iterator returns an {@link Iterator} over this Tuple instances values.
    *
    * @return Iterator

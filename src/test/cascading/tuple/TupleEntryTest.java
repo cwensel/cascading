@@ -97,4 +97,45 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "b", tuple.get( 1 ) );
     }
 
+  public void testExtractSet()
+    {
+    Fields selector = new Fields( 1, "d" );
+
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c", "d" ), new Tuple( "a", "b", "c", "d" ) );
+
+    Tuple tuple = entryA.extractTuple( selector );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "b", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "d", tuple.get( 1 ) );
+
+    entryA.setTuple( selector, new Tuple( "B", "D" ) );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "a", entryA.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "B", entryA.get( 1 ) );
+    assertEquals( "not equal: tuple.get(2)", "c", entryA.get( 2 ) );
+    assertEquals( "not equal: tuple.get(3)", "D", entryA.get( 3 ) );
+    }
+
+  public void testExtractSet2()
+    {
+    Fields selector = new Fields( "d", 1 );
+
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c", "d" ), new Tuple( "a", "b", "c", "d" ) );
+
+    Tuple tuple = entryA.extractTuple( selector );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "d", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "b", tuple.get( 1 ) );
+
+    entryA.setTuple( selector, new Tuple( "D", "B" ) );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "a", entryA.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "B", entryA.get( 1 ) );
+    assertEquals( "not equal: tuple.get(2)", "c", entryA.get( 2 ) );
+    assertEquals( "not equal: tuple.get(3)", "D", entryA.get( 3 ) );
+    }
   }

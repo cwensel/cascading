@@ -108,6 +108,26 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", aTuple.get( 1 ) );
     }
 
+  public void testExtractSet()
+    {
+    Tuple aTuple = tuple.extract( new int[]{0} );
+
+    assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+
+    assertEquals( "not equal: tuple.size()", 5, tuple.size() );
+    assertEquals( "not equal: tuple.get( 0 )", null, tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 2 ) );
+
+    tuple.set( new int[]{0}, new Tuple( "A" ) );
+
+    assertEquals( "not equal: tuple.size()", 5, tuple.size() );
+    assertEquals( "not equal: tuple.get( 0 )", "A", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 2 ) );
+    }
+
   public void testEqual()
     {
     Tuple aTuple = new Tuple( tuple );

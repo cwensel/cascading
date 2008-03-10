@@ -375,7 +375,7 @@ public class Group extends Pipe
     if( isGroupBy() )
       closure = new GroupClosure( (Tuple) key, values );
     else
-      closure = new CoGroupClosure( jobConf, getPipePos(), repeat, (Tuple) key, values );
+      closure = new CoGroupClosure( jobConf, pipes.size(), repeat, (Tuple) key, values );
 
     if( coGrouper == null )
       return new InnerJoin().getIterator( closure );

@@ -22,7 +22,6 @@
 package cascading.pipe.cogroup;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
@@ -41,10 +40,10 @@ public class CoGroupClosure extends GroupClosure
   /** Field groups */
   SpillableTupleList[] groups;
 
-  public CoGroupClosure( JobConf jobConf, Map<String, Integer> pipePos, int repeat, Tuple key, Iterator values )
+  public CoGroupClosure( JobConf jobConf, int numPipes, int repeat, Tuple key, Iterator values )
     {
     super( key, values );
-    build( jobConf, pipePos, repeat );
+    build( jobConf, numPipes, repeat );
     }
 
   @Override
@@ -62,11 +61,11 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ].iterator();
     }
 
-  public void build( JobConf jobConf, Map<String, Integer> pipePos, int repeat )
+  public void build( JobConf jobConf, int numPipes, int repeat )
     {
-    groups = new SpillableTupleList[Math.max( pipePos.size(), repeat )];
+    groups = new SpillableTupleList[Math.max( numPipes, repeat )];
 
-    for( int i = 0; i < pipePos.size(); i++ ) // use pipePos.size() not repeat, see below
+    for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
       groups[ i ] = new SpillableTupleList( jobConf.getInt( SPILL_THRESHOLD, defaultThreshold ) );
 
     while( values.hasNext() )
