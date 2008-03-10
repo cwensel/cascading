@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 /** Class CoGroupClosure ... */
 public class CoGroupClosure extends GroupClosure
   {
-  public static final String SPILL_THRESHOLD = "cascading.spill.threshold";
+  public static final String SPILL_THRESHOLD = "cascading.cogroup.spill.threshold";
   private static final int defaultThreshold = 10 * 1000;
 
   /** Field LOG */
@@ -66,18 +66,17 @@ public class CoGroupClosure extends GroupClosure
     {
     groups = new SpillableTupleList[Math.max( pipePos.size(), repeat )];
 
-    for( int i = 0; i < pipePos.size(); i++ )
+    for( int i = 0; i < pipePos.size(); i++ ) // use pipePos.size() not repeat, see below
       groups[ i ] = new SpillableTupleList( jobConf.getInt( SPILL_THRESHOLD, defaultThreshold ) );
 
     while( values.hasNext() )
       {
       Tuple current = (Tuple) values.next();
-      String name = (String) current.get( 0 );
-      Integer pos = pipePos.get( name ); // if in repeat mode, will always be 0
+      Integer pos = (Integer) current.get( 0 );
 
       if( LOG.isDebugEnabled() )
         {
-        LOG.debug( "name: " + name + " pos: " + pos );
+        LOG.debug( "group pos: " + pos );
 
         if( repeat != 1 )
           LOG.debug( "repeating: " + repeat );

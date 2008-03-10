@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased
 
-  Added numerous optimizations to improve overall performance. 
+  Renamed cascading.spill.threshold to cascading.cogroup.spill.threshold, so there is less a chance of collision.
+
+  Added numerous optimizations to improve overall performance.
 
   Changed c.p.Operators to push c.o.Operation results directly through to next operation without intermediate collection. This should
   improve pipelining of large result streams and lower runtime memory footprint.

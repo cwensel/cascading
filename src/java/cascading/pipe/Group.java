@@ -351,27 +351,25 @@ public class Group extends Pipe
       LOG.debug( "cogroup: [" + incomingScope + "] key pos: [" + groupFields + "]" );
 
     // todo: would be nice to delegate this back to the GroupClosure
+    Tuple groupTuple = entry.selectTuple( groupFields );
+    Tuple valuesTuple = entry.getTuple();
+
     if( isGroupBy() )
-      return new Tuple[]{entry.selectTuple( groupFields ), entry.getTuple()};
+      return new Tuple[]{groupTuple, valuesTuple};
     else
-      return new Tuple[]{entry.selectTuple( groupFields ), new Tuple( incomingScope.getName(), entry.getTuple() )};
+      return new Tuple[]{groupTuple, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple )};
     }
 
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
-   * @param key    of type WritableComparable
-   * @param values of type Iterator
+   * @param jobConf of type JobConf
+   * @param key     of type WritableComparable
+   * @param values  of type Iterator
    * @return Iterator<Tuple>
    */
   public Iterator<Tuple> makeReduceValues( JobConf jobConf, WritableComparable key, Iterator values )
     {
-    /*
-    * todo: support unlimited sized cogroupings
-    * a very naive implementation that will fail with large co-groups
-    * consider wrapping the values iterator with another iterator that performs the expected function
-    * of join, first, etc. consider the yield pattern in python
-    */
     GroupClosure closure;
 
     if( isGroupBy() )
@@ -474,8 +472,7 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException(
-            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }

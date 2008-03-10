@@ -527,28 +527,32 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
     int len = WritableUtils.readVInt( in );
 
     for( int i = 0; i < len; i++ )
-      {
-      int type = WritableUtils.readVInt( in );
+      elements.add( readType( WritableUtils.readVInt( in ), in ) );
+    }
 
-      if( type == 0 )
-        elements.add( null );
-      else if( type == 1 )
-        elements.add( WritableUtils.readString( in ) );
-      else if( type == 2 )
-        elements.add( in.readFloat() );
-      else if( type == 3 )
-        elements.add( in.readDouble() );
-      else if( type == 4 )
-        elements.add( WritableUtils.readVInt( in ) );
-      else if( type == 5 )
-        elements.add( WritableUtils.readVLong( in ) );
-      else if( type == 6 )
-        elements.add( in.readShort() );
-      else if( type == 7 )
-        elements.add( readNewTuple( in ) );
-      else if( type == 8 )
-        elements.add( readNewWritable( in ) );
-      else
+  private final Comparable readType( int type, DataInput in ) throws IOException
+    {
+    switch( type )
+      {
+      case 0:
+        return null;
+      case 1:
+        return WritableUtils.readString( in );
+      case 2:
+        return in.readFloat();
+      case 3:
+        return in.readDouble();
+      case 4:
+        return WritableUtils.readVInt( in );
+      case 5:
+        return WritableUtils.readVLong( in );
+      case 6:
+        return in.readShort();
+      case 7:
+        return readNewTuple( in );
+      case 8:
+        return readNewWritable( in );
+      default:
         throw new IOException( "could not read unknown element type: " + type );
       }
     }
