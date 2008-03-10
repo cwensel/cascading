@@ -23,6 +23,7 @@ package cascading.examples;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import cascading.flow.Scope;
 import cascading.pipe.Group;
@@ -65,7 +66,7 @@ public class Uniq extends Group
     }
 
   @Override
-  public Iterator<Tuple> makeReduceValues( JobConf jobConf, WritableComparable key, Iterator values )
+  public Iterator<Tuple> makeReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope thisScope, WritableComparable key, Iterator values )
     {
     // we must walk all the values, otherwise we will get dupe keys
     while( values.hasNext() )

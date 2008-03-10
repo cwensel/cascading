@@ -63,7 +63,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
   public DistanceUseCaseTest()
     {
-    super( "distance", true );
+    super( "distance", false );
     }
 
   /**

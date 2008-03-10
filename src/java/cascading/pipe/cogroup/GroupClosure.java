@@ -23,6 +23,7 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -31,11 +32,15 @@ public class GroupClosure
   {
   private static final Logger LOG = Logger.getLogger( GroupClosure.class );
 
+  final Fields[] groupingFields;
+  final Fields[] valueFields;
   final Tuple grouping;
   final Iterator values;
 
-  public GroupClosure( Tuple key, Iterator values )
+  public GroupClosure( Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
+    this.groupingFields = groupingFields;
+    this.valueFields = valueFields;
     this.grouping = key;
     this.values = values;
     }
@@ -55,6 +60,33 @@ public class GroupClosure
     if( pos != 0 )
       throw new IllegalArgumentException( "invalid group position: " + pos );
 
-    return values;
+    return makeIterator( 0, values );
+    }
+
+  protected Iterator<Tuple> makeIterator( final int pos, final Iterator values )
+    {
+    return new Iterator<Tuple>()
+    {
+    final int cleanPos = valueFields.length == 1 ? 0 : pos; // support repeated pipes
+
+    public boolean hasNext()
+      {
+      return values.hasNext();
+      }
+
+    public Tuple next()
+      {
+      Tuple tuple = (Tuple) values.next();
+
+      tuple.set( valueFields[ cleanPos ], groupingFields[ cleanPos ], grouping );
+
+      return tuple;
+      }
+
+    public void remove()
+      {
+      throw new UnsupportedOperationException( "remove not supported" );
+      }
+    };
     }
   }

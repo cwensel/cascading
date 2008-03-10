@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
+import cascading.operation.Aggregator;
+import cascading.pipe.Pipe;
 import cascading.util.Util;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
@@ -46,6 +48,10 @@ import org.apache.hadoop.io.WritableUtils;
  * <p/>
  * Tuples are mutable for sake of efficiency. They are also Hadoop Writable so they can be streamed in/out as binary.
  * The obvious limitation here is that what are streamed via Hadoop must also be Hadoop Writable, or simply primitive types.
+ * <p/>
+ * Since Tuples are mutable, it is not a good idea to hold an instance around with out first copying it via its copy
+ * constructor, a subsequent {@link Pipe} could change the Tuple in place. This is especially true for {@link Aggregator}
+ * operators.
  */
 public final class Tuple implements WritableComparable, Iterable, Serializable
   {
@@ -411,7 +417,16 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
     return results;
     }
 
-  Tuple extract( Fields declarator, Fields selector )
+  /**
+   * Method extract creates a new Tuple from the given selector, but sets the values in the current tuple to null.
+   * <p/>
+   * Use this method in conjunction with {@link #set}.
+   *
+   * @param declarator of type Fields
+   * @param selector   of type Fields
+   * @return Tuple
+   */
+  public Tuple extract( Fields declarator, Fields selector )
     {
     return extract( declarator.getPos( selector ) );
     }
@@ -432,7 +447,14 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
       elements.set( i, tuple.elements.get( count++ ) );
     }
 
-  void set( Fields declarator, Fields selector, Tuple tuple )
+  /**
+   * Method set sets the values in the given selector positions to the values from the given Tuple.
+   *
+   * @param declarator of type Fields
+   * @param selector   of type Fields
+   * @param tuple      of type Tuple
+   */
+  public void set( Fields declarator, Fields selector, Tuple tuple )
     {
     set( declarator.getPos( selector ), tuple );
     }

@@ -42,6 +42,6 @@ public class Insert extends Operation implements Function
 
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
-    outputCollector.add( values );
+    outputCollector.add( new Tuple( values ) );
     }
   }

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.pipe.Each;
@@ -66,9 +67,10 @@ public class PushFlowReducerStack extends FlowReducerStack
 
   private void buildStack()
     {
+    Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
 
-    stackTail = new FlowReducerStackElement( step.group, nextScope.getOutGroupingFields() );
+    stackTail = new FlowReducerStackElement( previousScopes, step.group, nextScope, nextScope.getOutGroupingFields() );
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
@@ -126,8 +128,10 @@ public class PushFlowReducerStack extends FlowReducerStack
     protected FlowReducerStackElement previous;
     protected FlowReducerStackElement next;
 
-    private Scope incomingScope;
+    private Scope incomingScope; // used by everything but group
+    private Set<Scope> incomingScopes; // used by group
     private FlowElement flowElement;
+    private Scope thisScope; // used by group
     private Fields outGroupingFields;
 
     private List<Every.EveryHandler> everyHandlers;
@@ -137,9 +141,11 @@ public class PushFlowReducerStack extends FlowReducerStack
     private Fields incomingFields;
     private TupleEntry tupleEntry;
 
-    public FlowReducerStackElement( Group group, Fields outGroupingFields )
+    public FlowReducerStackElement( Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields )
       {
       this.flowElement = group;
+      this.incomingScopes = incomingScopes;
+      this.thisScope = thisScope;
       this.outGroupingFields = outGroupingFields;
       }
 
@@ -284,7 +290,7 @@ public class PushFlowReducerStack extends FlowReducerStack
       // this can be one big tuple. the values iterator will have one Tuple of the format:
       // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
       // this can be nasty
-      values = ( (Group) flowElement ).makeReduceValues( jobConf, key, values );
+      values = ( (Group) flowElement ).makeReduceValues( jobConf, incomingScopes, thisScope, key, values );
 
       values = new TupleEntryIterator( next.resolveIncomingOperationFields(), values );
 

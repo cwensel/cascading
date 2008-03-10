@@ -23,6 +23,7 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.JobConf;
@@ -40,10 +41,10 @@ public class CoGroupClosure extends GroupClosure
   /** Field groups */
   SpillableTupleList[] groups;
 
-  public CoGroupClosure( JobConf jobConf, int numPipes, int repeat, Tuple key, Iterator values )
+  public CoGroupClosure( JobConf jobConf, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
-    super( key, values );
-    build( jobConf, numPipes, repeat );
+    super( groupingFields, valueFields, key, values );
+    build( jobConf, repeat );
     }
 
   @Override
@@ -58,11 +59,12 @@ public class CoGroupClosure extends GroupClosure
     if( pos < 0 || pos >= groups.length )
       throw new IllegalArgumentException( "invalid group position: " + pos );
 
-    return groups[ pos ].iterator();
+    return makeIterator( pos, groups[ pos ].iterator() );
     }
 
-  public void build( JobConf jobConf, int numPipes, int repeat )
+  public void build( JobConf jobConf, int repeat )
     {
+    int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, repeat )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below

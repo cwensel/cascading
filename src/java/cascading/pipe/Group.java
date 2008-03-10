@@ -351,7 +351,7 @@ public class Group extends Pipe
       LOG.debug( "cogroup: [" + incomingScope + "] key pos: [" + groupFields + "]" );
 
     // todo: would be nice to delegate this back to the GroupClosure
-    Tuple groupTuple = entry.selectTuple( groupFields );
+    Tuple groupTuple = entry.extractTuple( groupFields ); // we are nulling dupe values here to reduce bandwidth usage
     Tuple valuesTuple = entry.getTuple();
 
     if( isGroupBy() )
@@ -363,19 +363,38 @@ public class Group extends Pipe
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
-   * @param jobConf of type JobConf
-   * @param key     of type WritableComparable
-   * @param values  of type Iterator
-   * @return Iterator<Tuple>
+   * @param jobConf       of type JobConf
+   * @param outgoingScope of type Scope
+   * @param key           of type WritableComparable
+   * @param values        of type Iterator @return Iterator<Tuple>
    */
-  public Iterator<Tuple> makeReduceValues( JobConf jobConf, WritableComparable key, Iterator values )
+  public Iterator<Tuple> makeReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, WritableComparable key, Iterator values )
     {
     GroupClosure closure;
 
     if( isGroupBy() )
-      closure = new GroupClosure( (Tuple) key, values );
+      {
+      Scope incomingScope = incomingScopes.iterator().next();
+      Fields[] groupFields = Fields.fields( outgoingScope.getGroupingSelectors().get( incomingScope.getName() ) );
+      Fields[] valuesFields = Fields.fields( incomingScope.getOutValuesFields() );
+
+      closure = new GroupClosure( groupFields, valuesFields, (Tuple) key, values );
+      }
     else
-      closure = new CoGroupClosure( jobConf, pipes.size(), repeat, (Tuple) key, values );
+      {
+      Fields[] groupFields = new Fields[pipes.size()];
+      Fields[] valuesFields = new Fields[pipes.size()];
+
+      for( Scope incomingScope : incomingScopes )
+        {
+        int pos = getPipePos().get( incomingScope.getName() );
+
+        groupFields[ pos ] = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
+        valuesFields[ pos ] = incomingScope.getOutValuesFields();
+        }
+
+      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, (Tuple) key, values );
+      }
 
     if( coGrouper == null )
       return new InnerJoin().getIterator( closure );

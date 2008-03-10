@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
@@ -132,6 +133,24 @@ public class FlowStep implements Serializable
     throw exception;
     }
 
+  /**
+   * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),
+   * there will be more than one instance.
+   *
+   * @param flowElement of type FlowElement
+   * @return Set<Scope>
+   */
+  public Set<Scope> getPreviousScopes( FlowElement flowElement )
+    {
+    return graph.incomingEdgesOf( flowElement );
+    }
+
+  /**
+   * Method getNextScope returns the next Scope instance in the graph. There will always only be one next.
+   *
+   * @param flowElement of type FlowElement
+   * @return Scope
+   */
   public Scope getNextScope( FlowElement flowElement )
     {
     return graph.outgoingEdgesOf( flowElement ).iterator().next();
