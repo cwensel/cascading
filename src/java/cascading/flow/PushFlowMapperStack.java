@@ -227,11 +227,9 @@ public class PushFlowMapperStack extends FlowMapperStack
 
     private void operateGroup( TupleEntry tupleEntry )
       {
-      Tuple[] grouping = group.makeReduceGrouping( incomingScope, outgoingScope, tupleEntry );
-
       try
         {
-        lastOutput.collect( grouping[ 0 ], grouping[ 1 ] );
+        group.makeReduceGrouping( incomingScope, outgoingScope, tupleEntry, lastOutput );
         }
       catch( IOException exception )
         {
@@ -242,10 +240,11 @@ public class PushFlowMapperStack extends FlowMapperStack
         if( throwable instanceof CascadingException )
           throw (CascadingException) throwable;
 
-        throw new FlowException( "internal error at grouping: " + grouping[ 0 ].print() + " values: " + grouping[ 1 ].print(), throwable );
+        throw new FlowException( "internal error", throwable );
         }
       }
 
+    @Override
     public String toString()
       {
       return each != null ? each.toString() : group.toString();

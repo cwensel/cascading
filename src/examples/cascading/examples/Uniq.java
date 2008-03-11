@@ -21,6 +21,7 @@
 
 package cascading.examples;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,6 +34,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
 /** Class Uniq ... */
@@ -52,7 +54,7 @@ public class Uniq extends Group
     }
 
   @Override
-  public Tuple[] makeReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry )
+  public void makeReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector lastOutput ) throws IOException
     {
     Fields groupFields = groupFieldsMap.get( incomingScope.getName() );
 
@@ -60,9 +62,9 @@ public class Uniq extends Group
       LOG.debug( "uniq: [" + incomingScope + "] key pos: [" + groupFields + "]" );
 
     if( groupFields.isAll() )
-      return new Tuple[]{entry.getTuple(), EMPTY};
+      lastOutput.collect( entry.getTuple(), EMPTY );
     else
-      return new Tuple[]{entry.selectTuple( groupFields ), EMPTY};
+      lastOutput.collect( entry.selectTuple( groupFields ), EMPTY );
     }
 
   @Override
