@@ -41,7 +41,7 @@ public class S3Util
   {
   public enum Request
     {
-      DETAILS, OBJECT
+      DETAILS, OBJECT, CREATE
     }
 
   public static RestS3Service getS3Service( URI uri )
@@ -63,7 +63,8 @@ public class S3Util
         String authority = uri.getAuthority();
         String split[] = authority.split( "[:@]" );
 
-        userInfo = split[ 0 ] + ":" + split[ 1 ];
+        if( split.length >= 2 )
+          userInfo = split[ 0 ] + ":" + split[ 1 ];
         }
 
       if( userInfo != null )
@@ -116,6 +117,25 @@ public class S3Util
     return new S3Bucket( bucketName );
     }
 
+  public static boolean deleteObject( S3Service s3Service, S3Bucket s3Bucket, Path path ) throws IOException
+    {
+    S3Object object = getObject( s3Service, s3Bucket, path, Request.DETAILS );
+
+    if( object == null )
+      return true;
+
+    try
+      {
+      s3Service.deleteObject( s3Bucket, object.getKey() );
+      }
+    catch( S3ServiceException exception )
+      {
+      return false;
+      }
+
+    return true;
+    }
+
   public static S3Object getObject( S3Service s3Service, S3Bucket s3Bucket, Path path, Request type ) throws IOException
     {
     try
@@ -123,7 +143,9 @@ public class S3Util
       URI uri = path.toUri();
       String keyName = uri.getPath().substring( 1 );
 
-      if( type == Request.DETAILS )
+      if( type == Request.CREATE )
+        return new S3Object( s3Bucket, keyName );
+      else if( type == Request.DETAILS )
         return s3Service.getObjectDetails( s3Bucket, keyName );
       else if( type == Request.OBJECT )
         return s3Service.getObject( s3Bucket, keyName );
@@ -132,11 +154,29 @@ public class S3Util
       }
     catch( S3ServiceException exception )
       {
+      if( exception.getMessage().contains( "404" ) )
+        return null;
+
       IOException ioException = new IOException( "could not get object: " + path );
 
       ioException.initCause( exception );
 
       throw ioException;
+      }
+    }
+
+  public static void putObject( RestS3Service s3Service, S3Bucket bucket, S3Object object ) throws IOException
+    {
+    try
+      {
+      s3Service.putObject( bucket, object );
+      }
+    catch( S3ServiceException exception )
+      {
+      if( exception.getCause() instanceof IOException )
+        throw (IOException) exception.getCause();
+
+      throw new IOException( "could not store object: " + bucket.getName() + "/" + object.getKey() + " " + exception.getMessage() );
       }
     }
 

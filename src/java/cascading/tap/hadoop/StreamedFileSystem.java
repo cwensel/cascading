@@ -35,7 +35,7 @@ import org.apache.hadoop.util.Progressable;
 public abstract class StreamedFileSystem extends FileSystem
   {
   @Override
-  public FSDataOutputStream create( Path path, FsPermission fsPermission, boolean b, int i, short i1, long l, Progressable progressable ) throws IOException
+  public FSDataOutputStream create( Path path, FsPermission permission, boolean overwrite, int bufferSize, short replication, long blockSize, Progressable progress ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }
