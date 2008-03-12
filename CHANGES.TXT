@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Added c.f.FlowListener so that c.f.Flow instances can fire events on starting, completed, and throwable.
+
+  Changed c.t.h.S3HttpFileSystem so it can now create files remotely.
+
   Renamed cascading.spill.threshold to cascading.cogroup.spill.threshold, so there is less a chance of collision.
 
   Made numerous optimizations to improve overall performance.

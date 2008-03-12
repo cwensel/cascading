@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -80,6 +81,8 @@ public class Flow implements Runnable
   private SimpleDirectedGraph<FlowStep, Integer> stepGraph;
   /** Field jobConf */
   private JobConf jobConf;
+  /** Field listeners */
+  private List<SafeFlowListener> listeners;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -95,6 +98,11 @@ public class Flow implements Runnable
 
   /** Field steps */
   private transient List<FlowStep> steps;
+
+  /** Used for testing. */
+  protected Flow()
+    {
+    }
 
   protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
@@ -138,6 +146,45 @@ public class Flow implements Runnable
       setJobConf( new JobConf() );
 
     return jobConf;
+    }
+
+  List<SafeFlowListener> getListeners()
+    {
+    if( listeners == null )
+      listeners = new LinkedList<SafeFlowListener>();
+
+    return listeners;
+    }
+
+  /**
+   * Method hasListeners returns true if {@link FlowListener} instances have been registered.
+   *
+   * @return boolean
+   */
+  public boolean hasListeners()
+    {
+    return listeners != null && !listeners.isEmpty();
+    }
+
+  /**
+   * Method addListener registers the given flowListener with this instance.
+   *
+   * @param flowListener of type FlowListener
+   */
+  public void addListener( FlowListener flowListener )
+    {
+    getListeners().add( new SafeFlowListener( flowListener ) );
+    }
+
+  /**
+   * Method removeListener removes the given flowListener from this instance.
+   *
+   * @param flowListener of type FlowListener
+   * @return true if the listener was removed
+   */
+  public boolean removeListener( FlowListener flowListener )
+    {
+    return getListeners().remove( new SafeFlowListener( flowListener ) );
     }
 
   /**
@@ -322,11 +369,26 @@ public class Flow implements Runnable
 
       if( throwable != null )
         throw new FlowException( "unhandled exception", throwable );
+
+      if( hasListeners() )
+        {
+        for( SafeFlowListener safeFlowListener : getListeners() )
+          {
+          if( safeFlowListener.throwable != null )
+            throw new FlowException( "unhandled listener exception", throwable );
+          }
+        }
       }
     finally
       {
       thread = null;
       throwable = null;
+
+      if( hasListeners() )
+        {
+        for( SafeFlowListener safeFlowListener : getListeners() )
+          safeFlowListener.throwable = null;
+        }
       }
     }
 
@@ -403,6 +465,15 @@ public class Flow implements Runnable
     {
     try
       {
+      if( hasListeners() )
+        {
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "firing onStarting event: " + getListeners().size() );
+
+        for( FlowListener flowListener : getListeners() )
+          flowListener.onStarting( this );
+        }
+
       if( LOG.isInfoEnabled() )
         {
         LOG.info( "starting flow: " + Util.toNull( getName() ) );
@@ -453,6 +524,15 @@ public class Flow implements Runnable
 
         if( throwable != null || stop )
           {
+          if( stop && hasListeners() )
+            {
+            if( LOG.isDebugEnabled() )
+              LOG.debug( "firing onStopping event: " + getListeners().size() );
+
+            for( FlowListener flowListener : getListeners() )
+              flowListener.onStopping( this );
+            }
+
           LOG.warn( "stopping jobs" );
 
           for( Callable<Throwable> callable : jobsMap.values() )
@@ -475,6 +555,29 @@ public class Flow implements Runnable
       {
       if( !isPreserveTemporaryFiles() )
         cleanTemporaryFiles();
+
+      if( hasListeners() )
+        {
+        if( throwable != null )
+          {
+          if( LOG.isDebugEnabled() )
+            LOG.debug( "firing onThrowable event: " + getListeners().size() );
+
+          boolean isHandled = false;
+
+          for( FlowListener flowListener : getListeners() )
+            isHandled = flowListener.onThrowable( this, throwable ) || isHandled;
+
+          if( isHandled )
+            throwable = null;
+          }
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "firing onCompleted event: " + getListeners().size() );
+
+        for( FlowListener flowListener : getListeners() )
+          flowListener.onCompleted( this );
+        }
       }
     }
 
@@ -577,5 +680,80 @@ public class Flow implements Runnable
     dot.export( writer, graph );
     }
 
+
+  /** Class SafeFlowListener safely calls a wrapped FlowListener */
+  private class SafeFlowListener implements FlowListener
+    {
+    FlowListener flowListener;
+    Throwable throwable;
+
+    private SafeFlowListener( FlowListener flowListener )
+      {
+      this.flowListener = flowListener;
+      }
+
+    public void onStarting( Flow flow )
+      {
+      try
+        {
+        flowListener.onStarting( flow );
+        }
+      catch( Throwable throwable )
+        {
+        this.throwable = throwable;
+        }
+      }
+
+    public void onStopping( Flow flow )
+      {
+      try
+        {
+        flowListener.onStopping( flow );
+        }
+      catch( Throwable throwable )
+        {
+        this.throwable = throwable;
+        }
+      }
+
+    public void onCompleted( Flow flow )
+      {
+      try
+        {
+        flowListener.onCompleted( flow );
+        }
+      catch( Throwable throwable )
+        {
+        this.throwable = throwable;
+        }
+      }
+
+    public boolean onThrowable( Flow flow, Throwable flowThrowable )
+      {
+      try
+        {
+        return flowListener.onThrowable( flow, flowThrowable );
+        }
+      catch( Throwable throwable )
+        {
+        this.throwable = throwable;
+        }
+
+      return false;
+      }
+
+    public boolean equals( Object object )
+      {
+      if( object instanceof SafeFlowListener )
+        return flowListener.equals( ( (SafeFlowListener) object ).flowListener );
+
+      return flowListener.equals( object );
+      }
+
+    public int hashCode()
+      {
+      return flowListener.hashCode();
+      }
+    }
 
   }

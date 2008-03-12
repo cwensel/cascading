@@ -34,14 +34,69 @@ import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
 
-/**
- *
- */
+/** Class S3Util encapsulates calls to the JetS3t API. */
 public class S3Util
   {
   public enum Request
     {
       DETAILS, OBJECT, CREATE
+    }
+
+  /**
+   * Parses the userinfo username and password out of the given URI, and retuns the embedded, or default, AWS access and secret keys.
+   * <p/>
+   * This code will handle underscores in bucket names.
+   *
+   * @param uri
+   * @param defaultAccessKey
+   * @param defaultSecretAccessKey
+   * @return a String[] with accessKey and secretKey
+   */
+  public static String[] parseAWSUri( URI uri, String defaultAccessKey, String defaultSecretAccessKey )
+    {
+    String accessKey = null;
+    String secretAccessKey = null;
+    String userInfo = uri.getUserInfo();
+
+    // special handling for underscores in bucket names
+    if( userInfo == null )
+      {
+      String authority = uri.getAuthority();
+      String split[] = authority.split( "[:@]" );
+
+      if( split.length >= 2 )
+        userInfo = split[ 0 ] + ":" + split[ 1 ];
+      }
+
+    if( userInfo != null )
+      {
+      int index = userInfo.indexOf( ':' );
+
+      if( index != -1 )
+        {
+        accessKey = userInfo.substring( 0, index );
+        secretAccessKey = userInfo.substring( index + 1 );
+        }
+      else
+        {
+        accessKey = userInfo;
+        }
+      }
+
+    if( accessKey == null )
+      accessKey = defaultAccessKey;
+
+    if( secretAccessKey == null )
+      secretAccessKey = defaultSecretAccessKey;
+
+    if( accessKey == null && secretAccessKey == null )
+      throw new IllegalArgumentException( "AWS Access Key ID and Secret Access Key must be specified as the username or password in the given URI" );
+    else if( accessKey == null )
+      throw new IllegalArgumentException( "AWS Access Key ID must be specified as the username of the given URI" );
+    else if( secretAccessKey == null )
+      throw new IllegalArgumentException( "AWS Secret Access Key must be specified as the password of the given URI" );
+
+    return new String[]{accessKey, secretAccessKey};
     }
 
   public static RestS3Service getS3Service( URI uri )
@@ -53,49 +108,9 @@ public class S3Util
     {
     try
       {
-      String accessKey = null;
-      String secretAccessKey = null;
-      String userInfo = uri.getUserInfo();
+      String[] aws = parseAWSUri( uri, defaultAccessKey, defaultSecretAccessKey );
 
-      // special handling for underscores in bucket names
-      if( userInfo == null )
-        {
-        String authority = uri.getAuthority();
-        String split[] = authority.split( "[:@]" );
-
-        if( split.length >= 2 )
-          userInfo = split[ 0 ] + ":" + split[ 1 ];
-        }
-
-      if( userInfo != null )
-        {
-        int index = userInfo.indexOf( ':' );
-
-        if( index != -1 )
-          {
-          accessKey = userInfo.substring( 0, index );
-          secretAccessKey = userInfo.substring( index + 1 );
-          }
-        else
-          {
-          accessKey = userInfo;
-          }
-        }
-
-      if( accessKey == null )
-        accessKey = defaultAccessKey;
-
-      if( secretAccessKey == null )
-        secretAccessKey = defaultSecretAccessKey;
-
-      if( accessKey == null && secretAccessKey == null )
-        throw new IllegalArgumentException( "AWS Access Key ID and Secret Access Key must be specified as the username or password of a s3 URL" );
-      else if( accessKey == null )
-        throw new IllegalArgumentException( "AWS Access Key ID must be specified as the username of a s3 URL" );
-      else if( secretAccessKey == null )
-        throw new IllegalArgumentException( "AWS Secret Access Key must be specified as the password of a s3 URL" );
-
-      return new RestS3Service( new AWSCredentials( accessKey, secretAccessKey ) );
+      return new RestS3Service( new AWSCredentials( aws[ 0 ], aws[ 1 ] ) );
       }
     catch( S3ServiceException exception )
       {
@@ -136,6 +151,14 @@ public class S3Util
     return true;
     }
 
+  /**
+   * @param s3Service
+   * @param s3Bucket
+   * @param path
+   * @param type
+   * @return null if the S3 service returns a 404
+   * @throws IOException thrown if there is an error communicating to S3
+   */
   public static S3Object getObject( S3Service s3Service, S3Bucket s3Bucket, Path path, Request type ) throws IOException
     {
     try
