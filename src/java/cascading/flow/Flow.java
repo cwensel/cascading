@@ -491,6 +491,7 @@ public class Flow implements Runnable
       while( topoIterator.hasNext() )
         {
         FlowStep step = (FlowStep) topoIterator.next();
+        step.setParentFlowName( getName() );
         FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob();
 
         jobsMap.put( step.getName(), flowStepJob );

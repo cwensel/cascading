@@ -50,6 +50,9 @@ public class FlowStep implements Serializable
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( FlowStep.class );
 
+  /** Field parentFlowName */
+  String parentFlowName;
+
   /** Field name */
   final String name;
   /** Field graph */
@@ -72,6 +75,31 @@ public class FlowStep implements Serializable
     return name;
     }
 
+  /**
+   * Method getParentFlowName returns the parentFlowName of this FlowStep object.
+   *
+   * @return the parentFlowName (type Flow) of this FlowStep object.
+   */
+  public String getParentFlowName()
+    {
+    return parentFlowName;
+    }
+
+  void setParentFlowName( String parentFlowName )
+    {
+    this.parentFlowName = parentFlowName;
+    }
+
+  /**
+   * Method getStepName returns the stepName of this FlowStep object.
+   *
+   * @return the stepName (type String) of this FlowStep object.
+   */
+  public String getStepName()
+    {
+    return String.format( "%s[%s]", getParentFlowName(), getName() );
+    }
+
   JobConf getJobConf() throws IOException
     {
     return getJobConf( null );
@@ -79,9 +107,9 @@ public class FlowStep implements Serializable
 
   JobConf getJobConf( JobConf parentConf ) throws IOException
     {
-    JobConf conf = parentConf == null ? new JobConf( Flow.class ) : new JobConf( parentConf, Flow.class );
+    JobConf conf = parentConf == null ? new JobConf( FlowStep.class ) : new JobConf( parentConf, FlowStep.class );
 
-    conf.setJobName( "flow: " + name );
+    conf.setJobName( getStepName() );
 
     conf.setOutputKeyClass( Tuple.class );
     conf.setOutputValueClass( Tuple.class );
@@ -243,7 +271,7 @@ public class FlowStep implements Serializable
     public void stop()
       {
       if( LOG.isInfoEnabled() )
-        LOG.info( "stopping: " + flowStep.getName() );
+        LOG.info( "stopping: " + flowStep.getStepName() );
 
       stop = true;
 
@@ -254,7 +282,7 @@ public class FlowStep implements Serializable
         }
       catch( IOException exception )
         {
-        LOG.warn( "unable to kill job: " + flowStep.getName(), exception );
+        LOG.warn( "unable to kill job: " + flowStep.getStepName(), exception );
         }
       }
 
@@ -281,7 +309,7 @@ public class FlowStep implements Serializable
           return null;
 
         if( LOG.isInfoEnabled() )
-          LOG.info( "starting step: " + flowStep.getName() );
+          LOG.info( "starting step: " + flowStep.getStepName() );
 
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
@@ -290,17 +318,14 @@ public class FlowStep implements Serializable
 
         if( !runningJob.isSuccessful() )
           {
-          TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-          System.out.println( "runningJob.getTaskCompletionEvents(0).length = " + events.length );
+          dumpCompletionEvents();
 
-          for( TaskCompletionEvent event : events )
-            System.out.println( "event = " + event );
-
-          return new FlowException( "step failed: " + flowStep.getName() );
+          return new FlowException( "step failed: " + flowStep.getStepName() );
           }
         }
       catch( Throwable throwable )
         {
+        dumpCompletionEvents();
         return throwable;
         }
       finally
@@ -311,6 +336,27 @@ public class FlowStep implements Serializable
       return null;
       }
 
+    private void dumpCompletionEvents()
+      {
+      try
+        {
+        TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
+        LOG.warn( "runningJob.getTaskCompletionEvents(0).length = " + events.length );
+
+        for( TaskCompletionEvent event : events )
+          LOG.warn( "event = " + event );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "failed reading completion events", exception );
+        }
+      }
+
+    /**
+     * Method isSuccessful returns true if this step completed successfully.
+     *
+     * @return the successful (type boolean) of this FlowStepJob object.
+     */
     public boolean isSuccessful()
       {
       try

@@ -299,7 +299,7 @@ public class Hfs extends Tap
   public String toString()
     {
     if( stringPath != null )
-      return getClass().getSimpleName() + "[\"" + stringPath + "\"]";
+      return getClass().getSimpleName() + "[\"" + stringPath.replaceAll( "(?<=//).*:.*@", "" ) + "\"]"; // sanitize
     else
       return getClass().getSimpleName() + "[not initialized]";
     }
