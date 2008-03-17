@@ -61,9 +61,9 @@ public class FlowConnector
   private static final Logger LOG = Logger.getLogger( FlowConnector.class );
 
   /** Field head */
-  private final EndPipe head = new EndPipe( "head" );
+  private final Extent head = new Extent( "head" );
   /** Field tail */
-  private final EndPipe tail = new EndPipe( "tail" );
+  private final Extent tail = new Extent( "tail" );
   /** Field jobConf */
   private JobConf jobConf;
 
@@ -269,7 +269,7 @@ public class FlowConnector
 
       pipeGraph = makePipeGraph( pipes, sources, sinks );
 
-      addEndPipes( pipeGraph, sources, sinks );
+      addExtents( pipeGraph, sources, sinks );
       verifyGraph( pipeGraph );
 
       handleSplits( pipeGraph );
@@ -356,7 +356,7 @@ public class FlowConnector
    * @param sources
    * @param sinks
    */
-  private void addEndPipes( SimpleDirectedGraph<FlowElement, Scope> graph, Map<String, Tap> sources, Map<String, Tap> sinks )
+  private void addExtents( SimpleDirectedGraph<FlowElement, Scope> graph, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
     graph.addVertex( head );
 
@@ -390,7 +390,7 @@ public class FlowConnector
       if( pipeGraph.incomingEdgesOf( flowElement ).size() != 0 )
         break;
 
-      if( flowElement instanceof EndPipe )
+      if( flowElement instanceof Extent )
         continue;
 
       if( flowElement instanceof Pipe )
@@ -467,7 +467,7 @@ public class FlowConnector
 
   private void resolveFields( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement source )
     {
-    if( source instanceof EndPipe )
+    if( source instanceof Extent )
       return;
 
     Set<Scope> incomingScopes = graph.incomingEdgesOf( source );
@@ -479,7 +479,7 @@ public class FlowConnector
     if( flowElements.size() == 0 )
       throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
 
-    if( flowElements.get( 0 ) instanceof EndPipe )
+    if( flowElements.get( 0 ) instanceof Extent )
       return;
 
     Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
@@ -524,7 +524,7 @@ public class FlowConnector
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement instanceof EndPipe )
+      if( flowElement instanceof Extent )
         continue;
 
       // if Tap, Group, or Every - we insert the tap here
@@ -588,7 +588,7 @@ public class FlowConnector
         previousFlowElement = flowElement;
         flowElement = pipeGraph.getEdgeTarget( scopeIterator.next() );
 
-        if( flowElement instanceof EndPipe )
+        if( flowElement instanceof Extent )
           continue;
         else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )
           continue;
@@ -769,7 +769,7 @@ public class FlowConnector
         {
         FlowElement target = pipeGraph.getEdgeTarget( scope );
 
-        if( target instanceof EndPipe )
+        if( target instanceof Extent )
           continue;
 
         if( !( target instanceof Tap ) )
@@ -865,10 +865,10 @@ public class FlowConnector
     }
 
   /** Simple class that acts in as the root of the graph */
-  static class EndPipe extends Pipe
+  static class Extent extends Pipe
     {
     /** @see cascading.pipe.Pipe#Pipe(String) */
-    public EndPipe( String name )
+    public Extent( String name )
       {
       super( name );
       }

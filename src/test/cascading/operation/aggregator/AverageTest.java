@@ -27,7 +27,7 @@ import java.util.Map;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -70,9 +70,9 @@ public class AverageTest
     Map<String, Double> context = new HashMap<String, Double>();
     average.start( context, null );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    average.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    average.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", 0.0, tuple.getDouble( 0 ), 0.0d );
     }
@@ -92,9 +92,9 @@ public class AverageTest
     average.aggregate( context, new TupleEntry( new Tuple( new Double( 4.0 ) ) ) );
     average.aggregate( context, new TupleEntry( new Tuple( new Double( -5.0 ) ) ) );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    average.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    average.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 1.0, tuple.getDouble( 0 ), 0.0d );
     }

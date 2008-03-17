@@ -24,19 +24,43 @@ package cascading.tuple;
 import cascading.operation.Operation;
 
 /** Interface TupleCollector is used to allow {@link Operation} instances to emit result {@link Tuple} values. */
-public interface TupleCollector
+public abstract class TupleCollector
   {
+  protected Fields declared;
+
+  public TupleCollector( Fields declared )
+    {
+    if( declared == null )
+      throw new IllegalArgumentException( "declared fields must not be null" );
+
+    this.declared = declared;
+    }
+
   /**
    * Method add inserts the given {@link TupleEntry} into the outgoing stream.
    *
    * @param entry of type TupleEntry
    */
-  void add( TupleEntry entry );
+  public void add( TupleEntry entry )
+    {
+    add( entry.getTuple() );
+    }
 
   /**
    * Method add inserts the given {@link Tuple} into the outgoing stream.
    *
    * @param tuple of type Tuple
    */
-  void add( Tuple tuple );
+  public void add( Tuple tuple )
+    {
+    if( tuple.isEmpty() )
+      return;
+
+    if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
+      throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
+
+    collect( tuple );
+    }
+
+  protected abstract void collect( Tuple tuple );
   }

@@ -27,7 +27,7 @@ import java.util.Map;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -70,9 +70,9 @@ public class MaxTest
     Map<String, Double> context = new HashMap<String, Double>();
     max.start( context, null );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    max.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    max.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", null, tuple.get( 0 ) );
     }
@@ -91,9 +91,9 @@ public class MaxTest
     max.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );
     max.aggregate( context, new TupleEntry( new Tuple( new Double( -4.0 ) ) ) );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    max.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    max.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 3.0, tuple.getDouble( 0 ), 0.0d );
     }

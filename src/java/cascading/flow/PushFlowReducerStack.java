@@ -107,7 +107,6 @@ public class PushFlowReducerStack extends FlowReducerStack
     stackHead = (FlowReducerStackElement) stackTail.resolveStack();
     }
 
-
   public void reduce( WritableComparable key, Iterator values, OutputCollector output ) throws IOException
     {
     if( LOG.isDebugEnabled() )

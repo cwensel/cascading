@@ -21,24 +21,17 @@
 
 package cascading.tuple;
 
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 
 /**
  * TupleEntryCollector is a convenience class for managing a list of tuples. More specifically it can simultaneously
  * append and modify in place elements of the list through the use of a ListIterator.
  */
-public class TupleEntryCollector implements Iterable<TupleEntry>
+public class TupleListCollector extends TupleCollector implements Iterable<Tuple>
   {
-  /** Field entry */
-  private final TupleEntry entry = new TupleEntry();
   /** Field tuples */
   private final LinkedList<Tuple> tuples = new LinkedList<Tuple>();
-
-  /** Constructor TupleEntryCollector creates a new TupleEntryCollector instance. */
-  public TupleEntryCollector()
-    {
-    }
 
   /**
    * Constructor TupleEntryCollector creates a new TupleEntryCollector instance.
@@ -46,12 +39,10 @@ public class TupleEntryCollector implements Iterable<TupleEntry>
    * @param fields of type Fields
    * @param tuple  of type Tuple...
    */
-  public TupleEntryCollector( Fields fields, Tuple... tuple )
+  public TupleListCollector( Fields fields, Tuple... tuple )
     {
-    if( fields == null )
-      throw new IllegalArgumentException( "fields must not be null" );
+    super( fields );
 
-    entry.fields = fields;
     collect( tuple );
     }
 
@@ -60,48 +51,15 @@ public class TupleEntryCollector implements Iterable<TupleEntry>
    *
    * @param tuples of type Tuple
    */
-  public void collect( Tuple... tuples )
+  private void collect( Tuple... tuples )
     {
     for( Tuple tuple : tuples )
       add( tuple );
     }
 
-  /**
-   * Method remove removes the last Tuple instance from this instance.
-   *
-   * @return TupleEntry
-   */
-  public TupleEntry remove()
+  protected void collect( Tuple tuple )
     {
-    entry.tuple = tuples.remove();
-
-    return entry;
-    }
-
-  /**
-   * Method add adds the given Tuple instance if it is not empty.
-   *
-   * @param tuple of type Tuple
-   */
-  public void add( Tuple tuple )
-    {
-    if( tuple.isEmpty() )
-      return;
-
-    if( !entry.fields.isUnknown() && entry.fields.size() != tuple.size() )
-      throw new TupleException( "added the wrong number of fields, expected: " + entry.fields + ", got: " + tuple.size() );
-
     tuples.add( tuple );
-    }
-
-  /**
-   * Method iterator returns a ListIterator instance.
-   *
-   * @return ListIterator<Tuple>
-   */
-  public TupleEntryListIterator iterator()
-    {
-    return new TupleEntryListIterator( entry, (ListIterator<Tuple>) tuples.iterator() );
     }
 
   /**
@@ -118,5 +76,10 @@ public class TupleEntryCollector implements Iterable<TupleEntry>
   public void clear()
     {
     tuples.clear();
+    }
+
+  public Iterator<Tuple> iterator()
+    {
+    return tuples.iterator();
     }
   }

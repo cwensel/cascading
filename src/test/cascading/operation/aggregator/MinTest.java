@@ -27,7 +27,7 @@ import java.util.Map;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -69,9 +69,9 @@ public class MinTest
     {
     Map<String, Double> context = new HashMap<String, Double>();
     min.start( context, null );
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    min.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    min.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", null, tuple.get( 0 ) );
     }
@@ -90,9 +90,9 @@ public class MinTest
     min.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
     min.aggregate( context, new TupleEntry( new Tuple( new Double( -4.0 ) ) ) );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    min.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    min.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", -4.0, tuple.getDouble( 0 ), 0.0d );
     }

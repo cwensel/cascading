@@ -51,7 +51,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
 public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
@@ -124,9 +124,9 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     {
     public void complete( Map context, TupleCollector outputCollector )
       {
-      TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "result" ) );
-      super.complete( context, resultEntryCollector.iterator() );
-      Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+      TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "result" ) );
+      super.complete( context, resultEntryCollector );
+      Tuple tuple = resultEntryCollector.iterator().next();
 
       outputCollector.add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
       }
@@ -212,9 +212,9 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     {
     public void complete( Map context, TupleCollector outputCollector )
       {
-      TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-      super.complete( context, resultEntryCollector.iterator() );
-      Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+      TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+      super.complete( context, resultEntryCollector );
+      Tuple tuple = resultEntryCollector.iterator().next();
 
       outputCollector.add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
       }

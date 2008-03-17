@@ -47,7 +47,7 @@ import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
 public class BasicPipesTest extends CascadingTestCase
@@ -122,16 +122,16 @@ public class BasicPipesTest extends CascadingTestCase
 
 //      System.out.println( "tuple = " + tuple );
 
-      TupleEntryCollector tupleEntryCollector = new TupleEntryCollector( Fields.size( 2 ) );
+      TupleListCollector tupleEntryCollector = new TupleListCollector( Fields.size( 2 ) );
       Tuple tuple1 = tuple.get( new int[]{1} );
-      splitter.operate( new TupleEntry( tuple1 ), tupleEntryCollector.iterator() );
+      splitter.operate( new TupleEntry( tuple1 ), tupleEntryCollector );
 
-      TupleEntry entry = tupleEntryCollector.iterator().next();
+      Tuple tupleEntry = tupleEntryCollector.iterator().next();
 
-      if( entry.get( 0 ).equals( "72.14.199.11" ) )
+      if( tupleEntry.get( 0 ).equals( "72.14.199.11" ) )
         {
         found = true;
-        assertEquals( "wrong count", "3", entry.get( 1 ) );
+        assertEquals( "wrong count", "3", tupleEntry.get( 1 ) );
         }
       }
 
@@ -258,8 +258,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( 1 ), new RegexSplitter( Fields.size( 3 ) ) );
 
-    pipe = new Each( pipe,
-      new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
+    pipe = new Each( pipe, new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 

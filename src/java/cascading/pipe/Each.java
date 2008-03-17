@@ -21,7 +21,6 @@
 
 package cascading.pipe;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
@@ -33,8 +32,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryListIterator;
-import cascading.tuple.TupleException;
 import org.apache.log4j.Logger;
 
 /**
@@ -213,25 +210,10 @@ public class Each extends Operator
   /**
    * Method operate applies the encapsulated {@link Operation} to the {@link Tuple} stream.
    *
-   * @param scope          of type Scope
-   * @param inputIterator  of type Iterator<TupleEntry>
-   * @param outputIterator of type TupleEntryListIterator
+   * @param scope         of type Scope
+   * @param input         of type TupleEntry
+   * @param flowCollector of type FlowCollector
    */
-  public void operate( Scope scope, Iterator<TupleEntry> inputIterator, TupleEntryListIterator outputIterator )
-    {
-    while( inputIterator.hasNext() )
-      {
-      try
-        {
-        operate( scope, inputIterator.next(), outputIterator );
-        }
-      catch( Throwable throwable )
-        {
-        throw new OperatorException( "operator Each failed executing operation: " + operation, throwable );
-        }
-      }
-    }
-
   public void operate( Scope scope, TupleEntry input, FlowCollector flowCollector )
     {
     if( LOG.isDebugEnabled() )
@@ -265,23 +247,10 @@ public class Each extends Operator
 
   private void applyFunction( final FlowCollector flowCollector, final TupleEntry input, TupleEntry arguments, final TupleEntry declaredEntry, final Fields outgoingSelector )
     {
-    final Fields declared = declaredEntry.getFields();
-
-    TupleCollector tupleCollector = new TupleCollector()
+    TupleCollector tupleCollector = new TupleCollector( declaredEntry.getFields() )
     {
-    public void add( TupleEntry entry )
+    protected void collect( Tuple tuple )
       {
-      add( entry.getTuple() );
-      }
-
-    public void add( Tuple tuple )
-      {
-      if( tuple.isEmpty() )
-        return;
-
-      if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
-        throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
-
       flowCollector.collect( makeResult( outgoingSelector, input, declaredEntry, tuple ) );
       }
     };

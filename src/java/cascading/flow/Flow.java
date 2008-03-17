@@ -663,7 +663,7 @@ public class Flow implements Runnable
     {
     public String getVertexName( FlowElement object )
       {
-      if( object instanceof Tap || object instanceof FlowConnector.EndPipe )
+      if( object instanceof Tap || object instanceof FlowConnector.Extent )
         return object.toString().replaceAll( "\"", "\'" );
 
       Scope scope = graph.outgoingEdgesOf( object ).iterator().next();

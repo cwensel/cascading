@@ -27,7 +27,7 @@ import java.util.Map;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleListCollector;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -70,9 +70,9 @@ public class CountTest
     Map<String, Double> context = new HashMap<String, Double>();
     count.start( context, null );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    count.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    count.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", 0.0, tuple.getDouble( 0 ), 0.0d );
     }
@@ -89,9 +89,9 @@ public class CountTest
     count.aggregate( context, new TupleEntry() );
     count.aggregate( context, new TupleEntry() );
 
-    TupleEntryCollector resultEntryCollector = new TupleEntryCollector( new Fields( "field" ) );
-    count.complete( context, resultEntryCollector.iterator() );
-    Tuple tuple = resultEntryCollector.iterator().next().getTuple();
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    count.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 2, tuple.getDouble( 0 ), 0.0d );
     }

@@ -34,7 +34,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleException;
 
 /**
  * The Every operator applies an {@link Aggregator} to every grouping. Any number of Every instances may follow other
@@ -250,24 +249,12 @@ public class Every extends Operator
 
     public void complete( final TupleEntry value, final FlowCollector outputCollector )
       {
-      final Fields declared = outgoingScope.getDeclaredFields();
       final Fields outgoingSelector = outgoingScope.getOutGroupingSelector();
 
-      TupleCollector tupleCollector = new TupleCollector()
+      TupleCollector tupleCollector = new TupleCollector( outgoingScope.getDeclaredFields() )
       {
-      public void add( TupleEntry entry )
+      protected void collect( Tuple tuple )
         {
-        add( entry.getTuple() );
-        }
-
-      public void add( Tuple tuple )
-        {
-        if( tuple.isEmpty() )
-          return;
-
-        if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
-          throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
-
         outputCollector.collect( makeResult( outgoingSelector, value, outgoingScope.getDeclaredEntry(), tuple ) );
         }
       };
