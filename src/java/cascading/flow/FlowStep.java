@@ -335,6 +335,9 @@ public class FlowStep implements Serializable
       {
       try
         {
+        if( runningJob == null )
+          return;
+
         TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
         LOG.warn( "runningJob.getTaskCompletionEvents(0).length = " + events.length );
 

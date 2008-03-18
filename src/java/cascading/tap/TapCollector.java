@@ -41,13 +41,12 @@ public class TapCollector extends TupleCollector
   private void initalize() throws IOException
     {
     tap.sinkInit( conf );
+    tap.makeDirs( conf );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
     if( outputFormat instanceof JobConfigurable )
       ( (JobConfigurable) outputFormat ).configure( conf );
-
-    tap.makeDirs( conf );
 
     filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );

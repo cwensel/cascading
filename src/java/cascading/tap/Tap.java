@@ -59,6 +59,8 @@ public abstract class Tap implements FlowElement, Serializable
   {
   /** Field scheme */
   Scheme scheme;
+  /** Field writeDirect */
+  boolean writeDirect = false;
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -90,6 +92,16 @@ public abstract class Tap implements FlowElement, Serializable
     return scheme;
     }
 
+  public boolean isWriteDirect()
+    {
+    return writeDirect;
+    }
+
+  public void setWriteDirect( boolean writeDirect )
+    {
+    this.writeDirect = writeDirect;
+    }
+
   /**
    * Method sourceInit initializes this instance as a source.
    *
@@ -98,7 +110,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public void sourceInit( JobConf conf ) throws IOException
     {
-    scheme.sourceInit( conf );
+    scheme.sourceInit( this, conf );
     }
 
   /**
@@ -109,7 +121,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public void sinkInit( JobConf conf ) throws IOException
     {
-    scheme.sinkInit( conf );
+    scheme.sinkInit( this, conf );
     }
 
   /**

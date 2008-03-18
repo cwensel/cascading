@@ -23,6 +23,7 @@ package cascading.scheme;
 
 import java.io.IOException;
 
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.Writable;
@@ -62,13 +63,13 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public void sourceInit( JobConf conf )
+  public void sourceInit( Tap tap, JobConf conf )
     {
     conf.setInputFormat( SequenceFileInputFormat.class );
     }
 
   @Override
-  public void sinkInit( JobConf conf )
+  public void sinkInit( Tap tap, JobConf conf )
     {
     conf.setOutputFormat( SequenceFileOutputFormat.class );
     }

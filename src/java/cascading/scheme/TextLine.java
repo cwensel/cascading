@@ -23,6 +23,7 @@ package cascading.scheme;
 
 import java.io.IOException;
 
+import cascading.tap.Tap;
 import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -99,7 +100,7 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sourceInit( JobConf conf )
+  public void sourceInit( Tap tap, JobConf conf )
     {
     if( hasZippedFiles( conf.getInputPaths() ) )
       conf.setInputFormat( ZipInputFormat.class );
@@ -121,9 +122,9 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sinkInit( JobConf conf )
+  public void sinkInit( Tap tap, JobConf conf ) throws IOException
     {
-    if( conf.getOutputPath().getName().endsWith( ".zip" ) )
+    if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + conf.getOutputPath() );
 
     conf.setOutputFormat( TextOutputFormat.class );

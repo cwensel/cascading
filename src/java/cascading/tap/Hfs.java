@@ -278,6 +278,16 @@ public class Hfs extends Tap
     return false;
     }
 
+  protected Path getDfsTempPath( JobConf conf )
+    {
+    return new Path( conf.get( "hadoop.tmp.dir" ) );
+    }
+
+  protected String makeTemporaryPathDir( String name )
+    {
+    return name.replaceAll( " ", "_" ).replaceAll( "/", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
+    }
+
   /**
    * Given a file-system object, it makes an array of paths
    *

@@ -33,4 +33,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 public abstract class FlowReducerStack
   {
   public abstract void reduce( WritableComparable key, Iterator values, OutputCollector output ) throws IOException;
+
+  public abstract void close();
   }

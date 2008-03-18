@@ -79,4 +79,12 @@ public class FlowReducer extends MapReduceBase implements Reducer
       throw new FlowException( "internal error during reducer execution", throwable );
       }
     }
+
+  @Override
+  public void close() throws IOException
+    {
+    super.close();
+
+    flowReducerStack.close();
+    }
   }

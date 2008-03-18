@@ -56,18 +56,8 @@ public class TempDfs extends Dfs
     if( stringPath != null )
       return;
 
-    temporaryPath = makeTemporaryPathDir();
+    temporaryPath = makeTemporaryPathDir( name );
     stringPath = new Path( getDfsTempPath( conf ), temporaryPath ).toString();
-    }
-
-  private String makeTemporaryPathDir()
-    {
-    return name.replaceAll( " ", "_" ).replaceAll( "/", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
-    }
-
-  private Path getDfsTempPath( JobConf conf )
-    {
-    return new Path( conf.get( "hadoop.tmp.dir" ) );
     }
 
   @Override

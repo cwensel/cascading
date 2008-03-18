@@ -173,16 +173,18 @@ public abstract class Scheme implements Serializable
   /**
    * Method sourceInit initializes this instance as a source.
    *
+   * @param tap
    * @param conf of type JobConf
    */
-  public abstract void sourceInit( JobConf conf );
+  public abstract void sourceInit( Tap tap, JobConf conf ) throws IOException;
 
   /**
    * Method sinkInit initializes this instance as a sink.
    *
+   * @param tap
    * @param conf of type JobConf
    */
-  public abstract void sinkInit( JobConf conf );
+  public abstract void sinkInit( Tap tap, JobConf conf ) throws IOException;
 
   /**
    * Method source takes the given Hadoop key and value and returns a new {@link Tuple} instance.

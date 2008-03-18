@@ -29,10 +29,10 @@ import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.pipe.Each;
-import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
+import cascading.tap.TapCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -58,7 +58,7 @@ public class PushFlowReducerStack extends FlowReducerStack
   private FlowReducerStackElement stackHead;
   private FlowReducerStackElement stackTail;
 
-  public PushFlowReducerStack( JobConf jobConf )
+  public PushFlowReducerStack( JobConf jobConf ) throws IOException
     {
     this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
@@ -66,7 +66,7 @@ public class PushFlowReducerStack extends FlowReducerStack
     buildStack();
     }
 
-  private void buildStack()
+  private void buildStack() throws IOException
     {
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
@@ -104,16 +104,16 @@ public class PushFlowReducerStack extends FlowReducerStack
       operator = step.getNextFlowElement( nextScope );
       }
 
-    boolean writeDirect = false;
+//    boolean writeDirect = false;
+//
+//    while( operator instanceof EndPipe )
+//      {
+//      writeDirect = true;
+//      nextScope = step.getNextScope( operator );
+//      operator = step.getNextFlowElement( nextScope );
+//      }
 
-    while( operator instanceof EndPipe )
-      {
-      writeDirect = true;
-      nextScope = step.getNextScope( operator );
-      operator = step.getNextFlowElement( nextScope );
-      }
-
-    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator, writeDirect );
+    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator, jobConf );
     stackHead = (FlowReducerStackElement) stackTail.resolveStack();
     }
 
@@ -129,6 +129,12 @@ public class PushFlowReducerStack extends FlowReducerStack
     stackHead.collect( (Tuple) key, values );
     }
 
+  public void close()
+    {
+    if( stackTail.tapCollector != null )
+      stackTail.tapCollector.close();
+    }
+
   /**
    *
    */
@@ -140,7 +146,6 @@ public class PushFlowReducerStack extends FlowReducerStack
     private Scope incomingScope; // used by everything but group
     private Set<Scope> incomingScopes; // used by group
     private FlowElement flowElement;
-    private boolean writeDirect;
     private Scope thisScope; // used by group
     private Fields outGroupingFields;
 
@@ -150,6 +155,7 @@ public class PushFlowReducerStack extends FlowReducerStack
     private OutputCollector lastOutput;
     private Fields incomingFields;
     private TupleEntry tupleEntry;
+    private TapCollector tapCollector;
 
     public FlowReducerStackElement( Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields )
       {
@@ -173,12 +179,14 @@ public class PushFlowReducerStack extends FlowReducerStack
       this.flowElement = each;
       }
 
-    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink, boolean writeDirect )
+    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink, JobConf conf ) throws IOException
       {
       this.previous = previous;
       this.incomingScope = incomingScope;
       this.flowElement = sink;
-      this.writeDirect = writeDirect;
+
+      if( sink.isWriteDirect() )
+        this.tapCollector = sink.openForWrite( conf );
       }
 
     public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Every.EveryHandler everyHandler )
@@ -350,10 +358,10 @@ public class PushFlowReducerStack extends FlowReducerStack
       {
       try
         {
-//        if(writeDirect )
-//          ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple() );
-//        else
-        ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
+        if( tapCollector != null )
+          tapCollector.add( tupleEntry );
+        else
+          ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
         }
       catch( Throwable throwable )
         {
