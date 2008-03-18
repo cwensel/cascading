@@ -32,6 +32,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -199,6 +200,8 @@ public abstract class Scheme implements Serializable
    * @return the inputFormat (type InputFormat) of this Scheme object.
    */
   public abstract InputFormat getInputFormat( JobConf conf );
+
+  public abstract OutputFormat getOutputFormat( JobConf conf );
 
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.

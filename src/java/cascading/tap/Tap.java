@@ -157,11 +157,19 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public TapIterator openForRead( JobConf conf ) throws IOException
     {
-    JobConf thisConf = new JobConf( conf );
+    return new TapIterator( this, conf );
+    }
 
-    thisConf.setInputPath( getPath() );
-
-    return new TapIterator( getScheme(), thisConf );
+  /**
+   * Method openForWrite opens the resource represented by this Tap instance.
+   *
+   * @param conf of type JobConf
+   * @return TapCollector
+   * @throws IOException when
+   */
+  public TapCollector openForWrite( JobConf conf ) throws IOException
+    {
+    return new TapCollector( this, conf );
     }
 
   /**
@@ -235,6 +243,20 @@ public abstract class Tap implements FlowElement, Serializable
     else
       return incomingScope.getOutValuesFields();
     }
+
+  /**
+   * Method getQualifiedPath returns a FileSystem fully qualified Hadoop Path.
+   *
+   * @param conf of type JobConf
+   * @return Path
+   * @throws IOException when
+   */
+  public Path getQualifiedPath( JobConf conf ) throws IOException
+    {
+    return getPath();
+    }
+
+  public abstract boolean makeDirs( JobConf conf ) throws IOException;
 
   /**
    * Method deletePath deletes the resource represented by this instance.

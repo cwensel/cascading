@@ -24,7 +24,6 @@ package cascading.tap;
 import java.io.IOException;
 import java.util.Iterator;
 
-import cascading.scheme.Scheme;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -34,14 +33,17 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.log4j.Logger;
 
 /** Class TapIterator ... */
 public class TapIterator implements Iterator<Tuple>
   {
-  /** Field input */
-  private final Scheme input;
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( TapIterator.class );
+
+  private final Tap tap;
   /** Field inputFormat */
-  private final InputFormat inputFormat;
+  private InputFormat inputFormat;
   /** Field conf */
   private final JobConf conf;
   /** Field splits */
@@ -63,21 +65,27 @@ public class TapIterator implements Iterator<Tuple>
   /**
    * Constructor TapIterator creates a new TapIterator instance.
    *
-   * @param input of type Scheme
-   * @param conf  of type JobConf
+   * @param conf of type JobConf
    * @throws IOException when
    */
-  public TapIterator( Scheme input, JobConf conf ) throws IOException
+  public TapIterator( Tap tap, JobConf conf ) throws IOException
     {
-    this.input = input;
-    this.conf = conf;
+    this.tap = tap;
+    this.conf = new JobConf( conf );
 
-    inputFormat = this.input.getInputFormat( conf );
+    initalize();
+    }
+
+  private void initalize() throws IOException
+    {
+    tap.sourceInit( conf );
+
+    inputFormat = conf.getInputFormat();
 
     if( inputFormat instanceof JobConfigurable )
       ( (JobConfigurable) inputFormat ).configure( conf );
 
-    splits = inputFormat.getSplits( this.conf, 1 );
+    splits = inputFormat.getSplits( conf, 1 );
     reader = makeReader( currentSplit );
     key = reader.createKey();
     value = reader.createValue();
@@ -85,7 +93,7 @@ public class TapIterator implements Iterator<Tuple>
 
   private RecordReader makeReader( int currentSplit ) throws IOException
     {
-    return inputFormat.getRecordReader( splits[ currentSplit ], this.conf, Reporter.NULL );
+    return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
     }
 
   /**
@@ -128,7 +136,7 @@ public class TapIterator implements Iterator<Tuple>
       {
       if( reader.next( key, value ) )
         {
-        currentTuple = input.source( key, value );
+        currentTuple = tap.getScheme().source( key, value );
         }
       else if( currentSplit < splits.length - 1 )
         {
@@ -159,7 +167,7 @@ public class TapIterator implements Iterator<Tuple>
       }
     catch( IOException exception )
       {
-      // ignore
+      LOG.warn( "exception closing iteraor", exception );
       }
     }
   }

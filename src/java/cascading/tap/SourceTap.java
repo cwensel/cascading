@@ -46,13 +46,13 @@ public abstract class SourceTap extends Tap
   @Override
   public Fields getSinkFields()
     {
-    throw new UnsupportedOperationException( "unable to sink tuple streams via a MultiTap instance" );
+    throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
     }
 
   @Override
   public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
     {
-    throw new UnsupportedOperationException( "unable to sink tuple streams via a MultiTap instance" );
+    throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
     }
 
   @Override
@@ -63,6 +63,11 @@ public abstract class SourceTap extends Tap
 
   public boolean deletePath( JobConf conf ) throws IOException
     {
-    throw new UnsupportedOperationException( "unable to delete files in via a MultiTap instance" );
+    throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
+    }
+
+  public boolean makeDirs( JobConf conf ) throws IOException
+    {
+    throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
   }

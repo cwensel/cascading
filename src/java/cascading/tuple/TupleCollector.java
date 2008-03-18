@@ -63,4 +63,10 @@ public abstract class TupleCollector
     }
 
   protected abstract void collect( Tuple tuple );
+
+  public void close()
+    {
+    // do nothing
+    }
+
   }

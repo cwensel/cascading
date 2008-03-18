@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.t.TupleCollector, complementing c.t.TupleIterator, for directly writing Tuple instances out via a c.t.Tap
+  instance.
+
   Added c.f.FlowListener so that c.f.Flow instances can fire events on starting, completed, and throwable.
 
   Changed c.t.h.S3HttpFileSystem so it can now create files remotely.

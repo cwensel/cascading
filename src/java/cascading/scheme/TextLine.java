@@ -32,6 +32,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 
@@ -115,6 +116,7 @@ public class TextLine extends Scheme
       if( isZipped != paths[ i ].getName().endsWith( ".zip" ) )
         throw new IllegalStateException( "cannot mix zipped and upzippled files" );
       }
+
     return isZipped;
     }
 
@@ -152,6 +154,11 @@ public class TextLine extends Scheme
       return new ZipInputFormat();
     else
       return new TextInputFormat();
+    }
+
+  public OutputFormat getOutputFormat( JobConf conf )
+    {
+    return new TextOutputFormat();
     }
 
   @Override

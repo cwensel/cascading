@@ -130,12 +130,7 @@ public class FlowStep implements Serializable
 
   public TapIterator openSourceForRead( JobConf conf ) throws IOException
     {
-    JobConf thisConf = new JobConf( conf );
-    Tap source = sources.keySet().iterator().next();
-
-    thisConf.setInputPath( source.getPath() );
-
-    return new TapIterator( source.getScheme(), thisConf );
+    return new TapIterator( sources.keySet().iterator().next(), conf );
     }
 
   public TapIterator openSinkForRead( JobConf conf ) throws IOException

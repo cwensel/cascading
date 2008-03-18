@@ -174,13 +174,7 @@ public class Hfs extends Tap
     return path;
     }
 
-  /**
-   * Method getQualifiedPath returns a FileSystem fully qualified Hadoop Path.
-   *
-   * @param conf of type JobConf
-   * @return Path
-   * @throws IOException when
-   */
+  @Override
   public Path getQualifiedPath( JobConf conf ) throws IOException
     {
     return getPath().makeQualified( getFileSystem( conf ) );
@@ -209,6 +203,15 @@ public class Hfs extends Tap
     conf.setOutputPath( getQualifiedPath( conf ) );
 
     super.sinkInit( conf );
+    }
+
+  @Override
+  public boolean makeDirs( JobConf conf ) throws IOException
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "making dirs: " + getQualifiedPath( conf ) );
+
+    return getFileSystem( conf ).mkdirs( getPath() );
     }
 
   @Override

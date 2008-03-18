@@ -29,6 +29,7 @@ import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.pipe.Each;
+import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
@@ -103,7 +104,16 @@ public class PushFlowReducerStack extends FlowReducerStack
       operator = step.getNextFlowElement( nextScope );
       }
 
-    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator );
+    boolean writeDirect = false;
+
+    while( operator instanceof EndPipe )
+      {
+      writeDirect = true;
+      nextScope = step.getNextScope( operator );
+      operator = step.getNextFlowElement( nextScope );
+      }
+
+    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator, writeDirect );
     stackHead = (FlowReducerStackElement) stackTail.resolveStack();
     }
 
@@ -130,6 +140,7 @@ public class PushFlowReducerStack extends FlowReducerStack
     private Scope incomingScope; // used by everything but group
     private Set<Scope> incomingScopes; // used by group
     private FlowElement flowElement;
+    private boolean writeDirect;
     private Scope thisScope; // used by group
     private Fields outGroupingFields;
 
@@ -162,11 +173,12 @@ public class PushFlowReducerStack extends FlowReducerStack
       this.flowElement = each;
       }
 
-    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink )
+    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink, boolean writeDirect )
       {
       this.previous = previous;
       this.incomingScope = incomingScope;
       this.flowElement = sink;
+      this.writeDirect = writeDirect;
       }
 
     public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Every.EveryHandler everyHandler )
@@ -338,6 +350,9 @@ public class PushFlowReducerStack extends FlowReducerStack
       {
       try
         {
+//        if(writeDirect )
+//          ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple() );
+//        else
         ( (Tap) flowElement ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
         }
       catch( Throwable throwable )

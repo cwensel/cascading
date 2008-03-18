@@ -186,6 +186,12 @@ public class CascadeConnector
       return false;
       }
 
+    /** @see Tap#makeDirs(JobConf) */
+    public boolean makeDirs( JobConf conf ) throws IOException
+      {
+      return false;
+      }
+
     /** @see Tap#deletePath(JobConf) */
     public boolean deletePath( JobConf conf ) throws IOException
       {
