@@ -8,8 +8,11 @@ import java.io.IOException;
 
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
@@ -18,7 +21,7 @@ import org.apache.log4j.Logger;
 /**
  *
  */
-public class TapCollector extends TupleCollector
+public class TapCollector extends TupleCollector implements OutputCollector
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TapCollector.class );
@@ -31,7 +34,6 @@ public class TapCollector extends TupleCollector
 
   public TapCollector( Tap tap, JobConf conf ) throws IOException
     {
-    super( tap.getScheme().getSinkFields() );
     this.tap = tap;
     this.conf = new JobConf( conf );
 
@@ -41,7 +43,7 @@ public class TapCollector extends TupleCollector
   private void initalize() throws IOException
     {
     tap.sinkInit( conf );
-    tap.makeDirs( conf );
+    tap.makeDirs( conf ); // required
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
@@ -75,5 +77,10 @@ public class TapCollector extends TupleCollector
       {
       LOG.warn( "exception closing: " + filename, exception );
       }
+    }
+
+  public void collect( WritableComparable writableComparable, Writable writable ) throws IOException
+    {
+    writer.write( writableComparable, writable );
     }
   }

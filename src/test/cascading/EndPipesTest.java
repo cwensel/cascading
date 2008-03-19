@@ -11,6 +11,7 @@ import cascading.flow.FlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
+import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -65,9 +66,9 @@ public class EndPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-//    pipe = new EndPipe( pipe );
+    pipe = new EndPipe( pipe );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "/simple", true );
+    Tap sink = new Dfs( new TextLine(), outputPath + "simple", true );
 
 //    sink.setWriteDirect( true );
 

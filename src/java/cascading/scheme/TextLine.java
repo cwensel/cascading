@@ -131,6 +131,21 @@ public class TextLine extends Scheme
     }
 
   @Override
+  public InputFormat getInputFormat( JobConf conf )
+    {
+    if( hasZippedFiles( conf.getInputPaths() ) )
+      return new ZipInputFormat();
+    else
+      return new TextInputFormat();
+    }
+
+  @Override
+  public OutputFormat getOutputFormat( JobConf conf )
+    {
+    return new TextOutputFormat();
+    }
+
+  @Override
   public Tuple source( WritableComparable key, Writable value )
     {
     Tuple tuple = new Tuple();
@@ -146,20 +161,6 @@ public class TextLine extends Scheme
       }
 
     return tuple;
-    }
-
-  @Override
-  public InputFormat getInputFormat( JobConf conf )
-    {
-    if( hasZippedFiles( conf.getInputPaths() ) )
-      return new ZipInputFormat();
-    else
-      return new TextInputFormat();
-    }
-
-  public OutputFormat getOutputFormat( JobConf conf )
-    {
-    return new TextOutputFormat();
     }
 
   @Override

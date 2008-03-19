@@ -62,6 +62,8 @@ public class FlowStep implements Serializable
   final Map<Tap, String> sources = new HashMap<Tap, String>();   // all sources and all sinks must have same scheme
   /** Field sink */
   Tap sink;
+  /** Field tempSink */
+  TempDfs tempSink; // used if we need to bypass
   /** Field group */
   Group group;
 
@@ -123,7 +125,10 @@ public class FlowStep implements Serializable
     for( Tap tap : sources.keySet() )
       tap.sourceInit( conf );
 
-    sink.sinkInit( conf );
+    if( tempSink != null )
+      tempSink.sinkInit( conf );
+    else
+      sink.sinkInit( conf );
 
     return conf;
     }
@@ -196,6 +201,18 @@ public class FlowStep implements Serializable
    */
   public void clean( JobConf jobConf )
     {
+    if( tempSink != null )
+      {
+      try
+        {
+        tempSink.deletePath( jobConf );
+        }
+      catch( IOException exception )
+        {
+        LOG.warn( "unable to remove temporary file: " + sink, exception );
+        }
+      }
+
     if( sink instanceof TempDfs )
       {
       try

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -826,6 +827,9 @@ public class FlowConnector
 
         step.sources.put( (Tap) source, sourceName );
         step.sink = sink;
+
+        if( Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
+          step.tempSink = new TempDfs( sink.getPath().toString() );
 
         FlowElement lhs = source;
 

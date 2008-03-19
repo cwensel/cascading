@@ -28,6 +28,10 @@ public abstract class TupleCollector
   {
   protected Fields declared;
 
+  protected TupleCollector()
+    {
+    }
+
   public TupleCollector( Fields declared )
     {
     if( declared == null )
