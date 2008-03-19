@@ -82,6 +82,12 @@ public class TempDfs extends Dfs
     }
 
   @Override
+  public boolean isUseTapCollector()
+    {
+    return false;
+    }
+
+  @Override
   public boolean deletePath( JobConf conf ) throws IOException
     {
     return super.deletePath( conf ) && getFileSystem( conf ).delete( new Path( getDfsTempPath( conf ), temporaryPath ) );

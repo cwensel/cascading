@@ -56,7 +56,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 9, null );
+    validateLength( flow, 8, null );
     }
 
   public void testViaTap() throws Exception
@@ -84,6 +84,6 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 9, null );
+    validateLength( flow, 8, null );
     }
   }

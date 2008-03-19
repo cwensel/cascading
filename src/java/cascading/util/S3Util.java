@@ -37,9 +37,11 @@ import org.jets3t.service.security.AWSCredentials;
 /** Class S3Util encapsulates calls to the JetS3t API. */
 public class S3Util
   {
+  public static final String MIME_DIRECTORY = "application/x-directory";
+
   public enum Request
     {
-      DETAILS, OBJECT, CREATE
+      DETAILS, OBJECT, CREATE_OBJECT, CREATE_DIR
     }
 
   /**
@@ -163,11 +165,12 @@ public class S3Util
     {
     try
       {
-      URI uri = path.toUri();
-      String keyName = uri.getPath().substring( 1 );
+      String keyName = getKeyFrom( path );
 
-      if( type == Request.CREATE )
-        return new S3Object( s3Bucket, keyName );
+      if( type == Request.CREATE_OBJECT )
+        return makeObject( s3Bucket, keyName, null, null );
+      else if( type == Request.CREATE_DIR )
+        return makeObject( s3Bucket, keyName, MIME_DIRECTORY, "directory" );
       else if( type == Request.DETAILS )
         return s3Service.getObjectDetails( s3Bucket, keyName );
       else if( type == Request.OBJECT )
@@ -188,7 +191,53 @@ public class S3Util
       }
     }
 
-  public static void putObject( RestS3Service s3Service, S3Bucket bucket, S3Object object ) throws IOException
+  private static String getKeyFrom( Path path )
+    {
+    return path.toUri().getPath().substring( 1 );
+    }
+
+  public static S3Object[] listObjects( S3Service s3Service, S3Bucket s3Bucket, Path path ) throws IOException
+    {
+    try
+      {
+      return s3Service.listObjects( s3Bucket, getKeyFrom( path ), "/" );
+      }
+    catch( S3ServiceException exception )
+      {
+      IOException ioException = new IOException( "could not get object: " + path );
+
+      ioException.initCause( exception );
+
+      throw ioException;
+      }
+    }
+
+  private static S3Object makeObject( S3Bucket s3Bucket, String keyName, String mimeType, String body )
+    {
+    S3Object object = null;
+
+    if( body != null )
+      {
+      object = new S3Object( s3Bucket, keyName, body );
+      object.setContentLength( body.getBytes().length );
+      }
+    else
+      {
+      object = new S3Object( s3Bucket, keyName );
+      }
+
+    if( mimeType != null )
+      object.setContentType( mimeType );
+
+    return object;
+    }
+
+  public static boolean isDirectory( S3Object object )
+    {
+    return object.getContentType() != null && object.getContentType().equalsIgnoreCase( MIME_DIRECTORY );
+    }
+
+  public static void putObject( S3Service s3Service, S3Bucket bucket, S3Object object ) throws IOException
     {
     try
       {

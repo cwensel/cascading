@@ -39,6 +39,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
+import org.apache.log4j.Logger;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
@@ -54,6 +55,9 @@ import org.jets3t.service.model.S3Object;
  */
 public class S3HttpFileSystem extends StreamedFileSystem
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( S3HttpFileSystem.class );
+
   public static final String S3TP_SCHEME = "s3tp";
 
   private URI uri;
@@ -85,6 +89,9 @@ public class S3HttpFileSystem extends StreamedFileSystem
     if( !overwrite && exists( path ) )
       throw new IOException( "file already exists: " + path );
 
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "creating file: " + path );
+
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     final DigestOutputStream digestStream = new DigestOutputStream( stream, getMD5Digest() );
 
@@ -95,7 +102,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
       {
       super.close();
 
-      S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.CREATE );
+      S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.CREATE_OBJECT );
 
       object.setContentType( "text/plain" );
       object.setMd5Hash( digestStream.getMessageDigest().digest() );
@@ -105,6 +112,9 @@ public class S3HttpFileSystem extends StreamedFileSystem
       object.setDataInputStream( new ByteArrayInputStream( bytes ) );
       object.setContentLength( bytes.length );
 
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "putting file: " + path );
+
       S3Util.putObject( s3Service, s3Bucket, object );
       }
     };
@@ -113,6 +123,9 @@ public class S3HttpFileSystem extends StreamedFileSystem
   @Override
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "opening file: " + path );
+
     S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.OBJECT );
     FSDigestInputStream inputStream = new FSDigestInputStream( S3Util.getObjectInputStream( object ), getMD5SumFor( getConf(), path ) );
 
@@ -121,15 +134,54 @@ public class S3HttpFileSystem extends StreamedFileSystem
     }
 
   @Override
+  public boolean mkdirs( Path path, FsPermission fsPermission ) throws IOException
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "making dirs for: " + path );
+
+    S3Object directory = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS );
+
+    if( directory != null && S3Util.isDirectory( directory ) )
+      return true;
+
+    directory = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.CREATE_DIR );
+
+    S3Util.putObject( s3Service, s3Bucket, directory );
+
+    return true;
+    }
+
+  @Override
   public boolean delete( Path path ) throws IOException
     {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "deleting file: " + path );
+
     return S3Util.deleteObject( s3Service, s3Bucket, path );
     }
 
   @Override
   public boolean exists( Path path ) throws IOException
     {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "testing file: " + path );
+
     return S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.DETAILS ) != null;
+    }
+
+  @Override
+  public FileStatus[] listStatus( Path path ) throws IOException
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "listing path: " + path );
+
+    S3Object[] objects = S3Util.listObjects( s3Service, s3Bucket, path );
+    FileStatus[] status = new FileStatus[objects.length];
+
+    for( int i = 0; i < objects.length; i++ )
+      status[ i ] = makeStatus( objects[ i ] );
+
+    return status;
     }
 
   @Override
@@ -143,8 +195,12 @@ public class S3HttpFileSystem extends StreamedFileSystem
     if( object == null )
       throw new FileNotFoundException( "file does not exist: " + path );
 
-    return new StreamedFileStatus( object.getContentLength(), false, 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(), path,
-      object.getMd5HashAsHex() );
+    return makeStatus( object );
+    }
+
+  private StreamedFileStatus makeStatus( S3Object object )
+    {
+    return new StreamedFileStatus( object.getContentLength(), S3Util.isDirectory( object ), 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(), new Path( uri.toString() + "/", object.getKey() ), object.getMd5HashAsHex() );
     }
 
   private MessageDigest getMD5Digest() throws IOException

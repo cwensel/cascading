@@ -102,7 +102,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 9, null );
+    validateLength( flow, 8, null );
     }
 
   public void testSimpleChain() throws Exception
@@ -131,7 +131,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 9, null );
+    validateLength( flow, 8, null );
     }
 
   public void testCoGroup() throws Exception
@@ -431,7 +431,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 2, null );
+    validateLength( flow, 3, null );
     }
 
   public void testFilterComplex() throws Exception

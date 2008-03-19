@@ -174,7 +174,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 9 );
+    validateLength( flow, 8 );
     }
 
   public void testSimpleRelative() throws Exception
@@ -203,7 +203,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 9 );
+    validateLength( flow, 8 );
     }
 
   public void testCoGroup() throws Exception
@@ -308,7 +308,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 2 );
+    validateLength( flow, 3 );
     }
 
   public void testSimpleChain() throws Exception
@@ -338,6 +338,6 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 9 );
+    validateLength( flow, 8 );
     }
   }
