@@ -154,6 +154,12 @@ public class Hfs extends Tap
       }
     }
 
+  @Override
+  public boolean isUseTapCollector()
+    {
+    return super.isUseTapCollector() || stringPath != null && stringPath.matches( "(^https?://)|(^s3tp://)" );
+    }
+
   protected FileSystem getFileSystem( JobConf jobConf ) throws IOException
     {
     return FileSystem.get( getURIScheme( jobConf ), jobConf );

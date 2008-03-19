@@ -60,6 +60,9 @@ public abstract class Tap implements FlowElement, Serializable
   /** Field scheme */
   Scheme scheme;
 
+  /** Field writeDirect */
+  boolean useTapCollector = false;
+
   /**
    * Convenience function to make an array of Tap instances.
    *
@@ -88,6 +91,26 @@ public abstract class Tap implements FlowElement, Serializable
   public Scheme getScheme()
     {
     return scheme;
+    }
+
+  /**
+   * Method isUseTapCollector returns true if this instances {@link TapCollector} should be used to sink values.
+   *
+   * @return the writeDirect (type boolean) of this Tap object.
+   */
+  public boolean isUseTapCollector()
+    {
+    return useTapCollector;
+    }
+
+  /**
+   * Method setUseTapCollector should be set to true if this instances {@link TapCollector} should be used to sink values.
+   *
+   * @param useTapCollector the writeDirect of this Tap object.
+   */
+  public void setUseTapCollector( boolean useTapCollector )
+    {
+    this.useTapCollector = useTapCollector;
     }
 
   /**

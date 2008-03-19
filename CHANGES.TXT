@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Added support for bypassing Hadoop OutputCollector via Tap.setUseTapCollector() method. Setting to true will force
+  Cascading to use the c.t.TapCollector instead. This bypasses bugs in Hadoop with custom FileSystem types. This will
+  always be true for http(s) and s3tp filesystems when using a c.t.Hfs Tap type (atleast until HADOOP-3021 is resolved).
+
   Added c.t.TupleCollector, complementing c.t.TupleIterator, for directly writing Tuple instances out via a c.t.Tap
   instance.
 

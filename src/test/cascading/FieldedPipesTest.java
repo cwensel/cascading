@@ -56,7 +56,7 @@ import cascading.tuple.Fields;
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class FieldedPipesTest extends ClusterTestCase
   {
-  String inputFileApache = "build/test/data/apache.200.txt";
+  String inputFileApache = "build/test/data/apache.10.txt";
   String inputFileIps = "build/test/data/ips.20.txt";
   String inputFileNums = "build/test/data/nums.20.txt";
   String inputFileCritics = "build/test/data/critics.txt";
@@ -102,7 +102,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 131, null );
+    validateLength( flow, 9, null );
     }
 
   public void testSimpleChain() throws Exception
@@ -131,7 +131,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 131, null );
+    validateLength( flow, 9, null );
     }
 
   public void testCoGroup() throws Exception
@@ -431,7 +431,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 12, null );
+    validateLength( flow, 2, null );
     }
 
   public void testFilterComplex() throws Exception
@@ -523,7 +523,7 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
 
     Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
-    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
 
     Map sources = new HashMap();
     sources.put( "split", source );
@@ -567,7 +567,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "ip" ), new RegexFilter( ".*46.*" ) );
 
-    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "ip" ), new RegexFilter( ".*192.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "ip" ), new RegexFilter( ".*102.*" ) );
 
     Map sources = Cascades.tapsMap( "split", source );
     Map sinks = Cascades.tapsMap( Pipe.pipes( left, right ), Tap.taps( sink1, sink2 ) );

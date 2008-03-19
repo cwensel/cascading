@@ -52,7 +52,7 @@ import cascading.tuple.TupleListCollector;
 /** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
 public class BasicPipesTest extends CascadingTestCase
   {
-  String inputFileApache = "build/test/data/apache.200.txt";
+  String inputFileApache = "build/test/data/apache.10.txt";
   String inputFileIps = "build/test/data/ips.20.txt";
   String inputFileNums = "build/test/data/nums.20.txt";
 
@@ -86,7 +86,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 200 );
+    validateLength( flow, 10 );
     }
 
   /**
@@ -128,10 +128,10 @@ public class BasicPipesTest extends CascadingTestCase
 
       Tuple tupleEntry = tupleEntryCollector.iterator().next();
 
-      if( tupleEntry.get( 0 ).equals( "72.14.199.11" ) )
+      if( tupleEntry.get( 0 ).equals( "63.123.238.8" ) )
         {
         found = true;
-        assertEquals( "wrong count", "3", tupleEntry.get( 1 ) );
+        assertEquals( "wrong count", "2", tupleEntry.get( 1 ) );
         }
       }
 
@@ -174,7 +174,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 131 );
+    validateLength( flow, 9 );
     }
 
   public void testSimpleRelative() throws Exception
@@ -203,7 +203,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 131 );
+    validateLength( flow, 9 );
     }
 
   public void testCoGroup() throws Exception
@@ -308,7 +308,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 12 );
+    validateLength( flow, 2 );
     }
 
   public void testSimpleChain() throws Exception
@@ -338,6 +338,6 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 131 );
+    validateLength( flow, 9 );
     }
   }

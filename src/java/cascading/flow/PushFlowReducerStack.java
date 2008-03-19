@@ -105,16 +105,18 @@ public class PushFlowReducerStack extends FlowReducerStack
       operator = step.getNextFlowElement( nextScope );
       }
 
-    boolean writeDirect = true;
+    boolean useTapCollector = false;
 
     while( operator instanceof EndPipe )
       {
-      writeDirect = false;
+      useTapCollector = true;
       nextScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( nextScope );
       }
 
-    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator, writeDirect, jobConf );
+    useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
+
+    stackTail = new FlowReducerStackElement( stackTail, nextScope, (Tap) operator, useTapCollector, jobConf );
     stackHead = (FlowReducerStackElement) stackTail.resolveStack();
     }
 
@@ -180,13 +182,13 @@ public class PushFlowReducerStack extends FlowReducerStack
       this.flowElement = each;
       }
 
-    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink, boolean writeDirect, JobConf conf ) throws IOException
+    public FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf conf ) throws IOException
       {
       this.previous = previous;
       this.incomingScope = incomingScope;
       this.flowElement = sink;
 
-      if( !writeDirect )
+      if( useTapCollector )
         this.tapCollector = sink.openForWrite( conf );
       }
 

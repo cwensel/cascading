@@ -828,7 +828,7 @@ public class FlowConnector
         step.sources.put( (Tap) source, sourceName );
         step.sink = sink;
 
-        if( Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
+        if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
           step.tempSink = new TempDfs( sink.getPath().toString() );
 
         FlowElement lhs = source;
