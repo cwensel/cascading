@@ -191,7 +191,7 @@ public class S3Util
       }
     }
 
-  private static String getKeyFrom( Path path )
+  public static String getKeyFrom( Path path )
     {
     return path.toUri().getPath().substring( 1 );
     }

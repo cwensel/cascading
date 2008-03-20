@@ -176,6 +176,15 @@ public class S3HttpFileSystem extends StreamedFileSystem
       LOG.debug( "listing path: " + path );
 
     S3Object[] objects = S3Util.listObjects( s3Service, s3Bucket, path );
+
+    // if an object is an exact match, and is a file, just return the file status
+    String key = S3Util.getKeyFrom( path );
+    for( S3Object object : objects )
+      {
+      if( object.getKey().equals( key ) && !S3Util.isDirectory( object ) )
+        return new FileStatus[]{makeStatus( object )};
+      }
+
     FileStatus[] status = new FileStatus[objects.length];
 
     for( int i = 0; i < objects.length; i++ )
@@ -200,7 +209,8 @@ public class S3HttpFileSystem extends StreamedFileSystem
 
   private StreamedFileStatus makeStatus( S3Object object )
     {
-    return new StreamedFileStatus( object.getContentLength(), S3Util.isDirectory( object ), 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(), new Path( uri.toString() + "/", object.getKey() ), object.getMd5HashAsHex() );
+    return new StreamedFileStatus( object.getContentLength(), S3Util.isDirectory( object ), 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(),
+      new Path( uri.toString() + "/", object.getKey() ), object.getMd5HashAsHex() );
     }
 
   private MessageDigest getMD5Digest() throws IOException
