@@ -144,6 +144,40 @@ public class Util
       }
     }
 
+  public static String sanitizeUrl( String url )
+    {
+    if( url == null )
+      return null;
+
+    return url.replaceAll( "(?<=//).*:.*@", "" ) + "\"]";
+    }
+
+  public static String normalizeUrl( String url )
+    {
+    if( url == null )
+      return null;
+
+    return url.replaceAll( "([^:])/{2,}", "$1/" );
+    }
+
+  public static String toNull( Object object )
+    {
+    if( object == null )
+      return "";
+
+    return object.toString();
+    }
+
+  public static String truncate( String string, int maxSize )
+    {
+    string = toNull( string );
+
+    if( string.length() <= maxSize )
+      return string;
+
+    return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
+    }
+
   public static String printGraph( SimpleDirectedGraph graph )
     {
     StringWriter writer = new StringWriter();
@@ -194,14 +228,6 @@ public class Util
     } );
 
     dot.export( writer, graph );
-    }
-
-  public static String toNull( Object object )
-    {
-    if( object == null )
-      return "";
-
-    return object.toString();
     }
 
   public static void printMatrix( PrintStream out, SimpleDirectedGraph<FlowElement, Scope> graph )

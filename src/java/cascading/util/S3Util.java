@@ -170,7 +170,7 @@ public class S3Util
       if( type == Request.CREATE_OBJECT )
         return makeObject( s3Bucket, keyName, null, null );
       else if( type == Request.CREATE_DIR )
-        return makeObject( s3Bucket, keyName, MIME_DIRECTORY, "directory" );
+        return makeObject( s3Bucket, keyName, MIME_DIRECTORY, null );
       else if( type == Request.DETAILS )
         return s3Service.getObjectDetails( s3Bucket, keyName );
       else if( type == Request.OBJECT )

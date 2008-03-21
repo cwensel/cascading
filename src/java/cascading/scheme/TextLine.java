@@ -47,10 +47,18 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  */
 public class TextLine extends Scheme
   {
+  enum Compress
+    {
+      DEFAULT, ENABLE, DISABLE
+    }
+
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
   /** Field DEFAULT_SOURCE_FIELDS */
   public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "offset", "line" );
+
+  /** Field sinkCompression */
+  Compress sinkCompression = Compress.DISABLE;
 
   /**
    * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
@@ -99,6 +107,26 @@ public class TextLine extends Scheme
       throw new IllegalArgumentException( "this scheme requires only two fields, given [" + sourceFields + "]" );
     }
 
+  /**
+   * Method getSinkCompression returns the sinkCompression of this TextLine object.
+   *
+   * @return the sinkCompression (type Compress) of this TextLine object.
+   */
+  public Compress getSinkCompression()
+    {
+    return sinkCompression;
+    }
+
+  /**
+   * Method setSinkCompression sets the sinkCompression of this TextLine object.
+   *
+   * @param sinkCompression the sinkCompression of this TextLine object.
+   */
+  public void setSinkCompression( Compress sinkCompression )
+    {
+    this.sinkCompression = sinkCompression;
+    }
+
   @Override
   public void sourceInit( Tap tap, JobConf conf )
     {
@@ -126,6 +154,11 @@ public class TextLine extends Scheme
     {
     if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + conf.getOutputPath() );
+
+    if( getSinkCompression() == Compress.DISABLE )
+      conf.setBoolean( "mapred.output.compress", false );
+    else if( getSinkCompression() == Compress.ENABLE )
+      conf.setBoolean( "mapred.output.compress", true );
 
     conf.setOutputFormat( TextOutputFormat.class );
     }

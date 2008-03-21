@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
+import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,7 +58,7 @@ public class Hfs extends Tap
   /** Field path */
   transient Path path;
   /** Field paths */
-  private transient Path[] paths;
+  private transient FileStatus[] statuses;
 
   protected Hfs( Scheme scheme )
     {
@@ -73,7 +74,7 @@ public class Hfs extends Tap
   public Hfs( Fields sourceFields, String stringPath )
     {
     super( new SequenceFile( sourceFields ) );
-    this.stringPath = stringPath;
+    this.stringPath = Util.normalizeUrl( stringPath );
     }
 
   /**
@@ -86,7 +87,7 @@ public class Hfs extends Tap
   public Hfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
     {
     super( new SequenceFile( sourceFields ) );
-    this.stringPath = stringPath;
+    this.stringPath = Util.normalizeUrl( stringPath );
     this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
@@ -99,7 +100,7 @@ public class Hfs extends Tap
   public Hfs( Scheme scheme, String stringPath )
     {
     super( scheme );
-    this.stringPath = stringPath;
+    this.stringPath = Util.normalizeUrl( stringPath );
     }
 
   /**
@@ -112,7 +113,7 @@ public class Hfs extends Tap
   public Hfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
     super( scheme );
-    this.stringPath = stringPath;
+    this.stringPath = Util.normalizeUrl( stringPath );
     this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
@@ -243,12 +244,16 @@ public class Hfs extends Tap
     if( !fileStatus.isDir() )
       return fileStatus.getModificationTime();
 
-    makePaths( conf );
+    makeStatuses( conf );
 
     long date = 0;
 
-    for( Path path1 : paths )
-      date = Math.max( date, getFileSystem( conf ).getFileStatus( path1 ).getModificationTime() );
+    // filter out directories as we don't recurse into sub dirs
+    for( FileStatus status : statuses )
+      {
+      if( !status.isDir() )
+        date = Math.max( date, status.getModificationTime() );
+      }
 
     return date;
     }
@@ -268,11 +273,11 @@ public class Hfs extends Tap
       if( qualified.equals( currentFilePath ) )
         return true;
 
-      makePaths( conf );
+      makeStatuses( conf );
 
-      for( Path path1 : paths )
+      for( FileStatus status : statuses )
         {
-        if( path1.equals( currentFilePath ) )
+        if( status.getPath().equals( currentFilePath ) )
           return true;
         }
       }
@@ -300,17 +305,12 @@ public class Hfs extends Tap
    * @param conf of type JobConf
    * @throws IOException on failure
    */
-  private void makePaths( JobConf conf ) throws IOException
+  private void makeStatuses( JobConf conf ) throws IOException
     {
-    if( paths != null )
+    if( statuses != null )
       return;
 
-    FileSystem fileSystem = getFileSystem( conf );
-
-    paths = fileSystem.listPaths( getPath() );
-
-    for( int i = 0; i < paths.length; i++ )
-      paths[ i ] = paths[ i ].makeQualified( fileSystem );
+    statuses = getFileSystem( conf ).listStatus( getPath() );
     }
 
   /** @see Object#toString() */
@@ -318,7 +318,7 @@ public class Hfs extends Tap
   public String toString()
     {
     if( stringPath != null )
-      return getClass().getSimpleName() + "[\"" + stringPath.replaceAll( "(?<=//).*:.*@", "" ) + "\"]"; // sanitize
+      return getClass().getSimpleName() + "[\"" + Util.sanitizeUrl( stringPath ); // sanitize
     else
       return getClass().getSimpleName() + "[not initialized]";
     }

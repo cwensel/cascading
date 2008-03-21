@@ -258,18 +258,18 @@ public class Flow implements Runnable
         if( !sink.pathExists( confCopy ) )
           sinkMod = 0L;
         else
-          sinkMod = Math.min( sinkMod, sink.getPathModified( confCopy ) );
+          sinkMod = Math.min( sinkMod, sink.getPathModified( confCopy ) ); // return youngest mod date
         }
       }
 
     if( LOG.isInfoEnabled() )
       {
       if( sinkMod == -1L )
-        LOG.info( "atleast one sink is marked for delete" );
+        logInfo( "atleast one sink is marked for delete" );
       if( sinkMod == 0L )
-        LOG.info( "atleast one sink does not exist" );
+        logInfo( "atleast one sink does not exist" );
       else
-        LOG.info( "sink oldest modified date: " + new Date( sinkMod ) );
+        logInfo( "sink oldest modified date: " + new Date( sinkMod ) );
       }
 
     long sourceMod = 0;
@@ -292,7 +292,7 @@ public class Flow implements Runnable
     finally
       {
       if( LOG.isInfoEnabled() )
-        LOG.info( "source modification date at: " + new Date( sourceMod ) );
+        logInfo( "source modification date at: " + new Date( sourceMod ) ); // not oldest, we didnt check them all
       }
     }
 
@@ -468,7 +468,7 @@ public class Flow implements Runnable
       if( hasListeners() )
         {
         if( LOG.isDebugEnabled() )
-          LOG.debug( "firing onStarting event: " + getListeners().size() );
+          logDebug( "firing onStarting event: " + getListeners().size() );
 
         for( FlowListener flowListener : getListeners() )
           flowListener.onStarting( this );
@@ -476,12 +476,12 @@ public class Flow implements Runnable
 
       if( LOG.isInfoEnabled() )
         {
-        LOG.info( "starting flow: " + Util.toNull( getName() ) );
+        logInfo( "starting" );
 
         for( Tap source : getSources().values() )
-          LOG.info( " source: " + source );
+          logInfo( " source: " + source );
         for( Tap sink : getSinks().values() )
-          LOG.info( " sink: " + sink );
+          logInfo( " sink: " + sink );
         }
 
       // keep topo order
@@ -509,9 +509,9 @@ public class Flow implements Runnable
 
       if( LOG.isInfoEnabled() )
         {
-        LOG.info( " parallel execution is enabled: " + !jobsAreLocal() );
-        LOG.info( " starting jobs: " + jobsMap.size() );
-        LOG.info( " allocating threads: " + numThreads );
+        logInfo( " parallel execution is enabled: " + !jobsAreLocal() );
+        logInfo( " starting jobs: " + jobsMap.size() );
+        logInfo( " allocating threads: " + numThreads );
         }
 
       ExecutorService executor = Executors.newFixedThreadPool( numThreads );
@@ -528,7 +528,7 @@ public class Flow implements Runnable
           if( stop && hasListeners() )
             {
             if( LOG.isDebugEnabled() )
-              LOG.debug( "firing onStopping event: " + getListeners().size() );
+              logDebug( "firing onStopping event: " + getListeners().size() );
 
             for( FlowListener flowListener : getListeners() )
               flowListener.onStopping( this );
@@ -562,7 +562,7 @@ public class Flow implements Runnable
         if( throwable != null )
           {
           if( LOG.isDebugEnabled() )
-            LOG.debug( "firing onThrowable event: " + getListeners().size() );
+            logDebug( "firing onThrowable event: " + getListeners().size() );
 
           boolean isHandled = false;
 
@@ -574,7 +574,7 @@ public class Flow implements Runnable
           }
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "firing onCompleted event: " + getListeners().size() );
+          logDebug( "firing onCompleted event: " + getListeners().size() );
 
         for( FlowListener flowListener : getListeners() )
           flowListener.onCompleted( this );
@@ -600,6 +600,16 @@ public class Flow implements Runnable
       buffer.append( step );
 
     return buffer.toString();
+    }
+
+  private void logInfo( String message )
+    {
+    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    }
+
+  private void logDebug( String message )
+    {
+    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
     }
 
   /**

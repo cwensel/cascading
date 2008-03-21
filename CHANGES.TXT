@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Updated c.f.Flow and c.c.Cascade log messages to be easier to follow when executing many flow instances simultaneously.
+
+  Added compression flag to c.s.TextLine. Can now toggle compression (Hadoop style compression) per Tap instance. This prevents
+  clusters with complression enabled by default to export text files with a .deflate extension.
+
   Added support for bypassing Hadoop OutputCollector via Tap.setUseTapCollector() method. Setting to true will force
   Cascading to use the c.t.TapCollector instead. This bypasses bugs in Hadoop with custom FileSystem types. This will
   always be true for http(s) and s3tp filesystems when using a c.t.Hfs Tap type (atleast until HADOOP-3021 is resolved).

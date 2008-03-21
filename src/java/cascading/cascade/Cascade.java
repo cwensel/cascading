@@ -133,7 +133,7 @@ public class Cascade implements Runnable
   public void run()
     {
     if( LOG.isInfoEnabled() )
-      LOG.info( "starting cascade: " + Util.toNull( getName() ) );
+      logInfo( "starting" );
 
     try
       {
@@ -162,9 +162,9 @@ public class Cascade implements Runnable
 
       if( LOG.isInfoEnabled() )
         {
-        LOG.info( " parallel execution is enabled: " + !flow.jobsAreLocal() );
-        LOG.info( " starting flows: " + jobsMap.size() );
-        LOG.info( " allocating threads: " + numThreads );
+        logInfo( " parallel execution is enabled: " + !flow.jobsAreLocal() );
+        logInfo( " starting flows: " + jobsMap.size() );
+        logInfo( " allocating threads: " + numThreads );
         }
 
       ExecutorService executor = Executors.newFixedThreadPool( numThreads );
@@ -178,16 +178,16 @@ public class Cascade implements Runnable
 
         if( throwable != null )
           {
-          LOG.warn( "stopping flows" );
+          logWarn( "stopping flows" );
 
           for( Callable<Throwable> callable : jobsMap.values() )
             ( (CascadeJob) callable ).stop();
 
-          LOG.warn( "shutting down flow executor" );
+          logWarn( "shutting down flow executor" );
 
           executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
 
-          LOG.warn( "shutdown complete" );
+          logWarn( "shutdown complete" );
           break;
           }
         }
@@ -204,8 +204,23 @@ public class Cascade implements Runnable
     return getName();
     }
 
+  private void logInfo( String message )
+    {
+    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    }
+
+  private void logWarn( String message )
+    {
+    logWarn( message, null );
+    }
+
+  private void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    }
+
   /** Class CascadeJob manages Flow execution in the current Cascade instance. */
-  protected static class CascadeJob implements Callable<Throwable>
+  protected class CascadeJob implements Callable<Throwable>
     {
     /** Field flow */
     Flow flow;
@@ -244,20 +259,25 @@ public class Cascade implements Runnable
         try
           {
           if( LOG.isInfoEnabled() )
-            LOG.info( "starting flow: " + flow.getName() );
+            logInfo( "starting flow: " + flow.getName() );
 
           if( !flow.areSinksStale() )
+            {
+            if( LOG.isInfoEnabled() )
+              logInfo( "skipping flow, sinks are uptodate: " + flow.getName() );
+
             return null;
+            }
 
           flow.deleteSinks();
           flow.complete();
 
           if( LOG.isInfoEnabled() )
-            LOG.info( "completed flow: " + flow.getName() );
+            logInfo( "completed flow: " + flow.getName() );
           }
         catch( Throwable exception )
           {
-          LOG.info( "flow failed: " + flow.getName(), exception );
+          logWarn( "flow failed: " + flow.getName(), exception );
           failed = true;
           return new CascadeException( "flow failed: " + flow.getName(), exception );
           }
@@ -283,7 +303,7 @@ public class Cascade implements Runnable
     public void stop()
       {
       if( LOG.isInfoEnabled() )
-        LOG.info( "stopping flow: " + flow.getName() );
+        logInfo( "stopping flow: " + flow.getName() );
 
       stop = true;
 
@@ -301,7 +321,7 @@ public class Cascade implements Runnable
         }
       catch( InterruptedException exception )
         {
-        LOG.warn( "latch interrupted", exception );
+        logWarn( "latch interrupted", exception );
         }
 
       return false;
