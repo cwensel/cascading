@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
+import cascading.stats.FlowStats;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.hadoop.HttpFileSystem;
@@ -83,6 +84,8 @@ public class Flow implements Runnable
   private JobConf jobConf;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
+  /** Field flowStats */
+  private FlowStats flowStats = new FlowStats(); // don't use a listener to set values
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -146,6 +149,16 @@ public class Flow implements Runnable
       setJobConf( new JobConf() );
 
     return jobConf;
+    }
+
+  /**
+   * Method getFlowStats returns the flowStats of this Flow object.
+   *
+   * @return the flowStats (type FlowStats) of this Flow object.
+   */
+  public FlowStats getFlowStats()
+    {
+    return flowStats;
     }
 
   List<SafeFlowListener> getListeners()
@@ -332,7 +345,7 @@ public class Flow implements Runnable
    * Method start begins the execution of this Flow instance. It will return immediately. Use the method {@link #complete()}
    * to block until this Flow completes.
    */
-  public void start()
+  public synchronized void start()
     {
     if( thread != null )
       return;
@@ -465,6 +478,8 @@ public class Flow implements Runnable
     {
     try
       {
+      flowStats.markRunning();
+
       if( hasListeners() )
         {
         if( LOG.isDebugEnabled() )
@@ -514,6 +529,8 @@ public class Flow implements Runnable
         logInfo( " allocating threads: " + numThreads );
         }
 
+      flowStats.setStepsCount( jobsMap.size() );
+
       ExecutorService executor = Executors.newFixedThreadPool( numThreads );
       List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
 
@@ -539,6 +556,9 @@ public class Flow implements Runnable
           for( Callable<Throwable> callable : jobsMap.values() )
             ( (FlowStep.FlowStepJob) callable ).stop();
 
+          if( stop )
+            flowStats.markStopped();
+
           LOG.warn( "shutting down job executor" );
 
           executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
@@ -561,6 +581,8 @@ public class Flow implements Runnable
         {
         if( throwable != null )
           {
+          flowStats.markFailed( throwable );
+
           if( LOG.isDebugEnabled() )
             logDebug( "firing onThrowable event: " + getListeners().size() );
 
@@ -572,6 +594,9 @@ public class Flow implements Runnable
           if( isHandled )
             throwable = null;
           }
+
+        if( !flowStats.isFinished() )
+          flowStats.markCompleted();
 
         if( LOG.isDebugEnabled() )
           logDebug( "firing onCompleted event: " + getListeners().size() );

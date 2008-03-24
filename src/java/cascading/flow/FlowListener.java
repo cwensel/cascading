@@ -21,16 +21,39 @@
 
 package cascading.flow;
 
-/**
- *
- */
+/** Interface FlowListener provides hooks for receiving events on various stages of a {@link Flow} execution. */
 public interface FlowListener
   {
+  /**
+   * The onStarting event is fired when a Flow instance receives the start() message.
+   *
+   * @param flow
+   */
   void onStarting( Flow flow );
 
+  /**
+   * The onStopping event is fired when a Flow instance receives the stop() message.
+   *
+   * @param flow
+   */
   void onStopping( Flow flow );
 
+  /**
+   * The onCompleted event is fired when a Flow instance has completed all work whether if was success or failed. If
+   * there was a thrown exception, onThrowable will be fired before this event.
+   *
+   * @param flow
+   */
   void onCompleted( Flow flow );
 
+  /**
+   * The onThrowable event is fired if any child {@link FlowStep} throws a Throwable type. This throwable is passed
+   * as an argument to the event. This event method should return true if the given throwable was handled and should
+   * not be rethrown from the {@link Flow#complete()} method.
+   *
+   * @param flow
+   * @param throwable
+   * @return returns true if this listener has handled the given throwable
+   */
   boolean onThrowable( Flow flow, Throwable throwable );
   }

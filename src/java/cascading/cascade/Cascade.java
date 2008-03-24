@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import cascading.CascadingException;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
+import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.log4j.Logger;
@@ -60,6 +61,8 @@ public class Cascade implements Runnable
   private String name;
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
+  /** Field cascadeStats */
+  private CascadeStats cascadeStats = new CascadeStats();
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -79,6 +82,16 @@ public class Cascade implements Runnable
   public String getName()
     {
     return name;
+    }
+
+  /**
+   * Method getCascadeStats returns the cascadeStats of this Cascade object.
+   *
+   * @return the cascadeStats (type CascadeStats) of this Cascade object.
+   */
+  public CascadeStats getCascadeStats()
+    {
+    return cascadeStats;
     }
 
   /**
@@ -137,6 +150,8 @@ public class Cascade implements Runnable
 
     try
       {
+      cascadeStats.markRunning();
+
       // keep topo order
       Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
       TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
@@ -145,6 +160,9 @@ public class Cascade implements Runnable
       while( topoIterator.hasNext() )
         {
         flow = topoIterator.next();
+
+        cascadeStats.addFlowStats( flow.getFlowStats() );
+
         CascadeJob job = new CascadeJob( flow );
 
         jobsMap.put( flow.getName(), job );
@@ -178,6 +196,8 @@ public class Cascade implements Runnable
 
         if( throwable != null )
           {
+          cascadeStats.markFailed( throwable );
+
           logWarn( "stopping flows" );
 
           for( Callable<Throwable> callable : jobsMap.values() )
@@ -195,6 +215,11 @@ public class Cascade implements Runnable
     catch( Throwable throwable )
       {
       this.throwable = throwable;
+      }
+    finally
+      {
+      if( !cascadeStats.isFinished() )
+        cascadeStats.markCompleted();
       }
     }
 

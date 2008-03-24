@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added c.stats package to allow for collecting statics of Cascades, Flows, and FlowSteps.
+
   Updated c.f.Flow and c.c.Cascade log messages to be easier to follow when executing many flow instances simultaneously.
 
   Added compression flag to c.s.TextLine. Can now toggle compression (Hadoop style compression) per Tap instance. This prevents
