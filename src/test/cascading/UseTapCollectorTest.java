@@ -16,7 +16,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
@@ -38,7 +38,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -48,7 +48,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     pipe = new EndPipe( pipe );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "endpipe", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "endpipe", true );
 
 //    sink.setUseTapCollector( true );
 
@@ -66,7 +66,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -76,7 +76,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
 //    pipe = new EndPipe( pipe );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "tap", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "tap", true );
 
     sink.setUseTapCollector( true );
 

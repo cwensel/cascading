@@ -33,7 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
-import cascading.tap.TempDfs;
+import cascading.tap.TempHfs;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
@@ -63,7 +63,7 @@ public class FlowStep implements Serializable
   /** Field sink */
   Tap sink;
   /** Field tempSink */
-  TempDfs tempSink; // used if we need to bypass
+  TempHfs tempSink; // used if we need to bypass
   /** Field group */
   Group group;
 
@@ -213,7 +213,7 @@ public class FlowStep implements Serializable
         }
       }
 
-    if( sink instanceof TempDfs )
+    if( sink instanceof TempHfs )
       {
       try
         {

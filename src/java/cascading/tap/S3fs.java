@@ -26,7 +26,6 @@ import java.net.URI;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -43,9 +42,6 @@ public class S3fs extends Hfs
   /** Field S3FS_BUCKET is the property key for the S3 bucket */
   public static final String S3FS_BUCKET = "s3fs.bucket";
 
-  /** Field uri */
-  private URI uri;
-
   /**
    * Constructor S3fs creates a new S3fs instance.
    *
@@ -59,14 +55,14 @@ public class S3fs extends Hfs
     if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
       throw new IllegalArgumentException( "uri must use the s3 scheme" );
 
-    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
     }
 
   /**
    * Constructor S3fs creates a new S3fs instance.
    *
-   * @param sourceFields of type Fields
-   * @param uri of type URI
+   * @param sourceFields     of type Fields
+   * @param uri              of type URI
    * @param deleteOnSinkInit of type boolean
    */
   public S3fs( Fields sourceFields, URI uri, boolean deleteOnSinkInit )
@@ -76,7 +72,7 @@ public class S3fs extends Hfs
     if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
       throw new IllegalArgumentException( "uri must use the s3 scheme" );
 
-    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
     }
 
   /**
@@ -102,7 +98,7 @@ public class S3fs extends Hfs
   public S3fs( Fields sourceFields, String id, String secret, String bucket, String stringPath )
     {
     super( sourceFields, stringPath );
-    this.uri = makeURI( id, secret, bucket );
+    setUriScheme( makeURI( id, secret, bucket ) );
     }
 
   /**
@@ -117,14 +113,14 @@ public class S3fs extends Hfs
   public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath )
     {
     super( scheme, stringPath );
-    this.uri = makeURI( id, secret, bucket );
+    setUriScheme( makeURI( id, secret, bucket ) );
     }
 
   /**
    * Constructor S3fs creates a new S3fs instance.
    *
    * @param scheme of type Scheme
-   * @param uri of type URI
+   * @param uri    of type URI
    */
   public S3fs( Scheme scheme, URI uri )
     {
@@ -133,7 +129,7 @@ public class S3fs extends Hfs
     if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
       throw new IllegalArgumentException( "uri must use the s3 scheme" );
 
-    this.uri = URI.create( uri.getScheme() + "://" + uri.getAuthority() );
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
     }
 
   /**
@@ -160,7 +156,7 @@ public class S3fs extends Hfs
   public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath, boolean deleteOnInit )
     {
     super( scheme, stringPath, deleteOnInit );
-    this.uri = makeURI( id, secret, bucket );
+    setUriScheme( makeURI( id, secret, bucket ) );
     }
 
   /**
@@ -175,17 +171,19 @@ public class S3fs extends Hfs
     super( scheme, stringPath, deleteOnInit );
     }
 
-  protected FileSystem getFileSystem( JobConf conf ) throws IOException
+  @Override
+  protected void setStringPath( String stringPath )
     {
-    if( uri != null )
-      return FileSystem.get( uri, conf );
-    else
-      return FileSystem.get( getUri( conf ), conf ); // since uri is dervied, we don't cache the value
+    if( stringPath.matches( ".*://.*" ) && !stringPath.startsWith( "s3://" ) )
+      throw new IllegalArgumentException( "uri must use the s3 scheme" );
+
+    super.setStringPath( stringPath );
     }
 
-  private URI getUri( JobConf conf )
+  @Override
+  protected URI makeURIScheme( JobConf jobConf ) throws IOException
     {
-    return makeURI( conf.get( S3FS_ID ), conf.get( S3FS_SECRET ), conf.get( S3FS_BUCKET ) );
+    return makeURI( jobConf.get( S3FS_ID ), jobConf.get( S3FS_SECRET ), jobConf.get( S3FS_BUCKET ) );
     }
 
   private URI makeURI( String id, String secret, String bucket )

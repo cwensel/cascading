@@ -74,13 +74,9 @@ public class LargeDataTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "url" ), new RegexFilter( ".*\\.pdf$", true ) );
     pipe = new Each( pipe, new Fields( "raw" ), new RegexReplace( new Fields( "page" ), ":nl:", "\n" ), new Fields( "url", "page" ) );
     pipe = new Each( pipe, new Fields( "page" ), new TagSoupParser( new Fields( "xml" ) ), new Fields( "url", "xml" ) );
-    pipe = new Each( pipe, new Fields( "xml" ), new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ),
-      new Fields( "url", "body" ) );
-    pipe = new Each( pipe, new Fields( "body" ),
-      new XPathGenerator( new Fields( "words" ), XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ),
-      new Fields( "url", "words" ) );
-    pipe = new Each( pipe, new Fields( "words" ), new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ),
-      new Fields( "url", "word" ) );
+    pipe = new Each( pipe, new Fields( "xml" ), new XPathGenerator( new Fields( "body" ), XPathOperation.NAMESPACE_XHTML, "//xhtml:body" ), new Fields( "url", "body" ) );
+    pipe = new Each( pipe, new Fields( "body" ), new XPathGenerator( new Fields( "words" ), XPathOperation.NAMESPACE_XHTML, "//text()[ name(parent::node()) != 'script']" ), new Fields( "url", "words" ) );
+    pipe = new Each( pipe, new Fields( "words" ), new RegexGenerator( new Fields( "word" ), "(?<!\\pL)(?=\\pL)[^ ]*(?<=\\pL)(?!\\pL)" ), new Fields( "url", "word" ) );
 
     Pipe pipeUrl = new GroupBy( "url", pipe, new Fields( "url", "word" ) );
     pipeUrl = new Every( pipeUrl, new Fields( "url", "word" ), new Count(), new Fields( "url", "word", "count" ) );
@@ -91,7 +87,7 @@ public class LargeDataTest extends ClusterTestCase
     Map<String, Tap> sources = Cascades.tapsMap( Pipe.pipes( pipe ), Tap.taps( source ) );
     Map<String, Tap> sinks = Cascades.tapsMap( Pipe.pipes( pipeUrl, pipeWord ), Tap.taps( sinkUrl, sinkWord ) );
 
-    Flow flow = new FlowConnector().connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
+    Flow flow = new FlowConnector( jobConf ).connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
 
     //    flow.writeDOT( "large.dot" );
 

@@ -21,12 +21,55 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+import java.net.URI;
+
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapred.JobConf;
 
-/** Class Dfs is a {@link Tap} class that provides access to the Hadoop Distributed File System. */
+/**
+ * Class Dfs is a {@link Tap} class that provides access to the Hadoop Distributed File System.
+ * <p/>
+ * Use the {@link URI} constructors to specify a different HDFS cluster than the default.
+ */
 public class Dfs extends Hfs
   {
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param sourceFields of type Fields
+   * @param uri          of type URI
+   */
+  public Dfs( Fields sourceFields, URI uri )
+    {
+    super( sourceFields, uri.getPath() );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param sourceFields     of type Fields
+   * @param uri              of type URI
+   * @param deleteOnSinkInit of type boolean
+   */
+  public Dfs( Fields sourceFields, URI uri, boolean deleteOnSinkInit )
+    {
+    super( sourceFields, uri.getPath(), deleteOnSinkInit );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
+    }
+
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
@@ -41,8 +84,8 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields of type Fields
-   * @param stringPath of type String
+   * @param sourceFields     of type Fields
+   * @param stringPath       of type String
    * @param deleteOnSinkInit of type boolean
    */
   public Dfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
@@ -53,6 +96,39 @@ public class Dfs extends Hfs
   Dfs( Scheme scheme )
     {
     super( scheme );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param scheme of type Scheme
+   * @param uri    of type URI
+   */
+  public Dfs( Scheme scheme, URI uri )
+    {
+    super( scheme, uri.getPath() );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param scheme           of type Scheme
+   * @param uri              of type URI
+   * @param deleteOnSinkInit of type boolean
+   */
+  public Dfs( Scheme scheme, URI uri, boolean deleteOnSinkInit )
+    {
+    super( scheme, uri.getPath(), deleteOnSinkInit );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
     }
 
   /**
@@ -69,12 +145,33 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param scheme       of type Scheme
-   * @param stringPath   of type String
+   * @param scheme           of type Scheme
+   * @param stringPath       of type String
    * @param deleteOnSinkInit of type boolean
    */
   public Dfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
     super( scheme, stringPath, deleteOnSinkInit );
+    }
+
+  protected void setStringPath( String stringPath )
+    {
+    if( stringPath.matches( ".*://.*" ) && !stringPath.startsWith( "hdfs://" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    super.setStringPath( stringPath );
+    }
+
+  @Override
+  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+    {
+    String name = jobConf.get( "fs.default.name", "hdfs://localhost:5001/" );
+
+    if( name.equals( "local" ) || name.matches( ".*://.*" ) && !name.startsWith( "hdfs://" ) )
+      name = "hdfs://localhost:5001/";
+    else if( name.indexOf( '/' ) == -1 )
+      name = "hdfs://" + name;
+
+    return FileSystem.get( URI.create( name ), jobConf );
     }
   }

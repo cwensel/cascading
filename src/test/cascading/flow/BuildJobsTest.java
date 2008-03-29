@@ -40,9 +40,9 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
-import cascading.tap.TempDfs;
+import cascading.tap.TempHfs;
 import cascading.tuple.Fields;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -73,8 +73,8 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Dfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Dfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new Group( pipe, new Fields( 1 ) );
@@ -104,8 +104,8 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Dfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Dfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new Each( pipe, new Fields( 1 ), new Identity(), new Fields( 2 ) ); // in:second out:all
@@ -137,15 +137,15 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Dfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Dfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
     Pipe splice = new Group( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
 
-    sinks.put( splice.getName(), new Dfs( new Fields( 0, 1 ), "output/path" ) );
+    sinks.put( splice.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     List steps = new FlowConnector().connect( sources, sinks, splice ).getSteps();
 
@@ -174,8 +174,8 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Dfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Dfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
@@ -184,7 +184,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     cogroup = new Each( cogroup, new Identity() );
 
-    sinks.put( cogroup.getName(), new Dfs( new Fields( 0, 1 ), "output/path" ) );
+    sinks.put( cogroup.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     List steps = new FlowConnector().connect( sources, sinks, cogroup ).getSteps();
 
@@ -210,8 +210,8 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Dfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Dfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
@@ -220,7 +220,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     splice = new Each( splice, new Identity() );
 
-    sinks.put( splice.getName(), new Dfs( new TextLine(), "output/path" ) );
+    sinks.put( splice.getName(), new Hfs( new TextLine(), "output/path" ) );
 
     List steps = new FlowConnector().connect( sources, sinks, splice ).getSteps();
 
@@ -244,9 +244,9 @@ public class BuildJobsTest extends CascadingTestCase
   /** This should result in only two steps, one for each side */
   public void testSplit()
     {
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Dfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Dfs( new TextLine(), "foo/split2", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -270,9 +270,9 @@ public class BuildJobsTest extends CascadingTestCase
   /** This should result in a Temp Tap after the Every. Pushing the next Each to be run inside the next two parallel steps */
   public void testSplitComplex()
     {
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Dfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Dfs( new TextLine(), "foo/split2", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -309,7 +309,7 @@ public class BuildJobsTest extends CascadingTestCase
     nextScope = step.getNextScope( operator );
     operator = step.getNextFlowElement( nextScope );
 
-    assertTrue( "not a TempDfs", operator instanceof TempDfs );
+    assertTrue( "not a TempHfs", operator instanceof TempHfs );
     }
 
   private static class TestAssembly extends PipeAssembly
@@ -318,8 +318,7 @@ public class BuildJobsTest extends CascadingTestCase
       {
       Pipe pipe = new Pipe( name );
 
-      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ),
-        new Fields( "ip" ) );
+      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
       setTails( pipe );
       }
@@ -331,8 +330,8 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipe = new TestAssembly( "test" );
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink = new Dfs( new TextLine(), "foo/split1", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink = new Hfs( new TextLine(), "foo/split1", true );
 
     List<FlowStep> steps = new FlowConnector().connect( source, sink, pipe ).getSteps();
 
@@ -345,9 +344,9 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipe1 = new GroupBy( "left", pipe, new Fields( "ip" ) );
     Pipe pipe2 = new GroupBy( "right", pipe, new Fields( "ip" ) );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Dfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Dfs( new TextLine(), "foo/split2", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
 
     Map sources = new HashMap();
     sources.put( "test", source );

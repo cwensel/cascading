@@ -40,7 +40,7 @@ import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
 import cascading.tap.Tap;
-import cascading.tap.TempDfs;
+import cascading.tap.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -639,7 +639,7 @@ public class FlowConnector
     if( LOG.isDebugEnabled() )
       LOG.debug( "inserting tap after: " + pipe );
 
-    TempDfs tempDfs = makeTempDfs( pipe );
+    TempHfs tempDfs = makeTempDfs( pipe );
     Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( pipe ) );
 
     graph.addVertex( tempDfs );
@@ -653,10 +653,10 @@ public class FlowConnector
       }
     }
 
-  private TempDfs makeTempDfs( Pipe pipe )
+  private TempHfs makeTempDfs( Pipe pipe )
     {
     // must give Taps unique names
-    return new TempDfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
+    return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
     }
 
   private SimpleDirectedGraph<FlowElement, Scope> makePipeGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -829,7 +829,7 @@ public class FlowConnector
         step.sink = sink;
 
         if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
-          step.tempSink = new TempDfs( sink.getPath().toUri().getPath() );
+          step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
 
         FlowElement lhs = source;
 

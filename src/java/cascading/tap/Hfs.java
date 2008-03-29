@@ -74,7 +74,7 @@ public class Hfs extends Tap
   public Hfs( Fields sourceFields, String stringPath )
     {
     super( new SequenceFile( sourceFields ) );
-    this.stringPath = Util.normalizeUrl( stringPath );
+    setStringPath( stringPath );
     }
 
   /**
@@ -87,7 +87,7 @@ public class Hfs extends Tap
   public Hfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
     {
     super( new SequenceFile( sourceFields ) );
-    this.stringPath = Util.normalizeUrl( stringPath );
+    setStringPath( stringPath );
     this.deleteOnSinkInit = deleteOnSinkInit;
     }
 
@@ -100,7 +100,7 @@ public class Hfs extends Tap
   public Hfs( Scheme scheme, String stringPath )
     {
     super( scheme );
-    this.stringPath = Util.normalizeUrl( stringPath );
+    setStringPath( stringPath );
     }
 
   /**
@@ -113,8 +113,18 @@ public class Hfs extends Tap
   public Hfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
     super( scheme );
-    this.stringPath = Util.normalizeUrl( stringPath );
+    setStringPath( stringPath );
     this.deleteOnSinkInit = deleteOnSinkInit;
+    }
+
+  protected void setStringPath( String stringPath )
+    {
+    this.stringPath = Util.normalizeUrl( stringPath );
+    }
+
+  protected void setUriScheme( URI uriScheme )
+    {
+    this.uriScheme = uriScheme;
     }
 
   protected URI getURIScheme( JobConf jobConf ) throws IOException
@@ -122,8 +132,17 @@ public class Hfs extends Tap
     if( uriScheme != null )
       return uriScheme;
 
+    uriScheme = makeURIScheme( jobConf );
+
+    return uriScheme;
+    }
+
+  protected URI makeURIScheme( JobConf jobConf ) throws IOException
+    {
     try
       {
+      URI uriScheme = null;
+
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling path: " + stringPath );
 
@@ -142,7 +161,7 @@ public class Hfs extends Tap
       else if( schemeString != null )
         uriScheme = new URI( schemeString + ":///" );
       else
-        uriScheme = FileSystem.get( jobConf ).getUri();
+        uriScheme = getDefaultFileSystem( jobConf ).getUri();
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "using uri scheme: " + uriScheme );
@@ -159,6 +178,11 @@ public class Hfs extends Tap
   public boolean isUseTapCollector()
     {
     return super.isUseTapCollector() || stringPath != null && stringPath.matches( "(^https?://.*$)|(^s3tp://.*$)" );
+    }
+
+  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+    {
+    return FileSystem.get( jobConf );
     }
 
   protected FileSystem getFileSystem( JobConf jobConf ) throws IOException
@@ -289,7 +313,7 @@ public class Hfs extends Tap
     return false;
     }
 
-  protected Path getDfsTempPath( JobConf conf )
+  protected Path getTempPath( JobConf conf )
     {
     return new Path( conf.get( "hadoop.tmp.dir" ) );
     }

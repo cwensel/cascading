@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Changed behavior of c.t.Dfs to force use of HDFS. Previously Dfs would defaul to the local FileSystem
+  if the job was run in 'local'mode. Now a Dfs instance will cause failures if it cannot connect to a HDFS cluster.
+  Using c.t.Hfs will provide previous Dfs behavior. Hfs will use the 'default' filesystem if a scheme is not present
+  in the 'stringPath' (i.e. hdfs://host:port/some/path).
+
   Added c.stats package to allow for collecting statics of Cascades, Flows, and FlowSteps.
 
   Updated c.f.Flow and c.c.Cascade log messages to be easier to follow when executing many flow instances simultaneously.

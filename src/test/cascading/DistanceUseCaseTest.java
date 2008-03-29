@@ -44,7 +44,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
@@ -78,8 +78,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     copyFromLocal( inputFileCritics );
 
-    Tap source = new Dfs( new TextLine(), inputFileCritics );
-    Tap sink = new Dfs( new TextLine(), outputPathEuclidean + "/long", true );
+    Tap source = new Hfs( new TextLine(), inputFileCritics );
+    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/long", true );
 
     Pipe pipe = new Pipe( "euclidean" );
 
@@ -134,7 +134,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "graph.dot" );
 
@@ -169,8 +169,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     copyFromLocal( inputFileCritics );
 
-    Tap source = new Dfs( new TextLine(), inputFileCritics );
-    Tap sink = new Dfs( new TextLine(), outputPathEuclidean + "/short", true );
+    Tap source = new Hfs( new TextLine(), inputFileCritics );
+    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/short", true );
 
     // unknown number of elements
     Pipe pipe = new Each( "euclidean", new Fields( "line" ), Regexes.TAB_SPLITTER );
@@ -222,7 +222,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "graph.dot" );
 
@@ -252,8 +252,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     copyFromLocal( inputFileCritics );
 
-    Tap source = new Dfs( new TextLine(), inputFileCritics );
-    Tap sink = new Dfs( new TextLine(), outputPathEuclidean + "/composite", true );
+    Tap source = new Hfs( new TextLine(), inputFileCritics );
+    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/composite", true );
 
     // unknown number of elements
     Pipe pipe = new Each( "euclidean", new Fields( "line" ), Regexes.TAB_SPLITTER );
@@ -264,7 +264,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "eucdist.dot" );
 
@@ -294,8 +294,8 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     copyFromLocal( inputFileCritics );
 
-    Tap source = new Dfs( new TextLine(), inputFileCritics );
-    Tap sink = new Dfs( new TextLine(), outputPathPearson + "/composite", true );
+    Tap source = new Hfs( new TextLine(), inputFileCritics );
+    Tap sink = new Hfs( new TextLine(), outputPathPearson + "/composite", true );
 
     // unknown number of elements
     Pipe pipe = new Each( "pearson", new Fields( "line" ), Regexes.TAB_SPLITTER );
@@ -306,7 +306,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "peardist.dot" );
 

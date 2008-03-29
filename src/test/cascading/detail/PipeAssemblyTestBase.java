@@ -33,7 +33,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
@@ -64,8 +64,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   static Fields[] RHS_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] RHS_DECL_FIELDS = new Fields[]{new Fields( "field2" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
-  static Fields[] RHS_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field2" ), new Fields( "field" ),
-                                                   Fields.RESULTS, Fields.ALL};
+  static Fields[] RHS_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field2" ), new Fields( "field" ), Fields.RESULTS, Fields.ALL};
   static final String RHS_VALUE = "value2";
 
   public static void makeSuites( Properties properties, Map<String, Pipe> pipes, TestSuite suite, Class type ) throws IllegalAccessException, InvocationTargetException, InstantiationException
@@ -165,8 +164,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   int getResultLength()
     {
-    return Integer.parseInt(
-      properties.getProperty( getName() + ".length", properties.getProperty( "default.length" ) ) );
+    return Integer.parseInt( properties.getProperty( getName() + ".length", properties.getProperty( "default.length" ) ) );
     }
 
   boolean isError()
@@ -176,8 +174,8 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   public void runTest() throws Exception
     {
-    Tap source = new Dfs( new TextLine(), inputFile );
-    Tap sink = new Dfs( new TextLine(), outputPath + "/" + getName(), true );
+    Tap source = new Hfs( new TextLine(), inputFile );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/" + getName(), true );
 
     Flow flow = null;
 

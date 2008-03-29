@@ -47,7 +47,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
@@ -84,7 +84,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -94,7 +94,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "/simple", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
@@ -112,7 +112,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -123,7 +123,7 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "/simplechain", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simplechain", true );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
@@ -142,8 +142,8 @@ public class FieldedPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -153,7 +153,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
@@ -190,8 +190,8 @@ public class FieldedPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -201,7 +201,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
@@ -267,8 +267,8 @@ public class FieldedPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLowerOffset );
     copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -278,7 +278,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroupinner/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupinner/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
@@ -311,8 +311,8 @@ public class FieldedPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -323,7 +323,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
@@ -353,7 +353,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileLower );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
 
     Map sources = new HashMap();
 
@@ -362,7 +362,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
@@ -391,8 +391,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileJoined );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
-    Tap sink = new Dfs( new TextLine(), outputPath + "/ungrouped", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -416,8 +416,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Dfs( new TextLine(), outputPath + "/filter", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/filter", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -441,8 +441,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     copyFromLocal( inputFileApache );
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Dfs( new TextLine(), outputPath + "/filtercomplex", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/filtercomplex", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -478,8 +478,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Map sources = new HashMap();
 
-    sources.put( "lhs", new Dfs( new TextLine(), inputFileLhs ) );
-    sources.put( "rhs", new Dfs( new TextLine(), inputFileRhs ) );
+    sources.put( "lhs", new Hfs( new TextLine(), inputFileLhs ) );
+    sources.put( "rhs", new Hfs( new TextLine(), inputFileRhs ) );
 
     Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
     Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
@@ -487,7 +487,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/cross/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cross/", true );
 
     Flow flow = new FlowConnector( jobConf ).connect( sources, sink, cross );
 
@@ -514,9 +514,9 @@ public class FieldedPipesTest extends ClusterTestCase
 
     // 46 192
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink1 = new Dfs( new TextLine(), outputPath + "/split1", true );
-    Tap sink2 = new Dfs( new TextLine(), outputPath + "/split2", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink1 = new Hfs( new TextLine(), outputPath + "/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), outputPath + "/split2", true );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -551,9 +551,9 @@ public class FieldedPipesTest extends ClusterTestCase
 
     // 46 192
 
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink1 = new Dfs( new TextLine(), outputPath + "/splitcomp1", true );
-    Tap sink2 = new Dfs( new TextLine(), outputPath + "/splitcomp2", true );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink1 = new Hfs( new TextLine(), outputPath + "/splitcomp1", true );
+    Tap sink2 = new Hfs( new TextLine(), outputPath + "/splitcomp2", true );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -590,15 +590,15 @@ public class FieldedPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Tap source = new MultiTap( sourceLower, sourceUpper );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Dfs( new TextLine(), outputPath + "/complex/concat/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/concat/", true );
 
     Pipe pipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 

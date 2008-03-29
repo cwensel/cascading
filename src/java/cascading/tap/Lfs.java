@@ -40,8 +40,7 @@ public class Lfs extends Hfs
    */
   public Lfs( Fields sourceFields, String stringPath )
     {
-    super( new SequenceFile( sourceFields ) );
-    this.stringPath = stringPath;
+    super( new SequenceFile( sourceFields ), stringPath );
     }
 
   Lfs( Scheme scheme )
@@ -57,22 +56,27 @@ public class Lfs extends Hfs
    */
   public Lfs( Scheme scheme, String stringPath )
     {
-    super( scheme );
-    this.stringPath = stringPath;
+    super( scheme, stringPath );
     }
 
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param scheme       of type Scheme
-   * @param stringPath   of type String
-   * @param deleteOnInit of type boolean
+   * @param scheme           of type Scheme
+   * @param stringPath       of type String
+   * @param deleteOnSinkInit of type boolean
    */
-  public Lfs( Scheme scheme, String stringPath, boolean deleteOnInit )
+  public Lfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
     {
-    super( scheme );
-    this.stringPath = stringPath;
-    this.deleteOnSinkInit = deleteOnInit;
+    super( scheme, stringPath, deleteOnSinkInit );
+    }
+
+  protected void setStringPath( String stringPath )
+    {
+    if( stringPath.matches( ".*://.*" ) && !stringPath.startsWith( "file://" ) )
+      throw new IllegalArgumentException( "uri must use the file scheme" );
+
+    super.setStringPath( stringPath );
     }
 
   protected FileSystem getFileSystem( JobConf conf ) throws IOException
