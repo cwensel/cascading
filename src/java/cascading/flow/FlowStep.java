@@ -304,7 +304,16 @@ public class FlowStep implements Serializable
       this.predecessors = predecessors;
 
       if( flowStep.sink.getScheme().getNumSinkParts() != 0 )
-        currentConf.setNumReduceTasks( flowStep.sink.getScheme().getNumSinkParts() );
+        {
+        // if no reducer, set num map tasks to control parts
+        if( flowStep.group != null )
+          currentConf.setNumReduceTasks( flowStep.sink.getScheme().getNumSinkParts() );
+        else
+          currentConf.setNumMapTasks( flowStep.sink.getScheme().getNumSinkParts() );
+        }
+
+      if( flowStep.group == null )
+        currentConf.setNumReduceTasks( 0 ); // disable reducers
       }
 
     public Throwable call()

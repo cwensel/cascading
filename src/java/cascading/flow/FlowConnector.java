@@ -596,7 +596,7 @@ public class FlowConnector
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
-        else if( flowElement instanceof Tap && !foundGroup )
+        else if( flowElement instanceof Tap && !foundGroup ) // can disable group insertion here
           groupInsertions.add( (Tap) flowElement );
         else if( flowElement instanceof Group && foundGroup )
           tapInsertions.add( (Pipe) previousFlowElement );
