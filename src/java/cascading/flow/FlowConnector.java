@@ -639,7 +639,7 @@ public class FlowConnector
     if( LOG.isDebugEnabled() )
       LOG.debug( "inserting tap after: " + pipe );
 
-    TempHfs tempDfs = makeTempDfs( pipe );
+    TempHfs tempDfs = makeTemp( pipe );
     Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( pipe ) );
 
     graph.addVertex( tempDfs );
@@ -653,7 +653,7 @@ public class FlowConnector
       }
     }
 
-  private TempHfs makeTempDfs( Pipe pipe )
+  private TempHfs makeTemp( Pipe pipe )
     {
     // must give Taps unique names
     return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
