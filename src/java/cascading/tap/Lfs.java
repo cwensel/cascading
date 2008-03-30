@@ -23,15 +23,28 @@ package cascading.tap;
 
 import java.io.IOException;
 
+import cascading.flow.Flow;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 
-/** Class Lfs is a {@link Tap} class that provides access to the Local File System via Hadoop. */
+/**
+ * Class Lfs is a {@link Tap} class that provides access to the Local File System via Hadoop.
+ * <p/>
+ * Note that using a Lfs {@link Tap} instance in a {@link Flow} will force the flow to be executed
+ * in "local" mode force the flow to execute in the current JVM. Mixing with {@link Dfs} and other Tap
+ * types is possible, providing a means to implement complex file/data management functions.
+ * <p/>
+ * Use {@link Hfs} if you need a Tap instance that inherits the default {@link FileSystem} used by Hadoop.
+ */
 public class Lfs extends Hfs
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( Lfs.class );
+
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
@@ -84,4 +97,31 @@ public class Lfs extends Hfs
     return FileSystem.getLocal( conf );
     }
 
+  @Override
+  public void sinkInit( JobConf conf ) throws IOException
+    {
+    super.sinkInit( conf );
+
+    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) )
+      {
+      if( LOG.isInfoEnabled() )
+        LOG.info( "forcing job to local mode, via sink: " + toString() );
+
+      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
+      }
+    }
+
+  @Override
+  public void sourceInit( JobConf conf ) throws IOException
+    {
+    super.sourceInit( conf );
+
+    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) )
+      {
+      if( LOG.isInfoEnabled() )
+        LOG.info( "forcing job to local mode, via source: " + toString() );
+
+      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
+      }
+    }
   }
