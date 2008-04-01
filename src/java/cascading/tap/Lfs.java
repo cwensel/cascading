@@ -96,32 +96,4 @@ public class Lfs extends Hfs
     {
     return FileSystem.getLocal( conf );
     }
-
-  @Override
-  public void sinkInit( JobConf conf ) throws IOException
-    {
-    super.sinkInit( conf );
-
-    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) )
-      {
-      if( LOG.isInfoEnabled() )
-        LOG.info( "forcing job to local mode, via sink: " + toString() );
-
-      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
-      }
-    }
-
-  @Override
-  public void sourceInit( JobConf conf ) throws IOException
-    {
-    super.sourceInit( conf );
-
-    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) )
-      {
-      if( LOG.isInfoEnabled() )
-        LOG.info( "forcing job to local mode, via source: " + toString() );
-
-      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
-      }
-    }
   }

@@ -221,8 +221,12 @@ public class Hfs extends Tap
   @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
-    conf.addInputPath( getQualifiedPath( conf ) );
+    Path qualifiedPath = getQualifiedPath( conf );
+
+    conf.addInputPath( qualifiedPath );
     super.sourceInit( conf );
+
+    makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
     }
 
   @Override
@@ -231,9 +235,23 @@ public class Hfs extends Tap
     if( deleteOnSinkInit )
       deletePath( conf );
 
-    conf.setOutputPath( getQualifiedPath( conf ) );
+    Path qualifiedPath = getQualifiedPath( conf );
 
+    conf.setOutputPath( qualifiedPath );
     super.sinkInit( conf );
+
+    makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
+    }
+
+  private void makeLocal( JobConf conf, Path qualifiedPath, String infoMessage )
+    {
+    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( "file" ) )
+      {
+      if( LOG.isInfoEnabled() )
+        LOG.info( infoMessage + toString() );
+
+      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
+      }
     }
 
   @Override
