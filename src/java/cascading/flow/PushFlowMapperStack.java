@@ -26,8 +26,10 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.pipe.Each;
+import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
+import cascading.tap.TapCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -50,12 +52,15 @@ public class PushFlowMapperStack extends FlowMapperStack
   private FlowStep step;
   /** Field currentSource */
   private Tap currentSource;
+
+  private final JobConf jobConf;
   private FlowMapperStackElement stackHead;
   private FlowMapperStackElement stackTail;
 
 
-  public PushFlowMapperStack( JobConf jobConf )
+  public PushFlowMapperStack( JobConf jobConf ) throws IOException
     {
+    this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
     currentSource = step.findCurrentSource( jobConf );
 
@@ -65,14 +70,14 @@ public class PushFlowMapperStack extends FlowMapperStack
     buildStack();
     }
 
-  private void buildStack()
+  private void buildStack() throws IOException
     {
     Scope incomingScope = step.getNextScope( currentSource );
     FlowElement operator = step.getNextFlowElement( incomingScope );
 
     stackTail = null;
 
-    while( !( operator instanceof Group ) )
+    while( operator instanceof Each )
       {
       stackTail = new FlowMapperStackElement( stackTail, incomingScope, (Each) operator );
 
@@ -80,12 +85,30 @@ public class PushFlowMapperStack extends FlowMapperStack
       operator = step.getNextFlowElement( incomingScope );
       }
 
-    if( !( operator instanceof Group ) )
-      throw new IllegalStateException( "operator should be group, is instead: " + operator.getClass().getName() );
+    boolean useTapCollector = false;
 
-    Scope outgoingScope = step.getNextScope( operator ); // is always Group
+    while( operator instanceof EndPipe )
+      {
+      useTapCollector = true;
+      incomingScope = step.getNextScope( operator );
+      operator = step.getNextFlowElement( incomingScope );
+      }
 
-    stackTail = new FlowMapperStackElement( stackTail, incomingScope, (Group) operator, outgoingScope );
+    if( operator instanceof Group )
+      {
+      Scope outgoingScope = step.getNextScope( operator ); // is always Group
+
+      stackTail = new FlowMapperStackElement( stackTail, incomingScope, (Group) operator, outgoingScope );
+      }
+    else if( operator instanceof Tap )
+      {
+      useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
+
+      stackTail = new FlowMapperStackElement( stackTail, incomingScope, (Tap) operator, useTapCollector, jobConf );
+      }
+    else
+      throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
+
     stackHead = stackTail.resolveStack();
     }
 
@@ -108,6 +131,12 @@ public class PushFlowMapperStack extends FlowMapperStack
     stackHead.collect( tuple );
     }
 
+  public void close()
+    {
+    if( stackTail.tapCollector != null )
+      stackTail.tapCollector.close();
+    }
+
   /**
    *
    */
@@ -126,6 +155,8 @@ public class PushFlowMapperStack extends FlowMapperStack
 
     private TupleEntry tupleEntry;
     private OutputCollector lastOutput;
+    private Tap sink;
+    private TapCollector tapCollector;
 
     public FlowMapperStackElement( FlowMapperStackElement previous, Scope incomingScope, Each each )
       {
@@ -140,6 +171,16 @@ public class PushFlowMapperStack extends FlowMapperStack
       this.incomingScope = incomingScope;
       this.group = group;
       this.outgoingScope = outgoingScope;
+      }
+
+    public FlowMapperStackElement( FlowMapperStackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf conf ) throws IOException
+      {
+      this.previous = previous;
+      this.incomingScope = incomingScope;
+      this.sink = sink;
+
+      if( useTapCollector )
+        this.tapCollector = sink.openForWrite( conf );
       }
 
     public FlowMapperStackElement resolveStack()
@@ -169,8 +210,10 @@ public class PushFlowMapperStack extends FlowMapperStack
       {
       if( each != null )
         return each;
-      else
+      else if( group != null )
         return group;
+      else
+        return sink;
       }
 
     public Fields resolveIncomingFields()
@@ -211,8 +254,12 @@ public class PushFlowMapperStack extends FlowMapperStack
 
       if( each != null )
         operateEach( getTupleEntry( tuple ) );
-      else
+      else if( group != null )
         operateGroup( getTupleEntry( tuple ) );
+      else if( sink != null )
+        operateSink( getTupleEntry( tuple ) );
+      else
+        throw new FlowException( "no next stack element" );
       }
 
     public void collect( Tuple key, Iterator tupleIterator )
@@ -244,10 +291,28 @@ public class PushFlowMapperStack extends FlowMapperStack
         }
       }
 
+    private void operateSink( TupleEntry tupleEntry )
+      {
+      try
+        {
+        if( tapCollector != null )
+          sink.sink( tupleEntry.getFields(), tupleEntry.getTuple(), tapCollector );
+        else
+          sink.sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
+        }
+      catch( Throwable throwable )
+        {
+        if( throwable instanceof CascadingException )
+          throw (CascadingException) throwable;
+
+        throw new FlowException( "internal error: " + tupleEntry.getTuple().print(), throwable );
+        }
+      }
+
     @Override
     public String toString()
       {
-      return each != null ? each.toString() : group.toString();
+      return getFlowElement().toString();
       }
     }
   }

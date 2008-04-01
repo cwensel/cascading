@@ -81,4 +81,11 @@ public class FlowMapper extends MapReduceBase implements Mapper
       }
     }
 
+  @Override
+  public void close() throws IOException
+    {
+    super.close();
+
+    flowMapperStack.close();
+    }
   }

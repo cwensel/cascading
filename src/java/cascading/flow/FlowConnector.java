@@ -435,7 +435,12 @@ public class FlowConnector
 
           // don't connect two taps directly together
           if( source instanceof Tap && target instanceof Tap )
+            {
+            if( flowElement.getClass() == Pipe.class )
+              throw new FlowException( "cannot connect source and sink with a only a Pipe class" );
+
             continue out;
+            }
 
           graph.addEdge( source, target, new Scope( outgoing ) );
           }
@@ -577,7 +582,6 @@ public class FlowConnector
       {
       Iterator<Scope> scopeIterator = path.getEdgeList().iterator();
 
-      List<Tap> groupInsertions = new ArrayList<Tap>();
       List<Pipe> tapInsertions = new ArrayList<Pipe>();
 
       boolean foundGroup = false;
@@ -596,42 +600,20 @@ public class FlowConnector
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
-        else if( flowElement instanceof Tap && !foundGroup ) // can disable group insertion here
-          groupInsertions.add( (Tap) flowElement );
         else if( flowElement instanceof Group && foundGroup )
           tapInsertions.add( (Pipe) previousFlowElement );
         else if( flowElement instanceof Tap )
           foundGroup = false;
         }
 
-      for( Tap tap : groupInsertions )
-        insertGroupBefore( pipeGraph, tap );
-
       for( Pipe pipe : tapInsertions )
         insertTapAfter( pipeGraph, pipe );
 
-      if( !tapInsertions.isEmpty() || !groupInsertions.isEmpty() )
+      if( !tapInsertions.isEmpty() )
         return false;
       }
 
     return true;
-    }
-
-  private void insertGroupBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Tap tap )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "inserting group before: " + tap );
-
-    Set<Scope> incomingScopes = new HashSet<Scope>( graph.incomingEdgesOf( tap ) ); // will only be one, make copy
-    Scope scope = incomingScopes.iterator().next();
-
-    FlowElement source = graph.getEdgeSource( scope );
-    graph.removeEdge( source, tap );
-    Group group = new Group( (Pipe) source );
-    graph.addVertex( group );
-
-    graph.addEdge( group, tap, new Scope( scope ) );
-    graph.addEdge( source, group, new Scope( scope ) );
     }
 
   private void insertTapAfter( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )

@@ -33,4 +33,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 public abstract class FlowMapperStack
   {
   public abstract void map( WritableComparable key, Writable value, OutputCollector output ) throws IOException;
+
+  public abstract void close();
   }

@@ -55,6 +55,28 @@ public class BuildJobsTest extends CascadingTestCase
     super( "build jobs" );
     }
 
+  /**
+   * Test a single piece Pipe, should fail on connect()
+   *
+   * @throws IOException
+   */
+  public void testIdentity() throws Exception
+    {
+    Tap source = new Hfs( new TextLine(), "input/path" );
+    Tap sink = new Hfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    try
+      {
+      new FlowConnector().connect( source, sink, pipe );
+      fail( "did not throw failure on attept to connect source to sink" );
+      }
+    catch( FlowException exception )
+      {
+      }
+    }
+
   public void testName()
     {
     Pipe count = new Pipe( "count" );

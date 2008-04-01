@@ -614,28 +614,26 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( countFlow, 10, null );
     }
 
-//  public void testNoGroup() throws Exception
-//    {
-//    if( !new File( inputFileApache ).exists() )
-//      fail( "data file not found" );
-//
-//    copyFromLocal( inputFileApache );
-//
-//    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-//
-//    Pipe pipe = new Pipe( "test" );
-//
-//    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-//
-//    Tap sink = new Hfs( new TextLine(), outputPath + "/nogroup", true );
-//
-//    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
-//
-////    flow.writeDOT( "nogroup.dot" );
-//
-//    flow.complete();
-//
-//    validateLength( flow, 10, null );
-//    }
+  public void testNoGroup() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "/nogroup", true );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+    }
 
   }

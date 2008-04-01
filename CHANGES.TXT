@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.FlowConnector to create c.f.Flow instances that will bypass the reducer if no c.p.Group is participating
+  in the assembly. Previoiusly Group instances were inserted if missing. This allows a chain of c.p.Every instances
+  to be used to process/filter a tuple stream without the invoking the reducer needlessly (if a sort isn't required).
+  This change also supports bypassing the default Hadoop OutputCollector in the mapper via the sink c.t.Tap instance.
+
   Changed c.f.FlowStep behavior to run in 'local' mode if either the sink or source tap is a c.t.Lfs instance. This
   allows for c.f.Flow instances to run mixed if configured to execute on a particular cluster by default. This behavior
   supports complex import/export processes against the HDFS or other supported remote filesystem.

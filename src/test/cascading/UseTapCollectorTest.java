@@ -86,4 +86,29 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     validateLength( flow, 8, null );
     }
+
+  public void testNoGroup() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "/tapnogroup", true );
+
+    sink.setUseTapCollector( true );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+    }
+
   }

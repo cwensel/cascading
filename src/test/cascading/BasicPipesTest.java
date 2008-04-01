@@ -68,28 +68,6 @@ public class BasicPipesTest extends CascadingTestCase
     }
 
   /**
-   * Test a single piece Pipe
-   *
-   * @throws IOException
-   */
-  public void testIdentity() throws Exception
-    {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    Tap source = new Hfs( new TextLine(), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/identity", true );
-
-    Pipe pipe = new Pipe( "test" );
-
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-    flow.complete();
-
-    validateLength( flow, 10 );
-    }
-
-  /**
    * Test the count aggregator function
    *
    * @throws IOException
