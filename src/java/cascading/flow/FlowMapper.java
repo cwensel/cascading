@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopUtil;
-import cascading.flow.stack.PushFlowMapperStack;
+import cascading.flow.stack.FlowMapperStack;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -52,7 +52,7 @@ public class FlowMapper extends MapReduceBase implements Mapper
       {
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
-      flowMapperStack = new PushFlowMapperStack( jobConf );
+      flowMapperStack = new FlowMapperStack( jobConf );
       }
     catch( Throwable throwable )
       {

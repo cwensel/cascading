@@ -29,7 +29,6 @@ import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowReducerStack;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -46,10 +45,10 @@ import org.apache.log4j.Logger;
 /**
  *
  */
-public class PushFlowReducerStack extends FlowReducerStack
+public class FlowReducerStack
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( PushFlowReducerStack.class );
+  private static final Logger LOG = Logger.getLogger( FlowReducerStack.class );
 
   /** Field step */
   private FlowStep step;
@@ -58,7 +57,7 @@ public class PushFlowReducerStack extends FlowReducerStack
   private FlowReducerStackElement stackHead;
   private FlowReducerStackElement stackTail;
 
-  public PushFlowReducerStack( JobConf jobConf ) throws IOException
+  public FlowReducerStack( JobConf jobConf ) throws IOException
     {
     this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );

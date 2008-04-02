@@ -25,7 +25,6 @@ import java.io.IOException;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowMapperStack;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -43,10 +42,10 @@ import org.apache.log4j.Logger;
 /**
  *
  */
-public class PushFlowMapperStack extends FlowMapperStack
+public class FlowMapperStack
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( PushFlowMapperStack.class );
+  private static final Logger LOG = Logger.getLogger( FlowMapperStack.class );
 
   /** Field step */
   private FlowStep step;
@@ -58,7 +57,7 @@ public class PushFlowMapperStack extends FlowMapperStack
   private FlowMapperStackElement stackTail;
 
 
-  public PushFlowMapperStack( JobConf jobConf ) throws IOException
+  public FlowMapperStack( JobConf jobConf ) throws IOException
     {
     this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
