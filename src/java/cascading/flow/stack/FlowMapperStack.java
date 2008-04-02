@@ -48,14 +48,16 @@ public class FlowMapperStack
   private static final Logger LOG = Logger.getLogger( FlowMapperStack.class );
 
   /** Field step */
-  private FlowStep step;
+  private final FlowStep step;
   /** Field currentSource */
-  private Tap currentSource;
-
+  private final Tap currentSource;
+  /** Field jobConf */
   private final JobConf jobConf;
-  private FlowMapperStackElement stackHead;
-  private FlowMapperStackElement stackTail;
 
+  /** Field stackHead */
+  private MapperStackElement stackHead;
+  /** Field stackTail */
+  private MapperStackElement stackTail;
 
   public FlowMapperStack( JobConf jobConf ) throws IOException
     {
@@ -108,10 +110,10 @@ public class FlowMapperStack
     else
       throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
 
-    stackHead = stackTail.resolveStack();
+    stackHead = (MapperStackElement) stackTail.resolveStack();
     }
 
-  public void map( WritableComparable key, Writable value, OutputCollector output ) throws IOException
+  public void map( WritableComparable key, Writable value, OutputCollector output )
     {
     Tuple tuple = currentSource.source( key, value );
 
@@ -130,9 +132,8 @@ public class FlowMapperStack
     stackHead.collect( tuple );
     }
 
-  public void close()
+  public void close() throws IOException
     {
     stackTail.close();
     }
-
   }

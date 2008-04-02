@@ -853,20 +853,20 @@ public class FlowConnector
   /** Simple class that acts in as the root of the graph */
   static class Extent extends Pipe
     {
-    /** @see cascading.pipe.Pipe#Pipe(String) */
+    /** @see Pipe#Pipe(String) */
     public Extent( String name )
       {
       super( name );
       }
 
-    /** @see cascading.pipe.Pipe#outgoingScopeFor(Set<Scope>) */
+    /** @see Pipe#outgoingScopeFor(Set<Scope>) */
     @Override
     public Scope outgoingScopeFor( Set<Scope> scopes )
       {
       return new Scope();
       }
 
-    /** @see cascading.pipe.Pipe#toString() */
+    /** @see Pipe#toString() */
     @Override
     public String toString()
       {

@@ -1,12 +1,29 @@
 /*
- * Copyright (c) 2008, Your Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package cascading.flow.stack;
 
+import java.io.IOException;
 import java.util.Iterator;
 
-import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
@@ -18,51 +35,35 @@ import org.apache.hadoop.mapred.OutputCollector;
 /**
  *
  */
-abstract class FlowReducerStackElement implements FlowCollector
+abstract class ReducerStackElement extends StackElement
   {
-  protected FlowReducerStackElement previous;
-  protected FlowReducerStackElement next;
-
-  protected Scope incomingScope; // used by everything but group
-  protected Fields outGroupingFields;
-
-  private TupleEntry groupingTupleEntry;
-  protected OutputCollector lastOutput;
+  /** Field incomingScope */
+  Scope incomingScope; // used by everything but group
+  /** Field incomingFields */
   private Fields incomingFields;
+  /** Field outGroupingFields */
+  private Fields outGroupingFields;
+  /** Field groupingTupleEntry */
+  private TupleEntry groupingTupleEntry;
+  /** Field tupleEntry */
   private TupleEntry tupleEntry;
+  /** Field lastOutput */
+  OutputCollector lastOutput;
 
-  FlowReducerStackElement( FlowReducerStackElement previous, Scope incomingScope )
+  ReducerStackElement( StackElement previous, Scope incomingScope )
     {
     this.previous = previous;
     this.incomingScope = incomingScope;
     }
 
-  protected FlowReducerStackElement( Fields outGroupingFields )
+  ReducerStackElement( Fields outGroupingFields )
     {
     this.outGroupingFields = outGroupingFields;
     }
 
-  public FlowReducerStackElement resolveStack()
-    {
-    if( previous != null )
-      return previous.setNext( this );
+  protected abstract FlowElement getFlowElement();
 
-    return this;
-    }
-
-  private FlowReducerStackElement setNext( FlowReducerStackElement next )
-    {
-    this.next = next;
-
-    if( previous != null )
-      return previous.setNext( this );
-
-    return this;
-    }
-
-  public abstract FlowElement getFlowElement();
-
-  public Fields resolveIncomingFields()
+  Fields resolveIncomingFields()
     {
     if( incomingFields == null )
       incomingFields = getFlowElement().resolveFields( incomingScope );
@@ -75,12 +76,12 @@ abstract class FlowReducerStackElement implements FlowCollector
     this.lastOutput = lastOutput;
     }
 
-  public Scope getIncomingScope()
+  Scope getIncomingScope()
     {
     return incomingScope;
     }
 
-  protected Fields resolveIncomingOperationFields()
+  Fields resolveIncomingOperationFields()
     {
     return getFlowElement().resolveIncomingOperationFields( incomingScope );
     }
@@ -103,7 +104,7 @@ abstract class FlowReducerStackElement implements FlowCollector
     return outGroupingFields;
     }
 
-  protected TupleEntry getGroupingTupleEntry( Tuple tuple )
+  TupleEntry getGroupingTupleEntry( Tuple tuple )
     {
     if( groupingTupleEntry == null )
       groupingTupleEntry = new TupleEntry( getOutGroupingFields() );
@@ -113,7 +114,7 @@ abstract class FlowReducerStackElement implements FlowCollector
     return groupingTupleEntry;
     }
 
-  protected TupleEntry getTupleEntry( Tuple tuple )
+  TupleEntry getTupleEntry( Tuple tuple )
     {
     if( tupleEntry == null )
       tupleEntry = new TupleEntry( resolveIncomingFields() );
@@ -123,8 +124,7 @@ abstract class FlowReducerStackElement implements FlowCollector
     return tupleEntry;
     }
 
-  public void close()
+  public void close() throws IOException
     {
     }
-
   }

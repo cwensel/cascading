@@ -85,7 +85,7 @@ public class Flow implements Runnable
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field flowStats */
-  private FlowStats flowStats = new FlowStats(); // don't use a listener to set values
+  private final FlowStats flowStats = new FlowStats(); // don't use a listener to set values
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -720,7 +720,7 @@ public class Flow implements Runnable
   /** Class SafeFlowListener safely calls a wrapped FlowListener */
   private class SafeFlowListener implements FlowListener
     {
-    FlowListener flowListener;
+    final FlowListener flowListener;
     Throwable throwable;
 
     private SafeFlowListener( FlowListener flowListener )

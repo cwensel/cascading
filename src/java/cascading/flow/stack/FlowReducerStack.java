@@ -51,11 +51,14 @@ public class FlowReducerStack
   private static final Logger LOG = Logger.getLogger( FlowReducerStack.class );
 
   /** Field step */
-  private FlowStep step;
-
+  private final FlowStep step;
+  /** Field jobConf */
   private final JobConf jobConf;
-  private FlowReducerStackElement stackHead;
-  private FlowReducerStackElement stackTail;
+
+  /** Field stackHead */
+  private ReducerStackElement stackHead;
+  /** Field stackTail */
+  private ReducerStackElement stackTail;
 
   public FlowReducerStack( JobConf jobConf ) throws IOException
     {
@@ -115,10 +118,10 @@ public class FlowReducerStack
     useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
 
     stackTail = new TapReducerStackElement( stackTail, nextScope, (Tap) operator, useTapCollector, jobConf );
-    stackHead = (FlowReducerStackElement) stackTail.resolveStack();
+    stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
-  public void reduce( WritableComparable key, Iterator values, OutputCollector output ) throws IOException
+  public void reduce( WritableComparable key, Iterator values, OutputCollector output )
     {
     if( LOG.isDebugEnabled() )
       {
@@ -130,9 +133,8 @@ public class FlowReducerStack
     stackHead.collect( (Tuple) key, values );
     }
 
-  public void close()
+  public void close() throws IOException
     {
     stackTail.close();
     }
-
   }

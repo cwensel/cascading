@@ -32,7 +32,7 @@ public class Scope implements Serializable
   {
   static public enum Kind
     {
-      TAP, EACH, EVERY, GROUP;
+      TAP, EACH, EVERY, GROUP
     }
 
   /** Field name */

@@ -51,7 +51,7 @@ public class FlowStep implements Serializable
   private static final Logger LOG = Logger.getLogger( FlowStep.class );
 
   /** Field parentFlowName */
-  String parentFlowName;
+  private String parentFlowName;
 
   /** Field name */
   final String name;
@@ -266,13 +266,13 @@ public class FlowStep implements Serializable
 
   public class FlowStepJob implements Callable<Throwable>
     {
-    private FlowStep flowStep;
+    private final FlowStep flowStep;
     private JobConf currentConf;
     private JobClient currentJobClient;
     private RunningJob runningJob;
     private List<FlowStepJob> predecessors;
 
-    private CountDownLatch latch = new CountDownLatch( 1 );
+    private final CountDownLatch latch = new CountDownLatch( 1 );
     private boolean stop = false;
 
     public FlowStepJob( FlowStep flowStep )

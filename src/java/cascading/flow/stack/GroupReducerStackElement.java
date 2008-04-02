@@ -1,5 +1,22 @@
 /*
- * Copyright (c) 2008, Your Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package cascading.flow.stack;
@@ -18,11 +35,11 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  *
  */
-public class GroupReducerStackElement extends FlowReducerStackElement
+public class GroupReducerStackElement extends ReducerStackElement
   {
-  private Group group;
-  private Set<Scope> incomingScopes;
-  private Scope thisScope;
+  private final Group group;
+  private final Set<Scope> incomingScopes;
+  private final Scope thisScope;
   private final JobConf jobConf;
 
   public GroupReducerStackElement( Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, JobConf jobConf )
@@ -53,9 +70,8 @@ public class GroupReducerStackElement extends FlowReducerStackElement
     // this can be nasty
     values = group.makeReduceValues( jobConf, incomingScopes, thisScope, key, values );
 
-    values = new TupleEntryIterator( next.resolveIncomingOperationFields(), values );
+    values = new TupleEntryIterator( ( (ReducerStackElement) next ).resolveIncomingOperationFields(), values );
 
     next.collect( key, values );
     }
-
   }

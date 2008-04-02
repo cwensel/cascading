@@ -19,10 +19,31 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow;
+package cascading.flow.stack;
 
-/** Interface FlowConstants ... */
-public interface FlowConstants
+import cascading.flow.FlowCollector;
+
+/** Class StackElement is the base class for Map and Reduce operation stacks. */
+public abstract class StackElement implements FlowCollector
   {
-  String FLOW_STEP = "flow.step";
+  StackElement previous;
+  StackElement next;
+
+  public StackElement resolveStack()
+    {
+    if( previous != null )
+      return previous.setNext( this );
+
+    return this;
+    }
+
+  private StackElement setNext( StackElement next )
+    {
+    this.next = next;
+
+    if( previous != null )
+      return previous.setNext( this );
+
+    return this;
+    }
   }

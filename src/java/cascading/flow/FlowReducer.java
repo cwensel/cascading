@@ -68,10 +68,6 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       flowReducerStack.reduce( key, values, output );
       }
-    catch( IOException exception )
-      {
-      throw exception;
-      }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )

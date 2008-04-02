@@ -67,7 +67,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
     }
 
   @Override
-  public void close()
+  public void close() throws IOException
     {
     try
       {
@@ -76,6 +76,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
     catch( IOException exception )
       {
       LOG.warn( "exception closing: " + filename, exception );
+      throw exception;
       }
     }
 
