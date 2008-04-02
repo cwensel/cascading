@@ -50,7 +50,7 @@ public class ZipInputFormatTest extends TestCase
   private static int MAX_LENGTH = 10000;
   private static int MAX_ENTRIES = 100;
 
-  private static Path workDir = new Path( new Path( System.getProperty( "test.build.data", "build/test/output/" ), "data" ), "ZipInputFormatTest" );
+  private static Path workDir = new Path( "build/test/output/ziptest" );
 
   public void testSplits() throws Exception
     {
