@@ -22,7 +22,7 @@
 package cascading.flow;
 
 /** Interface FlowConstants ... */
-interface FlowConstants
+public interface FlowConstants
   {
   String FLOW_STEP = "flow.step";
   String FLOW_INPUT = "flow.input";

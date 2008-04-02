@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.stack.PushFlowMapperStack;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;

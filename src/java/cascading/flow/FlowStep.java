@@ -65,7 +65,7 @@ public class FlowStep implements Serializable
   /** Field tempSink */
   TempHfs tempSink; // used if we need to bypass
   /** Field group */
-  Group group;
+  public Group group;
 
   FlowStep( String name )
     {

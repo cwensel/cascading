@@ -26,6 +26,7 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.stack.PushFlowReducerStack;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
