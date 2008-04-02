@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.4.0
 
   Changed c.p.GroupBy default grouping fields to c.t.Fields.ALL from Fields.FIRST. This change provides a simple
   way to sort a tuple stream based on the order of the tuple fields.
@@ -14,17 +14,18 @@ unreleased
   allows for c.f.Flow instances to run mixed if configured to execute on a particular cluster by default. This behavior
   supports complex import/export processes against the HDFS or other supported remote filesystem.
 
-  Changed behavior of c.t.Dfs to force use of HDFS. Previously Dfs would defaul to the local FileSystem
+  Changed behavior of c.t.Dfs to force use of HDFS. Previously Dfs would default to the local FileSystem
   if the job was run in 'local'mode. Now a Dfs instance will cause failures if it cannot connect to a HDFS cluster.
   Using c.t.Hfs will provide previous Dfs behavior. Hfs will use the 'default' filesystem if a scheme is not present
   in the 'stringPath' (i.e. hdfs://host:port/some/path).
 
   Added c.stats package to allow for collecting statics of Cascades, Flows, and FlowSteps.
 
-  Updated c.f.Flow and c.c.Cascade log messages to be easier to follow when executing many flow instances simultaneously.
+  Updated c.f.Flow and c.c.Cascade log messages to be easier to follow when executing many flow instances
+  simultaneously.
 
-  Added compression flag to c.s.TextLine. Can now toggle compression (Hadoop style compression) per Tap instance. This prevents
-  clusters with complression enabled by default to export text files with a .deflate extension.
+  Added compression flag to c.s.TextLine. Can now toggle compression (Hadoop style compression) per Tap instance.
+  This prevents clusters with compression enabled by default to export text files with a .deflate extension.
 
   Added support for bypassing Hadoop OutputCollector via Tap.setUseTapCollector() method. Setting to true will force
   Cascading to use the c.t.TapCollector instead. This bypasses bugs in Hadoop with custom FileSystem types. This will
@@ -39,12 +40,14 @@ unreleased
 
   Renamed cascading.spill.threshold to cascading.cogroup.spill.threshold, so there is less a chance of collision.
 
-  Made numerous optimizations to improve overall performance.
+  Made numerous optimizations to improve overall performance. Namely split and merge of key/value tuples to remove
+  redundancy in the stream between the mapper and reducer.
 
-  Changed c.p.Operators to push c.o.Operation results directly through to next operation without intermediate collection. This should
-  improve pipelining of large result streams and lower runtime memory footprint.
+  Changed c.p.Operators to push c.o.Operation results directly through to next operation without intermediate
+  collection. This should improve pipelining of large result streams and lower runtime memory footprint.
 
-  Changed c.c.Cascade so it now runs Flows in parallel if Hadoop is clustered, and there are no dependencies between the Flows.
+  Changed c.c.Cascade so it now runs Flows in parallel if Hadoop is clustered, and there are no dependencies between the
+  Flows.
 
   Moved c.Cascade and related classed to c.cascade package. Wanted to preempt any future ugliness.
 
@@ -70,7 +73,8 @@ unreleased
 
   Fixed bug where in complex assemblies, some Scopes were not resolved.
 
-  Fixed bug where tap instances were not being inserted before some CoGroup joins if there was a previous Group in the assembly.
+  Fixed bug where tap instances were not being inserted before some CoGroup joins if there was a previous Group in the
+  assembly.
 
   Upgraded JGraphT to 0.7.3
 
