@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  *
  */
-public class GroupReducerStackElement extends ReducerStackElement
+class GroupReducerStackElement extends ReducerStackElement
   {
   private final Group group;
   private final Set<Scope> incomingScopes;

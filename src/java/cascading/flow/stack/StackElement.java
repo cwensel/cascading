@@ -24,7 +24,7 @@ package cascading.flow.stack;
 import cascading.flow.FlowCollector;
 
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
-public abstract class StackElement implements FlowCollector
+abstract class StackElement implements FlowCollector
   {
   StackElement previous;
   StackElement next;

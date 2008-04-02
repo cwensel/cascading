@@ -32,7 +32,7 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class EachReducerStackElement extends ReducerStackElement
+class EachReducerStackElement extends ReducerStackElement
   {
   private final Each each;
 

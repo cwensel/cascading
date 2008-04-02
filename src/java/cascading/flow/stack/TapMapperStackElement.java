@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  *
  */
-public class TapMapperStackElement extends MapperStackElement
+class TapMapperStackElement extends MapperStackElement
   {
   private final Tap sink;
   private TapCollector tapCollector;

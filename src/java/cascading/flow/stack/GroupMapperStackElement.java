@@ -34,7 +34,7 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class GroupMapperStackElement extends MapperStackElement
+class GroupMapperStackElement extends MapperStackElement
   {
   private final Group group;
   private final Scope outgoingScope;

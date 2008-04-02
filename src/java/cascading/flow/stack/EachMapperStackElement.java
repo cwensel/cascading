@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class EachMapperStackElement extends MapperStackElement
+class EachMapperStackElement extends MapperStackElement
   {
   private final Each each;
 

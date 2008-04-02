@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class EveryHandlerReducerStackElement extends ReducerStackElement
+class EveryHandlerReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
