@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.p.GroupBy default grouping fields to c.t.Fields.ALL from Fields.FIRST. This change provides a simple
+  way to sort a tuple stream based on the order of the tuple fields.
+
   Changed c.f.FlowConnector to create c.f.Flow instances that will bypass the reducer if no c.p.Group is participating
   in the assembly. Previoiusly Group instances were inserted if missing. This allows a chain of c.p.Every instances
   to be used to process/filter a tuple stream without the invoking the reducer needlessly (if a sort isn't required).

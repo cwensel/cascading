@@ -226,14 +226,14 @@ public class Group extends Pipe
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor Group creates a new Group instance where grouping occurs on {@link Fields#ALL) fields.
    *
    * @param pipe of type Pipe
    */
   public Group( Pipe pipe )
     {
     addPipe( pipe );
-    this.groupFieldsMap.put( pipe.getName(), Fields.FIRST ); // group on first element. this is more efficient that ALL
+    this.groupFieldsMap.put( pipe.getName(), Fields.ALL );
     this.coGrouper = new InnerJoin();
     }
 
@@ -493,8 +493,7 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException(
-            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
