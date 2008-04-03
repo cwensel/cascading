@@ -673,24 +673,24 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
   public int compareTo( Tuple other )
     {
     if( other.elements.size() != this.elements.size() )
-      return other.elements.size() < this.elements.size() ? 1 : -1;
+      return this.elements.size() - other.elements.size();
 
     for( int i = 0; i < this.elements.size(); i++ )
       {
       Comparable lhs = this.elements.get( i );
       Comparable rhs = other.elements.get( i );
 
+      if( lhs == null && rhs == null )
+        continue;
+
       if( lhs == null && rhs != null )
         return -1;
       else if( rhs != null && lhs == null )
         return 1;
 
-      if( lhs != null && rhs != null )
-        {
-        int c = lhs.compareTo( rhs );
-        if( c != 0 )
-          return c;
-        }
+      int c = lhs.compareTo( rhs );
+      if( c != 0 )
+        return c;
       }
 
     return 0;
@@ -724,7 +724,16 @@ public final class Tuple implements WritableComparable, Iterable, Serializable
 
     for( int i = 0; i < this.elements.size(); i++ )
       {
-      if( !this.elements.get( i ).equals( other.elements.get( i ) ) )
+      Comparable lhs = this.elements.get( i );
+      Comparable rhs = other.elements.get( i );
+
+      if( lhs == null && rhs == null )
+        continue;
+
+      if( lhs == null || rhs == null )
+        return false;
+
+      if( !lhs.equals( rhs ) )
         return false;
       }
 
