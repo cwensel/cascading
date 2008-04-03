@@ -157,7 +157,7 @@ public class Util
     if( url == null )
       return null;
 
-    return url.replaceAll( "([^:])/{2,}", "$1/" );
+    return url.replaceAll( "([^:]/)/{2,}", "$1/" );
     }
 
   public static String toNull( Object object )

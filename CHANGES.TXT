@@ -1,5 +1,9 @@
 Cascading Change Log
 
+0.4.1
+
+  Fixed path normalization regex in c.u.Util where it munged any path starting with file:///.
+
 0.4.0
 
   Changed c.p.GroupBy default grouping fields to c.t.Fields.ALL from Fields.FIRST. This change provides a simple
