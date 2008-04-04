@@ -62,9 +62,15 @@ public class SpillableTupleTest extends CascadingTestCase
     assertEquals( "not equal: list.size();", size, list.size() );
     assertEquals( "not equal: list.getNumFiles()", (int) Math.floor( size / threshold ), list.getNumFiles() );
 
+    int i = -1;
     int count = 0;
     for( Tuple tuple : list )
+      {
+      int value = tuple.getInteger( 0 );
+      assertTrue( "wrong diff", value - i == 1 );
+      i = value;
       count++;
+      }
 
     assertEquals( "not equal: list.size();", size, count );
 
