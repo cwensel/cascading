@@ -447,7 +447,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
 //    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );

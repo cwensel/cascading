@@ -31,20 +31,20 @@ public class Regexes
   /** Field TAB_SPLITTER is a predefined {@link RegexSplitter} for splitting on the TAB character */
   public static final RegexSplitter TAB_SPLITTER = new RegexSplitter( "\t" );
 
-  /** Field APACHE_GROUPS defines the significant regex groups used in {@link #APACHE_GROUP_FIELDS} */
-  public static final int[] APACHE_GROUPS = new int[]{1, 2, 3, 4, 5};
+  /** Field APACHE_GROUPS defines the significant regex groups used in {@link #APACHE_COMMON_GROUP_FIELDS} */
+  public static final int[] APACHE_COMMON_GROUPS = new int[]{1, 2, 3, 4, 5, 6};
 
   /**
    * Field APACHE_GROUP_FIELDS are the field names of the groups returned by the APACHE_REGEX.<br/>
    * These fields are: "time", "method", "event", "status", and "size"
    */
-  public static final Fields APACHE_GROUP_FIELDS = new Fields( "time", "method", "event", "status", "size" );
+  public static final Fields APACHE_COMMON_GROUP_FIELDS = new Fields( "ip", "time", "method", "event", "status", "size" );
   /**
    * Field APACHE_REGEX is used to parse Apache log files.<br/>
    * <code>^[^ ]* +[^ ]* +[^ ]* +\[([^]]*)\] +\"([^ ]*) ([^ ]*) [^ ]*\" ([^ ]*) ([^ ]*).*$</code>
    */
-  public static final String APACHE_REGEX = "^[^ ]* +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
+  public static final String APACHE_COMMON_REGEX = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
 
   /** Field APACHE_PARSER is a predefined {@link RegexParser} for parsing Apache log files */
-  public static final RegexParser APACHE_PARSER = new RegexParser( APACHE_GROUP_FIELDS, APACHE_REGEX, APACHE_GROUPS );
+  public static final RegexParser APACHE_COMMON_PARSER = new RegexParser( APACHE_COMMON_GROUP_FIELDS, APACHE_COMMON_REGEX, APACHE_COMMON_GROUPS );
   }

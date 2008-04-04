@@ -66,12 +66,12 @@ public class ArrivalUseCaseTest extends CascadingTestCase
 
     // input: offset, line
     // args: line
-    // output: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( 1 ), Regexes.APACHE_PARSER );
+    // output: "ip", "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( 1 ), Regexes.APACHE_COMMON_PARSER );
 
     // args: time
     // output: ts
-    pipe = new Each( pipe, new Fields( 0 ), Texts.APACHE_DATE_PARSER );
+    pipe = new Each( pipe, new Fields( 1 ), Texts.APACHE_DATE_PARSER );
 
     pipe = new Group( pipe, new Fields( 0 ) );
     pipe = new Every( pipe, new Fields( 0 ), new Count(), new Fields( 0, 1 ) );
@@ -94,7 +94,7 @@ public class ArrivalUseCaseTest extends CascadingTestCase
     Pipe pipe = new Pipe( "apache" );
 
     // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
 
     // DateParser.APACHE declares: "ts"
     pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER );
