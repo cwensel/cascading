@@ -57,15 +57,6 @@ public class ZipInputFormatTest extends TestCase
     test( new JobConf() );
     }
 
-  public void testNoSplits() throws Exception
-    {
-    JobConf job = new JobConf();
-
-    job.set( "fs.default.name", "ramfs:///" );
-
-    test( job );
-    }
-
   private void test( JobConf job ) throws IOException
     {
     FileSystem currentFs = FileSystem.get( job );
