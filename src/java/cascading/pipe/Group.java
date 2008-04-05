@@ -38,6 +38,7 @@ import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TuplePair;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -53,6 +54,10 @@ public class Group extends Pipe
   private final List<Pipe> pipes = new ArrayList<Pipe>();
   /** Field groupFieldsMap */
   protected final Map<String, Fields> groupFieldsMap = new LinkedHashMap<String, Fields>(); // keep order
+  /** Field sortFieldsMap */
+  protected Map<String, Fields> sortFieldsMap = new LinkedHashMap<String, Fields>(); // keep order
+  /** Field reverseOrder */
+  private boolean reverseOrder = false;
   /** Field declaredFields */
   protected Fields declaredFields;
   /** Field repeat */
@@ -144,27 +149,27 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param pipes  of type Pipe[]
-   * @param fields of type Fields[]
+   * @param pipes       of type Pipe[]
+   * @param groupFields of type Fields[]
    */
-  public Group( Pipe[] pipes, Fields[] fields )
+  public Group( Pipe[] pipes, Fields[] groupFields )
     {
     int last = -1;
     for( int i = 0; i < pipes.length; i++ )
       {
       addPipe( pipes[ i ] );
 
-      if( fields == null || fields.length == 0 )
+      if( groupFields == null || groupFields.length == 0 )
         {
         groupFieldsMap.put( pipes[ i ].getName(), Fields.FIRST );
         continue;
         }
 
-      if( last != -1 && last != fields[ i ].size() )
-        throw new IllegalArgumentException( "lhs and rhs cogroup fields must be same size" );
+      if( last != -1 && last != groupFields[ i ].size() )
+        throw new IllegalArgumentException( "all cogroup fields must be same size" );
 
-      last = fields[ i ].size();
-      groupFieldsMap.put( pipes[ i ].getName(), fields[ i ] );
+      last = groupFields[ i ].size();
+      groupFieldsMap.put( pipes[ i ].getName(), groupFields[ i ] );
       }
     }
 
@@ -266,6 +271,63 @@ public class Group extends Pipe
     }
 
   /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( Pipe pipe, Fields groupFields, Fields sortFields )
+    {
+    this( pipe, groupFields );
+    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields )
+    {
+    this( groupName, pipe, groupFields );
+    addPipe( pipe );
+    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    this( pipe, groupFields );
+    this.reverseOrder = reverseOrder;
+    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    this( groupName, pipe, groupFields );
+    this.reverseOrder = reverseOrder;
+    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    }
+
+  /**
    * Method getDeclaredFields returns the declaredFields of this Group object.
    *
    * @return the declaredFields (type Fields) of this Group object.
@@ -320,6 +382,36 @@ public class Group extends Pipe
     return groupFieldsMap;
     }
 
+  /**
+   * Method getSortingSelectors returns the sortingSelectors of this Group object.
+   *
+   * @return the sortingSelectors (type Map<String, Fields>) of this Group object.
+   */
+  public Map<String, Fields> getSortingSelectors()
+    {
+    return sortFieldsMap;
+    }
+
+  /**
+   * Method isSorted returns true if this Group instance is sorting values other than the group fields.
+   *
+   * @return the sorted (type boolean) of this Group object.
+   */
+  public boolean isSorted()
+    {
+    return !sortFieldsMap.isEmpty();
+    }
+
+  /**
+   * Method isSortReversed returns true if sorting is reversed.
+   *
+   * @return the sortReversed (type boolean) of this Group object.
+   */
+  public boolean isSortReversed()
+    {
+    return reverseOrder;
+    }
+
   private Map<String, Integer> getPipePos()
     {
     if( pipePos != null )
@@ -348,18 +440,22 @@ public class Group extends Pipe
   public void makeReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
     {
     Fields groupFields = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
+    Fields sortFields = outgoingScope.getSortingSelectors() == null ? null : outgoingScope.getSortingSelectors().get( incomingScope.getName() );
 
     if( LOG.isDebugEnabled() )
       LOG.debug( "cogroup: [" + incomingScope + "] key pos: [" + groupFields + "]" );
 
     // todo: would be nice to delegate this back to the GroupClosure
     Tuple groupTuple = entry.extractTuple( groupFields ); // we are nulling dupe values here to reduce bandwidth usage
+    Tuple sortTuple = sortFields == null ? null : entry.selectTuple( sortFields );
     Tuple valuesTuple = entry.getTuple();
 
+    WritableComparable groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
+
     if( isGroupBy() )
-      output.collect( groupTuple, valuesTuple );
+      output.collect( groupKey, valuesTuple );
     else
-      output.collect( groupTuple, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
+      output.collect( groupKey, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
     }
 
   /**
@@ -374,13 +470,15 @@ public class Group extends Pipe
     {
     GroupClosure closure;
 
+    Tuple grouping = !isSorted() ? (Tuple) key : ( (TuplePair) key ).getLhs();
+
     if( isGroupBy() )
       {
       Scope incomingScope = incomingScopes.iterator().next();
       Fields[] groupFields = Fields.fields( outgoingScope.getGroupingSelectors().get( incomingScope.getName() ) );
       Fields[] valuesFields = Fields.fields( incomingScope.getOutValuesFields() );
 
-      closure = new GroupClosure( groupFields, valuesFields, (Tuple) key, values );
+      closure = new GroupClosure( groupFields, valuesFields, grouping, values );
       }
     else
       {
@@ -395,7 +493,7 @@ public class Group extends Pipe
         valuesFields[ pos ] = incomingScope.getOutValuesFields();
         }
 
-      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, (Tuple) key, values );
+      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, grouping, values );
       }
 
     if( coGrouper == null )
@@ -415,10 +513,11 @@ public class Group extends Pipe
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     Map<String, Fields> groupingSelectors = resolveGroupingSelectors( incomingScopes );
+    Map<String, Fields> sortingSelectors = resolveSortingSelectors( incomingScopes );
     Fields declared = resolveDeclared( incomingScopes );
 
     // for Group, the outgoing fields are the same as those declared
-    return new Scope( getName(), declared, groupingSelectors, declared );
+    return new Scope( getName(), declared, groupingSelectors, sortingSelectors, declared );
     }
 
   Map<String, Fields> resolveGroupingSelectors( Set<Scope> incomingScopes )
@@ -426,28 +525,7 @@ public class Group extends Pipe
     try
       {
       Map<String, Fields> groupingSelectors = getGroupingSelectors();
-      Map<String, Fields> groupingFields = new HashMap<String, Fields>();
-
-      for( Scope incomingScope : incomingScopes )
-        {
-        Fields groupingSelector = groupingSelectors.get( incomingScope.getName() );
-
-        if( groupingSelector == null )
-          throw new OperatorException( "no grouping selector found for: " + incomingScope.getName() );
-
-        Fields incomingFields;
-
-        if( groupingSelector.isAll() )
-          incomingFields = resolveFields( incomingScope );
-        else if( groupingSelector.isKeys() )
-          incomingFields = incomingScope.getOutGroupingFields();
-        else if( groupingSelector.isValues() )
-          incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
-        else
-          incomingFields = resolveFields( incomingScope ).select( groupingSelector );
-
-        groupingFields.put( incomingScope.getName(), incomingFields );
-        }
+      Map<String, Fields> groupingFields = resolveSelectorsAgainstIncoming( incomingScopes, groupingSelectors );
 
       Iterator<Fields> iterator = groupingFields.values().iterator();
       int size = iterator.next().size();
@@ -467,6 +545,49 @@ public class Group extends Pipe
     catch( RuntimeException exception )
       {
       throw new OperatorException( "could not resolve grouping selector in: " + this, exception );
+      }
+    }
+
+  private Map<String, Fields> resolveSelectorsAgainstIncoming( Set<Scope> incomingScopes, Map<String, Fields> selectors )
+    {
+    Map<String, Fields> resolvedFields = new HashMap<String, Fields>();
+
+    for( Scope incomingScope : incomingScopes )
+      {
+      Fields selector = selectors.get( incomingScope.getName() );
+
+      if( selector == null )
+        throw new OperatorException( "no grouping selector found for: " + incomingScope.getName() );
+
+      Fields incomingFields;
+
+      if( selector.isAll() )
+        incomingFields = resolveFields( incomingScope );
+      else if( selector.isKeys() )
+        incomingFields = incomingScope.getOutGroupingFields();
+      else if( selector.isValues() )
+        incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+      else
+        incomingFields = resolveFields( incomingScope ).select( selector );
+
+      resolvedFields.put( incomingScope.getName(), incomingFields );
+      }
+
+    return resolvedFields;
+    }
+
+  Map<String, Fields> resolveSortingSelectors( Set<Scope> incomingScopes )
+    {
+    try
+      {
+      if( getSortingSelectors().isEmpty() )
+        return null;
+
+      return resolveSelectorsAgainstIncoming( incomingScopes, getSortingSelectors() );
+      }
+    catch( RuntimeException exception )
+      {
+      throw new OperatorException( "could not resolve sorting selector in: " + this, exception );
       }
     }
 

@@ -25,13 +25,10 @@ import java.util.Iterator;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
 
 /** Class GroupClosure ... */
 public class GroupClosure
   {
-  private static final Logger LOG = Logger.getLogger( GroupClosure.class );
-
   final Fields[] groupingFields;
   final Fields[] valueFields;
   final Tuple grouping;

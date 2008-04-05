@@ -35,6 +35,11 @@ import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.TempHfs;
 import cascading.tuple.Tuple;
+import cascading.tuple.TuplePair;
+import cascading.tuple.hadoop.GroupingComparator;
+import cascading.tuple.hadoop.GroupingPartitioner;
+import cascading.tuple.hadoop.ReverseComparator;
+import cascading.tuple.hadoop.ReverseGroupingComparator;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -313,7 +318,25 @@ public class FlowStep implements Serializable
         }
 
       if( flowStep.group == null )
+        {
         currentConf.setNumReduceTasks( 0 ); // disable reducers
+        }
+      else if( flowStep.group.isSorted() )
+        {
+        currentConf.setPartitionerClass( GroupingPartitioner.class );
+        currentConf.setMapOutputKeyClass( TuplePair.class );
+
+        if( flowStep.group.isSortReversed() )
+          {
+          currentConf.setOutputKeyComparatorClass( ReverseComparator.class );
+          currentConf.setOutputValueGroupingComparator( ReverseGroupingComparator.class );
+          }
+        else
+          {
+          // uses default comparator
+          currentConf.setOutputValueGroupingComparator( GroupingComparator.class );
+          }
+        }
       }
 
     public Throwable call()

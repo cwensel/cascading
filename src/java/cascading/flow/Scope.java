@@ -45,6 +45,8 @@ public class Scope implements Serializable
   private Fields declaredFields; // fields declared by the operation
   /** Field groupingSelectors */
   private Map<String, Fields> groupingSelectors;
+  /** Field sortingSelectors */
+  private Map<String, Fields> sortingSelectors;
 
   /** Field outGroupingSelector */
   private Fields outGroupingSelector;
@@ -142,7 +144,7 @@ public class Scope implements Serializable
    * @param groupingSelectors of type Map<String, Fields>
    * @param outValuesFields   of type Fields
    */
-  public Scope( String name, Fields declaredFields, Map<String, Fields> groupingSelectors, Fields outValuesFields )
+  public Scope( String name, Fields declaredFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields )
     {
     this.name = name;
     this.kind = Kind.GROUP;
@@ -153,9 +155,9 @@ public class Scope implements Serializable
     if( outValuesFields == null )
       throw new IllegalArgumentException( "values may not be null" );
 
-
     this.declaredFields = declaredFields;
     this.groupingSelectors = groupingSelectors;
+    this.sortingSelectors = sortingSelectors; // null ok
     this.outValuesFields = outValuesFields;
     }
 
@@ -315,6 +317,16 @@ public class Scope implements Serializable
     }
 
   /**
+   * Method getSortingSelectors returns the sortingSelectors of this Scope object.
+   *
+   * @return the sortingSelectors (type Map<String, Fields>) of this Scope object.
+   */
+  public Map<String, Fields> getSortingSelectors()
+    {
+    return sortingSelectors;
+    }
+
+  /**
    * Method getOutGroupingSelector returns the outGroupingSelector of this Scope object.
    *
    * @return the outGroupingSelector (type Fields) of this Scope object.
@@ -373,6 +385,7 @@ public class Scope implements Serializable
     this.argumentSelector = scope.argumentSelector;
     this.declaredFields = scope.declaredFields;
     this.groupingSelectors = scope.groupingSelectors;
+    this.sortingSelectors = scope.sortingSelectors;
     this.outGroupingSelector = scope.outGroupingSelector;
     this.outGroupingFields = scope.outGroupingFields;
     this.outValuesSelector = scope.outValuesSelector;

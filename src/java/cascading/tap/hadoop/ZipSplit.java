@@ -26,10 +26,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.UTF8;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -40,11 +38,9 @@ import org.apache.hadoop.mapred.Reporter;
  * {@link ZipInputFormat#getSplits(JobConf , int)} and passed to
  * {@link ZipInputFormat#getRecordReader(InputSplit , JobConf , Reporter)}.
  */
-
 public class ZipSplit extends FileSplit
   {
-  public static final Log LOG = LogFactory.getLog( "org.apache.hadoop.mapred.ZipSplit" );
-
+  /** Field entryPath */
   private String entryPath;
 
   ZipSplit()
@@ -78,7 +74,11 @@ public class ZipSplit extends FileSplit
     super( file, 0, length, conf );
     }
 
-  /** The path of the file within the zip archive. */
+  /**
+   * The path of the file within the zip archive.
+   *
+   * @return returns the path for this entry
+   */
   public String getEntryPath()
     {
     return entryPath;
@@ -90,12 +90,12 @@ public class ZipSplit extends FileSplit
   public void write( DataOutput out ) throws IOException
     {
     super.write( out );
-    UTF8.writeString( out, entryPath == null ? "" : entryPath );
+    WritableUtils.writeString( out, entryPath == null ? "" : entryPath );
     }
 
   public void readFields( DataInput in ) throws IOException
     {
     super.readFields( in );
-    entryPath = UTF8.readString( in );
+    entryPath = WritableUtils.readString( in );
     }
   }

@@ -7,6 +7,8 @@ package cascading;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -33,19 +35,16 @@ public class SortedValuesTest extends ClusterTestCase
 
   public SortedValuesTest()
     {
-    super( "sorted values", true );
+    super( "sorted values", false );
     }
 
-  public void testSortedValue() throws Exception
+  public void testSortedValues() throws Exception
     {
-    if( true )
-      return;
-
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
     Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath, true );
+    Tap sink = new Lfs( new TextLine(), outputPath + "forward", true );
 
     Pipe pipe = new Pipe( "apache" );
 
@@ -57,7 +56,8 @@ public class SortedValuesTest extends ClusterTestCase
     // DateParser.APACHE declares: "ts"
     pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
-    pipe = new GroupBy( pipe, new Fields( "col" ) );
+    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ) );
+//    pipe = new GroupBy( pipe, new Fields( "col" ) );
 
     jobConf.setNumMapTasks( 13 );
 
@@ -65,12 +65,43 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateFile( sink, 200 );
+    validateFile( sink, 200, 6, false );
     }
 
-  private void validateFile( Tap tap, int length ) throws IOException, ParseException
+  public void testSortedValuesReversed() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileApache );
+    Tap sink = new Lfs( new TextLine(), outputPath + "reverse", true );
+
+    Pipe pipe = new Pipe( "apache" );
+
+    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
+
+    // DateParser.APACHE declares: "ts"
+    pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ), true );
+
+    jobConf.setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateFile( sink, 200, 6, true );
+    }
+
+  private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed ) throws IOException, ParseException
     {
     TapIterator iterator = tap.openForRead( new JobConf() );
+
+    Set<Integer> values = new HashSet<Integer>();
 
     int lastValue = -1;
     int count = 0;
@@ -84,13 +115,20 @@ public class SortedValuesTest extends ClusterTestCase
 
       int value = tuple.getInteger( 1 );
 
-      assertTrue( "out of order in " + tap, lastValue < value );
+      values.add( value );
+
+      if( isReversed )
+        assertTrue( "out of order in " + tap, lastValue >= value );
+      else
+        assertTrue( "out of order in " + tap, lastValue <= value );
 
       lastValue = value;
       }
 
     if( length != -1 )
       assertEquals( "length of " + tap, length, count );
-    }
 
+    if( uniqueValues != -1 )
+      assertEquals( "unique values of" + tap, uniqueValues, values.size() );
+    }
   }

@@ -53,7 +53,7 @@ import org.apache.hadoop.io.WritableUtils;
  * constructor, a subsequent {@link Pipe} could change the Tuple in place. This is especially true for {@link Aggregator}
  * operators.
  */
-public final class Tuple implements WritableComparable, Iterable, Serializable
+public class Tuple implements WritableComparable, Iterable, Serializable
   {
   /** Field elements */
   private List<Comparable> elements = new ArrayList<Comparable>();
