@@ -63,7 +63,7 @@ class GroupMapperStackElement extends MapperStackElement
     {
     try
       {
-      group.makeReduceGrouping( incomingScope, outgoingScope, tupleEntry, lastOutput );
+      group.collectReduceGrouping( incomingScope, outgoingScope, tupleEntry, lastOutput );
       }
     catch( IOException exception )
       {

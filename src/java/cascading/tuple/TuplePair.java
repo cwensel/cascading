@@ -108,4 +108,9 @@ public class TuplePair extends Tuple
 
     return c;
     }
+
+  public String toString()
+    {
+    return tuples[ 0 ].print() + tuples[ 1 ].print();
+    }
   }

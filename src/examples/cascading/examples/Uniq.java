@@ -54,7 +54,7 @@ public class Uniq extends Group
     }
 
   @Override
-  public void makeReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector lastOutput ) throws IOException
+  public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector lastOutput ) throws IOException
     {
     Fields groupFields = groupFieldsMap.get( incomingScope.getName() );
 
@@ -68,7 +68,7 @@ public class Uniq extends Group
     }
 
   @Override
-  public Iterator<Tuple> makeReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope thisScope, WritableComparable key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope thisScope, WritableComparable key, Iterator values )
     {
     // we must walk all the values, otherwise we will get dupe keys
     while( values.hasNext() )

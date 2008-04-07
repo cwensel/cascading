@@ -63,12 +63,14 @@ class GroupReducerStackElement extends ReducerStackElement
 
   private void operateGroup( Tuple key, Iterator values )
     {
+    key = group.unwrapGrouping( key );
+
     // if a cogroup group instance...
     // an ungrouping iterator to partition the values back into a tuple so reduce stack can run
     // this can be one big tuple. the values iterator will have one Tuple of the format:
     // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
     // this can be nasty
-    values = group.makeReduceValues( jobConf, incomingScopes, thisScope, key, values );
+    values = group.iterateReduceValues( jobConf, incomingScopes, thisScope, key, values );
 
     values = new TupleEntryIterator( ( (ReducerStackElement) next ).resolveIncomingOperationFields(), values );
 

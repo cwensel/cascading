@@ -437,7 +437,7 @@ public class Group extends Pipe
    * @param entry         of type TupleEntry
    * @param output        of type OutputCollector
    */
-  public void makeReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
+  public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
     {
     Fields groupFields = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
     Fields sortFields = outgoingScope.getSortingSelectors() == null ? null : outgoingScope.getSortingSelectors().get( incomingScope.getName() );
@@ -458,6 +458,11 @@ public class Group extends Pipe
       output.collect( groupKey, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
     }
 
+  public Tuple unwrapGrouping( Tuple tuple )
+    {
+    return !isSorted() ? (Tuple) tuple : ( (TuplePair) tuple ).getLhs();
+    }
+
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
@@ -466,11 +471,9 @@ public class Group extends Pipe
    * @param key           of type WritableComparable
    * @param values        of type Iterator @return Iterator<Tuple>
    */
-  public Iterator<Tuple> makeReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, WritableComparable key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, WritableComparable key, Iterator values )
     {
     GroupClosure closure;
-
-    Tuple grouping = !isSorted() ? (Tuple) key : ( (TuplePair) key ).getLhs();
 
     if( isGroupBy() )
       {
@@ -478,7 +481,7 @@ public class Group extends Pipe
       Fields[] groupFields = Fields.fields( outgoingScope.getGroupingSelectors().get( incomingScope.getName() ) );
       Fields[] valuesFields = Fields.fields( incomingScope.getOutValuesFields() );
 
-      closure = new GroupClosure( groupFields, valuesFields, grouping, values );
+      closure = new GroupClosure( groupFields, valuesFields, (Tuple) key, values );
       }
     else
       {
@@ -493,7 +496,7 @@ public class Group extends Pipe
         valuesFields[ pos ] = incomingScope.getOutValuesFields();
         }
 
-      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, grouping, values );
+      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, (Tuple) key, values );
       }
 
     if( coGrouper == null )
@@ -525,7 +528,7 @@ public class Group extends Pipe
     try
       {
       Map<String, Fields> groupingSelectors = getGroupingSelectors();
-      Map<String, Fields> groupingFields = resolveSelectorsAgainstIncoming( incomingScopes, groupingSelectors );
+      Map<String, Fields> groupingFields = resolveSelectorsAgainstIncoming( incomingScopes, groupingSelectors, "grouping" );
 
       Iterator<Fields> iterator = groupingFields.values().iterator();
       int size = iterator.next().size();
@@ -548,7 +551,7 @@ public class Group extends Pipe
       }
     }
 
-  private Map<String, Fields> resolveSelectorsAgainstIncoming( Set<Scope> incomingScopes, Map<String, Fields> selectors )
+  private Map<String, Fields> resolveSelectorsAgainstIncoming( Set<Scope> incomingScopes, Map<String, Fields> selectors, String type )
     {
     Map<String, Fields> resolvedFields = new HashMap<String, Fields>();
 
@@ -557,7 +560,7 @@ public class Group extends Pipe
       Fields selector = selectors.get( incomingScope.getName() );
 
       if( selector == null )
-        throw new OperatorException( "no grouping selector found for: " + incomingScope.getName() );
+        throw new OperatorException( "no " + type + " selector found for: " + incomingScope.getName() );
 
       Fields incomingFields;
 
@@ -583,7 +586,7 @@ public class Group extends Pipe
       if( getSortingSelectors().isEmpty() )
         return null;
 
-      return resolveSelectorsAgainstIncoming( incomingScopes, getSortingSelectors() );
+      return resolveSelectorsAgainstIncoming( incomingScopes, getSortingSelectors(), "sorting" );
       }
     catch( RuntimeException exception )
       {
@@ -614,7 +617,8 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException(
+            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
