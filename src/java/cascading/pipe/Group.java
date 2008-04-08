@@ -458,6 +458,12 @@ public class Group extends Pipe
       output.collect( groupKey, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
     }
 
+  /**
+   * Method unwrapGrouping tests if the given grouping key Tuple should be unwrapped if this Group instance is sorting.
+   *
+   * @param tuple of type Tuple
+   * @return Tuple
+   */
   public Tuple unwrapGrouping( Tuple tuple )
     {
     return !isSorted() ? (Tuple) tuple : ( (TuplePair) tuple ).getLhs();
