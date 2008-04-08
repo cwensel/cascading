@@ -54,7 +54,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function
    */
   public ExpressionFunction( Fields fieldDeclaration, String expression, Class... parameterTypes )
     {
-    super( parameterTypes.length, fieldDeclaration, expression );
+    super( parameterTypes.length, fieldDeclaration, expression, parameterTypes );
 
     if( fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
