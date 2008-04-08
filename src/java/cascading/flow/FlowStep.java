@@ -135,6 +135,36 @@ public class FlowStep implements Serializable
     else
       sink.sinkInit( conf );
 
+    if( sink.getScheme().getNumSinkParts() != 0 )
+      {
+      // if no reducer, set num map tasks to control parts
+      if( group != null )
+        conf.setNumReduceTasks( sink.getScheme().getNumSinkParts() );
+      else
+        conf.setNumMapTasks( sink.getScheme().getNumSinkParts() );
+      }
+
+    if( group == null )
+      {
+      conf.setNumReduceTasks( 0 ); // disable reducers
+      }
+    else if( group.isSorted() )
+      {
+      conf.setPartitionerClass( GroupingPartitioner.class );
+      conf.setMapOutputKeyClass( TuplePair.class );
+
+      if( group.isSortReversed() )
+        {
+        conf.setOutputKeyComparatorClass( ReverseComparator.class );
+        conf.setOutputValueGroupingComparator( ReverseGroupingComparator.class );
+        }
+      else
+        {
+        // uses default comparator
+        conf.setOutputValueGroupingComparator( GroupingComparator.class );
+        }
+      }
+
     return conf;
     }
 
@@ -307,36 +337,6 @@ public class FlowStep implements Serializable
       {
       currentConf = flowStep.getJobConf( jobConf );
       this.predecessors = predecessors;
-
-      if( flowStep.sink.getScheme().getNumSinkParts() != 0 )
-        {
-        // if no reducer, set num map tasks to control parts
-        if( flowStep.group != null )
-          currentConf.setNumReduceTasks( flowStep.sink.getScheme().getNumSinkParts() );
-        else
-          currentConf.setNumMapTasks( flowStep.sink.getScheme().getNumSinkParts() );
-        }
-
-      if( flowStep.group == null )
-        {
-        currentConf.setNumReduceTasks( 0 ); // disable reducers
-        }
-      else if( flowStep.group.isSorted() )
-        {
-        currentConf.setPartitionerClass( GroupingPartitioner.class );
-        currentConf.setMapOutputKeyClass( TuplePair.class );
-
-        if( flowStep.group.isSortReversed() )
-          {
-          currentConf.setOutputKeyComparatorClass( ReverseComparator.class );
-          currentConf.setOutputValueGroupingComparator( ReverseGroupingComparator.class );
-          }
-        else
-          {
-          // uses default comparator
-          currentConf.setOutputValueGroupingComparator( GroupingComparator.class );
-          }
-        }
       }
 
     public Throwable call()
