@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Added c.o.e.ExpressionFilter, the c.o.Filter analog to c.o.e.ExpressionFunction.
+
 0.4.1
 
   Fixed path normalization regex in c.u.Util where it munged any path starting with file:///.

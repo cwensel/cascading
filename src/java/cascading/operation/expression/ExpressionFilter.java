@@ -21,18 +21,18 @@
 
 package cascading.operation.expression;
 
-import cascading.operation.Function;
+import cascading.operation.Filter;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 import org.codehaus.janino.ExpressionEvaluator;
 
 /**
- * Class ExpressionFunction dynamically resolves a given expression using argument {@link Tuple} values. This {@link Function}
+ * Class ExpressionFilter dynamically resolves a given expression using argument {@link Tuple} values. Any Tuple that
+ * returns true for the given expression will be removed from the stream. This {@link Filter}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifially this function uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifially this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
@@ -43,27 +43,21 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class ExpressionFunction extends ExpressionOperation implements Function
+public class ExpressionFilter extends ExpressionOperation implements Filter
   {
   /**
-   * Constructor ExpressionFunction creates a new ExpressionFunction instance.
+   * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
-   * @param fieldDeclaration of type Fields
-   * @param expression       of type String
-   * @param parameterTypes   of type Class[]
+   * @param expression     of type String
+   * @param parameterTypes of type Class[]
    */
-  public ExpressionFunction( Fields fieldDeclaration, String expression, Class... parameterTypes )
+  public ExpressionFilter( String expression, Class... parameterTypes )
     {
-    super( parameterTypes.length, fieldDeclaration, expression );
-
-    if( fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
+    super( ANY, Fields.ALL, expression, parameterTypes );
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  public boolean isRemove( TupleEntry input )
     {
-    outputCollector.add( new Tuple( evaluate( input ) ) );
+    return (Boolean) evaluate( input );
     }
-
   }
