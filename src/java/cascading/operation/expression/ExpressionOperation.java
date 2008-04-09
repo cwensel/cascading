@@ -154,6 +154,7 @@ public class ExpressionOperation extends Operation
       {
       throw new OperationException( "could not evaluate expression: " + expression, exception );
       }
+
     return value;
     }
   }
