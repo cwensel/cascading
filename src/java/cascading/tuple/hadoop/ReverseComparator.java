@@ -21,7 +21,6 @@ public class ReverseComparator extends WritableComparator
   @Override
   public int compare( WritableComparable lhs, WritableComparable rhs )
     {
-    return ( (TuplePair) rhs ).compareTo( (TuplePair) lhs );
+    return rhs.compareTo( lhs ); // swap arguments
     }
-
   }

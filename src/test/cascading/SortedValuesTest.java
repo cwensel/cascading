@@ -41,45 +41,21 @@ public class SortedValuesTest extends ClusterTestCase
 
   public void testSortedValues() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath + "forward", true );
-
-    Pipe pipe = new Pipe( "apache" );
-
-    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
-
-    pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
-
-    // DateParser.APACHE declares: "ts"
-    pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
-
-    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ) );
-
-    pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
-
-    jobConf.setNumMapTasks( 13 );
-
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    validateFile( sink, 200, 6, false );
+    runSortTest( "forward", false );
     }
 
   public void testSortedValuesReversed() throws Exception
     {
-    if( true )
-      return;
+    runSortTest( "reversed", true );
+    }
 
+  private void runSortTest( String path, boolean sorted ) throws IOException, ParseException
+    {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
     Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath + "reverse", true );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
 
     Pipe pipe = new Pipe( "apache" );
 
@@ -91,7 +67,7 @@ public class SortedValuesTest extends ClusterTestCase
     // DateParser.APACHE declares: "ts"
     pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
-    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ), true );
+    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ), sorted );
 
     pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
 
@@ -101,7 +77,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateFile( sink, 200, 6, true );
+    validateFile( sink, 200, 6, sorted );
     }
 
   private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed ) throws IOException, ParseException
@@ -110,7 +86,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     Set<Integer> values = new HashSet<Integer>();
 
-    int lastValue = -1;
+    int lastValue = isReversed ? Integer.MAX_VALUE : Integer.MIN_VALUE;
     int count = 0;
 
     while( iterator.hasNext() )

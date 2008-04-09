@@ -176,6 +176,7 @@ public class TupleTest extends CascadingTestCase
     bTuple = new Tuple( "Just My Luck", "ClaudiaPuig", "3.0", "LisaRose", "2.0" );
 
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) > 0 );
+    assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) < 0 );
     }
 
   public void testCompare3()
@@ -189,6 +190,7 @@ public class TupleTest extends CascadingTestCase
     bTuple = new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 2.0 );
 
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) > 0 );
+    assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) < 0 );
     }
 
   public void testCompare4()
@@ -202,6 +204,26 @@ public class TupleTest extends CascadingTestCase
     bTuple = new Tuple( "Just My Luck", "ClaudiaPuig", null, "Z", null );
 
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) == "LisaRose".compareTo( "Z" ) );
+    assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) == "Z".compareTo( "LisaRose" ) );
+    }
+
+  public void testPairCompare()
+    {
+    TuplePair aTuple = new TuplePair( new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 3.0 ), new Tuple( "a" ) );
+    TuplePair bTuple = new TuplePair( new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 3.0 ), new Tuple( "a" ) );
+
+    assertEquals( "not equal: aTuple", bTuple, aTuple );
+    assertTrue( "not equal than: aTuple = bTuple", aTuple.compareTo( bTuple ) == 0 );
+
+    bTuple = new TuplePair( new Tuple( "Just My Luck", "ClaudiaPuig", 2.0, "LisaRose", 3.0 ), new Tuple( "a" ) );
+
+    assertTrue( "not less than: aTuple > bTuple", aTuple.compareTo( bTuple ) > 0 );
+    assertTrue( "not less than: bTuple < aTuple", bTuple.compareTo( aTuple ) < 0 );
+
+    bTuple = new TuplePair( new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 3.0 ), new Tuple( "b" ) );
+
+    assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) < 0 );
+    assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) > 0 );
     }
 
   public void testParse()

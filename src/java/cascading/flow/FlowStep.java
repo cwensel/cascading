@@ -39,7 +39,6 @@ import cascading.tuple.TuplePair;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.ReverseComparator;
-import cascading.tuple.hadoop.ReverseGroupingComparator;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -154,15 +153,10 @@ public class FlowStep implements Serializable
       conf.setMapOutputKeyClass( TuplePair.class );
 
       if( group.isSortReversed() )
-        {
         conf.setOutputKeyComparatorClass( ReverseComparator.class );
-        conf.setOutputValueGroupingComparator( ReverseGroupingComparator.class );
-        }
-      else
-        {
-        // uses default comparator
-        conf.setOutputValueGroupingComparator( GroupingComparator.class );
-        }
+
+      // no need to supply a reverse comparator, only equality is checked
+      conf.setOutputValueGroupingComparator( GroupingComparator.class );
       }
 
     return conf;
