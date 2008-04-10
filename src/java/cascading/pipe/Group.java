@@ -301,9 +301,10 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param sortFields  of type Fields
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
    */
   public Group( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
@@ -315,10 +316,11 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName   of type String
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param sortFields  of type Fields
+   * @param groupName    of type String
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
    */
   public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
@@ -623,8 +625,7 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException(
-            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
