@@ -100,7 +100,6 @@
     <echo message="${CLASSPATH}"/>
   </target>
 
-  <!-- builds jstress -->
   <target name="build" depends="init">
     <echo message="building cascade..."/>
 
@@ -135,7 +134,6 @@
     </copy>
   </target>
 
-  <!-- creates jstress javadoc -->
   <target name="javadoc" depends="init">
     <echo message="creating cascading javadoc..."/>
     <delete dir="${javadoc}"/>
@@ -276,6 +274,5 @@
       </tarfileset>
     </tar>
   </target>
-
 
 </project>
