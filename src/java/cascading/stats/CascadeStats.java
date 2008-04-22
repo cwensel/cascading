@@ -40,4 +40,9 @@ public class CascadeStats extends CascadingStats
     {
     return flowStatsList.size();
     }
+
+  public String toString()
+    {
+    return "Cascade{" + "flowStatsList=" + flowStatsList + '}';
+    }
   }

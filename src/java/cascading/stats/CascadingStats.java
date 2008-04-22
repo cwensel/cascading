@@ -51,6 +51,31 @@ public class CascadingStats
     return status == Status.COMPLETED || status == Status.FAILED || status == Status.STOPPED;
     }
 
+  public boolean isPending()
+    {
+    return status == Status.PENDING;
+    }
+
+  public boolean isRunning()
+    {
+    return status == Status.RUNNING;
+    }
+
+  public boolean isCompleted()
+    {
+    return status == Status.COMPLETED;
+    }
+
+  public boolean isFailed()
+    {
+    return status == Status.FAILED;
+    }
+
+  public boolean isStopped()
+    {
+    return status == Status.STOPPED;
+    }
+
   public void markRunning()
     {
     if( status != Status.PENDING )
@@ -96,5 +121,20 @@ public class CascadingStats
 
     status = Status.STOPPED;
     markFinishedTime();
+    }
+
+  protected String getStatsString()
+    {
+    String string = "status=" + status + ", startTime=" + startTime;
+
+    if( finishedTime != 0 )
+      string += ", duration=" + ( finishedTime - startTime );
+
+    return string;
+    }
+
+  public String toString()
+    {
+    return "Cascading{" + getStatsString() + '}';
     }
   }

@@ -38,4 +38,15 @@ public class FlowStats extends CascadingStats
     {
     this.stepsCount = stepsCount;
     }
+
+  @Override
+  protected String getStatsString()
+    {
+    return super.getStatsString() + ", stepsCount=" + stepsCount;
+    }
+
+  public String toString()
+    {
+    return "Flow{" + getStatsString() + '}';
+    }
   }
