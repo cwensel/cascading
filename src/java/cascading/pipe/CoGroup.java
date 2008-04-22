@@ -112,4 +112,87 @@ public class CoGroup extends Group
     {
     super( pipes, fields );
     }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param declaredFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, coGrouper );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, coGrouper );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param pipes     of type Pipe...
+   */
+  public CoGroup( String groupName, Pipe... pipes )
+    {
+    super( groupName, pipes );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param pipes     of type Pipe[]
+   * @param fields    of type Fields[]
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] fields )
+    {
+    super( groupName, pipes, fields );
+    }
   }

@@ -64,9 +64,9 @@ public class Group extends Pipe
   private int repeat = 1;
   /** Field coGrouper */
   private CoGrouper coGrouper;
-
   /** Field groupName */
-  private transient String groupName;
+  private String groupName;
+
   /** Field pipePos */
   private transient Map<String, Integer> pipePos;
 
@@ -171,6 +171,95 @@ public class Group extends Pipe
       last = groupFields[ i ].size();
       groupFieldsMap.put( pipes[ i ].getName(), groupFields[ i ] );
       }
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param declaredFields of type Fields
+   */
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, coGrouper );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, coGrouper );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param lhs            of type Pipe
+   * @param lhsGroupFields of type Fields
+   * @param rhs            of type Pipe
+   * @param rhsGroupFields of type Fields
+   */
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param pipes     of type Pipe...
+   */
+  public Group( String groupName, Pipe... pipes )
+    {
+    this( pipes );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName
+   * @param pipes       of type Pipe[]
+   * @param groupFields of type Fields[]
+   */
+  public Group( String groupName, Pipe[] pipes, Fields[] groupFields )
+    {
+    this( pipes, groupFields );
+    this.groupName = groupName;
     }
 
   /**
@@ -625,7 +714,8 @@ public class Group extends Pipe
           size += resolveFields( incomingScope ).size();
 
         if( declaredFields.size() != size * repeat )
-          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException(
+            "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
