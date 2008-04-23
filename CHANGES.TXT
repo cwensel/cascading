@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Added c.s.CascadeStats and c.s.FlowStats to provide access to current state and statistics of particular
+  Cascade, Flow, or the child Flows of a Cascade.
+
+  Added ability to sort grouping values with sort argument on c.p.GroupBy. Sorts can be reversed.
+
   Added c.o.e.ExpressionFilter, the c.o.Filter analog to c.o.e.ExpressionFunction.
 
 0.4.1
