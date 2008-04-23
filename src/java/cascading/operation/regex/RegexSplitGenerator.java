@@ -21,24 +21,25 @@
 
 package cascading.operation.regex;
 
-import java.util.regex.Matcher;
-
-import cascading.operation.Function;
 import cascading.operation.generator.Generator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class RegexGenerator will emit a new Tuple for every matched regex group. */
-public class RegexGenerator extends RegexOperation implements Generator
+/**
+ * Class RegexGenerator will emit a new Tuple for every split on the incoming argument value delimited by the given patternString.
+ * <p/>
+ * This could be used to break a document into single word tuples for later processing for a word count.
+ */
+public class RegexSplitGenerator extends RegexOperation implements Generator
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
    *
    * @param patternString of type String
    */
-  public RegexGenerator( String patternString )
+  public RegexSplitGenerator( String patternString )
     {
     super( 1, Fields.size( 1 ), patternString );
     }
@@ -49,7 +50,7 @@ public class RegexGenerator extends RegexOperation implements Generator
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
-  public RegexGenerator( Fields fieldDeclaration, String patternString )
+  public RegexSplitGenerator( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );
 
@@ -57,7 +58,7 @@ public class RegexGenerator extends RegexOperation implements Generator
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
+  /** @see cascading.operation.Function#operate(cascading.tuple.TupleEntry, cascading.tuple.TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     String value = input.getTuple().getString( 0 );
@@ -65,9 +66,9 @@ public class RegexGenerator extends RegexOperation implements Generator
     if( value == null )
       value = "";
 
-    Matcher matcher = getPattern().matcher( value );
+    String[] split = getPattern().split( value );
 
-    while( matcher.find() )
-      outputCollector.add( new Tuple( matcher.group() ) );
+    for( String string : split )
+      outputCollector.add( new Tuple( string ) );
     }
   }

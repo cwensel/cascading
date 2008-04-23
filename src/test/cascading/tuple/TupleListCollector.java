@@ -63,7 +63,7 @@ public class TupleListCollector extends TupleCollector implements Iterable<Tuple
     }
 
   /**
-   * Method isEmpty returns the empty of this TupleCollector object.
+   * Method isEmpty returns true if this collection is empty.
    *
    * @return the empty (type boolean) of this TupleCollector object.
    */
@@ -78,6 +78,21 @@ public class TupleListCollector extends TupleCollector implements Iterable<Tuple
     tuples.clear();
     }
 
+  /**
+   * Returns the size of this collection.
+   *
+   * @return int
+   */
+  public int size()
+    {
+    return tuples.size();
+    }
+
+  /**
+   * Method iterator returns an iterator for this collection.
+   *
+   * @return Iterator<Tuple>
+   */
   public Iterator<Tuple> iterator()
     {
     return tuples.iterator();

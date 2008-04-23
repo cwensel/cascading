@@ -64,7 +64,11 @@ public class RegexSplitter extends RegexOperation implements Function
   /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
-    String value = (String) input.get( 0 );
+    String value = input.getTuple().getString( 0 );
+
+    if( value == null )
+      value = "";
+
     Tuple output = new Tuple();
 
     // TODO: optimize this

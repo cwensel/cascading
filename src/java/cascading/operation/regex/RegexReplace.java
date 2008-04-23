@@ -68,7 +68,7 @@ public class RegexReplace extends RegexOperation implements Function
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     // coerce to string
-    String value = (String) input.getTuple().getString( 0 );
+    String value = input.getTuple().getString( 0 );
 
     // make safe
     if( value == null )

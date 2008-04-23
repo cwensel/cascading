@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.o.r.RegexSplitGenerator to support splitting single tuple values into multiple tuples based on a regex
+  delimiter. Includes new tests.
+
   Added c.s.CascadeStats and c.s.FlowStats to provide access to current state and statistics of particular
   Cascade, Flow, or the child Flows of a Cascade.
 

@@ -30,7 +30,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class RegexParser ... */
+/** Class RegexParser is used to extract a matched regex from an incoming argument value. */
 public class RegexParser extends RegexOperation implements Function
   {
   /** Field groups */
@@ -100,7 +100,11 @@ public class RegexParser extends RegexOperation implements Function
   /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
-    String value = (String) input.get( 0 );
+    String value = input.getTuple().getString( 0 );
+
+    if( value == null )
+      value = "";
+
     Tuple output = new Tuple();
 
     // todo: reuse the matcher via the .reset() method. need to confirm only one thread will fire through this

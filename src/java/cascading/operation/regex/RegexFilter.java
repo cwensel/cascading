@@ -118,6 +118,9 @@ public class RegexFilter extends RegexOperation implements Filter
     {
     for( Object value : input )
       {
+      if( value == null )
+        value = "";
+
       Matcher matcher = getPattern().matcher( value.toString() );
 
       if( LOG.isDebugEnabled() )
