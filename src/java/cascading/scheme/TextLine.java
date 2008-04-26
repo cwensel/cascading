@@ -39,8 +39,11 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
- * lines. Either line-feed or carriage-return are used to signal end of line. Keys are the
- * position in the file, and values are the line of text.
+ * lines. Either line-feed or carriage-return are used to signal end of line.
+ * <p/>
+ * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line". But if
+ * a {@link Fields} is passed on the constructor with one field, the return tuples will simply
+ * be the "line" value. *
  * <p/>
  * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
  * bi-directional, so zip files cannot be written.
@@ -81,7 +84,8 @@ public class TextLine extends Scheme
     }
 
   /**
-   * Creates a new TextLine instance.
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
    *
    * @param sourceFields the source fields for this scheme
    * @param sinkFields   the sink fields for this scheme
@@ -90,12 +94,13 @@ public class TextLine extends Scheme
     {
     super( sourceFields, sinkFields );
 
-    if( sourceFields.size() != 2 )
-      throw new IllegalArgumentException( "this scheme requires only two fields, given [" + sourceFields + "]" );
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
     }
 
   /**
-   * Constructor
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
    *
    * @param sourceFields the source fields for this scheme
    */
@@ -103,8 +108,8 @@ public class TextLine extends Scheme
     {
     super( sourceFields );
 
-    if( sourceFields.size() != 2 )
-      throw new IllegalArgumentException( "this scheme requires only two fields, given [" + sourceFields + "]" );
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
     }
 
   /**
@@ -182,16 +187,11 @@ public class TextLine extends Scheme
   public Tuple source( WritableComparable key, Writable value )
     {
     Tuple tuple = new Tuple();
-    int[] currPos = sourceFields.getPos();
 
-    for( int currPo : currPos )
-      {
-      if( currPo == 0 )
-        tuple.add( key.toString() );
+    if( sourceFields.size() == 2 )
+      tuple.add( key.toString() );
 
-      if( currPo == 1 )
-        tuple.add( value.toString() );
-      }
+    tuple.add( value.toString() );
 
     return tuple;
     }

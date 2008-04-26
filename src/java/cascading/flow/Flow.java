@@ -42,6 +42,7 @@ import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
+import cascading.tap.TapCollector;
 import cascading.tap.TapIterator;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.tap.hadoop.S3HttpFileSystem;
@@ -461,6 +462,42 @@ public class Flow implements Runnable
     {
     for( Tap tap : sinks.values() )
       tap.deletePath( getJobConf() );
+    }
+
+  /**
+   * Method tapExists returns true if the resource represented by the given Tap instance exists.
+   *
+   * @param tap of type Tap
+   * @return boolean
+   * @throws IOException when
+   */
+  public boolean tapPathExists( Tap tap ) throws IOException
+    {
+    return tap.pathExists( getJobConf() );
+    }
+
+  /**
+   * Method openTapForRead return a {@link TapIterator} for the given Tap instance.
+   *
+   * @param tap of type Tap
+   * @return TapIterator
+   * @throws IOException when
+   */
+  public TapIterator openTapForRead( Tap tap ) throws IOException
+    {
+    return tap.openForRead( getJobConf() );
+    }
+
+  /**
+   * Method openTapForWrite returns a (@link TapCollector} for the given Tap instance.
+   *
+   * @param tap of type Tap
+   * @return TapCollector
+   * @throws IOException when
+   */
+  public TapCollector openTapForWrite( Tap tap ) throws IOException
+    {
+    return tap.openForWrite( getJobConf() );
     }
 
   /**

@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.s.TextLine to accept either on or two source fields. If one, only the 'line' value
+  is sourced from the value, discarding the 'offset' value.
+
   Added c.o.r.RegexSplitGenerator to support splitting single tuple values into multiple tuples based on a regex
   delimiter. Includes new tests.
 

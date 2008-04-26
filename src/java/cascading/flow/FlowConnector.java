@@ -208,6 +208,9 @@ public class FlowConnector
     for( Pipe pipe : pipes )
       Collections.addAll( heads, pipe.getHeads() );
 
+    if( heads.isEmpty() )
+      throw new IllegalArgumentException( "no pipe instance found" );
+
     if( heads.size() != 1 )
       throw new IllegalArgumentException( "there may be only 1 head pipe instance, found " + heads.size() );
 
