@@ -42,7 +42,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * Class TagSoupParser used the <a href="http://home.ccil.org/~cowan/XML/tagsoup/">Tag Soup</a> library to convert
- * incoming HTML to clean XHMTL.
+ * incoming HTML to clean XHTML.
  */
 public class TagSoupParser extends Operation implements Function
   {
