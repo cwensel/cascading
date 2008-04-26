@@ -14,7 +14,7 @@
 
   <property name="cascading.release.version" value="x.y.z"/>
 
-  <property name="javac.debug" value="false"/>
+  <property name="javac.debug" value="true"/>
 
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.java" location="${src}/java"/>

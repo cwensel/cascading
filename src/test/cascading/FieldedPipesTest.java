@@ -74,7 +74,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true );
+    super( "fielded pipes", false );
     }
 
   public void testSimpleGroup() throws Exception
@@ -132,6 +132,34 @@ public class FieldedPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 8, null );
+    }
+
+  public void testSimpleChainSplitter() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( "\\s+" ), new Fields( 1 ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simplesplit", true );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+
+    TapIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "75.185.76.245", iterator.next().get( 1 ) );
+
+    iterator.close();
     }
 
   public void testCoGroup() throws Exception

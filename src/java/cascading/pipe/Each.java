@@ -91,6 +91,18 @@ public class Each extends Operator
     }
 
   /**
+   * Only return fields selected by the outFieldsSelector.
+   *
+   * @param name             of type String
+   * @param function         of type Function
+   * @param outFieldSelector of type Fields
+   */
+  public Each( String name, Function function, Fields outFieldSelector )
+    {
+    super( name, (Operation) function, outFieldSelector );
+    }
+
+  /**
    * Pass all fields to the given function, only return fields declared by the function.
    *
    * @param previous of type Pipe

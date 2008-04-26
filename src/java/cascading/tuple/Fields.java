@@ -252,6 +252,9 @@ public final class Fields implements Comparable, Serializable
     Set<String> found = new HashSet<String>();
     Fields result = size( selector.size() );
 
+    if( hasUnknowns )
+      size = -1;
+
     int offset = 0;
     for( Fields current : fields )
       {
@@ -619,6 +622,9 @@ public final class Fields implements Comparable, Serializable
 
   final int translatePos( Integer integer, int size )
     {
+    if( size == -1 )
+      return integer;
+
     if( integer < 0 )
       integer = size + integer;
 
