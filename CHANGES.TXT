@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed c.t.h.HttpFileSystem to remember authority information in the url and prefix it when missing.
+  
   Changed c.s.TextLine to accept either on or two source fields. If one, only the 'line' value
   is sourced from the value, discarding the 'offset' value.
 

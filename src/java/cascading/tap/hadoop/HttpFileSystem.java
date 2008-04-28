@@ -56,6 +56,7 @@ public class HttpFileSystem extends StreamedFileSystem
 
   /** Field scheme */
   private String scheme;
+  private String authority;
 
   @Override
   public void initialize( URI uri, Configuration configuration ) throws IOException
@@ -63,6 +64,7 @@ public class HttpFileSystem extends StreamedFileSystem
     setConf( configuration );
 
     scheme = uri.getScheme();
+    authority = uri.getAuthority();
     }
 
   @Override
@@ -70,7 +72,7 @@ public class HttpFileSystem extends StreamedFileSystem
     {
     try
       {
-      return new URI( scheme + ":///" );
+      return new URI( scheme, authority, null, null, null );
       }
     catch( URISyntaxException exception )
       {
@@ -81,7 +83,7 @@ public class HttpFileSystem extends StreamedFileSystem
   @Override
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
-    URL url = path.toUri().toURL();
+    URL url = makeUrl( path );
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod( "GET" );
@@ -93,7 +95,7 @@ public class HttpFileSystem extends StreamedFileSystem
   @Override
   public boolean exists( Path path ) throws IOException
     {
-    URL url = path.toUri().toURL();
+    URL url = makeUrl( path );
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod( "HEAD" );
@@ -111,7 +113,7 @@ public class HttpFileSystem extends StreamedFileSystem
   @Override
   public FileStatus getFileStatus( Path path ) throws IOException
     {
-    URL url = path.toUri().toURL();
+    URL url = makeUrl( path );
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod( "HEAD" );
@@ -123,5 +125,20 @@ public class HttpFileSystem extends StreamedFileSystem
     long modified = connection.getHeaderFieldDate( "Last-Modified", System.currentTimeMillis() );
 
     return new FileStatus( length, false, 1, getDefaultBlockSize(), modified, path );
+    }
+
+  private URL makeUrl( Path path ) throws IOException
+    {
+    if( path.toString().startsWith( scheme ) )
+      return path.toUri().toURL();
+
+    try
+      {
+      return new URI( scheme, authority, path.toString(), null, null ).toURL();
+      }
+    catch( URISyntaxException exception )
+      {
+      throw new IOException( exception.getMessage() );
+      }
     }
   }
