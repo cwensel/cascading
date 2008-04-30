@@ -68,7 +68,7 @@ public class Cascade implements Runnable
   /** Field throwable */
   private Throwable throwable;
 
-  public Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
+  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
     {
     this.name = name;
     this.jobGraph = jobGraph;
@@ -92,6 +92,23 @@ public class Cascade implements Runnable
   public CascadeStats getCascadeStats()
     {
     return cascadeStats;
+    }
+
+  /**
+   * Method getFlows returns the flows managed by this Cascade object. The returned {@link Flow} instances
+   * will be in topological order.
+   *
+   * @return the flows (type Collection<Flow>) of this Cascade object.
+   */
+  public List<Flow> getFlows()
+    {
+    List<Flow> flows = new ArrayList<Flow>();
+    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
+
+    while( topoIterator.hasNext() )
+      flows.add( topoIterator.next() );
+
+    return flows;
     }
 
   /**

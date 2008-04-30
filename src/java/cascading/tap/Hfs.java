@@ -223,7 +223,14 @@ public class Hfs extends Tap
     {
     Path qualifiedPath = getQualifiedPath( conf );
 
+    for( Path exitingPath : conf.getInputPaths() )
+      {
+      if( exitingPath.equals( qualifiedPath ) )
+        throw new TapException( "may not add duplicate paths, found: " + exitingPath );
+      }
+
     conf.addInputPath( qualifiedPath );
+
     super.sourceInit( conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );

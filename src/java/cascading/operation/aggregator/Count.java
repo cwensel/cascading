@@ -73,6 +73,6 @@ public class Count extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    outputCollector.add( new Tuple( context.get( FIELD_NAME ).toString() ) );
+    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
     }
   }

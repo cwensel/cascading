@@ -274,7 +274,7 @@ public class FlowConnector
       pipeGraph = makePipeGraph( pipes, sources, sinks );
 
       addExtents( pipeGraph, sources, sinks );
-      verifyGraph( pipeGraph );
+      verifyGraphConnections( pipeGraph );
 
       handleSplits( pipeGraph );
       handleGroups( pipeGraph, sources.values() );
@@ -356,30 +356,30 @@ public class FlowConnector
   /**
    * created to support the ability to generate all paths between the head and tail of the process.
    *
-   * @param graph
+   * @param pipeGraph
    * @param sources
    * @param sinks
    */
-  private void addExtents( SimpleDirectedGraph<FlowElement, Scope> graph, Map<String, Tap> sources, Map<String, Tap> sinks )
+  private void addExtents( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
-    graph.addVertex( head );
+    pipeGraph.addVertex( head );
 
     for( String source : sources.keySet() )
       {
-      Scope scope = graph.addEdge( head, sources.get( source ) );
+      Scope scope = pipeGraph.addEdge( head, sources.get( source ) );
 
       // edge may already exist, if so, above returns null
       if( scope != null )
         scope.setName( source );
       }
 
-    graph.addVertex( tail );
+    pipeGraph.addVertex( tail );
 
     for( String sink : sinks.keySet() )
-      graph.addEdge( sinks.get( sink ), tail ).setName( sink );
+      pipeGraph.addEdge( sinks.get( sink ), tail ).setName( sink );
     }
 
-  private void verifyGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void verifyGraphConnections( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     if( pipeGraph.vertexSet().isEmpty() )
       return;
@@ -603,7 +603,7 @@ public class FlowConnector
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
-        else if( flowElement instanceof Group && foundGroup )
+        else if( flowElement instanceof Group && foundGroup ) // add tap between groups
           tapInsertions.add( (Pipe) previousFlowElement );
         else if( flowElement instanceof Tap )
           foundGroup = false;
@@ -657,7 +657,7 @@ public class FlowConnector
     }
 
   /**
-   * Perfoming no rule checks here.
+   * Perfoms one rule check, verifies group does not join duplicate tap resources.
    * <p/>
    * Scopes are always named after the source side of the source -> target relationship
    *
@@ -713,6 +713,25 @@ public class FlowConnector
           LOG.debug( "adding edge: " + source + " -> " + current );
 
         graph.addEdge( source, current ).setName( current.getName() ); // name scope after source
+        }
+      }
+
+    // verify joined taps are dupes
+    if( current.getPrevious().length > 1 )
+      {
+      Set<Tap> taps = new HashSet<Tap>();
+
+      for( Pipe previous : current.getPrevious() )
+        {
+        Tap source = sources.get( previous.getName() );
+
+        if( source == null )
+          continue;
+
+        if( taps.contains( source ) )
+          throw new FlowException( "groups may not join duplicate sources, found: " + source );
+
+        taps.add( source );
         }
       }
 

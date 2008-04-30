@@ -2,8 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where a join with duplicate taps was not recognized during job planning. Now an appropriate error
+  message is displayed, instead of jobs completing with only one instance of the resource stream.
+
   Fixed c.t.h.HttpFileSystem to remember authority information in the url and prefix it when missing.
-  
+
   Changed c.s.TextLine to accept either on or two source fields. If one, only the 'line' value
   is sourced from the value, discarding the 'offset' value.
 
