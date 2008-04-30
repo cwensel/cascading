@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed c.t.h.HttpFileSystem that url escaped the ? prefixing the query string.
+
   Fixed bug where a join with duplicate taps was not recognized during job planning. Now an appropriate error
   message is displayed, instead of jobs completing with only one instance of the resource stream.
 

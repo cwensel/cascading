@@ -21,6 +21,7 @@
 
 package cascading.tap.hadoop;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -32,6 +33,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.log4j.Logger;
 
 /**
@@ -81,6 +83,17 @@ public class HttpFileSystem extends StreamedFileSystem
     }
 
   @Override
+  public FileStatus[] globStatus( Path path, PathFilter pathFilter ) throws IOException
+    {
+    FileStatus fileStatus = getFileStatus( path );
+
+    if( fileStatus == null )
+      return null;
+
+    return new FileStatus[]{fileStatus};
+    }
+
+  @Override
   public FSDataInputStream open( Path path, int i ) throws IOException
     {
     URL url = makeUrl( path );
@@ -103,6 +116,7 @@ public class HttpFileSystem extends StreamedFileSystem
 
     if( LOG.isDebugEnabled() )
       {
+      LOG.debug( "connection.getURL() = " + connection.getURL() );
       LOG.debug( "connection.getResponseCode() = " + connection.getResponseCode() );
       LOG.debug( "connection.getResponseMessage() = " + connection.getResponseMessage() );
       }
@@ -119,9 +133,10 @@ public class HttpFileSystem extends StreamedFileSystem
     connection.setRequestMethod( "HEAD" );
     connection.connect();
 
-    // Content-Length
+    if( connection.getResponseCode() != 200 )
+      throw new FileNotFoundException( "could not find file: " + path );
+
     long length = connection.getHeaderFieldInt( "Content-Length", 0 );
-    // Last-Modified
     long modified = connection.getHeaderFieldDate( "Last-Modified", System.currentTimeMillis() );
 
     return new FileStatus( length, false, 1, getDefaultBlockSize(), modified, path );
@@ -130,7 +145,7 @@ public class HttpFileSystem extends StreamedFileSystem
   private URL makeUrl( Path path ) throws IOException
     {
     if( path.toString().startsWith( scheme ) )
-      return path.toUri().toURL();
+      return URI.create( path.toString() ).toURL();
 
     try
       {
