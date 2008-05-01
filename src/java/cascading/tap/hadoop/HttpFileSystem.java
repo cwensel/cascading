@@ -58,6 +58,7 @@ public class HttpFileSystem extends StreamedFileSystem
 
   /** Field scheme */
   private String scheme;
+  /** Field authority */
   private String authority;
 
   @Override
@@ -102,6 +103,8 @@ public class HttpFileSystem extends StreamedFileSystem
     connection.setRequestMethod( "GET" );
     connection.connect();
 
+    debugConnection( connection );
+
     return new FSDataInputStream( new FSDigestInputStream( connection.getInputStream(), getMD5SumFor( getConf(), path ) ) );
     }
 
@@ -114,12 +117,7 @@ public class HttpFileSystem extends StreamedFileSystem
     connection.setRequestMethod( "HEAD" );
     connection.connect();
 
-    if( LOG.isDebugEnabled() )
-      {
-      LOG.debug( "connection.getURL() = " + connection.getURL() );
-      LOG.debug( "connection.getResponseCode() = " + connection.getResponseCode() );
-      LOG.debug( "connection.getResponseMessage() = " + connection.getResponseMessage() );
-      }
+    debugConnection( connection );
 
     return connection.getResponseCode() == 200;
     }
@@ -133,13 +131,30 @@ public class HttpFileSystem extends StreamedFileSystem
     connection.setRequestMethod( "HEAD" );
     connection.connect();
 
+    debugConnection( connection );
+
     if( connection.getResponseCode() != 200 )
       throw new FileNotFoundException( "could not find file: " + path );
 
     long length = connection.getHeaderFieldInt( "Content-Length", 0 );
+
+    length = length < 0 ? 0 : length; // queries may return -1
+
     long modified = connection.getHeaderFieldDate( "Last-Modified", System.currentTimeMillis() );
 
     return new FileStatus( length, false, 1, getDefaultBlockSize(), modified, path );
+    }
+
+  private void debugConnection( HttpURLConnection connection ) throws IOException
+    {
+    if( LOG.isDebugEnabled() )
+      {
+      LOG.debug( "connection.getURL() = " + connection.getURL() );
+      LOG.debug( "connection.getRequestMethod() = " + connection.getRequestMethod() );
+      LOG.debug( "connection.getResponseCode() = " + connection.getResponseCode() );
+      LOG.debug( "connection.getResponseMessage() = " + connection.getResponseMessage() );
+      LOG.debug( "connection.getContentLength() = " + connection.getContentLength() );
+      }
     }
 
   private URL makeUrl( Path path ) throws IOException
