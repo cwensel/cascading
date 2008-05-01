@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -192,8 +192,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
         ZipSplit zipSplit = new ZipSplit( file, zipEntry.getName(), zipEntry.getSize(), job );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( String.format( "creating split for zip entry: %s size: %d method: %s compressed size: %d", zipEntry.getName(), zipEntry.getSize(),
-            ZipEntry.DEFLATED == zipEntry.getMethod() ? "DEFLATED" : "STORED", zipEntry.getCompressedSize() ) );
+          LOG.debug( String.format( "creating split for zip entry: %s size: %d method: %s compressed size: %d", zipEntry.getName(), zipEntry.getSize(), ZipEntry.DEFLATED == zipEntry.getMethod() ? "DEFLATED" : "STORED", zipEntry.getCompressedSize() ) );
 
         splits.add( zipSplit );
         }

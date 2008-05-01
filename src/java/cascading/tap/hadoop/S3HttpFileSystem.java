@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -209,8 +209,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
 
   private StreamedFileStatus makeStatus( S3Object object )
     {
-    return new StreamedFileStatus( object.getContentLength(), S3Util.isDirectory( object ), 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(),
-      new Path( uri.toString() + "/", object.getKey() ), object.getMd5HashAsHex() );
+    return new StreamedFileStatus( object.getContentLength(), S3Util.isDirectory( object ), 1, getDefaultBlockSize(), object.getLastModifiedDate().getTime(), new Path( uri.toString() + "/", object.getKey() ), object.getMd5HashAsHex() );
     }
 
   private MessageDigest getMD5Digest() throws IOException

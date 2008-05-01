@@ -36,7 +36,7 @@ General Information:
 
 License:
 
-  Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+  Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
 
   Cascading is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

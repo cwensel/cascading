@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -63,8 +63,7 @@ public class UnGroup extends Operation implements Generator
       numArgs = groupFieldSelector.size() + size;
 
       if( fieldDeclaration.size() != numArgs )
-        throw new IllegalArgumentException(
-          "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
     this.groupFieldSelector = groupFieldSelector;
@@ -81,8 +80,7 @@ public class UnGroup extends Operation implements Generator
       numArgs = groupFieldSelector.size() + resultFieldSelector.size();
 
       if( fieldDeclaration.size() != numArgs )
-        throw new IllegalArgumentException(
-          "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
     this.groupFieldSelector = groupFieldSelector;

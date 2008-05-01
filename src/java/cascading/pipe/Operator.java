@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -169,8 +169,7 @@ public abstract class Operator extends Pipe
   void verifyDeclared( Fields declared )
     {
     if( declared.isDefined() && declared.size() == 0 )
-      throw new OperatorException(
-        "field declaration: " + getFieldDeclaration().print() + ", resolves to an empty field set, current grouping is on all fields" );
+      throw new OperatorException( "field declaration: " + getFieldDeclaration().print() + ", resolves to an empty field set, current grouping is on all fields" );
     }
 
   void verifyOutputSelector( Fields outputSelector )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Vinculum Technologies, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2008 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -90,8 +90,7 @@ public class PearsonDistance extends CrossTab
       Double sum2 = (Double) context.get( SUM2 );
 
       double num = (Double) context.get( SUMPROD ) - ( sum1 * sum2 / count );
-      double den = Math.sqrt(
-        ( (Double) context.get( SUMSQRS1 ) - Math.pow( sum1, 2 ) / count ) * ( (Double) context.get( SUMSQRS2 ) - Math.pow( sum2, 2 ) / count ) );
+      double den = Math.sqrt( ( (Double) context.get( SUMSQRS1 ) - Math.pow( sum1, 2 ) / count ) * ( (Double) context.get( SUMSQRS2 ) - Math.pow( sum2, 2 ) / count ) );
 
       if( den == 0 )
         outputCollector.add( new Tuple( 0 ) );
