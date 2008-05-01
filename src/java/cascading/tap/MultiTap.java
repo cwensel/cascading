@@ -69,14 +69,32 @@ public class MultiTap extends SourceTap
       }
     }
 
+  /**
+   * Method getTaps returns the taps of this MultiTap object.
+   *
+   * @return the taps (type Tap[]) of this MultiTap object.
+   */
   public Tap[] getTaps()
     {
     return taps;
     }
 
+  /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
   public Path getPath()
     {
     return null;
+    }
+
+  @Override
+  public Scheme getScheme()
+    {
+    return taps[ 0 ].getScheme(); // they should all be equivalent per verifyTaps
+    }
+
+  @Override
+  public boolean isDeleteOnSinkInit()
+    {
+    return taps[ 0 ].isDeleteOnSinkInit();
     }
 
   @Override
@@ -158,5 +176,10 @@ public class MultiTap extends SourceTap
     int result = super.hashCode();
     result = 31 * result + ( taps != null ? Arrays.hashCode( taps ) : 0 );
     return result;
+    }
+
+  public String toString()
+    {
+    return "MultiTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
     }
   }
