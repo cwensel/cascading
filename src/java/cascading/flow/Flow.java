@@ -279,6 +279,10 @@ public class Flow implements Runnable
     }
 
   /**
+   * Method isSkipFlow returns true if the parent {@link Cascade} should skip this Flow instance. True is returned
+   * if isSkipIfSinkExists returns true and any of the sinks exist and are not
+   * {@link Tap#isDeleteOnSinkInit()}. Or is the sinks are newer than the sources.
+   *
    * @return the skipFlow (type boolean) of this Flow object.
    * @throws IOException when
    */
