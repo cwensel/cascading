@@ -303,7 +303,7 @@ public class Cascade implements Runnable
           if( LOG.isInfoEnabled() )
             logInfo( "starting flow: " + flow.getName() );
 
-          if( !flow.areSinksStale() )
+          if( flow.isSkipFlow() )
             {
             if( LOG.isInfoEnabled() )
               logInfo( "skipping flow, sinks are uptodate: " + flow.getName() );

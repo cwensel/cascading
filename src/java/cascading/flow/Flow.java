@@ -97,6 +97,8 @@ public class Flow implements Runnable
   private Map<String, Tap> sinks;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
+  /** Field skipIfSourceExists */
+  private boolean skipIfSinkExists = false;
   /** Field stop */
   private boolean stop = false;
 
@@ -253,39 +255,73 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method areSinksStale returns true if any of the sinks referenced are out of date in relation to the sources.
+   * Method isSkipIfSinkExists returns the skipIfSinkExists of this Flow object.
+   *
+   * @return the skipIfSinkExists (type boolean) of this Flow object.
+   */
+  public boolean isSkipIfSinkExists()
+    {
+    return skipIfSinkExists;
+    }
+
+  /**
+   * Method setSkipIfSinkExists sets the skipIfSinkExists of this Flow object. Defaults to false. Set to
+   * true if this Flow instance should complete immediately if the {@link Tap#pathExists(JobConf)} returns true.
+   * <p/>
+   * If {@link Tap#isDeleteOnSinkInit()} returns true, this Flow instance will execute after deleting
+   * the Tap resource.
+   *
+   * @param skipIfSinkExists the skipIfSinkExists of this Flow object.
+   */
+  public void setSkipIfSinkExists( boolean skipIfSinkExists )
+    {
+    this.skipIfSinkExists = skipIfSinkExists;
+    }
+
+  /**
+   * @return the skipFlow (type boolean) of this Flow object.
+   * @throws IOException when
+   */
+  public boolean isSkipFlow() throws IOException
+    {
+    long sinkModified = getSinkModified();
+
+    if( sinkModified <= 0 ) // do not skip, sinks don't exist
+      return false;
+
+    if( isSkipIfSinkExists() ) // skip, even if sink is older
+      {
+      if( LOG.isInfoEnabled() )
+        logInfo( "flow is marked for skip if sink exists" );
+
+      return true;
+      }
+
+    return !areSourcesNewer( sinkModified ); // skip if sinks are not stale
+    }
+
+  /**
+   * Method areSinksStale returns true if any of the sinks referenced are out of date in relation to the sources. Or
+   * if any sink method {@link Tap#isDeleteOnSinkInit()} returns true.
    *
    * @return boolean
    * @throws IOException when
    */
   public boolean areSinksStale() throws IOException
     {
-    long sinkMod = Long.MAX_VALUE;
+    return areSourcesNewer( getSinkModified() );
+    }
+
+  /**
+   * Method areSourcesNewer returns true if any source is newer than the given sinkModified date value.
+   *
+   * @param sinkModified of type long
+   * @return boolean
+   * @throws IOException when
+   */
+  public boolean areSourcesNewer( long sinkModified ) throws IOException
+    {
     JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
-
-    for( Tap sink : sinks.values() )
-      {
-      if( sink.isDeleteOnSinkInit() )
-        sinkMod = -1L;
-      else
-        {
-        if( !sink.pathExists( confCopy ) )
-          sinkMod = 0L;
-        else
-          sinkMod = Math.min( sinkMod, sink.getPathModified( confCopy ) ); // return youngest mod date
-        }
-      }
-
-    if( LOG.isInfoEnabled() )
-      {
-      if( sinkMod == -1L )
-        logInfo( "atleast one sink is marked for delete" );
-      if( sinkMod == 0L )
-        logInfo( "atleast one sink does not exist" );
-      else
-        logInfo( "sink oldest modified date: " + new Date( sinkMod ) );
-      }
-
     long sourceMod = 0;
 
     try
@@ -297,7 +333,7 @@ public class Flow implements Runnable
 
         sourceMod = source.getPathModified( confCopy );
 
-        if( sinkMod < sourceMod )
+        if( sinkModified < sourceMod )
           return true;
         }
 
@@ -308,6 +344,46 @@ public class Flow implements Runnable
       if( LOG.isInfoEnabled() )
         logInfo( "source modification date at: " + new Date( sourceMod ) ); // not oldest, we didnt check them all
       }
+    }
+
+  /**
+   * Method getSinkModified returns the youngest modified date of any sink {@link Tap} managed by this Flow instance.
+   * <p/>
+   * If zero (0) is returned, atleast one of the sink resources does not exist. If minus one (-1) is returned,
+   * atleast one of the sinks are marked for delete ({@link Tap#isDeleteOnSinkInit() returns true}).
+   *
+   * @return the sinkModified (type long) of this Flow object.
+   * @throws IOException when
+   */
+  public long getSinkModified() throws IOException
+    {
+    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
+    long sinkModified = Long.MAX_VALUE;
+
+    for( Tap sink : sinks.values() )
+      {
+      if( sink.isDeleteOnSinkInit() )
+        sinkModified = -1L;
+      else
+        {
+        if( !sink.pathExists( confCopy ) )
+          sinkModified = 0L;
+        else
+          sinkModified = Math.min( sinkModified, sink.getPathModified( confCopy ) ); // return youngest mod date
+        }
+      }
+
+    if( LOG.isInfoEnabled() )
+      {
+      if( sinkModified == -1L )
+        logInfo( "atleast one sink is marked for delete" );
+      if( sinkModified == 0L )
+        logInfo( "atleast one sink does not exist" );
+      else
+        logInfo( "sink oldest modified date: " + new Date( sinkModified ) );
+      }
+
+    return sinkModified;
     }
 
   /**
