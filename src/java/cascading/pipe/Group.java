@@ -320,7 +320,7 @@ public class Group extends Pipe
     }
 
   /**
-   * Constructor Group creates a new Group instance where grouping occurs on {@link Fields#ALL) fields.
+   * Constructor Group creates a new Group instance where grouping occurs on {@link Fields#ALL} fields.
    *
    * @param pipe of type Pipe
    */
