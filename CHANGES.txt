@@ -1,11 +1,11 @@
 Cascading Change Log
 
-unreleased
+0.5.0
 
   Added skipIfSinkExists property to c.f.Flow. Set to true if the c.c.Cascade should skip the Flow instance even
   if the sink is stale and not set to be deleted on initialization.
 
-  Fixed c.t.h.HttpFileSystem that url escaped the ? prefixing the query string.
+  Fixed bug in c.t.h.HttpFileSystem that URL escaped the ? prefixing the query string.
 
   Fixed bug where a join with duplicate taps was not recognized during job planning. Now an appropriate error
   message is displayed, instead of jobs completing with only one instance of the resource stream.
