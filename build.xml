@@ -119,7 +119,7 @@
   <target name="build" depends="init">
     <echo message="building cascade..."/>
 
-    <javac srcdir="${src.java}" destdir="${build.java}" verbose="off">
+    <javac srcdir="${src.java}" destdir="${build.java}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
     </javac>
 

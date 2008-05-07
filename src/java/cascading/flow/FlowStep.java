@@ -124,8 +124,6 @@ public class FlowStep implements Serializable
     conf.setCombinerClass( IdentityReducer.class );
     conf.setReducerClass( FlowReducer.class );
 
-    conf.set( FlowConstants.FLOW_STEP, Util.serializeBase64( this ) );
-
     for( Tap tap : sources.keySet() )
       tap.sourceInit( conf );
 
@@ -158,6 +156,9 @@ public class FlowStep implements Serializable
       // no need to supply a reverse comparator, only equality is checked
       conf.setOutputValueGroupingComparator( GroupingComparator.class );
       }
+
+    // perform last so init above will pass to tasks
+    conf.set( FlowConstants.FLOW_STEP, Util.serializeBase64( this ) );
 
     return conf;
     }

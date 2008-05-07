@@ -1,5 +1,14 @@
 Cascading Change Log
 
+unreleased
+
+  Changed order of JobConf initialization. c.f.FlowStep now is added to the JobConf last in order to catch
+  all lazily configured values. 
+
+  Changed compile to include debug info by default.
+
+  Fixed bug in c.t.MultiTap where super scheme was not returned if available.
+
 0.5.0
 
   Added skipIfSinkExists property to c.f.Flow. Set to true if the c.c.Cascade should skip the Flow instance even

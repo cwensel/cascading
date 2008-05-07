@@ -88,19 +88,24 @@ public class MultiTap extends SourceTap
   @Override
   public Scheme getScheme()
     {
+    Scheme scheme = super.getScheme();
+
+    if( scheme != null )
+      return scheme;
+
     return taps[ 0 ].getScheme(); // they should all be equivalent per verifyTaps
     }
 
   @Override
   public boolean isDeleteOnSinkInit()
     {
-    return taps[ 0 ].isDeleteOnSinkInit();
+    return false; // cannot be used as sink
     }
 
   @Override
   public Fields getSourceFields()
     {
-    return getTaps()[ 0 ].getSourceFields();
+    return getScheme().getSourceFields();
     }
 
   @Override
@@ -129,7 +134,7 @@ public class MultiTap extends SourceTap
   @Override
   public Tuple source( WritableComparable key, Writable value )
     {
-    return getTaps()[ 0 ].source( key, value );
+    return getScheme().source( key, value );
     }
 
   public boolean pathExists( JobConf conf ) throws IOException
