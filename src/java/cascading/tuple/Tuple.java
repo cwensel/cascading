@@ -180,7 +180,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
-   * Method getFloat returns the element at the given position i as a float.
+   * Method getFloat returns the element at the given position i as a float. Zero if null.
    *
    * @param i of type int
    * @return float
@@ -191,12 +191,14 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     if( value instanceof Number )
       return ( (Number) value ).floatValue();
+    else if( value == null )
+      return 0;
     else
       return Float.parseFloat( value.toString() );
     }
 
   /**
-   * Method getDouble returns the element at the given position i as a double.
+   * Method getDouble returns the element at the given position i as a double. Zero if null.
    *
    * @param i of type int
    * @return double
@@ -207,12 +209,14 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     if( value instanceof Number )
       return ( (Number) value ).doubleValue();
+    else if( value == null )
+      return 0;
     else
       return Double.parseDouble( value.toString() );
     }
 
   /**
-   * Method getInteger returns the element at the given position i as an int.
+   * Method getInteger returns the element at the given position i as an int. Zero if null.
    *
    * @param i of type int
    * @return int
@@ -223,12 +227,14 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     if( value instanceof Number )
       return ( (Number) value ).intValue();
+    else if( value == null )
+      return 0;
     else
       return Integer.parseInt( value.toString() );
     }
 
   /**
-   * Method getLong returns the element at the given position i as an long.
+   * Method getLong returns the element at the given position i as an long. Zero if null.
    *
    * @param i of type int
    * @return long
@@ -239,12 +245,14 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     if( value instanceof Number )
       return ( (Number) value ).longValue();
+    else if( value == null )
+      return 0;
     else
       return Long.parseLong( value.toString() );
     }
 
   /**
-   * Method getShort returns the element at the given position i as an long.
+   * Method getShort returns the element at the given position i as an long. Zero if null.
    *
    * @param i of type int
    * @return long
@@ -255,8 +263,29 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     if( value instanceof Number )
       return ( (Number) value ).shortValue();
+    else if( value == null )
+      return 0;
     else
       return Short.parseShort( value.toString() );
+    }
+
+  /**
+   * Method getBoolean returns the element at the given position as a boolean. If the value is (case ignored) the string 'true', a true value
+   * will be returned. False if null.
+   *
+   * @param i of type int
+   * @return boolean
+   */
+  public boolean getBoolean( int i )
+    {
+    Comparable value = get( i );
+
+    if( value instanceof Boolean )
+      return ( (Boolean) value ).booleanValue();
+    else if( value == null )
+      return false;
+    else
+      return Boolean.parseBoolean( value.toString() );
     }
 
   /**
@@ -497,6 +526,26 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   private Object[] elements()
     {
     return elements.toArray();
+    }
+
+  /**
+   * Method getTypes returns an array of the element classes. Null if the element is null.
+   *
+   * @return the types (type Class[]) of this Tuple object.
+   */
+  public Class[] getTypes()
+    {
+    Class[] types = new Class[elements.size()];
+
+    for( int i = 0; i < elements.size(); i++ )
+      {
+      Comparable value = elements.get( i );
+
+      if( value != null )
+        types[ i ] = value.getClass();
+      }
+
+    return types;
     }
 
   /**
@@ -808,6 +857,5 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     return buffer;
     }
-
 
   }

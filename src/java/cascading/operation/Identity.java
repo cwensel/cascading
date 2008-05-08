@@ -22,9 +22,9 @@
 package cascading.operation;
 
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
@@ -96,33 +96,6 @@ public class Identity extends Operation implements Function
       return;
       }
 
-    if( input.size() != types.length )
-      throw new OperationException( "number of input tuple values: " + input.size() + ", does not match number of coercion types: " + types.length );
-
-    Tuple result = new Tuple();
-
-    for( int i = 0; i < types.length; i++ )
-      {
-      Class type = types[ i ];
-
-      if( type == Object.class )
-        result.add( input.get( i ) );
-      else if( type == String.class )
-        result.add( input.getTuple().getString( i ) );
-      else if( type == Float.class )
-        result.add( input.getTuple().getFloat( i ) );
-      else if( type == Double.class )
-        result.add( input.getTuple().getDouble( i ) );
-      else if( type == Integer.class )
-        result.add( input.getTuple().getInteger( i ) );
-      else if( type == Long.class )
-        result.add( input.getTuple().getLong( i ) );
-      else if( type == Short.class )
-        result.add( input.getTuple().getShort( i ) );
-      else
-        throw new OperationException( "could not coerce value, " + input.get( i ) + " to type: " + type.getName() );
-      }
-
-    outputCollector.add( result );
+    outputCollector.add( Tuples.coerce( input.getTuple(), types ) );
     }
   }

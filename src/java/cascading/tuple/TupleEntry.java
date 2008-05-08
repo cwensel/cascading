@@ -196,6 +196,17 @@ public class TupleEntry
     }
 
   /**
+   * Method set sets the value in the given field.
+   *
+   * @param field of type Comparable
+   * @param value of type Comparable
+   */
+  public void set( Comparable field, Comparable value )
+    {
+    tuple.set( fields.getPos( field ), value );
+    }
+
+  /**
    * Method selectEntry selects the fields specified in selector from this instance.
    *
    * @param selector of type Fields
