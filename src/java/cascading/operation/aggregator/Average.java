@@ -29,6 +29,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
 public class Average extends Operation implements Aggregator
@@ -37,6 +38,9 @@ public class Average extends Operation implements Aggregator
   public static final String FIELD_NAME = "average";
   /** Field KEY_COUNT */
   private static final String KEY_COUNT = "count";
+
+  /** Field type */
+  private Class type = double.class;
 
   /** Constructs a new instance that returns the average of the values encoutered in the field name "average". */
   public Average()
@@ -57,12 +61,24 @@ public class Average extends Operation implements Aggregator
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
+  /**
+   * Constructs a new instance that returns the average of the values encoutered in the given fieldDeclaration field name.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param type             of type Class
+   */
+  public Average( Fields fieldDeclaration, Class type )
+    {
+    super( fieldDeclaration );
+    this.type = type;
+    }
+
   /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
     context.put( FIELD_NAME, new Double( 0.0 ) );
-    context.put( KEY_COUNT, 0l );
+    context.put( KEY_COUNT, 0L );
     }
 
   /** @see Aggregator#aggregate(Map, TupleEntry) */
@@ -79,10 +95,12 @@ public class Average extends Operation implements Aggregator
     {
     long count = (Long) context.get( KEY_COUNT );
 
+    Double result = new Double( 0.0 );
+
     // avoid Double.NaN
-    if( count == 0 )
-      outputCollector.add( new Tuple( new Double( 0.0 ) ) );
-    else
-      outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / count ) );
+    if( count != 0 )
+      result = (Double) context.get( FIELD_NAME ) / count;
+
+    outputCollector.add( new Tuple( (Comparable) Tuples.coerce( new Tuple( result ), 0, type ) ) );
     }
   }

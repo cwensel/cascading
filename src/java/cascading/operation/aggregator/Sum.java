@@ -29,12 +29,16 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
 public class Sum extends Operation implements Aggregator
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "sum";
+
+  /** Field type */
+  private Class type = double.class;
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()
@@ -56,6 +60,19 @@ public class Sum extends Operation implements Aggregator
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
+  /**
+   * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts
+   * only 1 argument. The return result is coerced into the given Class type.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param type             of type Class
+   */
+  public Sum( Fields fieldDeclaration, Class type )
+    {
+    this( fieldDeclaration );
+    this.type = type;
+    }
+
   /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
@@ -74,6 +91,6 @@ public class Sum extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
+    outputCollector.add( new Tuple( (Comparable) Tuples.coerce( new Tuple( (Comparable) context.get( FIELD_NAME ) ), 0, type ) ) );
     }
   }

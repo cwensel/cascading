@@ -62,30 +62,41 @@ public class Tuples
       throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match number of coercion types: " + types.length );
 
     for( int i = 0; i < types.length; i++ )
-      {
-      Class type = types[ i ];
-
-      if( type == Object.class )
-        destination[ i ] = tuple.get( i );
-      else if( type == String.class )
-        destination[ i ] = tuple.getString( i );
-      else if( type == Integer.class || type == int.class )
-        destination[ i ] = tuple.getInteger( i );
-      else if( type == Long.class || type == long.class )
-        destination[ i ] = tuple.getLong( i );
-      else if( type == Double.class || type == double.class )
-        destination[ i ] = tuple.getDouble( i );
-      else if( type == Float.class || type == float.class )
-        destination[ i ] = tuple.getFloat( i );
-      else if( type == Short.class || type == short.class )
-        destination[ i ] = tuple.getShort( i );
-      else if( type == Boolean.class || type == boolean.class )
-        destination[ i ] = tuple.getBoolean( i );
-      else if( type != null ) // make null if we don't know the type
-        throw new OperationException( "could not coerce value, " + tuple.get( i ) + " to type: " + type.getName() );
-      }
+      destination[ i ] = coerce( tuple, i, types[ i ] );
 
     return destination;
+    }
+
+  /**
+   * Method coerce returns the value in the tuple at the given velue to the requested type.
+   *
+   * @param tuple
+   * @param i
+   * @param type
+   * @return
+   */
+  public static Object coerce( Tuple tuple, int i, Class type )
+    {
+    if( type == Object.class )
+      return tuple.get( i );
+    else if( type == String.class )
+      return tuple.getString( i );
+    else if( type == Integer.class || type == int.class )
+      return tuple.getInteger( i );
+    else if( type == Long.class || type == long.class )
+      return tuple.getLong( i );
+    else if( type == Double.class || type == double.class )
+      return tuple.getDouble( i );
+    else if( type == Float.class || type == float.class )
+      return tuple.getFloat( i );
+    else if( type == Short.class || type == short.class )
+      return tuple.getShort( i );
+    else if( type == Boolean.class || type == boolean.class )
+      return tuple.getBoolean( i );
+    else if( type != null ) // make null if we don't know the type
+      throw new OperationException( "could not coerce value, " + tuple.get( i ) + " to type: " + type.getName() );
+
+    return null;
     }
 
   /**

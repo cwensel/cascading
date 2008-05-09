@@ -2,8 +2,13 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.o.Average, Max, Min, and Sum to take a Class for coercion of the result value.
+
+  Changes c.o.Max and Min to use infinity as initial values so zero is bigger than a really small number
+  for Max, and zero is smaller than a really big number for Min.
+
   Changed order of JobConf initialization. c.f.FlowStep now is added to the JobConf last in order to catch
-  all lazily configured values. 
+  all lazily configured values.
 
   Changed compile to include debug info by default.
 
