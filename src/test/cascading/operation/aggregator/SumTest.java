@@ -91,7 +91,7 @@ public class SumTest
    * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector)}.
    */
   @Test
-  public final void testAggregateComplete()
+  public final void testAggregateCompleteDouble()
     {
     Map<String, Double> context = new HashMap<String, Double>();
     sum.start( context, null );
@@ -104,7 +104,23 @@ public class SumTest
     sum.complete( context, resultEntryCollector );
     Tuple tuple = resultEntryCollector.iterator().next();
 
-    assertEquals( "Got expected value after aggregate", 2.0, tuple.getDouble( 0 ), 0.0d );
+    assertEquals( "Got expected value after aggregate", 2.0, (Double) tuple.get( 0 ), 0.0d );
+    }
+
+  public final void testAggregateCompleteInteger()
+    {
+    Map<String, Double> context = new HashMap<String, Double>();
+    sum.start( context, null );
+    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 1 ) ) ) );
+    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 3 ) ) ) );
+    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 2 ) ) ) );
+    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( -4 ) ) ) );
+
+    TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
+    sum.complete( context, resultEntryCollector );
+    Tuple tuple = resultEntryCollector.iterator().next();
+
+    assertEquals( "Got expected value after aggregate", 2, tuple.get( 0 ) );
     }
 
   }

@@ -29,7 +29,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
 
 /** Class Max is an {@link Aggregator} that returns the maximum value encountered in the current group. */
 public class Max extends Operation implements Aggregator
@@ -38,9 +37,6 @@ public class Max extends Operation implements Aggregator
   public static final String FIELD_NAME = "max";
   /** Field KEY_VALUE */
   private static final String KEY_VALUE = "value";
-
-  /** Field type */
-  private Class type = double.class;
 
   /** Constructs a new instance that returns the max value encoutered in the field name "max". */
   public Max()
@@ -61,18 +57,6 @@ public class Max extends Operation implements Aggregator
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  /**
-   * Constructs a new instance that returns the max value encoutered in the given fieldDeclaration field name.
-   *
-   * @param fieldDeclaration of type Fields
-   * @param type             of type Class
-   */
-  public Max( Fields fieldDeclaration, Class type )
-    {
-    super( fieldDeclaration );
-    this.type = type;
-    }
-
   /** @see Aggregator#start(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
@@ -91,7 +75,7 @@ public class Max extends Operation implements Aggregator
     else
       value = entry.getTuple().getDouble( 0 );
 
-    if( Double.compare( ( (Number) context.get( KEY_VALUE ) ).doubleValue(), value.doubleValue() ) < 0 )
+    if( ( (Number) context.get( KEY_VALUE ) ).doubleValue() < value.doubleValue() )
       {
       context.put( FIELD_NAME, entry.getTuple().get( 0 ) ); // keep and return original value
       context.put( KEY_VALUE, value );
@@ -102,11 +86,6 @@ public class Max extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    Comparable result = (Comparable) context.get( FIELD_NAME );
-
-    if( result != null )
-      result = (Comparable) Tuples.coerce( new Tuple( result ), 0, type );
-
-    outputCollector.add( new Tuple( result ) );
+    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
     }
   }
