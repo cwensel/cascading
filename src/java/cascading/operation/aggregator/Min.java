@@ -21,71 +21,50 @@
 
 package cascading.operation.aggregator;
 
-import java.util.Map;
-
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class Min is an {@link Aggregator} that returns the minimum value encountered in the current group. */
-public class Min extends Operation implements Aggregator
+public class Min extends ExtremaBase
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "min";
-  /** Field KEY_VALUE */
-  private static final String KEY_VALUE = "value";
 
-  /** Constructs a new instance that returns the min value encoutered in the field name "min". */
+  /** Constructs a new instance that returns the Min value encoutered in the field name "min". */
   public Min()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
   /**
-   * Constructs a new instance that returns the min value encoutered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the minimum value encoutered in the given fieldDeclaration field name.
    *
    * @param fieldDeclaration of type Fields
    */
   public Min( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
-
-    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  /** @see Aggregator#start(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  /**
+   * Constructs a new instance that returns the minimum value encoutered in the given fieldDeclaration field name.
+   * Any argument matching an ignoredValue won't be compared.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param ignoreValues     of type Object...
+   */
+  public Min( Fields fieldDeclaration, Object... ignoreValues )
     {
-    context.put( KEY_VALUE, Double.POSITIVE_INFINITY );
+    super( fieldDeclaration, ignoreValues );
     }
 
-  /** @see Aggregator#aggregate(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  protected boolean compare( Number lhs, Number rhs )
     {
-    Number value = null;
-
-    if( entry.getTuple().get( 0 ) instanceof Number )
-      value = (Number) entry.getTuple().get( 0 );
-    else
-      value = entry.getTuple().getDouble( 0 );
-
-    if( ( (Number) context.get( KEY_VALUE ) ).doubleValue() > value.doubleValue() )
-      {
-      context.put( FIELD_NAME, entry.getTuple().get( 0 ) ); // keep and return original value
-      context.put( KEY_VALUE, value );
-      }
+    return lhs.doubleValue() > rhs.doubleValue();
     }
 
-  /** @see Aggregator#complete(Map, TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  protected double getInitialValue()
     {
-    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
+    return Double.POSITIVE_INFINITY;
     }
   }

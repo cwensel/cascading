@@ -61,8 +61,8 @@ public class Average extends Operation implements Aggregator
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
-    context.put( FIELD_NAME, new Double( 0.0 ) );
-    context.put( KEY_COUNT, 0l );
+    context.put( FIELD_NAME, 0.0d );
+    context.put( KEY_COUNT, 0L );
     }
 
   /** @see Aggregator#aggregate(Map, TupleEntry) */
@@ -79,10 +79,6 @@ public class Average extends Operation implements Aggregator
     {
     long count = (Long) context.get( KEY_COUNT );
 
-    // avoid Double.NaN
-    if( count == 0 )
-      outputCollector.add( new Tuple( new Double( 0.0 ) ) );
-    else
-      outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / count ) );
+    outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / count ) );
     }
   }

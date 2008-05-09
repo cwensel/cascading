@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased
 
-  Changed c.o.Sum to take a Class for coercion of the result value.
+  Changed c.o.a.First, Last, Min, and Max to optionally ignore specified values. Useful if you do not wish
+  for a 'default' value to be considered first, or last in a set.
+
+  Changed c.o.a.Sum to take a Class for coercion of the result value.
 
   Changes c.o.Max and Min to use infinity as initial values so zero is bigger than a really small number
   for Max, and zero is smaller than a really big number for Min.

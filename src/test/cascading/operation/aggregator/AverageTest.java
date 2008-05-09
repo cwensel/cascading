@@ -74,7 +74,7 @@ public class AverageTest
     average.complete( context, resultEntryCollector );
     Tuple tuple = resultEntryCollector.iterator().next();
 
-    assertEquals( "Got expected initial value on start", 0.0, tuple.getDouble( 0 ), 0.0d );
+    assertEquals( "Got expected initial value on start", Double.NaN, tuple.getDouble( 0 ), 0.0d );
     }
 
   /**

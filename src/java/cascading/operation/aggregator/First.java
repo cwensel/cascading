@@ -24,18 +24,16 @@ package cascading.operation.aggregator;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
  * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered.
  * <p/>
- * By default, it returns the first Tuple of {@link Fields} ARGS found.
+ * By default, it returns the first Tuple of {@link Fields#ARGS} found.
  */
-public class First extends Operation implements Aggregator
+public class First extends ExtentBase
   {
   /** Field FIELD_NAME */
   private static final String FIELD_NAME = "first";
@@ -43,7 +41,7 @@ public class First extends Operation implements Aggregator
   /** Selects and returns the first argument Tuple encountered. */
   public First()
     {
-    super( Fields.ARGS );
+    super( Fields.ARGS, FIELD_NAME );
     }
 
   /**
@@ -53,28 +51,26 @@ public class First extends Operation implements Aggregator
    */
   public First( Fields fieldDeclaration )
     {
-    super( fieldDeclaration.size(), fieldDeclaration );
+    super( fieldDeclaration.size(), fieldDeclaration, FIELD_NAME );
     }
 
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  /**
+   * Selects and returns the first argument Tuple encountered, unless the Tuple
+   * is a member of the set ignoreTuples.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param ignoreTuples     of type Tuple...
+   */
+  public First( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
-    // no-op
+    super( fieldDeclaration, FIELD_NAME, ignoreTuples );
     }
 
-  /** @see Aggregator#aggregate(Map, TupleEntry) */
   @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  protected void performOperation( Map context, TupleEntry entry )
     {
     if( !context.containsKey( FIELD_NAME ) )
       context.put( FIELD_NAME, entry.getTuple() );
     }
 
-  /** @see Aggregator#complete(Map, TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
-    {
-    if( context.containsKey( FIELD_NAME ) )
-      outputCollector.add( (Tuple) context.get( FIELD_NAME ) );
-    }
   }
