@@ -43,7 +43,7 @@
   <property name="build.test" location="${build.classes}/test"/>
   <property name="build.examples" location="${build.classes}/examples"/>
 
-  <property name="test.data" location="${build}/testresults"/>
+  <property name="test.results" location="${build}/testresults"/>
   <property name="test.showoutput" value="yes"/>
 
   <property name="lib" location="${cascading.basedir}/lib"/>
@@ -57,6 +57,7 @@
   <property name="jar.cascading" value="cascading-${cascading.release.version}.jar"/>
   <property name="jar.cascading-lib" value="cascading-lib-${cascading.release.version}.jar"/>
   <property name="jar.cascading-examples" value="cascading-examples-${cascading.release.version}.jar"/>
+  <property name="jar.cascading-test" value="cascading-test-${cascading.release.version}.jar"/>
 
   <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
 
@@ -110,7 +111,7 @@
     <mkdir dir="${build.java}"/>
     <mkdir dir="${build.examples}"/>
     <mkdir dir="${build.test}"/>
-    <mkdir dir="${test.data}"/>
+    <mkdir dir="${test.results}"/>
 
     <property name="CLASSPATH" refid="project.class.path"/>
     <echo message="${CLASSPATH}"/>
@@ -182,8 +183,8 @@
       </classpath>
       <formatter type="plain" usefile="true"/>
 
-      <test name="${testcase}" todir="${test.data}" if="testcase"/>
-      <batchtest todir="${test.data}" haltonfailure="true" unless="testcase">
+      <test name="${testcase}" todir="${test.results}" if="testcase"/>
+      <batchtest todir="${test.results}" haltonfailure="true" unless="testcase">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>
         </fileset>
@@ -223,6 +224,7 @@
     <delete file="${build}/${jar.cascading}"/>
     <delete file="${build}/${jar.cascading-lib}"/>
     <delete file="${build}/${jar.cascading-examples}"/>
+    <delete file="${build}/${jar.cascading-test}"/>
     <delete dir="${build.java}/lib"/>
 
     <manifest file="${build}/MANIFEST.MF">
@@ -236,6 +238,14 @@
 
     <jar jarfile="${build}/${jar.cascading-examples}" manifest="${build}/MANIFEST.MF" compress="yes">
       <fileset dir="${build.examples}"/>
+    </jar>
+
+    <jar jarfile="${build}/${jar.cascading-test}" manifest="${build}/MANIFEST.MF" compress="yes">
+      <fileset dir="${build.test}">
+        <include name="cascading/**"/>
+        <include name="log4j.properties"/>
+        <include name="hadoop-site.xml"/>
+      </fileset>
     </jar>
 
     <!-- hadoop supports jars in a lib directory -->
