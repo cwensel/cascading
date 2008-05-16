@@ -34,6 +34,7 @@ import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -124,6 +125,36 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "/simplechain", true );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "chainedevery.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 8, null );
+    }
+
+  public void testChainEndingWithEach() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Group( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
+    pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
+
+    pipe = new Each( pipe, new Fields( "count1", "count2" ), new ExpressionFunction( new Fields( "sum" ), "count1 + count2", int.class, int.class ), Fields.ALL );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/chaineach", true );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
