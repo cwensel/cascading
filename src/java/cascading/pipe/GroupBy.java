@@ -30,6 +30,10 @@ import cascading.tuple.Fields;
  * <p/>
  * Optionally a stream can be further sorted by providing sortFields. This allows an Aggregator to receive
  * values in the order of the sortedFields.
+ * <p/>
+ * Note that sorting always happens on the groupFields, sortFields are a secondary sorting within the
+ * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see thier argument
+ * in order.
  */
 public class GroupBy extends Group
   {

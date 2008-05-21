@@ -31,9 +31,11 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
+import cascading.operation.aggregator.Count;
 import cascading.operation.regex.Regexes;
 import cascading.operation.text.Texts;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
@@ -53,7 +55,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   public SortedValuesTest()
     {
-    super( "sorted values", false );
+    super( "sorted values", true );
     }
 
   public void testSortedValues() throws Exception
@@ -94,10 +96,87 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateFile( sink, 200, 6, sorted );
+    validateFile( sink, 200, 6, sorted, 1 );
     }
 
-  private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed ) throws IOException, ParseException
+  public void testSortedValues2() throws Exception
+    {
+    runSortTest2( "forward2", false );
+    }
+
+  public void testSortedValuesReversed2() throws Exception
+    {
+    runSortTest2( "reversed2", true );
+    }
+
+  private void runSortTest2( String path, boolean sorted ) throws IOException, ParseException
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileApache );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+
+    Pipe pipe = new Pipe( "apache" );
+
+    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new GroupBy( pipe, new Fields( "status" ) );
+
+    pipe = new Every( pipe, new Fields( "status" ), new Count() );
+
+    // since status will be unique, sorting on count really won't happen.
+    // perfect opportunity for planner optimization
+    pipe = new GroupBy( pipe, new Fields( "status" ), new Fields( "count" ), sorted );
+
+    jobConf.setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateFile( sink, 6, 6, sorted, 0 );
+    }
+
+  public void testSortFails() throws Exception
+    {
+    String path = "fails";
+
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileApache );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+
+    Pipe pipe = new Pipe( "apache" );
+
+    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
+
+    // DateParser.APACHE declares: "ts"
+    pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "does-not-exist" ) );
+
+    pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
+
+    jobConf.setNumMapTasks( 13 );
+
+    try
+      {
+      new FlowConnector( jobConf ).connect( source, sink, pipe );
+      fail( "did not throw exception" );
+      }
+    catch( Exception exception )
+      {
+      // passes
+      }
+    }
+
+  private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed, int comparePosition ) throws IOException, ParseException
     {
     TapIterator iterator = tap.openForRead( new JobConf() );
 
@@ -113,7 +192,7 @@ public class SortedValuesTest extends ClusterTestCase
 
       tuple = new Tuple( tuple.getString( 1 ).split( "\t" ) );
 
-      int value = tuple.getInteger( 1 );
+      int value = tuple.getInteger( comparePosition );
 
       values.add( value );
 
