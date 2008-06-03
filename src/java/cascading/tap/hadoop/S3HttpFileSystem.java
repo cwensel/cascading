@@ -176,6 +176,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
     if( LOG.isDebugEnabled() )
       LOG.debug( "listing path: " + path );
 
+    // todo: content-type not returned on list
     S3Object[] objects = S3Util.listObjects( s3Service, s3Bucket, path );
 
     // if an object is an exact match, and is a file, just return the file status
