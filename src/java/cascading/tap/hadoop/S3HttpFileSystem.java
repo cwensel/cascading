@@ -107,6 +107,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
       object.setContentType( "text/plain" );
       object.setMd5Hash( digestStream.getMessageDigest().digest() );
 
+      // todo buffer to disk instead
       byte[] bytes = stream.toByteArray();
 
       object.setDataInputStream( new ByteArrayInputStream( bytes ) );
