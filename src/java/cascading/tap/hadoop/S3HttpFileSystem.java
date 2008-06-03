@@ -104,7 +104,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
 
       S3Object object = S3Util.getObject( s3Service, s3Bucket, path, S3Util.Request.CREATE_OBJECT );
 
-      object.setContentType( "text/plain" );
+      object.setContentType( "text/plain" ); // todo use 'binary/octet-stream'
       object.setMd5Hash( digestStream.getMessageDigest().digest() );
 
       // todo buffer to disk instead
