@@ -21,13 +21,8 @@
 
 package cascading.operation.regex;
 
-import java.util.regex.Matcher;
-
 import cascading.operation.Filter;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.log4j.Logger;
 
 /**
  * Class RegexFilter will apply the regex patternString against every input Tuple value and filter
@@ -39,15 +34,10 @@ import org.apache.log4j.Logger;
  * Also, by default, the whole Tuple is matched against the given patternString (tab delimited). If matchEachElement
  * is set to true, the pattern is applied to each Tuple value individually.
  */
-public class RegexFilter extends RegexOperation implements Filter
+public class RegexFilter extends RegexMatcher implements Filter
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( RegexFilter.class );
-
   /** Field matchEachElement */
-  private boolean matchEachElement = false;
-  /** Field removeMatch */
-  private boolean removeMatch = false;
+  protected final boolean matchEachElement;
 
   /**
    * Constructor RegexFilter creates a new RegexFilter instance.
@@ -56,7 +46,8 @@ public class RegexFilter extends RegexOperation implements Filter
    */
   public RegexFilter( String patternString )
     {
-    super( ANY, Fields.ALL, patternString );
+    super( patternString );
+    this.matchEachElement = false;
     }
 
   /**
@@ -67,8 +58,9 @@ public class RegexFilter extends RegexOperation implements Filter
    */
   public RegexFilter( String patternString, boolean removeMatch )
     {
-    super( ANY, Fields.ALL, patternString );
-    this.removeMatch = removeMatch;
+    super( patternString, removeMatch );
+    this.matchEachElement = false;
+
     }
 
   /**
@@ -78,8 +70,7 @@ public class RegexFilter extends RegexOperation implements Filter
    */
   public RegexFilter( String patternString, boolean removeMatch, boolean matchEachElement )
     {
-    super( ANY, patternString );
-    this.removeMatch = removeMatch;
+    super( patternString, removeMatch );
     this.matchEachElement = matchEachElement;
     }
 
@@ -92,44 +83,4 @@ public class RegexFilter extends RegexOperation implements Filter
       return matchWholeTuple( input.getTuple() );
     }
 
-  /**
-   * Method matchWholeTuple ...
-   *
-   * @param input of type Tuple
-   * @return boolean
-   */
-  private boolean matchWholeTuple( Tuple input )
-    {
-    Matcher matcher = getPattern().matcher( input.toString() );
-
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() );
-
-    return matcher.matches() == removeMatch;
-    }
-
-  /**
-   * Method matchEachElement ...
-   *
-   * @param input of type Tuple
-   * @return boolean
-   */
-  private boolean matchEachElement( Tuple input )
-    {
-    for( Object value : input )
-      {
-      if( value == null )
-        value = "";
-
-      Matcher matcher = getPattern().matcher( value.toString() );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() + ", element: '" + value + "'" );
-
-      if( matcher.matches() == removeMatch )
-        return true;
-      }
-
-    return false;
-    }
   }

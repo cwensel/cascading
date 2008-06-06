@@ -128,6 +128,14 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 2 ) );
     }
 
+  public void testEqualPrimitive()
+    {
+    assertEquals( "not equal: tuple", new Tuple( 1 ), new Tuple( 1 ) );
+    assertEquals( "not equal: tuple", new Tuple( "1" ), new Tuple( "1" ) );
+    assertEquals( "not equal: tuple", new Tuple( 1, 2 ), new Tuple( 1, 2 ) );
+    assertEquals( "not equal: tuple", new Tuple( "1", 2 ), new Tuple( "1", 2 ) );
+    }
+
   public void testEqual()
     {
     Tuple aTuple = new Tuple( tuple );

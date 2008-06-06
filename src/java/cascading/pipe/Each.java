@@ -25,6 +25,7 @@ import java.util.Set;
 
 import cascading.flow.FlowCollector;
 import cascading.flow.Scope;
+import cascading.operation.Assertion;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Operation;
@@ -219,6 +220,11 @@ public class Each extends Operator
     return (Filter) operation;
     }
 
+  private Assertion getAssertion()
+    {
+    return (Assertion) operation;
+    }
+
   /**
    * Method operate applies the encapsulated {@link Operation} to the {@link Tuple} stream.
    *
@@ -238,13 +244,29 @@ public class Each extends Operator
 
     if( isFunction() )
       applyFunction( flowCollector, input, arguments, scope.getDeclaredEntry(), scope.getOutValuesSelector() );
-    else
+    else if( isFilter() )
       applyFilter( flowCollector, input, arguments );
+    else
+      applyAssertion( flowCollector, input, arguments );
     }
 
   private boolean isFunction()
     {
     return operation instanceof Function;
+    }
+
+  private boolean isFilter()
+    {
+    return operation instanceof Filter;
+    }
+
+  private void applyAssertion( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+    {
+    getAssertion().doAssert( arguments );
+
+    // todo catch assertion exceptions ??
+
+    flowCollector.collect( input.getTuple() );
     }
 
   private void applyFilter( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )

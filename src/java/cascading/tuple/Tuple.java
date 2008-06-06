@@ -521,7 +521,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method elements returns a new Comparable[] array of this Tuple instances values.
    *
-   * @return Comparable[]
+   * @return Object[]
    */
   private Object[] elements()
     {
