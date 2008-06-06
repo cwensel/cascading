@@ -321,8 +321,6 @@ public class Each extends Operator
     {
     getAssertion().doAssert( arguments );
 
-    // todo catch assertion exceptions ??
-
     flowCollector.collect( input.getTuple() );
     }
 
