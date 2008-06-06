@@ -62,20 +62,20 @@ public abstract class BaseAssertion extends Operation implements Assertion
 
   protected void fail()
     {
-    fail( getMessage() );
+    throwFail( getMessage() );
     }
 
   protected void fail( Object... args )
     {
-    fail( getMessage(), args );
+    throwFail( getMessage(), args );
     }
 
-  public static void fail( String message )
+  public static void throwFail( String message )
     {
     throw new AssertionException( message );
     }
 
-  public static void fail( String message, Object... args )
+  public static void throwFail( String message, Object... args )
     {
     throw new AssertionException( String.format( message, args ) );
     }

@@ -26,6 +26,7 @@ import java.util.Set;
 import cascading.flow.FlowCollector;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
+import cascading.operation.AssertionLevel;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Operation;
@@ -193,6 +194,62 @@ public class Each extends Operator
   public Each( Pipe pipe, Fields argumentFieldSelector, Filter filter )
     {
     super( pipe, argumentFieldSelector, (Operation) filter, FILTER_SELECTOR );
+    }
+
+  ////////////////////
+  // TAKE ASSERTIONS
+  ///////////////////
+
+  /**
+   * Constructor Each creates a new Each instance.
+   *
+   * @param name           of type String
+   * @param assertionLevel
+   * @param assertion      of type Filter
+   */
+  public Each( String name, AssertionLevel assertionLevel, Assertion assertion )
+    {
+    super( name, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param name                  of type String
+   * @param argumentFieldSelector of type Fields
+   * @param assertion             of type Filter
+   */
+  public Each( String name, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
+    {
+    super( name, argumentFieldSelector, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param previous  of type Pipe
+   * @param assertion of type Filter
+   */
+  public Each( Pipe previous, AssertionLevel assertionLevel, Assertion assertion )
+    {
+    super( previous, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param previous
+   * @param argumentFieldSelector of type Fields
+   * @param assertionLevel
+   * @param assertion             of type Filter
+   */
+  public Each( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
+    {
+    super( previous, argumentFieldSelector, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param pipe                  of type Pipe
+   * @param argumentFieldSelector of type Fields
+   * @param assertion             of type Filter
+   */
+  public Each( Pipe pipe, Fields argumentFieldSelector, Assertion assertion )
+    {
+    super( pipe, argumentFieldSelector, (Operation) assertion, FILTER_SELECTOR );
     }
 
   @Override

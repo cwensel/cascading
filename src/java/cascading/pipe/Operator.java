@@ -24,6 +24,8 @@ package cascading.pipe;
 import java.util.Set;
 
 import cascading.flow.Scope;
+import cascading.operation.Assertion;
+import cascading.operation.AssertionLevel;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -42,9 +44,11 @@ public abstract class Operator extends Pipe
   /** Field operation */
   protected final Operation operation;
   /** Field argumentSelector */
-  protected Fields argumentSelector = Fields.ALL; // use wildcard. let the operator choose
+  protected Fields argumentSelector = Fields.ALL; // use wildcard. let the operation choose
   /** Field outputSelector */
   protected Fields outputSelector = Fields.RESULTS;  // this is overridden by the subclasses via the ctor
+  /** Field assertionLevel */
+  protected AssertionLevel assertionLevel; // do not initialize a default
 
   protected Operator( Operation operation )
     {
@@ -84,14 +88,14 @@ public abstract class Operator extends Pipe
     verifyOperation();
     }
 
-  public Operator( Pipe previous, Operation operation )
+  protected Operator( Pipe previous, Operation operation )
     {
     super( previous );
     this.operation = operation;
     verifyOperation();
     }
 
-  public Operator( Pipe previous, Fields argumentSelector, Operation operation )
+  protected Operator( Pipe previous, Fields argumentSelector, Operation operation )
     {
     super( previous );
     this.operation = operation;
@@ -108,10 +112,48 @@ public abstract class Operator extends Pipe
     verifyOperation();
     }
 
-  public Operator( Pipe previous, Operation operation, Fields outputSelector )
+  protected Operator( Pipe previous, Operation operation, Fields outputSelector )
     {
     super( previous );
     this.operation = operation;
+    this.outputSelector = outputSelector;
+    verifyOperation();
+    }
+
+  protected Operator( String name, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+    {
+    super( name );
+    this.assertionLevel = assertionLevel;
+    this.operation = operation;
+    this.outputSelector = outputSelector;
+    verifyOperation();
+    }
+
+  protected Operator( String name, Fields argumentSelector, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+    {
+    super( name );
+    this.assertionLevel = assertionLevel;
+    this.operation = operation;
+    this.argumentSelector = argumentSelector;
+    this.outputSelector = outputSelector;
+    verifyOperation();
+    }
+
+  protected Operator( Pipe previous, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+    {
+    super( previous );
+    this.assertionLevel = assertionLevel;
+    this.operation = operation;
+    this.outputSelector = outputSelector;
+    verifyOperation();
+    }
+
+  protected Operator( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+    {
+    super( previous );
+    this.assertionLevel = assertionLevel;
+    this.operation = operation;
+    this.argumentSelector = argumentSelector;
     this.outputSelector = outputSelector;
     verifyOperation();
     }
@@ -126,6 +168,9 @@ public abstract class Operator extends Pipe
 
     if( outputSelector == null )
       throw new IllegalArgumentException( "outputSelector may not be null" );
+
+    if( operation instanceof Assertion && ( assertionLevel == null || assertionLevel == AssertionLevel.NONE ) )
+      throw new IllegalArgumentException( "assertionLevel may not be null or NONE" );
     }
 
   public Fields getArgumentSelector()
@@ -141,6 +186,27 @@ public abstract class Operator extends Pipe
   public Fields getOutputSelector()
     {
     return outputSelector;
+    }
+
+  /**
+   * Method getAssertionLevel returns the assertionLevel of this Operator object. Only used if the {@link Operation}
+   * is an {@link Assertion}.
+   *
+   * @return the assertionLevel (type Assertion.Level) of this Operator object.
+   */
+  public AssertionLevel getAssertionLevel()
+    {
+    return assertionLevel;
+    }
+
+  /**
+   * Method isAssertion returns true if this Operation represents an {@link Assertion}.
+   *
+   * @return the assertion (type boolean) of this Operator object.
+   */
+  public boolean isAssertion()
+    {
+    return assertionLevel != null;
     }
 
   protected Tuple makeResult( Fields outgoingSelector, TupleEntry input, TupleEntry declaredEntry, Tuple output )

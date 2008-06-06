@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  */
 public class AssertMatches extends RegexMatcher implements Assertion
   {
-  private String tupleMessage = "argument tuple: %s did not match: %s";
+  private String message = "argument tuple: %s did not match: %s";
 
   public AssertMatches( String patternString )
     {
@@ -45,6 +45,6 @@ public class AssertMatches extends RegexMatcher implements Assertion
   public void doAssert( TupleEntry input )
     {
     if( matchWholeTuple( input.getTuple() ) )
-      BaseAssertion.fail( tupleMessage, input.getTuple(), patternString );
+      BaseAssertion.throwFail( message, input.getTuple(), patternString );
     }
   }

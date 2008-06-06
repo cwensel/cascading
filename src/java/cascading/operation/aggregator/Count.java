@@ -30,7 +30,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class Count is an {@link Aggregator} that calculates the number of items in the current group */
+/**
+ * Class Count is an {@link Aggregator} that calculates the number of items in the current group.
+ * </p>
+ * Note the resulting value for count is always a long. So any comparisons should be against a long value.
+ */
 public class Count extends Operation implements Aggregator
   {
   /** Field COUNT */

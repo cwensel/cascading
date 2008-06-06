@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  */
 public class AssertMatchesAll extends RegexMatcher implements Assertion
   {
-  private String elementMessage = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
+  private String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
 
   public AssertMatchesAll( String patternString )
     {
@@ -47,6 +47,6 @@ public class AssertMatchesAll extends RegexMatcher implements Assertion
     int pos = matchEachElementPos( input.getTuple() );
 
     if( pos != -1 )
-      BaseAssertion.fail( elementMessage, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
+      BaseAssertion.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
     }
   }

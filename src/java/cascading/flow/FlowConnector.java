@@ -34,9 +34,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import cascading.operation.Assertion;
+import cascading.operation.AssertionLevel;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
 import cascading.tap.Tap;
@@ -55,6 +58,8 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 /**
  * Use the FlowConnector to link sink and source {@link Tap} instances with an assembly of {@link Pipe} instances into
  * a {@link Flow}.
+ * </p>
+ * By default, all {@link Assertion} are planned into the resulting Flow instance. This can be changed by calling {@link #setAssertionLevel(AssertionLevel)}.
  */
 public class FlowConnector
   {
@@ -67,6 +72,8 @@ public class FlowConnector
   private final Extent tail = new Extent( "tail" );
   /** Field jobConf */
   private JobConf jobConf;
+  /** Field assertionLevel */
+  private AssertionLevel assertionLevel = AssertionLevel.STRICT;
 
   /** Constructor FlowConnector creates a new FlowConnector instance. */
   public FlowConnector()
@@ -109,6 +116,26 @@ public class FlowConnector
       String key = (String) enumeration.nextElement();
       jobConf.set( key, properties.getProperty( key ) );
       }
+    }
+
+  /**
+   * Method getAssertionLevel returns the assertionLevel of this FlowConnector object.
+   *
+   * @return the assertionLevel (type Level) of this FlowConnector object.
+   */
+  public AssertionLevel getAssertionLevel()
+    {
+    return assertionLevel;
+    }
+
+  /**
+   * Method setAssertionLevel sets the assertionLevel of this FlowConnector object.
+   *
+   * @param assertionLevel the assertionLevel of this FlowConnector object.
+   */
+  public void setAssertionLevel( AssertionLevel assertionLevel )
+    {
+    this.assertionLevel = assertionLevel;
     }
 
   /**
@@ -278,7 +305,7 @@ public class FlowConnector
 
       handleSplits( pipeGraph );
       handleGroups( pipeGraph, sources.values() );
-      removeEmptyPipes( pipeGraph ); // groups must be added before removing pipes
+      removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
 
       SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
@@ -411,7 +438,7 @@ public class FlowConnector
    *
    * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
    */
-  private void removeEmptyPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
+  private void removeUnnecessaryPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
     {
     DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( graph, head );
     Set<FlowElement> remove = new HashSet<FlowElement>();
@@ -421,7 +448,7 @@ public class FlowConnector
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement.getClass() == Pipe.class || flowElement instanceof PipeAssembly )
+      if( flowElement.getClass() == Pipe.class || flowElement instanceof PipeAssembly || testAssertion( flowElement ) )
         {
         if( LOG.isDebugEnabled() )
           LOG.debug( "remove testing pipe: " + flowElement );
@@ -459,6 +486,16 @@ public class FlowConnector
 
       graph.removeVertex( flowElement );
       }
+    }
+
+  private boolean testAssertion( FlowElement flowElement )
+    {
+    if( !( flowElement instanceof Operator ) )
+      return false;
+
+    Operator operator = (Operator) flowElement;
+
+    return operator.isAssertion() && operator.getAssertionLevel().isStricterThan( assertionLevel );
     }
 
   /**

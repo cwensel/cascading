@@ -31,9 +31,9 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class AssertionTest extends CascadingTestCase
+public class AssertionsTest extends CascadingTestCase
   {
-  public AssertionTest()
+  public AssertionsTest()
     {
     super( "assetion test" );
     }

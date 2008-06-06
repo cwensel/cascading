@@ -28,14 +28,5 @@ import cascading.tuple.TupleEntry;
  */
 public interface Assertion
   {
-  enum Level
-    {
-      NONE, VALID, STRICT
-    }
-
-  Level NONE = Level.NONE;
-  Level VALID = Level.VALID;
-  Level STRICT = Level.STRICT;
-
   void doAssert( TupleEntry input );
   }
