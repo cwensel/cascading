@@ -31,14 +31,14 @@ import cascading.tuple.Fields;
  * Optionally a stream can be further sorted by providing sortFields. This allows an Aggregator to receive
  * values in the order of the sortedFields.
  * <p/>
- * Note that sorting always happens on the groupFields, sortFields are a secondary sorting within the
- * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see thier argument
+ * Note that sorting always happens on the groupFields, sortFields are a secondary sorting on the grouped values within the
+ * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see their arguments
  * in order.
  */
 public class GroupBy extends Group
   {
   /**
-   * Constructor Group creates a new Group instance that will group on {@link Fields#ALL} fields.
+   * Creates a new GroupBy instance that will group on {@link Fields#ALL} fields.
    *
    * @param pipe of type Pipe
    */
@@ -48,7 +48,7 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names.
    *
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
@@ -59,7 +59,7 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names.
    *
    * @param groupName   of type String
    * @param pipe        of type Pipe
@@ -71,8 +71,8 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names
-   * and sort on the given sortFields fields names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
    *
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
@@ -84,8 +84,8 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names
-   * and sort on the given sortFields fields names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
    *
    * @param groupName   of type String
    * @param pipe        of type Pipe
@@ -98,8 +98,8 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names
-   * and sort on the given sortFields fields names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
    *
    * @param pipe         of type Pipe
    * @param groupFields  of type Fields
@@ -112,8 +112,8 @@ public class GroupBy extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance that will group on the given groupFields field names
-   * and sort on the given sortFields fields names.
+   * Creates a new GroupBy instance that will group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
    *
    * @param groupName    of type String
    * @param pipe         of type Pipe
