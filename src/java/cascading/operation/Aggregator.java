@@ -32,6 +32,9 @@ import cascading.tuple.TupleEntry;
  * a single value. Max, Min, Count, and Average are good examples.
  * <p/>
  * An Aggregator is called in the reduce phase.
+ * <p/>
+ * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
+ * unique vm, or by a single thread. The given Map context is guaranteed to be unique per 'reducer'.
  */
 public interface Aggregator
   {
