@@ -202,4 +202,38 @@ public class AssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  public void testTupleEquals()
+    {
+    Assertion assertion = new AssertSizeEquals( 1 );
+
+    assertPass( assertion, getEntry( new Tuple( 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertFail( assertion, getEntry( new Tuple( "0", 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
+    }
+
+  public void testTupleLessThan()
+    {
+    Assertion assertion = new AssertSizeLessThan( 2 );
+
+    assertPass( assertion, getEntry( new Tuple( 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertFail( assertion, getEntry( new Tuple( "0", 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
+    }
+
+  public void testTupleMoreThan()
+    {
+    Assertion assertion = new AssertSizeMoreThan( 1 );
+
+    assertFail( assertion, getEntry( new Tuple( 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
+    }
+
+
   }

@@ -19,17 +19,35 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.operation;
+package cascading.operation.assertion;
 
 import cascading.tuple.TupleEntry;
 
-/** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link Operation}. */
-public interface Assertion
+/**
+ * Class AssertSizeLessThan asserts that the current {@link cascading.tuple.Tuple} in the stream has a size less than (&lt;) the given size.
+ * </p>
+ * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values.
+ */
+public class AssertSizeLessThan extends BaseAssertion
   {
+  /** Field size */
+  private final int size;
+
   /**
-   * Method doAssert performs the assertion.
+   * Constructor AssertSizeLessThan creates a new AssertSizeLessThan instance.
    *
-   * @param input of type TupleEntry
+   * @param size of type int
    */
-  void doAssert( TupleEntry input );
+  public AssertSizeLessThan( int size )
+    {
+    super( "tuple size %s, is more than or equal to: %s, in tuple: %s" );
+    this.size = size;
+    }
+
+  /** @see cascading.operation.Assertion#doAssert(TupleEntry) */
+  public void doAssert( TupleEntry input )
+    {
+    if( input.size() >= size )
+      fail( input.size(), size, input.getTuple().print() );
+    }
   }
