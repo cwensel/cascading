@@ -41,13 +41,13 @@ class TapMapperStackElement extends MapperStackElement
   private final Tap sink;
   private TapCollector tapCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf conf ) throws IOException
+  public TapMapperStackElement( MapperStackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf jobConf ) throws IOException
     {
-    super( previous, incomingScope );
+    super( previous, incomingScope, jobConf, null );
     this.sink = sink;
 
     if( useTapCollector )
-      this.tapCollector = sink.openForWrite( conf );
+      this.tapCollector = sink.openForWrite( jobConf );
     }
 
   protected FlowElement getFlowElement()
@@ -86,5 +86,7 @@ class TapMapperStackElement extends MapperStackElement
     {
     if( tapCollector != null )
       tapCollector.close();
+
+    super.close();
     }
   }

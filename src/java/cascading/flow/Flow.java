@@ -95,6 +95,8 @@ public class Flow implements Runnable
   private Map<String, Tap> sources;
   /** Field sinks */
   private Map<String, Tap> sinks;
+  /** Field traps */
+  private Map<String, Tap> traps;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
   /** Field skipIfSourceExists */
@@ -110,7 +112,7 @@ public class Flow implements Runnable
     {
     }
 
-  protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks )
+  protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -118,6 +120,7 @@ public class Flow implements Runnable
     this.stepGraph = stepGraph;
     this.sources = sources;
     this.sinks = sinks;
+    this.traps = traps;
     }
 
   /**
@@ -221,6 +224,16 @@ public class Flow implements Runnable
   public Map<String, Tap> getSinks()
     {
     return Collections.unmodifiableMap( sinks );
+    }
+
+  /**
+   * Method getTraps returns the traps of this Flow object.
+   *
+   * @return the traps (type Map<String, Tap>) of this Flow object.
+   */
+  public Map<String, Tap> getTraps()
+    {
+    return Collections.unmodifiableMap( traps );
     }
 
   /**
@@ -530,6 +543,29 @@ public class Flow implements Runnable
   public TapIterator openSink( String name ) throws IOException
     {
     return sinks.get( name ).openForRead( getJobConf() );
+    }
+
+  /**
+   * Method openTrap opens the first trap Tap.
+   *
+   * @return TapIterator
+   * @throws IOException when
+   */
+  public TapIterator openTrap() throws IOException
+    {
+    return traps.values().iterator().next().openForRead( getJobConf() );
+    }
+
+  /**
+   * Method openTrap opens the named trap Tap.
+   *
+   * @param name of type String
+   * @return TapIterator
+   * @throws IOException when
+   */
+  public TapIterator openTrap( String name ) throws IOException
+    {
+    return traps.get( name ).openForRead( getJobConf() );
     }
 
   /**

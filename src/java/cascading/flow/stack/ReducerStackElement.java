@@ -21,15 +21,16 @@
 
 package cascading.flow.stack;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -50,14 +51,16 @@ abstract class ReducerStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  ReducerStackElement( StackElement previous, Scope incomingScope )
+  ReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap )
     {
+    super( jobConf, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }
 
-  ReducerStackElement( Fields outGroupingFields )
+  ReducerStackElement( JobConf jobConf, Tap trap, Fields outGroupingFields )
     {
+    super( jobConf, trap );
     this.outGroupingFields = outGroupingFields;
     }
 
@@ -122,9 +125,5 @@ abstract class ReducerStackElement extends StackElement
     tupleEntry.setTuple( tuple );
 
     return tupleEntry;
-    }
-
-  public void close() throws IOException
-    {
     }
   }

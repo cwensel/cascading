@@ -22,13 +22,13 @@
 package cascading;
 
 import java.io.File;
+import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
-import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -37,18 +37,20 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
-public class UseTapCollectorTest extends ClusterTestCase
+/**
+ *
+ */
+public class TrapTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
-  String outputPath = "build/test/output/tapcollector/";
+  String outputPath = "build/test/output/traps/";
 
-  public UseTapCollectorTest()
+  public TrapTest()
     {
-    super( "fielded pipes", true );
+    super( "trap tests", false );
     }
 
-  public void testViaEndPipe() throws Exception
+  public void testTrapNone() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -63,20 +65,18 @@ public class UseTapCollectorTest extends ClusterTestCase
     pipe = new Group( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    pipe = new EndPipe( pipe );
+    Tap sink = new Hfs( new TextLine(), outputPath + "none/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "none/trap", true );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "endpipe", true );
-
-//    sink.setUseTapCollector( true );
-
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
     validateLength( flow, 8, null );
+    validateLength( flow.openTrap(), 0 );
     }
 
-  public void testViaTap() throws Exception
+  public void testTrapEachAll() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -88,23 +88,40 @@ public class UseTapCollectorTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
     pipe = new Group( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-//    pipe = new EndPipe( pipe );
+    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "tap", true );
-
-    sink.setUseTapCollector( true );
-
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
-    validateLength( flow, 8, null );
+    validateLength( flow, 0, null );
+    validateLength( flow.openTrap(), 10 );
     }
 
-  public void testNoGroup() throws Exception
+  public void testTrapEveryAllAtStart() throws Exception
+    {
+    runTrapEveryAll( 0, "everystart", 8 );
+    }
+
+  public void testTrapEveryAllAtAggregate() throws Exception
+    {
+    runTrapEveryAll( 1, "everyaggregate", 10 ); // fails at all values
+    }
+
+  public void testTrapEveryAllAtComplete() throws Exception
+    {
+    runTrapEveryAll( 2, "everycomplete", 8 );
+    }
+
+  private void runTrapEveryAll( int failAt, String path, int failSize ) throws IOException
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -117,15 +134,19 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/tapnogroup", true );
+    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+    pipe = new Every( pipe, new TestFailAggregator( new Fields( "fail" ), failAt ), new Fields( "ip", "count" ) );
 
-    sink.setUseTapCollector( true );
+    Tap sink = new Hfs( new TextLine(), outputPath + path + "/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + path + "/trap", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
-    validateLength( flow, 10, null );
+    validateLength( flow, 0, null );
+    validateLength( flow.openTrap(), failSize );
     }
 
   }

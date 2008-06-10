@@ -49,6 +49,11 @@ public class CascadingTestCase extends TestCase
   protected void validateLength( Flow flow, int length, String name ) throws IOException
     {
     TapIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
+    validateLength( iterator, length );
+    }
+
+  protected void validateLength( TapIterator iterator, int length )
+    {
     int count = 0;
     while( iterator.hasNext() )
       {

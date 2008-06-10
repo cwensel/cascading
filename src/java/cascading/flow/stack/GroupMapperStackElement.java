@@ -28,8 +28,10 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
 import cascading.pipe.Group;
+import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -39,9 +41,9 @@ class GroupMapperStackElement extends MapperStackElement
   private final Group group;
   private final Scope outgoingScope;
 
-  public GroupMapperStackElement( MapperStackElement previous, Scope incomingScope, Group group, Scope outgoingScope )
+  public GroupMapperStackElement( MapperStackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Group group, Scope outgoingScope )
     {
-    super( previous, incomingScope );
+    super( previous, incomingScope, jobConf, trap );
     this.group = group;
     this.outgoingScope = outgoingScope;
     }

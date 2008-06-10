@@ -19,31 +19,31 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading;
+package cascading.flow.stack;
 
-import cascading.operation.Function;
-import cascading.operation.Operation;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
+import cascading.CascadingException;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
-public class TestFunction extends Operation implements Function
+/**
+ *
+ */
+public class StackException extends CascadingException
   {
-  private Tuple value;
-
-  public TestFunction( Fields fieldDeclaration, Tuple value )
+  public StackException()
     {
-    super( fieldDeclaration );
-    this.value = value;
     }
 
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  public StackException( String string )
     {
-    if( value == null )
-      throw new RuntimeException( "function failed" );
+    super( string );
+    }
 
-    outputCollector.add( value );
+  public StackException( String string, Throwable throwable )
+    {
+    super( string, throwable );
+    }
+
+  public StackException( Throwable throwable )
+    {
+    super( throwable );
     }
   }

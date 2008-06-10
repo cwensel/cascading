@@ -66,6 +66,8 @@ public class FlowStep implements Serializable
   final Map<Tap, String> sources = new HashMap<Tap, String>();   // all sources and all sinks must have same scheme
   /** Field sink */
   Tap sink;
+  /** Field traps */
+  public final Map<String, Tap> traps = new HashMap<String, Tap>();
   /** Field tempSink */
   TempHfs tempSink; // used if we need to bypass
   /** Field group */
@@ -132,6 +134,14 @@ public class FlowStep implements Serializable
     else
       sink.sinkInit( conf );
 
+    if( !traps.isEmpty() )
+      {
+      JobConf tempConf = new JobConf( conf );
+
+      for( Tap tap : traps.values() )
+        tap.sourceInit( tempConf );
+      }
+
     if( sink.getScheme().getNumSinkParts() != 0 )
       {
       // if no reducer, set num map tasks to control parts
@@ -189,6 +199,11 @@ public class FlowStep implements Serializable
     FlowException exception = new FlowException( "could not find source Tap for file: " + currentFile );
     LOG.error( exception );
     throw exception;
+    }
+
+  public Tap getTrap( String name )
+    {
+    return traps.get( name );
     }
 
   /**

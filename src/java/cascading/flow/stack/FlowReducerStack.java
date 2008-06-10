@@ -34,6 +34,7 @@ import cascading.flow.Scope;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
@@ -72,8 +73,9 @@ public class FlowReducerStack
     {
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
+    Tap trap = step.getTrap( ( (Pipe) step.group ).getName() );
 
-    stackTail = new GroupReducerStackElement( previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), jobConf );
+    stackTail = new GroupReducerStackElement( previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), jobConf, trap );
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
@@ -82,7 +84,7 @@ public class FlowReducerStack
       List<Every.EveryHandler> everyHandlers = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryHandlersReducerStackElement( stackTail, incomingScope, everyHandlers );
+      stackTail = new EveryHandlersReducerStackElement( stackTail, incomingScope, jobConf, step.traps, everyHandlers );
 
       while( operator instanceof Every )
         {
@@ -91,7 +93,8 @@ public class FlowReducerStack
 
         everyHandlers.add( everyHandler );
 
-        stackTail = new EveryHandlerReducerStackElement( stackTail, incomingScope, everyHandler );
+        trap = step.getTrap( ( (Pipe) operator ).getName() );
+        stackTail = new EveryHandlerReducerStackElement( stackTail, incomingScope, jobConf, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );
@@ -100,7 +103,8 @@ public class FlowReducerStack
 
     while( operator instanceof Each )
       {
-      stackTail = new EachReducerStackElement( stackTail, nextScope, (Each) operator );
+      trap = step.getTrap( ( (Pipe) operator ).getName() );
+      stackTail = new EachReducerStackElement( stackTail, nextScope, jobConf, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( nextScope );

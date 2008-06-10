@@ -30,6 +30,7 @@ import cascading.flow.Scope;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
@@ -80,7 +81,8 @@ public class FlowMapperStack
 
     while( operator instanceof Each )
       {
-      stackTail = new EachMapperStackElement( stackTail, incomingScope, (Each) operator );
+      Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+      stackTail = new EachMapperStackElement( stackTail, incomingScope, jobConf, trap, (Each) operator );
 
       incomingScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( incomingScope );
@@ -99,7 +101,8 @@ public class FlowMapperStack
       {
       Scope outgoingScope = step.getNextScope( operator ); // is always Group
 
-      stackTail = new GroupMapperStackElement( stackTail, incomingScope, (Group) operator, outgoingScope );
+      Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+      stackTail = new GroupMapperStackElement( stackTail, incomingScope, jobConf, trap, (Group) operator, outgoingScope );
       }
     else if( operator instanceof Tap )
       {

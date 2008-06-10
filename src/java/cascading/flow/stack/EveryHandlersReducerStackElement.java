@@ -23,24 +23,29 @@ package cascading.flow.stack;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
  */
 class EveryHandlersReducerStackElement extends ReducerStackElement
   {
+  private final Map<String, Tap> traps;
   private final List<Every.EveryHandler> everyHandlers;
 
-  public EveryHandlersReducerStackElement( StackElement previous, Scope incomingScope, List<Every.EveryHandler> everyHandlers )
+  public EveryHandlersReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
     {
-    super( previous, incomingScope );
+    super( previous, incomingScope, jobConf, null );
+    this.traps = traps;
     this.everyHandlers = everyHandlers;
     }
 
@@ -61,15 +66,33 @@ class EveryHandlersReducerStackElement extends ReducerStackElement
 
   private void operateEveryHandlers( TupleEntry keyEntry, Iterator values )
     {
-    for( Every.EveryHandler everyHandler : everyHandlers )
-      everyHandler.start( keyEntry );
+    for( Every.EveryHandler handler : everyHandlers )
+      {
+      try
+        {
+        handler.start( keyEntry );
+        }
+      catch( Exception exception )
+        {
+        handleException( traps.get( handler.getEvery().getName() ), exception, keyEntry );
+        }
+      }
 
     while( values.hasNext() )
       {
       TupleEntry valueEntry = (TupleEntry) values.next();
 
       for( Every.EveryHandler handler : everyHandlers )
-        handler.operate( valueEntry );
+        {
+        try
+          {
+          handler.operate( valueEntry );
+          }
+        catch( Exception exception )
+          {
+          handleException( traps.get( handler.getEvery().getName() ), exception, valueEntry );
+          }
+        }
       }
 
     next.collect( keyEntry.getTuple() );

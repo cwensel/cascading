@@ -24,9 +24,11 @@ package cascading.flow.stack;
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -35,9 +37,9 @@ class EveryHandlerReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
-  public EveryHandlerReducerStackElement( StackElement previous, Scope incomingScope, Every.EveryHandler everyHandler )
+  public EveryHandlerReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Every.EveryHandler everyHandler )
     {
-    super( previous, incomingScope );
+    super( previous, incomingScope, jobConf, trap );
     this.everyHandler = everyHandler;
     }
 
@@ -58,6 +60,13 @@ class EveryHandlerReducerStackElement extends ReducerStackElement
 
   private void operateEveryHandler( TupleEntry keyEntry )
     {
-    everyHandler.complete( keyEntry, next );
+    try
+      {
+      everyHandler.complete( keyEntry, next );
+      }
+    catch( Exception exception )
+      {
+      handleException( exception, keyEntry );
+      }
     }
   }

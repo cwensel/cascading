@@ -2,6 +2,12 @@ Cascading Change Log
 
 unreleased
 
+  Added support for assembly traps. If an exception is thrown from inside an c.o.Operation, the offending Tuple
+  can be saved to a file for later processing, allowing the job to complete.
+
+  Added support for stream assertions. STRICT and VALID assertions can be built into a pipe assembly, and optionally
+  planned out during runtime. Assertions will throw exceptions if they fail.
+
   Changed c.o.a.First, Last, Min, and Max to optionally ignore specified values. Useful if you do not wish
   for a 'default' value to be considered first, or last in a set.
 

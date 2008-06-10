@@ -80,6 +80,12 @@ public class TapIterator implements Iterator<Tuple>
     {
     tap.sourceInit( conf );
 
+    if( !tap.pathExists( conf ) )
+      {
+      complete = true;
+      return;
+      }
+
     inputFormat = conf.getInputFormat();
 
     if( inputFormat instanceof JobConfigurable )
@@ -129,7 +135,7 @@ public class TapIterator implements Iterator<Tuple>
 
   private void getNextTuple()
     {
-    if( currentTuple != null )
+    if( currentTuple != null || reader == null )
       return;
 
     try
@@ -163,7 +169,8 @@ public class TapIterator implements Iterator<Tuple>
     {
     try
       {
-      reader.close();
+      if( reader != null )
+        reader.close();
       }
     catch( IOException exception )
       {

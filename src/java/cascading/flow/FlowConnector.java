@@ -22,6 +22,7 @@
 package cascading.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -170,6 +171,30 @@ public class FlowConnector
     }
 
   /**
+   * Method connect links the given source, sink, and trap Taps to the given pipe assembly. The given trap will
+   * be linked to the assembly head along with the source.
+   *
+   * @param name   of type String
+   * @param source of type Tap
+   * @param sink   of type Tap
+   * @param trap   of type Tap
+   * @param pipe   of type Pipe
+   * @return Flow
+   */
+  public Flow connect( String name, Tap source, Tap sink, Tap trap, Pipe pipe )
+    {
+    Map<String, Tap> sources = new HashMap<String, Tap>();
+
+    sources.put( pipe.getHeads()[ 0 ].getName(), source );
+
+    Map<String, Tap> traps = new HashMap<String, Tap>();
+
+    traps.put( pipe.getHeads()[ 0 ].getName(), trap );
+
+    return connect( name, sources, sink, traps, pipe );
+    }
+
+  /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
    *
    * @param sources of type Map<String, Tap>
@@ -198,6 +223,24 @@ public class FlowConnector
     sinks.put( pipe.getName(), sink );
 
     return connect( name, sources, sinks, pipe );
+    }
+
+  /**
+   * Method connect links the named source and trap Taps and sink Tap to the given pipe assembly.
+   *
+   * @param name    of type String
+   * @param sources of type Map<String, Tap>
+   * @param sink    of type Tap
+   * @param pipe    of type Pipe
+   * @return Flow
+   */
+  public Flow connect( String name, Map<String, Tap> sources, Tap sink, Map<String, Tap> traps, Pipe pipe )
+    {
+    Map<String, Tap> sinks = new HashMap<String, Tap>();
+
+    sinks.put( pipe.getName(), sink );
+
+    return connect( name, sources, sinks, traps, pipe );
     }
 
   /**
@@ -249,6 +292,7 @@ public class FlowConnector
     return connect( name, sources, sinks, pipes );
     }
 
+
   /**
    * Method connect links the named sources and sinks to the given pipe assembly.
    *
@@ -275,7 +319,24 @@ public class FlowConnector
     {
     name = name == null ? makeName( pipes ) : name;
 
-    return buildFlow( name, pipes, sources, sinks );
+    return buildFlow( name, pipes, sources, sinks, new HashMap<String, Tap>() );
+    }
+
+  /**
+   * Method connect links the named sources, sinks and traps to the given pipe assembly.
+   *
+   * @param name    of type String
+   * @param sources of type Map<String, Tap>
+   * @param sinks   of type Map<String, Tap>
+   * @param traps   of type Map<String, Tap>
+   * @param pipes   of type Pipe...
+   * @return Flow
+   */
+  public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Pipe... pipes )
+    {
+    name = name == null ? makeName( pipes ) : name;
+
+    return buildFlow( name, pipes, sources, sinks, traps );
     }
 
   /**
@@ -285,9 +346,10 @@ public class FlowConnector
    * @param pipes   of type Pipe[]
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
+   * @param traps   of type Map<String, Tap>
    * @return Flow
    */
-  private Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
+  private Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     SimpleDirectedGraph<FlowElement, Scope> pipeGraph = null;
 
@@ -295,8 +357,10 @@ public class FlowConnector
       {
       verifyTaps( sources, true );
       verifyTaps( sinks, false );
+      verifyTaps( traps, false );
 
-      verifyNames( sources, sinks, pipes );
+      verifyEndPoints( sources, sinks, pipes );
+      verifyTraps( traps, pipes );
 
       pipeGraph = makePipeGraph( pipes, sources, sinks );
 
@@ -309,9 +373,9 @@ public class FlowConnector
       resolveFields( pipeGraph );
 
       SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
-      SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph );
+      SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph, traps );
 
-      return new Flow( jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ) );
+      return new Flow( jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ), new HashMap<String, Tap>( traps ) );
       }
     catch( FlowException exception )
       {
@@ -337,13 +401,14 @@ public class FlowConnector
       }
     }
 
-  private void verifyNames( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
+  private void verifyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
     {
     Set<String> names = new HashSet<String>();
 
     names.addAll( sources.keySet() );
     names.addAll( sinks.keySet() );
 
+    // handle tails
     for( Pipe pipe : pipes )
       {
       if( pipe instanceof PipeAssembly )
@@ -360,6 +425,7 @@ public class FlowConnector
         }
       }
 
+    // handle heads
     for( Pipe pipe : pipes )
       {
       for( Pipe head : pipe.getHeads() )
@@ -367,6 +433,32 @@ public class FlowConnector
         if( !names.contains( head.getName() ) )
           throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
         }
+      }
+    }
+
+  private void verifyTraps( Map<String, Tap> traps, Pipe[] pipes )
+    {
+    Set<String> names = new HashSet<String>();
+
+    collectNames( pipes, names );
+
+    for( String name : traps.keySet() )
+      {
+      if( !names.contains( name ) )
+        throw new FlowException( "trap name not found in assembly: " + name );
+      }
+    }
+
+  private void collectNames( Pipe[] pipes, Set<String> names )
+    {
+    for( Pipe pipe : pipes )
+      {
+      if( pipe instanceof PipeAssembly )
+        names.addAll( Arrays.asList( ( (PipeAssembly) pipe ).getTailNames() ) );
+      else
+        names.add( pipe.getName() );
+
+      collectNames( pipe.getPrevious(), names );
       }
     }
 
@@ -835,7 +927,7 @@ public class FlowConnector
     return tapGraph;
     }
 
-  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph )
+  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph, Map<String, Tap> traps )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
     SimpleDirectedGraph<FlowStep, Integer> stepGraph = new SimpleDirectedGraph<FlowStep, Integer>( Integer.class );
@@ -864,7 +956,7 @@ public class FlowConnector
           stepGraph.addEdge( steps.get( source.toString() ), step, count++ );
 
         List<Scope> scopes = DijkstraShortestPath.findPathBetween( pipeGraph, source, sink );
-        String sourceName = scopes.get( 0 ).getName();
+        String sourceName = scopes.get( 0 ).getName(); // root node of the shortest path
 
         step.sources.put( (Tap) source, sourceName );
         step.sink = sink;
@@ -885,6 +977,14 @@ public class FlowConnector
 
           if( rhs instanceof Group )
             step.group = (Group) rhs;
+
+          if( rhs instanceof Pipe ) // add relevant traps to step
+            {
+            String name = ( (Pipe) rhs ).getName();
+
+            if( traps.containsKey( name ) )
+              step.traps.put( name, traps.get( name ) );
+            }
 
           lhs = rhs;
           }
