@@ -26,22 +26,37 @@ import cascading.operation.regex.RegexMatcher;
 import cascading.tuple.TupleEntry;
 
 /**
- *
+ * Class AssertMatchesAll matches the given regular expression patternString against each argument
+ * {@link cascading.tuple.Tuple} element individually. See {@link AssertMatches} if you need to match the patternString regex against
+ * the tuple as a whole.
  */
 public class AssertMatchesAll extends RegexMatcher implements Assertion
   {
-  private String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
+  /** Field message */
+  private final String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
 
+  /**
+   * Constructor AssertMatchesAll creates a new AssertMatchesAll instance.
+   *
+   * @param patternString of type String
+   */
   public AssertMatchesAll( String patternString )
     {
     super( patternString, false );
     }
 
+  /**
+   * Constructor AssertMatchesAll creates a new AssertMatchesAll instance.
+   *
+   * @param patternString of type String
+   * @param negateMatch   of type boolean
+   */
   public AssertMatchesAll( String patternString, boolean negateMatch )
     {
     super( patternString, negateMatch );
     }
 
+  /** @see cascading.operation.Assertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     int pos = matchEachElementPos( input.getTuple() );
