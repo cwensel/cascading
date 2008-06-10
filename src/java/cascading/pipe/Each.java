@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
 /**
  * The Each operator applies either a {@link Function} or a {@link Filter} to each entry in the {@link Tuple}
  * stream. Any number of Each operators can follow an Each, {@link Group}, or {@link Every}
- * operator. Each is typically represented in model diagrams as an {@code E}.
+ * operator.
  */
 public class Each extends Operator
   {
