@@ -53,10 +53,7 @@ public class Count extends Operation implements Aggregator
    */
   public Count( Fields fieldDeclaration )
     {
-    super( 1, fieldDeclaration );
-
-    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+    super( fieldDeclaration ); // allow ANY number of arguments
     }
 
   /** @see Aggregator#start(Map, TupleEntry) */
