@@ -45,6 +45,6 @@ public class AssertMatches extends RegexMatcher implements Assertion
   public void doAssert( TupleEntry input )
     {
     if( matchWholeTuple( input.getTuple() ) )
-      BaseAssertion.throwFail( message, input.getTuple(), patternString );
+      BaseAssertion.throwFail( message, input.getTuple().print(), patternString );
     }
   }

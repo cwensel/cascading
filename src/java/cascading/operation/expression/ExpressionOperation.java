@@ -52,7 +52,7 @@ public class ExpressionOperation extends Operation
   /** Field parameterNames */
   private String[] parameterNames;
 
-  public ExpressionOperation( int numArgs, Fields fieldDeclaration, String expression, Class... parameterTypes )
+  protected ExpressionOperation( int numArgs, Fields fieldDeclaration, String expression, Class... parameterTypes )
     {
     super( numArgs, fieldDeclaration );
     this.parameterTypes = parameterTypes;
@@ -135,12 +135,12 @@ public class ExpressionOperation extends Operation
     }
 
   /**
-   * Exposed for testing. Performs the actual expression evaluation.
+   * Performs the actual expression evaluation.
    *
    * @param input of type TupleEntry
    * @return Comparable
    */
-  Comparable evaluate( TupleEntry input )
+  protected Comparable evaluate( TupleEntry input )
     {
     Tuple parameterTuple = input.selectTuple( getParameterFields() );
 

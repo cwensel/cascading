@@ -191,4 +191,15 @@ public class AssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  public void testExpression()
+    {
+    Assertion assertion = new AssertExpression( "$0 == 1", Integer.class );
+
+    assertPass( assertion, getEntry( new Tuple( 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "1", 0 ) ) );
+    assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
+    }
+
   }
