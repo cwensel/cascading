@@ -23,7 +23,6 @@ package cascading.operation;
 
 import java.util.Map;
 
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
@@ -39,9 +38,9 @@ import cascading.tuple.TupleEntry;
 public interface Aggregator
   {
   /**
-   * Initializes the aggregation procedure.  The {@link Map} is the utility that
-   * holds values to be aggregated.  If an initial value should be set here, this
-   * method should be called before {@link #aggregate(Map, TupleEntry)} and {@link #complete(java.util.Map,cascading.tuple.TupleCollector)}.
+   * Methdo start initializes the aggregation procedure.  The {@link Map} context is used to
+   * hold intermediate values. The context should be initialized here if necessary. This method will be called
+   * before {@link #aggregate(Map, TupleEntry)} and {@link #complete(java.util.Map,cascading.tuple.TupleCollector)}.
    *
    * @param context    the map to be initialized (if necessary)
    * @param groupEntry is the current grouping tuple
@@ -49,9 +48,7 @@ public interface Aggregator
   void start( Map context, TupleEntry groupEntry );
 
   /**
-   * Adds a {@link TupleEntry} to the aggregation operation.  This is issued by
-   * reducer for each {@link TupleEntry} that should partake in the aggregation
-   * operation.
+   * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
    *
    * @param context the map with aggregate values so far
    * @param entry   the tuple entry to add to the operation
@@ -59,9 +56,9 @@ public interface Aggregator
   void aggregate( Map context, TupleEntry entry );
 
   /**
-   * This should be issued last after each {@link TupleEntry} has been added by the
-   * {@link #aggregate(Map, TupleEntry)} operation.  Any final calculation is done
-   * here and a single {@link Tuple} is returned with the aggregate value.
+   * Method complete will be issued last after every {@link TupleEntry} has been passed to the
+   * {@link #aggregate(Map, TupleEntry)} method.  Any final calculation should be completed
+   * here and passed to the outputCollector.
    *
    * @param context         the aggregate map @return the final aggregate value
    * @param outputCollector
