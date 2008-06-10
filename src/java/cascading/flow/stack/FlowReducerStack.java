@@ -134,7 +134,15 @@ public class FlowReducerStack
       }
 
     stackTail.setLastOutput( output );
-    stackHead.collect( (Tuple) key, values );
+
+    try
+      {
+      stackHead.collect( (Tuple) key, values );
+      }
+    catch( StackException exception ) // unwrap
+      {
+      throw (RuntimeException) exception.getCause();
+      }
     }
 
   public void close() throws IOException

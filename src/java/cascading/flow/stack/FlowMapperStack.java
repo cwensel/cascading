@@ -132,7 +132,14 @@ public class FlowMapperStack
 
     stackTail.setLastOutput( output );
 
-    stackHead.collect( tuple );
+    try
+      {
+      stackHead.collect( tuple );
+      }
+    catch( StackException exception )
+      {
+      throw (RuntimeException) exception.getCause();
+      }
     }
 
   public void close() throws IOException

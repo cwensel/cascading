@@ -22,14 +22,13 @@
 package cascading.tap.hadoop;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import junit.framework.TestCase;
+import cascading.CascadingTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,9 +40,8 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.TestTextInputFormat;
 
-public class ZipInputFormatTest extends TestCase
+public class ZipInputFormatTest extends CascadingTestCase
   {
   private static final Log LOG = LogFactory.getLog( ZipInputFormatTest.class.getName() );
 
@@ -54,16 +52,11 @@ public class ZipInputFormatTest extends TestCase
 
   public void testSplits() throws Exception
     {
-    test( new JobConf() );
-    }
-
-  private void test( JobConf job ) throws IOException
-    {
+    JobConf job = new JobConf();
     FileSystem currentFs = FileSystem.get( job );
 
     Path file = new Path( workDir, "test.zip" );
 
-    // A reporter that does nothing
     Reporter reporter = Reporter.NULL;
 
     int seed = new Random().nextInt();
@@ -71,7 +64,6 @@ public class ZipInputFormatTest extends TestCase
     Random random = new Random( seed );
     job.setInputPath( file );
 
-    // for variety of zip file entries
     for( int entries = 1; entries < MAX_ENTRIES; entries += random.nextInt( MAX_ENTRIES / 10 ) + 1 )
       {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -112,24 +104,13 @@ public class ZipInputFormatTest extends TestCase
       byteArrayOutputStream.writeTo( outputStream );
       outputStream.close();
 
-      // try splitting the zip file, with 1 split per zip entry
       ZipInputFormat format = new ZipInputFormat();
       format.configure( job );
       LongWritable key = new LongWritable();
       Text value = new Text();
-      LOG.debug( "splitting zip file: requesting..." );
       InputSplit[] splits = format.getSplits( job, 100 );
-      LOG.debug( "splitting: got = " + splits.length );
 
-      if( splits.length == 0 )
-        {
-        assertEquals( "Files of length 0 are not returned from ZipInputFormat.getSplits().", 1, splits.length );
-        assertEquals( "Empty file length == 0", 0, splits[ 0 ].getLength() );
-        }
-
-      // check each split
       BitSet bits = new BitSet( (int) length );
-      long totalCount = 0;
       for( int j = 0; j < splits.length; j++ )
         {
         LOG.debug( "split[" + j + "]= " + splits[ j ] );
@@ -147,12 +128,11 @@ public class ZipInputFormatTest extends TestCase
             if( bits.get( v ) )
               LOG.warn( "conflict with " + v + " in split " + j + " at position " + reader.getPos() );
 
-            assertFalse( "Key in multiple partitions.", bits.get( v ) );
+            assertFalse( "key in multiple partitions.", bits.get( v ) );
             bits.set( v );
             count++;
             }
 
-          totalCount += count;
           LOG.debug( "splits[" + j + "]=" + splits[ j ] + " count=" + count );
           }
         finally
@@ -161,12 +141,8 @@ public class ZipInputFormatTest extends TestCase
           }
         }
 
-      assertEquals( "Some keys in no partition.", length, bits.cardinality() );
+      assertEquals( "some keys in no partition.", length, bits.cardinality() );
       }
     }
 
-  public static void main( String[] args ) throws Exception
-    {
-    new TestTextInputFormat().testFormat();
-    }
   }
