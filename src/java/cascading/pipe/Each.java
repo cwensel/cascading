@@ -204,7 +204,7 @@ public class Each extends Operator
    * Constructor Each creates a new Each instance.
    *
    * @param name           of type String
-   * @param assertionLevel
+   * @param assertionLevel of type AssertionLevel
    * @param assertion      of type Filter
    */
   public Each( String name, AssertionLevel assertionLevel, Assertion assertion )
@@ -215,6 +215,7 @@ public class Each extends Operator
   /**
    * @param name                  of type String
    * @param argumentFieldSelector of type Fields
+   * @param assertionLevel        of type AssertionLevel
    * @param assertion             of type Filter
    */
   public Each( String name, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
@@ -223,8 +224,9 @@ public class Each extends Operator
     }
 
   /**
-   * @param previous  of type Pipe
-   * @param assertion of type Filter
+   * @param previous       of type Pipe
+   * @param assertionLevel of type AssertionLevel
+   * @param assertion      of type Filter
    */
   public Each( Pipe previous, AssertionLevel assertionLevel, Assertion assertion )
     {
@@ -232,9 +234,9 @@ public class Each extends Operator
     }
 
   /**
-   * @param previous
+   * @param previous              of type Pipe
    * @param argumentFieldSelector of type Fields
-   * @param assertionLevel
+   * @param assertionLevel        of type AssertionLevel
    * @param assertion             of type Filter
    */
   public Each( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )

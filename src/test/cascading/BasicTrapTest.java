@@ -121,7 +121,6 @@ public class BasicTrapTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    // always fail
     pipe = new Pipe( "middle", pipe );
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
@@ -142,5 +141,34 @@ public class BasicTrapTest extends CascadingTestCase
     new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
 
+  public void testTrapNamesPass3() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
+    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new Pipe( "first", pipe );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+    pipe = new Pipe( "second", pipe );
+    pipe = new Every( pipe, new Count( new Fields( "count2" ) ), new Fields( "ip", "count", "count2" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+
+    Map<String, Tap> sources = new HashMap<String, Tap>();
+    Map<String, Tap> sinks = new HashMap<String, Tap>();
+    Map<String, Tap> traps = new HashMap<String, Tap>();
+
+    sources.put( "test", source );
+    sinks.put( "second", sink );
+    traps.put( "first", trap );
+
+    new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+    }
 
   }
