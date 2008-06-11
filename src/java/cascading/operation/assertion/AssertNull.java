@@ -21,18 +21,21 @@
 
 package cascading.operation.assertion;
 
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /** Class AssertNull asserts that every value in the argument values {@link Tuple} is a null value. */
-public class AssertNull extends BaseAssertion
+public class AssertNull extends AssertionBase implements ValueAssertion
   {
 
+  /** Constructor AssertNull creates a new AssertNull instance. */
   public AssertNull()
     {
     super( "argument '%s' value was not null, in tuple: %s" );
     }
 
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     int pos = 0;

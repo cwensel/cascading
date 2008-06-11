@@ -22,8 +22,8 @@
 package cascading.operation.assertion;
 
 import cascading.CascadingTestCase;
-import cascading.operation.Assertion;
 import cascading.operation.AssertionException;
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -31,11 +31,11 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-public class AssertionsTest extends CascadingTestCase
+public class ValueAssertionsTest extends CascadingTestCase
   {
-  public AssertionsTest()
+  public ValueAssertionsTest()
     {
-    super( "assetion test" );
+    super( "value assertions test" );
     }
 
   private TupleEntry getEntry( Tuple tuple )
@@ -43,7 +43,7 @@ public class AssertionsTest extends CascadingTestCase
     return new TupleEntry( Fields.size( tuple.size() ), tuple );
     }
 
-  private void assertFail( Assertion assertion, TupleEntry tupleEntry )
+  private void assertFail( ValueAssertion assertion, TupleEntry tupleEntry )
     {
     try
       {
@@ -56,14 +56,14 @@ public class AssertionsTest extends CascadingTestCase
       }
     }
 
-  private void assertPass( Assertion assertion, TupleEntry tupleEntry )
+  private void assertPass( ValueAssertion assertion, TupleEntry tupleEntry )
     {
     assertion.doAssert( tupleEntry );
     }
 
   public void testNotNull()
     {
-    Assertion assertion = new AssertNotNull();
+    ValueAssertion assertion = new AssertNotNull();
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );
@@ -74,7 +74,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testNull()
     {
-    Assertion assertion = new AssertNull();
+    ValueAssertion assertion = new AssertNull();
 
     assertFail( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
@@ -86,7 +86,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testEquals()
     {
-    Assertion assertion = new AssertEquals( 1 );
+    ValueAssertion assertion = new AssertEquals( 1 );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( 1, 1, 1, 1, 1, 1 ) ) );
@@ -106,7 +106,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testEqualsAll()
     {
-    Assertion assertion = new AssertEqualsAll( 1 );
+    ValueAssertion assertion = new AssertEqualsAll( 1 );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( 1, 1, 1, 1, 1, 1 ) ) );
@@ -119,7 +119,7 @@ public class AssertionsTest extends CascadingTestCase
   public void testMatches()
     {
     // match tuple, assert match
-    Assertion assertion = new AssertMatches( "^1$" );
+    ValueAssertion assertion = new AssertMatches( "^1$" );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( "1" ) ) );
@@ -156,7 +156,7 @@ public class AssertionsTest extends CascadingTestCase
   public void testMatchesAll()
     {
     // match elements, assert match
-    Assertion assertion = new AssertMatchesAll( "^1$" );
+    ValueAssertion assertion = new AssertMatchesAll( "^1$" );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( "1" ) ) );
@@ -193,7 +193,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testExpression()
     {
-    Assertion assertion = new AssertExpression( "$0 == 1", Integer.class );
+    ValueAssertion assertion = new AssertExpression( "$0 == 1", Integer.class );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );
@@ -204,7 +204,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testTupleEquals()
     {
-    Assertion assertion = new AssertSizeEquals( 1 );
+    ValueAssertion assertion = new AssertSizeEquals( 1 );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
@@ -215,7 +215,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testTupleLessThan()
     {
-    Assertion assertion = new AssertSizeLessThan( 2 );
+    ValueAssertion assertion = new AssertSizeLessThan( 2 );
 
     assertPass( assertion, getEntry( new Tuple( 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
@@ -226,7 +226,7 @@ public class AssertionsTest extends CascadingTestCase
 
   public void testTupleMoreThan()
     {
-    Assertion assertion = new AssertSizeMoreThan( 1 );
+    ValueAssertion assertion = new AssertSizeMoreThan( 1 );
 
     assertFail( assertion, getEntry( new Tuple( 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );

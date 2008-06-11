@@ -21,7 +21,7 @@
 
 package cascading.operation.assertion;
 
-import cascading.operation.Assertion;
+import cascading.operation.ValueAssertion;
 import cascading.operation.regex.RegexMatcher;
 import cascading.tuple.TupleEntry;
 
@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  * {@link cascading.tuple.Tuple} element individually. See {@link AssertMatches} if you need to match the patternString regex against
  * the tuple as a whole.
  */
-public class AssertMatchesAll extends RegexMatcher implements Assertion
+public class AssertMatchesAll extends RegexMatcher implements ValueAssertion
   {
   /** Field message */
   private final String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
@@ -56,12 +56,12 @@ public class AssertMatchesAll extends RegexMatcher implements Assertion
     super( patternString, negateMatch );
     }
 
-  /** @see cascading.operation.Assertion#doAssert(TupleEntry) */
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     int pos = matchEachElementPos( input.getTuple() );
 
     if( pos != -1 )
-      BaseAssertion.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
+      AssertionBase.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
     }
   }

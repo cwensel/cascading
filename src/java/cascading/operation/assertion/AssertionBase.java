@@ -21,7 +21,6 @@
 
 package cascading.operation.assertion;
 
-import cascading.operation.Assertion;
 import cascading.operation.AssertionException;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
@@ -29,27 +28,28 @@ import cascading.tuple.Fields;
 /**
  *
  */
-public abstract class BaseAssertion extends Operation implements Assertion
+public abstract class AssertionBase extends Operation
   {
+  /** Field message */
   private String message;
 
-  protected BaseAssertion()
+  protected AssertionBase()
     {
     super( ANY, Fields.ALL );
     }
 
-  protected BaseAssertion( String message )
+  protected AssertionBase( String message )
     {
     this();
     this.message = message;
     }
 
-  protected BaseAssertion( int numArgs )
+  protected AssertionBase( int numArgs )
     {
     super( numArgs, Fields.ALL );
     }
 
-  protected BaseAssertion( int numArgs, String message )
+  protected AssertionBase( int numArgs, String message )
     {
     this( numArgs );
     this.message = message;

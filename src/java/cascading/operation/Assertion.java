@@ -21,15 +21,7 @@
 
 package cascading.operation;
 
-import cascading.tuple.TupleEntry;
-
 /** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link Operation}. */
 public interface Assertion
   {
-  /**
-   * Method doAssert performs the assertion.
-   *
-   * @param input of type TupleEntry
-   */
-  void doAssert( TupleEntry input );
   }

@@ -21,16 +21,23 @@
 
 package cascading.operation.assertion;
 
+import cascading.operation.ValueAssertion;
 import cascading.tuple.TupleEntry;
 
 /**
  * Class AssertEqualsAll asserts that every value in the argument values {@link cascading.tuple.Tuple} is equal to the value
  * provided on the constructor.
  */
-public class AssertEqualsAll extends BaseAssertion
+public class AssertEqualsAll extends AssertionBase implements ValueAssertion
   {
+  /** Field value */
   private Comparable value;
 
+  /**
+   * Constructor AssertEqualsAll creates a new AssertEqualsAll instance.
+   *
+   * @param value of type Comparable
+   */
   public AssertEqualsAll( Comparable value )
     {
     super( "argument '%s' value was: %s, not: %s, in tuple: %s" );
@@ -41,6 +48,7 @@ public class AssertEqualsAll extends BaseAssertion
     this.value = value;
     }
 
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     int pos = 0;

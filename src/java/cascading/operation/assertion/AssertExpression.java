@@ -21,7 +21,7 @@
 
 package cascading.operation.assertion;
 
-import cascading.operation.Assertion;
+import cascading.operation.ValueAssertion;
 import cascading.operation.expression.ExpressionOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -42,7 +42,7 @@ import cascading.tuple.TupleEntry;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class AssertExpression extends ExpressionOperation implements Assertion
+public class AssertExpression extends ExpressionOperation implements ValueAssertion
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
@@ -55,9 +55,10 @@ public class AssertExpression extends ExpressionOperation implements Assertion
     super( ANY, Fields.ALL, expression, parameterTypes );
     }
 
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     if( !(Boolean) evaluate( input ) )
-      BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
+      AssertionBase.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
     }
   }

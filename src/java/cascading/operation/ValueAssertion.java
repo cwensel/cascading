@@ -19,34 +19,19 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.operation.assertion;
+package cascading.operation;
 
-import cascading.operation.ValueAssertion;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-/** Class AssertNotNull asserts that every value in the argument values {@link Tuple} is not a null value. */
-public class AssertNotNull extends AssertionBase implements ValueAssertion
+/**
+ *
+ */
+public interface ValueAssertion extends Assertion
   {
-
-  /** Constructor AssertNotNull creates a new AssertNotNull instance. */
-  public AssertNotNull()
-    {
-    super( "argument '%s' value was null, in tuple: %s" );
-    }
-
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
-    {
-    int pos = 0;
-
-    for( Object value : input.getTuple() )
-      {
-      if( value == null )
-        fail( input.getFields().get( pos ), input.getTuple().print() );
-
-      pos++;
-      }
-
-    }
+  /**
+   * Method doAssert performs the assertion.
+   *
+   * @param input of type TupleEntry
+   */
+  void doAssert( TupleEntry input );
   }

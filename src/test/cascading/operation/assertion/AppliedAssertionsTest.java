@@ -53,7 +53,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
     super( "applied assertions", false );
     }
 
-  public void testAssertionsPass() throws Exception
+  public void testValueAssertionsPass() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -61,7 +61,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
     copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "pass", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "value/pass", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -86,7 +86,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
     validateLength( flow, 1, null );
     }
 
-  public void testAssertionsFail() throws Exception
+  public void testValueAssertionsFail() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -94,7 +94,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
     copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "fail", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "value/fail", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -125,17 +125,17 @@ public class AppliedAssertionsTest extends ClusterTestCase
       }
     }
 
-  public void testAssertionsRemoval() throws Exception
+  public void testValueAssertionsRemoval() throws Exception
     {
-    runAssertions( AssertionLevel.NONE, AssertionLevel.STRICT, true );
-    runAssertions( AssertionLevel.VALID, AssertionLevel.STRICT, true );
-    runAssertions( AssertionLevel.STRICT, AssertionLevel.STRICT, false );
+    runValueAssertions( AssertionLevel.NONE, AssertionLevel.STRICT, true );
+    runValueAssertions( AssertionLevel.VALID, AssertionLevel.STRICT, true );
+    runValueAssertions( AssertionLevel.STRICT, AssertionLevel.STRICT, false );
 
-    runAssertions( AssertionLevel.NONE, AssertionLevel.VALID, true );
-    runAssertions( AssertionLevel.VALID, AssertionLevel.VALID, false );
+    runValueAssertions( AssertionLevel.NONE, AssertionLevel.VALID, true );
+    runValueAssertions( AssertionLevel.VALID, AssertionLevel.VALID, false );
     }
 
-  private void runAssertions( AssertionLevel planLevel, AssertionLevel setLevel, boolean pass ) throws IOException
+  private void runValueAssertions( AssertionLevel planLevel, AssertionLevel setLevel, boolean pass ) throws IOException
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -143,7 +143,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
     copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + planLevel + "/" + setLevel, true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "value/" + planLevel + "/" + setLevel, true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -160,6 +160,137 @@ public class AppliedAssertionsTest extends ClusterTestCase
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
     pipe = new Each( pipe, new Fields( "count" ), setLevel, new AssertEquals( 0L ) );
+
+    FlowConnector flowConnector = new FlowConnector( jobConf );
+
+    flowConnector.setAssertionLevel( planLevel );
+
+    Flow flow = flowConnector.connect( source, sink, pipe );
+
+    try
+      {
+      flow.complete();
+
+      if( !pass )
+        fail( "no assertions thrown" );
+      }
+    catch( Exception exception )
+      {
+      if( pass )
+        fail( "assertion thrown" );
+      }
+
+    if( pass )
+      validateLength( flow, 1, null );
+    }
+
+  public void testGroupAssertionsPass() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "pass", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
+
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
+
+    pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
+
+    pipe = new Group( pipe, new Fields( "method" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
+
+    pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 7L ) );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, null );
+    }
+
+  public void testGroupAssertionsFail() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "fail", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
+
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
+
+    pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
+
+    pipe = new Group( pipe, new Fields( "method" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
+
+    pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 0L ) );
+
+    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+    try
+      {
+      flow.complete();
+      fail( "no assertions thrown" );
+      }
+    catch( Exception exception )
+      {
+
+      }
+    }
+
+  public void testGroupAssertionsRemoval() throws Exception
+    {
+    runGroupAssertions( AssertionLevel.NONE, AssertionLevel.STRICT, true );
+    runGroupAssertions( AssertionLevel.VALID, AssertionLevel.STRICT, true );
+    runGroupAssertions( AssertionLevel.STRICT, AssertionLevel.STRICT, false );
+
+    runGroupAssertions( AssertionLevel.NONE, AssertionLevel.VALID, true );
+    runGroupAssertions( AssertionLevel.VALID, AssertionLevel.VALID, false );
+    }
+
+  private void runGroupAssertions( AssertionLevel planLevel, AssertionLevel setLevel, boolean pass ) throws IOException
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "value/" + planLevel + "/" + setLevel, true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, setLevel, new AssertNotNull() );
+
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
+
+    pipe = new Each( pipe, new Fields( "method" ), setLevel, new AssertMatches( "^POST" ) );
+
+    pipe = new Group( pipe, new Fields( "method" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
+
+    pipe = new Every( pipe, setLevel, new AssertGroupSizeEquals( 0L ) );
 
     FlowConnector flowConnector = new FlowConnector( jobConf );
 

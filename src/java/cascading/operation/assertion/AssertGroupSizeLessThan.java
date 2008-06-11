@@ -21,32 +21,22 @@
 
 package cascading.operation.assertion;
 
-import cascading.operation.ValueAssertion;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-
-/** Class AssertNotNull asserts that every value in the argument values {@link Tuple} is not a null value. */
-public class AssertNotNull extends AssertionBase implements ValueAssertion
+/** Class AssertGroupSizeLessThan is an {@link cascading.operation.ValueAssertion} that asserts the number of items in the current group. */
+public class AssertGroupSizeLessThan extends AssertGroupBase
   {
 
-  /** Constructor AssertNotNull creates a new AssertNotNull instance. */
-  public AssertNotNull()
+  /**
+   * Constructor AssertGroupSizeLessThan creates a new AssertGroupSizeLessThan instance.
+   *
+   * @param size of type long
+   */
+  public AssertGroupSizeLessThan( long size )
     {
-    super( "argument '%s' value was null, in tuple: %s" );
+    super( "group size %s, is more than or equal to: %s, in group %s: %s", size );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  protected boolean compare( Long groupSize )
     {
-    int pos = 0;
-
-    for( Object value : input.getTuple() )
-      {
-      if( value == null )
-        fail( input.getFields().get( pos ), input.getTuple().print() );
-
-      pos++;
-      }
-
+    return groupSize >= size;
     }
   }

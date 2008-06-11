@@ -21,6 +21,7 @@
 
 package cascading.operation.assertion;
 
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
@@ -28,10 +29,16 @@ import cascading.tuple.TupleEntry;
  * Class AssertEquals either asserts the number of constructor values is equal
  * to the number of arguments to the assertion and each value is equal to its corresponding argument.
  */
-public class AssertEquals extends BaseAssertion
+public class AssertEquals extends AssertionBase implements ValueAssertion
   {
+  /** Field values */
   private Tuple values;
 
+  /**
+   * Constructor AssertEquals creates a new AssertEquals instance.
+   *
+   * @param values of type Comparable...
+   */
   public AssertEquals( Comparable... values )
     {
     super( values.length, "argument tuple: %s was not equal to values: %s" );
@@ -45,6 +52,7 @@ public class AssertEquals extends BaseAssertion
     this.values = new Tuple( values );
     }
 
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     if( !input.getTuple().equals( values ) )

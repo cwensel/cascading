@@ -22,13 +22,14 @@
 package cascading.pipe;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
 import cascading.flow.Scope;
 import cascading.operation.Aggregator;
+import cascading.operation.AssertionLevel;
+import cascading.operation.GroupAssertion;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -41,7 +42,7 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * Every operators create aggregate values for every grouping they encounter. This aggregate value is added to the current
  * grouping Tuple. Subsequent Every instances can continue to append values to the grouping Tuple. When an Each follows
- * and Every, the Each applies its operation to the grouping Tuple.
+ * and Every, the Each applies its operation to the grouping Tuple (thus all values in the grouping are discarded).
  */
 public class Every extends Operator
   {
@@ -49,6 +50,8 @@ public class Every extends Operator
   private static final Fields AGGREGATOR_ARGUMENTS = Fields.FIRST; // we don't want to force a new map/red by default
   /** Field AGGREGATOR_SELECTOR */
   private static final Fields AGGREGATOR_SELECTOR = Fields.ALL;
+  /** Field ASSERTION_SELECTOR */
+  private static final Fields ASSERTION_SELECTOR = Fields.RESULTS;
 
   /**
    * Constructor Every creates a new Every instance.
@@ -98,9 +101,39 @@ public class Every extends Operator
     super( previous, AGGREGATOR_ARGUMENTS, (Operation) aggregator, outFieldSelector );
     }
 
+  /**
+   * Constructor Every creates a new Every instance.
+   *
+   * @param previous       of type Pipe
+   * @param assertionLevel of type AssertionLevel
+   * @param assertion      of type ValueAssertion
+   */
+  public Every( Pipe previous, AssertionLevel assertionLevel, GroupAssertion assertion )
+    {
+    super( previous, AGGREGATOR_ARGUMENTS, assertionLevel, (Operation) assertion, ASSERTION_SELECTOR );
+    }
+
+  /**
+   * Constructor Every creates a new Every instance.
+   *
+   * @param previous              of type Pipe
+   * @param argumentFieldSelector of type Fields
+   * @param assertionLevel        of type AssertionLevel
+   * @param assertion             of type ValueAssertion
+   */
+  public Every( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, GroupAssertion assertion )
+    {
+    super( previous, argumentFieldSelector, assertionLevel, (Operation) assertion, ASSERTION_SELECTOR );
+    }
+
   private Aggregator getAggregator()
     {
     return (Aggregator) operation;
+    }
+
+  private GroupAssertion getGroupAssertion()
+    {
+    return (GroupAssertion) operation;
     }
 
   /** @see Operator#resolveIncomingOperationFields(Scope) */
@@ -180,16 +213,19 @@ public class Every extends Operator
    */
   public EveryHandler getHandler( Scope outgoingScope )
     {
-    return new EveryHandler( outgoingScope );
+    if( isAssertion() )
+      return new EveryAssertionHandler( outgoingScope );
+    else
+      return new EveryAggregatorHandler( outgoingScope );
     }
 
   /** Class EveryHandler is a helper class that wraps Every instances. */
-  public class EveryHandler
+  public abstract class EveryHandler
     {
     /** Field scope */
     public final Scope outgoingScope;
     /** Field context */
-    private final Map context = new HashMap();
+    final Map context = new HashMap();
 
     /**
      * Constructor EveryHandler creates a new EveryHandler instance.
@@ -199,6 +235,38 @@ public class Every extends Operator
     public EveryHandler( Scope outgoingScope )
       {
       this.outgoingScope = outgoingScope;
+      }
+
+    public abstract void start( TupleEntry groupEntry );
+
+    public abstract void operate( TupleEntry inputEntry );
+
+    public abstract void complete( TupleEntry value, FlowCollector outputCollector );
+
+
+    @Override
+    public String toString()
+      {
+      return Every.this.toString();
+      }
+
+    public Every getEvery()
+      {
+      return Every.this;
+      }
+    }
+
+  public class EveryAggregatorHandler extends EveryHandler
+    {
+
+    /**
+     * Constructor EveryHandler creates a new EveryHandler instance.
+     *
+     * @param outgoingScope of type Scope
+     */
+    public EveryAggregatorHandler( Scope outgoingScope )
+      {
+      super( outgoingScope );
       }
 
     /**
@@ -231,22 +299,6 @@ public class Every extends Operator
         }
       }
 
-    /**
-     * Method complete calls the aggregator complete method.
-     *
-     * @param values          of type Iterator
-     * @param outputCollector of type TupleEntryListIterator
-     */
-    public void complete( Iterator values, FlowCollector outputCollector )
-      {
-      while( values.hasNext() )
-        {
-        TupleEntry value = (TupleEntry) values.next();
-
-        complete( value, outputCollector );
-        }
-      }
-
     public void complete( final TupleEntry value, final FlowCollector outputCollector )
       {
       final Fields outgoingSelector = outgoingScope.getOutGroupingSelector();
@@ -261,16 +313,47 @@ public class Every extends Operator
 
       getAggregator().complete( context, tupleCollector );
       }
+    }
 
-    @Override
-    public String toString()
+  public class EveryAssertionHandler extends EveryHandler
+    {
+    /**
+     * Constructor EveryHandler creates a new EveryHandler instance.
+     *
+     * @param outgoingScope of type Scope
+     */
+    public EveryAssertionHandler( Scope outgoingScope )
       {
-      return Every.this.toString();
+      super( outgoingScope );
       }
 
-    public Every getEvery()
+    /**
+     * Method start calls the aggregator start method.
+     *
+     * @param groupEntry the group TupleEntry
+     */
+    public void start( TupleEntry groupEntry )
       {
-      return Every.this;
+      context.clear();
+      getGroupAssertion().start( context, groupEntry );
+      }
+
+    /**
+     * Method operate calls the aggregator aggregate method.
+     *
+     * @param inputEntry of type TupleEntry
+     */
+    public void operate( TupleEntry inputEntry )
+      {
+      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
+
+      getGroupAssertion().aggregate( context, arguments );
+      }
+
+    public void complete( TupleEntry value, FlowCollector outputCollector )
+      {
+      getGroupAssertion().doAssert( context );
+      outputCollector.collect( value.getTuple() );
       }
     }
   }

@@ -23,24 +23,17 @@ package cascading.operation;
 
 import java.util.Map;
 
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
- * An Aggregator takes the set of all values associated with a grouping and returns
- * a single value. Max, Min, Count, and Average are good examples.
- * <p/>
- * An Aggregator is called in the reduce phase.
- * <p/>
- * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
- * unique vm, or by a single thread. The given Map context is guaranteed to be unique per 'reducer'.
+ *
  */
-public interface Aggregator
+public interface GroupAssertion extends Assertion
   {
   /**
-   * Method start initializes the aggregation procedure.  The {@link Map} context is used to
+   * Method start initializes the grouping procedure.  The {@link java.util.Map} context is used to
    * hold intermediate values. The context should be initialized here if necessary. This method will be called
-   * before {@link #aggregate(Map, TupleEntry)} and {@link #complete(java.util.Map,cascading.tuple.TupleCollector)}.
+   * before {@link #aggregate(java.util.Map , cascading.tuple.TupleEntry)} and {@link #doAssert(java.util.Map)}.
    *
    * @param context    the map to be initialized (if necessary)
    * @param groupEntry is the current grouping tuple
@@ -56,12 +49,10 @@ public interface Aggregator
   void aggregate( Map context, TupleEntry entry );
 
   /**
-   * Method complete will be issued last after every {@link TupleEntry} has been passed to the
-   * {@link #aggregate(Map, TupleEntry)} method.  Any final calculation should be completed
-   * here and passed to the outputCollector.
+   * Method doAssert performs the assertion.
    *
-   * @param context         the aggregate map @return the final aggregate value
-   * @param outputCollector
+   * @param context of type Map
    */
-  void complete( Map context, TupleCollector outputCollector );
+  void doAssert( Map context );
+
   }

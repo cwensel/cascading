@@ -21,6 +21,7 @@
 
 package cascading.operation.assertion;
 
+import cascading.operation.ValueAssertion;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -28,7 +29,7 @@ import cascading.tuple.TupleEntry;
  * </p>
  * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values.
  */
-public class AssertSizeLessThan extends BaseAssertion
+public class AssertSizeLessThan extends AssertionBase implements ValueAssertion
   {
   /** Field size */
   private final int size;
@@ -44,7 +45,7 @@ public class AssertSizeLessThan extends BaseAssertion
     this.size = size;
     }
 
-  /** @see cascading.operation.Assertion#doAssert(TupleEntry) */
+  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
   public void doAssert( TupleEntry input )
     {
     if( input.size() >= size )

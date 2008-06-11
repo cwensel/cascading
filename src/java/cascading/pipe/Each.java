@@ -30,6 +30,7 @@ import cascading.operation.AssertionLevel;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Operation;
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -279,9 +280,9 @@ public class Each extends Operator
     return (Filter) operation;
     }
 
-  private Assertion getAssertion()
+  private ValueAssertion getValueAssertion()
     {
-    return (Assertion) operation;
+    return (ValueAssertion) operation;
     }
 
   /**
@@ -321,7 +322,7 @@ public class Each extends Operator
 
   private void applyAssertion( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
     {
-    getAssertion().doAssert( arguments );
+    getValueAssertion().doAssert( arguments );
 
     flowCollector.collect( input.getTuple() );
     }
