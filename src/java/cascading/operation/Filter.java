@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
 public interface Filter
   {
   /**
-   * Method isRemove returns true if input should be removed.
+   * Method isRemove returns true if input should be removed from the tuple stream.
    *
    * @param input of type TupleEntry
    * @return boolean
