@@ -50,9 +50,3 @@ License:
 
   You should have received a copy of the GNU General Public License
   along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
-
-Knowns Issues:
-
-  There is one current limitation that will be resolved:
-
-   * With an Every -> Every chain, the second Every cannot reference a field created by the previous.
