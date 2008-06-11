@@ -31,6 +31,12 @@ public class Insert extends Operation implements Function
   {
   private final Tuple values;
 
+  /**
+   * Constructor Insert creates a new Insert instance with the given fields and values.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param values           of type Comparable...
+   */
   public Insert( Fields fieldDeclaration, Comparable... values )
     {
     super( 0, fieldDeclaration );
@@ -40,6 +46,7 @@ public class Insert extends Operation implements Function
       throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
     }
 
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( new Tuple( values ) );
