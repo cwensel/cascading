@@ -22,21 +22,35 @@
 package cascading.operation.assertion;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cascading.operation.GroupAssertion;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.log4j.Logger;
 
 /**
  *
  */
 public abstract class AssertGroupBase extends AssertionBase implements GroupAssertion
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( AssertGroupBase.class );
+
   /** Field COUNT */
   private static final String COUNT = "count";
   /** Field FIELDS */
   private static final String FIELDS = "fields";
   /** Field GROUP */
   private static final String GROUP = "group";
+
+  /** Field patternString */
+  protected String patternString;
+
+  /** Field pattern */
+  private transient Pattern pattern;
+
   /** Field size */
   protected long size;
 
@@ -46,10 +60,47 @@ public abstract class AssertGroupBase extends AssertionBase implements GroupAsse
     this.size = size;
     }
 
+  protected AssertGroupBase( String message, String patternString, long size )
+    {
+    super( message );
+    this.patternString = patternString;
+    this.size = size;
+    }
+
+  private Pattern getPattern()
+    {
+    if( pattern != null )
+      return pattern;
+
+    if( patternString == null )
+      pattern = Pattern.compile( ".*" );
+    else
+      pattern = Pattern.compile( patternString );
+
+    return pattern;
+    }
+
+  private boolean matchWholeTuple( Tuple input )
+    {
+    if( patternString == null )
+      return true;
+
+    Matcher matcher = getPattern().matcher( input.toString( "\t" ) );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() );
+
+    return matcher.matches();
+    }
+
   /** @see cascading.operation.Aggregator#start(java.util.Map, cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
+    // didn't match, so skip
+    if( !matchWholeTuple( groupEntry.getTuple() ) )
+      return;
+
     context.put( COUNT, 0L );
     context.put( FIELDS, groupEntry.getFields().print() );
     context.put( GROUP, groupEntry.getTuple().print() );
@@ -59,16 +110,28 @@ public abstract class AssertGroupBase extends AssertionBase implements GroupAsse
   @SuppressWarnings("unchecked")
   public void aggregate( Map context, TupleEntry entry )
     {
-    context.put( COUNT, (Long) context.get( COUNT ) + 1L );
+    Long groupSize = (Long) context.get( COUNT );
+
+    // didn't match, so skip
+    if( groupSize != null )
+      context.put( COUNT, groupSize + 1L );
     }
 
   public void doAssert( Map context )
     {
     Long groupSize = (Long) context.get( COUNT );
 
-    if( compare( groupSize ) )
-      fail( groupSize, size, context.get( FIELDS ), context.get( GROUP ) );
+    if( groupSize == null ) // didn't match, so skip
+      return;
+
+    if( assertFails( groupSize ) )
+      {
+      if( patternString == null )
+        fail( groupSize, size, context.get( FIELDS ), context.get( GROUP ) );
+      else
+        fail( patternString, groupSize, size, context.get( FIELDS ), context.get( GROUP ) );
+      }
     }
 
-  protected abstract boolean compare( Long groupSize );
+  protected abstract boolean assertFails( Long groupSize );
   }

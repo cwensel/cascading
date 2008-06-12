@@ -21,7 +21,14 @@
 
 package cascading.operation.assertion;
 
-/** Class AssertGroupSizeLessThan is an {@link cascading.operation.ValueAssertion} that asserts the number of items in the current group. */
+/**
+ * Class AssertGroupSizeEquals is an {@link cascading.operation.GroupAssertion} that asserts the number of items in the current group
+ * is less than the given size.
+ * </p>
+ * If a patternString is given, only grouping keys that match the regular expression will have this assertion applied.
+ * Note multiple key values will be delimited by a tab character.
+ */
+
 public class AssertGroupSizeLessThan extends AssertGroupBase
   {
 
@@ -32,10 +39,21 @@ public class AssertGroupSizeLessThan extends AssertGroupBase
    */
   public AssertGroupSizeLessThan( long size )
     {
-    super( "group size %s, is more than or equal to: %s, in group %s: %s", size );
+    super( "group size: %s, is more than or equal to: %s, in group %s: %s", size );
     }
 
-  protected boolean compare( Long groupSize )
+  /**
+   * Constructor AssertGroupSizeLessThan creates a new AssertGroupSizeLessThan instance.
+   *
+   * @param patternString of type String
+   * @param size          of type long
+   */
+  public AssertGroupSizeLessThan( String patternString, long size )
+    {
+    super( "group matching '%s' with size: %s, is more than or equal to: %s, in group %s: %s", patternString, size );
+    }
+
+  protected boolean assertFails( Long groupSize )
     {
     return groupSize >= size;
     }

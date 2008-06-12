@@ -61,6 +61,7 @@ public class GroupAssertionsTest extends CascadingTestCase
       }
     catch( AssertionException exception )
       {
+      //System.out.println( "exception.getMessage() = " + exception.getMessage() );
       // do nothing
       }
     }
@@ -85,6 +86,15 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
+
+    assertion = new AssertGroupSizeEquals( "1", 1 );
+
+    assertPass( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     }
 
   public void testSizeLessThan()
@@ -96,17 +106,34 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
     assertFail( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
+
+    assertion = new AssertGroupSizeLessThan( "1", 2 );
+
+    assertPass( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
+    assertFail( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     }
 
   public void testSizeMoreThan()
     {
     GroupAssertion assertion = new AssertGroupSizeMoreThan( 1 );
 
-    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) 1 ) ), getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ) );
     assertFail( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
 
     assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     assertFail( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
+
+    assertion = new AssertGroupSizeMoreThan( "1", 1 );
+
+    assertPass( assertion, getEntry( new Tuple( (Comparable) 1 ) ), getEntry( new Tuple( (Comparable) null ) ), getEntry( new Tuple( (Comparable) null ) ) );
+    assertFail( assertion, getEntry( new Tuple( 1 ) ), getEntry( new Tuple( 1 ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
     }
 
   }

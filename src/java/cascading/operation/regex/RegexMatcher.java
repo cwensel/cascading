@@ -27,13 +27,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
-/**
- *
- */
+/** Class RegexMatcher is the base class for common regular expression operations. */
 public class RegexMatcher extends RegexOperation
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( RegexFilter.class );
+  private static final Logger LOG = Logger.getLogger( RegexMatcher.class );
   /** Field removeMatch */
   protected final boolean negateMatch;
 
