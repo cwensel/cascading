@@ -47,7 +47,7 @@ import cascading.tuple.TupleEntry;
 public class Every extends Operator
   {
   /** Field AGGREGATOR_ARGUMENTS */
-  private static final Fields AGGREGATOR_ARGUMENTS = Fields.FIRST; // we don't want to force a new map/red by default
+  private static final Fields AGGREGATOR_ARGUMENTS = Fields.ALL;
   /** Field AGGREGATOR_SELECTOR */
   private static final Fields AGGREGATOR_SELECTOR = Fields.ALL;
   /** Field ASSERTION_SELECTOR */

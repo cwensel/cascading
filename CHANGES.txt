@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed default argument selector for c.p.Every to be Fields.ALL, to be consistent with the default value of c.p.Each.
+
   Added support for assembly traps. If an exception is thrown from inside an c.o.Operation, the offending Tuple
   can be saved to a file for later processing, allowing the job to complete.
 
