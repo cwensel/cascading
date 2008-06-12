@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.6.0
 
   Changed default argument selector for c.p.Every to be Fields.ALL, to be consistent with the default value of c.p.Each.
 
