@@ -222,16 +222,9 @@ public class Every extends Operator
   /** Class EveryHandler is a helper class that wraps Every instances. */
   public abstract class EveryHandler
     {
-    /** Field scope */
     public final Scope outgoingScope;
-    /** Field context */
     final Map context = new HashMap();
 
-    /**
-     * Constructor EveryHandler creates a new EveryHandler instance.
-     *
-     * @param outgoingScope of type Scope
-     */
     public EveryHandler( Scope outgoingScope )
       {
       this.outgoingScope = outgoingScope;
@@ -258,33 +251,17 @@ public class Every extends Operator
 
   public class EveryAggregatorHandler extends EveryHandler
     {
-
-    /**
-     * Constructor EveryHandler creates a new EveryHandler instance.
-     *
-     * @param outgoingScope of type Scope
-     */
     public EveryAggregatorHandler( Scope outgoingScope )
       {
       super( outgoingScope );
       }
 
-    /**
-     * Method start calls the aggregator start method.
-     *
-     * @param groupEntry the group TupleEntry
-     */
     public void start( TupleEntry groupEntry )
       {
       context.clear();
       getAggregator().start( context, groupEntry );
       }
 
-    /**
-     * Method operate calls the aggregator aggregate method.
-     *
-     * @param inputEntry of type TupleEntry
-     */
     public void operate( TupleEntry inputEntry )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
@@ -317,32 +294,17 @@ public class Every extends Operator
 
   public class EveryAssertionHandler extends EveryHandler
     {
-    /**
-     * Constructor EveryHandler creates a new EveryHandler instance.
-     *
-     * @param outgoingScope of type Scope
-     */
     public EveryAssertionHandler( Scope outgoingScope )
       {
       super( outgoingScope );
       }
 
-    /**
-     * Method start calls the aggregator start method.
-     *
-     * @param groupEntry the group TupleEntry
-     */
     public void start( TupleEntry groupEntry )
       {
       context.clear();
       getGroupAssertion().start( context, groupEntry );
       }
 
-    /**
-     * Method operate calls the aggregator aggregate method.
-     *
-     * @param inputEntry of type TupleEntry
-     */
     public void operate( TupleEntry inputEntry )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
@@ -350,10 +312,11 @@ public class Every extends Operator
       getGroupAssertion().aggregate( context, arguments );
       }
 
-    public void complete( TupleEntry value, FlowCollector outputCollector )
+    public void complete( TupleEntry groupEntry, FlowCollector outputCollector )
       {
       getGroupAssertion().doAssert( context );
-      outputCollector.collect( value.getTuple() );
+
+      outputCollector.collect( groupEntry.getTuple() );
       }
     }
   }

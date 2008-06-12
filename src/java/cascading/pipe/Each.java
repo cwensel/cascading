@@ -24,6 +24,7 @@ package cascading.pipe;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
+import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
@@ -285,31 +286,6 @@ public class Each extends Operator
     return (ValueAssertion) operation;
     }
 
-  /**
-   * Method operate applies the encapsulated {@link Operation} to the {@link Tuple} stream.
-   *
-   * @param scope         of type Scope
-   * @param input         of type TupleEntry
-   * @param flowCollector of type FlowCollector
-   */
-  public void operate( Scope scope, TupleEntry input, FlowCollector flowCollector )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( operation + " incoming entry: " + input );
-
-    TupleEntry arguments = scope.getArgumentsEntry( input );
-
-    if( LOG.isDebugEnabled() )
-      LOG.debug( operation + " arg entry: " + arguments );
-
-    if( isFunction() )
-      applyFunction( flowCollector, input, arguments, scope.getDeclaredEntry(), scope.getOutValuesSelector() );
-    else if( isFilter() )
-      applyFilter( flowCollector, input, arguments );
-    else
-      applyAssertion( flowCollector, input, arguments );
-    }
-
   private boolean isFunction()
     {
     return operation instanceof Function;
@@ -401,4 +377,64 @@ public class Each extends Operator
       throw new OperatorException( "could not resolve outgoing values selector in: " + this, exception );
       }
     }
+
+  public EachHandler getHandler()
+    {
+    if( isFunction() )
+      return new EachFunctionHandler();
+    else if( isFilter() )
+      return new EachFilterHandler();
+    else
+      return new EachAssertionHandler();
+    }
+
+  /** Class EachHandler is a helper class that wraps Each instances. */
+  public abstract class EachHandler
+    {
+    public void operate( Scope scope, TupleEntry input, FlowCollector flowCollector )
+      {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( operation + " incoming entry: " + input );
+
+      TupleEntry arguments = scope.getArgumentsEntry( input );
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( operation + " arg entry: " + arguments );
+
+      handle( scope, flowCollector, input, arguments );
+      }
+
+    abstract void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments );
+
+    public FlowElement getEach()
+      {
+      return Each.this;
+      }
+    }
+
+  public class EachFunctionHandler extends EachHandler
+    {
+    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+      {
+      applyFunction( flowCollector, input, arguments, scope.getDeclaredEntry(), scope.getOutValuesSelector() );
+      }
+    }
+
+  public class EachFilterHandler extends EachHandler
+    {
+    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+      {
+      applyFilter( flowCollector, input, arguments );
+      }
+    }
+
+  public class EachAssertionHandler extends EachHandler
+    {
+    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+      {
+      applyAssertion( flowCollector, input, arguments );
+      }
+    }
+
+
   }

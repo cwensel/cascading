@@ -36,17 +36,17 @@ import org.apache.hadoop.mapred.JobConf;
  */
 class EachReducerStackElement extends ReducerStackElement
   {
-  private final Each each;
+  private final Each.EachHandler eachHandler;
 
-  public EachReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each each )
+  public EachReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each.EachHandler eachHandler )
     {
     super( previous, incomingScope, jobConf, trap );
-    this.each = each;
+    this.eachHandler = eachHandler;
     }
 
   public FlowElement getFlowElement()
     {
-    return each;
+    return eachHandler.getEach();
     }
 
   public void collect( Tuple key, Iterator values )
@@ -69,7 +69,7 @@ class EachReducerStackElement extends ReducerStackElement
     {
     try
       {
-      each.operate( ( (ReducerStackElement) next ).getIncomingScope(), tupleEntry, next );
+      eachHandler.operate( ( (ReducerStackElement) next ).getIncomingScope(), tupleEntry, next );
       }
     catch( Exception exception )
       {
