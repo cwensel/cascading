@@ -231,6 +231,7 @@ public class FlowConnector
    * @param name    of type String
    * @param sources of type Map<String, Tap>
    * @param sink    of type Tap
+   * @param traps   of type Map<String, Tap>
    * @param pipe    of type Pipe
    * @return Flow
    */
@@ -355,9 +356,9 @@ public class FlowConnector
 
     try
       {
-      verifyTaps( sources, true );
-      verifyTaps( sinks, false );
-      verifyTaps( traps, false );
+      verifyTaps( sources, true, true );
+      verifyTaps( sinks, false, true );
+      verifyTaps( traps, false, false );
 
       verifyEndPoints( sources, sinks, pipes );
       verifyTraps( traps, pipes );
@@ -386,12 +387,17 @@ public class FlowConnector
     catch( Exception exception )
       {
       // captures pipegraph for debugging
-      throw new FlowException( "could not build flow from assembly", exception, pipeGraph );
+      // forward message in case cause or trace is lost
+      String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
+      throw new FlowException( message, exception, pipeGraph );
       }
     }
 
-  private void verifyTaps( Map<String, Tap> taps, boolean areSources )
+  private void verifyTaps( Map<String, Tap> taps, boolean areSources, boolean mayNotBeEmpty )
     {
+    if( mayNotBeEmpty && taps.isEmpty() )
+      throw new FlowException( ( areSources ? "source" : "sink" ) + " taps are required" );
+
     for( String tapName : taps.keySet() )
       {
       if( areSources && !taps.get( tapName ).isSource() )

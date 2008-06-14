@@ -1,5 +1,11 @@
 Cascading Change Log
 
+unreleased
+
+  Changed thrown c.f.FlowException instances to include cause message.
+
+  Fixed bug where empty sink or source map was not detected.
+
 0.6.0
 
   Changed default argument selector for c.p.Every to be Fields.ALL, to be consistent with the default value of c.p.Each.
