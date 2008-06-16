@@ -246,16 +246,6 @@ public class Each extends Operator
     super( previous, argumentFieldSelector, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
     }
 
-  /**
-   * @param pipe                  of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param assertion             of type Filter
-   */
-  public Each( Pipe pipe, Fields argumentFieldSelector, Assertion assertion )
-    {
-    super( pipe, argumentFieldSelector, (Operation) assertion, FILTER_SELECTOR );
-    }
-
   @Override
   protected void verifyOperation()
     {
