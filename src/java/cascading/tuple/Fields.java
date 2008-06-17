@@ -80,7 +80,7 @@ public final class Fields implements Comparable, Serializable
   public static final Fields VALUES = new Fields( Kind.VALUES );
   /** Field ARGS represents all fields used as the arguments for the current operation */
   public static final Fields ARGS = new Fields( Kind.ARGS );
-  /** Field RESULTS represents all fields returned by the previous operations */
+  /** Field RESULTS represents all fields returned by the current operation */
   public static final Fields RESULTS = new Fields( Kind.RESULTS );
   /** Field FIRST represents the first field position, 0 */
   public static final Fields FIRST = new Fields( 0 );
