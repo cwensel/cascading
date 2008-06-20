@@ -39,31 +39,67 @@ import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
- *
+ * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs preconfigured via the {@link JobConf}
+ * object.
+ * <p/>
+ * Use this class to allow custom MapReduce jobs to participage in the {@link cascading.cascade.Cascade} scheduler. If
+ * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
+ * according to their dependencies (topologically).
+ * <p/>
+ * Set {@code deleteSinkOnInit} to true if the outputPath in the jobConf should be deleted before executing the MapReduce job.
  */
 public class MapReduceFlow extends Flow
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MapReduceFlow.class );
 
+  /** Field deleteSinkOnInit */
   private boolean deleteSinkOnInit = false;
 
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param jobConf of type JobConf
+   */
   public MapReduceFlow( JobConf jobConf )
     {
     this( jobConf.getJobName(), jobConf, false );
     }
 
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param jobConf          of type JobConf
+   * @param deleteSinkOnInit of type boolean
+   */
+  public MapReduceFlow( JobConf jobConf, boolean deleteSinkOnInit )
+    {
+    this( jobConf.getJobName(), jobConf, deleteSinkOnInit );
+    }
+
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param name    of type String
+   * @param jobConf of type JobConf
+   */
   public MapReduceFlow( String name, JobConf jobConf )
     {
     this( name, jobConf, false );
     }
 
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param deleteSinkOnInit of type boolean
+   */
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
     {
     this.deleteSinkOnInit = deleteSinkOnInit;
 
     setName( name );
-//    setJobConf( jobConf );
     setSources( createSources( jobConf ) );
     setSinks( createSinks( jobConf ) );
     setTraps( createTraps( jobConf ) );
@@ -110,7 +146,7 @@ public class MapReduceFlow extends Flow
     return new HashMap<String, Tap>();
     }
 
-  public class NullScheme extends Scheme
+  class NullScheme extends Scheme
     {
     public void sourceInit( Tap tap, JobConf conf ) throws IOException
       {
@@ -130,7 +166,7 @@ public class MapReduceFlow extends Flow
 
     public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
       {
-
+      throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
       }
     }
   }

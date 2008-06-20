@@ -24,6 +24,8 @@ package cascading.flow;
 import java.io.IOException;
 
 import cascading.CascadingTestCase;
+import cascading.cascade.Cascade;
+import cascading.cascade.CascadeConnector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -40,6 +42,9 @@ public class MapReduceFlowTest extends CascadingTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
   String outputPath = "build/test/output/mapreduceflow/";
+  String outputPath1 = "build/test/output/mapreducecascade1/";
+  String outputPath2 = "build/test/output/mapreducecascade2/";
+  String outputPath3 = "build/test/output/mapreducecascade3/";
 
   public MapReduceFlowTest()
     {
@@ -70,5 +75,67 @@ public class MapReduceFlowTest extends CascadingTestCase
     flow.complete();
 
     validateLength( flow.openSink(), 10 );
+    }
+
+  public void testCascade() throws IOException
+    {
+    JobConf firstConf = new JobConf();
+    firstConf.setJobName( "first" );
+
+    firstConf.setOutputKeyClass( LongWritable.class );
+    firstConf.setOutputValueClass( Text.class );
+
+    firstConf.setMapperClass( IdentityMapper.class );
+    firstConf.setReducerClass( IdentityReducer.class );
+
+    firstConf.setInputFormat( TextInputFormat.class );
+    firstConf.setOutputFormat( TextOutputFormat.class );
+
+    firstConf.setInputPath( new Path( inputFileApache ) );
+    firstConf.setOutputPath( new Path( outputPath1 ) );
+
+    Flow firstFlow = new MapReduceFlow( firstConf, true );
+
+    JobConf secondConf = new JobConf();
+    secondConf.setJobName( "second" );
+
+    secondConf.setOutputKeyClass( LongWritable.class );
+    secondConf.setOutputValueClass( Text.class );
+
+    secondConf.setMapperClass( IdentityMapper.class );
+    secondConf.setReducerClass( IdentityReducer.class );
+
+    secondConf.setInputFormat( TextInputFormat.class );
+    secondConf.setOutputFormat( TextOutputFormat.class );
+
+    secondConf.setInputPath( new Path( outputPath1 ) );
+    secondConf.setOutputPath( new Path( outputPath2 ) );
+
+    Flow secondFlow = new MapReduceFlow( secondConf, true );
+
+    JobConf thirdConf = new JobConf();
+    thirdConf.setJobName( "third" );
+
+    thirdConf.setOutputKeyClass( LongWritable.class );
+    thirdConf.setOutputValueClass( Text.class );
+
+    thirdConf.setMapperClass( IdentityMapper.class );
+    thirdConf.setReducerClass( IdentityReducer.class );
+
+    thirdConf.setInputFormat( TextInputFormat.class );
+    thirdConf.setOutputFormat( TextOutputFormat.class );
+
+    thirdConf.setInputPath( new Path( outputPath2 ) );
+    thirdConf.setOutputPath( new Path( outputPath3 ) );
+
+    Flow thirdFlow = new MapReduceFlow( thirdConf, true );
+
+    CascadeConnector cascadeConnector = new CascadeConnector();
+
+    Cascade cascade = cascadeConnector.connect( firstFlow, secondFlow, thirdFlow );
+
+    cascade.complete();
+
+    validateLength( thirdFlow.openSink(), 10 );
     }
   }

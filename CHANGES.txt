@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Added c.f.MapReduceFlow to support custom MapReduce jobs, allowing them to participate in a Cascade job.
+
 0.6.1
 
   Changed thrown c.f.FlowException instances to include cause message.

@@ -26,9 +26,7 @@ import java.io.IOException;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
 
-/**
- *
- */
+/** Class MapReduceFlowStep wraps a {@link JobConf} and allows it to be executed as a {@link Flow}. */
 public class MapReduceFlowStep extends FlowStep
   {
   /** Field jobConf */

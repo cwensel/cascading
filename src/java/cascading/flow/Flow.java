@@ -170,7 +170,7 @@ public class Flow implements Runnable
     this.stepGraph = stepGraph;
     }
 
-  protected void setJobConf( JobConf jobConf )
+  private void setJobConf( JobConf jobConf )
     {
     if( jobConf == null ) // this is ok, getJobConf will pass a default parent in
       return;

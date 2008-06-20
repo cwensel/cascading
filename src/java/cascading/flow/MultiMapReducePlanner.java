@@ -51,9 +51,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-/**
- *
- */
+/** Class MultiMapReducePlanner is the core Hadoop MapReduce planner. */
 public class MultiMapReducePlanner
   {
   /** Field LOG */
@@ -134,6 +132,13 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method verifyTaps ...
+   *
+   * @param taps          of type Map<String, Tap>
+   * @param areSources    of type boolean
+   * @param mayNotBeEmpty of type boolean
+   */
   private void verifyTaps( Map<String, Tap> taps, boolean areSources, boolean mayNotBeEmpty )
     {
     if( mayNotBeEmpty && taps.isEmpty() )
@@ -148,6 +153,13 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method verifyEndPoints ...
+   *
+   * @param sources of type Map<String, Tap>
+   * @param sinks   of type Map<String, Tap>
+   * @param pipes   of type Pipe[]
+   */
   private void verifyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
     {
     Set<String> names = new HashSet<String>();
@@ -183,6 +195,12 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method verifyTraps ...
+   *
+   * @param traps of type Map<String, Tap>
+   * @param pipes of type Pipe[]
+   */
   private void verifyTraps( Map<String, Tap> traps, Pipe[] pipes )
     {
     Set<String> names = new HashSet<String>();
@@ -196,6 +214,12 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method collectNames ...
+   *
+   * @param pipes of type Pipe[]
+   * @param names of type Set<String>
+   */
   private void collectNames( Pipe[] pipes, Set<String> names )
     {
     for( Pipe pipe : pipes )
@@ -235,6 +259,11 @@ public class MultiMapReducePlanner
       pipeGraph.addEdge( sinks.get( sink ), tail ).setName( sink );
     }
 
+  /**
+   * Method verifyGraphConnections ...
+   *
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   */
   private void verifyGraphConnections( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     if( pipeGraph.vertexSet().isEmpty() )
@@ -317,6 +346,12 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method testAssertion ...
+   *
+   * @param flowElement of type FlowElement
+   * @return boolean
+   */
   private boolean testAssertion( FlowElement flowElement )
     {
     if( !( flowElement instanceof Operator ) )
@@ -340,6 +375,12 @@ public class MultiMapReducePlanner
       resolveFields( graph, iterator.next() );
     }
 
+  /**
+   * Method resolveFields ...
+   *
+   * @param graph  of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param source of type FlowElement
+   */
   private void resolveFields( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement source )
     {
     if( source instanceof Extent )
@@ -442,6 +483,13 @@ public class MultiMapReducePlanner
       ;
     }
 
+  /**
+   * Method handleGroupsInternal ...
+   *
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param sources   of type Collection<Tap>
+   * @return boolean
+   */
   private boolean handleGroupsInternal( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
@@ -485,6 +533,12 @@ public class MultiMapReducePlanner
     return true;
     }
 
+  /**
+   * Method insertTapAfter ...
+   *
+   * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param pipe  of type Pipe
+   */
   private void insertTapAfter( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
     {
     if( LOG.isDebugEnabled() )
@@ -504,12 +558,26 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method makeTemp ...
+   *
+   * @param pipe of type Pipe
+   * @return TempHfs
+   */
   private TempHfs makeTemp( Pipe pipe )
     {
     // must give Taps unique names
     return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
     }
 
+  /**
+   * Method makePipeGraph ...
+   *
+   * @param pipes   of type Pipe[]
+   * @param sources of type Map<String, Tap>
+   * @param sinks   of type Map<String, Tap>
+   * @return SimpleDirectedGraph<FlowElement, Scope>
+   */
   private SimpleDirectedGraph<FlowElement, Scope> makePipeGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
     SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
@@ -621,6 +689,12 @@ public class MultiMapReducePlanner
       }
     }
 
+  /**
+   * Method makeTapGraph ...
+   *
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @return SimpleDirectedGraph<Tap, Integer>
+   */
   private SimpleDirectedGraph<Tap, Integer> makeTapGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     SimpleDirectedGraph<Tap, Integer> tapGraph = new SimpleDirectedGraph<Tap, Integer>( Integer.class );
@@ -664,6 +738,14 @@ public class MultiMapReducePlanner
     return tapGraph;
     }
 
+  /**
+   * Method makeStepGraph ...
+   *
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param tapGraph  of type SimpleDirectedGraph<Tap, Integer>
+   * @param traps     of type Map<String, Tap>
+   * @return SimpleDirectedGraph<FlowStep, Integer>
+   */
   private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph, Map<String, Tap> traps )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
@@ -731,6 +813,13 @@ public class MultiMapReducePlanner
     return stepGraph;
     }
 
+  /**
+   * Method getCreateFlowStep ...
+   *
+   * @param steps of type Map<String, FlowStep>
+   * @param name  of type String
+   * @return FlowStep
+   */
   private FlowStep getCreateFlowStep( Map<String, FlowStep> steps, String name )
     {
     if( steps.containsKey( name ) )
