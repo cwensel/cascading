@@ -30,10 +30,8 @@ import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 
@@ -166,21 +164,6 @@ public class TextLine extends Scheme
       conf.setBoolean( "mapred.output.compress", true );
 
     conf.setOutputFormat( TextOutputFormat.class );
-    }
-
-  @Override
-  public InputFormat getInputFormat( JobConf conf )
-    {
-    if( hasZippedFiles( conf.getInputPaths() ) )
-      return new ZipInputFormat();
-    else
-      return new TextInputFormat();
-    }
-
-  @Override
-  public OutputFormat getOutputFormat( JobConf conf )
-    {
-    return new TextOutputFormat();
     }
 
   @Override

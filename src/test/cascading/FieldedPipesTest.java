@@ -103,6 +103,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
+    validateLength( flow.openSource(), 10 ); // validate source, this once, as a sanity check
     validateLength( flow, 8, null );
     }
 

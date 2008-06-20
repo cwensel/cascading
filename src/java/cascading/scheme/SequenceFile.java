@@ -28,10 +28,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
@@ -78,17 +76,6 @@ public class SequenceFile extends Scheme
   public Tuple source( WritableComparable key, Writable value )
     {
     return (Tuple) value;
-    }
-
-  @Override
-  public InputFormat getInputFormat( JobConf conf )
-    {
-    return new SequenceFileInputFormat();
-    }
-
-  public OutputFormat getOutputFormat( JobConf conf )
-    {
-    return new SequenceFileOutputFormat();
     }
 
   @Override

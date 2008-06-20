@@ -29,10 +29,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -194,16 +192,6 @@ public abstract class Scheme implements Serializable
    * @return Tuple
    */
   public abstract Tuple source( WritableComparable key, Writable value );
-
-  /**
-   * Method getInputFormat returns the inputFormat of this Scheme object.
-   *
-   * @param conf
-   * @return the inputFormat (type InputFormat) of this Scheme object.
-   */
-  public abstract InputFormat getInputFormat( JobConf conf );
-
-  public abstract OutputFormat getOutputFormat( JobConf conf );
 
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.

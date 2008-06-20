@@ -304,31 +304,32 @@ public class FlowStep implements Serializable
     return buffer.toString();
     }
 
-  public FlowStepJob getFlowStepJob()
+  public FlowStepJob getFlowStepJob( JobConf parentConf ) throws IOException
     {
-    return new FlowStepJob( this );
+    return new FlowStepJob( this.getName(), getJobConf( parentConf ) );
     }
 
   public class FlowStepJob implements Callable<Throwable>
     {
-    private final FlowStep flowStep;
+    private final String stepName;
     private JobConf currentConf;
     private JobClient currentJobClient;
     private RunningJob runningJob;
-    private List<FlowStepJob> predecessors;
 
+    private List<FlowStepJob> predecessors;
     private final CountDownLatch latch = new CountDownLatch( 1 );
     private boolean stop = false;
 
-    public FlowStepJob( FlowStep flowStep )
+    public FlowStepJob( String stepName, JobConf currentConf )
       {
-      this.flowStep = flowStep;
+      this.stepName = stepName;
+      this.currentConf = currentConf;
       }
 
     public void stop()
       {
       if( LOG.isInfoEnabled() )
-        LOG.info( "stopping: " + flowStep.getStepName() );
+        LOG.info( "stopping: " + stepName );
 
       stop = true;
 
@@ -339,13 +340,12 @@ public class FlowStep implements Serializable
         }
       catch( IOException exception )
         {
-        LOG.warn( "unable to kill job: " + flowStep.getStepName(), exception );
+        LOG.warn( "unable to kill job: " + stepName, exception );
         }
       }
 
-    public void init( JobConf jobConf, List<FlowStepJob> predecessors ) throws IOException
+    public void setPredecessors( List<FlowStepJob> predecessors ) throws IOException
       {
-      currentConf = flowStep.getJobConf( jobConf );
       this.predecessors = predecessors;
       }
 
@@ -363,7 +363,7 @@ public class FlowStep implements Serializable
           return null;
 
         if( LOG.isInfoEnabled() )
-          LOG.info( "starting step: " + flowStep.getStepName() );
+          LOG.info( "starting step: " + stepName );
 
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
@@ -374,7 +374,7 @@ public class FlowStep implements Serializable
           {
           dumpCompletionEvents();
 
-          return new FlowException( "step failed: " + flowStep.getStepName() );
+          return new FlowException( "step failed: " + stepName );
           }
         }
       catch( Throwable throwable )

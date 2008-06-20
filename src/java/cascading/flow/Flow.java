@@ -77,32 +77,34 @@ public class Flow implements Runnable
 
   /** Field name */
   private String name;
-  /** Field pipeGraph */
-  private SimpleDirectedGraph<FlowElement, Scope> pipeGraph;
-  /** Field stepGraph */
-  private SimpleDirectedGraph<FlowStep, Integer> stepGraph;
-  /** Field jobConf */
-  private JobConf jobConf;
+  /** Field skipIfSourceExists */
+  private boolean skipIfSinkExists = false;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field flowStats */
   private final FlowStats flowStats = new FlowStats(); // don't use a listener to set values
-  /** Field thread */
-  private Thread thread;
-  /** Field throwable */
-  private Throwable throwable;
   /** Field sources */
   private Map<String, Tap> sources;
   /** Field sinks */
   private Map<String, Tap> sinks;
   /** Field traps */
   private Map<String, Tap> traps;
+
+  /** Field stepGraph */
+  private SimpleDirectedGraph<FlowStep, Integer> stepGraph;
+  /** Field jobConf */
+  private JobConf jobConf;
+  /** Field thread */
+  private Thread thread;
+  /** Field throwable */
+  private Throwable throwable;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
-  /** Field skipIfSourceExists */
-  private boolean skipIfSinkExists = false;
   /** Field stop */
   private boolean stop = false;
+
+  /** Field pipeGraph */
+  private SimpleDirectedGraph<FlowElement, Scope> pipeGraph; // only used for documentation purposes
 
   /** Field steps */
   private transient List<FlowStep> steps;
@@ -123,6 +125,16 @@ public class Flow implements Runnable
     this.traps = traps;
     }
 
+  protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+    {
+    setJobConf( jobConf );
+    this.name = name;
+    this.stepGraph = stepGraph;
+    this.sources = sources;
+    this.sinks = sinks;
+    this.traps = traps;
+    }
+
   /**
    * Method getName returns the name of this Flow object.
    *
@@ -133,9 +145,34 @@ public class Flow implements Runnable
     return name;
     }
 
-  private void setJobConf( JobConf jobConf )
+  protected void setName( String name )
     {
-    if( jobConf == null )
+    this.name = name;
+    }
+
+  protected void setSources( Map<String, Tap> sources )
+    {
+    this.sources = sources;
+    }
+
+  protected void setSinks( Map<String, Tap> sinks )
+    {
+    this.sinks = sinks;
+    }
+
+  protected void setTraps( Map<String, Tap> traps )
+    {
+    this.traps = traps;
+    }
+
+  protected void setStepGraph( SimpleDirectedGraph<FlowStep, Integer> stepGraph )
+    {
+    this.stepGraph = stepGraph;
+    }
+
+  protected void setJobConf( JobConf jobConf )
+    {
+    if( jobConf == null ) // this is ok, getJobConf will pass a default parent in
       return;
 
     this.jobConf = new JobConf( jobConf ); // prevent local values from being shared
@@ -660,7 +697,7 @@ public class Flow implements Runnable
         {
         FlowStep step = (FlowStep) topoIterator.next();
         step.setParentFlowName( getName() );
-        FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob();
+        FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
 
         jobsMap.put( step.getName(), flowStepJob );
 
@@ -669,7 +706,7 @@ public class Flow implements Runnable
         for( FlowStep flowStep : Graphs.predecessorListOf( stepGraph, step ) )
           predecessors.add( (FlowStep.FlowStepJob) jobsMap.get( flowStep.getName() ) );
 
-        flowStepJob.init( getJobConf(), predecessors );
+        flowStepJob.setPredecessors( predecessors );
         }
 
       // if jobs are run local, then only use one thread to force execution serially
@@ -797,6 +834,9 @@ public class Flow implements Runnable
    */
   public void writeDOT( String filename )
     {
+    if( pipeGraph == null )
+      throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
+
     printElementGraph( filename, pipeGraph );
     }
 
@@ -851,7 +891,7 @@ public class Flow implements Runnable
     {
     public String getVertexName( FlowElement object )
       {
-      if( object instanceof Tap || object instanceof FlowConnector.Extent )
+      if( object instanceof Tap || object instanceof MultiMapReducePlanner.Extent )
         return object.toString().replaceAll( "\"", "\'" );
 
       Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
