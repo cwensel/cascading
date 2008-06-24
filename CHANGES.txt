@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug in c.t.TapCollector where writing to a Sequence file threw a NPE.
+
   Added c.f.MapReduceFlow to support custom MapReduce jobs, allowing them to participate in a Cascade job.
 
 0.6.1

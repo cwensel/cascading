@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
+import cascading.tuple.Tuples;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -75,7 +76,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
     {
     try
       {
-      writer.write( null, tuple );
+      writer.write( Tuples.NULL, tuple );
       }
     catch( IOException exception )
       {

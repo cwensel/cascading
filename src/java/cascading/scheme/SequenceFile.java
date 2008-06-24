@@ -26,6 +26,7 @@ import java.io.IOException;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -41,8 +42,6 @@ public class SequenceFile extends Scheme
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
-  /** Field NULL */
-  private static final Tuple NULL = new Tuple();
 
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
@@ -83,7 +82,7 @@ public class SequenceFile extends Scheme
     {
     Tuple result = sourceFields != null ? tuple.get( inFields, sourceFields ) : tuple;
 
-    outputCollector.collect( NULL, result );
+    outputCollector.collect( Tuples.NULL, result );
     }
 
   }
