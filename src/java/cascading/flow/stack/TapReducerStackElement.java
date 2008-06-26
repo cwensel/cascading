@@ -81,6 +81,10 @@ class TapReducerStackElement extends ReducerStackElement
       else
         ( (Tap) getFlowElement() ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
       }
+    catch( OutOfMemoryError error )
+      {
+      throw new FlowException( "out of memory, try increasing task memory allocation", error );
+      }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )

@@ -71,6 +71,10 @@ class GroupMapperStackElement extends MapperStackElement
       {
       throw new FlowException( "failed writing output", exception );
       }
+    catch( OutOfMemoryError error )
+      {
+      throw new FlowException( "out of memory, try increasing task memory allocation", error );
+      }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )
