@@ -33,11 +33,15 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class MultiTap is used to tie multipe {@link Tap} instances into a single resource. Effectively this will allow
- * multiple files to be concatenated into the requesting pipe assembly.
+ * Class MultiTap is used to tie multiple {@link Tap} instances into a single resource. Effectively this will allow
+ * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
  * <p/>
  * Note that order is not maintained by virtue of the underlying model. If order is necessary, use a unique sequence key
  * to span the resources, like a line number.
+ * </p>
+ * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.TextLine}), they may not contain
+ * the same semi-structure internally. For example, one file might be an Apache log file, and anoter might be a Log4J
+ * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
 public class MultiTap extends SourceTap
   {

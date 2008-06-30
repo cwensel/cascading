@@ -41,13 +41,14 @@ import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  * A Tap represents the physical data source or sink in a connected {@link Flow}.
- * That is...a source Tap is the head end of a connected {@link Pipe} and {@link Tuple} stream, and
+ * </p>
+ * That is, a source Tap is the head end of a connected {@link Pipe} and {@link Tuple} stream, and
  * a sink Tap is the tail end. Kinds of Tap types are used to manage files from a local disk,
  * distributed disk, remote storage like Amazon S3, or via FTP. It simply abstracts
  * out the complexity of connecting to these types of data sources.
  * <p/>
- * A Tap takes a {@link Scheme} instance, which is used to identify the type of resource. A Tap is responsible for
- * how the resource is reached.
+ * A Tap takes a {@link Scheme} instance, which is used to identify the type of resource (text file, binary file, etc).
+ * A Tap is responsible for how the resource is reached.
  * <p/>
  * A Tap is not given an explicit name by design. This is so a given Tap instance can be
  * re-used in different {@link Flow}s that may expect a source or sink by a different
@@ -279,6 +280,13 @@ public abstract class Tap implements FlowElement, Serializable
     return getPath();
     }
 
+  /**
+   * Method makeDirs makes all the directories this Tap instance represents.
+   *
+   * @param conf of type JobConf
+   * @return boolean
+   * @throws IOException when there is an error making directories
+   */
   public abstract boolean makeDirs( JobConf conf ) throws IOException;
 
   /**

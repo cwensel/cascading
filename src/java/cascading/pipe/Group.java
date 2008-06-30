@@ -176,7 +176,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -192,7 +192,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -209,7 +209,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -225,7 +225,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -240,7 +240,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName of type String
    * @param pipes     of type Pipe...
    */
   public Group( String groupName, Pipe... pipes )
@@ -252,7 +252,7 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName   of type String
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
    */
@@ -527,6 +527,7 @@ public class Group extends Pipe
    * @param outgoingScope of type Scope
    * @param entry         of type TupleEntry
    * @param output        of type OutputCollector
+   * @throws IOException thrown by OutputCollector on collect
    */
   public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
     {
@@ -563,10 +564,12 @@ public class Group extends Pipe
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
-   * @param jobConf       of type JobConf
-   * @param outgoingScope of type Scope
-   * @param key           of type WritableComparable
-   * @param values        of type Iterator @return Iterator<Tuple>
+   * @param jobConf        of type JobConf
+   * @param incomingScopes of type Set<Scope>
+   * @param outgoingScope  of type Scope
+   * @param key            of type WritableComparable
+   * @param values         of type Iterator @return Iterator<Tuple>
+   * @return a Tuple Iterator
    */
   public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, WritableComparable key, Iterator values )
     {

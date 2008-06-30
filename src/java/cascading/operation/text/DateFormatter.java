@@ -31,8 +31,8 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp is the number of milliseconds since January 1, 1970, 00:00:00 GMT,  using the
- * {@link SimpleDateFormat} syntax.
+ * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp
+ * is the number of milliseconds since January 1, 1970, 00:00:00 GMT,  using the {@link SimpleDateFormat} syntax.
  */
 public class DateFormatter extends DateOperation implements Function
   {

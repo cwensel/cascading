@@ -34,7 +34,8 @@ import cascading.util.Util;
 /**
  * Pipes are chained together through their constructors. To effect a split in the pipe,
  * simply pass a Pipe instance to two or more constructors of subsequent Pipe instances.
- * A join can be achieved by passing two or more Pipe instances to a {@link Group} pipe.
+ * A join can be achieved by passing two or more Pipe instances to a {@link Group} pipe
+ * (specifically the {@link CoGroup} class).
  */
 public class Pipe implements FlowElement, Serializable
   {

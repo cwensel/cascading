@@ -56,7 +56,7 @@ import org.apache.hadoop.io.WritableUtils;
 public class Tuple implements WritableComparable, Iterable, Serializable
   {
   /** Field elements */
-  private List<Comparable> elements = new ArrayList<Comparable>();
+  private List<Comparable> elements;
   /** Field printDelim */
   private final String printDelim = "\t";
 
@@ -122,9 +122,15 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     return result;
     }
 
+  protected Tuple( List<Comparable> elements )
+    {
+    this.elements = elements;
+    }
+
   /** Constructor Tuple creates a new Tuple instance. */
   public Tuple()
     {
+    this( new ArrayList<Comparable>() );
     }
 
   /**
@@ -134,21 +140,24 @@ public class Tuple implements WritableComparable, Iterable, Serializable
    */
   public Tuple( String value )
     {
+    this();
     elements.add( value );
     }
 
   /**
    * Copy constructor. Does not nest the given Tuple instance within this new instance.
    *
-   * @param tuple
+   * @param tuple of type Tuple
    */
   public Tuple( Tuple tuple )
     {
+    this();
     elements.addAll( tuple.elements );
     }
 
   public Tuple( Comparable... args )
     {
+    this();
     Collections.addAll( elements, args );
     }
 

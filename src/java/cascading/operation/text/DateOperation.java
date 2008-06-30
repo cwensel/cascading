@@ -29,9 +29,7 @@ import java.util.TimeZone;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 
-/**
- *
- */
+/** Class DateOperation is the base class for {@link DateFormatter} and {@link DateParser}. */
 public class DateOperation extends Operation
   {
   /** Field zone */
@@ -43,6 +41,13 @@ public class DateOperation extends Operation
   /** Field dateFormat */
   transient SimpleDateFormat dateFormat;
 
+  /**
+   * Constructor DateOperation creates a new DateOperation instance.
+   *
+   * @param numArgs          of type int
+   * @param fieldDeclaration of type Fields
+   * @param dateFormatString of type String
+   */
   public DateOperation( int numArgs, Fields fieldDeclaration, String dateFormatString )
     {
     super( numArgs, fieldDeclaration );
@@ -52,6 +57,15 @@ public class DateOperation extends Operation
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, got " + fieldDeclaration.print() );
     }
 
+  /**
+   * Constructor DateOperation creates a new DateOperation instance.
+   *
+   * @param numArgs          of type int
+   * @param fieldDeclaration of type Fields
+   * @param dateFormatString of type String
+   * @param zone             of type TimeZone
+   * @param locale           of type Locale
+   */
   public DateOperation( int numArgs, Fields fieldDeclaration, String dateFormatString, TimeZone zone, Locale locale )
     {
     super( numArgs, fieldDeclaration );

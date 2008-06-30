@@ -36,9 +36,7 @@ import org.codehaus.janino.ExpressionEvaluator;
 import org.codehaus.janino.Parser;
 import org.codehaus.janino.Scanner;
 
-/**
- *
- */
+/** Class ExpressionOperation is the base class for {@link ExpressionFunction} and {@link ExpressionFilter}. */
 public class ExpressionOperation extends Operation
   {
   /** Field expression */

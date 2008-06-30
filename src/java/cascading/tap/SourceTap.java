@@ -30,7 +30,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
- *
+ * Class SourceTap is the base class for {@link MultiTap}. Some {@link Tap} instances may only be sources (as opposed
+ * to being a sink). These types should subclass SourceTap for convenience.
  */
 public abstract class SourceTap extends Tap
   {
@@ -56,16 +57,18 @@ public abstract class SourceTap extends Tap
     }
 
   @Override
-  public boolean isSink()
+  public final boolean isSink()
     {
     return false;
     }
 
+  /** @see Tap#deletePath(JobConf) */
   public boolean deletePath( JobConf conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
     }
 
+  /** @see Tap#makeDirs(JobConf) */
   public boolean makeDirs( JobConf conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );

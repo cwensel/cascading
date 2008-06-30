@@ -24,24 +24,43 @@ package cascading.tuple;
 import java.util.Iterator;
 
 /**
- *
+ * Class TupleEntryIterator provides an efficient Iterator for returning {@link TupleEntry} elements in an
+ * underlying {@link Tuple} collection.
  */
 public class TupleEntryIterator implements Iterator<TupleEntry>
   {
+  /** Field entry */
   final TupleEntry entry = new TupleEntry();
+  /** Field iterator */
   final Iterator iterator;
 
+  /**
+   * Constructor TupleEntryIterator creates a new TupleEntryIterator instance.
+   *
+   * @param fields   of type Fields
+   * @param iterator of type Iterator
+   */
   public TupleEntryIterator( Fields fields, Iterator iterator )
     {
     this.entry.fields = fields;
     this.iterator = iterator;
     }
 
+  /**
+   * Method hasNext returns true if there is a next TupleEntry
+   *
+   * @return boolean
+   */
   public boolean hasNext()
     {
     return iterator.hasNext();
     }
 
+  /**
+   * Method next returns the next TupleEntry.
+   *
+   * @return TupleEntry
+   */
   public TupleEntry next()
     {
     entry.tuple = (Tuple) iterator.next();
@@ -49,6 +68,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
     return entry;
     }
 
+  /** Method remove removes the current TypleEntry from the underlying collection. */
   public void remove()
     {
     iterator.remove();

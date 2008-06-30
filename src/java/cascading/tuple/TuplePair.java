@@ -25,37 +25,58 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
- * Class TuplePair is a utility class that is optimized to hold two Tuple instances for sorting and hashing
- * within Hadoop
+ * Class TuplePair is a utility class that is optimized to hold two Tuple instances for sorting and hashing of each
+ * part independently.
  */
 public class TuplePair extends Tuple
   {
+  /** Field tuples */
   private Tuple[] tuples = new Tuple[2];
 
+  /** Constructor Tuple creates a new Tuple instance. */
   public TuplePair()
     {
+    super( (List<Comparable>) null ); // bypass unnecessary List creation
     tuples[ 0 ] = new Tuple();
     tuples[ 1 ] = new Tuple();
     }
 
+  /**
+   * Constructor TuplePair creates a new TuplePair instance.
+   *
+   * @param lhs of type Tuple
+   * @param rhs of type Tuple
+   */
   public TuplePair( Tuple lhs, Tuple rhs )
     {
     tuples[ 0 ] = lhs;
     tuples[ 1 ] = rhs;
     }
 
+  /**
+   * Method getLhs returns the lhs of this TuplePair object.
+   *
+   * @return the lhs (type Tuple) of this TuplePair object.
+   */
   public Tuple getLhs()
     {
     return tuples[ 0 ];
     }
 
+  /**
+   * Method getRhs returns the rhs of this TuplePair object.
+   *
+   * @return the rhs (type Tuple) of this TuplePair object.
+   */
   public Tuple getRhs()
     {
     return tuples[ 1 ];
     }
 
+  @Override
   public boolean equals( Object object )
     {
     if( this == object )
@@ -71,17 +92,20 @@ public class TuplePair extends Tuple
     return true;
     }
 
+  @Override
   public int hashCode()
     {
     return tuples != null ? Arrays.hashCode( tuples ) : 0;
     }
 
+  @Override
   public void write( DataOutput dataOutput ) throws IOException
     {
     tuples[ 0 ].write( dataOutput );
     tuples[ 1 ].write( dataOutput );
     }
 
+  @Override
   public void readFields( DataInput dataInput ) throws IOException
     {
     tuples[ 0 ].readFields( dataInput );
@@ -97,6 +121,12 @@ public class TuplePair extends Tuple
       return -1;
     }
 
+  /**
+   * Method compareTo compares this instance to the given TuplePair.
+   *
+   * @param tuplePair of type TuplePair
+   * @return int
+   */
   public int compareTo( TuplePair tuplePair )
     {
     int c = tuples[ 0 ].compareTo( tuplePair.tuples[ 0 ] );
@@ -109,6 +139,7 @@ public class TuplePair extends Tuple
     return c;
     }
 
+  @Override
   public String toString()
     {
     return tuples[ 0 ].print() + tuples[ 1 ].print();

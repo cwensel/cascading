@@ -28,12 +28,18 @@ import cascading.operation.Operation;
 /** Interface TupleCollector is used to allow {@link Operation} instances to emit result {@link Tuple} values. */
 public abstract class TupleCollector
   {
+  /** Field declared */
   protected Fields declared;
 
   protected TupleCollector()
     {
     }
 
+  /**
+   * Constructor TupleCollector creates a new TupleCollector instance.
+   *
+   * @param declared of type Fields
+   */
   public TupleCollector( Fields declared )
     {
     if( declared == null )
@@ -70,6 +76,12 @@ public abstract class TupleCollector
 
   protected abstract void collect( Tuple tuple );
 
+  /**
+   * Method close closes the underlying resource being written to. This method should be called when no more {@link Tuple}
+   * instances will be written out.
+   *
+   * @throws IOException when
+   */
   public void close() throws IOException
     {
     // do nothing

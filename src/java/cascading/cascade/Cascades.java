@@ -24,10 +24,15 @@ package cascading.cascade;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
-/** Class Cascades provides useful utilities for use in constructing {@link Cascade} instances via the {@link CascadeConnector}. */
+/**
+ * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link Flow}
+ * instances via the {@link CascadeConnector} and {@link FlowConnector}, respectively.
+ */
 public class Cascades
   {
   /**

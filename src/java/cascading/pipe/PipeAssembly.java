@@ -24,7 +24,10 @@ package cascading.pipe;
 import cascading.util.Util;
 
 /**
- * A PipeAssembly is the base class for subclasses that encapsulate reusable and sometimes complex pipelines.
+ * Subclasses of PipeAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
+ * a Pipe is used. That is, a typical PipeAssembly subclass will accept a 'previous' Pipe instance, and a few
+ * arguments for configuring the resulting sub-assembly. If the PipeAssembly represents a split in the pipeline process,
+ * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe[])}.
  * <p/>
  */
 public abstract class PipeAssembly extends Pipe
@@ -32,16 +35,31 @@ public abstract class PipeAssembly extends Pipe
   /** Field assembly */
   private Pipe[] tails;
 
+  /**
+   * Must be called by subclasses to set the final end points of the assembly the subclass represents.
+   *
+   * @param tails of type Pipe
+   */
   protected void setTails( Pipe... tails )
     {
     this.tails = tails;
     }
 
+  /**
+   * Method getTails returns all the tails of this PipeAssembly object. These values are set by {@link #setTails(Pipe[])}.
+   *
+   * @return the tails (type Pipe[]) of this PipeAssembly object.
+   */
   public Pipe[] getTails()
     {
     return tails;
     }
 
+  /**
+   * Method getTailNames returns the tailNames of this PipeAssembly object.
+   *
+   * @return the tailNames (type String[]) of this PipeAssembly object.
+   */
   public String[] getTailNames()
     {
     String[] names = new String[tails.length];

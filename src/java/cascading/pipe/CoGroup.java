@@ -26,7 +26,7 @@ import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
 
 /**
- * Class CoGroup allows for two or more tuple streams to join into a single stream.
+ * The CoGroup pipe allows for two or more tuple streams to join into a single stream.
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
@@ -116,7 +116,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -131,7 +131,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -147,7 +147,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -162,7 +162,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -176,7 +176,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName of type String
    * @param pipes     of type Pipe...
    */
   public CoGroup( String groupName, Pipe... pipes )
@@ -187,7 +187,7 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName
+   * @param groupName of type String
    * @param pipes     of type Pipe[]
    * @param fields    of type Fields[]
    */

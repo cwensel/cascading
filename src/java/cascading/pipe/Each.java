@@ -326,11 +326,13 @@ public class Each extends Operator
       return incomingScope.getOutValuesFields();
     }
 
+  @Override
   public Fields resolveIncomingOperationFields( Scope incomingScope )
     {
     return getFieldsFor( incomingScope );
     }
 
+  @Override
   public Fields resolveFields( Scope scope )
     {
     return getFieldsFor( scope );

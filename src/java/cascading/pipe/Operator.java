@@ -32,12 +32,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * argFields define the input fields used by the function. By default the first field from the input Tuple is used.
- * outFields define the fields in the result Tuple returned by this Pipe. By default, the operation results replace the
- * input Tuple.
- * <p/>
- * A null outFieldSelector denote that the operation replaces the whole input Tuple. Otherwise, the result of the
- * operation are appended to the input Tuple, and any Fields given as outFields are used to prune the Tuple.
+ * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link Operation}.
+ * </p>
+ * The argFields value select the input fields used by the operation. By default the whole input Tuple is passes as arguments.
+ * The outFields value select the fields in the result Tuple returned by this Pipe. By default, the operation results
+ * of the given operation replace the input Tuple.
  */
 public abstract class Operator extends Pipe
   {
@@ -173,16 +172,31 @@ public abstract class Operator extends Pipe
       throw new IllegalArgumentException( "assertionLevel may not be null or NONE" );
     }
 
+  /**
+   * Method getArgumentSelector returns the argumentSelector of this Operator object.
+   *
+   * @return the argumentSelector (type Fields) of this Operator object.
+   */
   public Fields getArgumentSelector()
     {
     return argumentSelector;
     }
 
+  /**
+   * Method getFieldDeclaration returns the fieldDeclaration of this Operator object.
+   *
+   * @return the fieldDeclaration (type Fields) of this Operator object.
+   */
   public Fields getFieldDeclaration()
     {
     return operation.getFieldDeclaration();
     }
 
+  /**
+   * Method getOutputSelector returns the outputSelector of this Operator object.
+   *
+   * @return the outputSelector (type Fields) of this Operator object.
+   */
   public Fields getOutputSelector()
     {
     return outputSelector;
@@ -224,12 +238,6 @@ public abstract class Operator extends Pipe
 
   // FIELDS
 
-  /**
-   * Method outgoingScopeFor returns the {@link Scope} being handed to the next pipe element.
-   *
-   * @param incomingScopes of type Set<Scope>
-   * @return Scope
-   */
   public abstract Scope outgoingScopeFor( Set<Scope> incomingScopes );
 
   void verifyDeclared( Fields declared )
@@ -364,6 +372,7 @@ public abstract class Operator extends Pipe
     return true;
     }
 
+  @Override
   public int hashCode()
     {
     int result = super.hashCode();

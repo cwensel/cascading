@@ -36,20 +36,30 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
-/**
- *
- */
+/** Class TapCollector is a kind of {@link TupleCollector} that writes to a particular {@link Tap} instance. */
 public class TapCollector extends TupleCollector implements OutputCollector
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TapCollector.class );
 
+  /** Field conf */
   private JobConf conf;
+  /** Field writer */
   private RecordWriter writer;
+  /** Field filenamePattern */
   private String filenamePattern = "part-%05d";
+  /** Field filename */
   private String filename;
+  /** Field tap */
   private Tap tap;
 
+  /**
+   * Constructor TapCollector creates a new TapCollector instance.
+   *
+   * @param tap  of type Tap
+   * @param conf of type JobConf
+   * @throws IOException when
+   */
   public TapCollector( Tap tap, JobConf conf ) throws IOException
     {
     this.tap = tap;
@@ -98,6 +108,13 @@ public class TapCollector extends TupleCollector implements OutputCollector
       }
     }
 
+  /**
+   * Method collect writes the given values to the {@link Tap} this instance encapsulates.
+   *
+   * @param writableComparable of type WritableComparable
+   * @param writable           of type Writable
+   * @throws IOException when
+   */
   public void collect( WritableComparable writableComparable, Writable writable ) throws IOException
     {
     writer.write( writableComparable, writable );

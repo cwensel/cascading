@@ -43,8 +43,9 @@ import org.apache.hadoop.mapred.OutputCollector;
  * It does not necessarily filter the output since a given implemenation may choose to
  * collapse values and ignore keys depending on the format.
  * <p/>
- * Setting the {@code numSinkParts} value insures the output resource has only one part. It does this by
- * setting the number of reducers to the given value. This may affect performance, so be cautioned.
+ * Setting the {@code numSinkParts} value insures the output resource has only one part.
+ * In the case of MapReduce, it does this by setting the number of reducers to the given value.
+ * This may affect performance, so be cautioned.
  */
 public abstract class Scheme implements Serializable
   {

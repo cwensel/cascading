@@ -48,6 +48,12 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 /** Class Util provides reusable operations. */
 public class Util
   {
+  /**
+   * This method serializes the given Object instance and retunrs a String Base64 representation.
+   *
+   * @param object to be serialized
+   * @return String
+   */
   public static String serializeBase64( Object object )
     {
     try
@@ -67,6 +73,12 @@ public class Util
     return null;
     }
 
+  /**
+   * This method deserializes the Base64 encoded String into an Object instance.
+   *
+   * @param string
+   * @return
+   */
   public static Object deserializeBase64( String string )
     {
     if( string == null || string.length() == 0 )
@@ -89,6 +101,13 @@ public class Util
       }
     }
 
+  /**
+   * This method joins the values in the given list with the delim String value.
+   *
+   * @param list
+   * @param delim
+   * @return String
+   */
   public static String join( int[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
@@ -104,6 +123,13 @@ public class Util
     return buffer.toString();
     }
 
+  /**
+   * This method joins the values in the given list with the delim String value.
+   *
+   * @param list
+   * @param delim
+   * @return
+   */
   public static String join( Object[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
@@ -119,11 +145,24 @@ public class Util
     return buffer.toString();
     }
 
+  /**
+   * This method joins each value in the collection with a tab character as the delimiter.
+   *
+   * @param collection
+   * @return
+   */
   public static String join( Collection collection )
     {
     return join( collection, "\t" );
     }
 
+  /**
+   * This method joins each valuein the collection with the given delimiter.
+   *
+   * @param collection
+   * @param delim
+   * @return
+   */
   public static String join( Collection collection, String delim )
     {
     StringBuffer buffer = new StringBuffer();
@@ -133,6 +172,14 @@ public class Util
     return buffer.toString();
     }
 
+  /**
+   * This method joins each value in the collection with the given delimiter. All results are appended to the
+   * given {@link StringBuffer} instance.
+   *
+   * @param buffer
+   * @param collection
+   * @param delim
+   */
   public static void join( StringBuffer buffer, Collection collection, String delim )
     {
     for( Object s : collection )
@@ -144,6 +191,12 @@ public class Util
       }
     }
 
+  /**
+   * This method attempts to remove any username and password from the given url String.
+   *
+   * @param url
+   * @return
+   */
   public static String sanitizeUrl( String url )
     {
     if( url == null )
@@ -152,6 +205,12 @@ public class Util
     return url.replaceAll( "(?<=//).*:.*@", "" ) + "\"]";
     }
 
+  /**
+   * This methdo attempts to remove duplicate consecutive forward slashes from the given url.
+   *
+   * @param url
+   * @return
+   */
   public static String normalizeUrl( String url )
     {
     if( url == null )
@@ -160,6 +219,13 @@ public class Util
     return url.replaceAll( "([^:]/)/{2,}", "$1/" );
     }
 
+  /**
+   * This method returns the {@link Object#toString()} of the given object, or an empty String if the object
+   * is null.
+   *
+   * @param object
+   * @return
+   */
   public static String toNull( Object object )
     {
     if( object == null )
@@ -168,6 +234,14 @@ public class Util
     return object.toString();
     }
 
+  /**
+   * This method truncates the given String value to the given size, but appends an ellipse ("...") if the
+   * String is larger than maxSize.
+   *
+   * @param string
+   * @param maxSize
+   * @return
+   */
   public static String truncate( String string, int maxSize )
     {
     string = toNull( string );
@@ -236,7 +310,7 @@ public class Util
     }
 
   /**
-   * Remove all nulls from the given List.
+   * This method removes all nulls from the given List.
    *
    * @param list
    */

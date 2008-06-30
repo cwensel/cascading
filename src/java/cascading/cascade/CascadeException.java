@@ -23,7 +23,7 @@ package cascading.cascade;
 
 import cascading.CascadingException;
 
-/** Class CascadeException ... */
+/** Class CascadeException is thrown by the {@link Cascade} class. */
 public class CascadeException extends CascadingException
   {
   /** Constructor CascadeException creates a new CascadeException instance. */

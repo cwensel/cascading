@@ -136,7 +136,7 @@ public class Every extends Operator
     return (GroupAssertion) operation;
     }
 
-  /** @see Operator#resolveIncomingOperationFields(Scope) */
+  @Override
   public Fields resolveIncomingOperationFields( Scope incomingScope )
     {
     if( incomingScope.isEach() || incomingScope.isTap() )
@@ -145,7 +145,7 @@ public class Every extends Operator
     return incomingScope.getOutValuesFields();
     }
 
-  /** @see Operator#resolveFields(Scope) */
+  @Override
   public Fields resolveFields( Scope scope )
     {
     if( scope.isEach() || scope.isTap() )
@@ -222,7 +222,9 @@ public class Every extends Operator
   /** Class EveryHandler is a helper class that wraps Every instances. */
   public abstract class EveryHandler
     {
+    /** Field outgoingScope */
     public final Scope outgoingScope;
+    /** Field context */
     final Map context = new HashMap();
 
     public EveryHandler( Scope outgoingScope )

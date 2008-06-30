@@ -31,7 +31,7 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class FieldJoiner joins the values in a Tuple with a given format and stuffs the result into a new field.
+ * Class FieldFormatter formats the values in a Tuple with a given format and stuffs the result into a new field.
  * <p/>
  * This function uses the {@link Formatter} class for formatting the argument tuple values into a new string.
  */

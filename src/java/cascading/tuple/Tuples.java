@@ -23,9 +23,7 @@ package cascading.tuple;
 
 import cascading.operation.OperationException;
 
-/**
- *
- */
+/** Class Tuples is a helper class providing common methods to manipulate {@link Tuple} instances. */
 public class Tuples
   {
   /** A constant empty Tuple instance. Immutability is not currently enforced. Use with caution. */
@@ -71,33 +69,33 @@ public class Tuples
     }
 
   /**
-   * Method coerce returns the value in the tuple at the given velue to the requested type.
+   * Method coerce returns the value in the tuple at the given position to the requested type.
    *
-   * @param tuple
-   * @param i
-   * @param type
-   * @return
+   * @param tuple of type Tuple
+   * @param pos   of type int
+   * @param type  of type Class
+   * @return returns the value coerced
    */
-  public static Object coerce( Tuple tuple, int i, Class type )
+  public static Object coerce( Tuple tuple, int pos, Class type )
     {
     if( type == Object.class )
-      return tuple.get( i );
+      return tuple.get( pos );
     else if( type == String.class )
-      return tuple.getString( i );
+      return tuple.getString( pos );
     else if( type == Integer.class || type == int.class )
-      return tuple.getInteger( i );
+      return tuple.getInteger( pos );
     else if( type == Long.class || type == long.class )
-      return tuple.getLong( i );
+      return tuple.getLong( pos );
     else if( type == Double.class || type == double.class )
-      return tuple.getDouble( i );
+      return tuple.getDouble( pos );
     else if( type == Float.class || type == float.class )
-      return tuple.getFloat( i );
+      return tuple.getFloat( pos );
     else if( type == Short.class || type == short.class )
-      return tuple.getShort( i );
+      return tuple.getShort( pos );
     else if( type == Boolean.class || type == boolean.class )
-      return tuple.getBoolean( i );
-    else if( type != null ) // make null if we don't know the type
-      throw new OperationException( "could not coerce value, " + tuple.get( i ) + " to type: " + type.getName() );
+      return tuple.getBoolean( pos );
+    else if( type != null )
+      throw new OperationException( "could not coerce value, " + tuple.get( pos ) + " to type: " + type.getName() );
 
     return null;
     }
