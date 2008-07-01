@@ -194,7 +194,7 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
-  public void testMerge() throws Exception
+  public void testSimpleMerge() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
       fail( "data file not found" );

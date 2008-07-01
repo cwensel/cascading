@@ -39,6 +39,7 @@ import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
+import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
@@ -333,6 +334,63 @@ public class BuildJobsTest extends CascadingTestCase
 
     assertTrue( "not a TempHfs", operator instanceof TempHfs );
     }
+
+  public void testMerge()
+    {
+    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );
+    Tap source2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge2" );
+
+    Tap sink = new Hfs( new TextLine(), "foo" );
+
+    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
+
+    Map sources = new HashMap();
+    sources.put( "left", source1 );
+    sources.put( "right", source2 );
+
+    Map sinks = new HashMap();
+    sinks.put( "merge", sink );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, merge );
+
+    flow.writeDOT( "merged.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 1, steps.size() );
+    }
+
+  public void testMerge2()
+    {
+    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );
+    Tap source2 = new Hfs( new SequenceFile( new Fields( "offset", "line" ) ), "foo/merge2" );
+
+    Tap sink = new Hfs( new TextLine(), "foo" );
+
+    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
+
+    Map sources = new HashMap();
+    sources.put( "left", source1 );
+    sources.put( "right", source2 );
+
+    Map sinks = new HashMap();
+    sinks.put( "merge", sink );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, merge );
+
+    flow.writeDOT( "merged.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+    }
+
 
   private static class TestAssembly extends PipeAssembly
     {

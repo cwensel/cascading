@@ -24,6 +24,7 @@ package cascading.flow;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -99,7 +100,7 @@ public class MultiMapReducePlanner
       verifyTaps( sinks, false, true );
       verifyTaps( traps, false, false );
 
-      verifyEndPoints( sources, sinks, pipes );
+      verifyPipeAssemblyEndPoints( sources, sinks, pipes );
       verifyTraps( traps, pipes );
 
       pipeGraph = makePipeGraph( pipes, sources, sinks );
@@ -160,7 +161,7 @@ public class MultiMapReducePlanner
    * @param sinks   of type Map<String, Tap>
    * @param pipes   of type Pipe[]
    */
-  private void verifyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
+  private void verifyPipeAssemblyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
     {
     Set<String> names = new HashSet<String>();
 
@@ -479,18 +480,79 @@ public class MultiMapReducePlanner
   private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
     // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
-    while( !handleGroupsInternal( pipeGraph, sources ) )
+    while( !handleGroupPartitioning( pipeGraph, sources ) )
       ;
+
+    handleHeterogeneousSources( pipeGraph );
     }
 
-  /**
-   * Method handleGroupsInternal ...
-   *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param sources   of type Collection<Tap>
-   * @return boolean
-   */
-  private boolean handleGroupsInternal( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+  private void handleHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    // find all Groups
+    Set<FlowElement> vertices = pipeGraph.vertexSet();
+    Set<Group> groups = new HashSet<Group>();
+
+    for( FlowElement vertice : vertices )
+      {
+      // only if it is a join/merge
+      if( vertice instanceof Group && pipeGraph.inDegreeOf( vertice ) > 1 )
+        groups.add( (Group) vertice );
+      }
+
+    // compare group sources
+    Set<Group> normalizeGroups = new HashSet<Group>();
+
+    for( Group group : groups )
+      {
+      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
+      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
+
+      List<Tap> taps = new ArrayList<Tap>();
+
+      for( GraphPath<FlowElement, Scope> path : paths )
+        {
+        List<Scope> list = path.getEdgeList();
+        Collections.reverse( list );
+
+        for( Scope scope : list )
+          {
+          FlowElement previousElement = pipeGraph.getEdgeSource( scope );
+
+          if( previousElement instanceof Tap )
+            {
+            taps.add( (Tap) previousElement );
+            break;
+            }
+
+          if( previousElement instanceof Group )
+            throw new IllegalStateException( "encountered Group before Tap: " + previousElement );
+          }
+        }
+
+      if( taps.size() < 2 )
+        throw new IllegalStateException( "must be 2 or more source taps to this group: " + group );
+
+      Tap commonTap = taps.remove( 0 ); // get first
+
+      for( Tap tap : taps )
+        {
+        // making assumption hadoop can handle multiple filesytems, but not multiple inputformats
+        // in the same job
+        // possibly could test for common input format
+        if( tap.getScheme().getClass() != commonTap.getScheme().getClass() )
+          normalizeGroups.add( group );
+        }
+      }
+
+    // if incompatible, insert Tap after its join/merge pipe
+    for( Group group : normalizeGroups )
+      {
+      for( Pipe previousPipe : group.getPrevious() )
+        insertTapAfter( pipeGraph, previousPipe );
+      }
+    }
+
+  private boolean handleGroupPartitioning( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
     List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
