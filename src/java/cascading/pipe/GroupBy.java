@@ -21,12 +21,25 @@
 
 package cascading.pipe;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
+import cascading.operation.Filter;
+import cascading.operation.Function;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 /**
- * The GroupBy pipe groups the Tuple stream by the given groupFields. Typically an {@link Every} follows GroupBy to apply an
- * {@link Aggregator} function to every grouping.
+ * The GroupBy pipe groups the {@link Tuple} stream by the given groupFields.
+ * </p>
+ * If more than one {@link Pipe} instance is provided on the constructor, all branches will be merged. It is required
+ * that all Pipe instances output the same field names, otherwise the {@link FlowConnector} will fail to create a
+ * {@link Flow} instance. Again, the Pipe instances are merged together as if one Tuple stream and not joined.
+ * See {@link CoGroup} for joining by common fields.
+ * </p>
+ * Typically an {@link Every} follows GroupBy to apply an {@link Aggregator} function to every grouping. The
+ * {@link Each} operator may also follow GroupBy to apply a {@link Function} or {@link Filter} to the resulting
+ * stream. But an Each cannot come immediately before an Every.
  * <p/>
  * Optionally a stream can be further sorted by providing sortFields. This allows an Aggregator to receive
  * values in the order of the sortedFields.
@@ -124,5 +137,88 @@ public class GroupBy extends Group
   public GroupBy( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     super( groupName, pipe, groupFields, sortFields, reverseOrder );
+    }
+
+  //////////
+  // MERGE
+  //////////
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
+   *
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   */
+  public GroupBy( Pipe[] pipes, Fields groupFields )
+    {
+    super( pipes, groupFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
+   *
+   * @param groupName   of type String
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   */
+  public GroupBy( String groupName, Pipe[] pipes, Fields groupFields )
+    {
+    super( groupName, pipes, groupFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
+   *
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public GroupBy( Pipe[] pipes, Fields groupFields, Fields sortFields )
+    {
+    super( pipes, groupFields, sortFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
+   *
+   * @param groupName   of type String
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public GroupBy( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields )
+    {
+    super( groupName, pipes, groupFields, sortFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
+   *
+   * @param pipes        of type Pipe
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public GroupBy( Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    super( pipes, groupFields, sortFields, reverseOrder );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names
+   * and sorts the grouped values on the given sortFields fields names.
+   *
+   * @param groupName    of type String
+   * @param pipes        of type Pipe
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public GroupBy( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    super( groupName, pipes, groupFields, sortFields, reverseOrder );
     }
   }

@@ -75,7 +75,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", false );
+    super( "fielded pipes", true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -193,6 +193,47 @@ public class FieldedPipesTest extends ClusterTestCase
 
     iterator.close();
     }
+
+  public void testMerge() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/merge/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
+
+    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+
+    TapIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\tA", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
 
   public void testCoGroup() throws Exception
     {

@@ -66,6 +66,8 @@ public class Group extends Pipe
   private CoGrouper coGrouper;
   /** Field groupName */
   private String groupName;
+  /** Field isGroupBy */
+  private boolean isGroupBy;
 
   /** Field pipePos */
   private transient Map<String, Integer> pipePos;
@@ -81,8 +83,7 @@ public class Group extends Pipe
    */
   public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields );
-    this.declaredFields = declaredFields;
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, null );
     }
 
   /**
@@ -97,7 +98,8 @@ public class Group extends Pipe
    */
   public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields );
+    this.declaredFields = declaredFields;
     this.coGrouper = coGrouper;
     }
 
@@ -112,8 +114,7 @@ public class Group extends Pipe
    */
   public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields );
-    this.coGrouper = coGrouper;
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, null, coGrouper );
     }
 
   /**
@@ -126,14 +127,7 @@ public class Group extends Pipe
    */
   public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
     {
-    addPipe( lhs );
-    addPipe( rhs );
-
-    if( lhsGroupFields.size() != rhsGroupFields.size() )
-      throw new IllegalArgumentException( "lhs and rhs cogroup fields must be same size" );
-
-    groupFieldsMap.put( lhs.getName(), lhsGroupFields );
-    groupFieldsMap.put( rhs.getName(), rhsGroupFields );
+    this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ) );
     }
 
   /**
@@ -143,7 +137,7 @@ public class Group extends Pipe
    */
   public Group( Pipe... pipes )
     {
-    this( pipes, null );
+    this( pipes, (Fields[]) null );
     }
 
   /**
@@ -319,6 +313,10 @@ public class Group extends Pipe
     this.repeat = repeat;
     }
 
+  ////////////
+  // GROUPBY
+  ////////////
+
   /**
    * Constructor Group creates a new Group instance where grouping occurs on {@link Fields#ALL} fields.
    *
@@ -326,9 +324,7 @@ public class Group extends Pipe
    */
   public Group( Pipe pipe )
     {
-    addPipe( pipe );
-    this.groupFieldsMap.put( pipe.getName(), Fields.ALL );
-    this.coGrouper = new InnerJoin();
+    this( null, pipe, Fields.ALL, null, false );
     }
 
   /**
@@ -339,9 +335,7 @@ public class Group extends Pipe
    */
   public Group( Pipe pipe, Fields groupFields )
     {
-    addPipe( pipe );
-    this.groupFieldsMap.put( pipe.getName(), groupFields );
-    this.coGrouper = new InnerJoin();
+    this( null, pipe, groupFields, null, false );
     }
 
   /**
@@ -353,10 +347,7 @@ public class Group extends Pipe
    */
   public Group( String groupName, Pipe pipe, Fields groupFields )
     {
-    addPipe( pipe );
-    this.groupName = groupName;
-    this.groupFieldsMap.put( pipe.getName(), groupFields );
-    this.coGrouper = new InnerJoin();
+    this( groupName, pipe, groupFields, null, false );
     }
 
   /**
@@ -368,8 +359,7 @@ public class Group extends Pipe
    */
   public Group( Pipe pipe, Fields groupFields, Fields sortFields )
     {
-    this( pipe, groupFields );
-    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    this( null, pipe, groupFields, sortFields, false );
     }
 
   /**
@@ -382,9 +372,7 @@ public class Group extends Pipe
    */
   public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields )
     {
-    this( groupName, pipe, groupFields );
-    addPipe( pipe );
-    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    this( groupName, pipe, groupFields, sortFields, false );
     }
 
   /**
@@ -397,9 +385,7 @@ public class Group extends Pipe
    */
   public Group( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
-    this( pipe, groupFields );
-    this.reverseOrder = reverseOrder;
-    this.sortFieldsMap.put( pipe.getName(), sortFields );
+    this( null, pipe, groupFields, sortFields, reverseOrder );
     }
 
   /**
@@ -413,9 +399,94 @@ public class Group extends Pipe
    */
   public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
-    this( groupName, pipe, groupFields );
+    this( groupName, Pipe.pipes( pipe ), groupFields, sortFields, reverseOrder );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   */
+  public Group( Pipe[] pipes, Fields groupFields )
+    {
+    this( null, pipes, groupFields, null, false );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   */
+  public Group( String groupName, Pipe[] pipes, Fields groupFields )
+    {
+    this( groupName, pipes, groupFields, null, false );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes       of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( Pipe[] pipes, Fields groupFields, Fields sortFields )
+    {
+    this( null, pipes, groupFields, sortFields, false );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param sortFields  of type Fields
+   */
+  public Group( String groupName, Pipe[] pipe, Fields groupFields, Fields sortFields )
+    {
+    this( groupName, pipe, groupFields, sortFields, false );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes        of type Pipe
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public Group( Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    this( null, pipes, groupFields, sortFields, reverseOrder );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName    of type String
+   * @param pipes        of type Pipe[]
+   * @param groupFields  of type Fields
+   * @param sortFields   of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public Group( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+    {
+    this.isGroupBy = true;
+    this.groupName = groupName;
+
+    for( Pipe pipe : pipes )
+      {
+      addPipe( pipe );
+      this.groupFieldsMap.put( pipe.getName(), groupFields );
+
+      if( sortFields != null )
+        this.sortFieldsMap.put( pipe.getName(), sortFields );
+      }
+
     this.reverseOrder = reverseOrder;
-    this.sortFieldsMap.put( pipe.getName(), sortFields );
     }
 
   /**
@@ -607,7 +678,7 @@ public class Group extends Pipe
 
   private boolean isGroupBy()
     {
-    return Math.max( pipes.size(), repeat ) == 1;
+    return isGroupBy;
     }
 
   // FIELDS
@@ -722,13 +793,32 @@ public class Group extends Pipe
         return declaredFields;
         }
 
-      Fields appendedFields = new Fields();
+      // support merge or cogrouping here
+      if( isGroupBy() )
+        {
+        Fields commonFields = null;
 
-      // will throwFail on name collisions
-      for( Scope incomingScope : incomingScopes )
-        appendedFields = appendedFields.append( resolveFields( incomingScope ) );
+        for( Scope incomingScope : incomingScopes )
+          {
+          Fields fields = resolveFields( incomingScope );
 
-      return appendedFields;
+          if( commonFields == null )
+            commonFields = fields;
+          else if( !commonFields.equals( fields ) )
+            throw new OperatorException( "merged streams must declare the same field names, expected: " + commonFields.print() + " found: " + fields.print() );
+          }
+
+        return commonFields;
+        }
+      else
+        {
+        Fields appendedFields = new Fields();
+
+        // will throwFail on name collisions
+        for( Scope incomingScope : incomingScopes )
+          appendedFields = appendedFields.append( resolveFields( incomingScope ) );
+        return appendedFields;
+        }
       }
     catch( RuntimeException exception )
       {

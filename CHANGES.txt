@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added merge capabilities in c.p.GroupBy. This allows multiple input branches to be grouped as if a single stream.
+
   Fixed bug in c.t.TapCollector where writing to a Sequence file threw a NPE.
 
   Added c.f.MapReduceFlow to support custom MapReduce jobs, allowing them to participate in a Cascade job.
