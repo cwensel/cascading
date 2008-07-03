@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -120,9 +121,9 @@ public class Flow implements Runnable
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
-    this.sources = sources;
-    this.sinks = sinks;
-    this.traps = traps;
+    setSources( sources );
+    setSinks( sinks );
+    setTraps( traps );
     }
 
   protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
@@ -130,9 +131,9 @@ public class Flow implements Runnable
     setJobConf( jobConf );
     this.name = name;
     this.stepGraph = stepGraph;
-    this.sources = sources;
-    this.sinks = sinks;
-    this.traps = traps;
+    setSources( sources );
+    setSinks( sinks );
+    setTraps( traps );
     }
 
   /**
@@ -152,16 +153,19 @@ public class Flow implements Runnable
 
   protected void setSources( Map<String, Tap> sources )
     {
+    addListeners( sources.values() );
     this.sources = sources;
     }
 
   protected void setSinks( Map<String, Tap> sinks )
     {
+    addListeners( sinks.values() );
     this.sinks = sinks;
     }
 
   protected void setTraps( Map<String, Tap> traps )
     {
+    addListeners( traps.values() );
     this.traps = traps;
     }
 
@@ -202,6 +206,15 @@ public class Flow implements Runnable
   public FlowStats getFlowStats()
     {
     return flowStats;
+    }
+
+  void addListeners( Collection listeners )
+    {
+    for( Object listener : listeners )
+      {
+      if( listener instanceof FlowListener )
+        addListener( (FlowListener) listener );
+      }
     }
 
   List<SafeFlowListener> getListeners()

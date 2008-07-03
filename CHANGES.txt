@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added support for c.t.Tap instances implementing c.f.FlowListener. If implemented, they will automatically be
+  added to the Flow even listeners collection and will receive Flow events.
+
   Fixed case where multiple source c.t.Tap instances return true for the containsFile method. Now verifies only one
   Tap contains the file, and fails otherwise.
 
