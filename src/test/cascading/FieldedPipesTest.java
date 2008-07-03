@@ -166,7 +166,8 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 8, null );
     }
 
-  public void testSimpleChainSplitter() throws Exception
+  // also tests the RegexSplitter
+  public void testNoGroup() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -179,7 +180,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new RegexSplitter( "\\s+" ), new Fields( 1 ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simplesplit", true );
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/simplesplit", true );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
 
@@ -714,27 +715,4 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 10, null );
     }
-
-  public void testNoGroup() throws Exception
-    {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-
-    Pipe pipe = new Pipe( "test" );
-
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-
-    Tap sink = new Hfs( new TextLine(), outputPath + "/nogroup", true );
-
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    validateLength( flow, 10, null );
-    }
-
   }

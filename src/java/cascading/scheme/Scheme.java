@@ -172,16 +172,18 @@ public abstract class Scheme implements Serializable
   /**
    * Method sourceInit initializes this instance as a source.
    *
-   * @param tap
+   * @param tap  of type Tap
    * @param conf of type JobConf
+   * @throws IOException on initializatin failure
    */
   public abstract void sourceInit( Tap tap, JobConf conf ) throws IOException;
 
   /**
    * Method sinkInit initializes this instance as a sink.
    *
-   * @param tap
+   * @param tap  of type Tap
    * @param conf of type JobConf
+   * @throws IOException on initialization failure
    */
   public abstract void sinkInit( Tap tap, JobConf conf ) throws IOException;
 

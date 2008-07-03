@@ -2,9 +2,14 @@ Cascading Change Log
 
 unreleased
 
+  Fixed case where multiple source c.t.Tap instances return true for the containsFile method. Now verifies only one
+  Tap contains the file, and fails otherwise.
+
+  Changed c.s.TextLine to not set numSinkParts to 1 by default. Now uses the natural number of parts.
+
   Changed MapReduce planner to force an intermediate file between branches with Hadoop incompatible source Taps
   on joins/merges. If the taps are compatible (have same Scheme), all branches will be processed in same Mapper
-  before the c.p.Group. 
+  before the c.p.Group.
 
   Added merge capabilities in c.p.GroupBy. This allows multiple input branches to be grouped as if a single stream.
 

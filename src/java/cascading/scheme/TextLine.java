@@ -70,18 +70,18 @@ public class TextLine extends Scheme
    */
   public TextLine()
     {
-    super( DEFAULT_SOURCE_FIELDS, 1 );
+    super( DEFAULT_SOURCE_FIELDS );
     }
 
   /**
    * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
    * "offset" is the byte offset in the input file.
    *
-   * @param numSinkFileParts of type int
+   * @param numSinkParts of type int
    */
-  public TextLine( int numSinkFileParts )
+  public TextLine( int numSinkParts )
     {
-    super( DEFAULT_SOURCE_FIELDS, numSinkFileParts );
+    super( DEFAULT_SOURCE_FIELDS, numSinkParts );
     }
 
   /**
@@ -108,6 +108,21 @@ public class TextLine extends Scheme
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
+
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples. The resulting data set will have numSinkParts.
+   *
+   * @param sourceFields the source fields for this scheme
+   * @param numSinkParts of type int
+   */
+  public TextLine( Fields sourceFields, int numSinkParts )
+    {
+    super( sourceFields, numSinkParts );
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
       throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );

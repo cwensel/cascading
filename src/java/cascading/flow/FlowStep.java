@@ -23,6 +23,7 @@ package cascading.flow;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,13 +189,25 @@ public class FlowStep implements Serializable
     if( currentFile == null || currentFile.length() == 0 )
       throw new IllegalStateException( "map.input.file property returned null" );
 
+    // test for the case that multiple taps contain the same file, and fail appropriately 
+    List<Tap> found = new ArrayList<Tap>();
+
     for( Tap source : sources.keySet() )
       {
       if( source.containsFile( jobConf, currentFile ) )
-        return source;
+        found.add( source );
       }
 
-    FlowException exception = new FlowException( "could not find source Tap for file: " + currentFile );
+    if( found.size() == 1 )
+      return found.get( 0 );
+
+    FlowException exception = null;
+
+    if( found.size() > 1 )
+      exception = new FlowException( "found more than one source Tap for file: " + currentFile + " taps: " + Util.join( found, "," ) );
+    else
+      exception = new FlowException( "could not find source Tap for file: " + currentFile );
+
     LOG.error( exception );
     throw exception;
     }
