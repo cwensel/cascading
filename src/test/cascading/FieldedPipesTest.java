@@ -448,6 +448,53 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testCoGroupGroupBy() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ), " " );
+    Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupgroupby/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
+
+    Pipe cogroup = new CoGroup( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+
+    //cogroup = new Each( cogroup, new Identity() );
+
+    Pipe groupby = new GroupBy( cogroup, new Fields( "numA" ) );
+
+    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, groupby );
+
+//    System.out.println( "flow =\n" + flow );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TapIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
   public void testCoGroupSamePipe() throws Exception
     {
     if( !new File( inputFileLower ).exists() )

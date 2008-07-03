@@ -540,7 +540,10 @@ public class MultiMapReducePlanner
         // in the same job
         // possibly could test for common input format
         if( tap.getScheme().getClass() != commonTap.getScheme().getClass() )
+          {
+          LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
           normalizeGroups.add( group );
+          }
         }
       }
 

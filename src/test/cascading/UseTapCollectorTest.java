@@ -117,11 +117,13 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/tapnogroup", true );
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/tapnogroup", true );
 
     sink.setUseTapCollector( true );
 
     Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "testnogroup.dot" );
 
     flow.complete();
 

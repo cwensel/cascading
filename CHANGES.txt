@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.p.Group is immediately followed by another c.p.Group (or their sub-classes) and fields could not
+  be resolved between them.
+
   Added support for c.t.Tap instances implementing c.f.FlowListener. If implemented, they will automatically be
   added to the Flow even listeners collection and will receive Flow events.
 
