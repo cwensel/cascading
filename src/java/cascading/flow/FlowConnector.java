@@ -92,7 +92,12 @@ public class FlowConnector
     while( enumeration.hasMoreElements() )
       {
       String key = (String) enumeration.nextElement();
-      jobConf.set( key, properties.getProperty( key ) );
+      String value = properties.getProperty( key );
+
+      if( value == null )
+        throw new IllegalStateException( "property value was null for key: " + key );
+
+      jobConf.set( key, value );
       }
     }
 

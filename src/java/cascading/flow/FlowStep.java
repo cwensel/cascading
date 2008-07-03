@@ -44,7 +44,6 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -123,7 +122,6 @@ public class FlowStep implements Serializable
     conf.setOutputValueClass( Tuple.class );
 
     conf.setMapperClass( FlowMapper.class );
-    conf.setCombinerClass( IdentityReducer.class );
     conf.setReducerClass( FlowReducer.class );
 
     for( Tap tap : sources.keySet() )

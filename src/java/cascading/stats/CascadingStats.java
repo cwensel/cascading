@@ -123,6 +123,14 @@ public class CascadingStats
     markFinishedTime();
     }
 
+  public long getDuration()
+    {
+    if( finishedTime != 0 )
+      return finishedTime - startTime;
+    else
+      return 0;
+    }
+
   protected String getStatsString()
     {
     String string = "status=" + status + ", startTime=" + startTime;
