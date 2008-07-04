@@ -189,7 +189,7 @@ public class FlowStep implements Serializable
     if( currentFile == null || currentFile.length() == 0 )
       throw new IllegalStateException( "map.input.file property returned null" );
 
-    // test for the case that multiple taps contain the same file, and fail appropriately 
+    // test for the case that multiple taps contain the same file, and fail appropriately
     List<Tap> found = new ArrayList<Tap>();
 
     for( Tap source : sources.keySet() )
