@@ -45,9 +45,6 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * <p/>
  * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
  * bi-directional, so zip files cannot be written.
- * </p>
- * By default, TextLine sets numSinkParts to 1, as the typical case is to extract data from the distributed
- * file system into text is to result in a single continuous file.
  */
 public class TextLine extends Scheme
   {
