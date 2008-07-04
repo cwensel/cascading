@@ -33,6 +33,7 @@ import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -57,7 +58,7 @@ public class BuildJobsTest extends CascadingTestCase
     }
 
   /**
-   * Test a single piece Pipe, should fail on connect()
+   * Test a single piece Pipe, should not fail, inserts Identity pipe
    *
    * @throws IOException
    */
@@ -68,14 +69,20 @@ public class BuildJobsTest extends CascadingTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    try
-      {
-      new FlowConnector().connect( source, sink, pipe );
-      fail( "did not throw failure on attept to connect source to sink" );
-      }
-    catch( FlowException exception )
-      {
-      }
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "wrong size", 1, steps.size() );
+
+    FlowStep step = (FlowStep) steps.get( 0 );
+
+    step.getJobConf(); // called init the step
+
+    assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
+    assertNull( "not null: step.groupBy", step.group );
+    assertNotNull( "null: step.sink", step.sink );
+
     }
 
   public void testName()
@@ -438,6 +445,68 @@ public class BuildJobsTest extends CascadingTestCase
     List<FlowStep> steps = new FlowConnector().connect( sources, sinks, pipe1, pipe2 ).getSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
+    }
+
+  public void testCoGroupAroundCoGroup() throws Exception
+    {
+    Tap source10 = new Hfs( new TextLine( new Fields( "num" ) ), "foo" );
+    Tap source20 = new Hfs( new TextLine( new Fields( "num" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "source20", source20 );
+    sources.put( "source101", source10 );
+    sources.put( "soucre102", source10 );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "baz", true );
+
+    Pipe pipeNum20 = new Pipe( "source20" );
+    Pipe pipeNum101 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source101" );
+
+    Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
+
+    Flow flow = new FlowConnector().connect( sources, sink, splice2 );
+
+    flow.writeDOT( "cogroupcogroupopt.dot" );
+
+    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
+    }
+
+  public void testCoGroupAroundCoGroupOptimized() throws Exception
+    {
+    Tap source10 = new Hfs( new TextLine( new Fields( "num" ) ), "foo" );
+    Tap source20 = new Hfs( new TextLine( new Fields( "num" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "source20", source20 );
+    sources.put( "source101", source10 );
+    sources.put( "soucre102", source10 );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "baz", true );
+
+    Pipe pipeNum20 = new Pipe( "source20" );
+    Pipe pipeNum101 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source101" );
+
+    Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
+
+    FlowConnector flowConnector = new FlowConnector();
+
+    flowConnector.setIntermediateSchemeClass( TextLine.class );
+
+    Flow flow = flowConnector.connect( sources, sink, splice2 );
+
+    flow.writeDOT( "cogroupcogroupopt.dot" );
+
+    assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
     }
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )

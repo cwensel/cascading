@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added support for passing an intermediateSchemeClass to the underlying planner to be used as the default c.s.Scheme
+  for intermediate c.t.Tap instances internal to a given c.f.Flow.
+
   Fixed bug where c.p.Group is immediately followed by another c.p.Group (or their sub-classes) and fields could not
   be resolved between them.
 

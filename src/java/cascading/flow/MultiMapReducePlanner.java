@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.operation.AssertionLevel;
+import cascading.operation.Identity;
+import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -52,7 +54,24 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-/** Class MultiMapReducePlanner is the core Hadoop MapReduce planner. */
+/**
+ * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
+ * </p>
+ * Notes:
+ * </p>
+ * <strong>Heterogeneous source Tap instances</strong></br>
+ * Currently Hadoop cannot have but one InputFormat per Mapper, but Cascading allows for any types of Taps
+ * to be used as sinks in a given Flow.
+ * </p>
+ * To overcome this issue, this planner will insert temporary Tap
+ * instances immediately before a merge or join Group (GroupBy or CoGroup) if the source Taps do not share
+ * the same Scheme class. By default temp Taps use the SequenceFile Scheme. So if the source Taps are custom
+ * or use TextLine, a few extra jobs can leak into a given Flow.
+ * </p>
+ * To overcome this, in turn, an intermediateSchemeClass must be passed from the FlowConnctor to the planner. This class
+ * will be instantiated for every temp Tap instance. The intention is that the given intermedeiateSchemeClass
+ * match all the source Tap schemes.
+ */
 public class MultiMapReducePlanner
   {
   /** Field LOG */
@@ -67,17 +86,21 @@ public class MultiMapReducePlanner
   private JobConf jobConf;
   /** Field assertionLevel */
   private AssertionLevel assertionLevel;
+  /** Field intermediateSchemeClass */
+  private final Class intermediateSchemeClass;
 
   /**
    * Constructor MultiMapReducePlanner creates a new MultiMapReducePlanner instance.
    *
-   * @param jobConf        of type JobConf
-   * @param assertionLevel of type AssertionLevel
+   * @param jobConf                 of type JobConf
+   * @param assertionLevel          of type AssertionLevel
+   * @param intermediateSchemeClass of type Class
    */
-  MultiMapReducePlanner( JobConf jobConf, AssertionLevel assertionLevel )
+  MultiMapReducePlanner( JobConf jobConf, AssertionLevel assertionLevel, Class intermediateSchemeClass )
     {
     this.jobConf = jobConf;
     this.assertionLevel = assertionLevel;
+    this.intermediateSchemeClass = intermediateSchemeClass;
     }
 
   /**
@@ -110,6 +133,7 @@ public class MultiMapReducePlanner
 
       handleSplits( pipeGraph );
       handleGroups( pipeGraph, sources.values() );
+      handleHeterogeneousSources( pipeGraph );
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
 
@@ -326,7 +350,7 @@ public class MultiMapReducePlanner
           if( source instanceof Tap && target instanceof Tap )
             {
             if( flowElement.getClass() == Pipe.class )
-              throw new FlowException( "cannot connect source and sink with a only a Pipe class" );
+              replaceWithIdentity( graph, (Pipe) flowElement );
 
             continue out;
             }
@@ -345,6 +369,32 @@ public class MultiMapReducePlanner
 
       graph.removeVertex( flowElement );
       }
+    }
+
+  private void replaceWithIdentity( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "replaceing with identity function" + pipe );
+
+    Set<Scope> incomingScopes = new HashSet<Scope>( graph.incomingEdgesOf( pipe ) ); // will only be one, make copy
+    Scope incomingScope = incomingScopes.iterator().next();
+
+    Set<Scope> outgoingScopes = new HashSet<Scope>( graph.outgoingEdgesOf( pipe ) ); // will only be one, make copy
+    Scope outgoingScope = outgoingScopes.iterator().next();
+
+    FlowElement source = graph.getEdgeSource( incomingScope );
+    graph.removeEdge( source, pipe );
+
+    FlowElement target = graph.getEdgeTarget( outgoingScope );
+    graph.removeEdge( pipe, target );
+
+    graph.removeVertex( pipe );
+
+    Each each = new Each( pipe.getName(), new Identity() );
+    graph.addVertex( each );
+
+    graph.addEdge( source, each, new Scope( incomingScope ) );
+    graph.addEdge( each, target, new Scope( outgoingScope ) );
     }
 
   /**
@@ -471,22 +521,13 @@ public class MultiMapReducePlanner
     return copy;
     }
 
-  /**
-   * Since all joins are at groups, depth first search is safe
-   *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param sources   of type Collection<Tap>
-   */
-  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+  private void handleHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
-    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
-    while( !handleGroupPartitioning( pipeGraph, sources ) )
+    while( !internalHeterogeneousSources( pipeGraph ) )
       ;
-
-    handleHeterogeneousSources( pipeGraph );
     }
 
-  private void handleHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private boolean internalHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     // find all Groups
     Set<FlowElement> vertices = pipeGraph.vertexSet();
@@ -539,7 +580,7 @@ public class MultiMapReducePlanner
         // making assumption hadoop can handle multiple filesytems, but not multiple inputformats
         // in the same job
         // possibly could test for common input format
-        if( tap.getScheme().getClass() != commonTap.getScheme().getClass() )
+        if( getSchemeClass( tap ) != getSchemeClass( commonTap ) )
           {
           LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
           normalizeGroups.add( group );
@@ -558,6 +599,29 @@ public class MultiMapReducePlanner
           insertTapAfter( pipeGraph, (Pipe) flowElement );
         }
       }
+
+    return normalizeGroups.isEmpty();
+    }
+
+  private Class getSchemeClass( Tap tap )
+    {
+    if( tap instanceof TempHfs )
+      return ( (TempHfs) tap ).getSchemeClass();
+    else
+      return tap.getScheme().getClass();
+    }
+
+  /**
+   * Since all joins are at groups, depth first search is safe
+   *
+   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param sources   of type Collection<Tap>
+   */
+  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+    {
+    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
+    while( !handleGroupPartitioning( pipeGraph, sources ) )
+      ;
     }
 
   private boolean handleGroupPartitioning( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
@@ -575,14 +639,15 @@ public class MultiMapReducePlanner
 
       FlowElement previousFlowElement = null;
       FlowElement flowElement = head;
+
       while( scopeIterator.hasNext() )
         {
         previousFlowElement = flowElement;
         flowElement = pipeGraph.getEdgeTarget( scopeIterator.next() );
 
-        if( flowElement instanceof Extent )
+        if( flowElement instanceof Extent ) // is an extent: head or tail
           continue;
-        else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )
+        else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )  // is a source tap
           continue;
 
         if( flowElement instanceof Group && !foundGroup )
@@ -637,7 +702,7 @@ public class MultiMapReducePlanner
   private TempHfs makeTemp( Pipe pipe )
     {
     // must give Taps unique names
-    return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/" );
+    return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/", intermediateSchemeClass );
     }
 
   /**

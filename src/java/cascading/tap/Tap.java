@@ -84,6 +84,11 @@ public abstract class Tap implements FlowElement, Serializable
     this.scheme = scheme;
     }
 
+  protected void setScheme( Scheme scheme )
+    {
+    this.scheme = scheme;
+    }
+
   /**
    * Method getScheme returns the scheme of this Tap object.
    *

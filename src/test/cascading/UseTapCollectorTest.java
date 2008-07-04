@@ -45,7 +45,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
   public UseTapCollectorTest()
     {
-    super( "fielded pipes", true );
+    super( "use tap collector tests", true );
     }
 
   public void testViaEndPipe() throws Exception

@@ -52,6 +52,8 @@ public class FlowConnector
   private JobConf jobConf;
   /** Field assertionLevel */
   private AssertionLevel assertionLevel = AssertionLevel.STRICT;
+  /** Field intermediateSchemeClass */
+  private Class intermediateSchemeClass;
 
   /** Constructor FlowConnector creates a new FlowConnector instance. */
   public FlowConnector()
@@ -119,6 +121,26 @@ public class FlowConnector
   public void setAssertionLevel( AssertionLevel assertionLevel )
     {
     this.assertionLevel = assertionLevel;
+    }
+
+  /**
+   * Method getIntermediateSchemeClass returns the intermediateSchemeClass of this FlowConnector object.
+   *
+   * @return the intermediateSchemeClass (type Class) of this FlowConnector object.
+   */
+  public Class getIntermediateSchemeClass()
+    {
+    return intermediateSchemeClass;
+    }
+
+  /**
+   * Method setIntermediateSchemeClass sets the intermediateSchemeClass of this FlowConnector object.
+   *
+   * @param intermediateSchemeClass the intermediateSchemeClass of this FlowConnector object.
+   */
+  public void setIntermediateSchemeClass( Class intermediateSchemeClass )
+    {
+    this.intermediateSchemeClass = intermediateSchemeClass;
     }
 
   /**
@@ -318,7 +340,7 @@ public class FlowConnector
     name = name == null ? makeName( pipes ) : name;
 
     // choose appropriate planner (when there is more than one)
-    return new MultiMapReducePlanner( jobConf, assertionLevel ).buildFlow( name, pipes, sources, sinks, traps );
+    return new MultiMapReducePlanner( jobConf, assertionLevel, intermediateSchemeClass ).buildFlow( name, pipes, sources, sinks, traps );
     }
 
   /////////

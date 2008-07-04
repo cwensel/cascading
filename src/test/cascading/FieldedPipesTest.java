@@ -22,6 +22,7 @@
 package cascading;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +60,8 @@ public class FieldedPipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
   String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums = "build/test/data/nums.20.txt";
+  String inputFileNums20 = "build/test/data/nums.20.txt";
+  String inputFileNums10 = "build/test/data/nums.10.txt";
   String inputFileCritics = "build/test/data/critics.txt";
 
   String inputFileUpper = "build/test/data/upper.txt";
@@ -75,7 +77,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", false ); // leave cluster testing enabled
+    super( "fielded pipes", true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -576,6 +578,65 @@ public class FieldedPipesTest extends ClusterTestCase
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB\t2\tB", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
+  public void testCoGroupAroundCoGroupWithout() throws Exception
+    {
+    runCoGroupAroundCoGroup( null, outputPath + "/complex/cogroupacogroupopt1/" );
+    }
+
+  public void testCoGroupAroundCoGroupWith() throws Exception
+    {
+    runCoGroupAroundCoGroup( TestTextLine.class, outputPath + "/complex/cogroupacogroupopt2/" );
+    }
+
+  private void runCoGroupAroundCoGroup( Class schemeClass, String stringPath ) throws IOException
+    {
+    if( !new File( inputFileNums10 ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileNums20 );
+    copyFromLocal( inputFileNums10 );
+
+    Tap source10 = new Hfs( new TestTextLine( new Fields( "num" ) ), inputFileNums10 );
+    Tap source20 = new Hfs( new TestTextLine( new Fields( "num" ) ), inputFileNums20 );
+
+    Map sources = new HashMap();
+
+    sources.put( "source20", source20 );
+    sources.put( "source101", source10 );
+    sources.put( "soucre102", source10 );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), stringPath, true );
+
+    Pipe pipeNum20 = new Pipe( "source20" );
+    Pipe pipeNum101 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source101" );
+
+    Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
+
+    FlowConnector flowConnector = new FlowConnector( jobConf );
+
+    flowConnector.setIntermediateSchemeClass( schemeClass );
+
+    Flow flow = flowConnector.connect( sources, sink, splice2 );
+
+//    flow.writeDOT( "cogroupcogroupopt.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+
+    TapIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\t1\t1", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "10\t10\t10", iterator.next().get( 1 ) );
 
     iterator.close();
     }

@@ -24,8 +24,11 @@ package cascading.tap;
 import java.io.IOException;
 import java.util.Set;
 
+import cascading.CascadingException;
 import cascading.flow.Scope;
+import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
+import cascading.tuple.Fields;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -34,20 +37,36 @@ public class TempHfs extends Hfs
   {
   /** Field name */
   final String name;
+  private Class schemeClass;
   /** Field temporaryPath */
   private String temporaryPath;
+
+  public TempHfs( String name )
+    {
+    super( new SequenceFile()
+    {
+    } );
+    this.name = name;
+    }
 
   /**
    * Constructor TempDfs creates a new TempDfs instance.
    *
    * @param name of type String
    */
-  public TempHfs( String name )
+  public TempHfs( String name, Class schemeClass )
     {
-    super( new SequenceFile()
-    {
-    } ); // source fields setting will be deferred
     this.name = name;
+
+    if( schemeClass == null )
+      this.schemeClass = SequenceFile.class;
+    else
+      this.schemeClass = schemeClass;
+    }
+
+  public Class getSchemeClass()
+    {
+    return schemeClass;
     }
 
   private void makeTemporaryFile( JobConf conf )
@@ -67,11 +86,23 @@ public class TempHfs extends Hfs
     // if incoming is Every, group fields are only those grouped on
     // if incoming is Group, value fields are all the fields
     Scope scope = incoming.iterator().next();
+    Fields outgoingFields = null;
 
     if( scope.isGroup() )
-      return new Scope( scope.getOutValuesFields() );
+      outgoingFields = scope.getOutValuesFields();
     else
-      return new Scope( scope.getOutGroupingFields() );
+      outgoingFields = scope.getOutGroupingFields();
+
+    try
+      {
+      setScheme( (Scheme) schemeClass.getConstructor( Fields.class ).newInstance( outgoingFields ) );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to create specified scheme: " + schemeClass.getName() );
+      }
+
+    return new Scope( outgoingFields );
     }
 
   @Override

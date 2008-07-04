@@ -60,6 +60,10 @@ public class Hfs extends Tap
   /** Field paths */
   private transient FileStatus[] statuses;
 
+  protected Hfs()
+    {
+    }
+
   protected Hfs( Scheme scheme )
     {
     super( scheme );
