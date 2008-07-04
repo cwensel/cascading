@@ -550,8 +550,13 @@ public class MultiMapReducePlanner
     // if incompatible, insert Tap after its join/merge pipe
     for( Group group : normalizeGroups )
       {
-      for( Pipe previousPipe : group.getPrevious() )
-        insertTapAfter( pipeGraph, previousPipe );
+      List<FlowElement> list = Graphs.predecessorListOf( pipeGraph, group );
+
+      for( FlowElement flowElement : list )
+        {
+        if( flowElement instanceof Pipe )
+          insertTapAfter( pipeGraph, (Pipe) flowElement );
+        }
       }
     }
 
