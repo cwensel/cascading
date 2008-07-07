@@ -134,7 +134,7 @@ public class TempHfs extends Hfs
   @Override
   public String toString()
     {
-    return getClass().getSimpleName() + "[" + name + "]";
+    return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[" + name + "]";
     }
 
   @Override

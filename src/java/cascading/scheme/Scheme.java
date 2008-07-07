@@ -98,11 +98,11 @@ public abstract class Scheme implements Serializable
   /**
    * Constructor Scheme creates a new Scheme instance.
    *
-   * @param sinkFields   of type Fields
    * @param sourceFields of type Fields
+   * @param sinkFields   of type Fields
    * @param numSinkParts of type int
    */
-  protected Scheme( Fields sinkFields, Fields sourceFields, int numSinkParts )
+  protected Scheme( Fields sourceFields, Fields sinkFields, int numSinkParts )
     {
     this.sinkFields = sinkFields;
     this.sourceFields = sourceFields;
@@ -225,6 +225,15 @@ public abstract class Scheme implements Serializable
       return false;
 
     return true;
+    }
+
+  @Override
+  public String toString()
+    {
+    if( getSinkFields().equals( getSourceFields() ) )
+      return getClass().getSimpleName() + "[" + getSourceFields().print() + "]";
+    else
+      return getClass().getSimpleName() + "[" + getSourceFields().print() + "->" + getSinkFields().print() + "]";
     }
 
   public int hashCode()

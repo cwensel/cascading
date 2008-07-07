@@ -371,9 +371,9 @@ public class Hfs extends Tap
   public String toString()
     {
     if( stringPath != null )
-      return getClass().getSimpleName() + "[\"" + Util.sanitizeUrl( stringPath ); // sanitize
+      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[\"" + Util.sanitizeUrl( stringPath ) + "\"]"; // sanitize
     else
-      return getClass().getSimpleName() + "[not initialized]";
+      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
     }
 
   /** @see Tap#equals(Object) */

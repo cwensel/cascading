@@ -78,9 +78,15 @@ public class SequenceFile extends Scheme
     }
 
   @Override
+  public Fields getSinkFields()
+    {
+    return super.getSourceFields();
+    }
+
+  @Override
   public void sink( Fields inFields, Tuple tuple, OutputCollector outputCollector ) throws IOException
     {
-    Tuple result = sourceFields != null ? tuple.get( inFields, sourceFields ) : tuple;
+    Tuple result = getSinkFields() != null ? tuple.get( inFields, getSinkFields() ) : tuple;
 
     outputCollector.collect( Tuples.NULL, result );
     }

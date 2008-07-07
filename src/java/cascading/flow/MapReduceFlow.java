@@ -164,6 +164,12 @@ public class MapReduceFlow extends Flow
         return new Tuple( key );
       }
 
+    @Override
+    public String toString()
+      {
+      return getClass().getSimpleName();
+      }
+
     public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
       {
       throw new UnsupportedOperationException( "sinking is not supported in the scheme" );

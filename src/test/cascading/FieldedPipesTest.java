@@ -77,7 +77,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true ); // leave cluster testing enabled
+    super( "fielded pipes", false ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -567,7 +567,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice2 );
 
-    countFlow.writeDOT( "cogroupcogroup.dot" );
+//    countFlow.writeDOT( "cogroupcogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
 
     countFlow.complete();
@@ -620,13 +620,15 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
 
+    splice2 = new Each( splice2, new Identity() );
+
     FlowConnector flowConnector = new FlowConnector( jobConf );
 
     flowConnector.setIntermediateSchemeClass( schemeClass );
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
-//    flow.writeDOT( "cogroupcogroupopt.dot" );
+    flow.writeDOT( "cogroupcogroupwout.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
 
     flow.complete();
