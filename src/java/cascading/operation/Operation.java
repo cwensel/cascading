@@ -46,6 +46,11 @@ public abstract class Operation implements Serializable
   /** Field numArgs */
   protected int numArgs = ANY;
 
+  /**
+   * Constructs a new instance that retuns an {@link Fields#UNKNOWN} {@link Tuple} and accepts any number of arguments.
+   * </p>
+   * It is a best practice to always declare the field names and number of arguments via one of the other constructors.
+   */
   protected Operation()
     {
     }

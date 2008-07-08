@@ -49,7 +49,8 @@ public abstract class TupleCollector
     }
 
   /**
-   * Method add inserts the given {@link TupleEntry} into the outgoing stream.
+   * Method add inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
+   * more efficient as it simply calls {@link TupleEntry#getTuple()};
    *
    * @param entry of type TupleEntry
    */
