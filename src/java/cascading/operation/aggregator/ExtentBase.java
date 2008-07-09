@@ -27,14 +27,14 @@ import java.util.HashSet;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class ExtentBase is the base class for First and Last. */
-public abstract class ExtentBase extends Operation implements Aggregator
+public abstract class ExtentBase extends BaseOperation implements Aggregator
   {
   /** Field defaultFieldName */
   private final String defaultFieldName;

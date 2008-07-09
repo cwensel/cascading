@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -37,7 +37,7 @@ import cascading.tuple.TupleEntry;
  * Class ExtremaBase is the base class for Max and Min. The unique thing about Max and Min are that they return the original,
  * un-coerced, argument value, though a coerced version of the argument is used for the comparison.
  */
-public abstract class ExtremaBase extends Operation implements Aggregator
+public abstract class ExtremaBase extends BaseOperation implements Aggregator
   {
   /** Field FIELD_NAME */
   private static final String KEY_EXTREMA = "extrema";

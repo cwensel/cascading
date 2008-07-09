@@ -22,13 +22,13 @@
 package cascading.operation.assertion;
 
 import cascading.operation.AssertionException;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public abstract class AssertionBase extends Operation
+public abstract class AssertionBase extends BaseOperation
   {
   /** Field message */
   private String message;

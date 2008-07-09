@@ -26,11 +26,11 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
 /** Class DateOperation is the base class for {@link DateFormatter} and {@link DateParser}. */
-public class DateOperation extends Operation
+public class DateOperation extends BaseOperation
   {
   /** Field zone */
   protected TimeZone zone;

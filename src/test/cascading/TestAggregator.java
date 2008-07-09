@@ -24,14 +24,14 @@ package cascading;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/TestAggregator.java#2 $ */
-public class TestAggregator extends Operation implements Aggregator
+public class TestAggregator extends BaseOperation implements Aggregator
   {
   private static final long serialVersionUID = 1L;
   private Tuple value;

@@ -30,7 +30,6 @@ import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Filter;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -66,7 +65,7 @@ public class Each extends Operator
    */
   public Each( String name, Function function )
     {
-    super( name, (Operation) function, FUNCTION_SELECTOR );
+    super( name, function, FUNCTION_SELECTOR );
     }
 
   /**
@@ -78,7 +77,7 @@ public class Each extends Operator
    */
   public Each( String name, Fields argumentFieldSelector, Function function )
     {
-    super( name, argumentFieldSelector, (Operation) function, FUNCTION_SELECTOR );
+    super( name, argumentFieldSelector, function, FUNCTION_SELECTOR );
     }
 
   /**
@@ -91,7 +90,7 @@ public class Each extends Operator
    */
   public Each( String name, Fields argumentFieldSelector, Function function, Fields outFieldSelector )
     {
-    super( name, argumentFieldSelector, (Operation) function, outFieldSelector );
+    super( name, argumentFieldSelector, function, outFieldSelector );
     }
 
   /**
@@ -103,7 +102,7 @@ public class Each extends Operator
    */
   public Each( String name, Function function, Fields outFieldSelector )
     {
-    super( name, (Operation) function, outFieldSelector );
+    super( name, function, outFieldSelector );
     }
 
   /**
@@ -114,7 +113,7 @@ public class Each extends Operator
    */
   public Each( Pipe previous, Function function )
     {
-    super( previous, (Operation) function, FUNCTION_SELECTOR );
+    super( previous, function, FUNCTION_SELECTOR );
     }
 
   /**
@@ -126,7 +125,7 @@ public class Each extends Operator
    */
   public Each( Pipe pipe, Fields argumentFieldSelector, Function function )
     {
-    super( pipe, argumentFieldSelector, (Operation) function, FUNCTION_SELECTOR );
+    super( pipe, argumentFieldSelector, function, FUNCTION_SELECTOR );
     }
 
   /**
@@ -139,7 +138,7 @@ public class Each extends Operator
    */
   public Each( Pipe pipe, Fields argumentFieldSelector, Function function, Fields outFieldSelector )
     {
-    super( pipe, argumentFieldSelector, (Operation) function, outFieldSelector );
+    super( pipe, argumentFieldSelector, function, outFieldSelector );
     }
 
   /**
@@ -151,7 +150,7 @@ public class Each extends Operator
    */
   public Each( Pipe pipe, Function function, Fields outFieldSelector )
     {
-    super( pipe, (Operation) function, outFieldSelector );
+    super( pipe, function, outFieldSelector );
     }
 
   /////////////////
@@ -166,7 +165,7 @@ public class Each extends Operator
    */
   public Each( String name, Filter filter )
     {
-    super( name, (Operation) filter, FILTER_SELECTOR );
+    super( name, filter, FILTER_SELECTOR );
     }
 
   /**
@@ -176,7 +175,7 @@ public class Each extends Operator
    */
   public Each( String name, Fields argumentFieldSelector, Filter filter )
     {
-    super( name, argumentFieldSelector, (Operation) filter, FILTER_SELECTOR );
+    super( name, argumentFieldSelector, filter, FILTER_SELECTOR );
     }
 
   /**
@@ -185,7 +184,7 @@ public class Each extends Operator
    */
   public Each( Pipe previous, Filter filter )
     {
-    super( previous, (Operation) filter, FILTER_SELECTOR );
+    super( previous, filter, FILTER_SELECTOR );
     }
 
   /**
@@ -195,7 +194,7 @@ public class Each extends Operator
    */
   public Each( Pipe pipe, Fields argumentFieldSelector, Filter filter )
     {
-    super( pipe, argumentFieldSelector, (Operation) filter, FILTER_SELECTOR );
+    super( pipe, argumentFieldSelector, filter, FILTER_SELECTOR );
     }
 
   ////////////////////
@@ -211,7 +210,7 @@ public class Each extends Operator
    */
   public Each( String name, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( name, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    super( name, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   /**
@@ -222,7 +221,7 @@ public class Each extends Operator
    */
   public Each( String name, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( name, argumentFieldSelector, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    super( name, argumentFieldSelector, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   /**
@@ -232,7 +231,7 @@ public class Each extends Operator
    */
   public Each( Pipe previous, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( previous, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    super( previous, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   /**
@@ -243,7 +242,7 @@ public class Each extends Operator
    */
   public Each( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( previous, argumentFieldSelector, assertionLevel, (Operation) assertion, FILTER_SELECTOR );
+    super( previous, argumentFieldSelector, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   @Override

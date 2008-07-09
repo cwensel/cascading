@@ -23,11 +23,11 @@ package cascading.operation.regex;
 
 import java.util.regex.Pattern;
 
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
 /** Class RegexOperation is the base class for all regex Operations. */
-public class RegexOperation extends Operation
+public class RegexOperation extends BaseOperation
   {
   /** Field patternString */
   protected String patternString = ".*";

@@ -24,14 +24,14 @@ package cascading.operation.aggregator;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
-public class Average extends Operation implements Aggregator
+public class Average extends BaseOperation implements Aggregator
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "average";

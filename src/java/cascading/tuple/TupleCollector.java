@@ -23,9 +23,7 @@ package cascading.tuple;
 
 import java.io.IOException;
 
-import cascading.operation.Operation;
-
-/** Interface TupleCollector is used to allow {@link Operation} instances to emit result {@link Tuple} values. */
+/** Interface TupleCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
 public abstract class TupleCollector
   {
   /** Field declared */

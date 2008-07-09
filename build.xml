@@ -21,7 +21,7 @@
   ~ along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<project name="cascading" default="build" basedir=".">
+<project name="cascading" default="compile" basedir=".">
 
   <dirname property="cascading.basedir" file="${ant.file.cascading}"/>
 
@@ -117,7 +117,7 @@
     <echo message="${CLASSPATH}"/>
   </target>
 
-  <target name="build" depends="init">
+  <target name="compile" depends="init">
     <echo message="building cascade..."/>
 
     <javac srcdir="${src.java}" destdir="${build.java}" verbose="off" debug="${javac.debug}">
@@ -168,7 +168,7 @@
   </target>
 
   <!-- runs JUnit tests -->
-  <target name="test" depends="init, build">
+  <target name="test" depends="init, compile">
     <echo message="running all cascading tests..."/>
 
     <junit printsummary="true" showoutput="${test.showoutput}" fork="yes" haltonerror="no" haltonfailure="no" dir="."
@@ -218,7 +218,7 @@
   </target>
 
   <!-- jar build -->
-  <target name="jar" depends="build">
+  <target name="jar" depends="compile">
 
     <echo message="jarring cascading..."/>
     <delete file="${build}/${jar.cascading}"/>

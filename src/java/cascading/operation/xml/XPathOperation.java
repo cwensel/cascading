@@ -42,14 +42,14 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 /** Class XPathOperation is the base class for all XPath operations. */
-public class XPathOperation extends Operation
+public class XPathOperation extends BaseOperation
   {
   /** Field NAMESPACE_XHTML */
   public static String[][] NAMESPACE_XHTML = new String[][]{new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};

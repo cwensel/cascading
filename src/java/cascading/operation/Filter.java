@@ -24,11 +24,11 @@ package cascading.operation;
 import cascading.tuple.TupleEntry;
 
 /**
- * Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}.
+ * Interface Filter marks a given {@link BaseOperation} as a filter, as opposed to being a {@link Function}.
  * <p/>
  * It is important that all filters call {@code super(ANY,Fields.ALL); } in their constructors.
  */
-public interface Filter
+public interface Filter extends Operation
   {
   /**
    * Method isRemove returns true if input should be removed from the tuple stream.

@@ -24,7 +24,7 @@ package cascading.operation.aggregator;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -32,7 +32,7 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
-public class Sum extends Operation implements Aggregator
+public class Sum extends BaseOperation implements Aggregator
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "sum";

@@ -30,7 +30,6 @@ import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
 import cascading.operation.GroupAssertion;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -61,7 +60,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, Aggregator aggregator )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, (Operation) aggregator, AGGREGATOR_SELECTOR );
+    super( previous, AGGREGATOR_ARGUMENTS, aggregator, AGGREGATOR_SELECTOR );
     }
 
   /**
@@ -73,7 +72,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, Fields argumentFieldSelector, Aggregator aggregator )
     {
-    super( previous, argumentFieldSelector, (Operation) aggregator, AGGREGATOR_SELECTOR );
+    super( previous, argumentFieldSelector, aggregator, AGGREGATOR_SELECTOR );
     }
 
   /**
@@ -86,7 +85,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, Fields argumentFieldSelector, Aggregator aggregator, Fields outFieldSelector )
     {
-    super( previous, argumentFieldSelector, (Operation) aggregator, outFieldSelector );
+    super( previous, argumentFieldSelector, aggregator, outFieldSelector );
     }
 
   /**
@@ -98,7 +97,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, Aggregator aggregator, Fields outFieldSelector )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, (Operation) aggregator, outFieldSelector );
+    super( previous, AGGREGATOR_ARGUMENTS, aggregator, outFieldSelector );
     }
 
   /**
@@ -110,7 +109,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, assertionLevel, (Operation) assertion, ASSERTION_SELECTOR );
+    super( previous, AGGREGATOR_ARGUMENTS, assertionLevel, assertion, ASSERTION_SELECTOR );
     }
 
   /**
@@ -123,7 +122,7 @@ public class Every extends Operator
    */
   public Every( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
-    super( previous, argumentFieldSelector, assertionLevel, (Operation) assertion, ASSERTION_SELECTOR );
+    super( previous, argumentFieldSelector, assertionLevel, assertion, ASSERTION_SELECTOR );
     }
 
   private Aggregator getAggregator()

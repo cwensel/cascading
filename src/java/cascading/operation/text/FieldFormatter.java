@@ -23,8 +23,8 @@ package cascading.operation.text;
 
 import java.util.Formatter;
 
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -35,7 +35,7 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * This function uses the {@link Formatter} class for formatting the argument tuple values into a new string.
  */
-public class FieldFormatter extends Operation implements Function
+public class FieldFormatter extends BaseOperation implements Function
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "formatted";

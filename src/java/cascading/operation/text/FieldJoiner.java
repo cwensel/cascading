@@ -21,15 +21,15 @@
 
 package cascading.operation.text;
 
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class FieldJoiner joins the values in a Tuple with a given delimiter and stuffs the result into a new field. */
-public class FieldJoiner extends Operation implements Function
+public class FieldJoiner extends BaseOperation implements Function
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "joined";

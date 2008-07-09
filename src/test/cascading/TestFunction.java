@@ -21,15 +21,15 @@
 
 package cascading;
 
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
-public class TestFunction extends Operation implements Function
+public class TestFunction extends BaseOperation implements Function
   {
   private Tuple value;
 

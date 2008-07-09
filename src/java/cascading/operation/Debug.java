@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  * Class Debug is a {@link Filter} that will never remove an item from a stream, but will print the Tuple to either
  * stdout or stderr.
  */
-public class Debug extends Operation implements Filter
+public class Debug extends BaseOperation implements Filter
   {
   static public enum Output
     {

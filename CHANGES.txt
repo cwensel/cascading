@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.o.Operation to an interface and introduced c.o.BaseOperation. This makes creating custom Operation types
+  more flexible and intuitive. c.o.Filter, c.o.Function, c.o.Aggregator, and c.o.Assertion now extend c.o.Operation.
+
   Added c.p.c.OuterJoin, c.p.c.MixedJoin, c.p.c.LeftJoin, and c.p.c.RightJoin c.p.c.CoGrouper classes. They
   compliment the default c.p.c.InnerJoin CoGrouper class.
 

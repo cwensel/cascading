@@ -24,15 +24,15 @@ package cascading.examples;
 import java.util.Set;
 import java.util.TreeSet;
 
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class SortElements ... */
-public class SortElements extends Operation implements Function
+public class SortElements extends BaseOperation implements Function
   {
   private final Fields[] fields;
 

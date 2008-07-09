@@ -22,9 +22,9 @@
 package cascading.examples;
 
 import cascading.operation.Aggregator;
+import cascading.operation.BaseOperation;
 import cascading.operation.Cut;
 import cascading.operation.Identity;
-import cascading.operation.Operation;
 import cascading.operation.regex.RegexFilter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -81,7 +81,7 @@ public class CrossTab extends PipeAssembly
     }
 
   /** Class CrossTabOperation */
-  public abstract static class CrossTabOperation extends Operation implements Aggregator
+  public abstract static class CrossTabOperation extends BaseOperation implements Aggregator
     {
     /**
      * Constructor CrossTabOperation creates a new CrossTabOperation instance.

@@ -27,7 +27,7 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class Insert adds literal values to the Tuple stream. */
-public class Insert extends Operation implements Function
+public class Insert extends BaseOperation implements Function
   {
   /** Field values */
   private final Tuple values;

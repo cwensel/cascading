@@ -26,13 +26,14 @@ import java.util.Set;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
+import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link Operation}.
+ * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
  * </p>
  * The argFields value select the input fields used by the operation. By default the whole input Tuple is passes as arguments.
  * The outFields value select the fields in the result Tuple returned by this Pipe. By default, the operation results
@@ -203,7 +204,7 @@ public abstract class Operator extends Pipe
     }
 
   /**
-   * Method getAssertionLevel returns the assertionLevel of this Operator object. Only used if the {@link Operation}
+   * Method getAssertionLevel returns the assertionLevel of this Operator object. Only used if the {@link cascading.operation.Operation}
    * is an {@link Assertion}.
    *
    * @return the assertionLevel (type Assertion.Level) of this Operator object.
@@ -346,7 +347,7 @@ public abstract class Operator extends Pipe
     {
     super.printInternal( buffer, scope );
     buffer.append( "[" );
-    operation.printInternal( buffer, scope );
+    BaseOperation.printOperationInternal( operation, buffer, scope );
     buffer.append( "]" );
     }
 

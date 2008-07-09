@@ -26,7 +26,7 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class Cut ... */
-public class Cut extends Operation implements Function
+public class Cut extends BaseOperation implements Function
   {
   /** Field fieldSelector */
   private final Fields fieldSelector;

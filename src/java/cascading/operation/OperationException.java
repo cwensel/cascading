@@ -23,7 +23,7 @@ package cascading.operation;
 
 import cascading.CascadingException;
 
-/** Class OperationException is thrown by {@link Operation} classes. */
+/** Class OperationException is thrown by {@link BaseOperation} classes. */
 public class OperationException extends CascadingException
   {
   /** Constructor OperationException creates a new OperationException instance. */

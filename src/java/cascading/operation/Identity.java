@@ -30,7 +30,7 @@ import cascading.tuple.Tuples;
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
  * coerced into specfic types.
  */
-public class Identity extends Operation implements Function
+public class Identity extends BaseOperation implements Function
   {
   /** Field types */
   private Class[] types = null;

@@ -21,136 +21,38 @@
 
 package cascading.operation;
 
-import java.io.Serializable;
-
-import cascading.flow.Scope;
-import cascading.operation.generator.Generator;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 
 /**
- * Class Operation is the base class of predicate types that are applied to {@link Tuple} streams via the {@link Each} or {@link Every} {@link Pipe}.
- * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Generator}, and
- * {@link Aggregator}.
+ * Interface Operation is the base interface for all functions applied to {@link cascading.tuple.Tuple} streams.
+ * <p/>
+ * Specificlly {@link Function}, {@link Filter}, {@link Aggregator}, and {@link Assertion}.
+ * <p/>
+ * Use {@link BaseOperation} for a convenient way to create new Operation types.
+ *
+ * @see cascading.operation.BaseOperation
  */
-public abstract class Operation implements Serializable
+public interface Operation
   {
   /** Field ANY denotes that a given Operation will take any number of argument values */
-  public static final int ANY = Integer.MAX_VALUE;
-
-  /** Field fieldDeclaration */
-  protected Fields fieldDeclaration = Fields.UNKNOWN;
-  /** Field numArgs */
-  protected int numArgs = ANY;
+  int ANY = Integer.MAX_VALUE;
 
   /**
-   * Constructs a new instance that retuns an {@link Fields#UNKNOWN} {@link Tuple} and accepts any number of arguments.
-   * </p>
-   * It is a best practice to always declare the field names and number of arguments via one of the other constructors.
-   */
-  protected Operation()
-    {
-    }
-
-  /**
-   * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts any number of arguments.
+   * Returns the fields created by this Operation instance. If this instance is a {@link Filter}, it should always
+   * return {@link Fields#ALL}.
    *
-   * @param fieldDeclaration of type Fields
+   * @return
    */
-  protected Operation( Fields fieldDeclaration )
-    {
-    this.fieldDeclaration = fieldDeclaration;
-    verify();
-    }
+  Fields getFieldDeclaration();
 
   /**
-   * Constructs a new instance that returns an unknown field set and accepts the given numArgs number of arguments.
+   * The minimum number of arguments this Operation expects from the calling {@link cascading.pipe.Each} or
+   * {@link cascading.pipe.Every} Operator.
+   * <p/>
+   * Operations should be willing to receive more arguments than expected, but should ignore them if they are unused,
+   * instead of failing.
    *
-   * @param numArgs of type numArgs
+   * @return an int
    */
-  protected Operation( int numArgs )
-    {
-    this.numArgs = numArgs;
-    verify();
-    }
-
-  /**
-   * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts numArgs number of arguments.
-   *
-   * @param numArgs          of type numArgs
-   * @param fieldDeclaration of type Fields
-   */
-  protected Operation( int numArgs, Fields fieldDeclaration )
-    {
-    this.numArgs = numArgs;
-    this.fieldDeclaration = fieldDeclaration;
-    verify();
-    }
-
-  /** Validates the state of this instance. */
-  private final void verify()
-    {
-    if( fieldDeclaration == null )
-      throw new IllegalArgumentException( "fieldDeclaration may not be null" );
-
-    if( numArgs < 0 )
-      throw new IllegalArgumentException( "numArgs may not be negative" );
-    }
-
-  /**
-   * Method getFieldDeclaration returns the fieldDeclaration of this Operation object.
-   *
-   * @return the fieldDeclaration (type Fields) of this Operation object.
-   */
-  public Fields getFieldDeclaration()
-    {
-    return fieldDeclaration;
-    }
-
-  /**
-   * Return the number of arguments passed to this operation.
-   *
-   * @return the number of arguments passed to this operation.
-   */
-  public int getNumArgs()
-    {
-    return numArgs;
-    }
-
-  @Override
-  public String toString()
-    {
-    StringBuilder buffer = new StringBuilder();
-
-    if( getClass().getSimpleName().length() != 0 )
-      buffer.append( getClass().getSimpleName() );
-    else
-      buffer.append( getClass().getName() ); // should get something for an anonymous inner class
-
-    if( fieldDeclaration != null )
-      buffer.append( "[decl:" ).append( fieldDeclaration ).append( "]" );
-
-    if( numArgs != ANY )
-      buffer.append( "[args:" ).append( numArgs ).append( "]" );
-
-    return buffer.toString();
-    }
-
-  public void printInternal( StringBuffer buffer, Scope scope )
-    {
-    if( getClass().getSimpleName().length() != 0 )
-      buffer.append( getClass().getSimpleName() );
-    else
-      buffer.append( getClass().getName() ); // should get something for an anonymous inner class
-
-    if( scope.getDeclaredFields() != null )
-      buffer.append( "[decl:" ).append( scope.getDeclaredFields() ).append( "]" );
-
-    if( numArgs != ANY )
-      buffer.append( "[args:" ).append( numArgs ).append( "]" );
-
-    }
+  int getNumArgs();
   }

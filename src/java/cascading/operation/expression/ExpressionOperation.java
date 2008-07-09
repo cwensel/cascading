@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -37,7 +37,7 @@ import org.codehaus.janino.Parser;
 import org.codehaus.janino.Scanner;
 
 /** Class ExpressionOperation is the base class for {@link ExpressionFunction} and {@link ExpressionFilter}. */
-public class ExpressionOperation extends Operation
+public class ExpressionOperation extends BaseOperation
   {
   /** Field expression */
   protected String expression;

@@ -35,7 +35,7 @@ import cascading.tuple.TupleEntry;
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
  * unique vm, or by a single thread. The given Map context is guaranteed to be unique per 'reducer'.
  */
-public interface Aggregator
+public interface Aggregator extends Operation
   {
   /**
    * Method start initializes the aggregation procedure.  The {@link Map} context is used to

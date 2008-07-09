@@ -21,7 +21,7 @@
 
 package cascading.operation.generator;
 
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
  * C, y
  * C, z
  */
-public class UnGroup extends Operation implements Generator
+public class UnGroup extends BaseOperation implements Generator
   {
   private static final Logger LOG = Logger.getLogger( UnGroup.class );
 

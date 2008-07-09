@@ -24,7 +24,7 @@ package cascading.operation.aggregator;
 import java.util.Map;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -35,7 +35,7 @@ import cascading.tuple.TupleEntry;
  * </p>
  * Note the resulting value for count is always a long. So any comparisons should be against a long value.
  */
-public class Count extends Operation implements Aggregator
+public class Count extends BaseOperation implements Aggregator
   {
   /** Field COUNT */
   public static final String FIELD_NAME = "count";

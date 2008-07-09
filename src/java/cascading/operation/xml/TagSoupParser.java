@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -44,7 +44,7 @@ import org.xml.sax.SAXNotSupportedException;
  * Class TagSoupParser used the <a href="http://home.ccil.org/~cowan/XML/tagsoup/">Tag Soup</a> library to convert
  * incoming HTML to clean XHTML.
  */
-public class TagSoupParser extends Operation implements Function
+public class TagSoupParser extends BaseOperation implements Function
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TagSoupParser.class );
