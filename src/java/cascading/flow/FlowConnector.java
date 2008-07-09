@@ -22,13 +22,13 @@
 package cascading.flow;
 
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Pipe;
@@ -48,6 +48,8 @@ public class FlowConnector
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( FlowConnector.class );
 
+  /** Field properties */
+  private Properties properties;
   /** Field jobConf */
   private JobConf jobConf;
   /** Field assertionLevel */
@@ -79,28 +81,7 @@ public class FlowConnector
    */
   public FlowConnector( Properties properties )
     {
-    copyProperties( properties );
-    }
-
-  private void copyProperties( Properties properties )
-    {
-    if( properties == null )
-      return;
-
-    jobConf = new JobConf();
-
-    Enumeration enumeration = properties.propertyNames();
-
-    while( enumeration.hasMoreElements() )
-      {
-      String key = (String) enumeration.nextElement();
-      String value = properties.getProperty( key );
-
-      if( value == null )
-        throw new IllegalStateException( "property value was null for key: " + key );
-
-      jobConf.set( key, value );
-      }
+    this.properties = properties;
     }
 
   /**
@@ -338,6 +319,9 @@ public class FlowConnector
   public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Pipe... pipes )
     {
     name = name == null ? makeName( pipes ) : name;
+
+    if( properties != null )
+      jobConf = HadoopUtil.createJobConf( properties );
 
     // choose appropriate planner (when there is more than one)
     return new MultiMapReducePlanner( jobConf, assertionLevel, intermediateSchemeClass ).buildFlow( name, pipes, sources, sinks, traps );
