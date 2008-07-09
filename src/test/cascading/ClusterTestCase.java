@@ -72,7 +72,7 @@ public class ClusterTestCase extends CascadingTestCase
 
     dfs = new MiniDFSCluster( conf, 4, true, null );
     fileSys = dfs.getFileSystem();
-    mr = new MiniMRCluster( 4, fileSys.getName(), 1 );
+    mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
 
     jobConf = mr.createJobConf();
     }

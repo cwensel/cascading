@@ -62,6 +62,11 @@ public class CoGroupClosure extends GroupClosure
     return makeIterator( pos, groups[ pos ].iterator() );
     }
 
+  public SpillableTupleList getGroup( int pos )
+    {
+    return groups[ pos ];
+    }
+
   public void build( JobConf jobConf, int repeat )
     {
     int numPipes = groupingFields.length;

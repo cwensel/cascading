@@ -39,7 +39,7 @@ public class InnerJoin implements CoGrouper
     return new JoinIterator( closure );
     }
 
-  private class JoinIterator implements Iterator<Tuple>
+  protected static class JoinIterator implements Iterator<Tuple>
     {
     final GroupClosure closure;
     Iterator[] iterators;
@@ -55,12 +55,17 @@ public class InnerJoin implements CoGrouper
       init();
       }
 
-    public void init()
+    protected void init()
       {
       iterators = new Iterator[closure.size()];
 
       for( int i = 0; i < closure.size(); i++ )
-        iterators[ i ] = closure.getIterator( i );
+        iterators[ i ] = getIterator( i );
+      }
+
+    protected Iterator getIterator( int i )
+      {
+      return closure.getIterator( i );
       }
 
     private Comparable[] initLastValues()
@@ -111,7 +116,7 @@ public class InnerJoin implements CoGrouper
           }
 
         // reset to first
-        iterators[ i ] = closure.getIterator( i );
+        iterators[ i ] = getIterator( i );
         lastValues[ i ] = (Comparable) iterators[ i ].next();
         }
 

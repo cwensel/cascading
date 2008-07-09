@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.p.c.OuterJoin, c.p.c.LeftJoin, and c.p.c.RightJoin CoGrouper classes. They compliment the default
+  c.p.c.InnerJoin CoGrouper class.
+
   Added support for passing an intermediateSchemeClass to the underlying planner to be used as the default c.s.Scheme
   for intermediate c.t.Tap instances internal to a given c.f.Flow.
 
