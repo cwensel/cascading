@@ -363,7 +363,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( sources, sinks, merge );
 
-    flow.writeDOT( "merged.dot" );
+//    flow.writeDOT( "merged.dot" );
 
     List<FlowStep> steps = flow.getSteps();
 
@@ -391,7 +391,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( sources, sinks, merge );
 
-    flow.writeDOT( "merged.dot" );
+//    flow.writeDOT( "merged.dot" );
 
     List<FlowStep> steps = flow.getSteps();
 
