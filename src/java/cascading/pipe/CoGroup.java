@@ -105,12 +105,51 @@ public class CoGroup extends Group
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param pipes  of type Pipe[]
-   * @param fields of type Fields[]
+   * @param pipes       of type Pipe[]
+   * @param groupFields of type Fields[]
    */
-  public CoGroup( Pipe[] pipes, Fields[] fields )
+  public CoGroup( Pipe[] pipes, Fields[] groupFields )
     {
-    super( pipes, fields );
+    super( pipes, groupFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    super( pipes, groupFields, declaredFields, coGrouper );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipes       of type Pipe[]
+   * @param groupFields of type Fields[]
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields )
+    {
+    super( groupName, pipes, groupFields );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName      of type String
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    super( groupName, pipes, groupFields, declaredFields, coGrouper );
     }
 
   /**
@@ -182,17 +221,5 @@ public class CoGroup extends Group
   public CoGroup( String groupName, Pipe... pipes )
     {
     super( groupName, pipes );
-    }
-
-  /**
-   * Constructor Group creates a new Group instance.
-   *
-   * @param groupName of type String
-   * @param pipes     of type Pipe[]
-   * @param fields    of type Fields[]
-   */
-  public CoGroup( String groupName, Pipe[] pipes, Fields[] fields )
-    {
-    super( groupName, pipes, fields );
     }
   }

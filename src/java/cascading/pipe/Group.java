@@ -101,6 +101,8 @@ public class Group extends Pipe
     this( lhs, lhsGroupFields, rhs, rhsGroupFields );
     this.declaredFields = declaredFields;
     this.coGrouper = coGrouper;
+
+    verifyCoGrouper();
     }
 
   /**
@@ -148,6 +150,48 @@ public class Group extends Pipe
    */
   public Group( Pipe[] pipes, Fields[] groupFields )
     {
+    this( null, pipes, groupFields, null, null );
+    }
+
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipes       of type Pipe[]
+   * @param groupFields of type Fields[]
+   */
+  public Group( String groupName, Pipe[] pipes, Fields[] groupFields )
+    {
+    this( groupName, pipes, groupFields, null, null );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    this( null, pipes, groupFields, declaredFields, coGrouper );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName      of type String
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+    {
+    this.groupName = groupName;
+
     int last = -1;
     for( int i = 0; i < pipes.length; i++ )
       {
@@ -165,6 +209,11 @@ public class Group extends Pipe
       last = groupFields[ i ].size();
       groupFieldsMap.put( pipes[ i ].getName(), groupFields[ i ] );
       }
+
+    this.declaredFields = declaredFields;
+    this.coGrouper = coGrouper;
+
+    verifyCoGrouper();
     }
 
   /**
@@ -246,19 +295,6 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName   of type String
-   * @param pipes       of type Pipe[]
-   * @param groupFields of type Fields[]
-   */
-  public Group( String groupName, Pipe[] pipes, Fields[] groupFields )
-    {
-    this( pipes, groupFields );
-    this.groupName = groupName;
-    }
-
-  /**
-   * Constructor Group creates a new Group instance.
-   *
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
    * @param repeat         of type int
@@ -283,6 +319,8 @@ public class Group extends Pipe
     {
     this( pipe, groupFields, repeat, declaredFields );
     this.coGrouper = coGrouper;
+
+    verifyCoGrouper();
     }
 
   /**
@@ -297,6 +335,8 @@ public class Group extends Pipe
     {
     this( pipe, groupFields, repeat );
     this.coGrouper = coGrouper;
+
+    verifyCoGrouper();
     }
 
   /**
@@ -487,6 +527,20 @@ public class Group extends Pipe
       }
 
     this.reverseOrder = reverseOrder;
+    }
+
+  private void verifyCoGrouper()
+    {
+    if( coGrouper == null )
+      return;
+
+    if( coGrouper.numJoins() == -1 )
+      return;
+
+    int joins = Math.max( repeat, groupFieldsMap.size() );
+
+    if( joins != coGrouper.numJoins() )
+      throw new IllegalArgumentException( "invalid cogrouper, only accepts " + coGrouper.numJoins() + " joins, expects: " + joins );
     }
 
   /**

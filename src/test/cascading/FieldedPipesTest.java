@@ -49,6 +49,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.LeftJoin;
+import cascading.pipe.cogroup.MixedJoin;
 import cascading.pipe.cogroup.OuterJoin;
 import cascading.pipe.cogroup.RightJoin;
 import cascading.scheme.TextLine;
@@ -80,7 +81,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true ); // leave cluster testing enabled
+    super( "fielded pipes", false ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -616,6 +617,89 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  /**
+   * 1 a
+   * 5 b
+   * 6 c
+   * 5 b
+   * 5 e
+   * <p/>
+   * 1 A
+   * 2 B
+   * 3 C
+   * 4 D
+   * 5 E
+   * <p/>
+   * 1 a
+   * 2 b
+   * 3 c
+   * 4 d
+   * 5 e
+   * <p/>
+   * 1	a	1	A  1  a
+   * -  -   2   B  2  b
+   * -  -   3   C  3  c
+   * -  -   4   D  4  d
+   * 5	b	5   E  5  e
+   * 5	e	5   E  5  e
+   *
+   * @throws Exception
+   */
+  public void testCoGroupMixed() throws Exception
+    {
+    if( !new File( inputFileLowerOffset ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLowerOffset );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLowerOffset = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "loweroffset", sourceLowerOffset );
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupmixed/", true );
+
+    Pipe pipeLowerOffset = new Each( new Pipe( "loweroffset" ), new Fields( "line" ), splitter );
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+
+    Pipe[] pipes = Pipe.pipes( pipeLowerOffset, pipeUpper, pipeLower );
+    Fields[] fields = Fields.fields( new Fields( "num" ), new Fields( "num" ), new Fields( "num" ) );
+
+    MixedJoin join = new MixedJoin( new boolean[]{MixedJoin.OUTER, MixedJoin.INNER, MixedJoin.OUTER} );
+    Pipe splice = new CoGroup( pipes, fields, Fields.size( 6 ), join );
+
+    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 6, null );
+
+    TapIterator iterator = countFlow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\ta", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB\t2\tb", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "null\tnull\t3\tC\t3\tc", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "null\tnull\t4\tD\t4\td", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE\t5\te", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "5\te\t5\tE\t5\te", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
   public void testCoGroupDiffFields() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
@@ -837,7 +921,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
-    flow.writeDOT( "cogroupcogroupwout.dot" );
+//    flow.writeDOT( "cogroupcogroupwout.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
 
     flow.complete();

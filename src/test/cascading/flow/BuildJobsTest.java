@@ -471,7 +471,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( sources, sink, splice2 );
 
-    flow.writeDOT( "cogroupcogroupopt.dot" );
+//    flow.writeDOT( "cogroupcogroupopt.dot" );
 
     assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
     }
@@ -504,7 +504,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
-    flow.writeDOT( "cogroupcogroupopt.dot" );
+//    flow.writeDOT( "cogroupcogroupopt.dot" );
 
     assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
     }

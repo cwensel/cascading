@@ -26,16 +26,22 @@ import java.util.Iterator;
 import cascading.tuple.Tuple;
 
 /**
- * Class RightJoin will return an {@link Iterator} that will iterate over a given {@link CoGrouper} and return tuples that represent
- * a left outer, right inner join of the CoGrouper internal grouped tuple collections.
+ * Class MixedJoin will return an {@link java.util.Iterator} that will iterate over a given
+ * {@link cascading.pipe.cogroup.CoGrouper} and return tuples that represent a join as defined by the given boolean array.
  * <p/>
- * Note only the farthest left tuple stream will be used as the outer join. All following joins to the right will
- * be inner joins. See {@link cascading.pipe.cogroup.MixedJoin} for more flexibility.
- *
- * @see cascading.pipe.cogroup.MixedJoin
+ * So if joining three streams, {@code boolean []{true,false,false}} will result in a 'inner', 'outer', 'outer' join.
  */
-public class RightJoin implements CoGrouper
+public class MixedJoin implements CoGrouper
   {
+  public static boolean INNER = true;
+  public static boolean OUTER = false;
+
+  boolean asInner[];
+
+  public MixedJoin( boolean[] asInner )
+    {
+    this.asInner = asInner;
+    }
 
   public Iterator<Tuple> getIterator( GroupClosure closure )
     {
@@ -44,12 +50,11 @@ public class RightJoin implements CoGrouper
 
   public int numJoins()
     {
-    return -1;
+    return asInner.length;
     }
 
-  protected static class JoinIterator extends OuterJoin.JoinIterator
+  protected class JoinIterator extends OuterJoin.JoinIterator
     {
-
     public JoinIterator( GroupClosure closure )
       {
       super( closure );
@@ -58,7 +63,7 @@ public class RightJoin implements CoGrouper
     @Override
     protected boolean isOuter( int i )
       {
-      return i == 0 && super.isOuter( i );
+      return !asInner[ i ] && super.isOuter( i );
       }
     }
 

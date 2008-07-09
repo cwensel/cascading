@@ -30,7 +30,9 @@ import cascading.tuple.Tuple;
  * a left inner, right outer join of the CoGrouper internal grouped tuple collections.
  * <p/>
  * Note only the farthest right tuple stream will be used as the outer join. All preceeding joins to the left will
- * be inner joins.
+ * be inner joins. See {@link cascading.pipe.cogroup.MixedJoin} for more flexibility.
+ *
+ * @see cascading.pipe.cogroup.MixedJoin
  */
 public class LeftJoin implements CoGrouper
   {
@@ -38,6 +40,11 @@ public class LeftJoin implements CoGrouper
   public Iterator<Tuple> getIterator( GroupClosure closure )
     {
     return new JoinIterator( closure );
+    }
+
+  public int numJoins()
+    {
+    return -1;
     }
 
   protected static class JoinIterator extends OuterJoin.JoinIterator

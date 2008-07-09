@@ -39,6 +39,11 @@ public class InnerJoin implements CoGrouper
     return new JoinIterator( closure );
     }
 
+  public int numJoins()
+    {
+    return -1;
+    }
+
   protected static class JoinIterator implements Iterator<Tuple>
     {
     final GroupClosure closure;

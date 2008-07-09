@@ -38,6 +38,11 @@ public class OuterJoin implements CoGrouper
     return new JoinIterator( closure );
     }
 
+  public int numJoins()
+    {
+    return -1;
+    }
+
   protected static class JoinIterator extends InnerJoin.JoinIterator
     {
     List[] singletons;
