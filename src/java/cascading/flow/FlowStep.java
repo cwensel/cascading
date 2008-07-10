@@ -381,7 +381,7 @@ public class FlowStep implements Serializable
 
         runningJob.waitForCompletion();
 
-        if( !runningJob.isSuccessful() )
+        if( !stop && !runningJob.isSuccessful() )
           {
           dumpCompletionEvents();
 
@@ -443,6 +443,16 @@ public class FlowStep implements Serializable
         }
 
       return false;
+      }
+
+    /**
+     * Method wasStarted returns true if this job was started
+     *
+     * @return boolean
+     */
+    public boolean wasStarted()
+      {
+      return runningJob != null;
       }
 
     }

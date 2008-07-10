@@ -101,14 +101,19 @@ public class Flow implements Runnable
   private Throwable throwable;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
-  /** Field stop */
-  private boolean stop = false;
 
   /** Field pipeGraph */
   private SimpleDirectedGraph<FlowElement, Scope> pipeGraph; // only used for documentation purposes
 
   /** Field steps */
   private transient List<FlowStep> steps;
+  /** Field jobsMap */
+  private transient Map<String, Callable<Throwable>> jobsMap;
+  /** Field executor */
+  private transient ExecutorService executor;
+  /** Field stop */
+  private boolean stop;
+  private Thread shutdownHook;
 
   /** Used for testing. */
   protected Flow()
@@ -494,15 +499,26 @@ public class Flow implements Runnable
     if( thread != null )
       return;
 
+    registerShutdownHook();
+
     thread = new Thread( this, ( "flow " + Util.toNull( getName() ) ).trim() );
 
     thread.start();
     }
 
-  /** Method stop suggests to the flow to stop execution. It does not kill running jobs. */
-  public void stop()
+  /** Method stop stops all running jobs, killing any currently executing. */
+  public synchronized void stop()
     {
-    this.stop = true;
+    if( stop )
+      return;
+
+    stop = true;
+    fireOnStopping();
+    internalStopAllJobs();
+
+    flowStats.markStopped();
+
+    handleExecutorShutdown();
     }
 
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
@@ -683,14 +699,7 @@ public class Flow implements Runnable
       {
       flowStats.markRunning();
 
-      if( hasListeners() )
-        {
-        if( LOG.isDebugEnabled() )
-          logDebug( "firing onStarting event: " + getListeners().size() );
-
-        for( FlowListener flowListener : getListeners() )
-          flowListener.onStarting( this );
-        }
+      fireOnStarting();
 
       if( LOG.isInfoEnabled() )
         {
@@ -702,25 +711,7 @@ public class Flow implements Runnable
           logInfo( " sink: " + sink );
         }
 
-      // keep topo order
-      Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-      TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( stepGraph );
-
-      while( topoIterator.hasNext() )
-        {
-        FlowStep step = (FlowStep) topoIterator.next();
-        step.setParentFlowName( getName() );
-        FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
-
-        jobsMap.put( step.getName(), flowStepJob );
-
-        List<FlowStep.FlowStepJob> predecessors = new ArrayList<FlowStep.FlowStepJob>();
-
-        for( FlowStep flowStep : Graphs.predecessorListOf( stepGraph, step ) )
-          predecessors.add( (FlowStep.FlowStepJob) jobsMap.get( flowStep.getName() ) );
-
-        flowStepJob.setPredecessors( predecessors );
-        }
+      initializeNewJobsMap();
 
       // if jobs are run local, then only use one thread to force execution serially
       int numThreads = jobsAreLocal() ? 1 : jobsMap.size();
@@ -732,41 +723,18 @@ public class Flow implements Runnable
         logInfo( " allocating threads: " + numThreads );
         }
 
-      flowStats.setStepsCount( jobsMap.size() );
-
-      ExecutorService executor = Executors.newFixedThreadPool( numThreads );
-      List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
-
-      executor.shutdown(); // don't accept any more work
+      List<Future<Throwable>> futures = spawnJobs( numThreads );
 
       for( Future<Throwable> future : futures )
         {
         throwable = future.get();
 
-        if( throwable != null || stop )
+        if( throwable != null )
           {
-          if( stop && hasListeners() )
-            {
-            if( LOG.isDebugEnabled() )
-              logDebug( "firing onStopping event: " + getListeners().size() );
+          if( !stop )
+            internalStopAllJobs();
 
-            for( FlowListener flowListener : getListeners() )
-              flowListener.onStopping( this );
-            }
-
-          LOG.warn( "stopping jobs" );
-
-          for( Callable<Throwable> callable : jobsMap.values() )
-            ( (FlowStep.FlowStepJob) callable ).stop();
-
-          if( stop )
-            flowStats.markStopped();
-
-          LOG.warn( "shutting down job executor" );
-
-          executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
-
-          LOG.warn( "shutdown complete" );
+          handleExecutorShutdown();
           break;
           }
         }
@@ -780,33 +748,155 @@ public class Flow implements Runnable
       if( !isPreserveTemporaryFiles() )
         cleanTemporaryFiles();
 
-      if( hasListeners() )
-        {
-        if( throwable != null )
-          {
-          flowStats.markFailed( throwable );
+      handleThrowable();
 
-          if( LOG.isDebugEnabled() )
-            logDebug( "firing onThrowable event: " + getListeners().size() );
+      if( !flowStats.isFinished() )
+        flowStats.markCompleted();
 
-          boolean isHandled = false;
+      fireOnCompleted();
 
-          for( FlowListener flowListener : getListeners() )
-            isHandled = flowListener.onThrowable( this, throwable ) || isHandled;
+      deregisterShutdownHook();
+      }
+    }
 
-          if( isHandled )
-            throwable = null;
-          }
+  private List<Future<Throwable>> spawnJobs( int numThreads ) throws InterruptedException
+    {
+    if( stop )
+      return new ArrayList<Future<Throwable>>();
 
-        if( !flowStats.isFinished() )
-          flowStats.markCompleted();
+    executor = Executors.newFixedThreadPool( numThreads );
+    List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
+    executor.shutdown(); // don't accept any more work
+    return futures;
+    }
 
-        if( LOG.isDebugEnabled() )
-          logDebug( "firing onCompleted event: " + getListeners().size() );
+  private void handleThrowable()
+    {
+    if( throwable != null )
+      {
+      flowStats.markFailed( throwable );
 
-        for( FlowListener flowListener : getListeners() )
-          flowListener.onCompleted( this );
-        }
+      fireOnThrowable();
+      }
+    }
+
+  synchronized Map<String, Callable<Throwable>> getJobsMap()
+    {
+    return jobsMap;
+    }
+
+  private synchronized void initializeNewJobsMap() throws IOException
+    {
+    // keep topo order
+    jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
+    TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( stepGraph );
+
+    while( topoIterator.hasNext() )
+      {
+      FlowStep step = (FlowStep) topoIterator.next();
+      step.setParentFlowName( getName() );
+      FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
+
+      jobsMap.put( step.getName(), flowStepJob );
+
+      List<FlowStep.FlowStepJob> predecessors = new ArrayList<FlowStep.FlowStepJob>();
+
+      for( FlowStep flowStep : Graphs.predecessorListOf( stepGraph, step ) )
+        predecessors.add( (FlowStep.FlowStepJob) jobsMap.get( flowStep.getName() ) );
+
+      flowStepJob.setPredecessors( predecessors );
+      }
+
+    flowStats.setStepsCount( jobsMap.size() );
+    }
+
+  private void internalStopAllJobs()
+    {
+    LOG.warn( "stopping jobs" );
+
+    try
+      {
+      if( jobsMap == null )
+        return;
+
+      for( Callable<Throwable> callable : jobsMap.values() )
+        ( (FlowStep.FlowStepJob) callable ).stop();
+      }
+    finally
+      {
+      LOG.warn( "stopped jobs" );
+      }
+    }
+
+  private void handleExecutorShutdown()
+    {
+    if( executor == null )
+      return;
+
+    LOG.warn( "shutting down job executor" );
+
+    try
+      {
+      executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+      }
+    catch( InterruptedException exception )
+      {
+      // ignore
+      }
+
+    LOG.warn( "shutdown complete" );
+    }
+
+  private void fireOnCompleted()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onCompleted event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onCompleted( this );
+      }
+    }
+
+  private void fireOnThrowable()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onThrowable event: " + getListeners().size() );
+
+      boolean isHandled = false;
+
+      for( FlowListener flowListener : getListeners() )
+        isHandled = flowListener.onThrowable( this, throwable ) || isHandled;
+
+      if( isHandled )
+        throwable = null;
+      }
+    }
+
+  private void fireOnStopping()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStopping event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onStopping( this );
+      }
+    }
+
+  private void fireOnStarting()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStarting event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onStarting( this );
       }
     }
 
@@ -814,6 +904,25 @@ public class Flow implements Runnable
     {
     for( FlowStep step : getSteps() )
       step.clean( getJobConf() );
+    }
+
+  private void registerShutdownHook()
+    {
+    shutdownHook = new Thread()
+    {
+    @Override
+    public void run()
+      {
+      Flow.this.stop();
+      }
+    };
+
+    Runtime.getRuntime().addShutdownHook( shutdownHook );
+    }
+
+  private void deregisterShutdownHook()
+    {
+    Runtime.getRuntime().removeShutdownHook( shutdownHook );
     }
 
   @Override

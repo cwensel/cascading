@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.Flow to automatically register a shutdown hook killing remote jobs on vm exit.
+
+  Changed c.f.Flow.stop() to immediately stop all running jobs.
+
   Changed c.o.Operation to an interface and introduced c.o.BaseOperation. This makes creating custom Operation types
   more flexible and intuitive. c.o.Filter, c.o.Function, c.o.Aggregator, and c.o.Assertion now extend c.o.Operation.
 

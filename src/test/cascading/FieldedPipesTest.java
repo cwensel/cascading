@@ -241,7 +241,6 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
-
   public void testCoGroup() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
