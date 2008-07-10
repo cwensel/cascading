@@ -70,6 +70,14 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * When a Flow is created, an optimized internal representation is created that is then executed
  * within the cluster. Thus any overhead inherent to a give {@link Pipe} assembly will be removed
  * once it's placed in context with the actual execution environment.
+ * <p/>
+ * <strong>Properties</strong><br/>
+ * <ul>
+ * <li>cascading.flow.preservetemporaryfiles</li>
+ * <li>cascading.flow.stopjobsonexit</li>
+ * </ul>
+ *
+ * @see cascading.flow.FlowConnector
  */
 public class Flow implements Runnable
   {
@@ -90,6 +98,10 @@ public class Flow implements Runnable
   private Map<String, Tap> sinks;
   /** Field traps */
   private Map<String, Tap> traps;
+  /** Field preserveTemporaryFiles */
+  private boolean preserveTemporaryFiles = false;
+  /** Field stopJobsOnExit */
+  protected boolean stopJobsOnExit = true;
 
   /** Field stepGraph */
   private SimpleDirectedGraph<FlowStep, Integer> stepGraph;
@@ -99,8 +111,8 @@ public class Flow implements Runnable
   private Thread thread;
   /** Field throwable */
   private Throwable throwable;
-  /** Field preserveTemporaryFiles */
-  private boolean preserveTemporaryFiles = false;
+  /** Field stop */
+  private boolean stop;
 
   /** Field pipeGraph */
   private SimpleDirectedGraph<FlowElement, Scope> pipeGraph; // only used for documentation purposes
@@ -111,16 +123,61 @@ public class Flow implements Runnable
   private transient Map<String, Callable<Throwable>> jobsMap;
   /** Field executor */
   private transient ExecutorService executor;
-  /** Field stop */
-  private boolean stop;
-  private Thread shutdownHook;
+  /** Field shutdownHook */
+  private transient Thread shutdownHook;
+
+  /**
+   * Property preserveTemporaryFiles forces the Flow instance to keep any temporary intermediate data sets. Useful
+   * for debugging. Defaults to {@code false}.
+   *
+   * @param properties             of type Map
+   * @param preserveTemporaryFiles of type boolean
+   */
+  public static void setPreserveTemporaryFiles( Map<Object, Object> properties, boolean preserveTemporaryFiles )
+    {
+    properties.put( "cascading.flow.preservetemporaryfiles", Boolean.toString( preserveTemporaryFiles ) );
+    }
+
+  /**
+   * Returns property preserveTemporaryFiles.
+   *
+   * @param properties of type Map
+   * @return a boolean
+   */
+  public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
+    {
+    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", Boolean.toString( false ) ) );
+    }
+
+  /**
+   * Propety stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
+   * underlying computing system supports it. Defaults to {@code true}.
+   *
+   * @param properties     of type Map
+   * @param stopJobsOnExit of type boolean
+   */
+  public static void setStopJobsOnExit( Map<Object, Object> properties, boolean stopJobsOnExit )
+    {
+    properties.put( "cascading.flow.stopjobsonexit", Boolean.toString( stopJobsOnExit ) );
+    }
+
+  /**
+   * Returns property stopJobsOnExit.
+   *
+   * @param properties of type Map
+   * @return a boolean
+   */
+  public static boolean getStopJobsOnExit( Map<Object, Object> properties )
+    {
+    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", Boolean.toString( true ) ) );
+    }
 
   /** Used for testing. */
   protected Flow()
     {
     }
 
-  protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -129,9 +186,10 @@ public class Flow implements Runnable
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
+    initFromProperties( properties );
     }
 
-  protected Flow( JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -139,6 +197,13 @@ public class Flow implements Runnable
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
+    initFromProperties( properties );
+    }
+
+  private void initFromProperties( Map<Object, Object> properties )
+    {
+    preserveTemporaryFiles = getPreserveTemporaryFiles( properties );
+    stopJobsOnExit = getStopJobsOnExit( properties );
     }
 
   /**
@@ -312,14 +377,13 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method setPreserveTemporaryFiles sets the preserveTemporaryFiles of this Flow object. Defaults to false. Set
-   * to true if temporary files should be kept.
+   * Method isStopJobsOnExit returns the stopJobsOnExit of this Flow object. Defaults to {@code true}.
    *
-   * @param preserveTemporaryFiles the preserveTemporaryFiles of this Flow object.
+   * @return the stopJobsOnExit (type boolean) of this Flow object.
    */
-  public void setPreserveTemporaryFiles( boolean preserveTemporaryFiles )
+  public boolean isStopJobsOnExit()
     {
-    this.preserveTemporaryFiles = preserveTemporaryFiles;
+    return stopJobsOnExit;
     }
 
   /**
@@ -908,6 +972,9 @@ public class Flow implements Runnable
 
   private void registerShutdownHook()
     {
+    if( !isStopJobsOnExit() )
+      return;
+
     shutdownHook = new Thread()
     {
     @Override
@@ -922,6 +989,9 @@ public class Flow implements Runnable
 
   private void deregisterShutdownHook()
     {
+    if( !isStopJobsOnExit() )
+      return;
+
     Runtime.getRuntime().removeShutdownHook( shutdownHook );
     }
 

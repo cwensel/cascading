@@ -84,6 +84,11 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * To overcome this, in turn, an intermediateSchemeClass must be passed from the FlowConnctor to the planner. This class
  * will be instantiated for every temp Tap instance. The intention is that the given intermedeiateSchemeClass
  * match all the source Tap schemes.
+ * <p/>
+ * <strong>Properties</strong><br/>
+ * <ul>
+ * <li>cascading.hadoop.jobconf</li>
+ * </ul>
  */
 public class MultiMapReducePlanner
   {
@@ -179,7 +184,7 @@ public class MultiMapReducePlanner
       SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
       SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph, traps );
 
-      return new Flow( jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ), new HashMap<String, Tap>( traps ) );
+      return new Flow( properties, jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ), new HashMap<String, Tap>( traps ) );
       }
     catch( FlowException exception )
       {

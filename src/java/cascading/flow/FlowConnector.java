@@ -52,6 +52,12 @@ import org.apache.log4j.Logger;
  * <p/>
  * By default, all {@link Assertion} are planned into the resulting Flow instance. This can be
  * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
+ * <p/>
+ * <strong>Properties</strong><br/>
+ * <ul>
+ * <li>cascading.flowconnector.assertionlevel</li>
+ * <li>cascading.flowconnector.intermediateschemeclass</li>
+ * </ul>
  *
  * @see cascading.flow.MapReduceFlow
  */

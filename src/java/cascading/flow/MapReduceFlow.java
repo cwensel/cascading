@@ -97,7 +97,21 @@ public class MapReduceFlow extends Flow
    */
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
     {
+    this( name, jobConf, deleteSinkOnInit, true );
+    }
+
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param deleteSinkOnInit of type boolean
+   * @param stopJobsOnExit   of type boolean
+   */
+  public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
+    {
     this.deleteSinkOnInit = deleteSinkOnInit;
+    this.stopJobsOnExit = stopJobsOnExit;
 
     setName( name );
     setSources( createSources( jobConf ) );
