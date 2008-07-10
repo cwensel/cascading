@@ -580,7 +580,8 @@ public class Flow implements Runnable
     fireOnStopping();
     internalStopAllJobs();
 
-    flowStats.markStopped();
+    if( !flowStats.isFinished() )
+      flowStats.markStopped();
 
     handleExecutorShutdown();
     }

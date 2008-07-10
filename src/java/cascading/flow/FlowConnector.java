@@ -71,7 +71,8 @@ public class FlowConnector
 
   public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
     {
-    properties.put( "cascading.flowconnector.assertionlevel", assertionLevel.toString() );
+    if( assertionLevel != null )
+      properties.put( "cascading.flowconnector.assertionlevel", assertionLevel.toString() );
     }
 
   public static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
