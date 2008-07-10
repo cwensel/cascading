@@ -967,6 +967,9 @@ public class Flow implements Runnable
 
   private void cleanTemporaryFiles()
     {
+    if( stop ) // unstable to call fs operations during shutdown
+      return;
+
     for( FlowStep step : getSteps() )
       step.clean( getJobConf() );
     }
@@ -990,7 +993,7 @@ public class Flow implements Runnable
 
   private void deregisterShutdownHook()
     {
-    if( !isStopJobsOnExit() )
+    if( !isStopJobsOnExit() || stop )
       return;
 
     Runtime.getRuntime().removeShutdownHook( shutdownHook );
