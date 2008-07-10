@@ -69,7 +69,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
 //    sink.setUseTapCollector( true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -97,7 +97,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     sink.setUseTapCollector( true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -121,7 +121,7 @@ public class UseTapCollectorTest extends ClusterTestCase
 
     sink.setUseTapCollector( true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "testnogroup.dot" );
 

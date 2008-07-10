@@ -21,8 +21,7 @@
 
 package cascading.flow.hadoop;
 
-import java.util.Enumeration;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
@@ -50,24 +49,21 @@ public class HadoopUtil
       }
     }
 
-  public static JobConf createJobConf( Properties properties )
+  public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )
     {
-    JobConf jobConf = new JobConf();
+    JobConf jobConf = defaultJobconf == null ? new JobConf() : new JobConf( defaultJobconf );
 
     if( properties == null )
       return jobConf;
 
-    Enumeration enumeration = properties.propertyNames();
-
-    while( enumeration.hasMoreElements() )
+    for( Object key : properties.keySet() )
       {
-      String key = (String) enumeration.nextElement();
-      String value = properties.getProperty( key );
+      Object value = properties.get( key );
 
-      if( value == null )
-        throw new IllegalStateException( "property value was null for key: " + key );
+      if( value == null ) // don't stuff null values
+        continue;
 
-      jobConf.set( key, value );
+      jobConf.set( key.toString(), value.toString() );
       }
 
     return jobConf;

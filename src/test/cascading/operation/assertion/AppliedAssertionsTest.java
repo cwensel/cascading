@@ -23,6 +23,7 @@ package cascading.operation.assertion;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
@@ -79,7 +80,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), AssertionLevel.STRICT, new AssertEquals( 7L ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -112,7 +113,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), AssertionLevel.STRICT, new AssertEquals( 0L ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     try
       {
@@ -161,9 +162,11 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), setLevel, new AssertEquals( 0L ) );
 
-    FlowConnector flowConnector = new FlowConnector( jobConf );
+    Map<Object, Object> properties = getProperties();
 
-    flowConnector.setAssertionLevel( planLevel );
+    FlowConnector.setAssertionLevel( properties, planLevel );
+
+    FlowConnector flowConnector = new FlowConnector( properties );
 
     Flow flow = flowConnector.connect( source, sink, pipe );
 
@@ -210,7 +213,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 7L ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -243,7 +246,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 0L ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     try
       {
@@ -292,9 +295,11 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, setLevel, new AssertGroupSizeEquals( 0L ) );
 
-    FlowConnector flowConnector = new FlowConnector( jobConf );
+    Map<Object, Object> properties = getProperties();
 
-    flowConnector.setAssertionLevel( planLevel );
+    FlowConnector.setAssertionLevel( properties, planLevel );
+
+    FlowConnector flowConnector = new FlowConnector( properties );
 
     Flow flow = flowConnector.connect( source, sink, pipe );
 

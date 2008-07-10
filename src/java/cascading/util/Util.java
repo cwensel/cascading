@@ -33,6 +33,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -250,6 +251,16 @@ public class Util
       return string;
 
     return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
+    }
+
+  public static <A> A getProperty( Map<Object, Object> properties, String key, A defaultValue )
+    {
+    if( properties == null )
+      return defaultValue;
+
+    A value = (A) properties.get( key );
+
+    return value == null ? defaultValue : value;
     }
 
   public static String printGraph( SimpleDirectedGraph graph )

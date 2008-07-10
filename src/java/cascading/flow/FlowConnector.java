@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.CascadingException;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Pipe;
@@ -39,9 +39,21 @@ import org.apache.log4j.Logger;
 
 /**
  * Use the FlowConnector to link sink and source {@link Tap} instances with an assembly of {@link Pipe} instances into
- * a {@link Flow}.
- * </p>
- * By default, all {@link Assertion} are planned into the resulting Flow instance. This can be changed by calling {@link #setAssertionLevel(AssertionLevel)}.
+ * an executable {@link Flow}.
+ * <p/>
+ * FlowConnector invokes a planner for the target execution environment. Currently only {@link cascading.flow.MultiMapReducePlanner}
+ * is supported. If you have just one custom Hadoop job to execute, see {@link cascading.flow.MapReduceFlow}.
+ * <p/>
+ * The FlowConnector and resulting Flow can be configured via a Map of properties given on the constructor. This properties
+ * map can be populated through static methods on FlowConnector and MultiMapReducePlanner.
+ * <p/>
+ * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
+ * runtime from a configuation file.
+ * <p/>
+ * By default, all {@link Assertion} are planned into the resulting Flow instance. This can be
+ * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
+ *
+ * @see cascading.flow.MapReduceFlow
  */
 public class FlowConnector
   {
@@ -49,28 +61,54 @@ public class FlowConnector
   private static final Logger LOG = Logger.getLogger( FlowConnector.class );
 
   /** Field properties */
-  private Properties properties;
-  /** Field jobConf */
-  private JobConf jobConf;
-  /** Field assertionLevel */
-  private AssertionLevel assertionLevel = AssertionLevel.STRICT;
-  /** Field intermediateSchemeClass */
-  private Class intermediateSchemeClass;
+  private Map<Object, Object> properties;
+
+  public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
+    {
+    properties.put( "cascading.flowconnector.assertionlevel", assertionLevel.toString() );
+    }
+
+  public static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
+    {
+    String assertionLevel = Util.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
+
+    return AssertionLevel.valueOf( assertionLevel );
+    }
+
+  public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class intermediateSchemeClass )
+    {
+    properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
+    }
+
+  public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClass )
+    {
+    properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
+    }
+
+  public static Class getIntermediateSchemeClass( Map<Object, Object> properties )
+    {
+    // supporting stuffed classes to overcome classloading issue
+    Object type = Util.getProperty( properties, "cascading.flowconnector.intermediateschemeclass", (Object) null );
+
+    if( type == null )
+      return null;
+
+    if( type instanceof Class )
+      return (Class) type;
+
+    try
+      {
+      return FlowConnector.class.getClassLoader().loadClass( type.toString() );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + type.toString(), exception );
+      }
+    }
 
   /** Constructor FlowConnector creates a new FlowConnector instance. */
   public FlowConnector()
     {
-    }
-
-  /**
-   * Constructor FlowConnector creates a new FlowConnector instance using the given {@link JobConf} instance as
-   * default values for the underlying jobs.
-   *
-   * @param jobConf of type JobConf
-   */
-  public FlowConnector( JobConf jobConf )
-    {
-    this.jobConf = jobConf;
     }
 
   /**
@@ -79,49 +117,20 @@ public class FlowConnector
    *
    * @param properties of type Properties
    */
-  public FlowConnector( Properties properties )
+  public FlowConnector( Map<Object, Object> properties )
     {
     this.properties = properties;
     }
 
   /**
-   * Method getAssertionLevel returns the assertionLevel of this FlowConnector object.
+   * Method getProperties returns the properties of this FlowConnector object. The returned Map instance
+   * is immutable to prevent changes to the underlying property values in this FlowConnector instance.
    *
-   * @return the assertionLevel (type Level) of this FlowConnector object.
+   * @return the properties (type Map<Object, Object>) of this FlowConnector object.
    */
-  public AssertionLevel getAssertionLevel()
+  public Map<Object, Object> getProperties()
     {
-    return assertionLevel;
-    }
-
-  /**
-   * Method setAssertionLevel sets the assertionLevel of this FlowConnector object.
-   *
-   * @param assertionLevel the assertionLevel of this FlowConnector object.
-   */
-  public void setAssertionLevel( AssertionLevel assertionLevel )
-    {
-    this.assertionLevel = assertionLevel;
-    }
-
-  /**
-   * Method getIntermediateSchemeClass returns the intermediateSchemeClass of this FlowConnector object.
-   *
-   * @return the intermediateSchemeClass (type Class) of this FlowConnector object.
-   */
-  public Class getIntermediateSchemeClass()
-    {
-    return intermediateSchemeClass;
-    }
-
-  /**
-   * Method setIntermediateSchemeClass sets the intermediateSchemeClass of this FlowConnector object.
-   *
-   * @param intermediateSchemeClass the intermediateSchemeClass of this FlowConnector object.
-   */
-  public void setIntermediateSchemeClass( Class intermediateSchemeClass )
-    {
-    this.intermediateSchemeClass = intermediateSchemeClass;
+    return Collections.unmodifiableMap( properties );
     }
 
   /**
@@ -320,11 +329,8 @@ public class FlowConnector
     {
     name = name == null ? makeName( pipes ) : name;
 
-    if( properties != null )
-      jobConf = HadoopUtil.createJobConf( properties );
-
     // choose appropriate planner (when there is more than one)
-    return new MultiMapReducePlanner( jobConf, assertionLevel, intermediateSchemeClass ).buildFlow( name, pipes, sources, sinks, traps );
+    return new MultiMapReducePlanner( properties ).buildFlow( name, pipes, sources, sinks, traps );
     }
 
   /////////

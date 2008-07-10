@@ -69,7 +69,7 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new TextLine(), outputPath + "none/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "none/trap", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -99,7 +99,7 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -129,7 +129,7 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "all/tap", true );
     Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "all/trap", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -172,7 +172,7 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new TextLine(), outputPath + path + "/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + path + "/trap", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 

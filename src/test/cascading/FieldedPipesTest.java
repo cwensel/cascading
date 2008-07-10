@@ -81,7 +81,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", false ); // leave cluster testing enabled
+    super( "fielded pipes", true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -103,7 +103,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "groupcount.dot" );
 
@@ -133,7 +133,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Tap sink = new Hfs( new TextLine(), outputPath + "/simplechain", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "chainedevery.dot" );
 
@@ -163,7 +163,7 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "count1", "count2" ), new ExpressionFunction( new Fields( "sum" ), "count1 + count2", int.class, int.class ), Fields.ALL );
     Tap sink = new Hfs( new TextLine(), outputPath + "/chaineach", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "chainedevery.dot" );
 
@@ -188,7 +188,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/simplesplit", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -227,7 +227,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
     flow.complete();
 
@@ -267,7 +267,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -324,7 +324,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     try
       {
-      countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+      countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
       }
     catch( FlowException exception )
       {
@@ -393,7 +393,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -460,7 +460,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -528,7 +528,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new LeftJoin() );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -595,7 +595,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new RightJoin() );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -650,6 +650,7 @@ public class FieldedPipesTest extends ClusterTestCase
       fail( "data file not found" );
 
     copyFromLocal( inputFileLowerOffset );
+    copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
     Tap sourceLowerOffset = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
@@ -678,7 +679,7 @@ public class FieldedPipesTest extends ClusterTestCase
     MixedJoin join = new MixedJoin( new boolean[]{MixedJoin.OUTER, MixedJoin.INNER, MixedJoin.OUTER} );
     Pipe splice = new CoGroup( pipes, fields, Fields.size( 6 ), join );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -726,7 +727,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe cogroup = new Group( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, cogroup );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 
 //    System.out.println( "flow =\n" + flow );
 
@@ -773,7 +774,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe groupby = new GroupBy( cogroup, new Fields( "numA" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, groupby );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, groupby );
 
 //    System.out.println( "flow =\n" + flow );
 
@@ -811,7 +812,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe cogroup = new Group( pipeLower, new Fields( "num" ), 2, new Fields( "num1", "char1", "num2", "char2" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, cogroup );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 
 //    System.out.println( "flow =\n" + flow );
 
@@ -857,7 +858,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( sources, sink, splice2 );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice2 );
 
 //    countFlow.writeDOT( "cogroupcogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
@@ -914,9 +915,11 @@ public class FieldedPipesTest extends ClusterTestCase
 
     splice2 = new Each( splice2, new Identity() );
 
-    FlowConnector flowConnector = new FlowConnector( jobConf );
+    Map<Object, Object> properties = getProperties();
 
-    flowConnector.setIntermediateSchemeClass( schemeClass );
+    FlowConnector.setIntermediateSchemeClass( properties, schemeClass );
+
+    FlowConnector flowConnector = new FlowConnector( properties );
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
@@ -952,7 +955,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "ungroup.dot" );
 
@@ -977,7 +980,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), filter );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "flow.dot" );
 
@@ -1011,7 +1014,7 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
 
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "filter.dot" );
 
@@ -1041,7 +1044,7 @@ public class FieldedPipesTest extends ClusterTestCase
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cross/", true );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, cross );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cross );
 
 //    System.out.println( "flow =\n" + flow );
 
@@ -1084,7 +1087,7 @@ public class FieldedPipesTest extends ClusterTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sinks, left, right );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
 
 //    flow.writeDOT( "split.dot" );
 
@@ -1124,7 +1127,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Map sources = Cascades.tapsMap( "split", source );
     Map sinks = Cascades.tapsMap( Pipe.pipes( left, right ), Tap.taps( sink1, sink2 ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sinks, left, right );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
 
 //    flow.writeDOT( "splitcomplex.dot" );
 
@@ -1156,7 +1159,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new GroupBy( pipe, new Fields( "num" ) );
 
-    Flow countFlow = new FlowConnector( jobConf ).connect( source, sink, splice );
+    Flow countFlow = new FlowConnector( getProperties() ).connect( source, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );

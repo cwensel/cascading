@@ -86,7 +86,7 @@ public class FlowTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sink, splice );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "stopped.dot" );
 

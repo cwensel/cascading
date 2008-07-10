@@ -58,7 +58,7 @@ public class CascadeTest extends ClusterTestCase
 
     Tap sink = new Dfs( new SequenceFile( new Fields( "ip" ) ), outputPath + "/first", true );
 
-    return new FlowConnector( jobConf ).connect( source, sink, pipe );
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
   private Flow secondFlow( Tap source )
@@ -69,7 +69,7 @@ public class CascadeTest extends ClusterTestCase
 
     Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second", true );
 
-    return new FlowConnector( jobConf ).connect( source, sink, pipe );
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
   private Flow thirdFlow( Tap source )
@@ -80,7 +80,7 @@ public class CascadeTest extends ClusterTestCase
 
     Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + "/third", true );
 
-    return new FlowConnector( jobConf ).connect( source, sink, pipe );
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
   private Flow fourthFlow( Tap source )
@@ -91,7 +91,7 @@ public class CascadeTest extends ClusterTestCase
 
     Tap sink = new Dfs( new TextLine(), outputPath + "/fourth", true );
 
-    return new FlowConnector( jobConf ).connect( source, sink, pipe );
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
   public void testSimpleCascade() throws IOException

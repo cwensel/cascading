@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import cascading.ClusterTestCase;
+import cascading.flow.MultiMapReducePlanner;
 import cascading.tuple.Fields;
 
 /**
@@ -42,7 +43,7 @@ public class TapTest extends ClusterTestCase
     {
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( jobConf ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getJobConf( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
     new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
     new Dfs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
@@ -96,7 +97,7 @@ public class TapTest extends ClusterTestCase
     {
     Tap tap = new Lfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( jobConf ).toUri().getScheme().equalsIgnoreCase( "file" ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getJobConf( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Lfs( new Fields( "foo" ), "file:///some/path" );
 

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Identity;
 import cascading.pipe.Each;
@@ -44,6 +45,7 @@ import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
@@ -56,18 +58,29 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
- * </p>
+ * <p/>
  * Notes:
- * </p>
- * <strong>Heterogeneous source Tap instances</strong></br>
+ * <p/>
+ * <strong>Custom JobConf properties</strong><br/>
+ * A custo JobConf instance can be passed to this planner by calling {@link #setJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
+ * on a map properties object before constructing a new {@link FlowConnector}.
+ * <p/>
+ * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
+ * All values in the map will be passed to a new default JobConf instance to be used as defaults for all resulting
+ * Flow instances.
+ * <p/>
+ * For example, {@code properties.set("mapred.child.java.opts","-Xmx512m");} would convince Hadoop
+ * to spawn all child jvms with a heap of 512MB.
+ * <p/>
+ * <strong>Heterogeneous source Tap instances</strong><br/>
  * Currently Hadoop cannot have but one InputFormat per Mapper, but Cascading allows for any types of Taps
  * to be used as sinks in a given Flow.
- * </p>
+ * <p/>
  * To overcome this issue, this planner will insert temporary Tap
  * instances immediately before a merge or join Group (GroupBy or CoGroup) if the source Taps do not share
  * the same Scheme class. By default temp Taps use the SequenceFile Scheme. So if the source Taps are custom
  * or use TextLine, a few extra jobs can leak into a given Flow.
- * </p>
+ * <p/>
  * To overcome this, in turn, an intermediateSchemeClass must be passed from the FlowConnctor to the planner. This class
  * will be instantiated for every temp Tap instance. The intention is that the given intermedeiateSchemeClass
  * match all the source Tap schemes.
@@ -82,6 +95,9 @@ public class MultiMapReducePlanner
   /** Field tail */
   private final Extent tail = new Extent( "tail" );
 
+  /** Field properties */
+  private final Map<Object, Object> properties;
+
   /** Field jobConf */
   private JobConf jobConf;
   /** Field assertionLevel */
@@ -90,17 +106,40 @@ public class MultiMapReducePlanner
   private final Class intermediateSchemeClass;
 
   /**
+   * Method setJobConf adds the given JobConf object to the given properties object. Use this method to pass
+   * custom default Hadoop JobConf properties to Hadoop.
+   *
+   * @param properties of type Map
+   * @param jobConf    of type JobConf
+   */
+  public static void setJobConf( Map<Object, Object> properties, JobConf jobConf )
+    {
+    properties.put( "cascading.hadoop.jobconf", jobConf );
+    }
+
+  /**
+   * Method getJobConf returns a stored JobConf instance, if any.
+   *
+   * @param properties of type Map
+   * @return a JobConf instance
+   */
+  public static JobConf getJobConf( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.hadoop.jobconf", (JobConf) null );
+    }
+
+  /**
    * Constructor MultiMapReducePlanner creates a new MultiMapReducePlanner instance.
    *
-   * @param jobConf                 of type JobConf
-   * @param assertionLevel          of type AssertionLevel
-   * @param intermediateSchemeClass of type Class
+   * @param properties of type Map<Object, Object>
    */
-  MultiMapReducePlanner( JobConf jobConf, AssertionLevel assertionLevel, Class intermediateSchemeClass )
+  protected MultiMapReducePlanner( Map<Object, Object> properties )
     {
-    this.jobConf = jobConf;
-    this.assertionLevel = assertionLevel;
-    this.intermediateSchemeClass = intermediateSchemeClass;
+    this.properties = properties;
+    this.jobConf = getJobConf( properties );
+    this.jobConf = HadoopUtil.createJobConf( properties, this.jobConf );
+    this.assertionLevel = FlowConnector.getAssertionLevel( properties );
+    this.intermediateSchemeClass = FlowConnector.getIntermediateSchemeClass( properties );
     }
 
   /**

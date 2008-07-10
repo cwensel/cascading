@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.CascadingTestCase;
 import cascading.operation.Identity;
@@ -498,9 +499,10 @@ public class BuildJobsTest extends CascadingTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
 
-    FlowConnector flowConnector = new FlowConnector();
+    Properties properties = new Properties();
+    FlowConnector.setIntermediateSchemeClass( properties, TextLine.class );
 
-    flowConnector.setIntermediateSchemeClass( TextLine.class );
+    FlowConnector flowConnector = new FlowConnector( properties );
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 

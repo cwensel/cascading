@@ -23,7 +23,10 @@ package cascading;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import cascading.flow.MultiMapReducePlanner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.dfs.MiniDFSCluster;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,8 +43,9 @@ public class ClusterTestCase extends CascadingTestCase
   transient private MiniDFSCluster dfs;
   transient private FileSystem fileSys;
   transient private MiniMRCluster mr;
-  transient protected JobConf jobConf;
+  transient private JobConf jobConf;
   transient private boolean enableCluster;
+  transient private Map<Object, Object> properties = new HashMap<Object, Object>();
 
   public ClusterTestCase( String string, boolean enableCluster )
     {
@@ -75,6 +79,13 @@ public class ClusterTestCase extends CascadingTestCase
     mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
 
     jobConf = mr.createJobConf();
+
+    MultiMapReducePlanner.setJobConf( properties, jobConf );
+    }
+
+  public Map<Object, Object> getProperties()
+    {
+    return new HashMap<Object, Object>( properties );
     }
 
   protected void copyFromLocal( String inputFile ) throws IOException

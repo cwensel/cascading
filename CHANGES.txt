@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.FlowConnector to only take a Map of properties. These properties are passed downstream to various
+  subsystems. This removes the Hadoop JobConf constructor, but it still can be passed as a property value. Also
+  properties will be pushed into a defaul JobConf, bypassing any direct JobConf coupling in applications.
+
   Changed c.f.Flow to automatically register a shutdown hook killing remote jobs on vm exit.
 
   Changed c.f.Flow.stop() to immediately stop all running jobs.

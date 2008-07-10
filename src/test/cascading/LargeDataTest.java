@@ -87,7 +87,7 @@ public class LargeDataTest extends ClusterTestCase
     Map<String, Tap> sources = Cascades.tapsMap( Pipe.pipes( pipe ), Tap.taps( source ) );
     Map<String, Tap> sinks = Cascades.tapsMap( Pipe.pipes( pipeUrl, pipeWord ), Tap.taps( sinkUrl, sinkWord ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
 
     //    flow.writeDOT( "large.dot" );
 

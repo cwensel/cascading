@@ -134,7 +134,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "graph.dot" );
 
@@ -222,7 +222,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "graph.dot" );
 
@@ -264,7 +264,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "eucdist.dot" );
 
@@ -306,7 +306,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
 //    flow.writeDOT( "peardist.dot" );
 

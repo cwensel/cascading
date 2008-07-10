@@ -25,10 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -90,9 +92,11 @@ public class SortedValuesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
 
-    jobConf.setNumMapTasks( 13 );
+    Map<Object, Object> properties = getProperties();
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -130,9 +134,11 @@ public class SortedValuesTest extends ClusterTestCase
     // perfect opportunity for planner optimization
     pipe = new GroupBy( pipe, new Fields( "status" ), new Fields( "count" ), sorted );
 
-    jobConf.setNumMapTasks( 13 );
+    Map<Object, Object> properties = getProperties();
 
-    Flow flow = new FlowConnector( jobConf ).connect( source, sink, pipe );
+    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -163,11 +169,13 @@ public class SortedValuesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
 
-    jobConf.setNumMapTasks( 13 );
+    Map<Object, Object> properties = getProperties();
+
+    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
 
     try
       {
-      new FlowConnector( jobConf ).connect( source, sink, pipe );
+      new FlowConnector( properties ).connect( source, sink, pipe );
       fail( "did not throw exception" );
       }
     catch( Exception exception )
