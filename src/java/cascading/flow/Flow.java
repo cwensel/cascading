@@ -576,12 +576,17 @@ public class Flow implements Runnable
     if( stop )
       return;
 
+    if( thread == null )
+      return;
+
     stop = true;
+
     fireOnStopping();
-    internalStopAllJobs();
 
     if( !flowStats.isFinished() )
       flowStats.markStopped();
+
+    internalStopAllJobs();
 
     handleExecutorShutdown();
     }
@@ -815,7 +820,7 @@ public class Flow implements Runnable
 
       handleThrowable();
 
-      if( !flowStats.isFinished() )
+      if( !stop && !flowStats.isFinished() )
         flowStats.markCompleted();
 
       fireOnCompleted();
@@ -884,7 +889,11 @@ public class Flow implements Runnable
       if( jobsMap == null )
         return;
 
-      for( Callable<Throwable> callable : jobsMap.values() )
+      List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
+
+      Collections.reverse( jobs );
+
+      for( Callable<Throwable> callable : jobs )
         ( (FlowStep.FlowStepJob) callable ).stop();
       }
     finally

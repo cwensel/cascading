@@ -22,10 +22,15 @@
 package cascading.cascade;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowStep;
+import cascading.flow.LockingFlowListener;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -48,7 +53,7 @@ public class CascadeTest extends ClusterTestCase
     super( "cascade tests", true );
     }
 
-  private Flow firstFlow()
+  private Flow firstFlow( String path )
     {
     Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
 
@@ -56,40 +61,40 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "ip" ) ), outputPath + "/first", true );
+    Tap sink = new Dfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/first", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
-  private Flow secondFlow( Tap source )
+  private Flow secondFlow( Tap source, String path )
     {
     Pipe pipe = new Pipe( "second" );
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + "/second", true );
+    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + path + "/second", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
-  private Flow thirdFlow( Tap source )
+  private Flow thirdFlow( Tap source, String path )
     {
     Pipe pipe = new Pipe( "third" );
 
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + "/third", true );
+    Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + path + "/third", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
 
-  private Flow fourthFlow( Tap source )
+  private Flow fourthFlow( Tap source, String path )
     {
     Pipe pipe = new Pipe( "fourth" );
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "/fourth", true );
+    Tap sink = new Dfs( new TextLine(), outputPath + path + "/fourth", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
@@ -98,10 +103,12 @@ public class CascadeTest extends ClusterTestCase
     {
     copyFromLocal( inputFile );
 
-    Flow first = firstFlow();
-    Flow second = secondFlow( first.getSink() );
-    Flow third = thirdFlow( second.getSink() );
-    Flow fourth = fourthFlow( third.getSink() );
+    String path = "simple";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
 
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
 
@@ -109,7 +116,50 @@ public class CascadeTest extends ClusterTestCase
 
     cascade.complete();
 
-
     validateLength( fourth, 20 );
+    }
+
+  public void testSimpleCascadeStop() throws IOException, InterruptedException
+    {
+    copyFromLocal( inputFile );
+
+    String path = "stopped";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    LockingFlowListener listener = new LockingFlowListener();
+
+    first.addListener( listener );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    System.out.println( "calling start" );
+    cascade.start();
+
+    assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    while( true )
+      {
+      System.out.println( "testing if running" );
+      Thread.sleep( 1000 );
+
+      Map<String, Callable<Throwable>> map = LockingFlowListener.getJobsMap( first );
+
+      if( map == null || map.values().size() == 0 )
+        continue;
+
+      if( ( (FlowStep.FlowStepJob) map.values().iterator().next() ).wasStarted() )
+        break;
+      }
+
+    System.out.println( "calling stop" );
+
+    cascade.stop();
+
+    assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
     }
   }

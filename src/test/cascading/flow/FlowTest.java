@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import cascading.ClusterTestCase;
@@ -52,7 +51,7 @@ public class FlowTest extends ClusterTestCase
 
   public FlowTest()
     {
-    super( "flow test", false );
+    super( "flow test", true );
     }
 
   public void testStop() throws Exception
@@ -119,39 +118,6 @@ public class FlowTest extends ClusterTestCase
 
     assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
     assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
-    }
-
-  class LockingFlowListener implements FlowListener
-    {
-    Semaphore started = new Semaphore( 0 );
-    Semaphore stopped = new Semaphore( 0 );
-    Semaphore completed = new Semaphore( 0 );
-    Semaphore thrown = new Semaphore( 0 );
-
-    LockingFlowListener()
-      {
-      }
-
-    public void onStarting( Flow flow )
-      {
-      started.release();
-      }
-
-    public void onStopping( Flow flow )
-      {
-      stopped.release();
-      }
-
-    public void onCompleted( Flow flow )
-      {
-      completed.release();
-      }
-
-    public boolean onThrowable( Flow flow, Throwable throwable )
-      {
-      thrown.release();
-      return false;
-      }
     }
 
 

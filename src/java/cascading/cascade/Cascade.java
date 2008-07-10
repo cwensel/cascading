@@ -22,6 +22,7 @@
 package cascading.cascade;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,9 @@ public class Cascade implements Runnable
   private Thread thread;
   /** Field throwable */
   private Throwable throwable;
+  private ExecutorService executor;
+  private Map<String, Callable<Throwable>> jobsMap;
+  private boolean stop;
 
   Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
     {
@@ -169,40 +173,17 @@ public class Cascade implements Runnable
       {
       cascadeStats.markRunning();
 
-      // keep topo order
-      Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-      TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
+      initializeNewJobsMap();
 
-      Flow flow = null;
-      while( topoIterator.hasNext() )
-        {
-        flow = topoIterator.next();
-
-        cascadeStats.addFlowStats( flow.getFlowStats() );
-
-        CascadeJob job = new CascadeJob( flow );
-
-        jobsMap.put( flow.getName(), job );
-
-        List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
-
-        for( Flow predecessor : Graphs.predecessorListOf( jobGraph, flow ) )
-          predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
-
-        job.init( predecessors );
-        }
-
-      // if jobs are run local, then only use one thread to force execution serially
-      int numThreads = flow.jobsAreLocal() ? 1 : jobsMap.size();
+      int numThreads = jobsMap.size();
 
       if( LOG.isInfoEnabled() )
         {
-        logInfo( " parallel execution is enabled: " + !flow.jobsAreLocal() );
-        logInfo( " starting flows: " + jobsMap.size() );
+        logInfo( " starting flows: " + numThreads );
         logInfo( " allocating threads: " + numThreads );
         }
 
-      ExecutorService executor = Executors.newFixedThreadPool( numThreads );
+      executor = Executors.newFixedThreadPool( numThreads );
       List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
 
       executor.shutdown(); // don't accept any more work
@@ -215,16 +196,10 @@ public class Cascade implements Runnable
           {
           cascadeStats.markFailed( throwable );
 
-          logWarn( "stopping flows" );
+          if( !stop )
+            internalStopAllFlows();
 
-          for( Callable<Throwable> callable : jobsMap.values() )
-            ( (CascadeJob) callable ).stop();
-
-          logWarn( "shutting down flow executor" );
-
-          executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
-
-          logWarn( "shutdown complete" );
+          handleExecutorShutdown();
           break;
           }
         }
@@ -238,6 +213,78 @@ public class Cascade implements Runnable
       if( !cascadeStats.isFinished() )
         cascadeStats.markCompleted();
       }
+    }
+
+  private void initializeNewJobsMap()
+    {
+    // keep topo order
+    jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
+    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
+
+    while( topoIterator.hasNext() )
+      {
+      Flow flow = topoIterator.next();
+
+      cascadeStats.addFlowStats( flow.getFlowStats() );
+
+      CascadeJob job = new CascadeJob( flow );
+
+      jobsMap.put( flow.getName(), job );
+
+      List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
+
+      for( Flow predecessor : Graphs.predecessorListOf( jobGraph, flow ) )
+        predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
+
+      job.init( predecessors );
+      }
+    }
+
+  public synchronized void stop()
+    {
+    if( stop )
+      return;
+
+    stop = true;
+
+    if( !cascadeStats.isFailed() )
+      cascadeStats.markStopped();
+
+    internalStopAllFlows();
+    handleExecutorShutdown();
+    }
+
+  private void handleExecutorShutdown()
+    {
+    if( executor == null )
+      return;
+
+    logWarn( "shutting down flow executor" );
+
+    try
+      {
+      executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+      }
+    catch( InterruptedException exception )
+      {
+      // ignore
+      }
+
+    logWarn( "shutdown complete" );
+    }
+
+  private void internalStopAllFlows()
+    {
+    logWarn( "stopping flows" );
+
+    List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
+
+    Collections.reverse( jobs );
+
+    for( Callable<Throwable> callable : jobs )
+      ( (CascadeJob) callable ).stop();
+
+    logWarn( "stopped flows" );
     }
 
   @Override

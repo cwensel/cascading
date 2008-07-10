@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added ability to stop all c.f.Flows executing within a c.c.Cascade instance via the stop() method.
+
   Changed c.f.FlowConnector to only take a Map of properties. These properties are passed downstream to various
   subsystems. This removes the Hadoop JobConf constructor, but it still can be passed as a property value. Also
   properties will be pushed into a defaul JobConf, bypassing any direct JobConf coupling in applications.
