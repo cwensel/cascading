@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.tuple.Tuple;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -51,9 +49,9 @@ public class TapIterator implements Iterator<Tuple>
   /** Field reader */
   private RecordReader reader;
   /** Field key */
-  private WritableComparable key;
+  private Object key;
   /** Field value */
-  private Writable value;
+  private Object value;
 
   /** Field currentSplit */
   private int currentSplit = 0;

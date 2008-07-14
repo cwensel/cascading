@@ -24,8 +24,6 @@ package cascading;
 import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  *
@@ -39,7 +37,7 @@ public class TestTextLine extends TextLine
     }
 
   @Override
-  public Tuple source( WritableComparable key, Writable value )
+  public Tuple source( Object key, Object value )
     {
     return new Tuple( value.toString().split( "\t" ) );
     }

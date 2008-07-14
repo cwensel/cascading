@@ -28,8 +28,6 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -136,7 +134,7 @@ public class MultiTap extends SourceTap
     }
 
   @Override
-  public Tuple source( WritableComparable key, Writable value )
+  public Tuple source( Object key, Object value )
     {
     return getScheme().source( key, value );
     }

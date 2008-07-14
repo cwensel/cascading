@@ -34,8 +34,6 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -116,7 +114,7 @@ public class FlowMapperStack
     stackHead = (MapperStackElement) stackTail.resolveStack();
     }
 
-  public void map( WritableComparable key, Writable value, OutputCollector output )
+  public void map( Object key, Object value, OutputCollector output )
     {
     Tuple tuple = currentSource.source( key, value );
 

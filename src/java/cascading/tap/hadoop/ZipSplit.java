@@ -45,7 +45,7 @@ public class ZipSplit extends FileSplit
 
   ZipSplit()
     {
-    super( null, 0, 0, null );
+    super( null, 0, 0, (String[]) null );
     }
 
   /**

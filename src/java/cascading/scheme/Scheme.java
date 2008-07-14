@@ -27,8 +27,6 @@ import java.io.Serializable;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -194,7 +192,7 @@ public abstract class Scheme implements Serializable
    * @param value of type Writable
    * @return Tuple
    */
-  public abstract Tuple source( WritableComparable key, Writable value );
+  public abstract Tuple source( Object key, Object value );
 
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.

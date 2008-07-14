@@ -34,8 +34,6 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -208,7 +206,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @param value of type Writable
    * @return Tuple
    */
-  public Tuple source( WritableComparable key, Writable value )
+  public Tuple source( Object key, Object value )
     {
     return scheme.source( key, value );
     }

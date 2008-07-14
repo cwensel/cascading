@@ -26,8 +26,7 @@ import java.io.IOException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.Tuples;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -79,6 +78,11 @@ public class TapCollector extends TupleCollector implements OutputCollector
       ( (JobConfigurable) outputFormat ).configure( conf );
 
     filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
+
+    // hack to support running in local mode
+//    if( FileOutputFormat.getWorkOutputPath( conf ) == null )
+    conf.set( "mapred.work.output.dir", FileOutputFormat.getOutputPath( conf ).toString() );
+
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
 
@@ -115,7 +119,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
    * @param writable           of type Writable
    * @throws IOException when
    */
-  public void collect( WritableComparable writableComparable, Writable writable ) throws IOException
+  public void collect( Object writableComparable, Object writable ) throws IOException
     {
     writer.write( writableComparable, writable );
     }

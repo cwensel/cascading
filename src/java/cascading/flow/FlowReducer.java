@@ -27,7 +27,6 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowReducerStack;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -62,7 +61,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       }
     }
 
-  public void reduce( WritableComparable key, Iterator values, OutputCollector output, Reporter reporter ) throws IOException
+  public void reduce( Object key, Iterator values, OutputCollector output, Reporter reporter ) throws IOException
     {
     try
       {

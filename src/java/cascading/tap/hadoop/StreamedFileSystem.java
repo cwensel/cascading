@@ -53,6 +53,12 @@ public abstract class StreamedFileSystem extends FileSystem
     }
 
   @Override
+  public boolean delete( Path path, boolean b ) throws IOException
+    {
+    throw new UnsupportedOperationException( "not supported" );
+    }
+
+  @Override
   public Path getWorkingDirectory()
     {
     return new Path( "/" ).makeQualified( this );

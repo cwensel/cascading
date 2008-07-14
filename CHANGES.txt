@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Updated to support Hadoop 0.17.x. This version is not API compatible with any Hadoop version less than 0.17.0. 
+
   Added ability to stop all c.f.Flows executing within a c.c.Cascade instance via the stop() method.
 
   Changed c.f.FlowConnector to only take a Map of properties. These properties are passed downstream to various

@@ -31,8 +31,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -170,12 +168,12 @@ public class MapReduceFlow extends Flow
       {
       }
 
-    public Tuple source( WritableComparable key, Writable value )
+    public Tuple source( Object key, Object value )
       {
       if( value instanceof Comparable )
-        return new Tuple( key, (Comparable) value );
+        return new Tuple( (Comparable) key, (Comparable) value );
       else
-        return new Tuple( key );
+        return new Tuple( (Comparable) key );
       }
 
     @Override

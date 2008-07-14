@@ -26,8 +26,6 @@ import java.io.IOException;
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowMapperStack;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -63,7 +61,7 @@ public class FlowMapper extends MapReduceBase implements Mapper
       }
     }
 
-  public void map( WritableComparable key, Writable value, OutputCollector output, Reporter reporter ) throws IOException
+  public void map( Object key, Object value, OutputCollector output, Reporter reporter ) throws IOException
     {
     try
       {

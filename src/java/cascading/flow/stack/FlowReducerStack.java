@@ -38,7 +38,6 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -125,7 +124,7 @@ public class FlowReducerStack
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
-  public void reduce( WritableComparable key, Iterator values, OutputCollector output )
+  public void reduce( Object key, Iterator values, OutputCollector output )
     {
     if( LOG.isDebugEnabled() )
       {
