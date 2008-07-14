@@ -27,6 +27,7 @@
 
   <property file="${user.home}/build.properties"/>
   <property file="${cascading.basedir}/version.properties"/>
+  <property file="${cascading.basedir}/build.properties"/>
 
   <property name="cascading.release.version" value="x.y.z"/>
 
