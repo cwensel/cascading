@@ -115,7 +115,7 @@
     <mkdir dir="${test.results}"/>
 
     <property name="CLASSPATH" refid="project.class.path"/>
-    <echo message="${CLASSPATH}"/>
+    <!--<echo message="${CLASSPATH}"/>-->
   </target>
 
   <target name="compile" depends="init">
