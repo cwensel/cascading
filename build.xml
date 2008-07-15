@@ -36,13 +36,11 @@
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.java" location="${src}/java"/>
   <property name="src.test" location="${src}/test"/>
-  <!--<property name="src.examples" location="${src}/examples"/>-->
 
   <property name="build" location="${cascading.basedir}/build/"/>
   <property name="build.classes" location="${build}"/>
   <property name="build.java" location="${build.classes}/java"/>
   <property name="build.test" location="${build.classes}/test"/>
-  <!--<property name="build.examples" location="${build.classes}/examples"/>-->
 
   <property name="test.results" location="${build}/testresults"/>
   <property name="test.showoutput" value="yes"/>
@@ -57,14 +55,12 @@
 
   <property name="jar.cascading" value="cascading-${cascading.release.version}.jar"/>
   <property name="jar.cascading-lib" value="cascading-lib-${cascading.release.version}.jar"/>
-  <!--<property name="jar.cascading-examples" value="cascading-examples-${cascading.release.version}.jar"/>-->
   <property name="jar.cascading-test" value="cascading-test-${cascading.release.version}.jar"/>
 
   <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
 
   <path id="project.class.path">
     <pathelement location="${build.java}"/>
-    <!--<pathelement location="${build.examples}"/>-->
     <pathelement location="${build.test}"/>
     <fileset dir="${lib}">
       <include name="*.jar"/>
@@ -96,13 +92,11 @@
 
   <path id="project.src.path">
     <pathelement location="${src.java}"/>
-    <!--<pathelement location="${src.examples}"/>-->
     <pathelement location="${src.test}"/>
   </path>
 
   <path id="javadoc.src.path">
     <pathelement location="${src.java}"/>
-    <!--<pathelement location="${src.examples}"/>-->
   </path>
 
   <!-- sets up environment -->
@@ -110,7 +104,6 @@
     <echo message="initializing cascading environment..."/>
 
     <mkdir dir="${build.java}"/>
-    <!--<mkdir dir="${build.examples}"/>-->
     <mkdir dir="${build.test}"/>
     <mkdir dir="${test.results}"/>
 
@@ -130,16 +123,6 @@
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
-
-    <!--<javac srcdir="${src.examples}" destdir="${build.examples}" verbose="off" debug="${javac.debug}">-->
-    <!--<classpath refid="project.class.path"/>-->
-    <!--</javac>-->
-    <!---->
-    <!--<copy todir="${build.examples}">-->
-    <!--<fileset dir="${src.examples}">-->
-    <!--<exclude name="**/*.java"/>-->
-    <!--</fileset>-->
-    <!--</copy>-->
 
     <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
@@ -224,7 +207,6 @@
     <echo message="jarring cascading..."/>
     <delete file="${build}/${jar.cascading}"/>
     <delete file="${build}/${jar.cascading-lib}"/>
-    <!--<delete file="${build}/${jar.cascading-examples}"/>-->
     <delete file="${build}/${jar.cascading-test}"/>
     <delete dir="${build.java}/lib"/>
 
@@ -236,10 +218,6 @@
     <jar jarfile="${build}/${jar.cascading-lib}" manifest="${build}/MANIFEST.MF" compress="yes">
       <fileset dir="${build.java}"/>
     </jar>
-
-    <!--<jar jarfile="${build}/${jar.cascading-examples}" manifest="${build}/MANIFEST.MF" compress="yes">-->
-    <!--<fileset dir="${build.examples}"/>-->
-    <!--</jar>-->
 
     <jar jarfile="${build}/${jar.cascading-test}" manifest="${build}/MANIFEST.MF" compress="yes">
       <fileset dir="${build.test}">
@@ -289,7 +267,6 @@
 
     <copy file="${build}/${jar.cascading}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-lib}" todir="${dist}"/>
-    <!--<copy file="${build}/${jar.cascading-examples}" todir="${dist}"/>-->
 
   </target>
 

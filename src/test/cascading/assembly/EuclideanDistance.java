@@ -19,7 +19,7 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.examples;
+package cascading.assembly;
 
 import java.util.Map;
 

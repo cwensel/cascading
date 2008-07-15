@@ -25,9 +25,9 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Map;
 
-import cascading.examples.EuclideanDistance;
-import cascading.examples.PearsonDistance;
-import cascading.examples.SortElements;
+import cascading.assembly.EuclideanDistance;
+import cascading.assembly.PearsonDistance;
+import cascading.assembly.SortElements;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Cut;
