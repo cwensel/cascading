@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.7.0
 
   Changes project structure, removed 'examples' sub-project.
 
