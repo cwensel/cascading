@@ -25,10 +25,12 @@ import cascading.operation.Aggregator;
 import cascading.operation.BaseOperation;
 import cascading.operation.Cut;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
 import cascading.tuple.Fields;
@@ -67,7 +69,9 @@ public class CrossTab extends PipeAssembly
     pipe = new Each( pipe, new SortElements( new Fields( "n1", "v1" ), new Fields( "n2", "v2" ) ) );
 
     // unique the pipe
-    pipe = new Uniq( pipe );
+    pipe = new GroupBy( pipe, Fields.ALL );
+
+    pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     // out: name1, name2, movie, name1, rate1, name2, rate2
     pipe = new Group( pipe, new Fields( "n1", "n2" ) );

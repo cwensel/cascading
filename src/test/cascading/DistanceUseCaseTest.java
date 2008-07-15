@@ -28,7 +28,6 @@ import java.util.Map;
 import cascading.examples.EuclideanDistance;
 import cascading.examples.PearsonDistance;
 import cascading.examples.SortElements;
-import cascading.examples.Uniq;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Cut;
@@ -42,6 +41,7 @@ import cascading.operation.regex.Regexes;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -191,7 +191,9 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new SortElements( new Fields( "name1", "rate1" ), new Fields( "name2", "rate2" ) ) );
 
     // unique the pipe
-    pipe = new Uniq( pipe );
+    pipe = new GroupBy( pipe, Fields.ALL );
+
+    pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
