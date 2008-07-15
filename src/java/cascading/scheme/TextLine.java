@@ -39,7 +39,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * <p/>
  * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line". But if
  * a {@link Fields} is passed on the constructor with one field, the return tuples will simply
- * be the "line" value.
+ * be the "line" value using the given field name.
  * <p/>
  * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
  * bi-directional, so zip files cannot be written.
@@ -91,7 +91,23 @@ public class TextLine extends Scheme
     super( sourceFields, sinkFields );
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
-      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields the source fields for this scheme
+   * @param sinkFields   the sink fields for this scheme
+   * @param numSinkParts of type int
+   */
+  public TextLine( Fields sourceFields, Fields sinkFields, int numSinkParts )
+    {
+    super( sourceFields, sinkFields, numSinkParts );
+
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
     }
 
   /**
@@ -105,7 +121,7 @@ public class TextLine extends Scheme
     super( sourceFields );
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
-      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
     }
 
   /**
@@ -120,7 +136,7 @@ public class TextLine extends Scheme
     super( sourceFields, numSinkParts );
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
-      throw new IllegalArgumentException( "this scheme requires either one or two fields, given [" + sourceFields + "]" );
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
     }
 
   /**
@@ -195,6 +211,7 @@ public class TextLine extends Scheme
   @Override
   public void sink( Fields inFields, Tuple tuple, OutputCollector outputCollector ) throws IOException
     {
+    // it's ok to use NULL here so the collector does not write anything
     outputCollector.collect( null, tuple.get( inFields, sinkFields ) );
     }
 
