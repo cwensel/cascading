@@ -823,9 +823,14 @@ public class Flow implements Runnable
       if( !stop && !flowStats.isFinished() )
         flowStats.markCompleted();
 
-      fireOnCompleted();
-
-      deregisterShutdownHook();
+      try
+        {
+        fireOnCompleted();
+        }
+      finally
+        {
+        deregisterShutdownHook();
+        }
       }
     }
 
