@@ -236,32 +236,51 @@ public class MultiMapReducePlanner
     names.addAll( sources.keySet() );
     names.addAll( sinks.keySet() );
 
+    Set<String> tailNames = new HashSet<String>();
+    Set<String> headNames = new HashSet<String>();
+
     // handle tails
     for( Pipe pipe : pipes )
       {
+
+      if( tailNames.contains( pipe.getName() ) )
+        throw new FlowException( "duplicate tail name found: " + pipe.getName() );
+
       if( pipe instanceof PipeAssembly )
         {
         for( String tailName : ( (PipeAssembly) pipe ).getTailNames() )
           {
-          if( !names.contains( tailName ) )
-            throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+          if( tailNames.contains( tailName ) )
+            throw new FlowException( "duplicate tail name found: " + tailName );
+
+          tailNames.add( tailName );
           }
         }
-      else if( !names.contains( pipe.getName() ) )
-        {
-        throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
-        }
+
+      tailNames.add( pipe.getName() );
       }
+
+    tailNames.removeAll( names );
+
+    if( !tailNames.isEmpty() )
+      throw new FlowException( "pipe name(s) not found in either sink or source map: " + Util.join( tailNames, ", " ) );
 
     // handle heads
     for( Pipe pipe : pipes )
       {
       for( Pipe head : pipe.getHeads() )
         {
-        if( !names.contains( head.getName() ) )
-          throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+        if( headNames.contains( head.getName() ) )
+          throw new FlowException( "duplicate tail name found: " + pipe.getName() );
+
+        headNames.add( pipe.getName() );
         }
       }
+
+    headNames.removeAll( names );
+
+    if( !headNames.isEmpty() )
+      throw new FlowException( "pipe name(s) not found in either sink or source map: " + Util.join( headNames, ", " ) );
     }
 
   /**

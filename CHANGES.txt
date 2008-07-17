@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Added checks for duplicate head and tail pipe names. These must remain uniquely named.
+
 0.7.0
 
   Changes project structure, removed 'examples' sub-project.
