@@ -244,7 +244,7 @@ public class MultiMapReducePlanner
         for( String tailName : ( (PipeAssembly) pipe ).getTailNames() )
           {
           if( !names.contains( tailName ) )
-            throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+            throw new FlowException( "pipe name not found in either sink or source map: " + tailName );
           }
         }
       else if( !names.contains( pipe.getName() ) )
@@ -259,7 +259,7 @@ public class MultiMapReducePlanner
       for( Pipe head : pipe.getHeads() )
         {
         if( !names.contains( head.getName() ) )
-          throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+          throw new FlowException( "pipe name not found in either sink or source map: " + head.getName() );
         }
       }
     }

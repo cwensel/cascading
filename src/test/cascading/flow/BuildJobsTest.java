@@ -572,6 +572,66 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
     }
 
+  public void testDanglingHead() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", tap );
+//    sources.put( "b", tap );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "b" );
+
+    Pipe group1 = new Group( pipeA );
+    Pipe group2 = new Group( pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( sources, sinks, merge );
+      fail( "did not catch missing sink tap" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+    }
+
+  public void testDanglingTail() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", tap );
+    sources.put( "b", tap );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "b" );
+
+    Pipe group1 = new Group( pipeA );
+    Pipe group2 = new Group( pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+//    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( sources, sinks, merge );
+      fail( "did not catch missing source tap" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+    }
+
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
     {
     return DijkstraShortestPath.findPathBetween( graph, lhs, rhs ).size() - 1;
