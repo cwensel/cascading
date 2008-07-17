@@ -59,12 +59,7 @@ public class Cascades
     Map<String, Tap> map = new HashMap<String, Tap>();
 
     for( int i = 0; i < names.length; i++ )
-      {
-      if( map.containsKey( names[ i ] ) )
-        throw new IllegalStateException( "duplicate name found: " + names[ i ] );
-
       map.put( names[ i ], taps[ i ] );
-      }
 
     return map;
     }
@@ -93,12 +88,7 @@ public class Cascades
     Map<String, Tap> map = new HashMap<String, Tap>();
 
     for( int i = 0; i < pipes.length; i++ )
-      {
-      if( map.containsKey( pipes[ i ].getName() ) )
-        throw new IllegalStateException( "duplicate pipe names not allowed: " + pipes[ i ].getName() );
-
       map.put( pipes[ i ].getName(), taps[ i ] );
-      }
 
     return map;
     }

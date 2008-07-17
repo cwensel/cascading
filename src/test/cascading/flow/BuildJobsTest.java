@@ -457,14 +457,14 @@ public class BuildJobsTest extends CascadingTestCase
 
     sources.put( "source20", source20 );
     sources.put( "source101", source10 );
-    sources.put( "soucre102", source10 );
+    sources.put( "source102", source10 );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), "baz", true );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
-    Pipe pipeNum102 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source102" );
 
     Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
 
@@ -474,7 +474,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "cogroupcogroupopt.dot" );
 
-    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
     }
 
   public void testCoGroupAroundCoGroupOptimized() throws Exception
@@ -486,14 +486,14 @@ public class BuildJobsTest extends CascadingTestCase
 
     sources.put( "source20", source20 );
     sources.put( "source101", source10 );
-    sources.put( "soucre102", source10 );
+    sources.put( "source102", source10 );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), "baz", true );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
-    Pipe pipeNum102 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source102" );
 
     Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
 
@@ -509,6 +509,67 @@ public class BuildJobsTest extends CascadingTestCase
 //    flow.writeDOT( "cogroupcogroupopt.dot" );
 
     assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
+    }
+
+  /**
+   * This tests if two pipes can have the same name, and thus logically the same input source.
+   * <p/>
+   * Further, a GroupBy with two inputs would fail if the source was directly associated. but there is a Group
+   * function between the source and the merge, so it passes.
+   *
+   * @throws IOException
+   */
+  public void testSameHeadName() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "a" );
+
+    Pipe group1 = new Group( "a1", pipeA );
+    Pipe group2 = new Group( "a2", pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, merge );
+
+    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
+    }
+
+  /**
+   * Verifies the same tap instance can be shared between two logically different pipes.
+   *
+   * @throws IOException
+   */
+  public void testSameTaps() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", tap );
+    sources.put( "b", tap );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "b" );
+
+    Pipe group1 = new Group( pipeA );
+    Pipe group2 = new Group( pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, merge );
+
+//    flow.writeDOT( "sametaps.dot" );
+
+    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
     }
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )

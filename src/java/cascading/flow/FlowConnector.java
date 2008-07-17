@@ -289,15 +289,11 @@ public class FlowConnector
     Map<String, Tap> sources = new HashMap<String, Tap>();
 
     for( Pipe pipe : heads )
-      {
-      if( sources.containsKey( pipe.getName() ) )
-        throw new IllegalStateException( "duplicate head pipe names not allowed: " + pipe.getName() );
-
       sources.put( pipe.getName(), source );
-      }
 
     return connect( name, sources, sinks, pipes );
     }
+
 
   /**
    * Method connect links the named sources and sinks to the given pipe assembly.

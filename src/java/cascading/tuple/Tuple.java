@@ -743,7 +743,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
       if( lhs == null && rhs != null )
         return -1;
-      else if( rhs != null && lhs == null )
+      else if( lhs != null && rhs == null )
         return 1;
 
       int c = lhs.compareTo( rhs );

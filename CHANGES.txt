@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased
 
-  Added checks for duplicate head and tail pipe names. These must remain uniquely named.
+  Fixed bug in c.t.Tuple where NPE was thrown under certain compareTo operations.
+
+  Fixed bug that prevented CoGrouping or Merging on the same source even though it was one or more Groupings away.
 
 0.7.0
 

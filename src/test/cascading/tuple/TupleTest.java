@@ -234,6 +234,16 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) > 0 );
     }
 
+  public void testCompareNull()
+    {
+    Tuple aTuple = new Tuple( "a", null, "c" );
+    Tuple bTuple = new Tuple( "a", "b", null );
+
+    assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) < 0 );
+    assertTrue( "not less than: bTuple < aTuple", bTuple.compareTo( aTuple ) > 0 );
+    }
+
+
   public void testParse()
     {
     assertTuple( new Tuple( 0 ) );

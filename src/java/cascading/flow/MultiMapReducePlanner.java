@@ -236,51 +236,32 @@ public class MultiMapReducePlanner
     names.addAll( sources.keySet() );
     names.addAll( sinks.keySet() );
 
-    Set<String> tailNames = new HashSet<String>();
-    Set<String> headNames = new HashSet<String>();
-
     // handle tails
     for( Pipe pipe : pipes )
       {
-
-      if( tailNames.contains( pipe.getName() ) )
-        throw new FlowException( "duplicate tail name found: " + pipe.getName() );
-
       if( pipe instanceof PipeAssembly )
         {
         for( String tailName : ( (PipeAssembly) pipe ).getTailNames() )
           {
-          if( tailNames.contains( tailName ) )
-            throw new FlowException( "duplicate tail name found: " + tailName );
-
-          tailNames.add( tailName );
+          if( !names.contains( tailName ) )
+            throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
           }
         }
-
-      tailNames.add( pipe.getName() );
+      else if( !names.contains( pipe.getName() ) )
+        {
+        throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+        }
       }
-
-    tailNames.removeAll( names );
-
-    if( !tailNames.isEmpty() )
-      throw new FlowException( "pipe name(s) not found in either sink or source map: " + Util.join( tailNames, ", " ) );
 
     // handle heads
     for( Pipe pipe : pipes )
       {
       for( Pipe head : pipe.getHeads() )
         {
-        if( headNames.contains( head.getName() ) )
-          throw new FlowException( "duplicate tail name found: " + pipe.getName() );
-
-        headNames.add( pipe.getName() );
+        if( !names.contains( head.getName() ) )
+          throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
         }
       }
-
-    headNames.removeAll( names );
-
-    if( !headNames.isEmpty() )
-      throw new FlowException( "pipe name(s) not found in either sink or source map: " + Util.join( headNames, ", " ) );
     }
 
   /**
@@ -648,6 +629,9 @@ public class MultiMapReducePlanner
           LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
           normalizeGroups.add( group );
           }
+
+        if( tap.equals( commonTap ) )
+          throw new FlowException( "groups may not join duplicate sources, found: " + tap );
         }
       }
 
@@ -848,25 +832,6 @@ public class MultiMapReducePlanner
         }
       }
 
-    // verify joined taps are dupes
-    if( current.getPrevious().length > 1 )
-      {
-      Set<Tap> taps = new HashSet<Tap>();
-
-      for( Pipe previous : current.getPrevious() )
-        {
-        Tap source = sources.get( previous.getName() );
-
-        if( source == null )
-          continue;
-
-        if( taps.contains( source ) )
-          throw new FlowException( "groups may not join duplicate sources, found: " + source );
-
-        taps.add( source );
-        }
-      }
-
     for( Pipe previous : current.getPrevious() )
       {
       makePipeGraph( graph, previous, sources, sinks );
@@ -878,10 +843,18 @@ public class MultiMapReducePlanner
         {
         // handle PipeAssembly instances, they are not part of the graph
         for( Pipe pipe : previous.getPrevious() )
+          {
+          if( graph.getEdge( pipe, current ) != null )
+            throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + pipe );
+
           graph.addEdge( pipe, current ).setName( pipe.getName() ); // name scope after previous pipe
+          }
         }
       else
         {
+        if( graph.getEdge( previous, current ) != null )
+          throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
+
         graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
         }
       }
