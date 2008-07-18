@@ -871,6 +871,7 @@ public class Group extends Pipe
         // will throwFail on name collisions
         for( Scope incomingScope : incomingScopes )
           appendedFields = appendedFields.append( resolveFields( incomingScope ) );
+
         return appendedFields;
         }
       }

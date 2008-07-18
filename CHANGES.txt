@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.t.Fields to fail if given duplicate field names.
+
   Changed behavior if Hadoop FileInputSplit is not used and property "map.input.file" is not set. If there is one
   source, it will returned as the source for the mapper stack, otherwise an exception is thrown. Subsequently joins
   and merges of non-file sources is not supported until a discriminator can be passed to the mapper.

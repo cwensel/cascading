@@ -360,7 +360,7 @@ public final class Fields implements Comparable, Serializable
    */
   public Fields( Comparable... fields )
     {
-    this.fields = expand( fields );
+    this.fields = validate( fields );
     }
 
   /**
@@ -498,17 +498,23 @@ public final class Fields implements Comparable, Serializable
     return isAll() || isArguments() || isKeys() || isValues();
     }
 
-  private Comparable[] expand( Comparable[] fields )
+  private Comparable[] validate( Comparable[] fields )
     {
     isOrdered = true;
 
+    Set<Comparable> names = new HashSet<Comparable>();
+
     for( int i = 0; i < fields.length; i++ )
       {
-      if( fields[ i ] instanceof Number && (Integer) fields[ i ] != i )
-        {
+      Comparable field = fields[ i ];
+
+      if( names.contains( field ) )
+        throw new TupleException( "duplicate field name found: " + field );
+
+      names.add( field );
+
+      if( field instanceof Number && (Integer) field != i )
         isOrdered = false;
-        break;
-        }
       }
 
     return fields;

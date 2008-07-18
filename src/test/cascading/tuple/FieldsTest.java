@@ -37,6 +37,29 @@ public class FieldsTest extends CascadingTestCase
     super.setUp();
     }
 
+  public void testDuplicate()
+    {
+    try
+      {
+      new Fields( 0, 0 );
+      fail( "accepted dupe field names" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+
+    try
+      {
+      new Fields( "foo", "foo" );
+      fail( "accepted dupe field names" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+    }
+
   public void testAppend()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -87,16 +110,16 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
     }
 
-  public void testDiffDupe()
-    {
-    Fields fieldA = new Fields( "a", "b" );
-    Fields fieldB = new Fields( "a", "a" );
-
-    Fields diff = fieldA.minus( fieldB );
-
-    assertEquals( "not equal: ", 1, diff.size() );
-    assertEquals( "not equal: ", "b", diff.get( 0 ) );
-    }
+//  public void testDiffDupe()
+//    {
+//    Fields fieldA = new Fields( "a", "b" );
+//    Fields fieldB = new Fields( "a", "a" );
+//
+//    Fields diff = fieldA.minus( fieldB );
+//
+//    assertEquals( "not equal: ", 1, diff.size() );
+//    assertEquals( "not equal: ", "b", diff.get( 0 ) );
+//    }
 
   public void testDiffSame()
     {
