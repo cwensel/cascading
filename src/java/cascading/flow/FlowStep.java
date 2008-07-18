@@ -186,9 +186,16 @@ public class FlowStep implements Serializable
     {
     String currentFile = jobConf.get( "map.input.file" );
 
+    // if FileInputSplit was not used, and there is only one source, go ahead and return it
     if( currentFile == null || currentFile.length() == 0 )
-      throw new IllegalStateException( "map.input.file property returned null" );
+      {
+      if( sources.size() == 1 )
+        return sources.keySet().iterator().next();
 
+      throw new IllegalStateException( "map.input.file property returned null" );
+      }
+
+    // do not assume if one source it is the current, should fail appropriately for misbehaving Taps
     // test for the case that multiple taps contain the same file, and fail appropriately
     List<Tap> found = new ArrayList<Tap>();
 

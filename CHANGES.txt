@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed behavior if Hadoop FileInputSplit is not used and property "map.input.file" is not set. If there is one
+  source, it will returned as the source for the mapper stack, otherwise an exception is thrown. Subsequently joins
+  and merges of non-file sources is not supported until a discriminator can be passed to the mapper.
+
   Fixed bug in c.t.Tuple where NPE was thrown under certain compareTo operations.
 
   Fixed bug that prevented CoGrouping or Merging on the same source even though it was one or more Groupings away.
