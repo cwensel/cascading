@@ -516,12 +516,18 @@ public class MultiMapReducePlanner
   /**
    * optimized for this case
    * <pre>
-   *        e - t
-   * t - e -
-   *        e - t
+   *         e - t           e1 - e - t
+   * t - e1 -       -- > t -
+   *         e - t           e1 - e - t
    * </pre>
    * <p/>
-   * this should run in two map/red jobs, not 3
+   * this should run in two map/red jobs, not 3. needs to be a flag on e1 to prevent this
+   * <p/>
+   * <pre>
+   *        g - t                 g - t
+   * g - e -       --> g - e - t -
+   *        g - t                 g - t
+   * </pre>
    *
    * @param pipeGraph
    */
@@ -578,7 +584,7 @@ public class MultiMapReducePlanner
     Set<Group> groups = findAllMergeJoinGroups( pipeGraph );
 
     // compare group sources
-    Set<Group> normalizeGroups = new HashSet<Group>();
+    Map<Group, Set<Tap>> normalizeGroups = new HashMap<Group, Set<Tap>>();
 
     for( Group group : groups )
       {
@@ -590,26 +596,22 @@ public class MultiMapReducePlanner
       // iterate each shortest path to current group finding each tap sourcing the merge/join
       for( GraphPath<FlowElement, Scope> path : paths )
         {
-        List<Scope> list = path.getEdgeList();
-        Collections.reverse( list );
+        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is group
+        Collections.reverse( flowElements );
 
-        for( Scope scope : list )
+        for( FlowElement previousElement : flowElements )
           {
-          FlowElement previousElement = pipeGraph.getEdgeSource( scope );
-
           if( previousElement instanceof Tap )
             {
             taps.add( (Tap) previousElement );
             break;
             }
-
-          if( previousElement instanceof Group )
-            throw new IllegalStateException( "encountered Group before Tap: " + previousElement );
           }
         }
 
-//      if( taps.size() < 2 )
-//        throw new IllegalStateException( "must be 2 or more source taps to this group: " + group );
+      if( taps.size() == 1 )
+        continue;
+
       Iterator<Tap> iterator = taps.iterator();
       Tap commonTap = iterator.next();
 
@@ -623,20 +625,29 @@ public class MultiMapReducePlanner
         if( getSchemeClass( tap ) != getSchemeClass( commonTap ) )
           {
           LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
-          normalizeGroups.add( group );
+          normalizeGroups.put( group, taps );
+          break;
           }
         }
       }
 
     // if incompatible, insert Tap after its join/merge pipe
-    for( Group group : normalizeGroups )
+    for( Group group : normalizeGroups.keySet() )
       {
-      List<FlowElement> list = Graphs.predecessorListOf( pipeGraph, group );
+      Set<Tap> taps = normalizeGroups.get( group );
 
-      for( FlowElement flowElement : list )
+      for( Tap tap : taps )
         {
-        if( flowElement instanceof Pipe )
-          insertTapAfter( pipeGraph, (Pipe) flowElement );
+        if( tap instanceof TempHfs )
+          continue;
+
+        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, 1 );
+        List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
+
+        List<FlowElement> flowElements = Graphs.getPathVertexList( paths.get( 0 ) );
+        Collections.reverse( flowElements );
+
+        insertTapAfter( pipeGraph, (Pipe) flowElements.get( 1 ) );
         }
       }
 
@@ -683,17 +694,15 @@ public class MultiMapReducePlanner
 
       for( GraphPath<FlowElement, Scope> path : paths )
         {
-        for( Scope scope : path.getEdgeList() )
+        for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
           {
-          FlowElement flowElement = reverseGraph.getEdgeTarget( scope );
+          if( !( flowElement instanceof Tap ) )
+            continue;
 
-          if( flowElement instanceof Tap )
-            {
-            Tap tap = (Tap) flowElement;
+          Tap tap = (Tap) flowElement;
 
-            taps.add( tap );
-            break;
-            }
+          taps.add( tap );
+          break;
           }
         }
 
@@ -711,40 +720,35 @@ public class MultiMapReducePlanner
   private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
     {
     // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
-    while( !handleGroupPartitioning( pipeGraph, sources ) )
+    while( !handleGroupPartitioning( pipeGraph ) )
       ;
     }
 
-  private boolean handleGroupPartitioning( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+  private boolean handleGroupPartitioning( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
     List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
-      Iterator<Scope> scopeIterator = path.getEdgeList().iterator();
-
+      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
       List<Pipe> tapInsertions = new ArrayList<Pipe>();
 
       boolean foundGroup = false;
 
-      FlowElement previousFlowElement = null;
-      FlowElement flowElement = head;
-
-      while( scopeIterator.hasNext() )
+      for( int i = 0; i < flowElements.size(); i++ )
         {
-        previousFlowElement = flowElement;
-        flowElement = pipeGraph.getEdgeTarget( scopeIterator.next() );
+        FlowElement flowElement = flowElements.get( i );
 
         if( flowElement instanceof Extent ) // is an extent: head or tail
           continue;
-        else if( flowElement instanceof Tap && sources.contains( (Tap) flowElement ) )  // is a source tap
+        else if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof Extent )  // is a source tap
           continue;
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
         else if( flowElement instanceof Group && foundGroup ) // add tap between groups
-          tapInsertions.add( (Pipe) previousFlowElement );
+          tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
         else if( flowElement instanceof Tap )
           foundGroup = false;
         }
