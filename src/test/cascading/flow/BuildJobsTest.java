@@ -299,7 +299,11 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
-  /** This should result in a Temp Tap after the Every. Pushing the next Each to be run inside the next two parallel steps */
+  /**
+   * This should result in a Temp Tap after the Each split.
+   * <p/>
+   * We previously would push the each to the next step, but if there is already data being written, save the cpu.
+   */
   public void testSplitComplex()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
@@ -327,7 +331,11 @@ public class BuildJobsTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    List<FlowStep> steps = new FlowConnector().connect( sources, sinks, left, right ).getSteps();
+    Flow flow = new FlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "splitcomplex.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
@@ -337,6 +345,11 @@ public class BuildJobsTest extends CascadingTestCase
     FlowElement operator = step.getNextFlowElement( nextScope );
 
     assertTrue( "not an Every", operator instanceof Every );
+
+    nextScope = step.getNextScope( operator );
+    operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not a Each", operator instanceof Each );
 
     nextScope = step.getNextScope( operator );
     operator = step.getNextFlowElement( nextScope );
@@ -584,11 +597,11 @@ public class BuildJobsTest extends CascadingTestCase
       }
     catch( FlowException exception )
       {
-      exception.writeDOT( "cogroupcogroup.dot" );
+//      exception.writeDOT( "cogroupcogroup.dot" );
       throw exception;
       }
 
-    flow.writeDOT( "cogroupcogroup.dot" );
+//    flow.writeDOT( "cogroupcogroup.dot" );
 
     assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
     }

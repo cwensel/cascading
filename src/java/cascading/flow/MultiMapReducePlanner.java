@@ -554,8 +554,10 @@ public class MultiMapReducePlanner
       else if( pipeGraph.outDegreeOf( flowElement ) <= 1 )
         continue;
 
-      if( !( lastInsertable instanceof Tap ) )
-        insertTapAfter( pipeGraph, (Pipe) lastInsertable );
+      if( lastInsertable instanceof Tap )
+        continue;
+
+      insertTapAfter( pipeGraph, (Pipe) flowElement );
       }
     }
 

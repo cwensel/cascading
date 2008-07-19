@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.MultiMapReducePlanner to keep a splitting c.p.Each on the previous step, instead of being duplicated
+  on each branch. If the Each is preceeded by a source c.t.Tap, it will be duplicated across branches to reduce
+  the number of step in the Flow.
+
   Fixed bug in c.f.MultiMapReducePlanner where too many temp tap instances were being inserted while normalizing
   the flow sources.
 
