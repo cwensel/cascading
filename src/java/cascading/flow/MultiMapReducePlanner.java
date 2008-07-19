@@ -626,7 +626,6 @@ public class MultiMapReducePlanner
         // possibly could test for common input format
         if( getSchemeClass( tap ) != getSchemeClass( commonTap ) )
           {
-          LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
           normalizeGroups.put( group, taps );
           break;
           }
@@ -648,6 +647,8 @@ public class MultiMapReducePlanner
 
         List<FlowElement> flowElements = Graphs.getPathVertexList( paths.get( 0 ) );
         Collections.reverse( flowElements );
+
+        LOG.warn( "inserting step to normalize incompatible sources: " + tap );
 
         insertTapAfter( pipeGraph, (Pipe) flowElements.get( 1 ) );
         }
