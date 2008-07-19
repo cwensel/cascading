@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.CascadingTestCase;
+import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
@@ -371,6 +372,41 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
 
+  public void testDupeSourceFail()
+    {
+    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+    Tap source2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+
+    Tap sink = new Hfs( new TextLine(), "foo" );
+
+    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
+
+    Map sources = new HashMap();
+    sources.put( "left", source1 );
+    sources.put( "right", source2 );
+
+    Map sinks = new HashMap();
+    sinks.put( "merge", sink );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, merge );
+      flow.writeDOT( "dupesource.dot" );
+      fail( "did not fail on dupe source" );
+      }
+    catch( Exception exception )
+      {
+
+      }
+    }
+
   public void testMerge2()
     {
     Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );
@@ -509,6 +545,53 @@ public class BuildJobsTest extends CascadingTestCase
 //    flow.writeDOT( "cogroupcogroupopt.dot" );
 
     assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
+    }
+
+  public void testCoGroupAroundCoGroupAroundCoGroup() throws Exception
+    {
+    if( true )
+      return;
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper1", sourceUpper );
+    sources.put( "upper2", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "output", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
+
+    Pipe splice1 = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    splice1 = new Each( splice1, new Identity() );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+
+    splice2 = new CoGroup( splice2, new Fields( "num1" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5" ) );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sink, splice2 );
+      }
+    catch( FlowException exception )
+      {
+      exception.writeDOT( "cogroupcogroup.dot" );
+      throw exception;
+      }
+
+    flow.writeDOT( "cogroupcogroup.dot" );
+
+    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
     }
 
   /**

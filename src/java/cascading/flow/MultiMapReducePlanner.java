@@ -178,6 +178,7 @@ public class MultiMapReducePlanner
       handleSplits( pipeGraph );
       handleGroups( pipeGraph, sources.values() );
       handleHeterogeneousSources( pipeGraph );
+      verifyUniqueGroupSources( pipeGraph );
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
 
@@ -574,15 +575,7 @@ public class MultiMapReducePlanner
   private boolean internalHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     // find all Groups
-    Set<FlowElement> vertices = pipeGraph.vertexSet();
-    Set<Group> groups = new HashSet<Group>();
-
-    for( FlowElement vertice : vertices )
-      {
-      // only if it is a join/merge
-      if( vertice instanceof Group && pipeGraph.inDegreeOf( vertice ) > 1 )
-        groups.add( (Group) vertice );
-      }
+    Set<Group> groups = findAllMergeJoinGroups( pipeGraph );
 
     // compare group sources
     Set<Group> normalizeGroups = new HashSet<Group>();
@@ -592,8 +585,9 @@ public class MultiMapReducePlanner
       KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
       List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
-      List<Tap> taps = new ArrayList<Tap>();
+      Set<Tap> taps = new HashSet<Tap>();
 
+      // iterate each shortest path to current group finding each tap sourcing the merge/join
       for( GraphPath<FlowElement, Scope> path : paths )
         {
         List<Scope> list = path.getEdgeList();
@@ -614,13 +608,15 @@ public class MultiMapReducePlanner
           }
         }
 
-      if( taps.size() < 2 )
-        throw new IllegalStateException( "must be 2 or more source taps to this group: " + group );
+//      if( taps.size() < 2 )
+//        throw new IllegalStateException( "must be 2 or more source taps to this group: " + group );
+      Iterator<Tap> iterator = taps.iterator();
+      Tap commonTap = iterator.next();
 
-      Tap commonTap = taps.remove( 0 ); // get first
-
-      for( Tap tap : taps )
+      while( iterator.hasNext() )
         {
+        Tap tap = iterator.next();
+
         // making assumption hadoop can handle multiple filesytems, but not multiple inputformats
         // in the same job
         // possibly could test for common input format
@@ -629,9 +625,6 @@ public class MultiMapReducePlanner
           LOG.warn( "inserting step to normalize incompatible sources: " + commonTap + " and " + tap );
           normalizeGroups.add( group );
           }
-
-        if( tap.equals( commonTap ) )
-          throw new FlowException( "groups may not join duplicate sources, found: " + tap );
         }
       }
 
@@ -650,12 +643,63 @@ public class MultiMapReducePlanner
     return normalizeGroups.isEmpty();
     }
 
+  private Set<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    Set<FlowElement> vertices = pipeGraph.vertexSet();
+    Set<Group> groups = new HashSet<Group>();
+
+    for( FlowElement vertice : vertices )
+      {
+      // only if it is a join/merge
+      if( vertice instanceof Group && pipeGraph.inDegreeOf( vertice ) > 1 )
+        groups.add( (Group) vertice );
+      }
+    return groups;
+    }
+
   private Class getSchemeClass( Tap tap )
     {
     if( tap instanceof TempHfs )
       return ( (TempHfs) tap ).getSchemeClass();
     else
       return tap.getScheme().getClass();
+    }
+
+  private void verifyUniqueGroupSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    Set<Group> groups = findAllMergeJoinGroups( pipeGraph );
+
+    SimpleDirectedGraph<FlowElement, Scope> reverseGraph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
+    Graphs.addGraphReversed( reverseGraph, pipeGraph );
+
+    for( Group group : groups )
+      {
+      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( reverseGraph, group, Integer.MAX_VALUE );
+      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( head );
+
+      Set<Tap> taps = new HashSet<Tap>();
+
+      int incoming = pipeGraph.inDegreeOf( group );
+
+      for( GraphPath<FlowElement, Scope> path : paths )
+        {
+        for( Scope scope : path.getEdgeList() )
+          {
+          FlowElement flowElement = reverseGraph.getEdgeTarget( scope );
+
+          if( flowElement instanceof Tap )
+            {
+            Tap tap = (Tap) flowElement;
+
+            taps.add( tap );
+            break;
+            }
+          }
+        }
+
+      if( taps.size() != incoming )
+        throw new FlowException( "groups may not join/merge duplicate sources, found incoming: " + Util.join( taps, ", " ) );
+      }
     }
 
   /**
