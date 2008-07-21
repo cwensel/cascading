@@ -576,17 +576,21 @@ public class BuildJobsTest extends CascadingTestCase
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), "output", true );
 
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
+    Pipe pipeLower = new Each( "lower", new Fields( "line" ), splitter );
+    Pipe pipeUpper1 = new Each( "upper1", new Fields( "line" ), splitter );
+    Pipe pipeUpper2 = new Each( "upper2", new Fields( "line" ), splitter );
 
     Pipe splice1 = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     splice1 = new Each( splice1, new Identity() );
 
+    splice1 = new GroupBy( splice1, new Fields( 0 ) );
+
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     splice2 = new Each( splice2, new Identity() );
+
+    splice2 = new GroupBy( splice2, new Fields( 0 ) );
 
     splice2 = new CoGroup( splice2, new Fields( "num1" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5" ) );
 
@@ -603,7 +607,108 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "cogroupcogroup.dot" );
 
-    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 6, flow.getSteps().size() );
+    }
+
+  public void testDirectCoGroup() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "num", "char" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+    sources.put( "lower2", sourceLower );
+    sources.put( "upper1", sourceUpper );
+    sources.put( "upper2", sourceUpper );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), "output1", true );
+    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+    Pipe pipeLower2 = new Pipe( "lower2" );
+    Pipe pipeUpper1 = new Pipe( "upper1" );
+    Pipe pipeUpper2 = new Pipe( "upper2" );
+
+    Pipe splice1 = new CoGroup( pipeLower1, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+
+    splice2 = new CoGroup( "output1", splice2, new Fields( "num1" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5" ) );
+
+    Pipe splice3 = new CoGroup( "output2", pipeLower2, new Fields( "num" ), splice2, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5", "num6", "char6" ) );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, splice3 );
+      }
+    catch( FlowException exception )
+      {
+//      exception.writeDOT( "directcogroup.dot" );
+      throw exception;
+      }
+
+//    flow.writeDOT( "directcogroup.dot" );
+
+    assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
+    }
+
+  public void testSplitOuput() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), "output1", true );
+    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+
+    Pipe left = new GroupBy( "output1", pipeLower1, new Fields( 0 ) );
+    Pipe right = new GroupBy( "output2", left, new Fields( 0 ) );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+      }
+    catch( FlowException exception )
+      {
+//      exception.writeDOT( "splitout.dot" );
+      throw exception;
+      }
+
+//    flow.writeDOT( "splitout.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+
+    for( FlowStep step : steps )
+      {
+      if( step.group != null )
+        continue;
+
+      Scope nextScope = step.getNextScope( step.sources.keySet().iterator().next() );
+      FlowElement operator = step.getNextFlowElement( nextScope );
+
+      assertTrue( "should be Pipe", operator instanceof Pipe );
+      }
     }
 
   /**

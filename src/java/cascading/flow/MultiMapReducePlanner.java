@@ -23,12 +23,12 @@ package cascading.flow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -176,8 +176,9 @@ public class MultiMapReducePlanner
       verifyGraphConnections( pipeGraph );
 
       handleSplits( pipeGraph );
-      handleGroups( pipeGraph, sources.values() );
+      handleGroups( pipeGraph );
       handleHeterogeneousSources( pipeGraph );
+      handleHeterogeneousSinks( pipeGraph );
       verifyUniqueGroupSources( pipeGraph );
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
@@ -419,7 +420,7 @@ public class MultiMapReducePlanner
   private void replaceWithIdentity( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "replaceing with identity function" + pipe );
+      LOG.debug( "replacing with identity function" + pipe );
 
     Set<Scope> incomingScopes = new HashSet<Scope>( graph.incomingEdgesOf( pipe ) ); // will only be one, make copy
     Scope incomingScope = incomingScopes.iterator().next();
@@ -583,7 +584,7 @@ public class MultiMapReducePlanner
   private boolean internalHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     // find all Groups
-    Set<Group> groups = findAllMergeJoinGroups( pipeGraph );
+    List<Group> groups = findAllMergeJoinGroups( pipeGraph );
 
     // compare group sources
     Map<Group, Set<Tap>> normalizeGroups = new HashMap<Group, Set<Tap>>();
@@ -599,14 +600,14 @@ public class MultiMapReducePlanner
       for( GraphPath<FlowElement, Scope> path : paths )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is group
-        Collections.reverse( flowElements );
+        Collections.reverse( flowElements ); // first element is group
 
         for( FlowElement previousElement : flowElements )
           {
           if( previousElement instanceof Tap )
             {
             taps.add( (Tap) previousElement );
-            break;
+            break; // stop finding taps in this path
             }
           }
         }
@@ -639,35 +640,91 @@ public class MultiMapReducePlanner
 
       for( Tap tap : taps )
         {
-        if( tap instanceof TempHfs )
+        if( tap instanceof TempHfs ) // we normalize to TempHfs
           continue;
 
         KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, 1 );
         List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
-        List<FlowElement> flowElements = Graphs.getPathVertexList( paths.get( 0 ) );
-        Collections.reverse( flowElements );
+        List<FlowElement> flowElements = Graphs.getPathVertexList( paths.get( 0 ) ); // shortest path tap -> group
+        Collections.reverse( flowElements ); // group -> tap
+
+        FlowElement flowElement = flowElements.get( 1 );
+
+        if( !( flowElement instanceof Pipe ) )
+          throw new IllegalStateException( "flow element should be a Pipe: " + flowElement );
 
         LOG.warn( "inserting step to normalize incompatible sources: " + tap );
 
-        insertTapAfter( pipeGraph, (Pipe) flowElements.get( 1 ) );
+        insertTapAfter( pipeGraph, (Pipe) flowElement );
         }
       }
 
     return normalizeGroups.isEmpty();
     }
 
-  private Set<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  /**
+   * This actually stuffs an Identity between the sink tap and a preceeding temp tap
+   *
+   * @param pipeGraph
+   */
+  private void handleHeterogeneousSinks( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
-    Set<FlowElement> vertices = pipeGraph.vertexSet();
-    Set<Group> groups = new HashSet<Group>();
+    while( !internalHeterogeneousSinks( pipeGraph ) )
+      ;
+    }
 
-    for( FlowElement vertice : vertices )
+  private boolean internalHeterogeneousSinks( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    SimpleDirectedGraph<FlowElement, Scope> reverseGraph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
+    Graphs.addGraphReversed( reverseGraph, pipeGraph );
+
+    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( reverseGraph, tail, Integer.MAX_VALUE );
+    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( head );
+
+    for( GraphPath<FlowElement, Scope> path : paths )
       {
-      // only if it is a join/merge
-      if( vertice instanceof Group && pipeGraph.inDegreeOf( vertice ) > 1 )
-        groups.add( (Group) vertice );
+      List<FlowElement> vertices = Graphs.getPathVertexList( path );
+
+      FlowElement tap = vertices.get( 1 );
+      FlowElement previous = vertices.get( 2 );
+
+      if( !( tap instanceof Tap ) )
+        throw new IllegalStateException( "flow element must be a Tap: " + tap );
+
+      if( !( previous instanceof Tap ) )
+        continue;
+
+      insertIdentityBefore( pipeGraph, (Tap) tap );
+
+      return false;
       }
+
+    return true;
+    }
+
+
+  /**
+   * Finds all groups that merge/join streams. returned in topological order.
+   *
+   * @param pipeGraph
+   * @return
+   */
+  private List<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    TopologicalOrderIterator<FlowElement, Scope> topoIterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
+
+    List<Group> groups = new LinkedList<Group>();
+
+    while( topoIterator.hasNext() )
+      {
+      FlowElement flowElement = topoIterator.next();
+
+      // only if it is a join/merge
+      if( flowElement instanceof Group && pipeGraph.inDegreeOf( flowElement ) > 1 )
+        groups.add( (Group) flowElement );
+      }
+
     return groups;
     }
 
@@ -681,7 +738,7 @@ public class MultiMapReducePlanner
 
   private void verifyUniqueGroupSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
-    Set<Group> groups = findAllMergeJoinGroups( pipeGraph );
+    List<Group> groups = findAllMergeJoinGroups( pipeGraph );
 
     SimpleDirectedGraph<FlowElement, Scope> reverseGraph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
     Graphs.addGraphReversed( reverseGraph, pipeGraph );
@@ -718,9 +775,8 @@ public class MultiMapReducePlanner
    * Since all joins are at groups, depth first search is safe
    *
    * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param sources   of type Collection<Tap>
    */
-  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Collection<Tap> sources )
+  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
     // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
     while( !handleGroupPartitioning( pipeGraph ) )
@@ -778,16 +834,59 @@ public class MultiMapReducePlanner
       LOG.debug( "inserting tap after: " + pipe );
 
     TempHfs tempDfs = makeTemp( pipe );
-    Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( pipe ) );
 
-    graph.addVertex( tempDfs );
-    graph.addEdge( pipe, tempDfs, new Scope( pipe.getName() ) );
+    insertFlowElementAfter( graph, pipe, tempDfs );
+    }
+
+  private void insertIdentityBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Tap tap )
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "inserting identity after: " + tap );
+
+    Each each = new Each( tap.toString(), new Identity() );
+
+    insertFlowElementBefore( graph, tap, each );
+    }
+
+  private void insertFlowElementAfter( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement previousElement, FlowElement flowElement )
+    {
+    Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( previousElement ) );
+
+    graph.addVertex( flowElement );
+
+    String name = previousElement.toString();
+
+    if( previousElement instanceof Pipe )
+      name = ( (Pipe) previousElement ).getName();
+
+    graph.addEdge( previousElement, flowElement, new Scope( name ) );
 
     for( Scope scope : outgoing )
       {
       FlowElement target = graph.getEdgeTarget( scope );
-      graph.removeEdge( pipe, target ); // remove scope
-      graph.addEdge( tempDfs, target, scope ); // add scope back
+      graph.removeEdge( previousElement, target ); // remove scope
+      graph.addEdge( flowElement, target, scope ); // add scope back
+      }
+    }
+
+  private void insertFlowElementBefore( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement nextElement, FlowElement flowElement )
+    {
+    Set<Scope> incoming = new HashSet<Scope>( graph.incomingEdgesOf( nextElement ) );
+
+    graph.addVertex( flowElement );
+
+    String name = nextElement.toString();
+
+    if( nextElement instanceof Pipe )
+      name = ( (Pipe) nextElement ).getName();
+
+    graph.addEdge( flowElement, nextElement, new Scope( name ) );
+
+    for( Scope scope : incoming )
+      {
+      FlowElement target = graph.getEdgeSource( scope );
+      graph.removeEdge( target, nextElement ); // remove scope
+      graph.addEdge( target, flowElement, scope ); // add scope back
       }
     }
 
