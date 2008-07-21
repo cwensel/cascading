@@ -445,7 +445,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     List<FlowStep> steps = flow.getSteps();
 
-    assertEquals( "not equal: steps.size()", 3, steps.size() );
+    assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
 
@@ -660,6 +660,62 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
     }
 
+  /**
+   * verify case where same source is fed to multiple chained cogroups
+   *
+   * @throws Exception
+   */
+  public void testMultipleCoGroupSimilarSources() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "num", "char" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+    sources.put( "upper1", sourceUpper );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), "output1", true );
+    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+    Pipe pipeUpper1 = new Pipe( "upper1" );
+
+    Pipe splice1 = new CoGroup( pipeLower1, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+
+    splice2 = new CoGroup( "output1", splice2, new Fields( "num1" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5" ) );
+
+    Pipe splice3 = new CoGroup( "output2", pipeUpper1, new Fields( "num" ), splice2, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3", "num4", "char4", "num5", "char5", "num6", "char6" ) );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, splice3 );
+      }
+    catch( FlowException exception )
+      {
+//      exception.writeDOT( "chainedcogroup.dot" );
+      throw exception;
+      }
+
+//    flow.writeDOT( "chainedcogroup.dot" );
+
+    assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
+    }
+
+  /**
+   * verify split is homogeneous
+   *
+   * @throws Exception
+   */
   public void testSplitOuput() throws Exception
     {
     Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );

@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased
 
-  Changed c.f.MultiMapReducePlanner to normalize heterogeneous sinks. 
+  Fixed bug in c.f.MultiMapReducePlanner where a source used on more than one c.p.Group would cause an internal
+  error during planning.
+
+  Changed c.f.MultiMapReducePlanner to normalize heterogeneous sinks.
 
   Changed c.f.MultiMapReducePlanner to keep a splitting c.p.Each on the previous step, instead of being duplicated
   on each branch. If the Each is preceeded by a source c.t.Tap, it will be duplicated across branches to reduce

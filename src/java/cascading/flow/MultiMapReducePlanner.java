@@ -657,11 +657,13 @@ public class MultiMapReducePlanner
         FlowElement flowElement = flowElements.get( 1 );
 
         if( !( flowElement instanceof Pipe ) )
-          throw new IllegalStateException( "flow element should be a Pipe: " + flowElement );
+          throw new IllegalStateException( "flow element should be a Pipe, found: " + flowElement );
 
         LOG.warn( "inserting step to normalize incompatible sources: " + tap );
 
         insertTapAfter( pipeGraph, (Pipe) flowElement );
+
+        return false;
         }
       }
 
