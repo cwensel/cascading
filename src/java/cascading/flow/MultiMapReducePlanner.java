@@ -163,6 +163,7 @@ public class MultiMapReducePlanner
 
     try
       {
+      // generic
       verifyTaps( sources, true, true );
       verifyTaps( sinks, false, true );
       verifyTaps( traps, false, false );
@@ -175,14 +176,18 @@ public class MultiMapReducePlanner
       addExtents( pipeGraph, sources, sinks );
       verifyGraphConnections( pipeGraph );
 
+      // m/r specific
       handleSplits( pipeGraph );
       handleGroups( pipeGraph );
       handleHeterogeneousSources( pipeGraph );
       handleHeterogeneousSinks( pipeGraph );
+
+      // generic
       verifyUniqueGroupSources( pipeGraph );
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
 
+      // m/r specific
       SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
       SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph, traps );
 
