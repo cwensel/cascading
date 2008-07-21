@@ -81,7 +81,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", false ); // leave cluster testing enabled
+    super( "fielded pipes", true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
