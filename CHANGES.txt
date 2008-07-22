@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.7.1
 
   Fixed bug in c.f.MultiMapReducePlanner where a source used on more than one c.p.Group would cause an internal
   error during planning.

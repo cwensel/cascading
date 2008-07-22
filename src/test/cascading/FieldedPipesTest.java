@@ -862,7 +862,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice2 );
 
-    countFlow.writeDOT( "cogroupcogroup.dot" );
+//    countFlow.writeDOT( "cogroupcogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
 
     countFlow.complete();
