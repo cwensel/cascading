@@ -199,7 +199,7 @@ public class Group extends Pipe
 
       if( groupFields == null || groupFields.length == 0 )
         {
-        groupFieldsMap.put( pipes[ i ].getName(), Fields.FIRST );
+        addGroupFields( pipes[ i ], Fields.FIRST );
         continue;
         }
 
@@ -207,7 +207,7 @@ public class Group extends Pipe
         throw new IllegalArgumentException( "all cogroup fields must be same size" );
 
       last = groupFields[ i ].size();
-      groupFieldsMap.put( pipes[ i ].getName(), groupFields[ i ] );
+      addGroupFields( pipes[ i ], groupFields[ i ] );
       }
 
     this.declaredFields = declaredFields;
@@ -556,9 +556,17 @@ public class Group extends Pipe
   private void addPipe( Pipe pipe )
     {
     if( pipe.getName() == null )
-      throw new IllegalArgumentException( "pipe must have name" );
+      throw new IllegalArgumentException( "each input pipe must have a name" );
 
     pipes.add( pipe ); // allow same pipe
+    }
+
+  private void addGroupFields( Pipe pipe, Fields fields )
+    {
+    if( groupFieldsMap.containsKey( pipe.getName() ) )
+      throw new IllegalArgumentException( "each input pipe branch must be uniquely named" );
+
+    groupFieldsMap.put( pipe.getName(), fields );
     }
 
   @Override
