@@ -44,7 +44,6 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.PipeAssembly;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
@@ -452,54 +451,6 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
-
-  private static class TestAssembly extends PipeAssembly
-    {
-    public TestAssembly( String name )
-      {
-      Pipe pipe = new Pipe( name );
-
-      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-
-      setTails( pipe );
-      }
-    }
-
-  /** Tests that proper pipe graph is assembled without throwing an internal error */
-  public void testPipeAssembly()
-    {
-    Pipe pipe = new TestAssembly( "test" );
-    pipe = new GroupBy( pipe, new Fields( "ip" ) );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink = new Hfs( new TextLine(), "foo/split1", true );
-
-    List<FlowStep> steps = new FlowConnector().connect( source, sink, pipe ).getSteps();
-
-    assertEquals( "not equal: steps.size()", 1, steps.size() );
-    }
-
-  public void testPipeAssemblySplit()
-    {
-    Pipe pipe = new TestAssembly( "test" );
-    Pipe pipe1 = new GroupBy( "left", pipe, new Fields( "ip" ) );
-    Pipe pipe2 = new GroupBy( "right", pipe, new Fields( "ip" ) );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
-
-    Map sources = new HashMap();
-    sources.put( "test", source );
-
-    Map sinks = new HashMap();
-    sinks.put( "left", sink1 );
-    sinks.put( "right", sink2 );
-
-    List<FlowStep> steps = new FlowConnector().connect( sources, sinks, pipe1, pipe2 ).getSteps();
-
-    assertEquals( "not equal: steps.size()", 2, steps.size() );
-    }
 
   public void testCoGroupAroundCoGroup() throws Exception
     {

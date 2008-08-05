@@ -374,10 +374,14 @@ public class MultiMapReducePlanner
    */
   private void removeUnnecessaryPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
     {
-    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( graph, head );
-    Set<FlowElement> remove = new HashSet<FlowElement>();
+    while( !internalRemoveUnnecessaryPipes( graph ) )
+      ;
+    }
 
-    out:
+  private boolean internalRemoveUnnecessaryPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
+    {
+    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( graph, head );
+
     while( iterator.hasNext() )
       {
       FlowElement flowElement = iterator.next();
@@ -403,23 +407,22 @@ public class MultiMapReducePlanner
             if( flowElement.getClass() == Pipe.class )
               replaceWithIdentity( graph, (Pipe) flowElement );
 
-            continue out;
+            return false;
             }
 
           graph.addEdge( source, target, new Scope( outgoing ) );
           }
 
-        remove.add( flowElement );
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "removing: " + flowElement );
+
+        graph.removeVertex( flowElement );
+
+        return false;
         }
       }
 
-    for( FlowElement flowElement : remove )
-      {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "removing: " + flowElement );
-
-      graph.removeVertex( flowElement );
-      }
+    return true;
     }
 
   private void replaceWithIdentity( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
@@ -975,6 +978,7 @@ public class MultiMapReducePlanner
       graph.addEdge( current, sink ).setName( current.getName() ); // name scope after sink
       }
 
+    // PipeAssemblies should always have a previous
     if( current.getPrevious().length == 0 )
       {
       Tap source = sources.remove( current.getName() );
@@ -993,6 +997,7 @@ public class MultiMapReducePlanner
         }
       }
 
+    // getPrevious never returns a PipeAssembly
     for( Pipe previous : current.getPrevious() )
       {
       makePipeGraph( graph, previous, sources, sinks );
@@ -1000,25 +1005,16 @@ public class MultiMapReducePlanner
       if( LOG.isDebugEnabled() )
         LOG.debug( "adding edge: " + previous + " -> " + current );
 
-      if( previous instanceof PipeAssembly )
-        {
-        // handle PipeAssembly instances, they are not part of the graph
-        for( Pipe pipe : previous.getPrevious() )
-          {
-          if( graph.getEdge( pipe, current ) != null )
-            throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + pipe );
-
-          graph.addEdge( pipe, current ).setName( pipe.getName() ); // name scope after previous pipe
-          }
-        }
-      else
-        {
-        if( graph.getEdge( previous, current ) != null )
-          throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
-
-        graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
-        }
+      addEdge( graph, current, previous );
       }
+    }
+
+  private void addEdge( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe current, Pipe previous )
+    {
+    if( graph.getEdge( previous, current ) != null )
+      throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
+
+    graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
     }
 
   /**

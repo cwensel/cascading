@@ -128,7 +128,28 @@ public class Pipe implements FlowElement, Serializable
     if( previous == null )
       return new Pipe[0];
 
-    return new Pipe[]{previous};
+    return unwindPipeAssemblies( previous );
+    }
+
+  /**
+   * Is responsible for unwinding nested PipeAssembly instances.
+   *
+   * @param tails
+   * @return
+   */
+  protected Pipe[] unwindPipeAssemblies( Pipe... tails )
+    {
+    Set<Pipe> previous = new HashSet<Pipe>();
+
+    for( Pipe pipe : tails )
+      {
+      if( pipe instanceof PipeAssembly )
+        Collections.addAll( previous, pipe.getPrevious() );
+      else
+        previous.add( pipe );
+      }
+
+    return previous.toArray( new Pipe[previous.size()] );
     }
 
   /**
