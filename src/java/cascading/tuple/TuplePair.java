@@ -102,7 +102,7 @@ public class TuplePair extends Tuple
   @Override
   public int hashCode()
     {
-    return tuples != null ? Arrays.hashCode( tuples ) : 0;
+    return Arrays.hashCode( tuples );
     }
 
   @Override
