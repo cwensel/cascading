@@ -52,8 +52,15 @@ public class TuplePair extends Tuple
    */
   public TuplePair( Tuple lhs, Tuple rhs )
     {
+    super( (List<Comparable>) null ); // bypass unnecessary List creation
     tuples[ 0 ] = lhs;
     tuples[ 1 ] = rhs;
+
+    if( lhs == null )
+      throw new IllegalArgumentException( "lhs may not be null" );
+
+    if( rhs == null )
+      throw new IllegalArgumentException( "rhs may not be null" );
     }
 
   /**

@@ -39,6 +39,8 @@ public class Debug extends BaseOperation implements Filter
 
   /** Field output */
   private Output output = Output.STDERR;
+  /** Field prefix */
+  private String prefix = null;
   /** Field printFields */
   private boolean printFields = false;
 
@@ -50,6 +52,32 @@ public class Debug extends BaseOperation implements Filter
   public Debug()
     {
     super( ANY, Fields.ALL );
+    }
+
+  /**
+   * Constructor Debug creates a new Debug instance that prints to stderr by default, and does not print
+   * the Tuple instance field names.
+   *
+   * @param prefix of type String
+   */
+  public Debug( String prefix )
+    {
+    this();
+    this.prefix = prefix;
+    }
+
+  /**
+   * Constructor Debug creates a new Debug instance that prints to stderr and will print the current
+   * Tuple instance field names if printFields is true.
+   *
+   * @param prefix      of type String
+   * @param printFields of type boolean
+   */
+  public Debug( String prefix, boolean printFields )
+    {
+    this();
+    this.prefix = prefix;
+    this.printFields = printFields;
     }
 
   /**
@@ -77,10 +105,40 @@ public class Debug extends BaseOperation implements Filter
     }
 
   /**
+   * Constructor Debug creates a new Debug instance that prints to the declared stream and does not print the Tuple
+   * field names.
+   *
+   * @param output of type Output
+   * @param prefix of type String
+   */
+  public Debug( Output output, String prefix )
+    {
+    this.output = output;
+    this.prefix = prefix;
+    }
+
+  /**
    * Constructor Debug creates a new Debug instance that prints to the declared stream and will print the Tuple instances
    * field names if printFields is true.
    *
-   * @param output of type Output
+   * @param output      of type Output
+   * @param prefix      of type String
+   * @param printFields of type boolean
+   */
+  public Debug( Output output, String prefix, boolean printFields )
+    {
+    this();
+    this.output = output;
+    this.prefix = prefix;
+    this.printFields = printFields;
+    }
+
+  /**
+   * Constructor Debug creates a new Debug instance that prints to the declared stream and will print the Tuple instances
+   * field names if printFields is true.
+   *
+   * @param output      of type Output
+   * @param printFields of type boolean
    */
   public Debug( Output output, boolean printFields )
     {
@@ -95,10 +153,22 @@ public class Debug extends BaseOperation implements Filter
     PrintStream stream = output == Output.STDOUT ? System.out : System.err;
 
     if( printFields )
-      stream.println( input.getFields().print() );
+      print( stream, input.getFields().print() );
 
-    stream.println( input.getTuple().print() );
+    print( stream, input.getTuple().print() );
 
     return false;
     }
+
+  private void print( PrintStream stream, String message )
+    {
+    if( prefix != null )
+      {
+      stream.print( prefix );
+      stream.print( ": " );
+      }
+
+    stream.println( message );
+    }
+
   }

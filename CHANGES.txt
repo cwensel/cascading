@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.o.Debug to accept a prefix text string that will be prefixed to every message.
+
   Fixed bug where c.f.MultiMapReducePlanner would fail when normalizing inputs to a group where the inputs
   passed through one or more splits.
 
