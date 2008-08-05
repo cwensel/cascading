@@ -648,22 +648,26 @@ public class MultiMapReducePlanner
         if( tap instanceof TempHfs ) // we normalize to TempHfs
           continue;
 
-        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, 1 );
+        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, Integer.MAX_VALUE );
         List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
-        List<FlowElement> flowElements = Graphs.getPathVertexList( paths.get( 0 ) ); // shortest path tap -> group
-        Collections.reverse( flowElements ); // group -> tap
+        // handle case where there is a split on a pipe between the tap and group
+        for( GraphPath<FlowElement, Scope> path : paths )
+          {
+          List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // shortest path tap -> group
+          Collections.reverse( flowElements ); // group -> tap
 
-        FlowElement flowElement = flowElements.get( 1 );
+          FlowElement flowElement = flowElements.get( 1 );
 
-        if( !( flowElement instanceof Pipe ) )
-          throw new IllegalStateException( "flow element should be a Pipe, found: " + flowElement );
+          if( flowElement instanceof TempHfs )
+            continue;
 
-        LOG.warn( "inserting step to normalize incompatible sources: " + tap );
+          LOG.warn( "inserting step to normalize incompatible sources: " + tap );
 
-        insertTapAfter( pipeGraph, (Pipe) flowElement );
+          insertTapAfter( pipeGraph, (Pipe) flowElement );
 
-        return false;
+          return false;
+          }
         }
       }
 

@@ -29,9 +29,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.CascadingTestCase;
+import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
+import cascading.operation.assertion.AssertNotNull;
+import cascading.operation.assertion.AssertNull;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
@@ -42,6 +45,7 @@ import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -709,6 +713,74 @@ public class BuildJobsTest extends CascadingTestCase
 //    flow.writeDOT( "chainedcogroup.dot" );
 
     assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
+    }
+
+  /**
+   * tests to make sure splits on a pipe before a cogroup and after result in proper normalization
+   *
+   * @throws Exception
+   */
+  public void testMultipleCoGroupSplitSources() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "num", "char" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+    sources.put( "upper1", sourceUpper );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), "output1", true );
+    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+    Pipe pipeUpper1 = new Pipe( "upper1" );
+
+    Pipe pipeLower2 = new Each( pipeLower1, new Identity() );
+    pipeLower2 = new Each( pipeLower1, new Identity() );
+    pipeLower2 = new Each( pipeLower1, new Identity() );
+    pipeLower2 = new GroupBy( pipeLower2, new Fields( "num", "char" ) );
+    pipeLower2 = new Every( pipeLower2, new Fields( "num", "char" ), new Count(), new Fields( "num", "char" ) );
+
+    pipeLower1 = new Each( pipeLower1, new Identity() );
+    pipeLower1 = new Each( pipeLower1, new Identity() );
+    pipeLower1 = new Each( pipeLower1, new Identity() );
+    pipeLower1 = new Pipe( "lower2", pipeLower1 );
+
+    pipeUpper1 = new Each( pipeUpper1, new Identity() );
+    pipeUpper1 = new Each( pipeUpper1, new Identity() );
+    pipeUpper1 = new Each( pipeUpper1, new Identity() );
+
+    Pipe splice1 = new CoGroup( "group", Pipe.pipes( pipeLower1, pipeLower2, pipeUpper1 ), Fields.fields( new Fields( "num" ), new Fields( "num" ), new Fields( "num" ) ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ), new InnerJoin() );
+
+    Pipe output1 = new Each( splice1, AssertionLevel.VALID, new AssertNotNull() );
+    output1 = new Each( output1, new Identity() );
+    output1 = new Pipe( "output1", output1 );
+
+    Pipe output2 = new Each( splice1, AssertionLevel.VALID, new AssertNull() );
+    output2 = new Each( output2, new Identity() );
+    output2 = new Pipe( "output2", output2 );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, output1, output2 );
+      }
+    catch( FlowException exception )
+      {
+//      exception.writeDOT( "chainedcogroup.dot" );
+      throw exception;
+      }
+
+//    flow.writeDOT( "chainedcogroup.dot" );
+
+    assertEquals( "not equal: steps.size()", 6, flow.getSteps().size() );
     }
 
   /**

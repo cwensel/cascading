@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.f.MultiMapReducePlanner would fail when normalizing inputs to a group where the inputs
+  passed through one or more splits.
+
   Fixed bug where c.g.CoGroup silently stepped on input pipes with the same input name.
 
 0.7.1
