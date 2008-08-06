@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.t.Tap.flowInit( c.f.Flow flow ) to allow a given tap to know what flows it is participating in. It is called
+  immediately after the Flow instance is initailized.
+
   Fixed bug with nested c.p.PipeAssembly instances where some nested assemblies threw an internal error from
   the planner.
 

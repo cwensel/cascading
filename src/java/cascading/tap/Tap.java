@@ -118,7 +118,26 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
+   * Method flowInit allows this Tap instance to initalize itself in context of the given {@link Flow} instance.
+   * This method is guaranteed to be called before the Flow is started and the
+   * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
+   *
+   * @param flow of type Flow
+   */
+  public void flowInit( Flow flow )
+    {
+
+    }
+
+  /**
    * Method sourceInit initializes this instance as a source.
+   * <p/>
+   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link Flow}
+   * instance or if it participates in multiple times in a given Flow or across different Flows in
+   * a {@link cascading.cascade.Cascade}.
+   * <p/>
+   * In the context of a Flow, it will be called after
+   * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
    * @param conf of type JobConf
    * @throws IOException on resource initialization failure.
@@ -130,6 +149,15 @@ public abstract class Tap implements FlowElement, Serializable
 
   /**
    * Method sinkInit initializes this instance as a sink.
+   * <p/>
+   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link Flow}
+   * instance or if it participates in multiple times in a given Flow or across different Flows in
+   * a {@link cascading.cascade.Cascade}.
+   * <p/>
+   * Note this method will be called in context of this Tap being used as a traditional 'sink' and as a 'trap'.
+   * <p/>
+   * In the context of a Flow, it will be called after
+   * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
    * @param conf of type JobConf
    * @throws IOException on resource initialization failure.

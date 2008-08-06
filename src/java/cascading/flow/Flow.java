@@ -187,6 +187,7 @@ public class Flow implements Runnable
     setSinks( sinks );
     setTraps( traps );
     initFromProperties( properties );
+    initFromTaps();
     }
 
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
@@ -198,12 +199,26 @@ public class Flow implements Runnable
     setSinks( sinks );
     setTraps( traps );
     initFromProperties( properties );
+    initFromTaps();
     }
 
   private void initFromProperties( Map<Object, Object> properties )
     {
     preserveTemporaryFiles = getPreserveTemporaryFiles( properties );
     stopJobsOnExit = getStopJobsOnExit( properties );
+    }
+
+  private void initFromTaps()
+    {
+    initFromTaps( sources );
+    initFromTaps( sinks );
+    initFromTaps( traps );
+    }
+
+  private void initFromTaps( Map<String, Tap> taps )
+    {
+    for( Tap tap : taps.values() )
+      tap.flowInit( this );
     }
 
   /**
