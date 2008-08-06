@@ -28,8 +28,10 @@ import java.util.Map;
 
 import cascading.CascadingTestCase;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.PipeAssembly;
@@ -102,6 +104,10 @@ public class PipeAssemblyTest extends CascadingTestCase
 
       pipe = new Each( pipe, new Identity() );
 
+      pipe = new GroupBy( pipe, Fields.ALL );
+
+      pipe = new Every( pipe, new First(), Fields.RESULTS );
+
       setTails( pipe );
       }
     }
@@ -130,8 +136,8 @@ public class PipeAssemblyTest extends CascadingTestCase
 
     assertEquals( "wrong number of previous", 1, allPrevious.length );
 
-    for( Pipe previous : allPrevious )
-      assertFalse( previous instanceof PipeAssembly );
+//    for( Pipe previous : allPrevious )
+//      assertFalse( previous instanceof PipeAssembly );
 
     Pipe[] heads = pipe.getHeads();
 
@@ -161,11 +167,11 @@ public class PipeAssemblyTest extends CascadingTestCase
 
       List<FlowStep> steps = flow.getSteps();
 
-      assertEquals( "wrong size", 1, steps.size() );
+      assertEquals( "wrong size", 2, steps.size() );
       }
     catch( FlowException exception )
       {
-//      exception.writeDOT( "nestedassembly.dot" );
+      exception.writeDOT( "nestedassembly.dot" );
 
       throw exception;
       }

@@ -69,7 +69,8 @@ public class Pipe implements FlowElement, Serializable
     }
 
   /**
-   * Constructor Pipe creates a new Pipe instance.
+   * Constructor Pipe creates a new Pipe instance with the given name. This is useful as the 'start' or head
+   * of a pipe assembly.
    *
    * @param name of type String
    */
@@ -79,7 +80,8 @@ public class Pipe implements FlowElement, Serializable
     }
 
   /**
-   * Constructor Pipe creates a new Pipe instance.
+   * Constructor Pipe creates a new Pipe instance with the given name and previous Pipe instance. This is useful for
+   * naming a branch in a pipe assembly.
    *
    * @param name     of type String
    * @param previous of type Pipe
@@ -103,7 +105,7 @@ public class Pipe implements FlowElement, Serializable
     }
 
   /**
-   * Get the name of this pipe.  Guaranteed non-null.
+   * Get the name of this pipe. Guaranteed non-null.
    *
    * @return String the name of this pipe
    */
@@ -119,7 +121,8 @@ public class Pipe implements FlowElement, Serializable
     }
 
   /**
-   * Get all the upstream pipes this pipe is connected to.
+   * Get all the upstream pipes this pipe is connected to. This method will return the Pipe instances
+   * passed on the constructors as inputs to this Pipe instance.
    *
    * @return all the upstream pipes this pipe is connected to.
    */
@@ -128,28 +131,7 @@ public class Pipe implements FlowElement, Serializable
     if( previous == null )
       return new Pipe[0];
 
-    return unwindPipeAssemblies( previous );
-    }
-
-  /**
-   * Is responsible for unwinding nested PipeAssembly instances.
-   *
-   * @param tails
-   * @return
-   */
-  protected Pipe[] unwindPipeAssemblies( Pipe... tails )
-    {
-    Set<Pipe> previous = new HashSet<Pipe>();
-
-    for( Pipe pipe : tails )
-      {
-      if( pipe instanceof PipeAssembly )
-        Collections.addAll( previous, pipe.getPrevious() );
-      else
-        previous.add( pipe );
-      }
-
-    return previous.toArray( new Pipe[previous.size()] );
+    return new Pipe[]{previous};
     }
 
   /**

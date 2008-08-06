@@ -305,7 +305,7 @@ public class MultiMapReducePlanner
       else
         names.add( pipe.getName() );
 
-      collectNames( pipe.getPrevious(), names );
+      collectNames( unwindPipeAssemblies( pipe.getPrevious() ), names );
       }
     }
 
@@ -952,7 +952,7 @@ public class MultiMapReducePlanner
 
     if( current instanceof PipeAssembly )
       {
-      for( Pipe pipe : current.getPrevious() )
+      for( Pipe pipe : unwindPipeAssemblies( current.getPrevious() ) )
         makePipeGraph( graph, pipe, sources, sinks );
 
       return;
@@ -979,7 +979,7 @@ public class MultiMapReducePlanner
       }
 
     // PipeAssemblies should always have a previous
-    if( current.getPrevious().length == 0 )
+    if( unwindPipeAssemblies( current.getPrevious() ).length == 0 )
       {
       Tap source = sources.remove( current.getName() );
 
@@ -997,8 +997,7 @@ public class MultiMapReducePlanner
         }
       }
 
-    // getPrevious never returns a PipeAssembly
-    for( Pipe previous : current.getPrevious() )
+    for( Pipe previous : unwindPipeAssemblies( current.getPrevious() ) )
       {
       makePipeGraph( graph, previous, sources, sinks );
 
@@ -1015,6 +1014,28 @@ public class MultiMapReducePlanner
       throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
 
     graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
+    }
+
+
+  /**
+   * Is responsible for unwinding nested PipeAssembly instances.
+   *
+   * @param tails
+   * @return
+   */
+  private Pipe[] unwindPipeAssemblies( Pipe... tails )
+    {
+    Set<Pipe> previous = new HashSet<Pipe>();
+
+    for( Pipe pipe : tails )
+      {
+      if( pipe instanceof PipeAssembly )
+        Collections.addAll( previous, unwindPipeAssemblies( pipe.getPrevious() ) );
+      else
+        previous.add( pipe );
+      }
+
+    return previous.toArray( new Pipe[previous.size()] );
     }
 
   /**

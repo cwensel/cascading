@@ -593,7 +593,7 @@ public class Group extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
-    return unwindPipeAssemblies( pipes.toArray( new Pipe[pipes.size()] ) );
+    return pipes.toArray( new Pipe[pipes.size()] );
     }
 
   /**

@@ -79,6 +79,6 @@ public abstract class PipeAssembly extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
-    return unwindPipeAssemblies( tails );
+    return tails;
     }
   }

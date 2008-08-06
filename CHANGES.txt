@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug with nested c.p.PipeAssembly instances where some nested assemblies threw an internal error from
+  the planner.
+
   Changed c.o.Debug to accept a prefix text string that will be prefixed to every message.
 
   Fixed bug where c.f.MultiMapReducePlanner would fail when normalizing inputs to a group where the inputs
