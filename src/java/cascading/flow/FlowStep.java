@@ -116,7 +116,10 @@ public class FlowStep implements Serializable
 
   JobConf getJobConf( JobConf parentConf ) throws IOException
     {
-    JobConf conf = parentConf == null ? new JobConf( FlowStep.class ) : new JobConf( parentConf, FlowStep.class );
+    JobConf conf = parentConf == null ? new JobConf() : new JobConf( parentConf );
+
+    if( conf.getJar() == null )
+      conf.setJarByClass( FlowStep.class );
 
     conf.setJobName( getStepName() );
 
