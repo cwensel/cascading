@@ -32,7 +32,7 @@ General Information:
     </target>
 
   Where the 'cascading.lib' property points to the cascading.jar. Remember cascading.jar already has a 'lib' folder
-  embedded in it. Alternatively you could just add the cascading libs and cascading-lib.jar to your 'lib' folder.
+  embedded in it.
 
 License:
 
