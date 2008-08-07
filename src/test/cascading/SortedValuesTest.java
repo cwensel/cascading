@@ -43,9 +43,9 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.JobConf;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/ArrivalUseCaseTest.java#2 $ */
@@ -186,7 +186,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed, int comparePosition ) throws IOException, ParseException
     {
-    TapIterator iterator = tap.openForRead( new JobConf() );
+    TupleIterator iterator = tap.openForRead( new JobConf() );
 
     Set<Integer> values = new HashSet<Integer>();
 

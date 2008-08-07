@@ -26,6 +26,7 @@ import java.io.IOException;
 import cascading.CascadingTestCase;
 import cascading.scheme.TextLine;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -47,14 +48,14 @@ public class TapCollectorTest extends CascadingTestCase
 
     JobConf conf = new JobConf();
 
-    TapCollector collector = tap.openForWrite( conf );
+    TapCollector collector = (TapCollector) tap.openForWrite( conf ); // casting for test
 
     for( int i = 0; i < 100; i++ )
       collector.collect( new Tuple( "string", "" + i, i ) );
 
     collector.close();
 
-    TapIterator iterator = tap.openForRead( conf );
+    TupleIterator iterator = tap.openForRead( conf );
 
     int count = 0;
     while( iterator.hasNext() )

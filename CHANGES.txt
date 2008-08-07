@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.t.Tap and c.f.Flow to return c.t.TupleIterator and c.t.TupleCollector instead of c.t.TapIterator and
+  c.t.TapCollector, respectively. 
+
   Added c.t.Tap.flowInit( c.f.Flow flow ) to allow a given tap to know what flows it is participating in. It is called
   immediately after the Flow instance is initailized.
 

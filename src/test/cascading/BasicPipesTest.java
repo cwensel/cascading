@@ -43,10 +43,10 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleListCollector;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
@@ -89,7 +89,7 @@ public class BasicPipesTest extends CascadingTestCase
     flow.start();
     flow.complete();
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
     Function splitter = new RegexSplitter( Fields.size( 2 ) );
 
     boolean found = false;
@@ -216,7 +216,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     validateLength( countFlow, 5 );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );

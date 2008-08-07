@@ -35,7 +35,10 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
-/** Class TapCollector is a kind of {@link TupleCollector} that writes to a particular {@link Tap} instance. */
+/**
+ * Class TapCollector is a kind of {@link TupleCollector} that writes tuples to the resource managed by
+ * a particular {@link Tap} instance.
+ */
 public class TapCollector extends TupleCollector implements OutputCollector
   {
   /** Field LOG */
@@ -99,7 +102,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
     }
 
   @Override
-  public void close() throws IOException
+  public void close()
     {
     try
       {
@@ -108,7 +111,7 @@ public class TapCollector extends TupleCollector implements OutputCollector
     catch( IOException exception )
       {
       LOG.warn( "exception closing: " + filename, exception );
-      throw exception;
+      throw new TapException( "exception closing: " + filename, exception );
       }
     }
 

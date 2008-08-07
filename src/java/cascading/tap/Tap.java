@@ -33,6 +33,8 @@ import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -207,10 +209,10 @@ public abstract class Tap implements FlowElement, Serializable
    * Method openForRead opens the resource represented by this Tap instance.
    *
    * @param conf of type JobConf
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when the resource cannot be opened
    */
-  public TapIterator openForRead( JobConf conf ) throws IOException
+  public TupleIterator openForRead( JobConf conf ) throws IOException
     {
     return new TapIterator( this, conf );
     }
@@ -219,10 +221,10 @@ public abstract class Tap implements FlowElement, Serializable
    * Method openForWrite opens the resource represented by this Tap instance.
    *
    * @param conf of type JobConf
-   * @return TapCollector
+   * @return TupleCollector
    * @throws IOException when
    */
-  public TapCollector openForWrite( JobConf conf ) throws IOException
+  public TupleCollector openForWrite( JobConf conf ) throws IOException
     {
     return new TapCollector( this, conf );
     }

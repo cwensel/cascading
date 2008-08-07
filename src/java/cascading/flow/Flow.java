@@ -43,10 +43,10 @@ import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
-import cascading.tap.TapCollector;
-import cascading.tap.TapIterator;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.tap.hadoop.S3HttpFileSystem;
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleIterator;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -653,10 +653,10 @@ public class Flow implements Runnable
   /**
    * Method openSource opens the first source Tap.
    *
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openSource() throws IOException
+  public TupleIterator openSource() throws IOException
     {
     return sources.values().iterator().next().openForRead( getJobConf() );
     }
@@ -665,10 +665,10 @@ public class Flow implements Runnable
    * Method openSource opens the named source Tap.
    *
    * @param name of type String
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openSource( String name ) throws IOException
+  public TupleIterator openSource( String name ) throws IOException
     {
     return sources.get( name ).openForRead( getJobConf() );
     }
@@ -676,10 +676,10 @@ public class Flow implements Runnable
   /**
    * Method openSink opens the first sink Tap.
    *
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openSink() throws IOException
+  public TupleIterator openSink() throws IOException
     {
     return sinks.values().iterator().next().openForRead( getJobConf() );
     }
@@ -688,10 +688,10 @@ public class Flow implements Runnable
    * Method openSink opens the named sink Tap.
    *
    * @param name of type String
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openSink( String name ) throws IOException
+  public TupleIterator openSink( String name ) throws IOException
     {
     return sinks.get( name ).openForRead( getJobConf() );
     }
@@ -699,10 +699,10 @@ public class Flow implements Runnable
   /**
    * Method openTrap opens the first trap Tap.
    *
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openTrap() throws IOException
+  public TupleIterator openTrap() throws IOException
     {
     return traps.values().iterator().next().openForRead( getJobConf() );
     }
@@ -711,10 +711,10 @@ public class Flow implements Runnable
    * Method openTrap opens the named trap Tap.
    *
    * @param name of type String
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openTrap( String name ) throws IOException
+  public TupleIterator openTrap( String name ) throws IOException
     {
     return traps.get( name ).openForRead( getJobConf() );
     }
@@ -744,25 +744,25 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method openTapForRead return a {@link TapIterator} for the given Tap instance.
+   * Method openTapForRead return a {@link TupleIterator} for the given Tap instance.
    *
    * @param tap of type Tap
-   * @return TapIterator
+   * @return TupleIterator
    * @throws IOException when
    */
-  public TapIterator openTapForRead( Tap tap ) throws IOException
+  public TupleIterator openTapForRead( Tap tap ) throws IOException
     {
     return tap.openForRead( getJobConf() );
     }
 
   /**
-   * Method openTapForWrite returns a (@link TapCollector} for the given Tap instance.
+   * Method openTapForWrite returns a (@link TupleCollector} for the given Tap instance.
    *
    * @param tap of type Tap
-   * @return TapCollector
+   * @return TupleCollector
    * @throws IOException when
    */
-  public TapCollector openTapForWrite( Tap tap ) throws IOException
+  public TupleCollector openTapForWrite( Tap tap ) throws IOException
     {
     return tap.openForWrite( getJobConf() );
     }

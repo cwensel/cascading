@@ -56,8 +56,8 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class FieldedPipesTest extends ClusterTestCase
@@ -194,7 +194,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "75.185.76.245", iterator.next().get( 1 ) );
 
@@ -233,7 +233,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "1\tA", iterator.next().get( 1 ) );
@@ -276,7 +276,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -339,7 +339,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -402,7 +402,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 3, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
@@ -469,7 +469,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 7, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB", iterator.next().get( 1 ) );
@@ -537,7 +537,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 4, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
@@ -604,7 +604,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 6, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB", iterator.next().get( 1 ) );
@@ -688,7 +688,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 6, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\ta", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB\t2\tb", iterator.next().get( 1 ) );
@@ -735,7 +735,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -782,7 +782,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -820,7 +820,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
@@ -869,7 +869,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TapIterator iterator = countFlow.openSink();
+    TupleIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB\t2\tB", iterator.next().get( 1 ) );
@@ -932,7 +932,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\t1\t1", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "10\t10\t10", iterator.next().get( 1 ) );
@@ -1054,7 +1054,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 37, null );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tB", iterator.next().get( 1 ) );

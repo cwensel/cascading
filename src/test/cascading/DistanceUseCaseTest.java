@@ -46,11 +46,11 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleListCollector;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
@@ -142,7 +142,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     validateLength( flow, 21 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
     boolean found = false;
 
     while( iterator.hasNext() )
@@ -232,7 +232,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     validateLength( flow, 21 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
     boolean found = false;
 
     while( iterator.hasNext() )
@@ -274,7 +274,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     validateLength( flow, 21 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
     boolean found = false;
 
     while( iterator.hasNext() )
@@ -316,7 +316,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     validateLength( flow, 21 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
     boolean found = false;
 
     while( iterator.hasNext() )

@@ -47,7 +47,7 @@ class TapMapperStackElement extends MapperStackElement
     this.sink = sink;
 
     if( useTapCollector )
-      this.tapCollector = sink.openForWrite( jobConf );
+      this.tapCollector = (TapCollector) sink.openForWrite( jobConf );
     }
 
   protected FlowElement getFlowElement()

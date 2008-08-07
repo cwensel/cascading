@@ -36,8 +36,8 @@ import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
-import cascading.tap.TapIterator;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleIterator;
 
 /**
  *
@@ -74,7 +74,7 @@ public class FunctionTest extends CascadingTestCase
 
     validateLength( flow, 200 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "a\tb", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "a\tb", iterator.next().get( 1 ) );
@@ -99,7 +99,7 @@ public class FunctionTest extends CascadingTestCase
 
     validateLength( flow, 5 );
 
-    TapIterator iterator = flow.openSink();
+    TupleIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1 and A", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2 and B", iterator.next().get( 1 ) );

@@ -48,7 +48,7 @@ class TapReducerStackElement extends ReducerStackElement
     this.sink = sink;
 
     if( useTapCollector )
-      this.tapCollector = sink.openForWrite( jobConf );
+      this.tapCollector = (TapCollector) sink.openForWrite( jobConf );
     }
 
   public FlowElement getFlowElement()

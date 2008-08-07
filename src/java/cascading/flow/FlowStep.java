@@ -36,6 +36,7 @@ import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.TempHfs;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import cascading.tuple.TuplePair;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
@@ -177,7 +178,7 @@ public class FlowStep implements Serializable
     return new TapIterator( sources.keySet().iterator().next(), conf );
     }
 
-  public TapIterator openSinkForRead( JobConf conf ) throws IOException
+  public TupleIterator openSinkForRead( JobConf conf ) throws IOException
     {
     return sink.openForRead( conf );
     }

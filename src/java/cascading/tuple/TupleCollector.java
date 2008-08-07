@@ -21,8 +21,6 @@
 
 package cascading.tuple;
 
-import java.io.IOException;
-
 /** Interface TupleCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
 public abstract class TupleCollector
   {
@@ -78,10 +76,8 @@ public abstract class TupleCollector
   /**
    * Method close closes the underlying resource being written to. This method should be called when no more {@link Tuple}
    * instances will be written out.
-   *
-   * @throws IOException when
    */
-  public void close() throws IOException
+  public void close()
     {
     // do nothing
     }

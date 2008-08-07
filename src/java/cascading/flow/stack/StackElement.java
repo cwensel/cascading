@@ -94,7 +94,7 @@ abstract class StackElement implements FlowCollector
       {
       try
         {
-        trapCollector = trap.openForWrite( jobConf );
+        trapCollector = (TapCollector) trap.openForWrite( jobConf );
         trapCollectors.put( trap, trapCollector );
         }
       catch( IOException exception )

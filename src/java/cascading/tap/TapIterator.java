@@ -22,9 +22,9 @@
 package cascading.tap;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -33,8 +33,11 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
-/** Class TapIterator ... */
-public class TapIterator implements Iterator<Tuple>
+/**
+ * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link Tap} instances when
+ * opening the taps resource for reading.
+ */
+public class TapIterator implements TupleIterator
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TapIterator.class );
