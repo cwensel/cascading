@@ -1135,7 +1135,13 @@ public class Flow implements Runnable
     }
 
 
-  /** Class SafeFlowListener safely calls a wrapped FlowListener */
+  /**
+   * Class SafeFlowListener safely calls a wrapped FlowListener.
+   * <p/>
+   * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
+   * can be caught by the calling Thread. Since Flow is asyncronous, much of the work is done in the run() method
+   * which in turn is run in a new Thread.
+   */
   private class SafeFlowListener implements FlowListener
     {
     final FlowListener flowListener;
