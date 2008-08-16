@@ -862,7 +862,7 @@ public class Flow implements Runnable
 
   private void handleThrowable()
     {
-    if( throwable != null )
+    if( throwable != null && !stop )
       {
       flowStats.markFailed( throwable );
 
@@ -1214,6 +1214,9 @@ public class Flow implements Runnable
       this.throwable = throwable;
 
       logWarn( String.format( "flow listener %s threw throwable", flowListener ), throwable );
+
+      // stop this flow
+      stop();
       }
 
     public boolean equals( Object object )

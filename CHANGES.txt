@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed behavior of c.f.Flow where if a c.f.FlowListener throws an exception, the Flow instance receiving the
+  exception will stop (by calling Flow.stop()). Listeners will continue to fire as expected and Flow.complete()
+  will re-throw the thrown exception (as was the original behavior).
+
   Added ability to set a Cascading specific temporary directory path for use by intermediate taps created
   within c.f.Flow instances. Use c.t.Hfs.setTemporaryDirectory() to configure.
 

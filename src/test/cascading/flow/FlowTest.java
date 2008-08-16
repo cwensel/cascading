@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import cascading.ClusterTestCase;
+import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
@@ -38,6 +39,7 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
 
 /**
  *
@@ -118,6 +120,117 @@ public class FlowTest extends ClusterTestCase
 
     assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
     assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+    }
+
+  public void testFailingListenerStarting() throws Exception
+    {
+    failingListenerTest( FailingFlowListener.OnFail.STARTING );
+    }
+
+  public void testFailingListenerStopping() throws Exception
+    {
+    failingListenerTest( FailingFlowListener.OnFail.STOPPING );
+    }
+
+  public void testFailingListenerCompleted() throws Exception
+    {
+    failingListenerTest( FailingFlowListener.OnFail.COMPLETED );
+    }
+
+  public void testFailingListenerThrowable() throws Exception
+    {
+    failingListenerTest( FailingFlowListener.OnFail.THROWABLE );
+    }
+
+  public void failingListenerTest( FailingFlowListener.OnFail onFail ) throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/stopped/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    if( onFail == FailingFlowListener.OnFail.THROWABLE )
+      {
+      pipeLower = new Each( pipeLower, new Debug()
+      {
+      @Override
+      public boolean isRemove( TupleEntry input )
+        {
+        throw new RuntimeException( "failing inside pipe assembly intentionally" );
+        }
+      } );
+      }
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "stopped.dot" );
+
+    FailingFlowListener listener = new FailingFlowListener( onFail );
+
+    flow.addListener( listener );
+
+    System.out.println( "calling start" );
+    flow.start();
+
+    assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    if( onFail == FailingFlowListener.OnFail.STOPPING )
+      {
+      while( true )
+        {
+        System.out.println( "testing if running" );
+        Thread.sleep( 1000 );
+
+        Map<String, Callable<Throwable>> map = flow.getJobsMap();
+
+        if( map == null || map.values().size() == 0 )
+          continue;
+
+        if( ( (FlowStep.FlowStepJob) map.values().iterator().next() ).wasStarted() )
+          break;
+        }
+
+      System.out.println( "calling stop" );
+
+      flow.stop();
+      }
+
+    assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    try
+      {
+      flow.complete();
+      fail( "did not rethrow exception from listener" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
     }
 
 

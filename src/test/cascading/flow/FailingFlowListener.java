@@ -21,47 +21,54 @@
 
 package cascading.flow;
 
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
-
 /**
  *
  */
-public class LockingFlowListener implements FlowListener
+public class FailingFlowListener extends LockingFlowListener
   {
-  public Semaphore started = new Semaphore( 0 );
-  public Semaphore stopped = new Semaphore( 0 );
-  public Semaphore completed = new Semaphore( 0 );
-  public Semaphore thrown = new Semaphore( 0 );
-
-  public static Map<String, Callable<Throwable>> getJobsMap( Flow flow )
+  public static enum OnFail
     {
-    return flow.getJobsMap();
+      STARTING, STOPPING, COMPLETED, THROWABLE
     }
 
-  public LockingFlowListener()
+  private final OnFail onFail;
+
+  public FailingFlowListener( OnFail onFail )
     {
+    this.onFail = onFail;
     }
 
   public void onStarting( Flow flow )
     {
-    started.release();
+    super.onStarting( flow );
+
+    if( onFail == OnFail.STARTING )
+      throw new RuntimeException( "intentionally failed on: " + onFail );
     }
 
   public void onStopping( Flow flow )
     {
-    stopped.release();
+    super.onStopping( flow );
+
+    if( onFail == OnFail.STOPPING )
+      throw new RuntimeException( "intentionally failed on: " + onFail );
     }
 
   public void onCompleted( Flow flow )
     {
-    completed.release();
+    super.onCompleted( flow );
+
+    if( onFail == OnFail.COMPLETED )
+      throw new RuntimeException( "intentionally failed on: " + onFail );
     }
 
   public boolean onThrowable( Flow flow, Throwable throwable )
     {
-    thrown.release();
+    super.onThrowable( flow, throwable );
+
+    if( onFail == OnFail.THROWABLE )
+      throw new RuntimeException( "intentionally failed on: " + onFail );
+
     return false;
     }
   }
