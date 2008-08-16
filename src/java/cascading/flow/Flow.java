@@ -1052,6 +1052,11 @@ public class Flow implements Runnable
     LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
     }
 
+  private void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    }
+
   /**
    * Method writeDOT writes this Flow instance to the given filename as a DOT file for import into a graphics package.
    *
@@ -1208,7 +1213,7 @@ public class Flow implements Runnable
       {
       this.throwable = throwable;
 
-      LOG.warn( String.format( "flow listener %s threw throwable", flowListener ), throwable );
+      logWarn( String.format( "flow listener %s threw throwable", flowListener ), throwable );
       }
 
     public boolean equals( Object object )
