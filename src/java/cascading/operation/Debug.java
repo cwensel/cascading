@@ -23,14 +23,13 @@ package cascading.operation;
 
 import java.io.PrintStream;
 
-import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
 /**
  * Class Debug is a {@link Filter} that will never remove an item from a stream, but will print the Tuple to either
  * stdout or stderr.
  */
-public class Debug extends BaseOperation implements Filter
+public class Debug extends BaseFilter
   {
   static public enum Output
     {
@@ -44,14 +43,12 @@ public class Debug extends BaseOperation implements Filter
   /** Field printFields */
   private boolean printFields = false;
 
-
   /**
    * Constructor Debug creates a new Debug instance that prints to stderr by default, and does not print
    * the Tuple instance field names.
    */
   public Debug()
     {
-    super( ANY, Fields.ALL );
     }
 
   /**

@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Addeed the c.o.BaseFilter abstract class as a convenience class for c.o.Filter implementations.
+
   Fixed bug where the 'mapred.jar' property was begin stepped on if previously set by the calling application.
 
   Changed c.t.Tap and c.f.Flow to return c.t.TupleIterator and c.t.TupleCollector instead of c.t.TapIterator and
