@@ -1144,7 +1144,9 @@ public class Flow implements Runnable
    */
   private class SafeFlowListener implements FlowListener
     {
+    /** Field flowListener */
     final FlowListener flowListener;
+    /** Field throwable */
     Throwable throwable;
 
     private SafeFlowListener( FlowListener flowListener )
@@ -1160,7 +1162,7 @@ public class Flow implements Runnable
         }
       catch( Throwable throwable )
         {
-        this.throwable = throwable;
+        handleThrowable( throwable );
         }
       }
 
@@ -1172,7 +1174,7 @@ public class Flow implements Runnable
         }
       catch( Throwable throwable )
         {
-        this.throwable = throwable;
+        handleThrowable( throwable );
         }
       }
 
@@ -1184,7 +1186,7 @@ public class Flow implements Runnable
         }
       catch( Throwable throwable )
         {
-        this.throwable = throwable;
+        handleThrowable( throwable );
         }
       }
 
@@ -1196,10 +1198,17 @@ public class Flow implements Runnable
         }
       catch( Throwable throwable )
         {
-        this.throwable = throwable;
+        handleThrowable( throwable );
         }
 
       return false;
+      }
+
+    private void handleThrowable( Throwable throwable )
+      {
+      this.throwable = throwable;
+
+      LOG.warn( String.format( "flow listener %s threw throwable", flowListener ), throwable );
       }
 
     public boolean equals( Object object )
