@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added ability to set a Cascading specific temporary directory path for use by intermediate taps created
+  within c.f.Flow instances. Use c.t.Hfs.setTemporaryDirectory() to configure.
+
   Addeed the c.o.BaseFilter abstract class as a convenience class for c.o.Filter implementations.
 
   Fixed bug where the 'mapred.jar' property was begin stepped on if previously set by the calling application.

@@ -24,6 +24,7 @@ package cascading.tap;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
@@ -40,7 +41,11 @@ import org.apache.log4j.Logger;
  * for resources specific to Hadoop Distributed file system, the Local file system, or Amazon S3, respectively.
  * <p/>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
- * <code>hdfs://...</code> will denonte Dfs, <code>file://...</code> will denote Lfs, and <code>s3://aws_id:aws_secret@bucket/...</code> will denote S3fs.
+ * <code>hdfs://...</code> will denonte Dfs, <code>file://...</code> will denote Lfs, and
+ * <code>s3://aws_id:aws_secret@bucket/...</code> will denote S3fs.
+ * <p/>
+ * Call {@link #setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
+ * other than the current Hadoop default path.
  */
 public class Hfs extends Tap
   {
@@ -48,6 +53,9 @@ public class Hfs extends Tap
   private static final Logger LOG = Logger.getLogger( Hfs.class );
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
+
+  /** Field TEMPORARY_DIRECTORY */
+  private static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
 
   /** Field deleteOnSinkInit */
   boolean deleteOnSinkInit = false;
@@ -59,6 +67,28 @@ public class Hfs extends Tap
   transient Path path;
   /** Field paths */
   private transient FileStatus[] statuses;
+
+  /**
+   * Method setTemporaryDirectory sets the temporary directory on the given properties object.
+   *
+   * @param properties of type Map<Object,Object>
+   * @param tempDir    of type String
+   */
+  public static void setTemporaryDirectory( Map<Object, Object> properties, String tempDir )
+    {
+    properties.put( TEMPORARY_DIRECTORY, tempDir );
+    }
+
+  /**
+   * Methdo getTemporaryDirectory returns the configured temporary directory from the given properties object.
+   *
+   * @param properties of type Map<Object,Object>
+   * @return a String or null if not set
+   */
+  public static String getTemporaryDirectory( Map<Object, Object> properties )
+    {
+    return (String) properties.get( TEMPORARY_DIRECTORY );
+    }
 
   protected Hfs()
     {
@@ -344,7 +374,12 @@ public class Hfs extends Tap
 
   protected Path getTempPath( JobConf conf )
     {
-    return new Path( conf.get( "hadoop.tmp.dir" ) );
+    String tempDir = conf.get( TEMPORARY_DIRECTORY );
+
+    if( tempDir == null )
+      tempDir = conf.get( "hadoop.tmp.dir" );
+
+    return new Path( tempDir );
     }
 
   protected String makeTemporaryPathDir( String name )
