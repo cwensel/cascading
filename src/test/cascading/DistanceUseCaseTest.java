@@ -30,7 +30,6 @@ import cascading.assembly.PearsonDistance;
 import cascading.assembly.SortElements;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Cut;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
@@ -93,7 +92,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
-    pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ), Fields.RESULTS );
+    pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
 
     // remove lines if the names are the same
     pipe = new Each( pipe, new RegexFilter( "^[^\\t]*\\t([^\\t]*)\\t[^\\t]*\\t\\1\\t.*", true ) );
@@ -182,7 +181,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
-    pipe = new Each( pipe, new Cut( new Fields( "movie", "name1", "rate1", "name2", "rate2" ) ) );
+    pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
 
     // remove lines if the names are the same
     pipe = new Each( pipe, new RegexFilter( "^[^\\t]*\\t([^\\t]*)\\t[^\\t]*\\t\\1\\t.*", true ) );

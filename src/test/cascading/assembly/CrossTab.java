@@ -23,7 +23,6 @@ package cascading.assembly;
 
 import cascading.operation.Aggregator;
 import cascading.operation.BaseOperation;
-import cascading.operation.Cut;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
@@ -60,7 +59,7 @@ public class CrossTab extends SubAssembly
     pipe = new Group( pipe, new Fields( "l" ), 2, new Fields( "n1", "l", "v1", "n2", "l2", "v2" ) );
 
     // remove useless fields
-    pipe = new Each( pipe, new Cut( new Fields( "l", "n1", "v1", "n2", "v2" ) ) );
+    pipe = new Each( pipe, new Fields( "l", "n1", "v1", "n2", "v2" ), new Identity() );
 
     // remove lines if the names are the same
     pipe = new Each( pipe, new RegexFilter( "^[^\\t]*\\t([^\\t]*)\\t[^\\t]*\\t\\1\\t.*", true ) );
