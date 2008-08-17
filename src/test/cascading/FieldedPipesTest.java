@@ -1099,6 +1099,48 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 2, "right" );
     }
 
+  /**
+   * verifies not inserting Identity between groups works
+   *
+   * @throws Exception
+   */
+  public void testSplitOut() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "line" ) ), inputFileApache );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), outputPath + "/splitout1", true );
+    Tap sink2 = new Hfs( new TextLine(), outputPath + "/splitout2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+
+    Pipe left = new GroupBy( "output1", pipeLower1, new Fields( 0 ) );
+    Pipe right = new GroupBy( "output2", left, new Fields( 0 ) );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+
+//    flow.writeDOT( "splitout.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, "output1" );
+    validateLength( flow, 10, "output2" );
+    }
+
   public void testSplitComplex() throws Exception
     {
     if( !new File( inputFileApache ).exists() )

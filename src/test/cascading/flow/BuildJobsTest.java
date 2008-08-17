@@ -778,16 +778,16 @@ public class BuildJobsTest extends CascadingTestCase
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
-    for( FlowStep step : steps )
-      {
-      if( step.group != null )
-        continue;
-
-      Scope nextScope = step.getNextScope( step.sources.keySet().iterator().next() );
-      FlowElement operator = step.getNextFlowElement( nextScope );
-
-      assertTrue( "should be Pipe", operator instanceof Pipe );
-      }
+//    for( FlowStep step : steps )
+//      {
+//      if( step.group != null )
+//        continue;
+//
+//      Scope nextScope = step.getNextScope( step.sources.keySet().iterator().next() );
+//      FlowElement operator = step.getNextFlowElement( nextScope );
+//
+//      assertTrue( "should be Pipe", operator instanceof Pipe );
+//      }
     }
 
   /**

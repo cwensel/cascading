@@ -35,8 +35,6 @@ import java.util.Set;
 
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.operation.AssertionLevel;
-import cascading.operation.Identity;
-import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -180,7 +178,6 @@ public class MultiMapReducePlanner
       handleSplits( pipeGraph );
       handleGroups( pipeGraph );
       handleHeterogeneousSources( pipeGraph );
-      handleHeterogeneousSinks( pipeGraph );
 
       // generic
       verifyUniqueGroupSources( pipeGraph );
@@ -401,15 +398,6 @@ public class MultiMapReducePlanner
           {
           FlowElement target = graph.getEdgeTarget( outgoing );
 
-          // don't connect two taps directly together
-          if( source instanceof Tap && target instanceof Tap )
-            {
-            if( flowElement.getClass() == Pipe.class )
-              replaceWithIdentity( graph, (Pipe) flowElement );
-
-            return false;
-            }
-
           graph.addEdge( source, target, new Scope( outgoing ) );
           }
 
@@ -423,32 +411,6 @@ public class MultiMapReducePlanner
       }
 
     return true;
-    }
-
-  private void replaceWithIdentity( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "replacing with identity function" + pipe );
-
-    Set<Scope> incomingScopes = new HashSet<Scope>( graph.incomingEdgesOf( pipe ) ); // will only be one, make copy
-    Scope incomingScope = incomingScopes.iterator().next();
-
-    Set<Scope> outgoingScopes = new HashSet<Scope>( graph.outgoingEdgesOf( pipe ) ); // will only be one, make copy
-    Scope outgoingScope = outgoingScopes.iterator().next();
-
-    FlowElement source = graph.getEdgeSource( incomingScope );
-    graph.removeEdge( source, pipe );
-
-    FlowElement target = graph.getEdgeTarget( outgoingScope );
-    graph.removeEdge( pipe, target );
-
-    graph.removeVertex( pipe );
-
-    Each each = new Each( pipe.getName(), new Identity() );
-    graph.addVertex( each );
-
-    graph.addEdge( source, each, new Scope( incomingScope ) );
-    graph.addEdge( each, target, new Scope( outgoingScope ) );
     }
 
   /**
@@ -678,47 +640,6 @@ public class MultiMapReducePlanner
     }
 
   /**
-   * This actually stuffs an Identity between the sink tap and a preceeding temp tap
-   *
-   * @param pipeGraph
-   */
-  private void handleHeterogeneousSinks( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    while( !internalHeterogeneousSinks( pipeGraph ) )
-      ;
-    }
-
-  private boolean internalHeterogeneousSinks( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    SimpleDirectedGraph<FlowElement, Scope> reverseGraph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
-    Graphs.addGraphReversed( reverseGraph, pipeGraph );
-
-    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( reverseGraph, tail, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( head );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      List<FlowElement> vertices = Graphs.getPathVertexList( path );
-
-      FlowElement tap = vertices.get( 1 );
-      FlowElement previous = vertices.get( 2 );
-
-      if( !( tap instanceof Tap ) )
-        throw new IllegalStateException( "flow element must be a Tap: " + tap );
-
-      if( !( previous instanceof Tap ) )
-        continue;
-
-      insertIdentityBefore( pipeGraph, (Tap) tap );
-
-      return false;
-      }
-
-    return true;
-    }
-
-
-  /**
    * Finds all groups that merge/join streams. returned in topological order.
    *
    * @param pipeGraph
@@ -852,16 +773,6 @@ public class MultiMapReducePlanner
     insertFlowElementAfter( graph, pipe, tempDfs );
     }
 
-  private void insertIdentityBefore( SimpleDirectedGraph<FlowElement, Scope> graph, Tap tap )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "inserting identity after: " + tap );
-
-    Each each = new Each( tap.toString(), new Identity() );
-
-    insertFlowElementBefore( graph, tap, each );
-    }
-
   private void insertFlowElementAfter( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement previousElement, FlowElement flowElement )
     {
     Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( previousElement ) );
@@ -880,27 +791,6 @@ public class MultiMapReducePlanner
       FlowElement target = graph.getEdgeTarget( scope );
       graph.removeEdge( previousElement, target ); // remove scope
       graph.addEdge( flowElement, target, scope ); // add scope back
-      }
-    }
-
-  private void insertFlowElementBefore( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement nextElement, FlowElement flowElement )
-    {
-    Set<Scope> incoming = new HashSet<Scope>( graph.incomingEdgesOf( nextElement ) );
-
-    graph.addVertex( flowElement );
-
-    String name = nextElement.toString();
-
-    if( nextElement instanceof Pipe )
-      name = ( (Pipe) nextElement ).getName();
-
-    graph.addEdge( flowElement, nextElement, new Scope( name ) );
-
-    for( Scope scope : incoming )
-      {
-      FlowElement target = graph.getEdgeSource( scope );
-      graph.removeEdge( target, nextElement ); // remove scope
-      graph.addEdge( target, flowElement, scope ); // add scope back
       }
     }
 
