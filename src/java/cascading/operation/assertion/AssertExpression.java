@@ -59,6 +59,6 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
   public void doAssert( TupleEntry input )
     {
     if( !(Boolean) evaluate( input ) )
-      AssertionBase.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
+      BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
     }
   }

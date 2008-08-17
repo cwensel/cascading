@@ -60,6 +60,6 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion
   public void doAssert( TupleEntry input )
     {
     if( matchWholeTuple( input.getTuple() ) )
-      AssertionBase.throwFail( message, input.getTuple().print(), patternString );
+      BaseAssertion.throwFail( message, input.getTuple().print(), patternString );
     }
   }

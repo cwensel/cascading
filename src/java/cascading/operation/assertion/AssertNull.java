@@ -26,7 +26,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /** Class AssertNull asserts that every value in the argument values {@link Tuple} is a null value. */
-public class AssertNull extends AssertionBase implements ValueAssertion
+public class AssertNull extends BaseAssertion implements ValueAssertion
   {
 
   /** Constructor AssertNull creates a new AssertNull instance. */

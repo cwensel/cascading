@@ -29,7 +29,7 @@ import cascading.tuple.TupleEntry;
  * </p>
  * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values.
  */
-public class AssertSizeLessThan extends AssertionBase implements ValueAssertion
+public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion
   {
   /** Field size */
   private final int size;

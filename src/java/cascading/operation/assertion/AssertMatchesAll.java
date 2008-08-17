@@ -62,6 +62,6 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion
     int pos = matchEachElementPos( input.getTuple() );
 
     if( pos != -1 )
-      AssertionBase.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
+      BaseAssertion.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
     }
   }

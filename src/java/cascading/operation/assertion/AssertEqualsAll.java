@@ -28,7 +28,7 @@ import cascading.tuple.TupleEntry;
  * Class AssertEqualsAll asserts that every value in the argument values {@link cascading.tuple.Tuple} is equal to the value
  * provided on the constructor.
  */
-public class AssertEqualsAll extends AssertionBase implements ValueAssertion
+public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
   {
   /** Field value */
   private Comparable value;
