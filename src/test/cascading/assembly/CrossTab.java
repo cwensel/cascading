@@ -32,13 +32,13 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.PipeAssembly;
+import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class CrossTab extends PipeAssembly
+public class CrossTab extends SubAssembly
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;

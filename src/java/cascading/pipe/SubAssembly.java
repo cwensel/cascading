@@ -24,13 +24,13 @@ package cascading.pipe;
 import cascading.util.Util;
 
 /**
- * Subclasses of PipeAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
- * a Pipe is used. That is, a typical PipeAssembly subclass will accept a 'previous' Pipe instance, and a few
- * arguments for configuring the resulting sub-assembly. If the PipeAssembly represents a split in the pipeline process,
+ * Subclasses of SubAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
+ * a Pipe is used. That is, a typical SubAssembly subclass will accept a 'previous' Pipe instance, and a few
+ * arguments for configuring the resulting sub-assembly. If the SubAssembly represents a split in the pipeline process,
  * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe[])}.
  * <p/>
  */
-public abstract class PipeAssembly extends Pipe
+public abstract class SubAssembly extends Pipe
   {
   /** Field assembly */
   private Pipe[] tails;

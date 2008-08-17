@@ -42,7 +42,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
-import cascading.pipe.PipeAssembly;
+import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
@@ -246,9 +246,9 @@ public class MultiMapReducePlanner
     // handle tails
     for( Pipe pipe : pipes )
       {
-      if( pipe instanceof PipeAssembly )
+      if( pipe instanceof SubAssembly )
         {
-        for( String tailName : ( (PipeAssembly) pipe ).getTailNames() )
+        for( String tailName : ( (SubAssembly) pipe ).getTailNames() )
           {
           if( !names.contains( tailName ) )
             throw new FlowException( "pipe name not found in either sink or source map: " + tailName );
@@ -300,8 +300,8 @@ public class MultiMapReducePlanner
     {
     for( Pipe pipe : pipes )
       {
-      if( pipe instanceof PipeAssembly )
-        names.addAll( Arrays.asList( ( (PipeAssembly) pipe ).getTailNames() ) );
+      if( pipe instanceof SubAssembly )
+        names.addAll( Arrays.asList( ( (SubAssembly) pipe ).getTailNames() ) );
       else
         names.add( pipe.getName() );
 
@@ -368,7 +368,7 @@ public class MultiMapReducePlanner
     }
 
   /**
-   * Method removeEmptyPipes performs a depth first traversal and removes instance of {@link Pipe} or {@link PipeAssembly}.
+   * Method removeEmptyPipes performs a depth first traversal and removes instance of {@link Pipe} or {@link cascading.pipe.SubAssembly}.
    *
    * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
    */
@@ -386,7 +386,7 @@ public class MultiMapReducePlanner
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement.getClass() == Pipe.class || flowElement instanceof PipeAssembly || testAssertion( flowElement ) )
+      if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testAssertion( flowElement ) )
         {
         if( LOG.isDebugEnabled() )
           LOG.debug( "remove testing pipe: " + flowElement );
@@ -950,7 +950,7 @@ public class MultiMapReducePlanner
     if( LOG.isDebugEnabled() )
       LOG.debug( "adding pipe: " + current );
 
-    if( current instanceof PipeAssembly )
+    if( current instanceof SubAssembly )
       {
       for( Pipe pipe : unwindPipeAssemblies( current.getPrevious() ) )
         makePipeGraph( graph, pipe, sources, sinks );
@@ -1029,7 +1029,7 @@ public class MultiMapReducePlanner
 
     for( Pipe pipe : tails )
       {
-      if( pipe instanceof PipeAssembly )
+      if( pipe instanceof SubAssembly )
         Collections.addAll( previous, unwindPipeAssemblies( pipe.getPrevious() ) );
       else
         previous.add( pipe );

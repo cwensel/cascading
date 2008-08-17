@@ -34,21 +34,21 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.PipeAssembly;
+import cascading.pipe.SubAssembly;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
 /** A planner test only, does not execute */
-public class PipeAssemblyTest extends CascadingTestCase
+public class SubAssemblyTest extends CascadingTestCase
   {
-  public PipeAssemblyTest()
+  public SubAssemblyTest()
     {
     super( "pipe assembly tests" );
     }
 
-  private static class TestAssembly extends PipeAssembly
+  private static class TestAssembly extends SubAssembly
     {
     public TestAssembly( String name )
       {
@@ -96,7 +96,7 @@ public class PipeAssemblyTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
-  private static class FirstAssembly extends PipeAssembly
+  private static class FirstAssembly extends SubAssembly
     {
     public FirstAssembly( Pipe previous )
       {
@@ -112,7 +112,7 @@ public class PipeAssemblyTest extends CascadingTestCase
       }
     }
 
-  private static class SecondAssembly extends PipeAssembly
+  private static class SecondAssembly extends SubAssembly
     {
     public SecondAssembly( Pipe previous )
       {
@@ -144,7 +144,7 @@ public class PipeAssemblyTest extends CascadingTestCase
     assertEquals( "wrong number of heads", 1, heads.length );
 
     for( Pipe head : heads )
-      assertFalse( head instanceof PipeAssembly );
+      assertFalse( head instanceof SubAssembly );
 
     }
 

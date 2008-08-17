@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Renamed c.p.PipeAssembly to c.p.SubAssembly to better reflect its purpose, which is to encapuslate reusable
+  pipe assemblies in the same manner as a sub-process or sub-routine.
+
   Fixed bug where c.t.TapCollector would throw an NPE if a custom Tap was not using paths.
 
   Changed behavior of c.f.Flow where if a c.f.FlowListener throws an exception, the Flow instance receiving the

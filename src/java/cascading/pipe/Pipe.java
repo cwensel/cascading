@@ -96,10 +96,10 @@ public class Pipe implements FlowElement, Serializable
 
   private void verifyPipe()
     {
-    if( !( previous instanceof PipeAssembly ) )
+    if( !( previous instanceof SubAssembly ) )
       return;
 
-    String[] strings = ( (PipeAssembly) previous ).getTailNames();
+    String[] strings = ( (SubAssembly) previous ).getTailNames();
     if( strings.length != 1 )
       throw new IllegalArgumentException( "pipe assembly must not return more than one tail pipe instance, found " + Util.join( strings, ", " ) );
     }
