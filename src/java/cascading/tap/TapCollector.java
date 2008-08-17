@@ -83,8 +83,8 @@ public class TapCollector extends TupleCollector implements OutputCollector
     filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
 
     // hack to support running in local mode
-//    if( FileOutputFormat.getWorkOutputPath( conf ) == null )
-    conf.set( "mapred.work.output.dir", FileOutputFormat.getOutputPath( conf ).toString() );
+    if( outputFormat instanceof FileOutputFormat )
+      conf.set( "mapred.work.output.dir", FileOutputFormat.getOutputPath( conf ).toString() );
 
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }

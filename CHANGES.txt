@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.t.TapCollector would throw an NPE if a custom Tap was not using paths.
+
   Changed behavior of c.f.Flow where if a c.f.FlowListener throws an exception, the Flow instance receiving the
   exception will stop (by calling Flow.stop()). Listeners will continue to fire as expected and Flow.complete()
   will re-throw the thrown exception (as was the original behavior).

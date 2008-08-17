@@ -33,6 +33,8 @@ import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
@@ -257,13 +259,13 @@ public class Hfs extends Tap
     {
     Path qualifiedPath = getQualifiedPath( conf );
 
-    for( Path exitingPath : conf.getInputPaths() )
+    for( Path exitingPath : FileInputFormat.getInputPaths( conf ) )
       {
       if( exitingPath.equals( qualifiedPath ) )
         throw new TapException( "may not add duplicate paths, found: " + exitingPath );
       }
 
-    conf.addInputPath( qualifiedPath );
+    FileInputFormat.addInputPath( conf, qualifiedPath );
 
     super.sourceInit( conf );
 
@@ -278,7 +280,7 @@ public class Hfs extends Tap
 
     Path qualifiedPath = getQualifiedPath( conf );
 
-    conf.setOutputPath( qualifiedPath );
+    FileOutputFormat.setOutputPath( conf, qualifiedPath );
     super.sinkInit( conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
