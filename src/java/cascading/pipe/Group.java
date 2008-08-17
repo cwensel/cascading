@@ -353,6 +353,66 @@ public class Group extends Pipe
     this.repeat = repeat;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName      of type String
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+    {
+    this( pipe, groupFields, repeat, declaredFields );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName      of type String
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+    {
+    this( pipe, groupFields, repeat, declaredFields, coGrouper );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   * @param coGrouper   of type CoGrouper
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+    {
+    this( pipe, groupFields, repeat, coGrouper );
+    this.groupName = groupName;
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   */
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat )
+    {
+    this( pipe, groupFields, repeat );
+    this.groupName = groupName;
+    }
+
   ////////////
   // GROUPBY
   ////////////

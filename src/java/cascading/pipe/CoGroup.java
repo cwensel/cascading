@@ -30,14 +30,21 @@ import cascading.tuple.Fields;
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
- * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields.
+ * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
+ * to overcome field name collisions.
  * <p/>
- * By default CoGroup performs an Inner Join via the {@link InnerJoin} {@link CoGrouper} class.
+ * By default CoGroup performs an inner join via the {@link InnerJoin} {@link CoGrouper} class.
+ *
+ * @see cascading.pipe.cogroup.InnerJoin
+ * @see cascading.pipe.cogroup.OuterJoin
+ * @see cascading.pipe.cogroup.LeftJoin
+ * @see cascading.pipe.cogroup.RightJoin
+ * @see cascading.pipe.cogroup.MixedJoin
  */
 public class CoGroup extends Group
   {
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
@@ -51,7 +58,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
@@ -66,7 +73,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
@@ -80,7 +87,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
@@ -93,7 +100,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param pipes of type Pipe...
    */
@@ -103,7 +110,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
@@ -114,7 +121,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
@@ -127,7 +134,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName   of type String
    * @param pipes       of type Pipe[]
@@ -139,7 +146,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName      of type String
    * @param pipes          of type Pipe[]
@@ -153,7 +160,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName      of type String
    * @param lhs            of type Pipe
@@ -168,7 +175,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName      of type String
    * @param lhs            of type Pipe
@@ -184,7 +191,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName      of type String
    * @param lhs            of type Pipe
@@ -199,7 +206,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName      of type String
    * @param lhs            of type Pipe
@@ -213,7 +220,7 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor Group creates a new Group instance.
+   * Constructor CoGroup creates a new CoGroup instance.
    *
    * @param groupName of type String
    * @param pipes     of type Pipe...
@@ -221,5 +228,121 @@ public class CoGroup extends Group
   public CoGroup( String groupName, Pipe... pipes )
     {
     super( groupName, pipes );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+    {
+    super( pipe, groupFields, repeat, declaredFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+    {
+    super( pipe, groupFields, repeat, declaredFields, coGrouper );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   * @param coGrouper   of type CoGrouper
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+    {
+    super( pipe, groupFields, repeat, coGrouper );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat )
+    {
+    super( pipe, groupFields, repeat );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param groupName      of type String
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+    {
+    super( groupName, pipe, groupFields, repeat, declaredFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param groupName      of type String
+   * @param pipe           of type Pipe
+   * @param groupFields    of type Fields
+   * @param repeat         of type int
+   * @param declaredFields of type Fields
+   * @param coGrouper      of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+    {
+    super( groupName, pipe, groupFields, repeat, declaredFields, coGrouper );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   * @param coGrouper   of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+    {
+    super( groupName, pipe, groupFields, repeat, coGrouper );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * given {@link Pipe} instance.
+   *
+   * @param groupName   of type String
+   * @param pipe        of type Pipe
+   * @param groupFields of type Fields
+   * @param repeat      of type int
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat )
+    {
+    super( groupName, pipe, groupFields, repeat );
     }
   }
