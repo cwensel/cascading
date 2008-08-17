@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.MultiMapReducePlanner to fail if it encounters an c.p.Each to c.p.Every chain. In these cases, a
+  c.p.Group type must be between them.
+
   Deleted c.o.Cut class as it was effectively a duplicate of c.o.Identity.
 
   Changed c.f.MultiMapReducePlanner to fail if a c.p.GroupAssertion is not accompanied by another c.o.Aggregator

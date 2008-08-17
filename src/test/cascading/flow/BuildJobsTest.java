@@ -276,6 +276,30 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
+  public void testNoGroup() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+
+    Pipe pipe = new Pipe( "count" );
+    pipe = new Each( pipe, new Identity() );
+    pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( sources, sinks, pipe );
+      fail( "did not throw flow exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+//      exception.printStackTrace();
+      }
+    }
+
   /** This should result in only two steps, one for each side */
   public void testSplit()
     {

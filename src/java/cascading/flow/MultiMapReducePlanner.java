@@ -35,6 +35,7 @@ import java.util.Set;
 
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.operation.AssertionLevel;
+import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -175,6 +176,7 @@ public class MultiMapReducePlanner
       verifyGraphConnections( pipeGraph );
 
       failOnLoneGroupAssertion( pipeGraph );
+      failOnMissingGroup( pipeGraph );
 
       // m/r specific
       handleSplits( pipeGraph );
@@ -407,6 +409,36 @@ public class MultiMapReducePlanner
 
         if( everies != 0 && everies == assertions )
           throw new FlowException( "group assertions must be accompanied by aggregator operations" );
+        }
+      }
+    }
+
+  private void failOnMissingGroup( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    List<Every> everies = findAllEveries( pipeGraph );
+
+    // walk Every instances after Group
+    for( Every every : everies )
+      {
+      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
+      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( every );
+
+      for( GraphPath<FlowElement, Scope> path : paths )
+        {
+        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is every
+        Collections.reverse( flowElements ); // first element is every
+
+        for( FlowElement flowElement : flowElements )
+          {
+          if( flowElement instanceof Each )
+            throw new FlowException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+
+          if( flowElement instanceof Every )
+            continue;
+
+          if( flowElement instanceof Group )
+            break;
+          }
         }
       }
     }
@@ -694,30 +726,32 @@ public class MultiMapReducePlanner
    */
   private List<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
-    return findAllGroups( pipeGraph, 2 );
+    return findAllOfType( pipeGraph, 2, Group.class, new LinkedList<Group>() );
     }
 
   private List<Group> findAllGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
-    return findAllGroups( pipeGraph, 1 );
+    return findAllOfType( pipeGraph, 1, Group.class, new LinkedList<Group>() );
     }
 
-  private List<Group> findAllGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, int minInDegree )
+  private List<Every> findAllEveries( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    return findAllOfType( pipeGraph, 1, Every.class, new LinkedList<Every>() );
+    }
+
+  private <P> List<P> findAllOfType( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, int minInDegree, Class<P> type, List<P> results )
     {
     TopologicalOrderIterator<FlowElement, Scope> topoIterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
-
-    List<Group> groups = new LinkedList<Group>();
 
     while( topoIterator.hasNext() )
       {
       FlowElement flowElement = topoIterator.next();
 
-      // only if it is a join/merge
-      if( flowElement instanceof Group && pipeGraph.inDegreeOf( flowElement ) >= minInDegree )
-        groups.add( (Group) flowElement );
+      if( type.isInstance( flowElement ) && pipeGraph.inDegreeOf( flowElement ) >= minInDegree )
+        results.add( (P) flowElement );
       }
 
-    return groups;
+    return results;
     }
 
   private Class getSchemeClass( Tap tap )
