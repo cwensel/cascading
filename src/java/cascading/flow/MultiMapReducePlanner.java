@@ -194,7 +194,7 @@ public class MultiMapReducePlanner
 
       return new Flow( properties, jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ), new HashMap<String, Tap>( traps ) );
       }
-    catch( FlowException exception )
+    catch( PlannerException exception )
       {
       exception.pipeGraph = pipeGraph;
 
@@ -205,7 +205,7 @@ public class MultiMapReducePlanner
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
-      throw new FlowException( message, exception, pipeGraph );
+      throw new PlannerException( message, exception, pipeGraph );
       }
     }
 
@@ -219,14 +219,14 @@ public class MultiMapReducePlanner
   private void verifyTaps( Map<String, Tap> taps, boolean areSources, boolean mayNotBeEmpty )
     {
     if( mayNotBeEmpty && taps.isEmpty() )
-      throw new FlowException( ( areSources ? "source" : "sink" ) + " taps are required" );
+      throw new PlannerException( ( areSources ? "source" : "sink" ) + " taps are required" );
 
     for( String tapName : taps.keySet() )
       {
       if( areSources && !taps.get( tapName ).isSource() )
-        throw new FlowException( "tap named: " + tapName + " is not a source: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + " is not a source: " + taps.get( tapName ) );
       else if( !areSources && !taps.get( tapName ).isSink() )
-        throw new FlowException( "tap named: " + tapName + " is not a sink: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + " is not a sink: " + taps.get( tapName ) );
       }
     }
 
@@ -252,12 +252,12 @@ public class MultiMapReducePlanner
         for( String tailName : ( (SubAssembly) pipe ).getTailNames() )
           {
           if( !names.contains( tailName ) )
-            throw new FlowException( "pipe name not found in either sink or source map: " + tailName );
+            throw new PlannerException( "pipe name not found in either sink or source map: " + tailName );
           }
         }
       else if( !names.contains( pipe.getName() ) )
         {
-        throw new FlowException( "pipe name not found in either sink or source map: " + pipe.getName() );
+        throw new PlannerException( "pipe name not found in either sink or source map: " + pipe.getName() );
         }
       }
 
@@ -267,7 +267,7 @@ public class MultiMapReducePlanner
       for( Pipe head : pipe.getHeads() )
         {
         if( !names.contains( head.getName() ) )
-          throw new FlowException( "pipe name not found in either sink or source map: " + head.getName() );
+          throw new PlannerException( "pipe name not found in either sink or source map: " + head.getName() );
         }
       }
     }
@@ -287,7 +287,7 @@ public class MultiMapReducePlanner
     for( String name : traps.keySet() )
       {
       if( !names.contains( name ) )
-        throw new FlowException( "trap name not found in assembly: " + name );
+        throw new PlannerException( "trap name not found in assembly: " + name );
       }
     }
 
@@ -360,11 +360,11 @@ public class MultiMapReducePlanner
         continue;
 
       if( flowElement instanceof Pipe )
-        throw new FlowException( "no Tap instance given to connect Pipe " + flowElement.toString() );
+        throw new PlannerException( "no Tap instance given to connect Pipe " + flowElement.toString() );
       else if( flowElement instanceof Tap )
-        throw new FlowException( "no Pipe instance given to connect Tap " + flowElement.toString() );
+        throw new PlannerException( "no Pipe instance given to connect Tap " + flowElement.toString() );
       else
-        throw new FlowException( "unknown element type: " + flowElement );
+        throw new PlannerException( "unknown element type: " + flowElement );
       }
     }
 
@@ -408,7 +408,7 @@ public class MultiMapReducePlanner
           }
 
         if( everies != 0 && everies == assertions )
-          throw new FlowException( "group assertions must be accompanied by aggregator operations" );
+          throw new PlannerException( "group assertions must be accompanied by aggregator operations" );
         }
       }
     }
@@ -431,7 +431,7 @@ public class MultiMapReducePlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new FlowException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             continue;
@@ -793,7 +793,7 @@ public class MultiMapReducePlanner
         }
 
       if( taps.size() != incoming )
-        throw new FlowException( "groups may not join/merge duplicate sources, found incoming: " + Util.join( taps, ", " ) );
+        throw new PlannerException( "groups may not join/merge duplicate sources, found incoming: " + Util.join( taps, ", " ) );
       }
     }
 
@@ -1058,7 +1058,7 @@ public class MultiMapReducePlanner
             LOG.debug( "adding tap edge: " + lastTap + " -> " + target );
 
           if( tapGraph.getEdge( lastTap, (Tap) target ) == null && !tapGraph.addEdge( lastTap, (Tap) target, count++ ) )
-            throw new FlowException( "could not add graph edge: " + lastTap + " -> " + target );
+            throw new PlannerException( "could not add graph edge: " + lastTap + " -> " + target );
           }
 
         lastTap = (Tap) target;

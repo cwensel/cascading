@@ -169,9 +169,9 @@ public class SubAssemblyTest extends CascadingTestCase
 
       assertEquals( "wrong size", 2, steps.size() );
       }
-    catch( FlowException exception )
+    catch( PlannerException exception )
       {
-      exception.writeDOT( "nestedassembly.dot" );
+//      exception.writeDOT( "nestedassembly.dot" );
 
       throw exception;
       }

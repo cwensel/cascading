@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.f.PlannerException, a subclass of c.f.FlowException, and updated c.f.MultiMapReducePlanner to throw
+  it on failures. Functionality of writing DOT files has been moved from FlowException to PlannerException.
+
   Added c.o.f.FilterNotNull and c.o.f.FilterNull filter classes.
 
   Changed c.f.MultiMapReducePlanner to fail if it encounters an c.p.Each to c.p.Every chain. In these cases, a

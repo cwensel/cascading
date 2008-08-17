@@ -29,7 +29,7 @@ import java.util.Map;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.flow.FlowException;
+import cascading.flow.PlannerException;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -326,9 +326,9 @@ public class FieldedPipesTest extends ClusterTestCase
       {
       countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
       }
-    catch( FlowException exception )
+    catch( PlannerException exception )
       {
-      exception.writeDOT( "cogroupedevery.dot" );
+//      exception.writeDOT( "cogroupedevery.dot" );
       throw exception;
       }
 
