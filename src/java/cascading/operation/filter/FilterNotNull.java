@@ -19,25 +19,26 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.operation;
+package cascading.operation.filter;
 
-import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
 
 /**
- * Class BaseFilter is a convenience abstract class for creating {@link Filter} implementations.
- * <p/>
- * It is not required that this class be subclassed by Filter implementations. But if they do not, they must declare the
- * following in their constructor:
- * <pre>
- * super( ANY, Fields.ALL );
- * </pre>
+ * Class FilterNotNull verifies that every value in the argument values {@link cascading.tuple.Tuple}
+ * is a null value. If a non-null value is encountered, the current Tuple will be filtered out.
  *
- * @see Filter
+ * @see FilterNull
  */
-public abstract class BaseFilter extends BaseOperation implements Filter
+public class FilterNotNull extends BaseFilter
   {
-  public BaseFilter()
+  public boolean isRemove( TupleEntry input )
     {
-    super( ANY, Fields.ALL );
+    for( Object value : input.getTuple() )
+      {
+      if( value != null )
+        return true;
+      }
+
+    return false;
     }
   }

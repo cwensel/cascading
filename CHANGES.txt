@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added c.o.f.FilterNotNull and c.o.f.FilterNull filter classes.
+
   Changed c.f.MultiMapReducePlanner to fail if it encounters an c.p.Each to c.p.Every chain. In these cases, a
   c.p.Group type must be between them.
 
@@ -25,7 +27,7 @@ unreleased
   Added ability to set a Cascading specific temporary directory path for use by intermediate taps created
   within c.f.Flow instances. Use c.t.Hfs.setTemporaryDirectory() to configure.
 
-  Addeed the c.o.BaseFilter abstract class as a convenience class for c.o.Filter implementations.
+  Added the c.o.f.BaseFilter abstract class as a convenience class for c.o.Filter implementations.
 
   Fixed bug where the 'mapred.jar' property was begin stepped on if previously set by the calling application.
 
