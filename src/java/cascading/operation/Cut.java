@@ -25,18 +25,33 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
-/** Class Cut ... */
+/**
+ * Class Cut should be used to narrow and optionally reorder the fields passed to the outgoing stream.
+ * <p/>
+ * This is especially useful if the current stream has many values unused downstream.
+ * <p/>
+ * Cut is similar to {@link Identity} in that it only copies values from the current stream, but it does
+ * not allow for renaming of fields.
+ *
+ * @see Identity
+ */
 public class Cut extends BaseOperation implements Function
   {
   /** Field fieldSelector */
   private final Fields fieldSelector;
 
+  /**
+   * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts any number of arguments.
+   *
+   * @param fieldDeclaration of type Fields
+   */
   public Cut( Fields fieldDeclaration )
     {
     super( Fields.asDeclaration( fieldDeclaration ) );
     this.fieldSelector = fieldDeclaration;
     }
 
+  /** @see Function#operate(TupleEntry, TupleCollector) */
   public void operate( TupleEntry input, TupleCollector outputCollector )
     {
     outputCollector.add( input.selectEntry( fieldSelector ) );
