@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.MultiMapReducePlanner to fail if a c.p.GroupAssertion is not accompanied by another c.o.Aggregator
+  operation. This is required so that the GroupAssertion does not change the passing tuple stream if it is planned out.
+
   Changed c.f.MultiMapReducePlanner to no longer insert new c.p.Each( ..., new Identity(), ... ) as a place holder.
 
   Renamed c.p.PipeAssembly to c.p.SubAssembly to better reflect its purpose, which is to encapuslate reusable

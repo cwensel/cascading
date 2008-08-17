@@ -174,6 +174,8 @@ public class MultiMapReducePlanner
       addExtents( pipeGraph, sources, sinks );
       verifyGraphConnections( pipeGraph );
 
+      failOnLoneGroupAssertion( pipeGraph );
+
       // m/r specific
       handleSplits( pipeGraph );
       handleGroups( pipeGraph );
@@ -361,6 +363,51 @@ public class MultiMapReducePlanner
         throw new FlowException( "no Pipe instance given to connect Tap " + flowElement.toString() );
       else
         throw new FlowException( "unknown element type: " + flowElement );
+      }
+    }
+
+  /**
+   * Verifies that there are not only GroupAssertions following any given Group instance. This will adversely
+   * affect the stream entering any subsquent Tap of Each instances.
+   *
+   * @param pipeGraph
+   */
+  private void failOnLoneGroupAssertion( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    List<Group> groups = findAllGroups( pipeGraph );
+
+    // walk Every instances after Group
+    for( Group group : groups )
+      {
+      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, group, Integer.MAX_VALUE );
+      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
+
+      for( GraphPath<FlowElement, Scope> path : paths )
+        {
+        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is tail
+
+        int everies = 0;
+        int assertions = 0;
+
+        for( FlowElement flowElement : flowElements )
+          {
+          if( flowElement instanceof Group )
+            continue;
+
+          if( !( flowElement instanceof Every ) )
+            break;
+
+          everies++;
+
+          Every every = (Every) flowElement;
+
+          if( every.getAssertionLevel() != null )
+            assertions++;
+          }
+
+        if( everies != 0 && everies == assertions )
+          throw new FlowException( "group assertions must be accompanied by aggregator operations" );
+        }
       }
     }
 
@@ -647,6 +694,16 @@ public class MultiMapReducePlanner
    */
   private List<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
     {
+    return findAllGroups( pipeGraph, 2 );
+    }
+
+  private List<Group> findAllGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+    {
+    return findAllGroups( pipeGraph, 1 );
+    }
+
+  private List<Group> findAllGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, int minInDegree )
+    {
     TopologicalOrderIterator<FlowElement, Scope> topoIterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
 
     List<Group> groups = new LinkedList<Group>();
@@ -656,7 +713,7 @@ public class MultiMapReducePlanner
       FlowElement flowElement = topoIterator.next();
 
       // only if it is a join/merge
-      if( flowElement instanceof Group && pipeGraph.inDegreeOf( flowElement ) > 1 )
+      if( flowElement instanceof Group && pipeGraph.inDegreeOf( flowElement ) >= minInDegree )
         groups.add( (Group) flowElement );
       }
 
