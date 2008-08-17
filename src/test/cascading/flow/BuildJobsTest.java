@@ -739,6 +739,47 @@ public class BuildJobsTest extends CascadingTestCase
    *
    * @throws Exception
    */
+  public void testSplitOnGroup() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower1", sourceLower );
+
+    // using null pos so all fields are written
+    Tap sink1 = new Hfs( new TextLine(), "output1", true );
+    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "output1", sink1 );
+    sinks.put( "output2", sink2 );
+
+    Pipe pipeLower1 = new Pipe( "lower1" );
+
+    Pipe pipe = new GroupBy( pipeLower1, new Fields( 0 ) );
+    Pipe left = new Each( new Pipe( "output1", pipe ), new Identity() );
+    Pipe right = new Each( new Pipe( "output2", pipe ), new Identity() );
+
+    Flow flow = null;
+    try
+      {
+      flow = new FlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+      }
+    catch( FlowException exception )
+      {
+//      exception.writeDOT( "splitout.dot" );
+      throw exception;
+      }
+
+//    flow.writeDOT( "splitout.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+    }
+
   public void testSplitOuput() throws Exception
     {
     Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "char" ) ), "foo" );
