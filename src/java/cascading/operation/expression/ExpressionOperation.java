@@ -50,9 +50,16 @@ public class ExpressionOperation extends BaseOperation
   /** Field parameterNames */
   private String[] parameterNames;
 
-  protected ExpressionOperation( int numArgs, Fields fieldDeclaration, String expression, Class... parameterTypes )
+  protected ExpressionOperation( Fields fieldDeclaration, String expression, Class... parameterTypes )
     {
-    super( numArgs, fieldDeclaration );
+    super( parameterTypes.length, fieldDeclaration );
+    this.parameterTypes = parameterTypes;
+    this.expression = expression;
+    }
+
+  protected ExpressionOperation( String expression, Class... parameterTypes )
+    {
+    super( parameterTypes.length );
     this.parameterTypes = parameterTypes;
     this.expression = expression;
     }

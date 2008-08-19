@@ -23,7 +23,6 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
-import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -37,13 +36,13 @@ public class RegexMatcher extends RegexOperation
 
   protected RegexMatcher( String patternString )
     {
-    super( ANY, Fields.ALL, patternString );
+    super( patternString );
     this.negateMatch = false;
     }
 
   protected RegexMatcher( String patternString, boolean negateMatch )
     {
-    super( ANY, Fields.ALL, patternString );
+    super( patternString );
     this.negateMatch = negateMatch;
     }
 

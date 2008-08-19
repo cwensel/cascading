@@ -24,7 +24,9 @@ package cascading.operation;
 import cascading.tuple.TupleEntry;
 
 /**
- *
+ * Class ValueAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Each} pipe Operator.
+ * <p/>
+ * Implementors must also extend {@link BaseOperation}.
  */
 public interface ValueAssertion extends Assertion
   {

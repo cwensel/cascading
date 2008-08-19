@@ -75,6 +75,16 @@ public class RegexOperation extends BaseOperation
   /**
    * Constructor RegexOperation creates a new RegexOperation instance.
    *
+   * @param patternString of type String
+   */
+  public RegexOperation( String patternString )
+    {
+    this.patternString = patternString;
+    }
+
+  /**
+   * Constructor RegexOperation creates a new RegexOperation instance.
+   *
    * @param numArgs          of type int
    * @param fieldDeclaration of type Fields
    */

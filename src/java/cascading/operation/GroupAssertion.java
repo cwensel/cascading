@@ -26,7 +26,9 @@ import java.util.Map;
 import cascading.tuple.TupleEntry;
 
 /**
- *
+ * Class GroupAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Every} pipe Operator.
+ * <p/>
+ * Implementors must also extend {@link BaseOperation}.
  */
 public interface GroupAssertion extends Assertion
   {

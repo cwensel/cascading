@@ -23,10 +23,14 @@ package cascading.operation.assertion;
 
 import cascading.operation.AssertionException;
 import cascading.operation.BaseOperation;
-import cascading.tuple.Fields;
 
 /**
+ * Class BaseAssertion is a convenience class for {@link cascading.operation.Assertion} implementations. Subclassing
+ * this class is not required, but does provide some conveneince functions for signaling assertion failures.
  *
+ * @see cascading.operation.Assertion
+ * @see cascading.operation.GroupAssertion
+ * @see cascading.operation.ValueAssertion
  */
 public abstract class BaseAssertion extends BaseOperation
   {
@@ -35,23 +39,21 @@ public abstract class BaseAssertion extends BaseOperation
 
   protected BaseAssertion()
     {
-    super( ANY, Fields.ALL );
     }
 
   protected BaseAssertion( String message )
     {
-    this();
     this.message = message;
     }
 
   protected BaseAssertion( int numArgs )
     {
-    super( numArgs, Fields.ALL );
+    super( numArgs );
     }
 
   protected BaseAssertion( int numArgs, String message )
     {
-    this( numArgs );
+    super( numArgs );
     this.message = message;
     }
 
@@ -70,11 +72,22 @@ public abstract class BaseAssertion extends BaseOperation
     throwFail( getMessage(), args );
     }
 
+  /**
+   * Static method throwFail shoudl be used to throw an {@link AssertionException}.
+   *
+   * @param message of type String, the message to be thrown
+   */
   public static void throwFail( String message )
     {
     throw new AssertionException( message );
     }
 
+  /**
+   * Static method throwFail shoudl be used to throw an {@link AssertionException}.
+   *
+   * @param message of type String, the message to be thrown as a format string
+   * @param args    of type Object[], the values to be passed into the message format string
+   */
   public static void throwFail( String message, Object... args )
     {
     throw new AssertionException( String.format( message, args ) );

@@ -22,7 +22,6 @@
 package cascading.operation.expression;
 
 import cascading.operation.Filter;
-import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.codehaus.janino.ExpressionEvaluator;
@@ -53,9 +52,10 @@ public class ExpressionFilter extends ExpressionOperation implements Filter
    */
   public ExpressionFilter( String expression, Class... parameterTypes )
     {
-    super( ANY, Fields.ALL, expression, parameterTypes );
+    super( expression, parameterTypes );
     }
 
+  /** @see cascading.operation.Filter#isRemove(TupleEntry) */
   public boolean isRemove( TupleEntry input )
     {
     return (Boolean) evaluate( input );

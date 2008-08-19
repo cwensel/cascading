@@ -23,7 +23,6 @@ package cascading.operation;
 
 import java.io.PrintStream;
 
-import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -50,7 +49,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug()
     {
-    super( ANY, Fields.ALL );
     }
 
   /**
@@ -61,7 +59,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( String prefix )
     {
-    this();
     this.prefix = prefix;
     }
 
@@ -74,7 +71,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( String prefix, boolean printFields )
     {
-    this();
     this.prefix = prefix;
     this.printFields = printFields;
     }
@@ -87,7 +83,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( boolean printFields )
     {
-    this();
     this.printFields = printFields;
     }
 
@@ -99,7 +94,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( Output output )
     {
-    this();
     this.output = output;
     }
 
@@ -112,7 +106,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( Output output, String prefix )
     {
-    this();
     this.output = output;
     this.prefix = prefix;
     }
@@ -127,7 +120,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( Output output, String prefix, boolean printFields )
     {
-    this();
     this.output = output;
     this.prefix = prefix;
     this.printFields = printFields;
@@ -142,7 +134,6 @@ public class Debug extends BaseOperation implements Filter
    */
   public Debug( Output output, boolean printFields )
     {
-    this();
     this.output = output;
     this.printFields = printFields;
     }

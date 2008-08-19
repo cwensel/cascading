@@ -28,7 +28,6 @@ import javax.xml.xpath.XPathExpressionException;
 
 import cascading.operation.Filter;
 import cascading.operation.OperationException;
-import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
@@ -53,7 +52,7 @@ public class XPathFilter extends XPathOperation implements Filter
    */
   public XPathFilter( String[][] namespaces, String path )
     {
-    super( 1, Fields.ALL, namespaces, path );
+    super( 1, namespaces, path );
     }
 
   /**
@@ -65,7 +64,7 @@ public class XPathFilter extends XPathOperation implements Filter
    */
   public XPathFilter( boolean removeMatch, String[][] namespaces, String path )
     {
-    super( 1, Fields.ALL, namespaces, path );
+    super( 1, namespaces, path );
     this.removeMatch = removeMatch;
     }
 

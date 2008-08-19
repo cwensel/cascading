@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed the behavior of c.o.BaseOperation to properly initialize itself if it is a c.o.Filter instance. This
+  removes the requirement that Filter implementations must set declaredFields to Fields.ALL, as it makes no
+  sense for a Filter to declare fields.
+
   Added c.f.PlannerException, a subclass of c.f.FlowException, and updated c.f.MultiMapReducePlanner to throw
   it on failures. Functionality of writing DOT files has been moved from FlowException to PlannerException.
 
@@ -29,8 +33,6 @@ unreleased
 
   Added ability to set a Cascading specific temporary directory path for use by intermediate taps created
   within c.f.Flow instances. Use c.t.Hfs.setTemporaryDirectory() to configure.
-
-  Added the c.o.f.BaseFilter abstract class as a convenience class for c.o.Filter implementations.
 
   Fixed bug where the 'mapred.jar' property was begin stepped on if previously set by the calling application.
 

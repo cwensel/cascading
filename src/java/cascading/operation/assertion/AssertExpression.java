@@ -52,7 +52,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
    */
   public AssertExpression( String expression, Class... parameterTypes )
     {
-    super( ANY, Fields.ALL, expression, parameterTypes );
+    super( Fields.ALL, expression, parameterTypes );
     }
 
   /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */

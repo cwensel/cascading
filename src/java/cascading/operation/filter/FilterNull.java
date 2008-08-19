@@ -21,6 +21,8 @@
 
 package cascading.operation.filter;
 
+import cascading.operation.BaseOperation;
+import cascading.operation.Filter;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -29,7 +31,7 @@ import cascading.tuple.TupleEntry;
  *
  * @see FilterNotNull
  */
-public class FilterNull extends BaseFilter
+public class FilterNull extends BaseOperation implements Filter
   {
   public boolean isRemove( TupleEntry input )
     {

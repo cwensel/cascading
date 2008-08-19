@@ -40,9 +40,17 @@ public abstract class BaseOperation implements Serializable, Operation
   {
 
   /** Field fieldDeclaration */
-  protected Fields fieldDeclaration = Fields.UNKNOWN;
+  protected Fields fieldDeclaration;
   /** Field numArgs */
   protected int numArgs = ANY;
+
+  // initialize this operation based on its subclass
+  {
+  if( this instanceof Filter || this instanceof Assertion )
+    fieldDeclaration = Fields.ALL;
+  else
+    fieldDeclaration = Fields.UNKNOWN;
+  }
 
   /**
    * Constructs a new instance that retuns an {@link Fields#UNKNOWN} {@link Tuple} and accepts any number of arguments.
@@ -91,6 +99,12 @@ public abstract class BaseOperation implements Serializable, Operation
   /** Validates the state of this instance. */
   private final void verify()
     {
+    if( this instanceof Filter && fieldDeclaration != Fields.ALL )
+      throw new IllegalArgumentException( "fieldDeclaration must be set to Fields.ALL for filter operations" );
+
+    if( this instanceof Assertion && fieldDeclaration != Fields.ALL )
+      throw new IllegalArgumentException( "fieldDeclaration must be set to Fields.ALL for assertion operations" );
+
     if( fieldDeclaration == null )
       throw new IllegalArgumentException( "fieldDeclaration may not be null" );
 
