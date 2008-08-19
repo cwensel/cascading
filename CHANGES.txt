@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.o.f.And, c.o.f.Or, c.o.f.Xor, and c.o.f.Not logic operator c.o.Filter implementations. They should be used
+  to compose more complex filters from existing implementations.
+
   Changed the behavior of c.o.BaseOperation to properly initialize itself if it is a c.o.Filter instance. This
   removes the requirement that Filter implementations must set declaredFields to Fields.ALL, as it makes no
   sense for a Filter to declare fields.

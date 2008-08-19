@@ -36,6 +36,7 @@ import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
+import cascading.operation.filter.And;
 import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -979,6 +980,31 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
     Filter filter = new RegexFilter( "^68.*" );
+
+    pipe = new Each( pipe, new Fields( "line" ), filter );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "flow.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 3, null );
+    }
+
+  public void testLogicFilter() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/logicfilter", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new And( new RegexFilter( "^68.*" ), new RegexFilter( "^1000.*" ) );
 
     pipe = new Each( pipe, new Fields( "line" ), filter );
 

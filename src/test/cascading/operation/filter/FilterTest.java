@@ -22,6 +22,7 @@
 package cascading.operation.filter;
 
 import cascading.CascadingTestCase;
+import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -66,4 +67,118 @@ public class FilterTest extends CascadingTestCase
     assertTrue( filter.isRemove( getEntry( new Tuple( null, null ) ) ) );
     }
 
+  public class BooleanFilter extends BaseOperation implements Filter
+    {
+    private final boolean result;
+
+    public BooleanFilter( boolean result )
+      {
+      this.result = result;
+      }
+
+    public boolean isRemove( TupleEntry input )
+      {
+      return result;
+      }
+    }
+
+  public void testAnd()
+    {
+    Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
+
+    Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
+    Filter filter = new And( fields, filters );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
+    filter = new And( fields, filters );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
+    filter = new And( fields, filters );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
+    filter = new And( fields, filters );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+    }
+
+  public void testOr()
+    {
+    Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
+
+    Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
+    Filter filter = new Or( fields, filters );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
+    filter = new Or( fields, filters );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
+    filter = new Or( fields, filters );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
+    filter = new Or( fields, filters );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+    }
+
+  public void testXor()
+    {
+    Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
+
+    Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
+    Filter filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
+    filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
+    filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
+    filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+    }
+
+  public void testNot()
+    {
+    Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
+
+    Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
+    Filter filter = new Not( new Or( fields, filters ) );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
+    filter = new Not( new Or( fields, filters ) );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
+    filter = new Not( new Or( fields, filters ) );
+
+    assertFalse( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+
+    filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
+    filter = new Not( new Or( fields, filters ) );
+
+    assertTrue( filter.isRemove( getEntry( new Tuple( 1, 2 ) ) ) );
+    }
   }

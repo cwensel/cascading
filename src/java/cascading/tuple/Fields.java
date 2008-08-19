@@ -41,7 +41,8 @@ import cascading.util.Util;
  * name, or it may be a literal Integer value representing a position, where positions start at position 0.
  * A Fields instance may also represent a set of field names.
  * <p/>
- * Fields are used as both declarators and selectors. A declarator declares that a given {@link Tap} or {@link cascading.operation.BaseOperation}
+ * Fields are used as both declarators and selectors. A declarator declares that a given {@link Tap} or
+ * {@link cascading.operation.BaseOperation}
  * returns the given field names, for a set of values the size of the given Fields instance. A selector is used to select
  * given referenced fields from a Tuple.
  * For example; <br/>
