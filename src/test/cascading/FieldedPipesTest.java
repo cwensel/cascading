@@ -236,8 +236,10 @@ public class FieldedPipesTest extends ClusterTestCase
 
     TupleIterator iterator = flow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\tA", iterator.next().get( 1 ) );
+    Comparable line = iterator.next().get( 1 );
+    assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
+    line = iterator.next().get( 1 );
+    assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
 
     iterator.close();
     }
