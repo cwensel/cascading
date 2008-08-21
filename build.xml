@@ -75,7 +75,7 @@
       <include name="hadoop-*-test.jar"/>
     </fileset>
 
-    <fileset dir="${hadoop.home}/build">
+    <fileset dir="${hadoop.home}/build" erroronmissingdir="false">
       <include name="hadoop-*-core.jar"/>
       <include name="hadoop-*-test.jar"/>
     </fileset>
