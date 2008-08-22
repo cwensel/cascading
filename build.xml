@@ -32,6 +32,7 @@
   <property name="cascading.release.version" value="x.y.z"/>
 
   <property name="javac.debug" value="true"/>
+  <property name="test.haltonerror" value="true"/>
 
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.java" location="${src}/java"/>
@@ -168,7 +169,7 @@
       <formatter type="plain" usefile="true"/>
 
       <test name="${testcase}" todir="${test.results}" if="testcase"/>
-      <batchtest todir="${test.results}" haltonfailure="true" unless="testcase">
+      <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>
         </fileset>
