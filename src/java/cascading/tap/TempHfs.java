@@ -37,6 +37,7 @@ public class TempHfs extends Hfs
   {
   /** Field name */
   final String name;
+  /** Field schemeClass */
   private Class schemeClass;
   /** Field temporaryPath */
   private String temporaryPath;

@@ -689,7 +689,7 @@ public class MultiMapReducePlanner
 
       for( Tap tap : taps )
         {
-        if( tap instanceof TempHfs ) // we normalize to TempHfs
+        if( tap instanceof TempHfs || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
           continue;
 
         KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, Integer.MAX_VALUE );

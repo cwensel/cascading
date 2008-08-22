@@ -468,13 +468,12 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( sources, sinks, merge );
 
-//    flow.writeDOT( "merged.dot" );
+//    flow.writeDOT( "merged2.dot" );
 
     List<FlowStep> steps = flow.getSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
-
 
   public void testCoGroupAroundCoGroup() throws Exception
     {

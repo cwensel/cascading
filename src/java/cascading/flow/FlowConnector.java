@@ -32,6 +32,7 @@ import cascading.CascadingException;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Pipe;
+import cascading.scheme.SequenceFile;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
@@ -98,7 +99,7 @@ public class FlowConnector
     Object type = Util.getProperty( properties, "cascading.flowconnector.intermediateschemeclass", (Object) null );
 
     if( type == null )
-      return null;
+      return SequenceFile.class;
 
     if( type instanceof Class )
       return (Class) type;
