@@ -49,7 +49,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -184,7 +183,6 @@ public class MultiMapReducePlanner
       handleHeterogeneousSources( pipeGraph );
 
       // generic
-      verifyUniqueGroupSources( pipeGraph );
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
       resolveFields( pipeGraph );
 
@@ -762,41 +760,6 @@ public class MultiMapReducePlanner
       return tap.getScheme().getClass();
     }
 
-  private void verifyUniqueGroupSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    List<Group> groups = findAllMergeJoinGroups( pipeGraph );
-
-    SimpleDirectedGraph<FlowElement, Scope> reverseGraph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
-    Graphs.addGraphReversed( reverseGraph, pipeGraph );
-
-    for( Group group : groups )
-      {
-      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( reverseGraph, group, Integer.MAX_VALUE );
-      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( head );
-
-      Set<Tap> taps = new HashSet<Tap>();
-
-      int incoming = pipeGraph.inDegreeOf( group );
-
-      for( GraphPath<FlowElement, Scope> path : paths )
-        {
-        for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
-          {
-          if( !( flowElement instanceof Tap ) )
-            continue;
-
-          Tap tap = (Tap) flowElement;
-
-          taps.add( tap );
-          break;
-          }
-        }
-
-      if( taps.size() != incoming )
-        throw new PlannerException( "groups may not join/merge duplicate sources, found incoming: " + Util.join( taps, ", " ) );
-      }
-    }
-
   /**
    * Since all joins are at groups, depth first search is safe
    *
@@ -1104,43 +1067,71 @@ public class MultiMapReducePlanner
         if( steps.containsKey( source.toString() ) )
           stepGraph.addEdge( steps.get( source.toString() ), step, count++ );
 
-        List<Scope> scopes = DijkstraShortestPath.findPathBetween( pipeGraph, source, sink );
-        String sourceName = scopes.get( 0 ).getName(); // root node of the shortest path
+        // support multiple paths from source to sink
+        // this allows for self joins on groups, even with different operation stacks between them
+        // note we must ignore paths with intermediate taps
+        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, source, Integer.MAX_VALUE );
+        List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( sink );
 
-        step.sources.put( (Tap) source, sourceName );
-        step.sink = sink;
-
-        if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
-          step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
-
-        FlowElement lhs = source;
-
-        step.graph.addVertex( lhs );
-
-        for( Scope scope : scopes )
+        for( GraphPath<FlowElement, Scope> path : paths )
           {
-          FlowElement rhs = pipeGraph.getEdgeTarget( scope );
+          if( pathContainsTap( path ) )
+            continue;
 
-          step.graph.addVertex( rhs );
-          step.graph.addEdge( lhs, rhs, scope );
+          List<Scope> scopes = path.getEdgeList();
+          String sourceName = scopes.get( 0 ).getName(); // root node of the shortest path
 
-          if( rhs instanceof Group )
-            step.group = (Group) rhs;
+          step.sources.put( (Tap) source, sourceName );
+          step.sink = sink;
 
-          if( rhs instanceof Pipe ) // add relevant traps to step
+          if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
+            step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
+
+          FlowElement lhs = source;
+
+          step.graph.addVertex( lhs );
+
+          for( Scope scope : scopes )
             {
-            String name = ( (Pipe) rhs ).getName();
+            FlowElement rhs = pipeGraph.getEdgeTarget( scope );
 
-            if( traps.containsKey( name ) )
-              step.traps.put( name, traps.get( name ) );
+            step.graph.addVertex( rhs );
+            step.graph.addEdge( lhs, rhs, scope );
+
+            if( rhs instanceof Group )
+              step.group = (Group) rhs;
+
+            if( rhs instanceof Pipe ) // add relevant traps to step
+              {
+              String name = ( (Pipe) rhs ).getName();
+
+              if( traps.containsKey( name ) )
+                step.traps.put( name, traps.get( name ) );
+              }
+
+            lhs = rhs;
             }
-
-          lhs = rhs;
           }
         }
       }
 
     return stepGraph;
+    }
+
+  private boolean pathContainsTap( GraphPath<FlowElement, Scope> path )
+    {
+    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+
+    // first and last are taps, if we find more than 2, return false
+    int count = 0;
+
+    for( FlowElement flowElement : flowElements )
+      {
+      if( flowElement instanceof Tap )
+        count++;
+      }
+
+    return count > 2;
     }
 
   /**

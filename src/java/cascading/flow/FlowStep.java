@@ -251,6 +251,11 @@ public class FlowStep implements Serializable
     return graph.outgoingEdgesOf( flowElement ).iterator().next();
     }
 
+  public Set<Scope> getNextScopes( FlowElement flowElement )
+    {
+    return graph.outgoingEdgesOf( flowElement );
+    }
+
   public FlowElement getNextFlowElement( Scope scope )
     {
     return graph.getEdgeTarget( scope );

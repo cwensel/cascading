@@ -412,41 +412,6 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
 
-  public void testDupeSourceFail()
-    {
-    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
-    Tap source2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
-
-    Tap sink = new Hfs( new TextLine(), "foo" );
-
-    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
-    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
-    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
-    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
-    right = new Each( right, new Fields( "line" ), new RegexFilter( ".*192.*" ) );
-
-    Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
-
-    Map sources = new HashMap();
-    sources.put( "left", source1 );
-    sources.put( "right", source2 );
-
-    Map sinks = new HashMap();
-    sinks.put( "merge", sink );
-
-    Flow flow = null;
-    try
-      {
-      flow = new FlowConnector().connect( sources, sinks, merge );
-      flow.writeDOT( "dupesource.dot" );
-      fail( "did not fail on dupe source" );
-      }
-    catch( Exception exception )
-      {
-
-      }
-    }
-
   public void testMerge2()
     {
     Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );

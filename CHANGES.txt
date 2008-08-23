@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed behavior of Cascading to allow for multiple paths from the same c.t.Tap source to be co-grouped on
+  via c.p.CoGroup. This allows for a kind of self-join where each stream is processed by a different operation
+  path within the Mapper.
+
   Added c.o.f.And, c.o.f.Or, c.o.f.Xor, and c.o.f.Not logic operator c.o.Filter implementations. They should be used
   to compose more complex filters from existing implementations.
 

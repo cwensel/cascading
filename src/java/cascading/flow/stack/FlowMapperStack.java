@@ -22,6 +22,7 @@
 package cascading.flow.stack;
 
 import java.io.IOException;
+import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
@@ -53,10 +54,17 @@ public class FlowMapperStack
   /** Field jobConf */
   private final JobConf jobConf;
 
-  /** Field stackHead */
-  private MapperStackElement stackHead;
-  /** Field stackTail */
-  private MapperStackElement stackTail;
+  /** Field stack */
+  private Stack stacks[];
+
+  /** Class Stack is a simple holder for stack head and tails */
+  private class Stack
+    {
+    /** Field stackHead */
+    MapperStackElement head;
+    /** Field stackTail */
+    MapperStackElement tail;
+    }
 
   public FlowMapperStack( JobConf jobConf ) throws IOException
     {
@@ -72,76 +80,92 @@ public class FlowMapperStack
 
   private void buildStack() throws IOException
     {
-    Scope incomingScope = step.getNextScope( currentSource );
-    FlowElement operator = step.getNextFlowElement( incomingScope );
+    Set<Scope> incomingScopes = step.getNextScopes( currentSource );
 
-    stackTail = null;
+    stacks = new Stack[incomingScopes.size()];
 
-    while( operator instanceof Each )
+    int i = 0;
+
+    for( Scope incomingScope : incomingScopes )
       {
-      Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-      stackTail = new EachMapperStackElement( stackTail, incomingScope, jobConf, trap, ( (Each) operator ).getHandler() );
+      FlowElement operator = step.getNextFlowElement( incomingScope );
 
-      incomingScope = step.getNextScope( operator );
-      operator = step.getNextFlowElement( incomingScope );
+      stacks[ i ] = new Stack();
+
+      stacks[ i ].tail = null;
+
+      while( operator instanceof Each )
+        {
+        Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, ( (Each) operator ).getHandler() );
+
+        incomingScope = step.getNextScope( operator );
+        operator = step.getNextFlowElement( incomingScope );
+        }
+
+      boolean useTapCollector = false;
+
+      while( operator instanceof EndPipe )
+        {
+        useTapCollector = true;
+        incomingScope = step.getNextScope( operator );
+        operator = step.getNextFlowElement( incomingScope );
+        }
+
+      if( operator instanceof Group )
+        {
+        Scope outgoingScope = step.getNextScope( operator ); // is always Group
+
+        Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, (Group) operator, outgoingScope );
+        }
+      else if( operator instanceof Tap )
+        {
+        useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
+
+        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, incomingScope, (Tap) operator, useTapCollector, jobConf );
+        }
+      else
+        throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
+
+      stacks[ i ].head = (MapperStackElement) stacks[ i ].tail.resolveStack();
+
+      i++;
       }
-
-    boolean useTapCollector = false;
-
-    while( operator instanceof EndPipe )
-      {
-      useTapCollector = true;
-      incomingScope = step.getNextScope( operator );
-      operator = step.getNextFlowElement( incomingScope );
-      }
-
-    if( operator instanceof Group )
-      {
-      Scope outgoingScope = step.getNextScope( operator ); // is always Group
-
-      Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-      stackTail = new GroupMapperStackElement( stackTail, incomingScope, jobConf, trap, (Group) operator, outgoingScope );
-      }
-    else if( operator instanceof Tap )
-      {
-      useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
-
-      stackTail = new TapMapperStackElement( stackTail, incomingScope, (Tap) operator, useTapCollector, jobConf );
-      }
-    else
-      throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
-
-    stackHead = (MapperStackElement) stackTail.resolveStack();
     }
 
   public void map( Object key, Object value, OutputCollector output )
     {
-    Tuple tuple = currentSource.source( key, value );
-
-    if( LOG.isDebugEnabled() )
+    for( int i = 0; i < stacks.length; i++ )
       {
-      if( key instanceof Tuple )
-        LOG.debug( "map key: " + ( (Tuple) key ).print() );
-      else
-        LOG.debug( "map key: [" + key + "]" );
+      Tuple tuple = currentSource.source( key, value );
 
-      LOG.debug( "map value: " + tuple.print() );
-      }
+      if( LOG.isDebugEnabled() )
+        {
+        if( key instanceof Tuple )
+          LOG.debug( "map key: " + ( (Tuple) key ).print() );
+        else
+          LOG.debug( "map key: [" + key + "]" );
 
-    stackTail.setLastOutput( output );
+        LOG.debug( "map value: " + tuple.print() );
+        }
 
-    try
-      {
-      stackHead.collect( tuple );
-      }
-    catch( StackException exception )
-      {
-      throw (RuntimeException) exception.getCause();
+      stacks[ i ].tail.setLastOutput( output );
+
+      try
+        {
+        stacks[ i ].head.collect( tuple );
+        }
+      catch( StackException exception )
+        {
+        throw (RuntimeException) exception.getCause();
+        }
       }
     }
 
   public void close() throws IOException
     {
-    stackTail.close();
+    for( int i = 0; i < stacks.length; i++ )
+      stacks[ i ].tail.close();
     }
   }
