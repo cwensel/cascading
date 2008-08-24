@@ -70,7 +70,9 @@ public class FlowMapperStack
     {
     this.jobConf = jobConf;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
-    currentSource = step.findCurrentSource( jobConf );
+
+    // is set by the MultiInputSplit
+    currentSource = (Tap) Util.deserializeBase64( jobConf.getRaw( FlowConstants.STEP_SOURCE ) );
 
     if( LOG.isDebugEnabled() )
       LOG.debug( "map current source: " + currentSource );

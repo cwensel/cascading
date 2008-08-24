@@ -343,37 +343,6 @@ public class Hfs extends Tap
     return date;
     }
 
-  @Override
-  public boolean containsFile( JobConf conf, String currentFile )
-    {
-    Path currentFilePath = new Path( currentFile );
-
-    try
-      {
-      Path qualified = getQualifiedPath( conf );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "comparing: " + qualified + " with: " + currentFilePath );
-
-      if( qualified.equals( currentFilePath ) )
-        return true;
-
-      makeStatuses( conf );
-
-      for( FileStatus status : statuses )
-        {
-        if( status.getPath().equals( currentFilePath ) )
-          return true;
-        }
-      }
-    catch( IOException exception )
-      {
-      throw new TapException( "could not get FileSystem", exception );
-      }
-
-    return false;
-    }
-
   protected Path getTempPath( JobConf conf )
     {
     String tempDir = conf.get( TEMPORARY_DIRECTORY );

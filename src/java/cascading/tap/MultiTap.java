@@ -117,22 +117,6 @@ public class MultiTap extends SourceTap
       tap.sourceInit( conf );
     }
 
-  public Tap findTapFor( JobConf conf, String currentFile )
-    {
-    for( Tap tap : getTaps() )
-      {
-      if( tap.containsFile( conf, currentFile ) )
-        return tap;
-      }
-
-    return null;
-    }
-
-  public boolean containsFile( JobConf conf, String currentFile )
-    {
-    return findTapFor( conf, currentFile ) != null;
-    }
-
   @Override
   public Tuple source( Object key, Object value )
     {

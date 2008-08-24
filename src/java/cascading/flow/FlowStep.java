@@ -23,7 +23,6 @@ package cascading.flow;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.TempHfs;
+import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 import cascading.tuple.TuplePair;
@@ -129,13 +129,9 @@ public class FlowStep implements Serializable
     conf.setMapperClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
-    for( Tap tap : sources.keySet() )
-      tap.sourceInit( conf );
+    initFromSources( conf );
 
-    if( tempSink != null )
-      tempSink.sinkInit( conf );
-    else
-      sink.sinkInit( conf );
+    initFromSink( conf );
 
     if( !traps.isEmpty() )
       {
@@ -176,6 +172,30 @@ public class FlowStep implements Serializable
     return conf;
     }
 
+  private void initFromSources( JobConf conf ) throws IOException
+    {
+    JobConf[] fromJobs = new JobConf[sources.size()];
+    int i = 0;
+
+    for( Tap tap : sources.keySet() )
+      {
+      fromJobs[ i ] = new JobConf( conf );
+      tap.sourceInit( fromJobs[ i ] );
+      fromJobs[ i ].set( FlowConstants.STEP_SOURCE, Util.serializeBase64( tap ) );
+      i++;
+      }
+
+    MultiInputFormat.addInputFormat( conf, fromJobs );
+    }
+
+  private void initFromSink( JobConf conf ) throws IOException
+    {
+    if( tempSink != null )
+      tempSink.sinkInit( conf );
+    else
+      sink.sinkInit( conf );
+    }
+
   public TapIterator openSourceForRead( JobConf conf ) throws IOException
     {
     return new TapIterator( sources.keySet().iterator().next(), conf );
@@ -184,43 +204,6 @@ public class FlowStep implements Serializable
   public TupleIterator openSinkForRead( JobConf conf ) throws IOException
     {
     return sink.openForRead( conf );
-    }
-
-  public Tap findCurrentSource( JobConf jobConf )
-    {
-    String currentFile = jobConf.get( "map.input.file" );
-
-    // if FileInputSplit was not used, and there is only one source, go ahead and return it
-    if( currentFile == null || currentFile.length() == 0 )
-      {
-      if( sources.size() == 1 )
-        return sources.keySet().iterator().next();
-
-      throw new IllegalStateException( "map.input.file property returned null" );
-      }
-
-    // do not assume if one source it is the current, should fail appropriately for misbehaving Taps
-    // test for the case that multiple taps contain the same file, and fail appropriately
-    List<Tap> found = new ArrayList<Tap>();
-
-    for( Tap source : sources.keySet() )
-      {
-      if( source.containsFile( jobConf, currentFile ) )
-        found.add( source );
-      }
-
-    if( found.size() == 1 )
-      return found.get( 0 );
-
-    FlowException exception = null;
-
-    if( found.size() > 1 )
-      exception = new FlowException( "found more than one source Tap for file: " + currentFile + " taps: " + Util.join( found, "," ) );
-    else
-      exception = new FlowException( "could not find source Tap for file: " + currentFile );
-
-    LOG.error( exception );
-    throw exception;
     }
 
   public Tap getTrap( String name )

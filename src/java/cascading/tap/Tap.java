@@ -177,15 +177,6 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract Path getPath();
 
   /**
-   * Method containsFile indicates whether the tap contains a given file.
-   *
-   * @param conf        of type JobConf
-   * @param currentFile of type String
-   * @return boolean
-   */
-  public abstract boolean containsFile( JobConf conf, String currentFile );
-
-  /**
    * Method getSourceFields returns the sourceFields of this Tap object.
    *
    * @return the sourceFields (type Fields) of this Tap object.

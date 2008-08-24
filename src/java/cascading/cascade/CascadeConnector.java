@@ -180,12 +180,6 @@ public class CascadeConnector
       return null;
       }
 
-    /** @see Tap#containsFile(JobConf, String) */
-    public boolean containsFile( JobConf conf, String currentFile )
-      {
-      return false;
-      }
-
     /** @see Tap#makeDirs(JobConf) */
     public boolean makeDirs( JobConf conf ) throws IOException
       {

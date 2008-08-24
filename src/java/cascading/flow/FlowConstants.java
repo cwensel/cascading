@@ -24,5 +24,6 @@ package cascading.flow;
 /** Interface FlowConstants ... */
 public interface FlowConstants
   {
-  String FLOW_STEP = "flow.step";
+  String FLOW_STEP = "cascading.flow.step";
+  String STEP_SOURCE = "cascading.step.source";
   }
