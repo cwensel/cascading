@@ -169,6 +169,19 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
+   * @param groupName      of type String
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
+   */
+  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields )
+    {
+    this( groupName, pipes, groupFields, declaredFields, null );
+    }
+
+  /**
+   * Constructor Group creates a new Group instance.
+   *
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
@@ -902,8 +915,11 @@ public class Group extends Pipe
       {
       Fields declaredFields = getDeclaredFields();
 
-      if( declaredFields != null )
+      if( declaredFields != null ) // null for GroupBy
         {
+        if( incomingScopes.size() != pipes.size() && repeat == 1 )
+          throw new OperatorException( "self joins without intermediate operators are not permitted, see 'repeat' constructor or identity function" );
+
         int size = 0;
 
         for( Scope incomingScope : incomingScopes )

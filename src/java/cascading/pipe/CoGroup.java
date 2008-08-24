@@ -152,6 +152,19 @@ public class CoGroup extends Group
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields )
+    {
+    super( groupName, pipes, groupFields, declaredFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param groupName      of type String
+   * @param pipes          of type Pipe[]
+   * @param groupFields    of type Fields[]
+   * @param declaredFields of type Fields
    * @param coGrouper      of type CoGrouper
    */
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
