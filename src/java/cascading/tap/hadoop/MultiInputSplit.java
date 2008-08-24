@@ -33,13 +33,14 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.util.ReflectionUtils;
 
-/**
- *
- */
+/** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
+  /** Field jobConf */
   private transient JobConf jobConf;
+  /** Field inputSplit */
   InputSplit inputSplit;
+  /** Field config */
   Map<String, String> config;
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )

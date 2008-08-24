@@ -559,7 +559,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     List<FlowStep> steps = flow.getSteps();
 
-    assertEquals( "not equal: steps.size()", 2, steps.size() );
+    assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
 
   public void testCoGroupAroundCoGroup() throws Exception
@@ -588,7 +588,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "cogroupcogroupopt.dot" );
 
-    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
     }
 
   public void testCoGroupAroundCoGroupOptimized() throws Exception
@@ -672,7 +672,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "cogroupcogroup.dot" );
 
-    assertEquals( "not equal: steps.size()", 6, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
     }
 
   public void testDirectCoGroup() throws Exception
@@ -722,7 +722,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "directcogroup.dot" );
 
-    assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
     }
 
   /**
@@ -773,7 +773,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "chainedcogroup.dot" );
 
-    assertEquals( "not equal: steps.size()", 7, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
     }
 
   /**
@@ -841,7 +841,7 @@ public class BuildJobsTest extends CascadingTestCase
 
 //    flow.writeDOT( "chainedcogroup.dot" );
 
-    assertEquals( "not equal: steps.size()", 6, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
     }
 
   /**

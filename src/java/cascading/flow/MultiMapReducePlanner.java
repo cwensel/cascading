@@ -132,6 +132,31 @@ public class MultiMapReducePlanner
     }
 
   /**
+   * Method setNormalizeHeterogeneousSources adds the given doNormalize boolean to the given properites object.
+   * Use this method if additional jobs should be planned in to handle incompatible InputFormat classes.
+   * <p/>
+   * Normalization is off by default.
+   *
+   * @param properties  of type Map
+   * @param doNormalize of type boolean
+   */
+  public static void setNormalizeHeterogeneousSources( Map<Object, Object> properties, boolean doNormalize )
+    {
+    properties.put( "cascading.multimapreduceplanner.normalizesources", Boolean.toString( doNormalize ) );
+    }
+
+  /**
+   * Method getNormalizeHeterogeneousSources returns if this planner will normalize heterogeneous input sources.
+   *
+   * @param properties of type Map
+   * @return a boolean
+   */
+  public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", false );
+    }
+
+  /**
    * Constructor MultiMapReducePlanner creates a new MultiMapReducePlanner instance.
    *
    * @param properties of type Map<Object, Object>
@@ -180,7 +205,9 @@ public class MultiMapReducePlanner
       // m/r specific
       handleSplits( pipeGraph );
       handleGroups( pipeGraph );
-      handleHeterogeneousSources( pipeGraph );
+
+      if( getNormalizeHeterogeneousSources( properties ) )
+        handleHeterogeneousSources( pipeGraph );
 
       // generic
       removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes

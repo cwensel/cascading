@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed behavior of c.f.MultiMapReducePlanner to use c.t.h.MultiInputFormat to allow single Mappers
+  to support many different Hadoop InputFormat types simultaneously. This deprecates the need to normalize
+  sources to a map and reduces the number of jobs in a c.f.Flow in some cases.
+
   Changed behavior of Cascading to allow for multiple paths from the same c.t.Tap source to be co-grouped on
   via c.p.CoGroup. This allows for a kind of self-join where each stream is processed by a different operation
   path within the Mapper.

@@ -39,10 +39,17 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- *
+ * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
+ * to read data from incompatible file types.
  */
 public class MultiInputFormat implements InputFormat
   {
+  /**
+   * Used to set the current JobConf with all sub jobs configurations.
+   *
+   * @param toJob
+   * @param fromJobs
+   */
   public static void addInputFormat( JobConf toJob, JobConf... fromJobs )
     {
     toJob.setInputFormat( MultiInputFormat.class );
@@ -83,7 +90,7 @@ public class MultiInputFormat implements InputFormat
     return configs;
     }
 
-  public static JobConf[] getJobConfs( JobConf job, List<Map<String, String>> configs )
+  static JobConf[] getJobConfs( JobConf job, List<Map<String, String>> configs )
     {
 
     JobConf[] jobConfs = new JobConf[configs.size()];
@@ -94,7 +101,7 @@ public class MultiInputFormat implements InputFormat
     return jobConfs;
     }
 
-  public static JobConf mergeConf( JobConf job, Map<String, String> config, boolean directly )
+  static JobConf mergeConf( JobConf job, Map<String, String> config, boolean directly )
     {
     JobConf currentConf = directly ? job : new JobConf( job );
 
@@ -104,7 +111,7 @@ public class MultiInputFormat implements InputFormat
     return currentConf;
     }
 
-  public static InputFormat[] getInputFormats( JobConf[] jobConfs )
+  static InputFormat[] getInputFormats( JobConf[] jobConfs )
     {
     InputFormat[] inputFormats = new InputFormat[jobConfs.length];
 
@@ -114,6 +121,12 @@ public class MultiInputFormat implements InputFormat
     return inputFormats;
     }
 
+  /**
+   * Method validateInput delegates to the appropriate InputFormat.
+   *
+   * @param job of type JobConf
+   * @throws IOException when
+   */
   public void validateInput( JobConf job ) throws IOException
     {
     for( JobConf jobConf : getJobConfs( job, getConfigs( job ) ) )
@@ -125,6 +138,14 @@ public class MultiInputFormat implements InputFormat
     return (List<Map<String, String>>) Util.deserializeBase64( job.get( "cascading.multiinputformats" ) );
     }
 
+  /**
+   * Method getSplits delegates to the appropriate InputFormat.
+   *
+   * @param job       of type JobConf
+   * @param numSplits of type int
+   * @return InputSplit[]
+   * @throws IOException when
+   */
   public InputSplit[] getSplits( JobConf job, int numSplits ) throws IOException
     {
     numSplits = numSplits == 0 ? 1 : numSplits;
@@ -202,12 +223,19 @@ public class MultiInputFormat implements InputFormat
     return inputSizes;
     }
 
+  /**
+   * Method getRecordReader delegates to the appropriate InputFormat.
+   *
+   * @param split    of type InputSplit
+   * @param job      of type JobConf
+   * @param reporter of type Reporter
+   * @return RecordReader
+   * @throws IOException when
+   */
   public RecordReader getRecordReader( InputSplit split, JobConf job, Reporter reporter ) throws IOException
     {
     MultiInputSplit multiSplit = (MultiInputSplit) split;
     JobConf currentConf = mergeConf( job, multiSplit.config, true );
-
-//    job.set( "cascading.map.input.tap", currentConf.get( "cascading.map.input.tap" ) );
 
     return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
     }

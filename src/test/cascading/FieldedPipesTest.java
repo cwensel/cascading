@@ -970,6 +970,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
+    assertEquals( "wrong number of steps", 2, flow.getSteps().size() );
+
 //    flow.writeDOT( "cogroupcogroupwout.dot" );
 
     flow.complete();
