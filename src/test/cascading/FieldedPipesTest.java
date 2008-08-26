@@ -287,6 +287,51 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testCoGroupFilteredBranch() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupfilteredbranch/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    pipeUpper = new Each( pipeUpper, new Fields( "num" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
+    pipeUpper = new Group( pipeUpper, new Fields( "num" ) );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
+
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 5, null );
+
+    TupleIterator iterator = countFlow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\tnull\tnull", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\tnull\tnull", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
   public void testCoGroupSelf() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
