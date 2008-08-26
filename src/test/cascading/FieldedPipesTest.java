@@ -287,6 +287,12 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  /**
+   * this test intentionally filters out all values so the intermediate tap is empty. this tap is cogrouped with
+   * a new stream using an outerjoin.
+   *
+   * @throws Exception
+   */
   public void testCoGroupFilteredBranch() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
