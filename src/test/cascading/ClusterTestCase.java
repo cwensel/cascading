@@ -40,6 +40,8 @@ import org.apache.hadoop.mapred.MiniMRCluster;
  */
 public class ClusterTestCase extends CascadingTestCase
   {
+  public static final String CLUSTER_TESTING_PROPERTY = "test.cluster.enabled";
+
   transient private MiniDFSCluster dfs;
   transient private FileSystem fileSys;
   transient private MiniMRCluster mr;
@@ -50,7 +52,7 @@ public class ClusterTestCase extends CascadingTestCase
   public ClusterTestCase( String string, boolean enableCluster )
     {
     super( string );
-    this.enableCluster = enableCluster;
+    this.enableCluster = Boolean.parseBoolean( System.getProperty( CLUSTER_TESTING_PROPERTY, Boolean.toString( enableCluster ) ) );
     }
 
   public ClusterTestCase( String string )
