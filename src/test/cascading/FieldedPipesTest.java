@@ -82,7 +82,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true ); // leave cluster testing enabled
+    super( "fielded pipes", false ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
@@ -1094,6 +1094,44 @@ public class FieldedPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 1, null );
+    }
+
+  /**
+   * Intentionally filters all values out to test next mr job behaves
+   *
+   * @throws Exception
+   */
+  public void testFilterAll() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/filtercomplex", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+
+    pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
+
+    pipe = new Group( pipe, new Fields( "method" ) );
+
+    pipe = new Each( pipe, new Fields( "method" ), new Identity( new Fields( "value" ) ), Fields.ALL );
+
+    pipe = new Group( pipe, new Fields( "value" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "filter.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 0, null );
     }
 
   public void testCross() throws Exception
