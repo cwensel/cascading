@@ -145,7 +145,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
-   * Copy constructor. Does not nest the given Tuple instance within this new instance.
+   * Copy constructor. Does not nest the given Tuple instance within this new instance. Use {@link #add(Comparable)}.
    *
    * @param tuple of type Tuple
    */
@@ -155,10 +155,15 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     elements.addAll( tuple.elements );
     }
 
-  public Tuple( Comparable... args )
+  /**
+   * Constructor Tuple creates a new Tuple instance with all the given values.
+   *
+   * @param values of type Comparable...
+   */
+  public Tuple( Comparable... values )
     {
     this();
-    Collections.addAll( elements, args );
+    Collections.addAll( elements, values );
     }
 
   /**
