@@ -21,8 +21,6 @@
 
 package cascading.flow;
 
-import org.jgrapht.graph.SimpleDirectedGraph;
-
 /**
  * Class PlannerException is thrown when a job planner fails.
  * <p/>
@@ -31,13 +29,10 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  * <a href="http://en.wikipedia.org/wiki/DOT_language">DOT file format</a> using the {@link #writeDOT(String)}
  * method.
  */
-public class PlannerException extends FlowException
+public class ElementGraphException extends FlowException
   {
-  /** Field pipeGraph */
-  ElementGraph elementGraph;
-
   /** Constructor PlannerException creates a new PlannerException instance. */
-  public PlannerException()
+  public ElementGraphException()
     {
     }
 
@@ -46,7 +41,7 @@ public class PlannerException extends FlowException
    *
    * @param string of type String
    */
-  public PlannerException( String string )
+  public ElementGraphException( String string )
     {
     super( string );
     }
@@ -57,7 +52,7 @@ public class PlannerException extends FlowException
    * @param string    of type String
    * @param throwable of type Throwable
    */
-  public PlannerException( String string, Throwable throwable )
+  public ElementGraphException( String string, Throwable throwable )
     {
     super( string, throwable );
     }
@@ -67,44 +62,8 @@ public class PlannerException extends FlowException
    *
    * @param throwable of type Throwable
    */
-  public PlannerException( Throwable throwable )
+  public ElementGraphException( Throwable throwable )
     {
     super( throwable );
-    }
-
-  /**
-   * Constructor PlannerException creates a new PlannerException instance.
-   *
-   * @param string       of type String
-   * @param throwable    of type Throwable
-   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   */
-  public PlannerException( String string, Throwable throwable, ElementGraph elementGraph )
-    {
-    super( string, throwable );
-    this.elementGraph = elementGraph;
-    }
-
-  /**
-   * Method getPipeGraph returns the pipeGraph of this PlannerException object.
-   *
-   * @return the pipeGraph (type SimpleDirectedGraph<FlowElement, Scope>) of this PlannerException object.
-   */
-  SimpleDirectedGraph<FlowElement, Scope> getElementGraph()
-    {
-    return elementGraph;
-    }
-
-  /**
-   * Method writeDOT writes the failed Flow instance to the given filename as a DOT file for import into a graphics package.
-   *
-   * @param filename of type String
-   */
-  public void writeDOT( String filename )
-    {
-    if( elementGraph == null )
-      return;
-
-    elementGraph.writeDOT( filename );
     }
   }

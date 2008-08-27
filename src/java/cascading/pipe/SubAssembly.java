@@ -21,6 +21,10 @@
 
 package cascading.pipe;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import cascading.util.Util;
 
 /**
@@ -81,4 +85,26 @@ public abstract class SubAssembly extends Pipe
     {
     return tails;
     }
+
+  /**
+   * Is responsible for unwinding nested PipeAssembly instances.
+   *
+   * @param tails of type Pipe[]
+   * @return a Pipe[]
+   */
+  public static Pipe[] unwind( Pipe... tails )
+    {
+    Set<Pipe> previous = new HashSet<Pipe>();
+
+    for( Pipe pipe : tails )
+      {
+      if( pipe instanceof SubAssembly )
+        Collections.addAll( previous, unwind( pipe.getPrevious() ) );
+      else
+        previous.add( pipe );
+      }
+
+    return previous.toArray( new Pipe[previous.size()] );
+    }
+
   }

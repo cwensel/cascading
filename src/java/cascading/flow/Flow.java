@@ -21,9 +21,7 @@
 
 package cascading.flow;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,10 +49,6 @@ import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -115,7 +109,7 @@ public class Flow implements Runnable
   private boolean stop;
 
   /** Field pipeGraph */
-  private SimpleDirectedGraph<FlowElement, Scope> pipeGraph; // only used for documentation purposes
+  private ElementGraph pipeGraph; // only used for documentation purposes
 
   /** Field steps */
   private transient List<FlowStep> steps;
@@ -177,7 +171,7 @@ public class Flow implements Runnable
     {
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -1067,7 +1061,7 @@ public class Flow implements Runnable
     if( pipeGraph == null )
       throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
 
-    printElementGraph( filename, pipeGraph );
+    pipeGraph.writeDOT( filename );
     }
 
   /**
@@ -1096,49 +1090,6 @@ public class Flow implements Runnable
       this.flow = flow;
       }
     }
-
-  // DOT WRITER
-
-  protected static void printElementGraph( String filename, SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    try
-      {
-      Writer writer = new FileWriter( filename );
-
-      printElementGraph( writer, graph );
-
-      writer.close();
-      }
-    catch( IOException exception )
-      {
-      exception.printStackTrace();
-      }
-    }
-
-  protected static void printElementGraph( Writer writer, final SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    DOTExporter dot = new DOTExporter<FlowElement, Scope>( new IntegerNameProvider<FlowElement>(), new VertexNameProvider<FlowElement>()
-    {
-    public String getVertexName( FlowElement object )
-      {
-      if( object instanceof Tap || object instanceof MultiMapReducePlanner.Extent )
-        return object.toString().replaceAll( "\"", "\'" );
-
-      Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
-
-      return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
-      }
-    }, new EdgeNameProvider<Scope>()
-    {
-    public String getEdgeName( Scope object )
-      {
-      return object.toString().replaceAll( "\"", "\'" );
-      }
-    } );
-
-    dot.export( writer, graph );
-    }
-
 
   /**
    * Class SafeFlowListener safely calls a wrapped FlowListener.

@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +38,6 @@ import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
-import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
@@ -92,11 +90,6 @@ public class MultiMapReducePlanner
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MultiMapReducePlanner.class );
-
-  /** Field head */
-  private final Extent head = new Extent( "head" );
-  /** Field tail */
-  private final Extent tail = new Extent( "tail" );
 
   /** Field properties */
   private final Map<Object, Object> properties;
@@ -182,7 +175,7 @@ public class MultiMapReducePlanner
    */
   public Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
-    SimpleDirectedGraph<FlowElement, Scope> pipeGraph = null;
+    ElementGraph elementGraph = null;
 
     try
       {
@@ -194,34 +187,37 @@ public class MultiMapReducePlanner
       verifyPipeAssemblyEndPoints( sources, sinks, pipes );
       verifyTraps( traps, pipes );
 
-      pipeGraph = makePipeGraph( pipes, sources, sinks );
+      elementGraph = new ElementGraph( pipes, sources, sinks, assertionLevel );
 
-      addExtents( pipeGraph, sources, sinks );
-      verifyGraphConnections( pipeGraph );
-
-      failOnLoneGroupAssertion( pipeGraph );
-      failOnMissingGroup( pipeGraph );
+      // rules
+      failOnLoneGroupAssertion( elementGraph );
+      failOnMissingGroup( elementGraph );
 
       // m/r specific
-      handleSplits( pipeGraph );
-      handleGroups( pipeGraph );
+      handleSplits( elementGraph );
+      handleGroups( elementGraph );
 
       if( getNormalizeHeterogeneousSources( properties ) )
-        handleHeterogeneousSources( pipeGraph );
+        handleHeterogeneousSources( elementGraph );
 
       // generic
-      removeUnnecessaryPipes( pipeGraph ); // groups must be added before removing pipes
-      resolveFields( pipeGraph );
+      elementGraph.removeUnnecessaryPipes(); // groups must be added before removing pipes
+      elementGraph.resolveFields();
 
       // m/r specific
-      SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( pipeGraph );
-      SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( pipeGraph, tapGraph, traps );
+      SimpleDirectedGraph<Tap, Integer> tapGraph = makeTapGraph( elementGraph );
+      SimpleDirectedGraph<FlowStep, Integer> stepGraph = makeStepGraph( elementGraph, tapGraph, traps );
 
-      return new Flow( properties, jobConf, name, pipeGraph, stepGraph, new HashMap<String, Tap>( sources ), new HashMap<String, Tap>( sinks ), new HashMap<String, Tap>( traps ) );
+      // clone data
+      sources = new HashMap<String, Tap>( sources );
+      sinks = new HashMap<String, Tap>( sinks );
+      traps = new HashMap<String, Tap>( traps );
+
+      return new Flow( properties, jobConf, name, elementGraph, stepGraph, sources, sinks, traps );
       }
     catch( PlannerException exception )
       {
-      exception.pipeGraph = pipeGraph;
+      exception.elementGraph = elementGraph;
 
       throw exception;
       }
@@ -230,7 +226,7 @@ public class MultiMapReducePlanner
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
-      throw new PlannerException( message, exception, pipeGraph );
+      throw new PlannerException( message, exception, elementGraph );
       }
     }
 
@@ -331,65 +327,7 @@ public class MultiMapReducePlanner
       else
         names.add( pipe.getName() );
 
-      collectNames( unwindPipeAssemblies( pipe.getPrevious() ), names );
-      }
-    }
-
-  /**
-   * created to support the ability to generate all paths between the head and tail of the process.
-   *
-   * @param pipeGraph
-   * @param sources
-   * @param sinks
-   */
-  private void addExtents( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, Map<String, Tap> sources, Map<String, Tap> sinks )
-    {
-    pipeGraph.addVertex( head );
-
-    for( String source : sources.keySet() )
-      {
-      Scope scope = pipeGraph.addEdge( head, sources.get( source ) );
-
-      // edge may already exist, if so, above returns null
-      if( scope != null )
-        scope.setName( source );
-      }
-
-    pipeGraph.addVertex( tail );
-
-    for( String sink : sinks.keySet() )
-      pipeGraph.addEdge( sinks.get( sink ), tail ).setName( sink );
-    }
-
-  /**
-   * Method verifyGraphConnections ...
-   *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   */
-  private void verifyGraphConnections( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    if( pipeGraph.vertexSet().isEmpty() )
-      return;
-
-    // need to verify that only EndPipe instances are origins in this graph. Otherwise a Tap was not properly connected
-    TopologicalOrderIterator<FlowElement, Scope> iterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
-
-    while( iterator.hasNext() )
-      {
-      FlowElement flowElement = iterator.next();
-
-      if( pipeGraph.incomingEdgesOf( flowElement ).size() != 0 )
-        break;
-
-      if( flowElement instanceof Extent )
-        continue;
-
-      if( flowElement instanceof Pipe )
-        throw new PlannerException( "no Tap instance given to connect Pipe " + flowElement.toString() );
-      else if( flowElement instanceof Tap )
-        throw new PlannerException( "no Pipe instance given to connect Tap " + flowElement.toString() );
-      else
-        throw new PlannerException( "unknown element type: " + flowElement );
+      collectNames( SubAssembly.unwind( pipe.getPrevious() ), names );
       }
     }
 
@@ -397,19 +335,16 @@ public class MultiMapReducePlanner
    * Verifies that there are not only GroupAssertions following any given Group instance. This will adversely
    * affect the stream entering any subsquent Tap of Each instances.
    *
-   * @param pipeGraph
+   * @param elementGraph
    */
-  private void failOnLoneGroupAssertion( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void failOnLoneGroupAssertion( ElementGraph elementGraph )
     {
-    List<Group> groups = findAllGroups( pipeGraph );
+    List<Group> groups = elementGraph.findAllGroups();
 
     // walk Every instances after Group
     for( Group group : groups )
       {
-      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, group, Integer.MAX_VALUE );
-      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
-
-      for( GraphPath<FlowElement, Scope> path : paths )
+      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsFrom( group ) )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is tail
 
@@ -438,17 +373,14 @@ public class MultiMapReducePlanner
       }
     }
 
-  private void failOnMissingGroup( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void failOnMissingGroup( ElementGraph elementGraph )
     {
-    List<Every> everies = findAllEveries( pipeGraph );
+    List<Every> everies = elementGraph.findAllEveries();
 
     // walk Every instances after Group
     for( Every every : everies )
       {
-      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
-      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( every );
-
-      for( GraphPath<FlowElement, Scope> path : paths )
+      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( every ) )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is every
         Collections.reverse( flowElements ); // first element is every
@@ -469,126 +401,6 @@ public class MultiMapReducePlanner
     }
 
   /**
-   * Method removeEmptyPipes performs a depth first traversal and removes instance of {@link Pipe} or {@link cascading.pipe.SubAssembly}.
-   *
-   * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
-   */
-  private void removeUnnecessaryPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    while( !internalRemoveUnnecessaryPipes( graph ) )
-      ;
-    }
-
-  private boolean internalRemoveUnnecessaryPipes( SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( graph, head );
-
-    while( iterator.hasNext() )
-      {
-      FlowElement flowElement = iterator.next();
-
-      if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testAssertion( flowElement ) )
-        {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "remove testing pipe: " + flowElement );
-
-        Set<Scope> incomingScopes = graph.incomingEdgesOf( flowElement ); // Pipe class is guaranteed to have one input
-        Scope incoming = incomingScopes.iterator().next();
-        Set<Scope> outgoingScopes = graph.outgoingEdgesOf( flowElement );
-
-        // source -> incoming -> flowElement -> outgoing -> target
-        FlowElement source = graph.getEdgeSource( incoming );
-        for( Scope outgoing : outgoingScopes )
-          {
-          FlowElement target = graph.getEdgeTarget( outgoing );
-
-          graph.addEdge( source, target, new Scope( outgoing ) );
-          }
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "removing: " + flowElement );
-
-        graph.removeVertex( flowElement );
-
-        return false;
-        }
-      }
-
-    return true;
-    }
-
-  /**
-   * Method testAssertion ...
-   *
-   * @param flowElement of type FlowElement
-   * @return boolean
-   */
-  private boolean testAssertion( FlowElement flowElement )
-    {
-    if( !( flowElement instanceof Operator ) )
-      return false;
-
-    Operator operator = (Operator) flowElement;
-
-    return operator.isAssertion() && operator.getAssertionLevel().isStricterThan( assertionLevel );
-    }
-
-  /**
-   * Method resolveFields performs a breadth first traversal and resolves the tuple fields between each Pipe instance.
-   *
-   * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
-   */
-  private void resolveFields( SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    TopologicalOrderIterator<FlowElement, Scope> iterator = new TopologicalOrderIterator<FlowElement, Scope>( graph );
-
-    while( iterator.hasNext() )
-      resolveFields( graph, iterator.next() );
-    }
-
-  /**
-   * Method resolveFields ...
-   *
-   * @param graph  of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param source of type FlowElement
-   */
-  private void resolveFields( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement source )
-    {
-    if( source instanceof Extent )
-      return;
-
-    Set<Scope> incomingScopes = graph.incomingEdgesOf( source );
-    Set<Scope> outgoingScopes = graph.outgoingEdgesOf( source );
-
-    // don't bother with sink taps
-    List<FlowElement> flowElements = Graphs.successorListOf( graph, source );
-
-    if( flowElements.size() == 0 )
-      throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
-
-    if( flowElements.get( 0 ) instanceof Extent )
-      return;
-
-    Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
-
-    if( LOG.isDebugEnabled() )
-      {
-      LOG.debug( "for modifier: " + source );
-      if( outgoingScope.getArgumentSelector() != null )
-        LOG.debug( "setting outgoing arguments: " + outgoingScope.getArgumentSelector() );
-      if( outgoingScope.getDeclaredFields() != null )
-        LOG.debug( "setting outgoing declared: " + outgoingScope.getDeclaredFields() );
-      if( outgoingScope.getGroupingSelectors() != null )
-        LOG.debug( "setting outgoing group: " + outgoingScope.getGroupingSelectors() );
-      if( outgoingScope.getOutValuesSelector() != null )
-        LOG.debug( "setting outgoing values: " + outgoingScope.getOutValuesSelector() );
-      }
-
-    for( Scope scope : outgoingScopes )
-      scope.copyFields( outgoingScope );
-    }
-
-  /**
    * optimized for this case
    * <pre>
    *         e - t           e1 - e - t
@@ -604,12 +416,12 @@ public class MultiMapReducePlanner
    *        g - t                 g - t
    * </pre>
    *
-   * @param pipeGraph
+   * @param elementGraph
    */
-  private void handleSplits( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void handleSplits( ElementGraph elementGraph )
     {
     // copy so we can modify the graph while iterating
-    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( copyPipeGraph( pipeGraph ), head );
+    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( elementGraph.copyElementGraph(), elementGraph.head );
 
     FlowElement lastInsertable = null;
 
@@ -617,7 +429,7 @@ public class MultiMapReducePlanner
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement instanceof Extent )
+      if( flowElement instanceof ElementGraph.Extent )
         continue;
 
       // if Tap, Group, or Every - we insert the tap here
@@ -626,46 +438,33 @@ public class MultiMapReducePlanner
 
       if( flowElement instanceof Tap )
         continue;
-      else if( pipeGraph.outDegreeOf( flowElement ) <= 1 )
+      else if( elementGraph.outDegreeOf( flowElement ) <= 1 )
         continue;
 
       if( lastInsertable instanceof Tap )
         continue;
 
-      insertTapAfter( pipeGraph, (Pipe) flowElement );
+      insertTapAfter( elementGraph, (Pipe) flowElement );
       }
     }
 
-  /**
-   * Method copyPipeGraph creates a copy of the given pipeGraph.
-   *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   * @return SimpleDirectedGraph<FlowElement, Scope>
-   */
-  private SimpleDirectedGraph<FlowElement, Scope> copyPipeGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void handleHeterogeneousSources( ElementGraph elementGraph )
     {
-    SimpleDirectedGraph<FlowElement, Scope> copy = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
-    Graphs.addGraph( copy, pipeGraph );
-    return copy;
-    }
-
-  private void handleHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    while( !internalHeterogeneousSources( pipeGraph ) )
+    while( !internalHeterogeneousSources( elementGraph ) )
       ;
     }
 
-  private boolean internalHeterogeneousSources( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private boolean internalHeterogeneousSources( ElementGraph elementGraph )
     {
     // find all Groups
-    List<Group> groups = findAllMergeJoinGroups( pipeGraph );
+    List<Group> groups = elementGraph.findAllMergeJoinGroups();
 
     // compare group sources
     Map<Group, Set<Tap>> normalizeGroups = new HashMap<Group, Set<Tap>>();
 
     for( Group group : groups )
       {
-      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
+      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, elementGraph.head, Integer.MAX_VALUE );
       List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
       Set<Tap> taps = new HashSet<Tap>();
@@ -717,7 +516,7 @@ public class MultiMapReducePlanner
         if( tap instanceof TempHfs || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
           continue;
 
-        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, tap, Integer.MAX_VALUE );
+        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, tap, Integer.MAX_VALUE );
         List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
         // handle case where there is a split on a pipe between the tap and group
@@ -733,7 +532,7 @@ public class MultiMapReducePlanner
 
           LOG.warn( "inserting step to normalize incompatible sources: " + tap );
 
-          insertTapAfter( pipeGraph, (Pipe) flowElement );
+          insertTapAfter( elementGraph, (Pipe) flowElement );
 
           return false;
           }
@@ -741,42 +540,6 @@ public class MultiMapReducePlanner
       }
 
     return normalizeGroups.isEmpty();
-    }
-
-  /**
-   * Finds all groups that merge/join streams. returned in topological order.
-   *
-   * @param pipeGraph
-   * @return
-   */
-  private List<Group> findAllMergeJoinGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    return findAllOfType( pipeGraph, 2, Group.class, new LinkedList<Group>() );
-    }
-
-  private List<Group> findAllGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    return findAllOfType( pipeGraph, 1, Group.class, new LinkedList<Group>() );
-    }
-
-  private List<Every> findAllEveries( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
-    {
-    return findAllOfType( pipeGraph, 1, Every.class, new LinkedList<Every>() );
-    }
-
-  private <P> List<P> findAllOfType( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, int minInDegree, Class<P> type, List<P> results )
-    {
-    TopologicalOrderIterator<FlowElement, Scope> topoIterator = new TopologicalOrderIterator<FlowElement, Scope>( pipeGraph );
-
-    while( topoIterator.hasNext() )
-      {
-      FlowElement flowElement = topoIterator.next();
-
-      if( type.isInstance( flowElement ) && pipeGraph.inDegreeOf( flowElement ) >= minInDegree )
-        results.add( (P) flowElement );
-      }
-
-    return results;
     }
 
   private Class getSchemeClass( Tap tap )
@@ -790,19 +553,19 @@ public class MultiMapReducePlanner
   /**
    * Since all joins are at groups, depth first search is safe
    *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param elementGraph of type PipeGraph
    */
-  private void handleGroups( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private void handleGroups( ElementGraph elementGraph )
     {
     // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
-    while( !handleGroupPartitioning( pipeGraph ) )
+    while( !handleGroupPartitioning( elementGraph ) )
       ;
     }
 
-  private boolean handleGroupPartitioning( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private boolean handleGroupPartitioning( ElementGraph elementGraph )
     {
-    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
+    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, elementGraph.head, Integer.MAX_VALUE );
+    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( elementGraph.tail );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -815,10 +578,11 @@ public class MultiMapReducePlanner
         {
         FlowElement flowElement = flowElements.get( i );
 
-        if( flowElement instanceof Extent ) // is an extent: head or tail
+        if( flowElement instanceof ElementGraph.Extent ) // is an extent: head or tail
           continue;
-        else if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof Extent )  // is a source tap
-          continue;
+        else
+          if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof ElementGraph.Extent )  // is a source tap
+            continue;
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
@@ -829,7 +593,7 @@ public class MultiMapReducePlanner
         }
 
       for( Pipe pipe : tapInsertions )
-        insertTapAfter( pipeGraph, pipe );
+        insertTapAfter( elementGraph, pipe );
 
       if( !tapInsertions.isEmpty() )
         return false;
@@ -841,10 +605,10 @@ public class MultiMapReducePlanner
   /**
    * Method insertTapAfter ...
    *
-   * @param graph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param graph of type PipeGraph
    * @param pipe  of type Pipe
    */
-  private void insertTapAfter( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe pipe )
+  private void insertTapAfter( ElementGraph graph, Pipe pipe )
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "inserting tap after: " + pipe );
@@ -854,7 +618,7 @@ public class MultiMapReducePlanner
     insertFlowElementAfter( graph, pipe, tempDfs );
     }
 
-  private void insertFlowElementAfter( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement previousElement, FlowElement flowElement )
+  private void insertFlowElementAfter( ElementGraph graph, FlowElement previousElement, FlowElement flowElement )
     {
     Set<Scope> outgoing = new HashSet<Scope>( graph.outgoingEdgesOf( previousElement ) );
 
@@ -888,138 +652,15 @@ public class MultiMapReducePlanner
     }
 
   /**
-   * Method makePipeGraph ...
-   *
-   * @param pipes   of type Pipe[]
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @return SimpleDirectedGraph<FlowElement, Scope>
-   */
-  private SimpleDirectedGraph<FlowElement, Scope> makePipeGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
-    {
-    SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
-    HashMap<String, Tap> sourcesCopy = new HashMap<String, Tap>( sources );
-    HashMap<String, Tap> sinksCopy = new HashMap<String, Tap>( sinks );
-
-    for( Pipe pipe : pipes )
-      makePipeGraph( graph, pipe, sourcesCopy, sinksCopy );
-
-    return graph;
-    }
-
-  /**
-   * Perfoms one rule check, verifies group does not join duplicate tap resources.
-   * <p/>
-   * Scopes are always named after the source side of the source -> target relationship
-   *
-   * @param current
-   * @param sources
-   * @param sinks
-   */
-  private void makePipeGraph( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe current, Map<String, Tap> sources, Map<String, Tap> sinks )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "adding pipe: " + current );
-
-    if( current instanceof SubAssembly )
-      {
-      for( Pipe pipe : unwindPipeAssemblies( current.getPrevious() ) )
-        makePipeGraph( graph, pipe, sources, sinks );
-
-      return;
-      }
-
-    if( graph.containsVertex( current ) )
-      return;
-
-    graph.addVertex( current );
-
-    Tap sink = sinks.remove( current.getName() );
-
-    if( sink != null )
-      {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding sink: " + sink );
-
-      graph.addVertex( sink );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding edge: " + current + " -> " + sink );
-
-      graph.addEdge( current, sink ).setName( current.getName() ); // name scope after sink
-      }
-
-    // PipeAssemblies should always have a previous
-    if( unwindPipeAssemblies( current.getPrevious() ).length == 0 )
-      {
-      Tap source = sources.remove( current.getName() );
-
-      if( source != null )
-        {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "adding source: " + source );
-
-        graph.addVertex( source );
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "adding edge: " + source + " -> " + current );
-
-        graph.addEdge( source, current ).setName( current.getName() ); // name scope after source
-        }
-      }
-
-    for( Pipe previous : unwindPipeAssemblies( current.getPrevious() ) )
-      {
-      makePipeGraph( graph, previous, sources, sinks );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding edge: " + previous + " -> " + current );
-
-      addEdge( graph, current, previous );
-      }
-    }
-
-  private void addEdge( SimpleDirectedGraph<FlowElement, Scope> graph, Pipe current, Pipe previous )
-    {
-    if( graph.getEdge( previous, current ) != null )
-      throw new FlowException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
-
-    graph.addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
-    }
-
-
-  /**
-   * Is responsible for unwinding nested PipeAssembly instances.
-   *
-   * @param tails
-   * @return
-   */
-  private Pipe[] unwindPipeAssemblies( Pipe... tails )
-    {
-    Set<Pipe> previous = new HashSet<Pipe>();
-
-    for( Pipe pipe : tails )
-      {
-      if( pipe instanceof SubAssembly )
-        Collections.addAll( previous, unwindPipeAssemblies( pipe.getPrevious() ) );
-      else
-        previous.add( pipe );
-      }
-
-    return previous.toArray( new Pipe[previous.size()] );
-    }
-
-  /**
    * Method makeTapGraph ...
    *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param elementGraph of type PipeGraph
    * @return SimpleDirectedGraph<Tap, Integer>
    */
-  private SimpleDirectedGraph<Tap, Integer> makeTapGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph )
+  private SimpleDirectedGraph<Tap, Integer> makeTapGraph( ElementGraph elementGraph )
     {
     SimpleDirectedGraph<Tap, Integer> tapGraph = new SimpleDirectedGraph<Tap, Integer>( Integer.class );
-    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, head, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( tail );
+    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetweenExtents();
     int count = 0;
 
     if( LOG.isDebugEnabled() )
@@ -1032,9 +673,9 @@ public class MultiMapReducePlanner
 
       for( Scope scope : path )
         {
-        FlowElement target = pipeGraph.getEdgeTarget( scope );
+        FlowElement target = elementGraph.getEdgeTarget( scope );
 
-        if( target instanceof Extent )
+        if( target instanceof ElementGraph.Extent )
           continue;
 
         if( !( target instanceof Tap ) )
@@ -1061,12 +702,12 @@ public class MultiMapReducePlanner
   /**
    * Method makeStepGraph ...
    *
-   * @param pipeGraph of type SimpleDirectedGraph<FlowElement, Scope>
-   * @param tapGraph  of type SimpleDirectedGraph<Tap, Integer>
-   * @param traps     of type Map<String, Tap>
+   * @param elementGraph of type PipeGraph
+   * @param tapGraph     of type SimpleDirectedGraph<Tap, Integer>
+   * @param traps        of type Map<String, Tap>
    * @return SimpleDirectedGraph<FlowStep, Integer>
    */
-  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( SimpleDirectedGraph<FlowElement, Scope> pipeGraph, SimpleDirectedGraph<Tap, Integer> tapGraph, Map<String, Tap> traps )
+  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( ElementGraph elementGraph, SimpleDirectedGraph<Tap, Integer> tapGraph, Map<String, Tap> traps )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
     SimpleDirectedGraph<FlowStep, Integer> stepGraph = new SimpleDirectedGraph<FlowStep, Integer>( Integer.class );
@@ -1097,8 +738,7 @@ public class MultiMapReducePlanner
         // support multiple paths from source to sink
         // this allows for self joins on groups, even with different operation stacks between them
         // note we must ignore paths with intermediate taps
-        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( pipeGraph, source, Integer.MAX_VALUE );
-        List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( sink );
+        List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetween( source, sink );
 
         for( GraphPath<FlowElement, Scope> path : paths )
           {
@@ -1111,7 +751,7 @@ public class MultiMapReducePlanner
           step.sources.put( (Tap) source, sourceName );
           step.sink = sink;
 
-          if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( pipeGraph, sink ).get( 0 ) instanceof EndPipe )
+          if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( elementGraph, sink ).get( 0 ) instanceof EndPipe )
             step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
 
           FlowElement lhs = source;
@@ -1120,7 +760,7 @@ public class MultiMapReducePlanner
 
           for( Scope scope : scopes )
             {
-            FlowElement rhs = pipeGraph.getEdgeTarget( scope );
+            FlowElement rhs = elementGraph.getEdgeTarget( scope );
 
             step.graph.addVertex( rhs );
             step.graph.addEdge( lhs, rhs, scope );
@@ -1181,30 +821,6 @@ public class MultiMapReducePlanner
     steps.put( name, step );
 
     return step;
-    }
-
-  /** Simple class that acts in as the root of the graph */
-  static class Extent extends Pipe
-    {
-    /** @see Pipe#Pipe(String) */
-    public Extent( String name )
-      {
-      super( name );
-      }
-
-    /** @see Pipe#outgoingScopeFor(Set<Scope>) */
-    @Override
-    public Scope outgoingScopeFor( Set<Scope> scopes )
-      {
-      return new Scope();
-      }
-
-    /** @see Pipe#toString() */
-    @Override
-    public String toString()
-      {
-      return "[" + getName() + "]";
-      }
     }
 
   }
