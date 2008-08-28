@@ -34,7 +34,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
-import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
  * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs preconfigured via the {@link JobConf}
@@ -118,9 +117,9 @@ public class MapReduceFlow extends Flow
     setStepGraph( makeStepGraph( jobConf ) );
     }
 
-  private SimpleDirectedGraph<FlowStep, Integer> makeStepGraph( JobConf jobConf )
+  private StepGraph makeStepGraph( JobConf jobConf )
     {
-    SimpleDirectedGraph<FlowStep, Integer> stepGraph = new SimpleDirectedGraph<FlowStep, Integer>( Integer.class );
+    StepGraph stepGraph = new StepGraph();
 
     Tap sink = getSinks().values().iterator().next();
     FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );

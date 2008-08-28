@@ -49,7 +49,6 @@ import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
@@ -98,7 +97,7 @@ public class Flow implements Runnable
   protected boolean stopJobsOnExit = true;
 
   /** Field stepGraph */
-  private SimpleDirectedGraph<FlowStep, Integer> stepGraph;
+  private StepGraph stepGraph;
   /** Field jobConf */
   private JobConf jobConf;
   /** Field thread */
@@ -171,7 +170,7 @@ public class Flow implements Runnable
     {
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -184,7 +183,7 @@ public class Flow implements Runnable
     initFromTaps();
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, SimpleDirectedGraph<FlowStep, Integer> stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     setJobConf( jobConf );
     this.name = name;
@@ -248,7 +247,7 @@ public class Flow implements Runnable
     this.traps = traps;
     }
 
-  protected void setStepGraph( SimpleDirectedGraph<FlowStep, Integer> stepGraph )
+  protected void setStepGraph( StepGraph stepGraph )
     {
     this.stepGraph = stepGraph;
     }

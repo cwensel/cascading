@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -98,8 +99,36 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     addExtents( sources, sinks );
     }
 
+  /** Method verifyGraphConnections ... */
+  private void verifyGraph()
+    {
+    if( vertexSet().isEmpty() )
+      return;
+
+    // need to verify that only EndPipe instances are origins in this graph. Otherwise a Tap was not properly connected
+    TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
+
+    while( iterator.hasNext() )
+      {
+      FlowElement flowElement = iterator.next();
+
+      if( incomingEdgesOf( flowElement ).size() != 0 )
+        break;
+
+      if( flowElement instanceof Extent )
+        continue;
+
+      if( flowElement instanceof Pipe )
+        throw new ElementGraphException( "no Tap instance given to connect Pipe " + flowElement.toString() );
+      else if( flowElement instanceof Tap )
+        throw new ElementGraphException( "no Pipe instance given to connect Tap " + flowElement.toString() );
+      else
+        throw new ElementGraphException( "unknown element type: " + flowElement );
+      }
+    }
+
   /**
-   * Method copyGraph ...
+   * Method copyGraph returns a partial copy of the current ElementGraph. Only Vertices and Edges are copied.
    *
    * @return ElementGraph
    */
@@ -117,7 +146,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    * @param sources
    * @param sinks
    */
-  void addExtents( Map<String, Tap> sources, Map<String, Tap> sinks )
+  private void addExtents( Map<String, Tap> sources, Map<String, Tap> sinks )
     {
     addVertex( head );
 
@@ -134,6 +163,77 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     for( String sink : sinks.keySet() )
       addEdge( sinks.get( sink ), tail ).setName( sink );
+    }
+
+  /**
+   * Perfoms one rule check, verifies group does not join duplicate tap resources.
+   * <p/>
+   * Scopes are always named after the source side of the source -> target relationship
+   */
+  private void makeGraph( Pipe current, Map<String, Tap> sources, Map<String, Tap> sinks )
+    {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "adding pipe: " + current );
+
+    if( current instanceof SubAssembly )
+      {
+      for( Pipe pipe : SubAssembly.unwind( current.getPrevious() ) )
+        makeGraph( pipe, sources, sinks );
+
+      return;
+      }
+
+    if( containsVertex( current ) )
+      return;
+
+    addVertex( current );
+
+    Tap sink = sinks.remove( current.getName() );
+
+    if( sink != null )
+      {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "adding sink: " + sink );
+
+      addVertex( sink );
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "adding edge: " + current + " -> " + sink );
+
+      addEdge( current, sink ).setName( current.getName() ); // name scope after sink
+      }
+
+    // PipeAssemblies should always have a previous
+    if( SubAssembly.unwind( current.getPrevious() ).length == 0 )
+      {
+      Tap source = sources.remove( current.getName() );
+
+      if( source != null )
+        {
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "adding source: " + source );
+
+        addVertex( source );
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "adding edge: " + source + " -> " + current );
+
+        addEdge( source, current ).setName( current.getName() ); // name scope after source
+        }
+      }
+
+    for( Pipe previous : SubAssembly.unwind( current.getPrevious() ) )
+      {
+      makeGraph( previous, sources, sinks );
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "adding edge: " + previous + " -> " + current );
+
+      if( getEdge( previous, current ) != null )
+        throw new ElementGraphException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
+
+      addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
+      }
     }
 
   /**
@@ -201,105 +301,6 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     }
 
   /**
-   * Perfoms one rule check, verifies group does not join duplicate tap resources.
-   * <p/>
-   * Scopes are always named after the source side of the source -> target relationship
-   */
-  void makeGraph( Pipe current, Map<String, Tap> sources, Map<String, Tap> sinks )
-    {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "adding pipe: " + current );
-
-    if( current instanceof SubAssembly )
-      {
-      for( Pipe pipe : SubAssembly.unwind( current.getPrevious() ) )
-        makeGraph( pipe, sources, sinks );
-
-      return;
-      }
-
-    if( containsVertex( current ) )
-      return;
-
-    addVertex( current );
-
-    Tap sink = sinks.remove( current.getName() );
-
-    if( sink != null )
-      {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding sink: " + sink );
-
-      addVertex( sink );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding edge: " + current + " -> " + sink );
-
-      addEdge( current, sink ).setName( current.getName() ); // name scope after sink
-      }
-
-    // PipeAssemblies should always have a previous
-    if( SubAssembly.unwind( current.getPrevious() ).length == 0 )
-      {
-      Tap source = sources.remove( current.getName() );
-
-      if( source != null )
-        {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "adding source: " + source );
-
-        addVertex( source );
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "adding edge: " + source + " -> " + current );
-
-        addEdge( source, current ).setName( current.getName() ); // name scope after source
-        }
-      }
-
-    for( Pipe previous : SubAssembly.unwind( current.getPrevious() ) )
-      {
-      makeGraph( previous, sources, sinks );
-
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "adding edge: " + previous + " -> " + current );
-
-      if( getEdge( previous, current ) != null )
-        throw new ElementGraphException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
-
-      addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
-      }
-    }
-
-  /** Method verifyGraphConnections ... */
-  private void verifyGraph()
-    {
-    if( vertexSet().isEmpty() )
-      return;
-
-    // need to verify that only EndPipe instances are origins in this graph. Otherwise a Tap was not properly connected
-    TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
-
-    while( iterator.hasNext() )
-      {
-      FlowElement flowElement = iterator.next();
-
-      if( incomingEdgesOf( flowElement ).size() != 0 )
-        break;
-
-      if( flowElement instanceof Extent )
-        continue;
-
-      if( flowElement instanceof Pipe )
-        throw new ElementGraphException( "no Tap instance given to connect Pipe " + flowElement.toString() );
-      else if( flowElement instanceof Tap )
-        throw new ElementGraphException( "no Pipe instance given to connect Tap " + flowElement.toString() );
-      else
-        throw new ElementGraphException( "unknown element type: " + flowElement );
-      }
-    }
-
-  /**
    * Method writeDOT writes this element graph to a DOT file for easy vizualization and debugging.
    *
    * @param filename of type String
@@ -356,7 +357,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       ;
     }
 
-  boolean internalRemoveUnnecessaryPipes()
+  private boolean internalRemoveUnnecessaryPipes()
     {
     DepthFirstIterator<FlowElement, Scope> iterator = getDepthFirstIterator();
 
@@ -394,7 +395,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return true;
     }
 
-  boolean testAssertion( FlowElement flowElement, AssertionLevel assertionLevel )
+  private boolean testAssertion( FlowElement flowElement, AssertionLevel assertionLevel )
     {
     if( !( flowElement instanceof Operator ) )
       return false;
@@ -418,7 +419,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     resolved = true;
     }
 
-  void resolveFields( FlowElement source )
+  private void resolveFields( FlowElement source )
     {
     if( source instanceof Extent )
       return;
@@ -507,9 +508,78 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return results;
     }
 
-  /** Simple class that acts in as the root of the graph */
-  static class Extent extends Pipe
+  public void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement )
     {
+    Set<Scope> outgoing = new HashSet<Scope>( outgoingEdgesOf( previousElement ) );
+
+    addVertex( flowElement );
+
+    String name = previousElement.toString();
+
+    if( previousElement instanceof Pipe )
+      name = ( (Pipe) previousElement ).getName();
+
+    addEdge( previousElement, flowElement, new Scope( name ) );
+
+    for( Scope scope : outgoing )
+      {
+      FlowElement target = getEdgeTarget( scope );
+      removeEdge( previousElement, target ); // remove scope
+      addEdge( flowElement, target, scope ); // add scope back
+      }
+    }
+
+  /** Simple class that acts in as the root of the graph */
+  /**
+   * Method makeTapGraph returns a directed graph of all taps in the current element graph.
+   *
+   * @return SimpleDirectedGraph<Tap, Integer>
+   */
+  public SimpleDirectedGraph<Tap, Integer> makeTapGraph()
+    {
+    SimpleDirectedGraph<Tap, Integer> tapGraph = new SimpleDirectedGraph<Tap, Integer>( Integer.class );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetweenExtents();
+    int count = 0;
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "found num paths: " + paths.size() );
+
+    for( GraphPath<FlowElement, Scope> element : paths )
+      {
+      List<Scope> path = element.getEdgeList();
+      Tap lastTap = null;
+
+      for( Scope scope : path )
+        {
+        FlowElement target = getEdgeTarget( scope );
+
+        if( target instanceof Extent )
+          continue;
+
+        if( !( target instanceof Tap ) )
+          continue;
+
+        tapGraph.addVertex( (Tap) target );
+
+        if( lastTap != null )
+          {
+          if( LOG.isDebugEnabled() )
+            LOG.debug( "adding tap edge: " + lastTap + " -> " + target );
+
+          if( tapGraph.getEdge( lastTap, (Tap) target ) == null && !tapGraph.addEdge( lastTap, (Tap) target, count++ ) )
+            throw new ElementGraphException( "could not add graph edge: " + lastTap + " -> " + target );
+          }
+
+        lastTap = (Tap) target;
+        }
+      }
+
+    return tapGraph;
+    }
+
+  public static class Extent extends Pipe
+    {
+
     /** @see cascading.pipe.Pipe#Pipe(String) */
     public Extent( String name )
       {
