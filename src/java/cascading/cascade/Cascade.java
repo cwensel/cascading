@@ -68,8 +68,11 @@ public class Cascade implements Runnable
   private Thread thread;
   /** Field throwable */
   private Throwable throwable;
+  /** Field executor */
   private ExecutorService executor;
+  /** Field jobsMap */
   private Map<String, Callable<Throwable>> jobsMap;
+  /** Field stop */
   private boolean stop;
 
   Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
