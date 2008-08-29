@@ -27,13 +27,24 @@ import cascading.flow.Flow;
 /** Class FlowStats collects {@link Flow} specific statistics. */
 public class FlowStats extends CascadingStats
   {
+  /** Field stepsCount */
   int stepsCount;
 
+  /**
+   * Method getStepsCount returns the number of steps this Flow executed.
+   *
+   * @return the stepsCount (type int) of this FlowStats object.
+   */
   public int getStepsCount()
     {
     return stepsCount;
     }
 
+  /**
+   * Method setStepsCount sets the steps value.
+   *
+   * @param stepsCount the stepsCount of this FlowStats object.
+   */
   public void setStepsCount( int stepsCount )
     {
     this.stepsCount = stepsCount;
@@ -45,6 +56,7 @@ public class FlowStats extends CascadingStats
     return super.getStatsString() + ", stepsCount=" + stepsCount;
     }
 
+  @Override
   public String toString()
     {
     return "Flow{" + getStatsString() + '}';

@@ -29,18 +29,30 @@ import cascading.cascade.Cascade;
 /** Class Cascadetats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats
   {
+  /** Field flowStatsList */
   List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
 
+  /**
+   * Method addFlowStats add a child {@link cascading.flow.Flow} {2link FlowStats} instance.
+   *
+   * @param flowStats of type FlowStats
+   */
   public void addFlowStats( FlowStats flowStats )
     {
     flowStatsList.add( flowStats );
     }
 
+  /**
+   * Method getFlowCount returns the number of {@link cascading.flow.Flow}s executed by the Cascade.
+   *
+   * @return the flowCount (type int) of this CascadeStats object.
+   */
   public int getFlowCount()
     {
     return flowStatsList.size();
     }
 
+  @Override
   public String toString()
     {
     return "Cascade{" + "flowStatsList=" + flowStatsList + '}';

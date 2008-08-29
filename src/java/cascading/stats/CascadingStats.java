@@ -24,6 +24,20 @@ package cascading.stats;
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
  * core elements that have state.
+ * <p/>
+ * There are five states the stats object reports; pending, running, completed, failed, stopped, and finished.
+ * <ul>
+ * <li><code>pending</code> - when the Flow or Cascade has yet to start.</li>
+ * <li><code>running</code> - when the Flow or Cascade is executing a workload.</li>
+ * <li><code>completed</code> - when the Flow or Cascade naturally completed its workload.</li>
+ * <li><code>failed</code> - when the Flow or Cascade threw an error and failed to finish the workload.</li>
+ * <li><code>stopped</code> - when the user calls stop() on the Flow or Cascade.</li>
+ * <li><code>finished</code> - when the Flow or Cascade is no longer processing a workload and <code>completed</code>,
+ * <code>failed</code>, or <code>stopped</code> is true.</li>
+ * </ul>
+ *
+ * @see FlowStats
+ * @see CascadeStats
  */
 public class CascadingStats
   {
@@ -32,17 +46,23 @@ public class CascadingStats
       PENDING, RUNNING, COMPLETED, FAILED, STOPPED;
     }
 
+  /** Field status */
   Status status = Status.PENDING;
+  /** Field startTime */
   long startTime;
+  /** Field finishedTime */
   long finishedTime;
+  /** Field throwable */
   Throwable throwable;
 
-  public CascadingStats()
+  /** Constructor CascadingStats creates a new CascadingStats instance. */
+  CascadingStats()
     {
     }
 
   /**
-   * Method isFinished returns true if the current status show no work currently being executed.
+   * Method isFinished returns true if the current status show no work currently being executed. This method
+   * returns true if {@link #isCompleted()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *
    * @return the finished (type boolean) of this CascadingStats object.
    */
@@ -51,31 +71,57 @@ public class CascadingStats
     return status == Status.COMPLETED || status == Status.FAILED || status == Status.STOPPED;
     }
 
+  /**
+   * Method isPending returns true if no work has started.
+   *
+   * @return the pending (type boolean) of this CascadingStats object.
+   */
   public boolean isPending()
     {
     return status == Status.PENDING;
     }
 
+  /**
+   * Method isRunning returns true when work has begun.
+   *
+   * @return the running (type boolean) of this CascadingStats object.
+   */
   public boolean isRunning()
     {
     return status == Status.RUNNING;
     }
 
+  /**
+   * Method isCompleted returns true when work has completed successfully.
+   *
+   * @return the completed (type boolean) of this CascadingStats object.
+   */
   public boolean isCompleted()
     {
     return status == Status.COMPLETED;
     }
 
+  /**
+   * Method isFailed returns true when the work ended with an error.
+   *
+   * @return the failed (type boolean) of this CascadingStats object.
+   */
   public boolean isFailed()
     {
     return status == Status.FAILED;
     }
 
+  /**
+   * Method isStopped returns true when the user stopped the work.
+   *
+   * @return the stopped (type boolean) of this CascadingStats object.
+   */
   public boolean isStopped()
     {
     return status == Status.STOPPED;
     }
 
+  /** Method markRunning sets the status to running. */
   public void markRunning()
     {
     if( status != Status.PENDING )
@@ -90,6 +136,7 @@ public class CascadingStats
     startTime = System.currentTimeMillis();
     }
 
+  /** Method markCompleted sets the status to completed. */
   public void markCompleted()
     {
     if( status != Status.RUNNING )
@@ -104,6 +151,11 @@ public class CascadingStats
     finishedTime = System.currentTimeMillis();
     }
 
+  /**
+   * Method markFailed sets the status to failed.
+   *
+   * @param throwable of type Throwable
+   */
   public void markFailed( Throwable throwable )
     {
     if( status != Status.RUNNING )
@@ -114,6 +166,7 @@ public class CascadingStats
     this.throwable = throwable;
     }
 
+  /** Method markStopped sets the status to stopped. */
   public void markStopped()
     {
     if( status != Status.RUNNING )
@@ -123,6 +176,11 @@ public class CascadingStats
     markFinishedTime();
     }
 
+  /**
+   * Method getDuration returns the duration the work executed before being finished.
+   *
+   * @return the duration (type long) of this CascadingStats object.
+   */
   public long getDuration()
     {
     if( finishedTime != 0 )
@@ -141,6 +199,7 @@ public class CascadingStats
     return string;
     }
 
+  @Override
   public String toString()
     {
     return "Cascading{" + getStatsString() + '}';
