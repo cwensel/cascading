@@ -128,6 +128,15 @@ public class TuplePair extends Tuple
       return -1;
     }
 
+  @Override
+  public int compareTo( Tuple other )
+    {
+    if( other instanceof TuplePair )
+      return compareTo( (TuplePair) other );
+    else
+      return -1;
+    }
+
   /**
    * Method compareTo compares this instance to the given TuplePair.
    *

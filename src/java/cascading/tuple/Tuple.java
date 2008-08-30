@@ -735,6 +735,9 @@ public class Tuple implements WritableComparable, Iterable, Serializable
    */
   public int compareTo( Tuple other )
     {
+    if( other == null || other.elements == null )
+      return 1;
+
     if( other.elements.size() != this.elements.size() )
       return this.elements.size() - other.elements.size();
 

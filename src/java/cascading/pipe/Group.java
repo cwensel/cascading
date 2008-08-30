@@ -39,7 +39,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TuplePair;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -748,7 +747,7 @@ public class Group extends Pipe
     Tuple sortTuple = sortFields == null ? null : entry.selectTuple( sortFields );
     Tuple valuesTuple = entry.getTuple();
 
-    WritableComparable groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
+    Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 
     if( isGroupBy() )
       output.collect( groupKey, valuesTuple );
@@ -777,7 +776,7 @@ public class Group extends Pipe
    * @param values         of type Iterator @return Iterator<Tuple>
    * @return a Tuple Iterator
    */
-  public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, WritableComparable key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, Tuple key, Iterator values )
     {
     GroupClosure closure;
 

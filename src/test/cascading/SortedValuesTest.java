@@ -94,7 +94,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( MultiMapReducePlanner.getJobConf( properties ) != null )
+      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 

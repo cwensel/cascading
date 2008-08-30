@@ -115,6 +115,9 @@ public class Util
 
     for( Object s : list )
       {
+      if( s == null )
+        continue;
+
       if( buffer.length() != 0 )
         buffer.append( delim );
 
@@ -122,6 +125,11 @@ public class Util
       }
 
     return buffer.toString();
+    }
+
+  public static String join( String delim, String... strings )
+    {
+    return join( strings, delim );
     }
 
   /**
@@ -137,6 +145,9 @@ public class Util
 
     for( Object s : list )
       {
+      if( s == null )
+        continue;
+
       if( buffer.length() != 0 )
         buffer.append( delim );
 

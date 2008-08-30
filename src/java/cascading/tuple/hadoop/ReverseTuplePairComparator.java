@@ -28,16 +28,15 @@ import cascading.tuple.TuplePair;
 /**
  *
  */
-public class GroupingComparator extends TupleComparator<TuplePair>
+public class ReverseTuplePairComparator extends TuplePairComparator
   {
-  public GroupingComparator() throws IOException
+  public ReverseTuplePairComparator() throws IOException
     {
-    super( TuplePair.class );
     }
 
   @Override
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return ( (TuplePair) lhs ).getLhs().compareTo( ( (TuplePair) rhs ).getLhs() );
+    return rhs.compareTo( lhs ); // swap arguments
     }
   }

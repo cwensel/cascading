@@ -40,7 +40,10 @@ import cascading.tuple.TupleIterator;
 import cascading.tuple.TuplePair;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
-import cascading.tuple.hadoop.ReverseComparator;
+import cascading.tuple.hadoop.ReverseTuplePairComparator;
+import cascading.tuple.hadoop.TupleComparator;
+import cascading.tuple.hadoop.TuplePairComparator;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -129,6 +132,8 @@ public class FlowStep implements Serializable
     conf.setMapperClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
+    conf.set( "io.serializations", Util.join( ",", conf.get( "io.serializations" ), TupleSerialization.class.getName() ) );
+
     initFromSources( conf );
 
     initFromSink( conf );
@@ -150,6 +155,8 @@ public class FlowStep implements Serializable
         conf.setNumMapTasks( sink.getScheme().getNumSinkParts() );
       }
 
+    conf.setOutputKeyComparatorClass( TupleComparator.class );
+
     if( group == null )
       {
       conf.setNumReduceTasks( 0 ); // disable reducers
@@ -160,7 +167,9 @@ public class FlowStep implements Serializable
       conf.setMapOutputKeyClass( TuplePair.class );
 
       if( group.isSortReversed() )
-        conf.setOutputKeyComparatorClass( ReverseComparator.class );
+        conf.setOutputKeyComparatorClass( ReverseTuplePairComparator.class );
+      else
+        conf.setOutputKeyComparatorClass( TuplePairComparator.class );
 
       // no need to supply a reverse comparator, only equality is checked
       conf.setOutputValueGroupingComparator( GroupingComparator.class );
