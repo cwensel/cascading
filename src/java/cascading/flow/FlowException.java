@@ -26,6 +26,9 @@ import cascading.CascadingException;
 /** FlowException instances are thrown on errors when executing a Flow. */
 public class FlowException extends CascadingException
   {
+  /** Field flowName */
+  String flowName;
+
   /** Constructor FlowException creates a new FlowException instance. */
   public FlowException()
     {
@@ -34,22 +37,35 @@ public class FlowException extends CascadingException
   /**
    * Constructor FlowException creates a new FlowException instance.
    *
-   * @param string of type String
+   * @param message of type String
    */
-  public FlowException( String string )
+  public FlowException( String message )
     {
-    super( string );
+    super( message );
     }
 
   /**
    * Constructor FlowException creates a new FlowException instance.
    *
-   * @param string    of type String
+   * @param message   of type String
    * @param throwable of type Throwable
    */
-  public FlowException( String string, Throwable throwable )
+  public FlowException( String message, Throwable throwable )
     {
-    super( string, throwable );
+    super( message, throwable );
+    }
+
+  /**
+   * Constructor FlowException creates a new FlowException instance.
+   *
+   * @param flowName  of type String
+   * @param message   of type String
+   * @param throwable of type Throwable
+   */
+  public FlowException( String flowName, String message, Throwable throwable )
+    {
+    super( message, throwable );
+    this.flowName = flowName;
     }
 
   /**
@@ -60,5 +76,20 @@ public class FlowException extends CascadingException
   public FlowException( Throwable throwable )
     {
     super( throwable );
+    }
+
+  /**
+   * Method getFlowName returns the name of the parent {@link Flow} instance.
+   *
+   * @return the flowName (type String) of this FlowException object.
+   */
+  public String getFlowName()
+    {
+    return flowName;
+    }
+
+  void setFlowName( String flowName )
+    {
+    this.flowName = flowName;
     }
   }

@@ -612,21 +612,24 @@ public class Flow implements Runnable
         }
       catch( InterruptedException exception )
         {
-        throw new FlowException( "thread interrupted", exception );
+        throw new FlowException( getName(), "thread interrupted", exception );
         }
+
+      if( throwable instanceof FlowException )
+        ( (FlowException) throwable ).setFlowName( getName() );
 
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
       if( throwable != null )
-        throw new FlowException( "unhandled exception", throwable );
+        throw new FlowException( getName(), "unhandled exception", throwable );
 
       if( hasListeners() )
         {
         for( SafeFlowListener safeFlowListener : getListeners() )
           {
           if( safeFlowListener.throwable != null )
-            throw new FlowException( "unhandled listener exception", throwable );
+            throw new FlowException( getName(), "unhandled listener exception", throwable );
           }
         }
       }

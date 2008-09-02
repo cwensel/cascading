@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.f.FlowException to return the parent c.f.Flow name.
+
   Changed behavior of c.f.MultiMapReducePlanner to use c.t.h.MultiInputFormat to allow single Mappers
   to support many different Hadoop InputFormat types simultaneously. This deprecates the need to normalize
   sources to a map and reduces the number of jobs in a c.f.Flow in some cases.
