@@ -156,7 +156,7 @@ public class MultiInputFormat implements InputFormat
 
     // if only one InputFormat, just return what ever it suggests
     if( inputFormats.length == 1 )
-      return inputFormats[ 0 ].getSplits( jobConfs[ 0 ], numSplits );
+      return collapse( getSplits( inputFormats, jobConfs, new int[]{numSplits} ), configs );
 
     int[] indexedSplits = new int[inputFormats.length];
 
