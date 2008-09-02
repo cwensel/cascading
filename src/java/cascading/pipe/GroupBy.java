@@ -44,9 +44,12 @@ import cascading.tuple.Tuple;
  * Optionally a stream can be further sorted by providing sortFields. This allows an Aggregator to receive
  * values in the order of the sortedFields.
  * <p/>
- * Note that sorting always happens on the groupFields, sortFields are a secondary sorting on the grouped values within the
+ * Note that local sorting always happens on the groupFields, sortFields are a secondary sorting on the grouped values within the
  * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see their arguments
  * in order.
+ * <p/>
+ * It should be noted for MapReduce systems, distributed group sorting is not 'complete'. That is groups are sorted
+ * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
  */
 public class GroupBy extends Group
   {
@@ -142,6 +145,19 @@ public class GroupBy extends Group
   //////////
   // MERGE
   //////////
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on Fields.FIRST.
+   * <p/>
+   * The assumption is that the first fields in all streams are logically the same field, which should be true
+   * as merging assumes all incoming streams have the same fields in the same order.
+   *
+   * @param pipes of type Pipe
+   */
+  public GroupBy( Pipe[] pipes )
+    {
+    super( pipes, Fields.FIRST );
+    }
 
   /**
    * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
