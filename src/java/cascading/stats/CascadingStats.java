@@ -29,7 +29,7 @@ package cascading.stats;
  * <ul>
  * <li><code>pending</code> - when the Flow or Cascade has yet to start.</li>
  * <li><code>running</code> - when the Flow or Cascade is executing a workload.</li>
- * <li><code>completed</code> - when the Flow or Cascade naturally completed its workload.</li>
+ * <li><code>successful</code> - when the Flow or Cascade naturally completed its workload without failure.</li>
  * <li><code>failed</code> - when the Flow or Cascade threw an error and failed to finish the workload.</li>
  * <li><code>stopped</code> - when the user calls stop() on the Flow or Cascade.</li>
  * <li><code>finished</code> - when the Flow or Cascade is no longer processing a workload and <code>completed</code>,
@@ -43,7 +43,7 @@ public class CascadingStats
   {
   enum Status
     {
-      PENDING, RUNNING, COMPLETED, FAILED, STOPPED;
+      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED;
     }
 
   /** Field status */
@@ -62,13 +62,13 @@ public class CascadingStats
 
   /**
    * Method isFinished returns true if the current status show no work currently being executed. This method
-   * returns true if {@link #isCompleted()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
+   * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *
    * @return the finished (type boolean) of this CascadingStats object.
    */
   public boolean isFinished()
     {
-    return status == Status.COMPLETED || status == Status.FAILED || status == Status.STOPPED;
+    return status == Status.SUCCESSFUL || status == Status.FAILED || status == Status.STOPPED;
     }
 
   /**
@@ -92,13 +92,13 @@ public class CascadingStats
     }
 
   /**
-   * Method isCompleted returns true when work has completed successfully.
+   * Method isSuccessful returns true when work has completed successfully.
    *
    * @return the completed (type boolean) of this CascadingStats object.
    */
-  public boolean isCompleted()
+  public boolean isSuccessful()
     {
-    return status == Status.COMPLETED;
+    return status == Status.SUCCESSFUL;
     }
 
   /**
@@ -136,13 +136,13 @@ public class CascadingStats
     startTime = System.currentTimeMillis();
     }
 
-  /** Method markCompleted sets the status to completed. */
-  public void markCompleted()
+  /** Method markSuccessful sets the status to successful. */
+  public void markSuccessful()
     {
     if( status != Status.RUNNING )
-      throw new IllegalStateException( "may not mark flow as " + Status.COMPLETED + ", is already " + status );
+      throw new IllegalStateException( "may not mark flow as " + Status.SUCCESSFUL + ", is already " + status );
 
-    status = Status.COMPLETED;
+    status = Status.SUCCESSFUL;
     markFinishedTime();
     }
 

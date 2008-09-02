@@ -214,7 +214,7 @@ public class Cascade implements Runnable
     finally
       {
       if( !cascadeStats.isFinished() )
-        cascadeStats.markCompleted();
+        cascadeStats.markSuccessful();
       }
     }
 

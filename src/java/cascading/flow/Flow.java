@@ -829,7 +829,7 @@ public class Flow implements Runnable
       handleThrowable();
 
       if( !stop && !flowStats.isFinished() )
-        flowStats.markCompleted();
+        flowStats.markSuccessful();
 
       try
         {
