@@ -166,6 +166,12 @@ public class MultiInputFormat implements InputFormat
     long[] inputSizes = getInputSizes( inputFormats, jobConfs );
     long totalSize = sum( inputSizes );
 
+    if( totalSize == 0 )
+      {
+      Arrays.fill( indexedSplits, 1 );
+      return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
+      }
+
     for( int i = 0; i < inputSizes.length; i++ )
       indexedSplits[ i ] = (int) Math.ceil( numSplits * inputSizes[ i ] / totalSize );
 
