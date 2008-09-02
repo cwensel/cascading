@@ -153,6 +153,11 @@ public class MultiInputFormat implements InputFormat
     List<Map<String, String>> configs = getConfigs( job );
     JobConf[] jobConfs = getJobConfs( job, configs );
     InputFormat[] inputFormats = getInputFormats( jobConfs );
+
+    // if only one InputFormat, just return what ever it suggests
+    if( inputFormats.length == 1 )
+      return inputFormats[ 0 ].getSplits( jobConfs[ 0 ], numSplits );
+
     int[] indexedSplits = new int[inputFormats.length];
 
     // if we need only a few, the return one for each
