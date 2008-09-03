@@ -73,7 +73,9 @@ public class TapCollector extends TupleCollector implements OutputCollector
   private void initalize() throws IOException
     {
     tap.sinkInit( conf );
-    tap.makeDirs( conf ); // required
+
+    if( !tap.makeDirs( conf ) ) // required
+      throw new TapException( "unable to make dirs for: " + tap.toString() );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 

@@ -41,6 +41,9 @@ public interface Aggregator extends Operation
    * Method start initializes the aggregation procedure.  The {@link Map} context is used to
    * hold intermediate values. The context should be initialized here if necessary. This method will be called
    * before {@link #aggregate(Map, TupleEntry)} and {@link #complete(java.util.Map,cascading.tuple.TupleCollector)}.
+   * <p/>
+   * TupleEntry groupEntry, or groupEntry.getTuple() should not be stored directly in the context. A copy of the tuple
+   * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
    *
    * @param context    the map to be initialized (if necessary)
    * @param groupEntry is the current grouping tuple
@@ -49,6 +52,9 @@ public interface Aggregator extends Operation
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
+   * <p/>
+   * TupleEntry entry, or entry.getTuple() should not be stored directly in the context. A copy of the tuple
+   * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
    *
    * @param context the map with aggregate values so far
    * @param entry   the tuple entry to add to the operation

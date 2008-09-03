@@ -67,6 +67,10 @@ public class FlowMapper extends MapReduceBase implements Mapper
       {
       flowMapperStack.map( key, value, output );
       }
+    catch( IOException exception )
+      {
+      throw exception;
+      }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )

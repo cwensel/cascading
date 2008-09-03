@@ -136,7 +136,7 @@ public class FlowMapperStack
       }
     }
 
-  public void map( Object key, Object value, OutputCollector output )
+  public void map( Object key, Object value, OutputCollector output ) throws IOException
     {
     for( int i = 0; i < stacks.length; i++ )
       {
@@ -160,6 +160,9 @@ public class FlowMapperStack
         }
       catch( StackException exception )
         {
+        if( exception.getCause() instanceof IOException )
+          throw (IOException) exception.getCause();
+
         throw (RuntimeException) exception.getCause();
         }
       }

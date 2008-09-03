@@ -81,6 +81,11 @@ public abstract class StreamedFileSystem extends FileSystem
     return new FileStatus[]{getFileStatus( path )};
     }
 
+  public FSDataOutputStream append( Path f, int bufferSize, Progressable progress ) throws IOException
+    {
+    throw new UnsupportedOperationException( "not supported" );
+    }
+
   public static String getMD5SumFor( Configuration conf, Path path )
     {
     return getMD5SumFor( conf, path.toString() );

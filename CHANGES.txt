@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added some forward compatible changes for supporting Hadoop 0.18 at the API level. Currently there are other
+  issues preventing some tests from passing on Hadoop 0.18.
+
   Changed c.f.FlowException to return the parent c.f.Flow name.
 
   Changed behavior of c.f.MultiMapReducePlanner to use c.t.h.MultiInputFormat to allow single Mappers

@@ -212,18 +212,30 @@ public class S3Util
       }
     }
 
-  private static S3Object makeObject( S3Bucket s3Bucket, String keyName, String mimeType, String body )
+  private static S3Object makeObject( S3Bucket bucket, String keyName, String mimeType, String body ) throws IOException
     {
     S3Object object = null;
 
-    if( body != null )
+    try
       {
-      object = new S3Object( s3Bucket, keyName, body );
-      object.setContentLength( body.getBytes().length );
+      if( body != null )
+        {
+        object = new S3Object( bucket, keyName, body );
+        object.setContentLength( body.getBytes().length );
+        }
+      else
+        {
+        object = new S3Object( bucket, keyName );
+        }
       }
-    else
+    catch( RuntimeException exception )
       {
-      object = new S3Object( s3Bucket, keyName );
+      throw exception;
+      }
+//    catch( UnsupportedEncodingException exception ) // for hadoop 0.18
+    catch( Exception exception )
+      {
+      throw new IOException( "could not create object: " + bucket.getName() + "/" + object.getKey() + " " + exception.getMessage() );
       }
 
     if( mimeType != null )
