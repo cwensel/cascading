@@ -2,9 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Updated c.o.x.TagSoupParser to accept 'features', use these features to recover past behaviors.
+
   Updated janino and tagsoup libraries to 2.5.15 and 1.2, respectively. Note that tagsoup, in theory, is not
   backwards compatible by default. See their release notes: http://home.ccil.org/~cowan/XML/tagsoup/#1.2
-  c.o.x.TagSoupParser was updated to accept 'features', use these features to recover past behaviors.
 
   Added some forward compatible changes for supporting Hadoop 0.18 at the API level. Currently there are other
   issues preventing some tests from passing on Hadoop 0.18.
