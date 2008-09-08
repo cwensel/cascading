@@ -374,7 +374,11 @@ public class FlowStep implements Serializable
         for( FlowStepJob predecessor : predecessors )
           {
           if( !predecessor.isSuccessful() )
+            {
+            LOG.warn( "abandoning step: " + stepName + ", predecessor failed: " + predecessor.stepName );
+
             return null;
+            }
           }
 
         if( stop )
