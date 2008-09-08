@@ -24,6 +24,8 @@ package cascading.operation.xml;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -49,10 +51,12 @@ public class TagSoupParser extends BaseOperation implements Function
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TagSoupParser.class );
 
+  /** Field features */
+  private Map<String, Boolean> features;
   /** Field schema */
-  private HTMLSchema schema;
+  private transient HTMLSchema schema;
   /** Field parser */
-  private Parser parser;
+  private transient Parser parser;
 
   /**
    * Constructor TagSoupParser creates a new TagSoupParser instance.
@@ -83,7 +87,29 @@ public class TagSoupParser extends BaseOperation implements Function
     parser = new Parser();
     parser.setProperty( Parser.schemaProperty, getSchema() );
 
+    if( features != null )
+      {
+      for( Map.Entry<String, Boolean> entry : features.entrySet() )
+        parser.setFeature( entry.getKey(), entry.getValue() );
+      }
+
     return parser;
+    }
+
+  /**
+   * Method setFeature allows the user to set 'features' directly on the TagSoup parser, {@link Parser#setFeature(String, boolean)}.
+   * <p/>
+   * Note, all features are lazily added when the Parser is instantiated.
+   *
+   * @param feature of type String
+   * @param value   of type boolean
+   */
+  public void setFeature( String feature, boolean value )
+    {
+    if( features == null )
+      features = new HashMap<String, Boolean>();
+
+    features.put( feature, value );
     }
 
   /** @see cascading.operation.Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */

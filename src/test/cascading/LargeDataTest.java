@@ -40,7 +40,7 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
@@ -64,9 +64,9 @@ public class LargeDataTest extends ClusterTestCase
 
     copyFromLocal( inputPageData );
 
-    Tap source = new Dfs( new TextLine(), inputPageData );
-    Tap sinkUrl = new Dfs( new TextLine(), outputPathUrl, true );
-    Tap sinkWord = new Dfs( new TextLine(), outputPathWord, true );
+    Tap source = new Hfs( new TextLine(), inputPageData );
+    Tap sinkUrl = new Hfs( new TextLine(), outputPathUrl, true );
+    Tap sinkWord = new Hfs( new TextLine(), outputPathWord, true );
 
     Pipe pipe = new Pipe( "large" );
 
@@ -93,6 +93,6 @@ public class LargeDataTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 23950 );
+    validateLength( flow, 23807 );
     }
   }
