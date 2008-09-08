@@ -43,7 +43,6 @@ import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
 import cascading.tuple.hadoop.TupleComparator;
 import cascading.tuple.hadoop.TuplePairComparator;
-import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -132,7 +131,7 @@ public class FlowStep implements Serializable
     conf.setMapperClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
-    conf.set( "io.serializations", Util.join( ",", conf.get( "io.serializations" ), TupleSerialization.class.getName() ) );
+//    conf.set( "io.serializations", Util.join( ",", conf.get( "io.serializations" ), TupleSerialization.class.getName() ) );
 
     initFromSources( conf );
 
