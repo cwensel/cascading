@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.8.0
 
   Updated c.o.x.TagSoupParser to accept 'features', use these features to recover past behaviors.
 
