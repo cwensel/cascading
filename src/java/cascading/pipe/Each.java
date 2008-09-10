@@ -413,9 +413,9 @@ public class Each extends Operator
       Scope scope;
       TupleEntry input;
 
-      private EachTupleCollector( Fields declared, Scope scope )
+      private EachTupleCollector( Fields fields, Scope scope )
         {
-        super( declared );
+        super( fields );
         this.scope = scope;
         }
       }
