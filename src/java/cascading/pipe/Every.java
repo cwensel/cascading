@@ -223,6 +223,8 @@ public class Every extends Operator
     {
     /** Field outgoingScope */
     public final Scope outgoingScope;
+    /** Field outputCollector */
+    public FlowCollector outputCollector;
     /** Field context */
     final Map context = new HashMap();
 
@@ -235,7 +237,7 @@ public class Every extends Operator
 
     public abstract void operate( TupleEntry inputEntry );
 
-    public abstract void complete( TupleEntry value, FlowCollector outputCollector );
+    public abstract void complete( TupleEntry value );
 
 
     @Override
@@ -252,9 +254,29 @@ public class Every extends Operator
 
   public class EveryAggregatorHandler extends EveryHandler
     {
-    public EveryAggregatorHandler( Scope outgoingScope )
+    EveryTupleCollector tupleCollector;
+
+    private abstract class EveryTupleCollector extends TupleCollector
+      {
+      TupleEntry value;
+
+      public EveryTupleCollector( Fields fields )
+        {
+        super( fields );
+        }
+      }
+
+    public EveryAggregatorHandler( final Scope outgoingScope )
       {
       super( outgoingScope );
+
+      tupleCollector = new EveryTupleCollector( outgoingScope.getDeclaredFields() )
+      {
+      protected void collect( Tuple tuple )
+        {
+        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getDeclaredEntry(), tuple ) );
+        }
+      };
       }
 
     public void start( TupleEntry groupEntry )
@@ -277,17 +299,9 @@ public class Every extends Operator
         }
       }
 
-    public void complete( final TupleEntry value, final FlowCollector outputCollector )
+    public void complete( TupleEntry value )
       {
-      final Fields outgoingSelector = outgoingScope.getOutGroupingSelector();
-
-      TupleCollector tupleCollector = new TupleCollector( outgoingScope.getDeclaredFields() )
-      {
-      protected void collect( Tuple tuple )
-        {
-        outputCollector.collect( makeResult( outgoingSelector, value, outgoingScope.getDeclaredEntry(), tuple ) );
-        }
-      };
+      tupleCollector.value = value;
 
       getAggregator().complete( context, tupleCollector );
       }
@@ -313,7 +327,7 @@ public class Every extends Operator
       getGroupAssertion().aggregate( context, arguments );
       }
 
-    public void complete( TupleEntry groupEntry, FlowCollector outputCollector )
+    public void complete( TupleEntry groupEntry )
       {
       getGroupAssertion().doAssert( context );
 

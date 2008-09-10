@@ -48,6 +48,19 @@ class EveryHandlerReducerStackElement extends ReducerStackElement
     return null;
     }
 
+  @Override
+  StackElement setNext( StackElement next )
+    {
+    try
+      {
+      return super.setNext( next );
+      }
+    finally
+      {
+      everyHandler.outputCollector = next;
+      }
+    }
+
   protected Fields resolveIncomingOperationFields()
     {
     return everyHandler.getEvery().resolveIncomingOperationFields( incomingScope );
@@ -62,7 +75,7 @@ class EveryHandlerReducerStackElement extends ReducerStackElement
     {
     try
       {
-      everyHandler.complete( keyEntry, next );
+      everyHandler.complete( keyEntry );
       }
     catch( Exception exception )
       {
