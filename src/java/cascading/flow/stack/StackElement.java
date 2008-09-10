@@ -55,7 +55,7 @@ abstract class StackElement implements FlowCollector
     return this;
     }
 
-  private StackElement setNext( StackElement next )
+  StackElement setNext( StackElement next )
     {
     this.next = next;
 

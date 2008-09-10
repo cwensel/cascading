@@ -34,17 +34,31 @@ import org.apache.hadoop.mapred.JobConf;
  */
 class EachMapperStackElement extends MapperStackElement
   {
-  private final Each.EachHandler eachHandler;
+  private final Each each;
+  private Each.EachHandler eachHandler;
 
-  public EachMapperStackElement( MapperStackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each.EachHandler eachHandler )
+  public EachMapperStackElement( MapperStackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each each )
     {
     super( previous, incomingScope, jobConf, trap );
-    this.eachHandler = eachHandler;
+    this.each = each;
     }
 
   protected FlowElement getFlowElement()
     {
-    return eachHandler.getEach();
+    return each;
+    }
+
+  @Override
+  StackElement setNext( StackElement next )
+    {
+    try
+      {
+      return super.setNext( next );
+      }
+    finally
+      {
+      eachHandler = each.getHandler( next, ( (MapperStackElement) next ).getIncomingScope() );
+      }
     }
 
   @Override
@@ -59,7 +73,7 @@ class EachMapperStackElement extends MapperStackElement
     {
     try
       {
-      eachHandler.operate( ( (MapperStackElement) next ).getIncomingScope(), tupleEntry, next );
+      eachHandler.operate( tupleEntry );
       }
     catch( Exception exception )
       {

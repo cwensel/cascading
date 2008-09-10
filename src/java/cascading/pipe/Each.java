@@ -302,16 +302,8 @@ public class Each extends Operator
       flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFunction( final FlowCollector flowCollector, final TupleEntry input, TupleEntry arguments, final TupleEntry declaredEntry, final Fields outgoingSelector )
+  private void applyFunction( TupleEntry arguments, TupleCollector tupleCollector )
     {
-    TupleCollector tupleCollector = new TupleCollector( declaredEntry.getFields() )
-    {
-    protected void collect( Tuple tuple )
-      {
-      flowCollector.collect( makeResult( outgoingSelector, input, declaredEntry, tuple ) );
-      }
-    };
-
     getFunction().operate( arguments, tupleCollector ); // adds results to collector
     }
 
@@ -369,20 +361,29 @@ public class Each extends Operator
       }
     }
 
-  public EachHandler getHandler()
+  public EachHandler getHandler( FlowCollector flowCollector, Scope scope )
     {
     if( isFunction() )
-      return new EachFunctionHandler();
+      return new EachFunctionHandler( flowCollector, scope );
     else if( isFilter() )
-      return new EachFilterHandler();
+      return new EachFilterHandler( flowCollector, scope );
     else
-      return new EachAssertionHandler();
+      return new EachAssertionHandler( flowCollector, scope );
     }
 
   /** Class EachHandler is a helper class that wraps Each instances. */
   public abstract class EachHandler
     {
-    public void operate( Scope scope, TupleEntry input, FlowCollector flowCollector )
+    FlowCollector flowCollector;
+    final Scope scope;
+
+    protected EachHandler( FlowCollector flowCollector, Scope scope )
+      {
+      this.flowCollector = flowCollector;
+      this.scope = scope;
+      }
+
+    public void operate( TupleEntry input )
       {
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " incoming entry: " + input );
@@ -392,10 +393,10 @@ public class Each extends Operator
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " arg entry: " + arguments );
 
-      handle( scope, flowCollector, input, arguments );
+      handle( input, arguments );
       }
 
-    abstract void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments );
+    abstract void handle( TupleEntry input, TupleEntry arguments );
 
     public FlowElement getEach()
       {
@@ -405,15 +406,48 @@ public class Each extends Operator
 
   public class EachFunctionHandler extends EachHandler
     {
-    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+    EachTupleCollector tupleCollector;
+
+    private abstract class EachTupleCollector extends TupleCollector
       {
-      applyFunction( flowCollector, input, arguments, scope.getDeclaredEntry(), scope.getOutValuesSelector() );
+      Scope scope;
+      TupleEntry input;
+
+      private EachTupleCollector( Fields declared, Scope scope )
+        {
+        super( declared );
+        this.scope = scope;
+        }
+      }
+
+    public EachFunctionHandler( final FlowCollector flowCollector, Scope scope )
+      {
+      super( flowCollector, scope );
+
+      tupleCollector = new EachTupleCollector( scope.getDeclaredEntry().getFields(), scope )
+      {
+      protected void collect( Tuple tuple )
+        {
+        flowCollector.collect( makeResult( scope.getOutValuesSelector(), input, scope.getDeclaredEntry(), tuple ) );
+        }
+      };
+      }
+
+    void handle( TupleEntry input, TupleEntry arguments )
+      {
+      tupleCollector.input = input;
+      applyFunction( arguments, tupleCollector );
       }
     }
 
   public class EachFilterHandler extends EachHandler
     {
-    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+    public EachFilterHandler( FlowCollector flowCollector, Scope scope )
+      {
+      super( flowCollector, scope );
+      }
+
+    void handle( TupleEntry input, TupleEntry arguments )
       {
       applyFilter( flowCollector, input, arguments );
       }
@@ -421,11 +455,14 @@ public class Each extends Operator
 
   public class EachAssertionHandler extends EachHandler
     {
-    void handle( Scope scope, FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+    public EachAssertionHandler( FlowCollector flowCollector, Scope scope )
+      {
+      super( flowCollector, scope );
+      }
+
+    void handle( TupleEntry input, TupleEntry arguments )
       {
       applyAssertion( flowCollector, input, arguments );
       }
     }
-
-
   }

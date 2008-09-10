@@ -103,7 +103,7 @@ public class FlowReducerStack
     while( operator instanceof Each )
       {
       trap = step.getTrap( ( (Pipe) operator ).getName() );
-      stackTail = new EachReducerStackElement( stackTail, nextScope, jobConf, trap, ( (Each) operator ).getHandler() );
+      stackTail = new EachReducerStackElement( stackTail, nextScope, jobConf, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( nextScope );

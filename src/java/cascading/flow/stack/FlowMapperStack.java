@@ -99,7 +99,7 @@ public class FlowMapperStack
       while( operator instanceof Each )
         {
         Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, ( (Each) operator ).getHandler() );
+        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, (Each) operator );
 
         incomingScope = step.getNextScope( operator );
         operator = step.getNextFlowElement( incomingScope );
