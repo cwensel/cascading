@@ -34,17 +34,33 @@ import cascading.tuple.TupleEntry;
 public class TestAggregator extends BaseOperation implements Aggregator
   {
   private static final long serialVersionUID = 1L;
-  private Tuple value;
+  private Tuple[] value;
+  private int duplicates = 1;
 
   /**
    * Constructor
    *
    * @param fields the fields to operate on
+   * @param value
    */
-  public TestAggregator( Fields fields, Tuple value )
+  public TestAggregator( Fields fields, Tuple... value )
     {
     super( fields );
     this.value = value;
+    }
+
+  /**
+   * Constructor TestAggregator creates a new TestAggregator instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param value            of type Tuple
+   * @param duplicates       of type int
+   */
+  public TestAggregator( Fields fieldDeclaration, Tuple value, int duplicates )
+    {
+    super( fieldDeclaration );
+    this.value = new Tuple[]{value};
+    this.duplicates = duplicates;
     }
 
   /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
@@ -64,6 +80,10 @@ public class TestAggregator extends BaseOperation implements Aggregator
   @SuppressWarnings("unchecked")
   public void complete( Map context, TupleCollector outputCollector )
     {
-    outputCollector.add( value );
+    for( int i = 0; i < duplicates; i++ )
+      {
+      for( Tuple tuple : value )
+        outputCollector.add( tuple );
+      }
     }
   }

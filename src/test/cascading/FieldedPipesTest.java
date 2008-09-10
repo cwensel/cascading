@@ -58,6 +58,7 @@ import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
@@ -1372,4 +1373,32 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 10, null );
     }
+
+  public void testGeneratorAggregator() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Group( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new TestAggregator( new Fields( "count1" ), new Tuple( "first1" ), new Tuple( "first2" ) ) );
+    pipe = new Every( pipe, new TestAggregator( new Fields( "count2" ), new Tuple( "second" ), new Tuple( "second2" ), new Tuple( "second3" ) ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "/generatoraggregator", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 8 * 2 * 3, null );
+    }
+
   }
