@@ -600,33 +600,37 @@ public class Tuple implements WritableComparable, Iterable, Serializable
       if( element == null )
         {
         WritableUtils.writeVInt( out, 0 );
+        continue;
         }
-      else if( element instanceof String )
+
+      Class type = element.getClass();
+
+      if( String.class == type )
         {
         WritableUtils.writeVInt( out, 1 );
         WritableUtils.writeString( out, (String) element );
         }
-      else if( element instanceof Float )
+      else if( Float.class == type )
         {
         WritableUtils.writeVInt( out, 2 );
         out.writeFloat( (Float) element );
         }
-      else if( element instanceof Double )
+      else if( Double.class == type )
         {
         WritableUtils.writeVInt( out, 3 );
         out.writeDouble( (Double) element );
         }
-      else if( element instanceof Integer )
+      else if( Integer.class == type )
         {
         WritableUtils.writeVInt( out, 4 );
         WritableUtils.writeVInt( out, (Integer) element );
         }
-      else if( element instanceof Long )
+      else if( Long.class == type )
         {
         WritableUtils.writeVInt( out, 5 );
         WritableUtils.writeVLong( out, (Long) element );
         }
-      else if( element instanceof Short )
+      else if( Short.class == type )
         {
         WritableUtils.writeVInt( out, 6 );
         out.writeShort( (Short) element );
