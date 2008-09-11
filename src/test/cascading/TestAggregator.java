@@ -36,6 +36,7 @@ public class TestAggregator extends BaseOperation implements Aggregator
   private static final long serialVersionUID = 1L;
   private Tuple[] value;
   private int duplicates = 1;
+  private Fields groupFields;
 
   /**
    * Constructor
@@ -46,6 +47,13 @@ public class TestAggregator extends BaseOperation implements Aggregator
   public TestAggregator( Fields fields, Tuple... value )
     {
     super( fields );
+    this.value = value;
+    }
+
+  public TestAggregator( Fields fields, Fields groupFields, Tuple... value )
+    {
+    super( fields );
+    this.groupFields = groupFields;
     this.value = value;
     }
 
@@ -63,11 +71,23 @@ public class TestAggregator extends BaseOperation implements Aggregator
     this.duplicates = duplicates;
     }
 
+  public TestAggregator( Fields fieldDeclaration, Fields groupFields, Tuple value, int duplicates )
+    {
+    super( fieldDeclaration );
+    this.groupFields = groupFields;
+    this.value = new Tuple[]{value};
+    this.duplicates = duplicates;
+    }
+
   /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
   @SuppressWarnings("unchecked")
   public void start( Map context, TupleEntry groupEntry )
     {
-    // no-op
+    if( groupFields == null )
+      return;
+
+    if( !groupFields.equals( groupEntry.getFields() ) )
+      throw new RuntimeException( "fields do not match: " + groupFields.print() + " != " + groupEntry.getFields().print() );
     }
 
   /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */

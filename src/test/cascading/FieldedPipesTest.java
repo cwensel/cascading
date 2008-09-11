@@ -1389,8 +1389,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Group( pipe, new Fields( "ip" ) );
 
-    pipe = new Every( pipe, new TestAggregator( new Fields( "count1" ), new Tuple( "first1" ), new Tuple( "first2" ) ) );
-    pipe = new Every( pipe, new TestAggregator( new Fields( "count2" ), new Tuple( "second" ), new Tuple( "second2" ), new Tuple( "second3" ) ) );
+    pipe = new Every( pipe, new TestAggregator( new Fields( "count1" ), new Fields( "ip" ), new Tuple( "first1" ), new Tuple( "first2" ) ) );
+    pipe = new Every( pipe, new TestAggregator( new Fields( "count2" ), new Fields( "ip" ), new Tuple( "second" ), new Tuple( "second2" ), new Tuple( "second3" ) ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "/generatoraggregator", true );
 
