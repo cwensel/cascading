@@ -26,11 +26,15 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import cascading.operation.Aggregator;
@@ -55,6 +59,9 @@ import org.apache.hadoop.io.WritableUtils;
  */
 public class Tuple implements WritableComparable, Iterable, Serializable
   {
+  /** Field classCache */
+  private static Map<String, Constructor> classCache = new HashMap<String, Constructor>();
+
   /** Field elements */
   private List<Comparable> elements;
   /** Field printDelim */
@@ -690,8 +697,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
 
     try
       {
-      Class type = Class.forName( className );
-      WritableComparable result = (WritableComparable) type.newInstance();
+      WritableComparable result = (WritableComparable) getConstructorFor( className ).newInstance();
 
       result.readFields( in );
 
@@ -709,6 +715,30 @@ public class Tuple implements WritableComparable, Iterable, Serializable
       {
       throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
       }
+    catch( NoSuchMethodException exception )
+      {
+      throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
+      }
+    catch( InvocationTargetException exception )
+      {
+      throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
+      }
+    }
+
+  private static Constructor getConstructorFor( String className ) throws ClassNotFoundException, NoSuchMethodException
+    {
+    Constructor constructor = classCache.get( className );
+
+    if( constructor != null )
+      return constructor;
+
+    Class type = Thread.currentThread().getContextClassLoader().loadClass( className );
+
+    constructor = type.getDeclaredConstructor();
+
+    classCache.put( className, constructor );
+
+    return constructor;
     }
 
   /**

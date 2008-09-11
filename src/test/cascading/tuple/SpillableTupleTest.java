@@ -24,6 +24,7 @@ package cascading.tuple;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
+import org.apache.hadoop.io.Text;
 
 /**
  *
@@ -38,6 +39,8 @@ public class SpillableTupleTest extends CascadingTestCase
 
   public void testSpill()
     {
+    long time = System.currentTimeMillis();
+
     performSpillTest( 5, 50 );
     performSpillTest( 49, 50 );
     performSpillTest( 50, 50 );
@@ -45,6 +48,8 @@ public class SpillableTupleTest extends CascadingTestCase
     performSpillTest( 499, 50 );
     performSpillTest( 500, 50 );
     performSpillTest( 501, 50 );
+
+    System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
 
   private void performSpillTest( int size, int threshold )
@@ -56,7 +61,7 @@ public class SpillableTupleTest extends CascadingTestCase
       String aString = "string number " + i;
       double random = Math.random();
 
-      list.add( new Tuple( i, aString, random ) );
+      list.add( new Tuple( i, aString, random, new Text( aString ) ) );
       }
 
     assertEquals( "not equal: list.size();", size, list.size() );
