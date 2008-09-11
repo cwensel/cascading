@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where writing to a c.t.TupleCollector would fail if using a c.s.SequenceFile in some cases.
+
 0.8.0
 
   Updated c.o.x.TagSoupParser to accept 'features', use these features to recover past behaviors.

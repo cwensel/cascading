@@ -24,7 +24,9 @@ package cascading.tap;
 import java.io.IOException;
 
 import cascading.CascadingTestCase;
+import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.JobConf;
@@ -42,10 +44,22 @@ public class TapCollectorTest extends CascadingTestCase
     }
 
 
-  public void testTapCollector() throws IOException
+  public void testTapCollectorText() throws IOException
     {
-    Tap tap = new Lfs( new TextLine(), outputPath + "tapcollector" );
+    Tap tap = new Lfs( new TextLine(), outputPath + "tapcollectortext" );
 
+    runTest( tap );
+    }
+
+  public void testTapCollectorSequence() throws IOException
+    {
+    Tap tap = new Lfs( new SequenceFile( new Fields( "string", "value", "number" ) ), outputPath + "tapcollectorseq" );
+
+    runTest( tap );
+    }
+
+  private void runTest( Tap tap ) throws IOException
+    {
     JobConf conf = new JobConf();
 
     TapCollector collector = (TapCollector) tap.openForWrite( conf ); // casting for test

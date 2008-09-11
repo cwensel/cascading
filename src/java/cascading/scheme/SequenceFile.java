@@ -66,6 +66,8 @@ public class SequenceFile extends Scheme
   @Override
   public void sinkInit( Tap tap, JobConf conf )
     {
+    conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
+    conf.setOutputValueClass( Tuple.class ); // supports TapCollector
     conf.setOutputFormat( SequenceFileOutputFormat.class );
     }
 
