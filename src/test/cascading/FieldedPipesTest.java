@@ -39,6 +39,7 @@ import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.And;
 import cascading.operation.generator.UnGroup;
 import cascading.operation.regex.RegexFilter;
+import cascading.operation.regex.RegexGenerator;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.regex.Regexes;
@@ -201,6 +202,28 @@ public class FieldedPipesTest extends ClusterTestCase
     assertEquals( "not equal: tuple.get(1)", "75.185.76.245", iterator.next().get( 1 ) );
 
     iterator.close();
+    }
+
+  public void testGeneratorToTap() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexGenerator( "\\s+" ), new Fields( 1 ) );
+
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/generatortotap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 161, null );
     }
 
   public void testSimpleMerge() throws Exception
