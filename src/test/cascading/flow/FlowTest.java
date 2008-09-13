@@ -23,6 +23,7 @@ package cascading.flow;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
+import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -54,6 +56,76 @@ public class FlowTest extends ClusterTestCase
   public FlowTest()
     {
     super( "flow test", true );
+    }
+
+  // test is not executed, just guarantees flow is run locally
+  public void testLocalModeSource() throws Exception
+    {
+    Tap source = new Lfs( new TextLine(), "input/path" );
+    Tap sink = new Hfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Map<Object, Object> props = getProperties();
+    Flow flow = new FlowConnector( props ).connect( source, sink, pipe );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "wrong size", 1, steps.size() );
+
+    FlowStep step = (FlowStep) steps.get( 0 );
+
+    String tracker = step.getJobConf( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+
+
+    assertTrue( "is not local", isLocal );
+    }
+
+  // test is not executed, just guarantees flow is run locally
+  public void testLocalModeSink() throws Exception
+    {
+    Tap source = new Hfs( new TextLine(), "input/path" );
+    Tap sink = new Lfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Map<Object, Object> props = getProperties();
+    Flow flow = new FlowConnector( props ).connect( source, sink, pipe );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "wrong size", 1, steps.size() );
+
+    FlowStep step = (FlowStep) steps.get( 0 );
+
+    String tracker = step.getJobConf( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+
+    assertTrue( "is not local", isLocal );
+    }
+
+  // test is not executed, just guarantees flow is run on cluster
+  public void testNotLocalMode() throws Exception
+    {
+    Tap source = new Hfs( new TextLine(), "input/path" );
+    Tap sink = new Hfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Map<Object, Object> props = getProperties();
+    Flow flow = new FlowConnector( props ).connect( source, sink, pipe );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "wrong size", 1, steps.size() );
+
+    FlowStep step = (FlowStep) steps.get( 0 );
+
+    String tracker = step.getJobConf( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+
+    assertTrue( "is local", !isLocal );
     }
 
   public void testStop() throws Exception
@@ -232,6 +304,4 @@ public class FlowTest extends ClusterTestCase
       // ignore
       }
     }
-
-
   }

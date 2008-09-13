@@ -465,7 +465,5 @@ public class FlowStep implements Serializable
       {
       return runningJob != null;
       }
-
     }
-
   }

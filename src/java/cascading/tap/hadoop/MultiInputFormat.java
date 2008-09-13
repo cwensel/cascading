@@ -56,14 +56,22 @@ public class MultiInputFormat implements InputFormat
     List<Map<String, String>> configs = new ArrayList<Map<String, String>>();
     List<Path> allPaths = new ArrayList<Path>();
 
+    boolean isLocal = false;
+
     for( JobConf fromJob : fromJobs )
       {
       configs.add( getConfig( toJob, fromJob ) );
       Collections.addAll( allPaths, FileInputFormat.getInputPaths( fromJob ) );
+
+      if( !isLocal )
+        isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
       }
 
     FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[allPaths.size()] ) );
     toJob.set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
+
+    if( isLocal )
+      toJob.set( "mapred.job.tracker", "local" );
     }
 
   private static Map<String, String> getConfig( JobConf toJob, JobConf fromJob )

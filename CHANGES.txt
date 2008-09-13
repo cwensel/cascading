@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixes bug where c.t.Lfs did not force local mode for current MapReduce step.
+
   Fixed bug where writing to a c.t.TupleCollector would fail if using a c.s.SequenceFile in some cases.
 
 0.8.0

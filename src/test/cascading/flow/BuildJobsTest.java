@@ -87,7 +87,6 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
     assertNull( "not null: step.groupBy", step.group );
     assertNotNull( "null: step.sink", step.sink );
-
     }
 
   public void testName()
