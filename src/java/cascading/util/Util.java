@@ -55,23 +55,14 @@ public class Util
    * @param object to be serialized
    * @return String
    */
-  public static String serializeBase64( Object object )
+  public static String serializeBase64( Object object ) throws IOException
     {
-    try
-      {
-      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream( bytes );
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream( bytes );
 
-      out.writeObject( object );
+    out.writeObject( object );
 
-      return new String( Base64.encodeBase64( bytes.toByteArray() ) );
-      }
-    catch( IOException exception )
-      {
-      exception.printStackTrace();
-      }
-
-    return null;
+    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
     }
 
   /**
@@ -80,7 +71,7 @@ public class Util
    * @param string
    * @return
    */
-  public static Object deserializeBase64( String string )
+  public static Object deserializeBase64( String string ) throws IOException
     {
     if( string == null || string.length() == 0 )
       return null;
@@ -91,10 +82,6 @@ public class Util
       ObjectInputStream in = new ObjectInputStream( bytes );
 
       return in.readObject();
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to deserialize data", exception );
       }
     catch( ClassNotFoundException exception )
       {

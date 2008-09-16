@@ -1,5 +1,10 @@
 Cascading Change Log
 
+  unreleased
+
+  Fixed bug where unserializable Operations were being squashed internally. c.f.Flow instances will now
+  fail immediately and be marked as 'failed'.
+
 0.8.1
 
   Fixed bug where c.t.Lfs did not force local mode for current MapReduce step.

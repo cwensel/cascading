@@ -829,7 +829,7 @@ public class Flow implements Runnable
       if( !isPreserveTemporaryFiles() )
         cleanTemporaryFiles();
 
-      handleThrowable();
+      handleThrowableAndMarkFailed();
 
       if( !stop && !flowStats.isFinished() )
         flowStats.markSuccessful();
@@ -856,7 +856,7 @@ public class Flow implements Runnable
     return futures;
     }
 
-  private void handleThrowable()
+  private void handleThrowableAndMarkFailed()
     {
     if( throwable != null && !stop )
       {

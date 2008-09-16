@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cascading.CascadingException;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -68,7 +69,14 @@ public class MultiInputFormat implements InputFormat
       }
 
     FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[allPaths.size()] ) );
-    toJob.set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
+    try
+      {
+      toJob.set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to pack input formats", exception );
+      }
 
     if( isLocal )
       toJob.set( "mapred.job.tracker", "local" );
@@ -141,7 +149,7 @@ public class MultiInputFormat implements InputFormat
       jobConf.getInputFormat().validateInput( jobConf );
     }
 
-  private List<Map<String, String>> getConfigs( JobConf job )
+  private List<Map<String, String>> getConfigs( JobConf job ) throws IOException
     {
     return (List<Map<String, String>>) Util.deserializeBase64( job.get( "cascading.multiinputformats" ) );
     }

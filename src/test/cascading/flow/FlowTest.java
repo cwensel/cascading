@@ -29,7 +29,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import cascading.ClusterTestCase;
+import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
+import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
@@ -194,6 +196,61 @@ public class FlowTest extends ClusterTestCase
     assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
     }
 
+  private static class BadFilter extends BaseOperation implements Filter
+    {
+    private Object object = new Object(); // intentional
+
+    public boolean isRemove( TupleEntry input )
+      {
+      return false;
+      }
+    }
+
+  public void testFailedSerialization() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/badserialization/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new Each( pipeLower, new Fields( "num" ), new BadFilter() );
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+
+//    countFlow.writeDOT( "stopped.dot" );
+
+    LockingFlowListener listener = new LockingFlowListener();
+
+    flow.addListener( listener );
+
+    try
+      {
+      flow.complete();
+      fail( "did not throw serialization exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+
+    assertTrue( "not marked failed", flow.getFlowStats().isFailed() );
+    }
+
   public void testFailingListenerStarting() throws Exception
     {
     failingListenerTest( FailingFlowListener.OnFail.STARTING );
@@ -304,4 +361,5 @@ public class FlowTest extends ClusterTestCase
       // ignore
       }
     }
+
   }
