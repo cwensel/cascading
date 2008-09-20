@@ -48,6 +48,9 @@ import org.apache.log4j.Logger;
  * The FlowConnector and resulting Flow can be configured via a Map of properties given on the constructor. This properties
  * map can be populated through static methods on FlowConnector and MultiMapReducePlanner.
  * <p/>
+ * Most applications will need to call {@link #setJarClass(java.util.Map, Class)} or {@link #setJarPath(java.util.Map, String)}
+ * so that the correct application jar file is passed through to all child processes.
+ * <p/>
  * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
  * runtime from a configuation file.
  * <p/>
@@ -56,6 +59,8 @@ import org.apache.log4j.Logger;
  * <p/>
  * <strong>Properties</strong><br/>
  * <ul>
+ * <li>cascading.flowconnector.jar.class</li>
+ * <li>cascading.flowconnector.jar.path</li>
  * <li>cascading.flowconnector.assertionlevel</li>
  * <li>cascading.flowconnector.intermediateschemeclass</li>
  * </ul>
@@ -112,6 +117,40 @@ public class FlowConnector
       {
       throw new CascadingException( "unable to load class: " + type.toString(), exception );
       }
+    }
+
+  /**
+   * Method setJarClass is used to set the application jar file.
+   *
+   * @param properties of type Map
+   * @param type       of type Class
+   */
+  public static void setJarClass( Map<Object, Object> properties, Class type )
+    {
+    if( type != null )
+      properties.put( "cascading.flowconnector.jar.class", type );
+    }
+
+  public static Class getJarClass( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.flowconnector.jar.class", (Class) null );
+    }
+
+  /**
+   * Method setJarClass is used to set the application jar file.
+   *
+   * @param properties of type Map
+   * @param path       of type String
+   */
+  public static void setJarPath( Map<Object, Object> properties, String path )
+    {
+    if( path != null )
+      properties.put( "cascading.flowconnector.jar.path", path );
+    }
+
+  public static String getJarPath( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.flowconnector.jar.path", (String) null );
     }
 
   /** Constructor FlowConnector creates a new FlowConnector instance. */

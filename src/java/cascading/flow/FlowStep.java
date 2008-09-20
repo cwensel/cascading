@@ -120,9 +120,6 @@ public class FlowStep implements Serializable
     {
     JobConf conf = parentConf == null ? new JobConf() : new JobConf( parentConf );
 
-    if( conf.getJar() == null )
-      conf.setJarByClass( FlowStep.class );
-
     conf.setJobName( getStepName() );
 
     conf.setOutputKeyClass( Tuple.class );

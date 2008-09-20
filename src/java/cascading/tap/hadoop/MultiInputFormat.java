@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.log4j.Logger;
 
 /**
  * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
@@ -45,6 +46,9 @@ import org.apache.hadoop.mapred.Reporter;
  */
 public class MultiInputFormat implements InputFormat
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( MultiInputFormat.class );
+
   /**
    * Used to set the current JobConf with all sub jobs configurations.
    *
@@ -69,6 +73,7 @@ public class MultiInputFormat implements InputFormat
       }
 
     FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[allPaths.size()] ) );
+
     try
       {
       toJob.set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
@@ -101,6 +106,8 @@ public class MultiInputFormat implements InputFormat
 
       if( value != null && value.equals( entry.getValue() ) )
         configs.remove( entry.getKey() );
+
+      configs.remove( "mapred.working.dir" );
       }
 
     return configs;
@@ -108,7 +115,6 @@ public class MultiInputFormat implements InputFormat
 
   static JobConf[] getJobConfs( JobConf job, List<Map<String, String>> configs )
     {
-
     JobConf[] jobConfs = new JobConf[configs.size()];
 
     for( int i = 0; i < jobConfs.length; i++ )
@@ -122,7 +128,12 @@ public class MultiInputFormat implements InputFormat
     JobConf currentConf = directly ? job : new JobConf( job );
 
     for( String key : config.keySet() )
+      {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "merging key: " + key + " value: " + config.get( key ) );
+
       currentConf.set( key, config.get( key ) );
+      }
 
     return currentConf;
     }

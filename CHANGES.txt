@@ -2,6 +2,12 @@ Cascading Change Log
 
   unreleased
 
+  Added new properties via c.f.FlowConnector.setJarClass and c.f.FlowConnector.setJarPath for
+  setting the application jar file.
+
+  Fixed bug where job jar was not being inherited by subsequent MapReduce jobs when the first job was executed
+  in local mode.
+
   Fixed bug where unserializable Operations were being squashed internally. c.f.Flow instances will now
   fail immediately and be marked as 'failed'.
 

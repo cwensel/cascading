@@ -144,8 +144,21 @@ public class MultiMapReducePlanner extends FlowPlanner
   protected MultiMapReducePlanner( Map<Object, Object> properties )
     {
     super( properties );
-    this.jobConf = HadoopUtil.createJobConf( properties, getJobConf( properties ) );
-    this.intermediateSchemeClass = FlowConnector.getIntermediateSchemeClass( properties );
+    jobConf = HadoopUtil.createJobConf( properties, getJobConf( properties ) );
+    intermediateSchemeClass = FlowConnector.getIntermediateSchemeClass( properties );
+
+    Class type = FlowConnector.getJarClass( properties );
+    if( jobConf.getJar() == null && type != null )
+      jobConf.setJarByClass( type );
+
+    String path = FlowConnector.getJarPath( properties );
+    if( jobConf.getJar() == null && path != null )
+      jobConf.setJar( path );
+
+    if( jobConf.getJar() == null )
+      jobConf.setJarByClass( MultiMapReducePlanner.class );
+
+    LOG.info( "using application jar: " + jobConf.getJar() );
     }
 
   /**
