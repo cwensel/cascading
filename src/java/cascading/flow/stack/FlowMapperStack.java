@@ -23,6 +23,7 @@ package cascading.flow.stack;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.Collection;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
@@ -36,6 +37,7 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
+import cascading.operation.Operation;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -59,6 +61,7 @@ public class FlowMapperStack
 
   /** Field stack */
   private Stack stacks[];
+  private Collection<Operation> allOperations;
 
   /** Class Stack is a simple holder for stack head and tails */
   private class Stack
@@ -82,6 +85,11 @@ public class FlowMapperStack
       LOG.debug( "map current source: " + currentSource );
 
     buildStack();
+
+    allOperations = step.getAllOperations();
+
+    for( Operation operation : allOperations )
+      operation.prepare( flowSession );
     }
 
   private void buildStack() throws IOException
@@ -174,6 +182,9 @@ public class FlowMapperStack
 
   public void close() throws IOException
     {
+    for( Operation operation : allOperations )
+      operation.cleanup( flowSession );
+
     for( int i = 0; i < stacks.length; i++ )
       stacks[ i ].tail.close();
     }

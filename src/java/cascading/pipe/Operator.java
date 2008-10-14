@@ -22,6 +22,7 @@
 package cascading.pipe;
 
 import java.util.Set;
+import java.io.Serializable;
 
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
@@ -171,6 +172,16 @@ public abstract class Operator extends Pipe
 
     if( operation instanceof Assertion && ( assertionLevel == null || assertionLevel == AssertionLevel.NONE ) )
       throw new IllegalArgumentException( "assertionLevel may not be null or NONE" );
+    }
+
+  /**
+   * Method getOperation returns the operation managed by this Operator object.
+   *
+   * @return the operation (type Operation) of this Operator object.
+   */
+  public Operation getOperation()
+    {
+    return operation;
     }
 
   /**

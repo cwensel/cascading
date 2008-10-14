@@ -24,6 +24,7 @@ package cascading.operation;
 import java.io.Serializable;
 
 import cascading.flow.Scope;
+import cascading.flow.FlowSession;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;
@@ -110,6 +111,22 @@ public abstract class BaseOperation implements Serializable, Operation
 
     if( numArgs < 0 )
       throw new IllegalArgumentException( "numArgs may not be negative" );
+    }
+
+  /**
+   * @see Operation#prepare(FlowSession)
+   */
+  public void prepare( FlowSession flowSession )
+    {
+    // do nothing
+    }
+
+  /**
+   * @see Operation#cleanup(FlowSession)
+   */
+  public void cleanup( FlowSession flowSession )
+    {
+    // do nothing
     }
 
   /** @see Operation#getFieldDeclaration() */

@@ -27,10 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import cascading.pipe.Group;
+import cascading.pipe.Operator;
 import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.TempHfs;
@@ -46,6 +49,7 @@ import cascading.tuple.hadoop.TupleComparator;
 import cascading.tuple.hadoop.TuplePairComparator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
+import cascading.operation.Operation;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
@@ -266,6 +270,20 @@ public class FlowStep implements Serializable
   public String getSourceName( Tap source )
     {
     return sources.get( source );
+    }
+
+  public Collection<Operation> getAllOperations()
+    {
+    Set<FlowElement> vertices = graph.vertexSet();
+    Set<Operation> operations = new HashSet<Operation>();
+
+    for( FlowElement vertice : vertices )
+      {
+      if( vertice instanceof Operator )
+        operations.add( ( (Operator) vertice ).getOperation() );
+      }
+
+    return operations;
     }
 
   /**
