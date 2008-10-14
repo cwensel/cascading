@@ -55,7 +55,7 @@ public class BufferPipesTest extends ClusterTestCase
   String inputFileRhs = "build/test/data/rhs.txt";
   String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
 
-  String outputPath = "build/test/output/reducer/";
+  String outputPath = "build/test/output/buffer/";
 
   public BufferPipesTest()
     {
