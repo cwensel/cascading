@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Added a new operation called c.o.Buffer. Buffers are similiar to Reduce in MapReduce. They are given an Iterator
+  of input arguments and can emit any number of result c.t.Tuple instances. For many problems, this is more
+  efficient than using an c.o.Aggregator operation. Only one c.p.Every pipe with a Buffer operation may
+  follow a GroupBy or CoGroup.
+
   Fixed dot file writing so GraphViz can properly load.
 
   Upgraded jgrapht library, requires JDK 1.6.

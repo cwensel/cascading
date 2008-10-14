@@ -59,10 +59,10 @@ public class BufferPipesTest extends ClusterTestCase
 
   public BufferPipesTest()
     {
-    super( "reducer pipes", false );
+    super( "buffer pipes", false ); // no need for clustering
     }
 
-  public void testSimpleReducer() throws Exception
+  public void testSimpleBuffer() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )
       fail( "data file not found" );
@@ -78,7 +78,7 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new GroupBy( pipe, new Fields( "num" ) );
 
-    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), true, "next" ) );
+    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), 2, true, "next" ) );
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 
@@ -98,6 +98,46 @@ public class BufferPipesTest extends ClusterTestCase
     assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", line );
     line = iterator.next().get( 1 );
     assertEquals( "not equal: tuple.get(1)", "1\tb\tnext\tfinal", line );
+
+    iterator.close();
+    }
+
+  public void testSimpleBuffer2() throws Exception
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower" ), "\\s" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "num" ) );
+
+    pipe = new Every( pipe, new Fields( "lower" ), new TestBuffer( new Fields( "next" ), 1, true, "next" ), Fields.RESULTS );
+
+    pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "unknownselect.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 18, null );
+
+    TupleIterator iterator = flow.openSink();
+
+    Comparable line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
+    line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
+    line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
 
     iterator.close();
     }

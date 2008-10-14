@@ -34,8 +34,17 @@ import cascading.tuple.TupleEntry;
  */
 public class TestBuffer extends BaseOperation implements Buffer
   {
+  private int exepectedSize = -1;
   private boolean insertHeader;
   private String value;
+
+  public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, String value )
+    {
+    super( fieldDeclaration );
+    this.exepectedSize = exepectedSize;
+    this.insertHeader = insertHeader;
+    this.value = value;
+    }
 
   public TestBuffer( Fields fieldDeclaration, boolean insertHeader, String value )
     {
@@ -58,6 +67,10 @@ public class TestBuffer extends BaseOperation implements Buffer
     while( bufferCall.getArgumentsIterator().hasNext() )
       {
       TupleEntry arguments = bufferCall.getArgumentsIterator().next(); // must be called
+
+      if( exepectedSize != -1 && arguments.size() != exepectedSize )
+        throw new RuntimeException( "arguments wrong size" );
+
       bufferCall.getOutputCollector().add( new Tuple( value ) );
       }
     }
