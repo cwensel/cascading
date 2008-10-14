@@ -92,7 +92,7 @@ public class RegressionPipesTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-    flow.writeDOT( "unknownselect.dot" );
+//    flow.writeDOT( "unknownselect.dot" );
 
     flow.complete();
 
