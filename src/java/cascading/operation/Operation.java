@@ -21,8 +21,8 @@
 
 package cascading.operation;
 
-import cascading.tuple.Fields;
 import cascading.flow.FlowSession;
+import cascading.tuple.Fields;
 
 /**
  * Interface Operation is the base interface for all functions applied to {@link cascading.tuple.Tuple} streams.
@@ -41,6 +41,9 @@ public interface Operation
   /**
    * The prepare method is called immediately before the current Operation instance is put into play. This method
    * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowSession)} method.
+   * <p/>
+   * This method may be called more than once during the life of this instance. But it will never be called multiple times
+   * without a cleanup invocation immediately before subsequent invocations.
    *
    * @param flowSession of type FlowSession
    */
@@ -49,6 +52,9 @@ public interface Operation
   /**
    * The cleanup method is called immediately after the current Operation instance is taken out of play. This method
    * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowSession)} method.
+   * <p/>
+   * This method may be called more than once during the life of this instance. But it will never be called multiple times
+   * without a prepare invocation before.
    *
    * @param flowSession of type FlowSession
    */

@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Added new lifecycle methods to c.o.Operation, prepare and cleanup. These methods are called so that an Operation
+  instance can initialize and destroy any resources. They may be called more than once before the instance is
+  garbage collected. 
+
   Added a new operation called c.o.Buffer. Buffers are similiar to Reduce in MapReduce. They are given an Iterator
   of input arguments and can emit any number of result c.t.Tuple instances. For many problems, this is more
   efficient than using an c.o.Aggregator operation. Only one c.p.Every pipe with a Buffer operation may
