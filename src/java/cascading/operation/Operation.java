@@ -40,7 +40,7 @@ public interface Operation<C>
 
   /**
    * The prepare method is called immediately before the current Operation instance is put into play. This method
-   * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowProcess} method.
+   * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a cleanup invocation immediately before subsequent invocations.
@@ -52,7 +52,7 @@ public interface Operation<C>
 
   /**
    * The cleanup method is called immediately after the current Operation instance is taken out of play. This method
-   * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowProcess} method.
+   * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowProcess, OperationCall)} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a prepare invocation before.
