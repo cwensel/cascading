@@ -57,7 +57,7 @@ public class FlowTest extends ClusterTestCase
 
   public FlowTest()
     {
-    super( "flow test", true );
+    super( "flow test", true ); // must be run in cluster mode
     }
 
   // test is not executed, just guarantees flow is run locally
@@ -79,7 +79,6 @@ public class FlowTest extends ClusterTestCase
 
     String tracker = step.getJobConf( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
-
 
     assertTrue( "is not local", isLocal );
     }
