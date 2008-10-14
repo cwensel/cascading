@@ -22,14 +22,15 @@
 package cascading.flow.stack;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.Collection;
+import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
+import cascading.operation.Operation;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
@@ -37,7 +38,6 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import cascading.operation.Operation;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -61,6 +61,7 @@ public class FlowMapperStack
 
   /** Field stack */
   private Stack stacks[];
+  /** Field allOperations */
   private Collection<Operation> allOperations;
 
   /** Class Stack is a simple holder for stack head and tails */
@@ -182,10 +183,10 @@ public class FlowMapperStack
 
   public void close() throws IOException
     {
-    for( Operation operation : allOperations )
-      operation.cleanup( flowSession );
-
     for( int i = 0; i < stacks.length; i++ )
       stacks[ i ].tail.close();
+
+    for( Operation operation : allOperations )
+      operation.cleanup( flowSession );
     }
   }
