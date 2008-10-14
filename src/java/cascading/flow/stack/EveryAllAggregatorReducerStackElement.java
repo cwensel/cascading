@@ -33,17 +33,16 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
  */
-class EveryHandlersReducerStackElement extends ReducerStackElement
+class EveryAllAggregatorReducerStackElement extends ReducerStackElement
   {
   private final Map<String, Tap> traps;
   private final List<Every.EveryHandler> everyHandlers;
 
-  public EveryHandlersReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
+  public EveryAllAggregatorReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
     {
     super( previous, flowSession, incomingScope, null );
     this.traps = traps;

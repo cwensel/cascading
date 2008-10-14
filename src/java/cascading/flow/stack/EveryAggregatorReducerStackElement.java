@@ -29,16 +29,15 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
  */
-class EveryHandlerReducerStackElement extends ReducerStackElement
+class EveryAggregatorReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
-  public EveryHandlerReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
+  public EveryAggregatorReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
     {
     super( previous, flowSession, incomingScope, trap );
     this.everyHandler = everyHandler;

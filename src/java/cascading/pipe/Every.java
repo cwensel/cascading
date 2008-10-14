@@ -30,6 +30,7 @@ import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
 import cascading.operation.GroupAssertion;
 import cascading.operation.OperationCall;
+import cascading.operation.Reducer;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -103,6 +104,54 @@ public class Every extends Operator
   /**
    * Constructor Every creates a new Every instance.
    *
+   * @param previous of type Pipe
+   * @param reducer  of type Reducer
+   */
+  public Every( Pipe previous, Reducer reducer )
+    {
+    super( previous, AGGREGATOR_ARGUMENTS, reducer, AGGREGATOR_SELECTOR );
+    }
+
+  /**
+   * Constructor Every creates a new Every instance.
+   *
+   * @param previous              of type Pipe
+   * @param argumentFieldSelector of type Fields
+   * @param reducer               of type Reducer
+   */
+  public Every( Pipe previous, Fields argumentFieldSelector, Reducer reducer )
+    {
+    super( previous, argumentFieldSelector, reducer, AGGREGATOR_SELECTOR );
+    }
+
+  /**
+   * Constructor Every creates a new Every instance.
+   *
+   * @param previous              of type Pipe
+   * @param argumentFieldSelector of type Fields
+   * @param reducer               of type Reducer
+   * @param outFieldSelector      of type Fields
+   */
+  public Every( Pipe previous, Fields argumentFieldSelector, Reducer reducer, Fields outFieldSelector )
+    {
+    super( previous, argumentFieldSelector, reducer, outFieldSelector );
+    }
+
+  /**
+   * Constructor Every creates a new Every instance.
+   *
+   * @param previous         of type Pipe
+   * @param reducer          of type Reducer
+   * @param outFieldSelector of type Fields
+   */
+  public Every( Pipe previous, Reducer reducer, Fields outFieldSelector )
+    {
+    super( previous, AGGREGATOR_ARGUMENTS, reducer, outFieldSelector );
+    }
+
+  /**
+   * Constructor Every creates a new Every instance.
+   *
    * @param previous       of type Pipe
    * @param assertionLevel of type AssertionLevel
    * @param assertion      of type ValueAssertion
@@ -125,9 +174,34 @@ public class Every extends Operator
     super( previous, argumentFieldSelector, assertionLevel, assertion, ASSERTION_SELECTOR );
     }
 
+  /**
+   * Method isReducer returns true if this Every instance holds a {@link Reducer} operation.
+   *
+   * @return boolean
+   */
+  public boolean isReducer()
+    {
+    return operation instanceof Reducer;
+    }
+
+  /**
+   * Method isReducer returns true if this Every instance holds a {@link Aggregator} operation.
+   *
+   * @return boolean
+   */
+  public boolean isAggregator()
+    {
+    return operation instanceof Aggregator;
+    }
+
   private Aggregator getAggregator()
     {
     return (Aggregator) operation;
+    }
+
+  private Reducer getReducer()
+    {
+    return (Reducer) operation;
     }
 
   private GroupAssertion getGroupAssertion()
@@ -150,7 +224,10 @@ public class Every extends Operator
     if( scope.isEach() || scope.isTap() )
       throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
 
-    return scope.getOutGroupingFields();
+    if( isReducer() )
+      return scope.getOutValuesFields();
+    else
+      return scope.getOutGroupingFields();
     }
 
   /** @see Operator#outgoingScopeFor(Set<Scope>) */
@@ -214,8 +291,10 @@ public class Every extends Operator
     {
     if( isAssertion() )
       return new EveryAssertionHandler( outgoingScope );
-    else
+    else if( isAggregator() )
       return new EveryAggregatorHandler( outgoingScope );
+    else
+      return new EveryReducerHandler( outgoingScope );
     }
 
   /** Class EveryHandler is a helper class that wraps Every instances. */
@@ -238,7 +317,7 @@ public class Every extends Operator
 
     public abstract void operate( FlowSession flowSession, TupleEntry inputEntry );
 
-    public abstract void complete( FlowSession flowSession, TupleEntry value );
+    public abstract void complete( FlowSession flowSession, TupleEntry groupEntry );
 
 
     @Override
@@ -282,6 +361,7 @@ public class Every extends Operator
 
     public void start( FlowSession flowSession, TupleEntry groupEntry )
       {
+      operationCall.setArguments( null );  // zero it out
       operationCall.setOutputCollector( null ); // zero it out
       operationCall.setGroup( groupEntry );
       getAggregator().start( flowSession, operationCall );
@@ -303,14 +383,78 @@ public class Every extends Operator
         }
       }
 
-    public void complete( FlowSession flowSession, TupleEntry value )
+    public void complete( FlowSession flowSession, TupleEntry groupEntry )
       {
-      tupleCollector.value = value;
+      tupleCollector.value = groupEntry;
 
       operationCall.setArguments( null );
       operationCall.setOutputCollector( tupleCollector );
 
       getAggregator().complete( flowSession, operationCall );
+      }
+    }
+
+  public class EveryReducerHandler extends EveryHandler
+    {
+    EveryTupleCollector tupleCollector;
+
+    private abstract class EveryTupleCollector extends TupleCollector
+      {
+      TupleEntry value;
+
+      public EveryTupleCollector( Fields fields )
+        {
+        super( fields );
+        }
+      }
+
+    public EveryReducerHandler( final Scope outgoingScope )
+      {
+      super( outgoingScope );
+
+      tupleCollector = new EveryTupleCollector( outgoingScope.getDeclaredFields() )
+      {
+      protected void collect( Tuple tuple )
+        {
+        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getDeclaredEntry(), tuple ) );
+        }
+      };
+      }
+
+    public void start( FlowSession flowSession, TupleEntry groupEntry )
+      {
+      tupleCollector.value = groupEntry;
+      operationCall.setArguments( null );
+      operationCall.setOutputCollector( tupleCollector );
+      operationCall.setGroup( groupEntry );
+      getReducer().start( flowSession, operationCall );
+      }
+
+    public void operate( FlowSession flowSession, TupleEntry inputEntry )
+      {
+      tupleCollector.value = inputEntry;
+
+      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
+
+      operationCall.setArguments( arguments );
+
+      try
+        {
+        getReducer().operate( flowSession, operationCall );
+        }
+      catch( Throwable throwable )
+        {
+        throw new OperatorException( "operator Every failed executing reducer: " + operation, throwable );
+        }
+      }
+
+    public void complete( FlowSession flowSession, TupleEntry groupEntry )
+      {
+      tupleCollector.value = groupEntry;
+
+      operationCall.setArguments( null );
+
+      getReducer().complete( flowSession, operationCall );
       }
     }
 
@@ -323,6 +467,7 @@ public class Every extends Operator
 
     public void start( FlowSession flowSession, TupleEntry groupEntry )
       {
+      operationCall.setArguments( null );
       operationCall.setOutputCollector( null ); // zero it out
       operationCall.setGroup( groupEntry );
 

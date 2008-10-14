@@ -82,22 +82,39 @@ public class FlowReducerStack
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
-    if( operator instanceof Every )
+    if( operator instanceof Every && !( (Every) operator ).isReducer() )
       {
-      List<Every.EveryHandler> everyHandlers = new ArrayList<Every.EveryHandler>();
+      List<Every.EveryHandler> allAggregators = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryHandlersReducerStackElement( stackTail, flowSession, incomingScope, step.traps, everyHandlers );
+      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowSession, incomingScope, step.traps, allAggregators );
 
-      while( operator instanceof Every )
+      while( operator instanceof Every && !( (Every) operator ).isReducer() )
         {
         nextScope = step.getNextScope( operator );
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
 
-        everyHandlers.add( everyHandler );
+        allAggregators.add( everyHandler );
 
         trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stackTail = new EveryHandlerReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
+        stackTail = new EveryAggregatorReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
+        incomingScope = nextScope;
+
+        operator = step.getNextFlowElement( nextScope );
+        }
+      }
+
+    if( operator instanceof Every && ( (Every) operator ).isReducer() )
+      {
+      Scope incomingScope = nextScope;
+
+      while( operator instanceof Every && ( (Every) operator ).isReducer() )
+        {
+        nextScope = step.getNextScope( operator );
+        Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
+
+        trap = step.getTrap( ( (Pipe) operator ).getName() );
+        stackTail = new EveryReducerReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );
