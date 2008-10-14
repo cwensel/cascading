@@ -33,10 +33,11 @@ unreleased
 
   Changed c.o.Aggregator to no longer use a Map for the context. Users can now specify custom types by returning
   either a new instance from start() or recycling an instance passed into start(). This change will break all existing
-  implementations of Aggregator. Note, simply returning a new Map<Object,Object> in start() should be sufficient.
+  implementations of Aggregator. Note, simply setting a new Map<Object,Object> on the call instance in start()
+  should be sufficient.
 
   Changed all c.o.Function, c.o.Filter, c.o.Aggregator, c.o.ValueAssertion, and c.o.GroupAssertions to accept
-  a c.f.FlowSession object on all relevant methods. FlowSession provides call-backs into the underyling system
+  a c.f.FlowProcess object on all relevant methods. FlowProcess provides call-backs into the underyling system
   to get configuration properties, fire a "keep alive" ping, or increment a custom counter. This change will
   break all existing implemenations of the above interfaces.
 
