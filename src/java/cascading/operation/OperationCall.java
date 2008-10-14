@@ -34,10 +34,9 @@ public interface OperationCall<C>
   C getContext();
 
   /**
-   * Sets the 'context' object.
+   * Sets the user defined 'context' object.
    *
    * @param context user defined object
    */
   void setContext( C context );
-
   }

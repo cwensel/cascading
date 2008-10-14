@@ -110,12 +110,13 @@ public class UnGroup extends BaseOperation implements Function
     if( LOG.isDebugEnabled() )
       LOG.debug( "using size: " + size );
 
-    Tuple group = input.getTuple().remove( input.getFields(), groupFieldSelector );
+    Tuple tuple = new Tuple( input.getTuple() ); // make clone
+    Tuple group = tuple.remove( input.getFields(), groupFieldSelector );
 
-    for( int i = 0; i < input.getTuple().size(); i = i + size )
+    for( int i = 0; i < tuple.size(); i = i + size )
       {
       Tuple result = new Tuple( group );
-      result.addAll( input.getTuple().get( Fields.offsetSelector( size, i ).getPos() ) );
+      result.addAll( tuple.get( Fields.offsetSelector( size, i ).getPos() ) );
 
       outputCollector.add( result );
       }

@@ -53,9 +53,11 @@ public class SortElements extends BaseOperation implements Function
       set.add( input.selectTuple( field ) );
 
     int i = 0;
-    for( Tuple tuple : set )
-      input.getTuple().put( input.getFields(), fields[ i++ ], tuple );
+    Tuple inputCopy = new Tuple( input.getTuple() );
 
-    functionCall.getOutputCollector().add( input );
+    for( Tuple tuple : set )
+      inputCopy.put( input.getFields(), fields[ i++ ], tuple );
+
+    functionCall.getOutputCollector().add( inputCopy );
     }
   }
