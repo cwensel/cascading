@@ -21,6 +21,8 @@
 
 package cascading.operation;
 
+import java.util.Iterator;
+
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
@@ -28,7 +30,7 @@ import cascading.tuple.TupleEntry;
  * Class OperationCall is the common base class for {@link FunctionCall}, {@link FilterCall},
  * {@link AggregatorCall}, {@link ValueAssertionCall}, and {@link GroupAssertionCall}.
  */
-public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCall<C>, BufferCall<C>, ValueAssertionCall, GroupAssertionCall<C>
+public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCall<C>, BufferCall, ValueAssertionCall, GroupAssertionCall<C>
   {
   /** Field context */
   private C context;
@@ -36,6 +38,8 @@ public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCal
   private TupleEntry group;
   /** Field arguments */
   private TupleEntry arguments;
+  /** Field argumentsIterator */
+  private Iterator<TupleEntry> argumentsIterator;
   /** Field outputCollector */
   private TupleCollector outputCollector;
 
@@ -76,6 +80,17 @@ public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCal
   public void setGroup( TupleEntry group )
     {
     this.group = group;
+    }
+
+  /** @see BufferCall#getArgumentsIterator() */
+  public Iterator<TupleEntry> getArgumentsIterator()
+    {
+    return argumentsIterator;
+    }
+
+  public void setArgumentsIterator( Iterator<TupleEntry> argumentsIterator )
+    {
+    this.argumentsIterator = argumentsIterator;
     }
 
   /** @see FunctionCall#getArguments() */

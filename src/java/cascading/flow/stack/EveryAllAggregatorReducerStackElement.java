@@ -86,7 +86,7 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
         {
         try
           {
-          handler.operate( flowSession, valueEntry );
+          handler.operate( flowSession, null, valueEntry, null );
           }
         catch( Exception exception )
           {

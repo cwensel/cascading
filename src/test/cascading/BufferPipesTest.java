@@ -40,6 +40,7 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
@@ -77,19 +78,15 @@ public class BufferPipesTest extends ClusterTestCase
       this.value = value;
       }
 
-    public void start( FlowSession flowSession, BufferCall bufferCall )
-      {
-      bufferCall.getOutputCollector().add( new Tuple( "start" ) );
-      }
-
     public void operate( FlowSession flowSession, BufferCall bufferCall )
       {
       bufferCall.getOutputCollector().add( new Tuple( value ) );
-      }
 
-    public void complete( FlowSession flowSession, BufferCall bufferCall )
-      {
-      bufferCall.getOutputCollector().add( new Tuple( "finish" ) );
+      while( bufferCall.getArgumentsIterator().hasNext() )
+        {
+        TupleEntry arguments = bufferCall.getArgumentsIterator().next();
+        bufferCall.getOutputCollector().add( new Tuple( value ) );
+        }
       }
     }
 
@@ -119,11 +116,13 @@ public class BufferPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 13, null );
+    validateLength( flow, 18, null );
 
     TupleIterator iterator = flow.openSink();
 
     Comparable line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "null\tnull\tnext\tfinal", line );
+    line = iterator.next().get( 1 );
     assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", line );
     line = iterator.next().get( 1 );
     assertEquals( "not equal: tuple.get(1)", "1\tb\tnext\tfinal", line );

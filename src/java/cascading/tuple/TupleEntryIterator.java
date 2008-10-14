@@ -47,6 +47,29 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
     }
 
   /**
+   * Method getFields returns the fields of this TupleEntryIterator object.
+   *
+   * @return the fields (type Fields) of this TupleEntryIterator object.
+   */
+  public Fields getFields()
+    {
+    return entry.fields;
+    }
+
+  /**
+   * Method getTupleEntry returns the entry of this TupleEntryIterator object.
+   * <p/>
+   * Since TupleEntry instances are re-used, this entry will inherit a new Tuple
+   * on every {@link #next()} call.
+   *
+   * @return the entry (type TupleEntry) of this TupleEntryIterator object.
+   */
+  public TupleEntry getTupleEntry()
+    {
+    return entry;
+    }
+
+  /**
    * Method hasNext returns true if there is a next TupleEntry
    *
    * @return boolean

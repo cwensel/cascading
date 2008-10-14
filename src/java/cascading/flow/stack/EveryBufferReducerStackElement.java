@@ -31,6 +31,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  *
@@ -71,36 +72,15 @@ class EveryBufferReducerStackElement extends ReducerStackElement
   @Override
   public void collect( Tuple key, Iterator values )
     {
-    try
-      {
-      everyHandler.start( flowSession, getGroupingTupleEntry( key ) );
-      }
-    catch( Exception exception )
-      {
-      handleException( exception, getGroupingTupleEntry( key ) );
-      }
-
-    while( values.hasNext() )
-      {
-      TupleEntry valueEntry = (TupleEntry) values.next();
-
-      try
-        {
-        everyHandler.operate( flowSession, valueEntry );
-        }
-      catch( Exception exception )
-        {
-        handleException( exception, valueEntry );
-        }
-      }
+    TupleEntry groupingEntry = getGroupingTupleEntry( key );
 
     try
       {
-      everyHandler.complete( flowSession, getGroupingTupleEntry( key ) );
+      everyHandler.operate( flowSession, groupingEntry, null, (TupleEntryIterator) values );
       }
     catch( Exception exception )
       {
-      handleException( exception, getGroupingTupleEntry( key ) );
+      handleException( exception, ( (Every.EveryBufferHandler) everyHandler ).getLastValue() );
       }
     }
   }

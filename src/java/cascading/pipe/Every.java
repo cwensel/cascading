@@ -21,6 +21,7 @@
 
 package cascading.pipe;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
@@ -35,6 +36,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  * The Every operator applies an {@link Aggregator} to every grouping. Any number of Every instances may follow other
@@ -294,7 +296,7 @@ public class Every extends Operator
     else if( isAggregator() )
       return new EveryAggregatorHandler( outgoingScope );
     else
-      return new EveryReducerHandler( outgoingScope );
+      return new EveryBufferHandler( outgoingScope );
     }
 
   /** Class EveryHandler is a helper class that wraps Every instances. */
@@ -315,7 +317,7 @@ public class Every extends Operator
 
     public abstract void start( FlowSession flowSession, TupleEntry groupEntry );
 
-    public abstract void operate( FlowSession flowSession, TupleEntry inputEntry );
+    public abstract void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator );
 
     public abstract void complete( FlowSession flowSession, TupleEntry groupEntry );
 
@@ -367,7 +369,7 @@ public class Every extends Operator
       getAggregator().start( flowSession, operationCall );
       }
 
-    public void operate( FlowSession flowSession, TupleEntry inputEntry )
+    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
@@ -394,7 +396,7 @@ public class Every extends Operator
       }
     }
 
-  public class EveryReducerHandler extends EveryHandler
+  public class EveryBufferHandler extends EveryHandler
     {
     EveryTupleCollector tupleCollector;
 
@@ -408,7 +410,7 @@ public class Every extends Operator
         }
       }
 
-    public EveryReducerHandler( final Scope outgoingScope )
+    public EveryBufferHandler( final Scope outgoingScope )
       {
       super( outgoingScope );
 
@@ -421,20 +423,40 @@ public class Every extends Operator
       };
       }
 
-    public void start( FlowSession flowSession, TupleEntry groupEntry )
+    public TupleEntry getLastValue()
       {
-      tupleCollector.value = groupEntry;
-      operationCall.setArguments( null );
-      operationCall.setOutputCollector( tupleCollector );
-      operationCall.setGroup( groupEntry );
-      getReducer().start( flowSession, operationCall );
+      return tupleCollector.value;
       }
 
-    public void operate( FlowSession flowSession, TupleEntry inputEntry )
+    public void start( FlowSession flowSession, TupleEntry groupEntry )
       {
-      tupleCollector.value = inputEntry;
+      }
 
-      operationCall.setArguments( outgoingScope.getArgumentsEntry( inputEntry ) );
+    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, final TupleEntryIterator tupleEntryIterator )
+      {
+      tupleCollector.value = tupleEntryIterator.getTupleEntry();
+      tupleCollector.value.setTuple( Tuple.size( tupleCollector.value.getFields().size() ) );
+
+      operationCall.setOutputCollector( tupleCollector );
+      operationCall.setGroup( groupEntry );
+
+      operationCall.setArgumentsIterator( new Iterator<TupleEntry>()
+      {
+      public boolean hasNext()
+        {
+        return tupleEntryIterator.hasNext();
+        }
+
+      public TupleEntry next()
+        {
+        return outgoingScope.getArgumentsEntry( (TupleEntry) tupleEntryIterator.next() );
+        }
+
+      public void remove()
+        {
+        tupleEntryIterator.remove();
+        }
+      } );
 
       try
         {
@@ -442,17 +464,12 @@ public class Every extends Operator
         }
       catch( Throwable throwable )
         {
-        throw new OperatorException( "operator Every failed executing reducer: " + operation, throwable );
+        throw new OperatorException( "operator Every failed executing buffer: " + operation, throwable );
         }
       }
 
     public void complete( FlowSession flowSession, TupleEntry groupEntry )
       {
-      tupleCollector.value = groupEntry;
-
-      operationCall.setArguments( null );
-
-      getReducer().complete( flowSession, operationCall );
       }
     }
 
@@ -472,7 +489,7 @@ public class Every extends Operator
       getGroupAssertion().start( flowSession, operationCall );
       }
 
-    public void operate( FlowSession flowSession, TupleEntry inputEntry )
+    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
