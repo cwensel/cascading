@@ -47,9 +47,11 @@ public class ValueAssertionsTest extends CascadingTestCase
 
   private void assertFail( ValueAssertion assertion, TupleEntry tupleEntry )
     {
+    ConcreteCall concreteCall = getOperationCall( tupleEntry );
+    assertion.prepare( FlowProcess.NULL, concreteCall );
     try
       {
-      assertion.doAssert( FlowProcess.NULL, getOperationCall( tupleEntry ) );
+      assertion.doAssert( FlowProcess.NULL, concreteCall );
       fail();
       }
     catch( AssertionException exception )
@@ -67,7 +69,9 @@ public class ValueAssertionsTest extends CascadingTestCase
 
   private void assertPass( ValueAssertion assertion, TupleEntry tupleEntry )
     {
-    assertion.doAssert( null, getOperationCall( tupleEntry ) );
+    ConcreteCall concreteCall = getOperationCall( tupleEntry );
+    assertion.prepare( FlowProcess.NULL, concreteCall );
+    assertion.doAssert( FlowProcess.NULL, concreteCall );
     }
 
   public void testNotNull()
