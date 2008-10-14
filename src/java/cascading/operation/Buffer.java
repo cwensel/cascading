@@ -31,7 +31,7 @@ import cascading.flow.FlowSession;
  * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowSession, BufferCall)}
  * method provides a mechanism for maintaining a 'context' object to hold intermedite values.
  */
-public interface Buffer<C> extends Operation
+public interface Buffer extends Operation
   {
   /**
    * Method operate is called for each {@link cascading.tuple.TupleEntry} value in the current grouping.
