@@ -33,32 +33,34 @@ import cascading.tuple.Fields;
  *
  * @see cascading.operation.BaseOperation
  */
-public interface Operation<PC>
+public interface Operation<C>
   {
   /** Field ANY denotes that a given Operation will take any number of argument values */
   int ANY = Integer.MAX_VALUE;
 
   /**
    * The prepare method is called immediately before the current Operation instance is put into play. This method
-   * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowProcess)} method.
+   * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowProcess} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a cleanup invocation immediately before subsequent invocations.
    *
    * @param flowProcess
+   * @param operationCall
    */
-  void prepare( FlowProcess<PC> flowProcess );
+  void prepare( FlowProcess flowProcess, OperationCall<C> operationCall );
 
   /**
    * The cleanup method is called immediately after the current Operation instance is taken out of play. This method
-   * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowProcess)} method.
+   * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowProcess} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a prepare invocation before.
    *
    * @param flowProcess
+   * @param operationCall
    */
-  void cleanup( FlowProcess<PC> flowProcess );
+  void cleanup( FlowProcess flowProcess, OperationCall<C> operationCall );
 
   /**
    * Returns the fields created by this Operation instance. If this instance is a {@link Filter}, it should always

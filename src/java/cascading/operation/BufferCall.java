@@ -27,7 +27,7 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Interface BufferCall provides access to the current {@link cascading.operation.Buffer} invocation arguments. */
-public interface BufferCall
+public interface BufferCall<C> extends OperationCall<C>
   {
   /**
    * Returns the current grouping {@link cascading.tuple.TupleEntry}.

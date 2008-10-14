@@ -61,6 +61,16 @@ class EveryAggregatorReducerStackElement extends ReducerStackElement
       }
     }
 
+  public void prepare()
+    {
+    everyHandler.prepare( flowProcess );
+    }
+
+  public void cleanup()
+    {
+    everyHandler.cleanup( flowProcess );
+    }
+
   protected Fields resolveIncomingOperationFields()
     {
     return everyHandler.getEvery().resolveIncomingOperationFields( incomingScope );

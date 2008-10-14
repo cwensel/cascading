@@ -25,7 +25,7 @@ import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Interface FunctionCall provides access to the current {@link Function} invocation arguments. */
-public interface FunctionCall
+public interface FunctionCall<C> extends OperationCall<C>
   {
   /**
    * Returns {@link TupleEntry} of argument values.

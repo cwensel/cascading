@@ -67,6 +67,10 @@ abstract class StackElement implements FlowCollector
     return this;
     }
 
+  public abstract void prepare();
+
+  public abstract void cleanup();
+
   public FlowProcess getFlowProcess()
     {
     return flowProcess;
@@ -113,8 +117,18 @@ abstract class StackElement implements FlowCollector
     return trapCollector;
     }
 
+  public void open() throws IOException
+    {
+    prepare();
+
+    if( previous != null )
+      previous.open();
+    }
+
   public void close() throws IOException
     {
+    cleanup();
+
     for( TapCollector trapCollector : trapCollectors.values() )
       trapCollector.close();
 

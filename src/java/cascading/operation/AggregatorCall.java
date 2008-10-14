@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  * This interface is generic, allowing the user to set a custom 'context' object when {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall)}
  * is called.
  */
-public interface AggregatorCall<C>
+public interface AggregatorCall<C> extends OperationCall<C>
   {
   /**
    * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called

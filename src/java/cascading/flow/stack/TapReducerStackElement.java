@@ -94,6 +94,16 @@ class TapReducerStackElement extends ReducerStackElement
       }
     }
 
+  public void prepare()
+    {
+    // do nothing
+    }
+
+  public void cleanup()
+    {
+    // do nothing
+    }
+
   @Override
   public void close() throws IOException
     {

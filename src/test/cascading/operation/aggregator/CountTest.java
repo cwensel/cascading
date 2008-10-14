@@ -23,7 +23,7 @@ package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
-import cascading.operation.OperationCall;
+import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -34,7 +34,7 @@ public class CountTest extends CascadingTestCase
   {
   /** class under test */
   private Count count;
-  private OperationCall operationCall;
+  private ConcreteCall operationCall;
 
   public CountTest()
     {
@@ -44,7 +44,7 @@ public class CountTest extends CascadingTestCase
   public void setUp() throws Exception
     {
     count = new Count();
-    operationCall = new OperationCall();
+    operationCall = new ConcreteCall();
     }
 
   public void tearDown() throws Exception

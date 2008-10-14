@@ -23,7 +23,7 @@ package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
-import cascading.operation.OperationCall;
+import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -34,7 +34,7 @@ public class LastTest extends CascadingTestCase
   {
   /** class under test */
   private Last last;
-  private OperationCall operationCall;
+  private ConcreteCall operationCall;
 
   public LastTest()
     {
@@ -44,7 +44,7 @@ public class LastTest extends CascadingTestCase
   public void setUp() throws Exception
     {
     last = new Last();
-    operationCall = new OperationCall();
+    operationCall = new ConcreteCall();
     }
 
   public void tearDown() throws Exception

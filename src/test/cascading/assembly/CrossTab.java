@@ -84,7 +84,7 @@ public class CrossTab extends SubAssembly
     }
 
   /** Class CrossTabOperation */
-  public abstract static class CrossTabOperation<C> extends BaseOperation implements Aggregator<C>
+  public abstract static class CrossTabOperation<C> extends BaseOperation<C> implements Aggregator<C>
     {
     /**
      * Constructor CrossTabOperation creates a new CrossTabOperation instance.

@@ -21,6 +21,8 @@
 
 package cascading;
 
+import java.util.Iterator;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -74,9 +76,11 @@ public class TestBuffer extends BaseOperation implements Buffer
     if( insertHeader )
       bufferCall.getOutputCollector().add( new Tuple( value ) );
 
-    while( bufferCall.getArgumentsIterator().hasNext() )
+    Iterator<TupleEntry> iterator = bufferCall.getArgumentsIterator();
+
+    while( iterator.hasNext() )
       {
-      TupleEntry arguments = bufferCall.getArgumentsIterator().next(); // must be called
+      TupleEntry arguments = iterator.next(); // must be called
 
       if( exepectedSize != -1 && arguments.size() != exepectedSize )
         throw new RuntimeException( "arguments wrong size" );

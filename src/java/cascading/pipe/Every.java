@@ -30,8 +30,8 @@ import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Buffer;
+import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
-import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -307,12 +307,12 @@ public class Every extends Operator
     /** Field outputCollector */
     public FlowCollector outputCollector;
     /** Field operationCall */
-    OperationCall operationCall;
+    ConcreteCall operationCall;
 
     public EveryHandler( Scope outgoingScope )
       {
       this.outgoingScope = outgoingScope;
-      this.operationCall = new OperationCall();
+      this.operationCall = new ConcreteCall();
       }
 
     public abstract void start( FlowProcess flowProcess, TupleEntry groupEntry );
@@ -331,6 +331,16 @@ public class Every extends Operator
     public Every getEvery()
       {
       return Every.this;
+      }
+
+    public void prepare( FlowProcess flowProcess )
+      {
+      getOperation().prepare( flowProcess, operationCall );
+      }
+
+    public void cleanup( FlowProcess flowProcess )
+      {
+      getOperation().cleanup( flowProcess, operationCall );
       }
     }
 

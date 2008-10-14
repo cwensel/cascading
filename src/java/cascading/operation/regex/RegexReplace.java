@@ -26,11 +26,12 @@ import java.util.regex.Matcher;
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /** Class RegexReplace is used to replace a matched regex with a replacement value. */
-public class RegexReplace extends RegexOperation implements Function
+public class RegexReplace extends RegexOperation<Matcher> implements Function<Matcher>
   {
   /** Field replacement */
   private final String replacement;
@@ -64,8 +65,14 @@ public class RegexReplace extends RegexOperation implements Function
     this.replacement = replacement;
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
+    {
+    operationCall.setContext( getPattern().matcher( "" ) );
+    }
+
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
     {
     // coerce to string
     String value = functionCall.getArguments().getString( 0 );
@@ -76,8 +83,7 @@ public class RegexReplace extends RegexOperation implements Function
 
     Tuple output = new Tuple();
 
-    // todo: reuse the matcher via the .reset() method. need to confirm only one thread will fire through this
-    Matcher matcher = getPattern().matcher( value );
+    Matcher matcher = functionCall.getContext().reset( value );
 
     if( replaceAll )
       output.add( matcher.replaceAll( replacement ) );

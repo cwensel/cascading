@@ -97,4 +97,14 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
 
     next.collect( keyEntry.getTuple() );
     }
+
+  public void prepare()
+    {
+    // do nothing, redundant
+    }
+
+  public void cleanup()
+    {
+    // do nothing, redundant
+    }
   }

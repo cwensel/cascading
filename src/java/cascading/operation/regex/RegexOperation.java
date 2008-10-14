@@ -27,7 +27,7 @@ import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
 /** Class RegexOperation is the base class for all regex Operations. */
-public class RegexOperation<PC> extends BaseOperation<PC>
+public class RegexOperation<C> extends BaseOperation<C>
   {
   /** Field patternString */
   protected String patternString = ".*";

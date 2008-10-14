@@ -22,7 +22,6 @@
 package cascading.flow.stack;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Set;
 
 import cascading.flow.FlowConstants;
@@ -30,7 +29,6 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.operation.Operation;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
@@ -61,8 +59,6 @@ public class FlowMapperStack
 
   /** Field stack */
   private Stack stacks[];
-  /** Field allOperations */
-  private Collection<Operation> allOperations;
 
   /** Class Stack is a simple holder for stack head and tails */
   private class Stack
@@ -87,10 +83,8 @@ public class FlowMapperStack
 
     buildStack();
 
-    allOperations = step.getAllOperations();
-
-    for( Operation operation : allOperations )
-      operation.prepare( flowProcess );
+    for( Stack stack : stacks )
+      stack.tail.open();
     }
 
   private void buildStack() throws IOException
@@ -184,9 +178,9 @@ public class FlowMapperStack
   public void close() throws IOException
     {
     for( int i = 0; i < stacks.length; i++ )
+      {
+      stacks[ i ].tail.cleanup();
       stacks[ i ].tail.close();
-
-    for( Operation operation : allOperations )
-      operation.cleanup( flowProcess );
+      }
     }
   }

@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.tuple.TupleEntry;
 
 /** Interface ValueAssertionCall provides access to the current {@link ValueAssertion} invocation arguments. */
-public interface ValueAssertionCall
+public interface ValueAssertionCall<C> extends OperationCall<C>
   {
   /**
    * Returns {@link TupleEntry} of argument values.

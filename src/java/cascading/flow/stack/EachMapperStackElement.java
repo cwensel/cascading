@@ -61,6 +61,16 @@ class EachMapperStackElement extends MapperStackElement
       }
     }
 
+  public void prepare()
+    {
+    eachHandler.prepare( flowProcess );
+    }
+
+  public void cleanup()
+    {
+    eachHandler.cleanup( flowProcess );
+    }
+
   @Override
   public void collect( Tuple tuple )
     {

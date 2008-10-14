@@ -85,6 +85,16 @@ class TapMapperStackElement extends MapperStackElement
       }
     }
 
+  public void prepare()
+    {
+    // do nothing
+    }
+
+  public void cleanup()
+    {
+    // do nothing
+    }
+
   @Override
   public void close() throws IOException
     {

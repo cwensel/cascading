@@ -77,7 +77,7 @@ public class Or extends Logic
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    Object[] contexts = (Object[]) flowProcess.getContext();
+    Object[] contexts = (Object[]) filterCall.getContext();
 
     try
       {
@@ -88,7 +88,7 @@ public class Or extends Logic
 
         entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
 
-        flowProcess.setContext( contexts[ i ] );
+        filterCall.setContext( contexts[ i ] );
 
         if( filters[ i ].isRemove( flowProcess, filterCall ) )
           return true;
@@ -98,7 +98,7 @@ public class Or extends Logic
       }
     finally
       {
-      flowProcess.setContext( contexts );
+      filterCall.setContext( contexts );
       }
     }
   }

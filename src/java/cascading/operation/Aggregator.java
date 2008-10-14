@@ -38,7 +38,7 @@ import cascading.tuple.TupleEntry;
  *
  * @see AggregatorCall
  */
-public interface Aggregator<C> extends Operation
+public interface Aggregator<C> extends Operation<C>
   {
   /**
    * Method start initializes the aggregation procedure and is called for every unique grouping.

@@ -26,15 +26,13 @@ import java.util.regex.Matcher;
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /** Class RegexGenerator will emit a new Tuple for every matched regex group. */
-public class RegexGenerator extends RegexOperation implements Function
+public class RegexGenerator extends RegexOperation<Matcher> implements Function<Matcher>
   {
-  /** Field matcher */
-  private Matcher matcher;
-
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
    *
@@ -60,20 +58,20 @@ public class RegexGenerator extends RegexOperation implements Function
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
     {
-    matcher = getPattern().matcher( "" );
+    operationCall.setContext( getPattern().matcher( "" ) );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    matcher.reset( value );
+    Matcher matcher = functionCall.getContext().reset( value );
 
     while( matcher.find() )
       functionCall.getOutputCollector().add( new Tuple( matcher.group() ) );

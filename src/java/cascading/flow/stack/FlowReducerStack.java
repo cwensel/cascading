@@ -23,7 +23,6 @@ package cascading.flow.stack;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,6 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.operation.Operation;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
@@ -64,8 +62,6 @@ public class FlowReducerStack
   private ReducerStackElement stackHead;
   /** Field stackTail */
   private ReducerStackElement stackTail;
-  /** Field allOperations */
-  private Collection<Operation> allOperations;
 
   public FlowReducerStack( HadoopFlowProcess flowProcess ) throws IOException
     {
@@ -75,10 +71,7 @@ public class FlowReducerStack
 
     buildStack();
 
-    allOperations = step.getAllOperations();
-
-    for( Operation operation : allOperations )
-      operation.prepare( flowProcess );
+    stackTail.open();
     }
 
   private void buildStack() throws IOException
@@ -179,8 +172,5 @@ public class FlowReducerStack
   public void close() throws IOException
     {
     stackTail.close();
-
-    for( Operation operation : allOperations )
-      operation.cleanup( flowProcess );
     }
   }

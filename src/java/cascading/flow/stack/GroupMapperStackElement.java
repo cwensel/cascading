@@ -83,4 +83,14 @@ class GroupMapperStackElement extends MapperStackElement
       throw new FlowException( "internal error", throwable );
       }
     }
+
+  public void prepare()
+    {
+    // do nothing, groups don't count
+    }
+
+  public void cleanup()
+    {
+    // do nothing, groups don't count
+    }
   }

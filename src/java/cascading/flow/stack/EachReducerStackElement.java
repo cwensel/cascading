@@ -63,6 +63,16 @@ class EachReducerStackElement extends ReducerStackElement
       }
     }
 
+  public void prepare()
+    {
+    eachHandler.prepare( flowProcess );
+    }
+
+  public void cleanup()
+    {
+    eachHandler.cleanup( flowProcess );
+    }
+
   public void collect( Tuple key, Iterator values )
     {
     operateEach( key, values );

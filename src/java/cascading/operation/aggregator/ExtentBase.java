@@ -34,7 +34,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /** Class ExtentBase is the base class for First and Last. */
-public abstract class ExtentBase extends BaseOperation implements Aggregator<Tuple[]>
+public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggregator<Tuple[]>
   {
   /** Field ignoreTuples */
   private final Collection<Tuple> ignoreTuples;

@@ -24,8 +24,8 @@ package cascading.operation.assertion;
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
+import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
-import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -47,7 +47,7 @@ public class GroupAssertionsTest extends CascadingTestCase
 
   private void assertFail( GroupAssertion assertion, TupleEntry groupEntry, TupleEntry... values )
     {
-    OperationCall operationCall = new OperationCall();
+    ConcreteCall operationCall = new ConcreteCall();
 
     operationCall.setGroup( groupEntry );
 
@@ -74,7 +74,7 @@ public class GroupAssertionsTest extends CascadingTestCase
 
   private void assertPass( GroupAssertion assertion, TupleEntry groupEntry, TupleEntry... values )
     {
-    OperationCall operationCall = new OperationCall();
+    ConcreteCall operationCall = new ConcreteCall();
 
     operationCall.setGroup( groupEntry );
 

@@ -32,7 +32,7 @@ import cascading.operation.BaseOperation;
  * @see cascading.operation.GroupAssertion
  * @see cascading.operation.ValueAssertion
  */
-public abstract class BaseAssertion extends BaseOperation
+public abstract class BaseAssertion<C> extends BaseOperation<C>
   {
   /** Field message */
   private String message;

@@ -23,7 +23,7 @@ package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
-import cascading.operation.OperationCall;
+import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -34,7 +34,7 @@ public class AverageTest extends CascadingTestCase
   {
   /** class under test */
   private Average average;
-  private OperationCall operationCall;
+  private ConcreteCall operationCall;
 
   public AverageTest()
     {
@@ -44,7 +44,7 @@ public class AverageTest extends CascadingTestCase
   public void setUp() throws Exception
     {
     average = new Average();
-    operationCall = new OperationCall();
+    operationCall = new ConcreteCall();
     }
 
   public void tearDown() throws Exception

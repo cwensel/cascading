@@ -75,4 +75,14 @@ class GroupReducerStackElement extends ReducerStackElement
 
     next.collect( key, values );
     }
+
+  public void prepare()
+    {
+    // do nothing, groups don't count
+    }
+
+  public void cleanup()
+    {
+    // do nothing, groups don't count
+    }
   }

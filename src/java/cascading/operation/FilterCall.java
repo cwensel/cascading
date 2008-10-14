@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.tuple.TupleEntry;
 
 /** Interface FilterCall provides access to the current {@link Filter} invocation arguments. */
-public interface FilterCall
+public interface FilterCall<C> extends OperationCall<C>
   {
   /**
    * Returns {@link TupleEntry} of argument values.

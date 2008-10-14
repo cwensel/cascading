@@ -25,6 +25,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
+import cascading.operation.OperationCall;
 
 /**
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
@@ -56,15 +57,15 @@ public class Not extends BaseOperation implements Filter
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess flowProcess, OperationCall operationCall )
     {
-    filter.prepare( flowProcess );
+    filter.prepare( flowProcess, operationCall );
     }
 
   @Override
-  public void cleanup( FlowProcess flowProcess )
+  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
     {
-    filter.cleanup( flowProcess );
+    filter.cleanup( flowProcess, operationCall );
     }
 
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */

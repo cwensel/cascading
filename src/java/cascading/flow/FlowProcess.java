@@ -30,7 +30,7 @@ package cascading.flow;
  * Thus, a call to {@link #increment(Enum, int)} may start incrementing from zero if the operation making the call
  * belongs to a subsquent 'job' or 'step' from any previous operations calling increment.
  */
-public abstract class FlowProcess<PC>
+public abstract class FlowProcess
   {
   /** Field NULL is a noop implemenation of FlowSession. */
   public static FlowProcess NULL = new FlowProcess( FlowSession.NULL )
@@ -52,8 +52,6 @@ public abstract class FlowProcess<PC>
 
   /** Field currentSession */
   private FlowSession currentSession;
-
-  private PC context;
 
   protected FlowProcess()
     {
@@ -84,16 +82,6 @@ public abstract class FlowProcess<PC>
     this.currentSession = currentSession;
 
     currentSession.setCurrentProcess( this );
-    }
-
-  public PC getContext()
-    {
-    return context;
-    }
-
-  public void setContext( PC context )
-    {
-    this.context = context;
     }
 
   /**

@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 /**
  *
  */
-public abstract class AssertGroupBase extends BaseAssertion implements GroupAssertion<AssertGroupBase.Context>
+public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Context> implements GroupAssertion<AssertGroupBase.Context>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( AssertGroupBase.class );

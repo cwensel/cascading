@@ -21,98 +21,23 @@
 
 package cascading.operation;
 
-import java.util.Iterator;
-
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
-
 /**
- * Class OperationCall is the common base class for {@link FunctionCall}, {@link FilterCall},
- * {@link AggregatorCall}, {@link ValueAssertionCall}, and {@link GroupAssertionCall}.
+ *
  */
-public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCall<C>, BufferCall, ValueAssertionCall, GroupAssertionCall<C>
+public interface OperationCall<C>
   {
-  /** Field context */
-  private C context;
-  /** Field group */
-  private TupleEntry group;
-  /** Field arguments */
-  private TupleEntry arguments;
-  /** Field argumentsIterator */
-  private Iterator<TupleEntry> argumentsIterator;
-  /** Field outputCollector */
-  private TupleCollector outputCollector;
-
-  /** Constructor OperationCall creates a new OperationCall instance. */
-  public OperationCall()
-    {
-    }
+  /**
+   * Returns the user set context object, C.
+   *
+   * @return user defined object
+   */
+  C getContext();
 
   /**
-   * Constructor OperationCall creates a new OperationCall instance.
+   * Sets the 'context' object.
    *
-   * @param arguments       of type TupleEntry
-   * @param outputCollector of type TupleCollector
+   * @param context user defined object
    */
-  public OperationCall( TupleEntry arguments, TupleCollector outputCollector )
-    {
-    this.arguments = arguments;
-    this.outputCollector = outputCollector;
-    }
-
-  /** @see AggregatorCall#getContext() */
-  public C getContext()
-    {
-    return context;
-    }
-
-  public void setContext( C context )
-    {
-    this.context = context;
-    }
-
-  /** @see AggregatorCall#getGroup() */
-  public TupleEntry getGroup()
-    {
-    return group;
-    }
-
-  public void setGroup( TupleEntry group )
-    {
-    this.group = group;
-    }
-
-  /** @see BufferCall#getArgumentsIterator() */
-  public Iterator<TupleEntry> getArgumentsIterator()
-    {
-    return argumentsIterator;
-    }
-
-  public void setArgumentsIterator( Iterator<TupleEntry> argumentsIterator )
-    {
-    this.argumentsIterator = argumentsIterator;
-    }
-
-  /** @see FunctionCall#getArguments() */
-  public TupleEntry getArguments()
-    {
-    return arguments;
-    }
-
-  public void setArguments( TupleEntry arguments )
-    {
-    this.arguments = arguments;
-    }
-
-  /** @see FunctionCall#getOutputCollector() */
-  public TupleCollector getOutputCollector()
-    {
-    return outputCollector;
-    }
-
-  public void setOutputCollector( TupleCollector outputCollector )
-    {
-    this.outputCollector = outputCollector;
-    }
+  void setContext( C context );
 
   }

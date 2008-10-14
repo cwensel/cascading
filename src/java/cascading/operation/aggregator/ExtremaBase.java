@@ -37,7 +37,7 @@ import cascading.tuple.TupleEntry;
  * Class ExtremaBase is the base class for Max and Min. The unique thing about Max and Min are that they return the original,
  * un-coerced, argument value, though a coerced version of the argument is used for the comparison.
  */
-public abstract class ExtremaBase extends BaseOperation implements Aggregator<ExtremaBase.Context>
+public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> implements Aggregator<ExtremaBase.Context>
   {
   /** Field ignoreValues */
   protected final Collection ignoreValues;

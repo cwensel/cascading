@@ -28,6 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
@@ -107,7 +108,7 @@ public abstract class Logic extends BaseOperation implements Filter
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess flowProcess, OperationCall operationCall )
     {
     Object[] contexts = new Object[filters.length];
 
@@ -115,28 +116,28 @@ public abstract class Logic extends BaseOperation implements Filter
       {
       Filter filter = filters[ i ];
 
-      filter.prepare( flowProcess );
+      filter.prepare( flowProcess, operationCall );
 
-      contexts[ i ] = flowProcess.getContext();
+      contexts[ i ] = operationCall.getContext();
 
-      flowProcess.setContext( null );
+      operationCall.setContext( null );
       }
 
-    flowProcess.setContext( contexts );
+    operationCall.setContext( contexts );
     }
 
   @Override
-  public void cleanup( FlowProcess flowProcess )
+  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
     {
-    Object[] contexts = (Object[]) flowProcess.getContext();
+    Object[] contexts = (Object[]) operationCall.getContext();
 
     for( int i = 0; i < filters.length; i++ )
       {
       Filter filter = filters[ i ];
 
-      flowProcess.setContext( contexts[ i ] );
+      operationCall.setContext( contexts[ i ] );
 
-      filter.prepare( flowProcess );
+      filter.cleanup( flowProcess, operationCall );
       }
     }
 

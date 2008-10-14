@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
  *
  * @see Aggregator
  */
-public interface GroupAssertion<C> extends Assertion
+public interface GroupAssertion<C> extends Assertion<C>
   {
   /**
    * Method start initializes the aggregation procedure and is called for every unique grouping.

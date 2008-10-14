@@ -30,7 +30,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
-public class Average extends BaseOperation implements Aggregator<Average.Context>
+public class Average extends BaseOperation<Average.Context> implements Aggregator<Average.Context>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "average";

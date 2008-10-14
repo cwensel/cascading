@@ -24,9 +24,9 @@ package cascading.operation.filter;
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
+import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
-import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -36,7 +36,7 @@ import cascading.tuple.TupleEntry;
  */
 public class FilterTest extends CascadingTestCase
   {
-  private OperationCall operationCall;
+  private ConcreteCall operationCall;
 
   public FilterTest()
     {
@@ -47,7 +47,7 @@ public class FilterTest extends CascadingTestCase
   protected void setUp() throws Exception
     {
     super.setUp();
-    operationCall = new OperationCall();
+    operationCall = new ConcreteCall();
     }
 
   private TupleEntry getEntry( Tuple tuple )

@@ -33,7 +33,7 @@ import cascading.tuple.Tuple;
  * </p>
  * Note the resulting value for count is always a long. So any comparisons should be against a long value.
  */
-public class Count extends BaseOperation implements Aggregator<Long[]>
+public class Count extends BaseOperation<Long[]> implements Aggregator<Long[]>
   {
   /** Field COUNT */
   public static final String FIELD_NAME = "count";

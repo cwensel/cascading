@@ -41,7 +41,7 @@ import cascading.flow.FlowProcess;
  * unique vm, or by a single thread. Also, note the Iterator will return the same {@link cascading.tuple.TupleEntry}
  * instance, but with new values in its child {@link cascading.tuple.Tuple}.
  */
-public interface Buffer extends Operation
+public interface Buffer<C> extends Operation<C>
   {
   /**
    * Method operate is called once for each grouping. {@link BufferCall} passes in an {@link java.util.Iterator}
@@ -54,5 +54,5 @@ public interface Buffer extends Operation
    * @param flowProcess of type FlowProcess
    * @param bufferCall  of type BufferCall
    */
-  void operate( FlowProcess flowProcess, BufferCall bufferCall );
+  void operate( FlowProcess flowProcess, BufferCall<C> bufferCall );
   }

@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -98,13 +99,13 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     }
 
   @Override
-  public void prepare( FlowProcess<Matcher> flowProcess )
+  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
     {
-    flowProcess.setContext( getPattern().matcher( "" ) );
+    operationCall.setContext( getPattern().matcher( "" ) );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess<Matcher> flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
@@ -113,7 +114,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
 
     Tuple output = new Tuple();
 
-    Matcher matcher = flowProcess.getContext().reset( value );
+    Matcher matcher = functionCall.getContext().reset( value );
 
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );

@@ -66,11 +66,11 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion<Matche
     }
 
   /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
-  public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
+  public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Matcher> assertionCall )
     {
     Tuple tuple = assertionCall.getArguments().getTuple();
 
-    if( matchWholeTuple( flowProcess, tuple ) )
+    if( matchWholeTuple( assertionCall.getContext(), tuple ) )
       BaseAssertion.throwFail( message, tuple.print(), patternString );
     }
   }

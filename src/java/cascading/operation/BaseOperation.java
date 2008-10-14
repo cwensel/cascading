@@ -37,13 +37,13 @@ import cascading.tuple.Tuple;
  * </p>
  * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, and {@link Assertion}.
  */
-public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
+public abstract class BaseOperation<C> implements Serializable, Operation<C>
   {
 
   /** Field fieldDeclaration */
   protected Fields fieldDeclaration;
   /** Field numArgs */
-  protected int numArgs = ANY;
+  protected int numArgs = Operation.ANY;
 
   // initialize this operation based on its subclass
   {
@@ -113,22 +113,14 @@ public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
       throw new IllegalArgumentException( "numArgs may not be negative" );
     }
 
-  /**
-   * Method prepare does nothing, and may safely be overridden.
-   *
-   * @see Operation#prepare(cascading.flow.FlowProcess)
-   */
-  public void prepare( FlowProcess<PC> flowProcess )
+  /** Method prepare does nothing, and may safely be overridden. */
+  public void prepare( FlowProcess flowProcess, OperationCall<C> operationCall )
     {
     // do nothing
     }
 
-  /**
-   * Method cleanup does nothing, and may safely be overridden.
-   *
-   * @see Operation#cleanup(cascading.flow.FlowProcess)
-   */
-  public void cleanup( FlowProcess<PC> flowProcess )
+  /** Method cleanup does nothing, and may safely be overridden. */
+  public void cleanup( FlowProcess flowProcess, OperationCall<C> operationCall )
     {
     // do nothing
     }
@@ -148,7 +140,7 @@ public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
   @Override
   public String toString()
     {
-    return toStringInternal( this );
+    return toStringInternal( (Operation) this );
     }
 
   public static String toStringInternal( Operation operation )
@@ -164,7 +156,7 @@ public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
     if( operation.getFieldDeclaration() != null )
       buffer.append( "[decl:" ).append( operation.getFieldDeclaration() ).append( "]" );
 
-    if( operation.getNumArgs() != ANY )
+    if( operation.getNumArgs() != Operation.ANY )
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
 
     return buffer.toString();
@@ -182,7 +174,7 @@ public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
     if( scope.getDeclaredFields() != null )
       buffer.append( "[decl:" ).append( scope.getDeclaredFields() ).append( "]" );
 
-    if( operation.getNumArgs() != ANY )
+    if( operation.getNumArgs() != Operation.ANY )
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
     }
 

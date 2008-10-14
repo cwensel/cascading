@@ -83,12 +83,12 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
     }
 
   /** @see Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
+  public boolean isRemove( FlowProcess flowProcess, FilterCall<Matcher> filterCall )
     {
     if( matchEachElement )
-      return matchEachElement( flowProcess, filterCall.getArguments().getTuple() );
+      return matchEachElement( filterCall.getContext(), filterCall.getArguments().getTuple() );
     else
-      return matchWholeTuple( flowProcess, filterCall.getArguments().getTuple() );
+      return matchWholeTuple( filterCall.getContext(), filterCall.getArguments().getTuple() );
     }
 
   }

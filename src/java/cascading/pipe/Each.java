@@ -29,11 +29,11 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
+import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
-import cascading.operation.OperationCall;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -289,7 +289,7 @@ public class Each extends Operator
     return operation instanceof Filter;
     }
 
-  private void applyAssertion( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, OperationCall operationCall )
+  private void applyAssertion( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, ConcreteCall operationCall )
     {
     getValueAssertion().doAssert( flowProcess, operationCall );
 
@@ -380,13 +380,13 @@ public class Each extends Operator
     {
     FlowCollector flowCollector;
     final Scope scope;
-    protected OperationCall operationCall;
+    protected ConcreteCall operationCall;
 
     protected EachHandler( FlowCollector flowCollector, Scope scope )
       {
       this.flowCollector = flowCollector;
       this.scope = scope;
-      operationCall = new OperationCall();
+      operationCall = new ConcreteCall();
       }
 
     public void operate( FlowProcess flowProcess, TupleEntry input )
@@ -407,6 +407,16 @@ public class Each extends Operator
     public FlowElement getEach()
       {
       return Each.this;
+      }
+
+    public void prepare( FlowProcess flowProcess )
+      {
+      getOperation().prepare( flowProcess, operationCall );
+      }
+
+    public void cleanup( FlowProcess flowProcess )
+      {
+      getOperation().cleanup( flowProcess, operationCall );
       }
     }
 

@@ -24,6 +24,7 @@ package cascading.operation.regex;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.OperationCall;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -55,20 +56,20 @@ public class RegexMatcher extends RegexOperation<Matcher>
     }
 
   @Override
-  public void prepare( FlowProcess<Matcher> flowProcess )
+  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
     {
-    flowProcess.setContext( getPattern().matcher( "" ) );
+    operationCall.setContext( getPattern().matcher( "" ) );
     }
 
   /**
    * Method matchWholeTuple ...
    *
-   * @param flowProcess
-   * @param input       of type Tuple @return boolean
+   * @param matcher
+   * @param input   of type Tuple @return boolean
    */
-  protected boolean matchWholeTuple( FlowProcess<Matcher> flowProcess, Tuple input )
+  protected boolean matchWholeTuple( Matcher matcher, Tuple input )
     {
-    Matcher matcher = flowProcess.getContext().reset( input.toString( "\t" ) );
+    matcher.reset( input.toString( "\t" ) );
 
     boolean matchFound = matcher.find();
 
@@ -81,15 +82,15 @@ public class RegexMatcher extends RegexOperation<Matcher>
   /**
    * Method matchEachElement ...
    *
-   * @param flowProcess
-   * @param input       of type Tuple @return boolean
+   * @param matcher
+   * @param input   of type Tuple @return boolean
    */
-  protected boolean matchEachElement( FlowProcess<Matcher> flowProcess, Tuple input )
+  protected boolean matchEachElement( Matcher matcher, Tuple input )
     {
-    return matchEachElementPos( flowProcess, input ) != -1;
+    return matchEachElementPos( matcher, input ) != -1;
     }
 
-  protected int matchEachElementPos( FlowProcess<Matcher> flowProcess, Tuple input )
+  protected int matchEachElementPos( Matcher matcher, Tuple input )
     {
     int pos = 0;
     for( Object value : input )
@@ -97,7 +98,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
       if( value == null )
         value = "";
 
-      Matcher matcher = flowProcess.getContext().reset( value.toString() );
+      matcher.reset( value.toString() );
 
       boolean matchFound = matcher.find();
 

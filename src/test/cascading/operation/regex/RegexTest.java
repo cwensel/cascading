@@ -24,7 +24,7 @@ package cascading.operation.regex;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
-import cascading.operation.OperationCall;
+import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -35,7 +35,7 @@ import cascading.tuple.TupleListCollector;
  */
 public class RegexTest extends CascadingTestCase
   {
-  private OperationCall operationCall;
+  private ConcreteCall operationCall;
 
   public RegexTest()
     {
@@ -46,7 +46,7 @@ public class RegexTest extends CascadingTestCase
   protected void setUp() throws Exception
     {
     super.setUp();
-    operationCall = new OperationCall();
+    operationCall = new ConcreteCall();
     }
 
   public void testSplitter()
@@ -57,7 +57,9 @@ public class RegexTest extends CascadingTestCase
 
     operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
     operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
     splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -75,10 +77,11 @@ public class RegexTest extends CascadingTestCase
 
     RegexSplitGenerator splitter = new RegexSplitGenerator( new Fields( "word" ), "\\s+" );
 
-
     operationCall.setArguments( new TupleEntry( new Tuple( "foo\t  bar" ) ) );
     operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
     splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
 
     assertEquals( "wrong size", 2, collector.size() );
 
@@ -97,7 +100,9 @@ public class RegexTest extends CascadingTestCase
 
     operationCall.setArguments( new TupleEntry( new Tuple( "foo\t bar" ) ) );
     operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
     splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -116,7 +121,9 @@ public class RegexTest extends CascadingTestCase
 
     operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
     operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
     splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 

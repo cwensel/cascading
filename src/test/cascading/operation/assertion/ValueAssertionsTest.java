@@ -24,7 +24,7 @@ package cascading.operation.assertion;
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
-import cascading.operation.OperationCall;
+import cascading.operation.ConcreteCall;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -58,9 +58,9 @@ public class ValueAssertionsTest extends CascadingTestCase
       }
     }
 
-  private OperationCall getOperationCall( TupleEntry tupleEntry )
+  private ConcreteCall getOperationCall( TupleEntry tupleEntry )
     {
-    OperationCall operationCall = new OperationCall();
+    ConcreteCall operationCall = new ConcreteCall();
     operationCall.setArguments( tupleEntry );
     return operationCall;
     }
