@@ -38,7 +38,7 @@ public interface GroupAssertion<C> extends Assertion<C>
    * <p/>
    * The AggregatorCall context should be initialized here if necessary.
    * <p/>
-   * The first time this method is called for a given 'session', the AggregatorCall context will be null. This method should
+   * The first time this method is called for a given 'process', the AggregatorCall context will be null. This method should
    * set a new instance of the user defined context object. When the AggregatorCall context is not null, it is up to
    * the developer to create a new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to
    * remove any previous state/values.

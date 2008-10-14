@@ -23,28 +23,18 @@ package cascading.operation;
 
 import cascading.tuple.TupleEntry;
 
-/** Interface GroupAssertionCall provides access to the current {@link GroupAssertion} invocation arguments. */
+/**
+ * Interface GroupAssertionCall provides access to the current {@link GroupAssertion} invocation arguments.
+ * <p/>
+ * This interface is generic, allowing the user to set a custom 'context' object when {@link GroupAssertion#start(cascading.flow.FlowProcess, GroupAssertionCall)}
+ * is called. The {@link OperationCall#setContext(Object)} and {@link OperationCall#getContext()} methods are
+ * inherited from {@link OperationCall}.
+ *
+ * @see GroupAssertion
+ * @see OperationCall
+ */
 public interface GroupAssertionCall<C> extends OperationCall<C>
   {
-  /**
-   * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called
-   * during {@link GroupAssertion#start(cascading.flow.FlowProcess, GroupAssertionCall)}.
-   *
-   * @return user defined object
-   */
-  C getContext();
-
-  /**
-   * Sets the 'context' object used by code in {@link GroupAssertion#aggregate(cascading.flow.FlowProcess, GroupAssertionCall)}.
-   * <p/>
-   * This method should only be called in the {@link GroupAssertion#start(cascading.flow.FlowProcess, GroupAssertionCall)}
-   * method. Further, if {@link #getContext()} does not return null, consider 'resetting' the current instance. For
-   * example, if the 'context' is a Map or Set, call the clear() method instead of creating a new Map instance.
-   *
-   * @param context user defined object
-   */
-  void setContext( C context );
-
   /**
    * Returns the current grouping {@link TupleEntry}.
    *

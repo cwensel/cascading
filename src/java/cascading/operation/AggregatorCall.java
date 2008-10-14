@@ -28,29 +28,14 @@ import cascading.tuple.TupleEntry;
  * Interface AggregatorCall provides access to the current {@link Aggregator} invocation arguments.
  * <p/>
  * This interface is generic, allowing the user to set a custom 'context' object when {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall)}
- * is called.
+ * is called. The {@link OperationCall#setContext(Object)} and {@link OperationCall#getContext()} methods are
+ * inherited from {@link OperationCall}.
+ *
+ * @see Aggregator
+ * @see OperationCall
  */
 public interface AggregatorCall<C> extends OperationCall<C>
   {
-  /**
-   * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called
-   * during {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall}.
-   *
-   * @return user defined object
-   */
-  C getContext();
-
-  /**
-   * Sets the 'context' object used by code in {@link Aggregator#aggregate(cascading.flow.FlowProcess, AggregatorCall)}.
-   * <p/>
-   * This method should only be called in the {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall)}
-   * method. Further, if {@link #getContext()} does not return null, consider 'resetting' the current instance. For
-   * example, if the 'context' is a Map or Set, call the clear() method instead of creating a new Map instance.
-   *
-   * @param context user defined object
-   */
-  void setContext( C context );
-
   /**
    * Returns the current grouping {@link TupleEntry}.
    *

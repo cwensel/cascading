@@ -30,13 +30,14 @@ import cascading.tuple.TupleEntry;
  * {@link cascading.operation.aggregator.Count}, and {@link cascading.operation.aggregator.Average} are good examples.
  * <p/>
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
- * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowProcess, AggregatorCall}
+ * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowProcess, AggregatorCall)}
  * method provides a mechanism for maintaining a 'context' object to hold intermedite values.
  * <p/>
  * Note {@link TupleEntry} instances are reused internally so should not be stored. Instead use the TupleEntry or Tuple
  * copy constructors to make safe copies.
  *
  * @see AggregatorCall
+ * @see OperationCall
  */
 public interface Aggregator<C> extends Operation<C>
   {
@@ -45,7 +46,7 @@ public interface Aggregator<C> extends Operation<C>
    * <p/>
    * The AggregatorCall context should be initialized here if necessary.
    * <p/>
-   * The first time this method is called for a given 'session', the AggregatorCall context will be null. This method should
+   * The first time this method is called for a given 'process', the AggregatorCall context will be null. This method should
    * set a new instance of the user defined context object. When the AggregatorCall context is not null, it is up to
    * the developer to create a new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to
    * remove any previous state/values.

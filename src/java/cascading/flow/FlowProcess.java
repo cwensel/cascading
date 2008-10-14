@@ -23,12 +23,17 @@ package cascading.flow;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
- * {@link cascading.operation.Operation} is given a reference to a particluar implemenation, allowing them
+ * {@link cascading.operation.Operation} is given a reference to a particluar implemenation, allowing it
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>
  * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link cascading.flow.Flow}.
  * Thus, a call to {@link #increment(Enum, int)} may start incrementing from zero if the operation making the call
  * belongs to a subsquent 'job' or 'step' from any previous operations calling increment.
+ * <p/>
+ * A FlowProcess is roughly a child of {@link FlowSession}. FlowSession is roughly one to one with a particular {@link Flow}.
+ * And every FlowSession will have one or more FlowProcesses.
+ *
+ * @see FlowSession
  */
 public abstract class FlowProcess
   {
