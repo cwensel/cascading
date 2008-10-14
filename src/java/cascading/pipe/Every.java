@@ -434,8 +434,14 @@ public class Every extends Operator
 
     public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, final TupleEntryIterator tupleEntryIterator )
       {
-      tupleCollector.value = tupleEntryIterator.getTupleEntry();
-      tupleCollector.value.setTuple( Tuple.size( tupleCollector.value.getFields().size() ) );
+      // we want to null out any 'values' before and after the iterator begins/ends
+      // this allows buffers to emit tuples before next() and when hasNext() return false;
+      final TupleEntry tupleEntry = tupleEntryIterator.getTupleEntry();
+      final Tuple emptyTuple = Tuple.size( tupleEntry.getFields().size() );
+      tupleEntry.setTuple( emptyTuple );
+      tupleEntry.set( groupEntry );
+
+      tupleCollector.value = tupleEntry; // null out header entries
 
       operationCall.setOutputCollector( tupleCollector );
       operationCall.setGroup( groupEntry );
@@ -444,7 +450,12 @@ public class Every extends Operator
       {
       public boolean hasNext()
         {
-        return tupleEntryIterator.hasNext();
+        boolean hasNext = tupleEntryIterator.hasNext();
+
+        if( !hasNext )
+          tupleEntry.setTuple( emptyTuple ); // null out footer entries
+
+        return hasNext;
         }
 
       public TupleEntry next()

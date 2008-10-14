@@ -36,12 +36,17 @@ public interface BufferCall
    */
   TupleEntry getGroup();
 
-  /** @return  */
+  /**
+   * Returns an {@link Iterator} of {@link TupleEntry} instances representing the arguments for the called
+   * {@link Buffer#operate(cascading.flow.FlowSession, BufferCall)} method.
+   *
+   * @return Iterator<TupleEntry>
+   */
   Iterator<TupleEntry> getArgumentsIterator();
 
 
   /**
-   * Returns the {@link cascading.tuple.TupleCollector} used to emit result values.
+   * Returns the {@link cascading.tuple.TupleCollector} used to emit result values. Zero or more entries may be emitted.
    *
    * @return TupleCollector
    */

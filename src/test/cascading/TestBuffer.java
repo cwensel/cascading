@@ -36,7 +36,17 @@ public class TestBuffer extends BaseOperation implements Buffer
   {
   private int exepectedSize = -1;
   private boolean insertHeader;
+  private boolean insertFooter;
   private String value;
+
+  public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, boolean insertFooter, String value )
+    {
+    super( fieldDeclaration );
+    this.exepectedSize = exepectedSize;
+    this.insertHeader = insertHeader;
+    this.insertFooter = insertFooter;
+    this.value = value;
+    }
 
   public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, String value )
     {
@@ -73,5 +83,9 @@ public class TestBuffer extends BaseOperation implements Buffer
 
       bufferCall.getOutputCollector().add( new Tuple( value ) );
       }
+
+    if( insertFooter )
+      bufferCall.getOutputCollector().add( new Tuple( value ) );
+
     }
   }

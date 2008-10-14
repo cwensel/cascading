@@ -60,6 +60,8 @@ public interface AggregatorCall<C>
 
   /**
    * Returns {@link TupleEntry} of argument values.
+   * <p/>
+   * Will return {@code null} unless called in {@link Aggregator#aggregate(cascading.flow.FlowSession, AggregatorCall)}.
    *
    * @return TupleEntry
    */
@@ -68,7 +70,7 @@ public interface AggregatorCall<C>
   /**
    * Returns the {@link TupleCollector} used to emit result values.
    * <p/>
-   * Note this value return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowSession, AggregatorCall)}.
+   * Will return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowSession, AggregatorCall)}.
    *
    * @return TupleCollector
    */

@@ -132,6 +132,17 @@ public class TupleEntry
     }
 
   /**
+   * Constructor TupleEntry creates a new TupleEntry instance that is a safe copy of the given tupleEntry.
+   *
+   * @param tupleEntry of type TupleEntry
+   */
+  public TupleEntry( TupleEntry tupleEntry )
+    {
+    this.fields = tupleEntry.fields;
+    this.tuple = new Tuple( tupleEntry.getTuple() );
+    }
+
+  /**
    * Constructor TupleEntry creates a new TupleEntry instance.
    *
    * @param tuple of type Tuple
@@ -384,6 +395,24 @@ public class TupleEntry
     catch( Exception exception )
       {
       throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  /**
+   * Method set sets the values from the given tupleEntry into this TupleEntry instance based on the given
+   * tupleEntry field names.
+   *
+   * @param tupleEntry of type TupleEntry
+   */
+  public void set( TupleEntry tupleEntry )
+    {
+    try
+      {
+      this.tuple.set( fields, tupleEntry.getFields(), tupleEntry.getTuple() );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + tupleEntry.getFields().print(), exception );
       }
     }
 

@@ -78,7 +78,7 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new GroupBy( pipe, new Fields( "num" ) );
 
-    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), 2, true, "next" ) );
+    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), 2, true, true, "next" ) );
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 
@@ -88,16 +88,15 @@ public class BufferPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 18, null );
+    validateLength( flow, 23, null );
 
     TupleIterator iterator = flow.openSink();
 
-    Comparable line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "null\tnull\tnext\tfinal", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "1\tb\tnext\tfinal", line );
+    assertEquals( "not equal: tuple.get(1)", "1\tnull\tnext\tfinal", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\tb\tnext\tfinal", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\tc\tnext\tfinal", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\tnull\tnext\tfinal", iterator.next().get( 1 ) );
 
     iterator.close();
     }
