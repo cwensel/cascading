@@ -24,28 +24,27 @@ package cascading.operation;
 import cascading.flow.FlowSession;
 
 /**
- * An Aggregator takes the set of all values associated with a grouping and returns
- * zero or more values. {@link cascading.operation.aggregator.Max}, {@link cascading.operation.aggregator.Min},
- * {@link cascading.operation.aggregator.Count}, and {@link cascading.operation.aggregator.Average} are good examples.
+ * A Buffer takes the set of all values associated with a grouping and returns
+ * zero or more values.
  * <p/>
- * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
- * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowSession, cascading.operation.AggregatorCall)}
+ * Buffer implementations should be reentrant. There is no guarantee an Buffer instance will be executed in a
+ * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowSession, BufferCall)}
  * method provides a mechanism for maintaining a 'context' object to hold intermedite values.
  */
-public interface Reducer<C> extends Operation
+public interface Buffer<C> extends Operation
   {
   /**
-   * Method start initializes the aggregation procedure and is called for every unique grouping.
+   * Method start initializes the buffering procedure and is called for every unique grouping.
    * <p/>
    * The context is used to hold intermediate values is is user defined. The context should be initialized here if necessary.
    * <p/>
-   * This method will be called before {@link #aggregate(cascading.flow.FlowSession, cascading.operation.AggregatorCall)}
-   * and {@link #complete(cascading.flow.FlowSession, cascading.operation.AggregatorCall)}
+   * This method will be called before {@link #operate(cascading.flow.FlowSession, BufferCall)}
+   * and {@link #complete(cascading.flow.FlowSession, BufferCall)}
    * <p/>
    * TupleEntry groupEntry, or groupEntry.getTuple() should not be stored directly in the context. A copy of the tuple
    * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor if the whole Tuple is kept.
    * <p/>
-   * The first time this method is called for a given 'session', context will be null. This method should return a
+   * The first time this method is called for a given 'session', context will be null. This method should set a
    * new instance of the user defined context object. If context is not null, it is up to the developer to create a
    * new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to remove any
    * previous state/values.
@@ -59,7 +58,7 @@ public interface Reducer<C> extends Operation
    * @param flowSession    of type FlowSession is the current session
    * @param aggregatorCall
    */
-  void start( FlowSession flowSession, ReducerCall<C> reducerCall );
+  void start( FlowSession flowSession, BufferCall<C> bufferCall );
 
   /**
    * Method operate is called for each {@link cascading.tuple.TupleEntry} value in the current grouping.
@@ -70,7 +69,7 @@ public interface Reducer<C> extends Operation
    * @param flowSession    of type FlowSession is the current session
    * @param aggregatorCall
    */
-  void operate( FlowSession flowSession, ReducerCall<C> reducerCall );
+  void operate( FlowSession flowSession, BufferCall<C> bufferCall );
 
   /**
    * Method complete will be issued last after every {@link cascading.tuple.TupleEntry} has been passed to the
@@ -81,5 +80,5 @@ public interface Reducer<C> extends Operation
    * @param flowSession    of type FlowSession is the current session
    * @param aggregatorCall
    */
-  void complete( FlowSession flowSession, ReducerCall<C> reducerCall );
+  void complete( FlowSession flowSession, BufferCall<C> bufferCall );
   }

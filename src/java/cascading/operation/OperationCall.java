@@ -28,7 +28,7 @@ import cascading.tuple.TupleEntry;
  * Class OperationCall is the common base class for {@link FunctionCall}, {@link FilterCall},
  * {@link AggregatorCall}, {@link ValueAssertionCall}, and {@link GroupAssertionCall}.
  */
-public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCall<C>, ReducerCall<C>, ValueAssertionCall, GroupAssertionCall<C>
+public class OperationCall<C> implements FunctionCall, FilterCall, AggregatorCall<C>, BufferCall<C>, ValueAssertionCall, GroupAssertionCall<C>
   {
   /** Field context */
   private C context;

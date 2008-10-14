@@ -27,9 +27,9 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
+import cascading.operation.Buffer;
+import cascading.operation.BufferCall;
 import cascading.operation.Insert;
-import cascading.operation.Reducer;
-import cascading.operation.ReducerCall;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -43,7 +43,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
-public class ReducerPipesTest extends ClusterTestCase
+public class BufferPipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
   String inputFileIps = "build/test/data/ips.20.txt";
@@ -62,35 +62,34 @@ public class ReducerPipesTest extends ClusterTestCase
 
   String outputPath = "build/test/output/reducer/";
 
-  public ReducerPipesTest()
+  public BufferPipesTest()
     {
     super( "reducer pipes", false );
     }
 
-
-  public static class TestReducer extends BaseOperation implements Reducer
+  public static class TestBuffer extends BaseOperation implements Buffer
     {
     private String value;
 
-    public TestReducer( Fields fieldDeclaration, String value )
+    public TestBuffer( Fields fieldDeclaration, String value )
       {
       super( fieldDeclaration );
       this.value = value;
       }
 
-    public void start( FlowSession flowSession, ReducerCall reducerCall )
+    public void start( FlowSession flowSession, BufferCall bufferCall )
       {
-
+      bufferCall.getOutputCollector().add( new Tuple( "start" ) );
       }
 
-    public void operate( FlowSession flowSession, ReducerCall reducerCall )
+    public void operate( FlowSession flowSession, BufferCall bufferCall )
       {
-      reducerCall.getOutputCollector().add( new Tuple( value ) );
+      bufferCall.getOutputCollector().add( new Tuple( value ) );
       }
 
-    public void complete( FlowSession flowSession, ReducerCall reducerCall )
+    public void complete( FlowSession flowSession, BufferCall bufferCall )
       {
-
+      bufferCall.getOutputCollector().add( new Tuple( "finish" ) );
       }
     }
 
@@ -110,7 +109,7 @@ public class ReducerPipesTest extends ClusterTestCase
 
     pipe = new GroupBy( pipe, new Fields( "num" ) );
 
-    pipe = new Every( pipe, new TestReducer( new Fields( "next" ), "next" ) );
+    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), "next" ) );
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 
@@ -131,5 +130,4 @@ public class ReducerPipesTest extends ClusterTestCase
 
     iterator.close();
     }
-
   }

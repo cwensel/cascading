@@ -27,23 +27,23 @@ import cascading.tuple.TupleEntry;
 /**
  * Interface AggregatorCall provides access to the current {@link cascading.operation.Aggregator} invocation arguments.
  * <p/>
- * This interface is generic, allowing the user to set a custom 'context' object when {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, ReducerCall)}
+ * This interface is generic, allowing the user to set a custom 'context' object when {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, BufferCall)}
  * is called.
  */
-public interface ReducerCall<C>
+public interface BufferCall<C>
   {
   /**
    * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called
-   * during {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, ReducerCall)}.
+   * during {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, BufferCall)}.
    *
    * @return user defined object
    */
   C getContext();
 
   /**
-   * Sets the 'context' object used by code in {@link cascading.operation.Aggregator#aggregate(cascading.flow.FlowSession, ReducerCall)}.
+   * Sets the 'context' object used by code in {@link cascading.operation.Aggregator#aggregate(cascading.flow.FlowSession, BufferCall)}.
    * <p/>
-   * This method should only be called in the {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, ReducerCall)}
+   * This method should only be called in the {@link cascading.operation.Aggregator#start(cascading.flow.FlowSession, BufferCall)}
    * method. Further, if {@link #getContext()} does not return null, consider 'resetting' the current instance. For
    * example, if the 'context' is a Map or Set, call the clear() method instead of creating a new Map instance.
    *
@@ -68,7 +68,7 @@ public interface ReducerCall<C>
   /**
    * Returns the {@link cascading.tuple.TupleCollector} used to emit result values.
    * <p/>
-   * Note this value return {@code null} unless called in {@link cascading.operation.Aggregator#complete(cascading.flow.FlowSession, ReducerCall)}.
+   * Note this value return {@code null} unless called in {@link cascading.operation.Aggregator#complete(cascading.flow.FlowSession, BufferCall)}.
    *
    * @return TupleCollector
    */

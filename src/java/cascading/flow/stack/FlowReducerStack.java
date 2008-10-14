@@ -82,14 +82,14 @@ public class FlowReducerStack
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
-    if( operator instanceof Every && !( (Every) operator ).isReducer() )
+    if( operator instanceof Every && !( (Every) operator ).isBuffer() )
       {
       List<Every.EveryHandler> allAggregators = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
       stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowSession, incomingScope, step.traps, allAggregators );
 
-      while( operator instanceof Every && !( (Every) operator ).isReducer() )
+      while( operator instanceof Every && !( (Every) operator ).isBuffer() )
         {
         nextScope = step.getNextScope( operator );
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
@@ -103,18 +103,17 @@ public class FlowReducerStack
         operator = step.getNextFlowElement( nextScope );
         }
       }
-
-    if( operator instanceof Every && ( (Every) operator ).isReducer() )
+    else if( operator instanceof Every && ( (Every) operator ).isBuffer() )
       {
       Scope incomingScope = nextScope;
 
-      while( operator instanceof Every && ( (Every) operator ).isReducer() )
+      while( operator instanceof Every && ( (Every) operator ).isBuffer() )
         {
         nextScope = step.getNextScope( operator );
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
 
         trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stackTail = new EveryReducerReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
+        stackTail = new EveryBufferReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );

@@ -35,11 +35,11 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-class EveryReducerReducerStackElement extends ReducerStackElement
+class EveryBufferReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
-  public EveryReducerReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
+  public EveryBufferReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
     {
     super( previous, flowSession, incomingScope, trap );
     this.everyHandler = everyHandler;

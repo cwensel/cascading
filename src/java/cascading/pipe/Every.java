@@ -28,9 +28,9 @@ import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
+import cascading.operation.Buffer;
 import cascading.operation.GroupAssertion;
 import cascading.operation.OperationCall;
-import cascading.operation.Reducer;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -107,7 +107,7 @@ public class Every extends Operator
    * @param previous of type Pipe
    * @param reducer  of type Reducer
    */
-  public Every( Pipe previous, Reducer reducer )
+  public Every( Pipe previous, Buffer reducer )
     {
     super( previous, AGGREGATOR_ARGUMENTS, reducer, AGGREGATOR_SELECTOR );
     }
@@ -119,7 +119,7 @@ public class Every extends Operator
    * @param argumentFieldSelector of type Fields
    * @param reducer               of type Reducer
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Reducer reducer )
+  public Every( Pipe previous, Fields argumentFieldSelector, Buffer reducer )
     {
     super( previous, argumentFieldSelector, reducer, AGGREGATOR_SELECTOR );
     }
@@ -132,7 +132,7 @@ public class Every extends Operator
    * @param reducer               of type Reducer
    * @param outFieldSelector      of type Fields
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Reducer reducer, Fields outFieldSelector )
+  public Every( Pipe previous, Fields argumentFieldSelector, Buffer reducer, Fields outFieldSelector )
     {
     super( previous, argumentFieldSelector, reducer, outFieldSelector );
     }
@@ -144,7 +144,7 @@ public class Every extends Operator
    * @param reducer          of type Reducer
    * @param outFieldSelector of type Fields
    */
-  public Every( Pipe previous, Reducer reducer, Fields outFieldSelector )
+  public Every( Pipe previous, Buffer reducer, Fields outFieldSelector )
     {
     super( previous, AGGREGATOR_ARGUMENTS, reducer, outFieldSelector );
     }
@@ -175,13 +175,13 @@ public class Every extends Operator
     }
 
   /**
-   * Method isReducer returns true if this Every instance holds a {@link Reducer} operation.
+   * Method isBuffer returns true if this Every instance holds a {@link cascading.operation.Buffer} operation.
    *
    * @return boolean
    */
-  public boolean isReducer()
+  public boolean isBuffer()
     {
-    return operation instanceof Reducer;
+    return operation instanceof Buffer;
     }
 
   /**
@@ -199,9 +199,9 @@ public class Every extends Operator
     return (Aggregator) operation;
     }
 
-  private Reducer getReducer()
+  private Buffer getReducer()
     {
-    return (Reducer) operation;
+    return (Buffer) operation;
     }
 
   private GroupAssertion getGroupAssertion()
@@ -224,7 +224,7 @@ public class Every extends Operator
     if( scope.isEach() || scope.isTap() )
       throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
 
-    if( isReducer() )
+    if( isBuffer() )
       return scope.getOutValuesFields();
     else
       return scope.getOutGroupingFields();
@@ -434,9 +434,7 @@ public class Every extends Operator
       {
       tupleCollector.value = inputEntry;
 
-      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
-
-      operationCall.setArguments( arguments );
+      operationCall.setArguments( outgoingScope.getArgumentsEntry( inputEntry ) );
 
       try
         {
