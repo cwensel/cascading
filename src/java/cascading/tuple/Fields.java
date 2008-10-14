@@ -340,6 +340,14 @@ public final class Fields implements Comparable, Iterable, Serializable
     return result;
     }
 
+  private static Fields asSelector( Fields fields )
+    {
+    if( !fields.isDefined() )
+      return UNKNOWN;
+
+    return fields;
+    }
+
   private Fields()
     {
     }
@@ -715,8 +723,9 @@ public final class Fields implements Comparable, Iterable, Serializable
       return this;
 
     // supports -1_UNKNOWN_RETURNED
+    // guarantees pos arguments remain selector positions, not absolute positions
     if( isUnknown() )
-      return asDeclaration( selector );
+      return asSelector( selector );
 
     Fields result = size( selector.size() );
 

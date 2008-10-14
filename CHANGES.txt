@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where selecting postions from a c.t.Fields.UNKNOWN declaration would return the first position, not
+  the specified position.
+
   Renamed c.t.Fields.KEYS to c.t.Fields.GROUP to be consistent with the Cascading model.
 
   Fixed bug where c.t.Tap may inappropriately delete a sink from a task.
