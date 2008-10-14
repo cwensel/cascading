@@ -21,12 +21,12 @@
 
 package cascading.operation.text;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class FieldJoiner joins the values in a Tuple with a given delimiter and stuffs the result into a new field. */
 public class FieldJoiner extends BaseOperation implements Function
@@ -80,9 +80,9 @@ public class FieldJoiner extends BaseOperation implements Function
     return delimiter;
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    outputCollector.add( new Tuple( input.getTuple().toString( delimiter ) ) );
+    functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().toString( delimiter ) ) );
     }
   }

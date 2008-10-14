@@ -21,8 +21,9 @@
 
 package cascading.operation.regex;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Filter;
-import cascading.tuple.TupleEntry;
+import cascading.operation.FilterCall;
 
 /**
  * Class RegexFilter will apply the regex patternString against every input Tuple value and filter
@@ -74,13 +75,13 @@ public class RegexFilter extends RegexMatcher implements Filter
     this.matchEachElement = matchEachElement;
     }
 
-  /** @see Filter#isRemove(TupleEntry) */
-  public boolean isRemove( TupleEntry input )
+  /** @see Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
     if( matchEachElement )
-      return matchEachElement( input.getTuple() );
+      return matchEachElement( filterCall.getArguments().getTuple() );
     else
-      return matchWholeTuple( input.getTuple() );
+      return matchWholeTuple( filterCall.getArguments().getTuple() );
     }
 
   }

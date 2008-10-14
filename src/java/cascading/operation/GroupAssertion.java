@@ -21,8 +21,7 @@
 
 package cascading.operation;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -30,31 +29,50 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * Implementors must also extend {@link BaseOperation}.
  */
-public interface GroupAssertion extends Assertion
+public interface GroupAssertion<C> extends Assertion
   {
   /**
-   * Method start initializes the grouping procedure.  The {@link java.util.Map} context is used to
-   * hold intermediate values. The context should be initialized here if necessary. This method will be called
-   * before {@link #aggregate(java.util.Map , cascading.tuple.TupleEntry)} and {@link #doAssert(java.util.Map)}.
+   * Method start initializes the aggregation procedure and is called for every unique grouping.
+   * <p/>
+   * The context is used to hold intermediate values is is user defined. The context should be initialized here if necessary.
+   * <p/>
+   * This method will be called before {@link #aggregate(cascading.flow.FlowSession, GroupAssertionCall)}
+   * and {@link #aggregate(cascading.flow.FlowSession, GroupAssertionCall)}
+   * <p/>
+   * TupleEntry groupEntry, or groupEntry.getTuple() should not be stored directly in the context. A copy of the tuple
+   * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor if the whole Tuple is kept.
+   * <p/>
+   * The first time this method is called for a given 'session', context will be null. This method should return a
+   * new instance of the user defined context object. If context is not null, it is up to the developer to create a
+   * new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to remove any
+   * previous state/values.
+   * <p/>
+   * For example, if a Map is used to hold the intermediate data for each subsequent
+   * {@link #aggregate(cascading.flow.FlowSession, GroupAssertionCall)}
+   * call, new HashMap() should be returned when context is null. On the next grouping, start() will be called
+   * again, but this time with the old Map instance. In this case, map.clear() should be called before returning the
+   * instance.
    *
-   * @param context    the map to be initialized (if necessary)
-   * @param groupEntry is the current grouping tuple
+   * @param flowSession   of type FlowSession is the current session
+   * @param assertionCall
+   * @return is user defined
    */
-  void start( Map context, TupleEntry groupEntry );
+  void start( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
    *
-   * @param context the map with aggregate values so far
-   * @param entry   the tuple entry to add to the operation
+   * @param flowSession   of type FlowSession
+   * @param assertionCall
    */
-  void aggregate( Map context, TupleEntry entry );
+  void aggregate( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
 
   /**
    * Method doAssert performs the assertion.
    *
-   * @param context of type Map
+   * @param flowSession   of type FlowSession
+   * @param assertionCall
    */
-  void doAssert( Map context );
+  void doAssert( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
 
   }

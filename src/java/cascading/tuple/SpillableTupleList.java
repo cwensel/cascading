@@ -22,8 +22,6 @@
 package cascading.tuple;
 
 import java.io.Closeable;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -127,7 +125,7 @@ public class SpillableTupleList implements Iterable<Tuple>
     LOG.info( "spilling tuple list to file number " + ( getNumFiles() + 1 ) );
 
     File file = createTempFile();
-    DataOutputStream dataOutputStream = createDataOutputStream( file );
+    TupleOutputStream dataOutputStream = createTupleOutputStream( file );
 
     try
       {
@@ -167,14 +165,14 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private void writeList( DataOutputStream dataOutputStream, List<Tuple> list )
+  private void writeList( TupleOutputStream dataOutputStream, List<Tuple> list )
     {
     try
       {
       dataOutputStream.writeLong( list.size() );
 
       for( Tuple tuple : list )
-        tuple.write( dataOutputStream );
+        dataOutputStream.writeTuple( tuple );
       }
     catch( IOException exception )
       {
@@ -182,11 +180,11 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private DataOutputStream createDataOutputStream( File file )
+  private TupleOutputStream createTupleOutputStream( File file )
     {
     try
       {
-      return new DataOutputStream( new FileOutputStream( file ) );
+      return new TupleOutputStream( new FileOutputStream( file ) );
       }
     catch( FileNotFoundException exception )
       {
@@ -194,15 +192,15 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private List<Tuple> readList( DataInputStream dataInputStream )
+  private List<Tuple> readList( TupleInputStream tupleInputStream )
     {
     try
       {
-      long size = dataInputStream.readLong();
+      long size = tupleInputStream.readLong();
       List<Tuple> list = new LinkedList<Tuple>();
 
       for( int i = 0; i < size; i++ )
-        list.add( Tuple.readNewTuple( dataInputStream ) );
+        list.add( tupleInputStream.readTuple() );
 
       return list;
       }
@@ -212,11 +210,11 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private DataInputStream createDataInputStream( File file )
+  private TupleInputStream createTupleInputStream( File file )
     {
     try
       {
-      return new DataInputStream( new FileInputStream( file ) );
+      return new TupleInputStream( new FileInputStream( file ) );
       }
     catch( FileNotFoundException exception )
       {
@@ -279,7 +277,7 @@ public class SpillableTupleList implements Iterable<Tuple>
 
     private List<Tuple> getListFor( File file )
       {
-      DataInputStream dataInputStream = createDataInputStream( file );
+      TupleInputStream dataInputStream = createTupleInputStream( file );
 
       try
         {

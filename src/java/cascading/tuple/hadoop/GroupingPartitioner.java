@@ -27,7 +27,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 
 /**
- *
+ * Class GroupingPartitioner is an implementation of {@link Partitioner}.
  */
 public class GroupingPartitioner implements Partitioner<TuplePair, Tuple>
   {

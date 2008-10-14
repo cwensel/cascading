@@ -27,6 +27,7 @@ import java.io.Serializable;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -197,12 +198,10 @@ public abstract class Scheme implements Serializable
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.
    *
-   * @param fields          of type Fields
-   * @param tuple           of type Tuple
-   * @param outputCollector of type OutputCollector
-   * @throws IOException when
+   * @param tupleEntry
+   *@param outputCollector of type OutputCollector @throws IOException when
    */
-  public abstract void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException;
+  public abstract void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException;
 
 
   @Override

@@ -21,22 +21,34 @@
 
 package cascading.operation.aggregator;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
-public class Average extends BaseOperation implements Aggregator
+public class Average extends BaseOperation implements Aggregator<Average.Context>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "average";
-  /** Field KEY_COUNT */
-  private static final String KEY_COUNT = "count";
+
+  /** Class Context is used to hold intermediate values. */
+  protected static class Context
+    {
+    double sum = 0.0D;
+    long count = 0L;
+
+    public Context reset()
+      {
+      sum = 0.0D;
+      count = 0L;
+
+      return this;
+      }
+    }
 
   /** Constructs a new instance that returns the average of the values encoutered in the field name "average". */
   public Average()
@@ -57,28 +69,32 @@ public class Average extends BaseOperation implements Aggregator
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  /** @see Aggregator#start(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    context.put( FIELD_NAME, 0.0d );
-    context.put( KEY_COUNT, 0L );
+    if( aggregatorCall.getContext() != null )
+      aggregatorCall.getContext().reset();
+    else
+      aggregatorCall.setContext( new Context() );
     }
 
-  /** @see Aggregator#aggregate(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    context.put( FIELD_NAME, (Double) context.get( FIELD_NAME ) + entry.getTuple().getDouble( 0 ) );
-    context.put( KEY_COUNT, (Long) context.get( KEY_COUNT ) + 1 );
+    Context context = aggregatorCall.getContext();
+    TupleEntry arguments = aggregatorCall.getArguments();
+
+    context.sum += arguments.getDouble( 0 );
+    context.count += 1d;
     }
 
-  /** @see Aggregator#complete(Map, TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    long count = (Long) context.get( KEY_COUNT );
+    aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
+    }
 
-    outputCollector.add( new Tuple( (Double) context.get( FIELD_NAME ) / count ) );
+  private Tuple getResult( AggregatorCall<Context> aggregatorCall )
+    {
+    Context context = aggregatorCall.getContext();
+
+    return new Tuple( (Double) context.sum / context.count );
     }
   }

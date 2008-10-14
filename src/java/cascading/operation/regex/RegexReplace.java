@@ -23,11 +23,11 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class RegexReplace is used to replace a matched regex with a replacement value. */
 public class RegexReplace extends RegexOperation implements Function
@@ -64,11 +64,11 @@ public class RegexReplace extends RegexOperation implements Function
     this.replacement = replacement;
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     // coerce to string
-    String value = input.getTuple().getString( 0 );
+    String value = functionCall.getArguments().getString( 0 );
 
     // make safe
     if( value == null )
@@ -84,6 +84,6 @@ public class RegexReplace extends RegexOperation implements Function
     else
       output.add( matcher.replaceFirst( replacement ) );
 
-    outputCollector.add( output );
+    functionCall.getOutputCollector().add( output );
     }
   }

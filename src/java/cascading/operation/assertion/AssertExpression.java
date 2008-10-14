@@ -21,7 +21,9 @@
 
 package cascading.operation.assertion;
 
+import cascading.flow.FlowSession;
 import cascading.operation.ValueAssertion;
+import cascading.operation.ValueAssertionCall;
 import cascading.operation.expression.ExpressionOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -55,9 +57,11 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
     super( Fields.ALL, expression, parameterTypes );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
     {
+    TupleEntry input = assertionCall.getArguments();
+
     if( !(Boolean) evaluate( input ) )
       BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
     }

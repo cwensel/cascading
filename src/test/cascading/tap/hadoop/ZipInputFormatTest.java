@@ -32,7 +32,6 @@ import cascading.CascadingTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.InMemoryFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -40,6 +39,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.FileInputFormat;
 
 public class ZipInputFormatTest extends CascadingTestCase
   {
@@ -62,7 +62,7 @@ public class ZipInputFormatTest extends CascadingTestCase
     int seed = new Random().nextInt();
     LOG.info( "seed = " + seed );
     Random random = new Random( seed );
-    job.setInputPath( file );
+    FileInputFormat.setInputPaths( job, file );
 
     for( int entries = 1; entries < MAX_ENTRIES; entries += random.nextInt( MAX_ENTRIES / 10 ) + 1 )
       {
@@ -94,10 +94,7 @@ public class ZipInputFormatTest extends CascadingTestCase
       zos.flush();
       zos.close();
 
-      currentFs.delete( file );
-
-      if( currentFs instanceof InMemoryFileSystem )
-        ( (InMemoryFileSystem) currentFs ).reserveSpaceWithCheckSum( file, byteArrayOutputStream.size() );
+      currentFs.delete( file, true );
 
       OutputStream outputStream = currentFs.create( file );
 

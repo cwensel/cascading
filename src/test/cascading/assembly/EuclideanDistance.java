@@ -21,13 +21,11 @@
 
 package cascading.assembly;
 
-import java.util.Map;
-
-import cascading.operation.Aggregator;
+import cascading.flow.FlowSession;
+import cascading.operation.AggregatorCall;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -63,35 +61,29 @@ public class EuclideanDistance extends CrossTab
     }
 
   /** TODO: doc me */
-  protected static class Euclidean extends CrossTabOperation
+  protected static class Euclidean extends CrossTabOperation<Double[]>
     {
     private static final long serialVersionUID = 1L;
-    private static final String SUMSQR = "sumsqr";
 
     public Euclidean()
       {
       super( new Fields( "euclidean" ) );
       }
 
-    /** @see Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
-    @SuppressWarnings("unchecked")
-    public void start( Map context, TupleEntry groupEntry )
+    public void start( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
       {
-      context.put( SUMSQR, 0d );
+      aggregatorCall.setContext( new Double[]{0d} );
       }
 
-    /** @see Aggregator#aggregate(Map, TupleEntry) */
-    @SuppressWarnings("unchecked")
-    public void aggregate( Map context, TupleEntry entry )
+    public void aggregate( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
       {
-      context.put( SUMSQR, ( (Double) context.get( SUMSQR ) ) + Math.pow( entry.getTuple().getDouble( 0 ) - entry.getTuple().getDouble( 1 ), 2 ) );
+      TupleEntry entry = aggregatorCall.getArguments();
+      aggregatorCall.getContext()[ 0 ] += Math.pow( entry.getDouble( 0 ) - entry.getDouble( 1 ), 2 );
       }
 
-    /** @see Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
-    @SuppressWarnings("unchecked")
-    public void complete( Map context, TupleCollector outputCollector )
+    public void complete( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
       {
-      outputCollector.add( new Tuple( 1 / ( 1 + (Double) context.get( SUMSQR ) ) ) );
+      aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + aggregatorCall.getContext()[ 0 ] ) ) );
       }
     }
   }

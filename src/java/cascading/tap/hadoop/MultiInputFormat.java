@@ -154,6 +154,7 @@ public class MultiInputFormat implements InputFormat
    * @param job of type JobConf
    * @throws IOException when
    */
+  @Deprecated
   public void validateInput( JobConf job ) throws IOException
     {
     for( JobConf jobConf : getJobConfs( job, getConfigs( job ) ) )

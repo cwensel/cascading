@@ -19,9 +19,12 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.operation.generator;
+package cascading.operation.function;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -45,7 +48,7 @@ import org.apache.log4j.Logger;
  * C, y
  * C, z
  */
-public class UnGroup extends BaseOperation implements Generator
+public class UnGroup extends BaseOperation implements Function
   {
   private static final Logger LOG = Logger.getLogger( UnGroup.class );
 
@@ -94,12 +97,12 @@ public class UnGroup extends BaseOperation implements Generator
     this.size = size;
     }
 
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     if( resultFieldSelectors != null )
-      useResultSelectors( input, outputCollector );
+      useResultSelectors( functionCall.getArguments(), functionCall.getOutputCollector() );
     else
-      useSize( input, outputCollector );
+      useSize( functionCall.getArguments(), functionCall.getOutputCollector() );
     }
 
   private void useSize( TupleEntry input, TupleCollector outputCollector )

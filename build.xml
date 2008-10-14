@@ -44,7 +44,9 @@
   <property name="build.test" location="${build.classes}/test"/>
 
   <property name="test.results" location="${build}/testresults"/>
-  <property name="test.showoutput" value="yes"/>
+  <property name="test.showoutput" value="no"/>
+
+  <property name="test.cluster.enabled" value="true"/>
 
   <property name="lib" location="${cascading.basedir}/lib"/>
   <property name="lib.build" location="${lib}/build"/>
@@ -157,10 +159,14 @@
     <echo message="running all cascading tests..."/>
 
     <junit printsummary="true" showoutput="${test.showoutput}" fork="yes" haltonerror="no" haltonfailure="no" dir="."
-           maxmemory="512m">
+           maxmemory="756m">
 
+      <sysproperty key="test.cluster.enabled" value="${test.cluster.enabled}"/>
       <sysproperty key="test.build.data" value="data"/>
       <sysproperty key="hadoop.log.dir" value="build/test/log"/>
+
+      <!--<jvmarg value="-Xdebug"/>-->
+      <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
 
       <classpath>
         <path refid="project.class.path"/>

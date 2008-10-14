@@ -31,8 +31,9 @@ import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
 import cascading.operation.Filter;
 import cascading.operation.Function;
+import cascading.operation.OperationCall;
 import cascading.operation.aggregator.Count;
-import cascading.operation.generator.UnGroup;
+import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
@@ -102,7 +103,8 @@ public class BasicPipesTest extends CascadingTestCase
 
       TupleListCollector tupleEntryCollector = new TupleListCollector( Fields.size( 2 ) );
       Tuple tuple1 = tuple.get( new int[]{1} );
-      splitter.operate( new TupleEntry( tuple1 ), tupleEntryCollector );
+      OperationCall operationCall = new OperationCall( new TupleEntry( tuple1 ), tupleEntryCollector );
+      splitter.operate( null, operationCall );
 
       Tuple tupleEntry = tupleEntryCollector.iterator().next();
 

@@ -21,9 +21,10 @@
 
 package cascading.operation.assertion;
 
+import cascading.flow.FlowSession;
 import cascading.operation.ValueAssertion;
+import cascading.operation.ValueAssertionCall;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class AssertEquals either asserts the number of constructor values is equal
@@ -52,11 +53,13 @@ public class AssertEquals extends BaseAssertion implements ValueAssertion
     this.values = new Tuple( values );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
     {
-    if( !input.getTuple().equals( values ) )
-      fail( input.getTuple().print(), values.print() );
+    Tuple tuple = assertionCall.getArguments().getTuple();
+
+    if( !tuple.equals( values ) )
+      fail( tuple.print(), values.print() );
     }
 
   }

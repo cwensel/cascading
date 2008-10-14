@@ -29,6 +29,7 @@ import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -54,15 +55,18 @@ public class FlowReducerStack
   private final FlowStep step;
   /** Field jobConf */
   private final JobConf jobConf;
+  /** Field flowSession */
+  private final FlowSession flowSession;
 
   /** Field stackHead */
   private ReducerStackElement stackHead;
   /** Field stackTail */
   private ReducerStackElement stackTail;
 
-  public FlowReducerStack( JobConf jobConf ) throws IOException
+  public FlowReducerStack( JobConf jobConf, FlowSession flowSession ) throws IOException
     {
     this.jobConf = jobConf;
+    this.flowSession = flowSession;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
 
     buildStack();
@@ -74,7 +78,7 @@ public class FlowReducerStack
     Scope nextScope = step.getNextScope( step.group );
     Tap trap = step.getTrap( ( (Pipe) step.group ).getName() );
 
-    stackTail = new GroupReducerStackElement( previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), jobConf, trap );
+    stackTail = new GroupReducerStackElement( flowSession, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
@@ -83,7 +87,7 @@ public class FlowReducerStack
       List<Every.EveryHandler> everyHandlers = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryHandlersReducerStackElement( stackTail, incomingScope, jobConf, step.traps, everyHandlers );
+      stackTail = new EveryHandlersReducerStackElement( stackTail, flowSession, incomingScope, step.traps, everyHandlers );
 
       while( operator instanceof Every )
         {
@@ -93,7 +97,7 @@ public class FlowReducerStack
         everyHandlers.add( everyHandler );
 
         trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stackTail = new EveryHandlerReducerStackElement( stackTail, incomingScope, jobConf, trap, everyHandler );
+        stackTail = new EveryHandlerReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );
@@ -103,7 +107,7 @@ public class FlowReducerStack
     while( operator instanceof Each )
       {
       trap = step.getTrap( ( (Pipe) operator ).getName() );
-      stackTail = new EachReducerStackElement( stackTail, nextScope, jobConf, trap, (Each) operator );
+      stackTail = new EachReducerStackElement( stackTail, flowSession, nextScope, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( nextScope );
@@ -120,11 +124,11 @@ public class FlowReducerStack
 
     useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
 
-    stackTail = new TapReducerStackElement( stackTail, nextScope, (Tap) operator, useTapCollector, jobConf );
+    stackTail = new TapReducerStackElement( stackTail, flowSession, nextScope, (Tap) operator, useTapCollector );
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
-  public void reduce( Object key, Iterator values, OutputCollector output )
+  public void reduce( Object key, Iterator values, OutputCollector output ) throws IOException
     {
     if( LOG.isDebugEnabled() )
       {
@@ -138,8 +142,11 @@ public class FlowReducerStack
       {
       stackHead.collect( (Tuple) key, values );
       }
-    catch( StackException exception ) // unwrap
+    catch( StackException exception )
       {
+      if( exception.getCause() instanceof IOException )
+        throw (IOException) exception.getCause();
+
       throw (RuntimeException) exception.getCause();
       }
     }

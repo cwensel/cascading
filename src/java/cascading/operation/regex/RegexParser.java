@@ -23,12 +23,12 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class RegexParser is used to extract a matched regex from an incoming argument value. */
 public class RegexParser extends RegexOperation implements Function
@@ -97,10 +97,10 @@ public class RegexParser extends RegexOperation implements Function
     this.groups = groups;
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    String value = input.getTuple().getString( 0 );
+    String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
@@ -116,6 +116,6 @@ public class RegexParser extends RegexOperation implements Function
     for( int pos : groups )
       output.add( matcher.group( pos ) );
 
-    outputCollector.add( output );
+    functionCall.getOutputCollector().add( output );
     }
   }

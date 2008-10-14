@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
 import cascading.tap.Tap;
@@ -42,9 +43,9 @@ class EveryHandlersReducerStackElement extends ReducerStackElement
   private final Map<String, Tap> traps;
   private final List<Every.EveryHandler> everyHandlers;
 
-  public EveryHandlersReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
+  public EveryHandlersReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
     {
-    super( previous, incomingScope, jobConf, null );
+    super( previous, flowSession, incomingScope, null );
     this.traps = traps;
     this.everyHandlers = everyHandlers;
     }
@@ -70,7 +71,7 @@ class EveryHandlersReducerStackElement extends ReducerStackElement
       {
       try
         {
-        handler.start( keyEntry );
+        handler.start( flowSession, keyEntry );
         }
       catch( Exception exception )
         {
@@ -86,7 +87,7 @@ class EveryHandlersReducerStackElement extends ReducerStackElement
         {
         try
           {
-          handler.operate( valueEntry );
+          handler.operate( flowSession, valueEntry );
           }
         catch( Exception exception )
           {

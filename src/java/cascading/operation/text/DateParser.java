@@ -28,12 +28,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds
@@ -102,14 +102,14 @@ public class DateParser extends DateOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     Tuple output = new Tuple();
 
     try
       {
-      Date date = getDateFormat().parse( (String) input.get( 0 ) );
+      Date date = getDateFormat().parse( (String) functionCall.getArguments().get( 0 ) );
 
       if( calendarFields == null )
         output.add( date.getTime() );
@@ -118,10 +118,10 @@ public class DateParser extends DateOperation implements Function
       }
     catch( ParseException exception )
       {
-      throw new OperationException( "unable to parse input value: " + input.get( 0 ), exception );
+      throw new OperationException( "unable to parse input value: " + functionCall.getArguments().get( 0 ), exception );
       }
 
-    outputCollector.add( output );
+    functionCall.getOutputCollector().add( output );
     }
 
   private void makeCalendarFields( Tuple output, Date date )

@@ -21,41 +21,37 @@
 
 package cascading.operation.aggregator;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import cascading.CascadingTestCase;
+import cascading.flow.FlowSession;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
-import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
 
 /** Test class for {@link Sum} */
-public class SumTest
+public class SumTest extends CascadingTestCase
   {
-
   /** class under test */
   private Sum sum;
+  private OperationCall operationCall;
 
-  /** @throws java.lang.Exception  */
-  @Before
+  public SumTest()
+    {
+    super( "sum tests" );
+    }
+
   public void setUp() throws Exception
     {
     sum = new Sum();
+    operationCall = new OperationCall();
     }
 
-  /** @throws java.lang.Exception  */
-  @After
   public void tearDown() throws Exception
     {
     sum = null;
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Sum#Sum()}. */
-  @Test
   public final void testSum()
     {
     assertEquals( "Got expected number of args", 1, sum.getNumArgs() );
@@ -63,8 +59,6 @@ public class SumTest
     assertEquals( "Got expected fields", fields, sum.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.aggregator.Sum#Sum(cascading.tuple.Fields)}. */
-  @Test
   public final void testSumFields()
     {
     final Fields fields = new Fields( "sum" );
@@ -72,36 +66,35 @@ public class SumTest
     assertEquals( "Got expected fields", fields, sum.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
-  @Test
   public final void testStart()
     {
-    Map<String, Double> context = new HashMap<String, Double>();
-    sum.start( context, null );
+    sum.start( FlowSession.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-    sum.complete( context, resultEntryCollector );
+    operationCall.setOutputCollector( resultEntryCollector );
+    sum.complete( FlowSession.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", 0.0, tuple.getDouble( 0 ), 0.0d );
     }
 
-  /**
-   * Test method for {@link cascading.operation.aggregator.Sum#aggregate(java.util.Map, cascading.tuple.TupleEntry)}.
-   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector)}.
-   */
-  @Test
   public final void testAggregateCompleteDouble()
     {
-    Map<String, Double> context = new HashMap<String, Double>();
-    sum.start( context, null );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Double( -4.0 ) ) ) );
+    sum.start( FlowSession.NULL, operationCall );
+
+
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( -4.0 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-    sum.complete( context, resultEntryCollector );
+    operationCall.setOutputCollector( resultEntryCollector );
+    sum.complete( FlowSession.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 2.0, (Double) tuple.get( 0 ), 0.0d );
@@ -109,18 +102,24 @@ public class SumTest
 
   public final void testAggregateCompleteInteger()
     {
-    Map<String, Double> context = new HashMap<String, Double>();
-    sum.start( context, null );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 1 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 3 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( 2 ) ) ) );
-    sum.aggregate( context, new TupleEntry( new Tuple( new Integer( -4 ) ) ) );
+    Sum sum = new Sum( new Fields( "sum" ), Integer.class );
+    sum.start( FlowSession.NULL, operationCall );
+
+
+    operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 1 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 3 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 2 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
+    operationCall.setArguments( new TupleEntry( new Tuple( new Integer( -4 ) ) ) );
+    sum.aggregate( FlowSession.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-    sum.complete( context, resultEntryCollector );
+    operationCall.setOutputCollector( resultEntryCollector );
+    sum.complete( FlowSession.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 2, tuple.get( 0 ) );
     }
-
   }

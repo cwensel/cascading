@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.tuple.TupleEntry;
+import cascading.flow.FlowSession;
 
 /**
  * Class ValueAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Each} pipe Operator.
@@ -33,7 +33,8 @@ public interface ValueAssertion extends Assertion
   /**
    * Method doAssert performs the assertion.
    *
-   * @param input of type TupleEntry
+   * @param flowSession   of type FlowSession
+   * @param assertionCall
    */
-  void doAssert( TupleEntry input );
+  void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall );
   }

@@ -24,6 +24,7 @@ package cascading.operation.regex;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -34,9 +35,18 @@ import cascading.tuple.TupleListCollector;
  */
 public class RegexTest extends CascadingTestCase
   {
+  private OperationCall operationCall;
+
   public RegexTest()
     {
     super( "regex test" );
+    }
+
+  @Override
+  protected void setUp() throws Exception
+    {
+    super.setUp();
+    operationCall = new OperationCall();
     }
 
   public void testSplitter()
@@ -45,7 +55,9 @@ public class RegexTest extends CascadingTestCase
 
     RegexSplitter splitter = new RegexSplitter( "\t" );
 
-    splitter.operate( new TupleEntry( new Tuple( "foo\tbar" ) ), collector );
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.operate( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -63,7 +75,10 @@ public class RegexTest extends CascadingTestCase
 
     RegexSplitGenerator splitter = new RegexSplitGenerator( new Fields( "word" ), "\\s+" );
 
-    splitter.operate( new TupleEntry( new Tuple( "foo\t  bar" ) ), collector );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\t  bar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.operate( null, operationCall );
 
     assertEquals( "wrong size", 2, collector.size() );
 
@@ -80,7 +95,9 @@ public class RegexTest extends CascadingTestCase
 
     RegexReplace splitter = new RegexReplace( new Fields( "words" ), "\\s+", "-", true );
 
-    splitter.operate( new TupleEntry( new Tuple( "foo\t bar" ) ), collector );
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\t bar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.operate( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -97,7 +114,9 @@ public class RegexTest extends CascadingTestCase
 
     RegexParser splitter = new RegexParser( Fields.UNKNOWN, "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
 
-    splitter.operate( new TupleEntry( new Tuple( "foo\tbar" ) ), collector );
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.operate( null, operationCall );
 
     assertEquals( "wrong size", 1, collector.size() );
 

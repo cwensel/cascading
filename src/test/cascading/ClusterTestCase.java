@@ -49,10 +49,23 @@ public class ClusterTestCase extends CascadingTestCase
   transient private boolean enableCluster;
   transient private Map<Object, Object> properties = new HashMap<Object, Object>();
 
+  int numMapTasks = 4;
+  int numReduceTasks = 1;
+
+  private String logger;
+
   public ClusterTestCase( String string, boolean enableCluster )
     {
     super( string );
     this.enableCluster = Boolean.parseBoolean( System.getProperty( CLUSTER_TESTING_PROPERTY, Boolean.toString( enableCluster ) ) );
+    this.logger = System.getProperty( "log4j.logger" );
+    }
+
+  public ClusterTestCase( String string, boolean enableCluster, int numMapTasks, int numReduceTasks )
+    {
+    this( string, enableCluster );
+    this.numMapTasks = numMapTasks;
+    this.numReduceTasks = numReduceTasks;
     }
 
   public ClusterTestCase( String string )
@@ -69,18 +82,29 @@ public class ClusterTestCase extends CascadingTestCase
     if( !enableCluster )
       {
       jobConf = new JobConf();
-      return;
+      }
+    else
+      {
+      System.setProperty( "test.build.data", "build" );
+      System.setProperty( "hadoop.log.dir", "build/test/log" );
+      Configuration conf = new Configuration();
+
+      dfs = new MiniDFSCluster( conf, 4, true, null );
+      fileSys = dfs.getFileSystem();
+      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
+
+      jobConf = mr.createJobConf();
+
+      jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
+      jobConf.set( "mapred.map.tasks.speculative.execution", "false" );
+      jobConf.set( "mapred.reduce.tasks.speculative.execution", "false" );
       }
 
-    System.setProperty( "test.build.data", "build" );
-    System.setProperty( "hadoop.log.dir", "build/test/log" );
-    Configuration conf = new Configuration();
+    jobConf.setNumMapTasks( numMapTasks );
+    jobConf.setNumReduceTasks( numReduceTasks );
 
-    dfs = new MiniDFSCluster( conf, 4, true, null );
-    fileSys = dfs.getFileSystem();
-    mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
-
-    jobConf = mr.createJobConf();
+    if( logger != null )
+      properties.put( "log4j.logger", logger );
 
     MultiMapReducePlanner.setJobConf( properties, jobConf );
     }
@@ -103,13 +127,31 @@ public class ClusterTestCase extends CascadingTestCase
 
   public void tearDown() throws IOException
     {
-    if( fileSys != null )
-      fileSys.close();
+    try
+      {
+      if( fileSys != null )
+        fileSys.close();
+      }
+    catch( IOException exception )
+      {
+      }
 
-    if( dfs != null )
-      dfs.shutdown();
+    try
+      {
+      if( dfs != null )
+        dfs.shutdown();
+      }
+    catch( Exception exception )
+      {
+      }
 
-    if( mr != null )
-      mr.shutdown();
+    try
+      {
+      if( mr != null )
+        mr.shutdown();
+      }
+    catch( Exception exception )
+      {
+      }
     }
   }

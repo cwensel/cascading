@@ -29,13 +29,13 @@ import cascading.tuple.Tuple;
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
 public class PipeParamTest extends CascadingTestCase
   {
-  Fields[] ARGS_PASS = new Fields[]{new Fields( "x" ), Fields.ALL, Fields.KEYS, Fields.VALUES};
-  Fields[] FUNCS_PASS = new Fields[]{new Fields( "y" ), Fields.UNKNOWN, Fields.ALL, Fields.KEYS, Fields.VALUES, Fields.ARGS};
+  Fields[] ARGS_PASS = new Fields[]{new Fields( "x" ), Fields.ALL, Fields.GROUP, Fields.VALUES};
+  Fields[] FUNCS_PASS = new Fields[]{new Fields( "y" ), Fields.UNKNOWN, Fields.ALL, Fields.GROUP, Fields.VALUES, Fields.ARGS};
   Fields[] OUTS_PASS = new Fields[]{new Fields( "y" ), Fields.RESULTS, Fields.ALL};
 
   Fields[] ARGS_FAIL = new Fields[]{Fields.UNKNOWN, Fields.ARGS, Fields.RESULTS};
   Fields[] FUNCS_FAIL = new Fields[]{Fields.RESULTS};
-  Fields[] OUTS_FAIL = new Fields[]{Fields.UNKNOWN, Fields.ARGS, Fields.KEYS, Fields.VALUES};
+  Fields[] OUTS_FAIL = new Fields[]{Fields.UNKNOWN, Fields.ARGS, Fields.GROUP, Fields.VALUES};
 
   public PipeParamTest()
     {

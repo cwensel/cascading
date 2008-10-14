@@ -48,7 +48,7 @@ public class TrapTest extends ClusterTestCase
 
   public TrapTest()
     {
-    super( "trap tests", false );
+    super( "trap tests", true, 4, 4 );
     }
 
   public void testTrapNone() throws Exception
@@ -126,8 +126,8 @@ public class TrapTest extends ClusterTestCase
     pipe = new Group( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "all/trap", true );
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/tap", true );
+    Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/trap", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 

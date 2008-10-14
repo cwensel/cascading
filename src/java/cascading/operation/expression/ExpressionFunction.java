@@ -21,11 +21,11 @@
 
 package cascading.operation.expression;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 import org.codehaus.janino.ExpressionEvaluator;
 
 /**
@@ -60,10 +60,10 @@ public class ExpressionFunction extends ExpressionOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    outputCollector.add( new Tuple( evaluate( input ) ) );
+    functionCall.getOutputCollector().add( new Tuple( evaluate( functionCall.getArguments() ) ) );
     }
 
   }

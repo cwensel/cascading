@@ -21,9 +21,6 @@
 
 package cascading.tuple;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +32,17 @@ public class TuplePair extends Tuple
   {
   /** Field tuples */
   private Tuple[] tuples = new Tuple[2];
+
+  /**
+   * Returns a reference to the private tuples of the given TuplePark
+   *
+   * @param tuplePair of type Tuple[]
+   * @return Tuple[]
+   */
+  static Tuple[] tuples( TuplePair tuplePair )
+    {
+    return tuplePair.tuples;
+    }
 
   /** Constructor Tuple creates a new Tuple instance. */
   public TuplePair()
@@ -103,20 +111,6 @@ public class TuplePair extends Tuple
   public int hashCode()
     {
     return Arrays.hashCode( tuples );
-    }
-
-  @Override
-  public void write( DataOutput dataOutput ) throws IOException
-    {
-    tuples[ 0 ].write( dataOutput );
-    tuples[ 1 ].write( dataOutput );
-    }
-
-  @Override
-  public void readFields( DataInput dataInput ) throws IOException
-    {
-    tuples[ 0 ].readFields( dataInput );
-    tuples[ 1 ].readFields( dataInput );
     }
 
   @Override

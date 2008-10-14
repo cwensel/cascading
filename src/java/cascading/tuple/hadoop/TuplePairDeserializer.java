@@ -19,11 +19,24 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.operation.generator;
+package cascading.tuple.hadoop;
 
-import cascading.operation.Function;
+import java.io.IOException;
 
-/** Interface Generator ... */
-public interface Generator extends Function
+import cascading.tuple.TuplePair;
+
+class TuplePairDeserializer extends BaseDeserializer<TuplePair>
   {
+  TuplePairDeserializer( SerializationElementReader elementReader )
+    {
+    super( elementReader );
+    }
+
+  public TuplePair deserialize( TuplePair tuple ) throws IOException
+    {
+    if( tuple == null )
+      return inputStream.readTuplePair();
+
+    return inputStream.readTuplePair( tuple );
+    }
   }

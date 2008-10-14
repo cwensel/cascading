@@ -21,18 +21,18 @@
 
 package cascading.operation.regex;
 
-import cascading.operation.generator.Generator;
+import cascading.flow.FlowSession;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class RegexGenerator will emit a new Tuple for every split on the incoming argument value delimited by the given patternString.
  * <p/>
  * This could be used to break a document into single word tuples for later processing for a word count.
  */
-public class RegexSplitGenerator extends RegexOperation implements Generator
+public class RegexSplitGenerator extends RegexOperation implements Function
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -58,10 +58,10 @@ public class RegexSplitGenerator extends RegexOperation implements Generator
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.tuple.TupleEntry, cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see cascading.operation.Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    String value = input.getTuple().getString( 0 );
+    String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
@@ -69,6 +69,6 @@ public class RegexSplitGenerator extends RegexOperation implements Generator
     String[] split = getPattern().split( value );
 
     for( String string : split )
-      outputCollector.add( new Tuple( string ) );
+      functionCall.getOutputCollector().add( new Tuple( string ) );
     }
   }

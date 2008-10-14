@@ -21,11 +21,12 @@
 
 package cascading.operation.assertion;
 
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cascading.flow.FlowSession;
 import cascading.operation.GroupAssertion;
+import cascading.operation.GroupAssertionCall;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
@@ -33,17 +34,10 @@ import org.apache.log4j.Logger;
 /**
  *
  */
-public abstract class AssertGroupBase extends BaseAssertion implements GroupAssertion
+public abstract class AssertGroupBase extends BaseAssertion implements GroupAssertion<AssertGroupBase.Context>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( AssertGroupBase.class );
-
-  /** Field COUNT */
-  private static final String COUNT = "count";
-  /** Field FIELDS */
-  private static final String FIELDS = "fields";
-  /** Field GROUP */
-  private static final String GROUP = "group";
 
   /** Field patternString */
   protected String patternString;
@@ -53,6 +47,31 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
 
   /** Field size */
   protected long size;
+
+  public static class Context
+    {
+    Long count;
+    String fields;
+    String group;
+
+    public Context set( long count, String fields, String group )
+      {
+      this.count = count;
+      this.fields = fields;
+      this.group = group;
+
+      return this;
+      }
+
+    public Context reset()
+      {
+      count = null;
+      fields = null;
+      group = null;
+
+      return this;
+      }
+    }
 
   public AssertGroupBase( String message, long size )
     {
@@ -93,33 +112,34 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
     return matcher.matches();
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
     {
+    if( assertionCall.getContext() == null )
+      assertionCall.setContext( new Context() );
+
+    TupleEntry groupEntry = assertionCall.getGroup();
+    Context context = assertionCall.getContext();
+
     // didn't match, so skip
     if( !matchWholeTuple( groupEntry.getTuple() ) )
-      return;
-
-    context.put( COUNT, 0L );
-    context.put( FIELDS, groupEntry.getFields().print() );
-    context.put( GROUP, groupEntry.getTuple().print() );
+      context.reset();
+    else
+      context.set( 0L, groupEntry.getFields().print(), groupEntry.getTuple().print() );
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
     {
-    Long groupSize = (Long) context.get( COUNT );
+    Long groupSize = (Long) assertionCall.getContext().count;
 
     // didn't match, so skip
     if( groupSize != null )
-      context.put( COUNT, groupSize + 1L );
+      assertionCall.getContext().count += 1L;
     }
 
-  public void doAssert( Map context )
+  public void doAssert( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
     {
-    Long groupSize = (Long) context.get( COUNT );
+    Context context = assertionCall.getContext();
+    Long groupSize = context.count;
 
     if( groupSize == null ) // didn't match, so skip
       return;
@@ -127,9 +147,9 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
     if( assertFails( groupSize ) )
       {
       if( patternString == null )
-        fail( groupSize, size, context.get( FIELDS ), context.get( GROUP ) );
+        fail( groupSize, size, context.fields, context.group );
       else
-        fail( patternString, groupSize, size, context.get( FIELDS ), context.get( GROUP ) );
+        fail( patternString, groupSize, size, context.fields, context.group );
       }
     }
 

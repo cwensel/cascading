@@ -21,13 +21,11 @@
 
 package cascading;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/TestAggregator.java#2 $ */
 public class TestFailAggregator extends BaseOperation implements Aggregator
@@ -46,25 +44,19 @@ public class TestFailAggregator extends BaseOperation implements Aggregator
     this.fail = fail;
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     if( fail == 0 )
       throw new RuntimeException( "failed" );
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     if( fail == 1 )
       throw new RuntimeException( "failed" );
     }
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     if( fail == 2 )
       throw new RuntimeException( "failed" );

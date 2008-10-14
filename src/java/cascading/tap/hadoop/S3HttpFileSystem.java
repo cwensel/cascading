@@ -95,7 +95,7 @@ public class S3HttpFileSystem extends StreamedFileSystem
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     final DigestOutputStream digestStream = new DigestOutputStream( stream, getMD5Digest() );
 
-    return new FSDataOutputStream( digestStream )
+    return new FSDataOutputStream( digestStream, null )
     {
     @Override
     public void close() throws IOException
@@ -152,8 +152,15 @@ public class S3HttpFileSystem extends StreamedFileSystem
     return true;
     }
 
+  @Deprecated
   @Override
   public boolean delete( Path path ) throws IOException
+    {
+    return delete( path, true );
+    }
+
+  @Override
+  public boolean delete( Path path, boolean recursive ) throws IOException
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "deleting file: " + path );

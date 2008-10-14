@@ -21,7 +21,16 @@
 
 package cascading.tuple;
 
-/** Class TupleEntry allows a Tuple instance and its declarating Fields instance to be used as a single object. */
+/**
+ * Class TupleEntry allows a {@link Tuple} instance and its declarating {@link Fields} instance to be used as a single object.
+ * <p/>
+ * Once a TupleEntry is created, its Fields cannot be changed, but the Tuple instance it holds can be replaced, or
+ * modified. The managed Tuple should not have elements added or removed, as this will break the relationship with
+ * the associated Fields instance.
+ *
+ * @see Fields
+ * @see Tuple
+ */
 public class TupleEntry
   {
   /** Field fields */
@@ -207,6 +216,84 @@ public class TupleEntry
     }
 
   /**
+   * Method getString returns the element for the given fieldname field as a String.
+   *
+   * @param field of type Comparable
+   * @return String
+   */
+  public String getString( Comparable field )
+    {
+    return tuple.getString( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getFloat returns the element for the given fieldname field as a float. Zero if null.
+   *
+   * @param field of type Comparable
+   * @return float
+   */
+  public float getFloat( Comparable field )
+    {
+    return tuple.getFloat( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getDouble returns the element for the given fieldname field as a double. Zero if null.
+   *
+   * @param field of type Comparable
+   * @return double
+   */
+  public double getDouble( Comparable field )
+    {
+    return tuple.getDouble( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getInteger  returns the element for the given fieldname field as an int. Zero if null.
+   *
+   * @param field of type Comparable
+   * @return int
+   */
+  public int getInteger( Comparable field )
+    {
+    return tuple.getInteger( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getLong returns the element for the given fieldname field as a long. Zero if null.
+   *
+   * @param field of type Comparable
+   * @return long
+   */
+  public long getLong( Comparable field )
+    {
+    return tuple.getLong( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getShort returns the element for the given fieldname field as a short. Zero if null.
+   *
+   * @param field of type Comparable
+   * @return short
+   */
+  public short getShort( Comparable field )
+    {
+    return tuple.getShort( fields.getPos( field ) );
+    }
+
+  /**
+   * Method getBoolean returns the element for the given fieldname field as a boolean.
+   * If the value is (case ignored) the string 'true', a {@code true} value will be returned. {@code false} if null.
+   *
+   * @param field of type Comparable
+   * @return boolean
+   */
+  public boolean getBoolean( Comparable field )
+    {
+    return tuple.getBoolean( fields.getPos( field ) );
+    }
+
+  /**
    * Method selectEntry selects the fields specified in selector from this instance.
    *
    * @param selector of type Fields
@@ -254,6 +341,7 @@ public class TupleEntry
    * @param selector of type Fields
    * @return Tuple
    */
+  @Deprecated
   public Tuple extractTuple( Fields selector )
     {
     if( selector == null || selector.isAll() )

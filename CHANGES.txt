@@ -1,6 +1,43 @@
 Cascading Change Log
 
-  0.8.2
+unreleased
+
+  Renamed c.t.Fields.KEYS to c.t.Fields.GROUP to be consistent with the Cascading model.
+
+  Fixed bug where c.t.Tap may inappropriately delete a sink from a task.
+
+  Changed c.o.Aggregator to no longer use a Map for the context. Users can now specify custom types by returning
+  either a new instance from start() or recycling an instance passed into start(). This change will break all existing
+  implementations of Aggregator. Note, simply returning a new Map<Object,Object> in start() should be sufficient.
+
+  Changed all c.o.Function, c.o.Filter, c.o.Aggregator, c.o.ValueAssertion, and c.o.GroupAssertions to accept
+  a c.f.FlowSession object on all relevant methods. FlowSession provides call-backs into the underyling system
+  to get configuration properties, fire a "keep alive" ping, or increment a custom counter. This change will
+  break all existing implemenations of the above interfaces.
+
+  Added ability to set serialization tokens via the cascading.serialization.tokens property. This compliments the
+  c.t.h.SerializationToken annotation.
+
+  Optimized co-grouping operation by using c.t.IndexTuple instead of a nested c.t.Tuple.
+
+  Changed c.t.Tap and c.s.Scheme sink methods to take a c.t.TupleEntry, instead of c.t.Fields and c.t.Tuple
+  individually.
+
+  Added the c.t.h.SerializationToken Java Annotation. This allows for an int value to be written during serialization
+  instead of a Class name for custom objects nested in c.t.Tuple instances. This feature should dramatically reduce
+  the size of Tuples saved in SequenceFiles, and improve the general performance during 'shuffling' between Map and
+  Reduce stages.
+
+  Added c.t.h.TupleSerialization, a Hadoop Serialization implementation. Tuple is no longer Hadoop Writable
+  and now relies on TupleSerialization for serialization support. Subequently nested objects in c.t.Tuple
+  only need to be c.l.Comparable. So they can be serialized properly, a Serialization implementation must be
+  registered with Hadoop. Note all primitive types are handled directly by Tuple, but custom types must
+  have a Serialization implementation, or must be Hadoop WritableComparable so that the default WritableSerialization
+  implementation will write them out.
+
+  Added support for Hadoop 0.18.x.
+
+0.8.2
 
   Added new properties via c.f.FlowConnector.setJarClass and c.f.FlowConnector.setJarPath for
   setting the application jar file.

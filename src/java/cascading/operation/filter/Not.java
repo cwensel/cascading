@@ -21,15 +21,16 @@
 
 package cascading.operation.filter;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
-import cascading.tuple.TupleEntry;
+import cascading.operation.FilterCall;
 
 /**
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
  * instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.tuple.TupleEntry)} returns {@code true} for the given instance,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall)} returns {@code true} for the given instance,
  * this filter will return the opposite, {@code false}.
  *
  * @see And
@@ -54,9 +55,9 @@ public class Not extends BaseOperation implements Filter
       throw new IllegalArgumentException( "filter may not be null" );
     }
 
-  /** @see cascading.operation.Filter#isRemove(TupleEntry) */
-  public boolean isRemove( TupleEntry input )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
-    return !filter.isRemove( input );
+    return !filter.isRemove( flowSession, filterCall );
     }
   }

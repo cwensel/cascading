@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * The FlowConnector and resulting Flow can be configured via a Map of properties given on the constructor. This properties
  * map can be populated through static methods on FlowConnector and MultiMapReducePlanner.
  * <p/>
- * Most applications will need to call {@link #setJarClass(java.util.Map, Class)} or {@link #setJarPath(java.util.Map, String)}
+ * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or {@link #setApplicationJarPath(java.util.Map, String)}
  * so that the correct application jar file is passed through to all child processes.
  * <p/>
  * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
@@ -125,15 +125,15 @@ public class FlowConnector
    * @param properties of type Map
    * @param type       of type Class
    */
-  public static void setJarClass( Map<Object, Object> properties, Class type )
+  public static void setApplicationJarClass( Map<Object, Object> properties, Class type )
     {
     if( type != null )
-      properties.put( "cascading.flowconnector.jar.class", type );
+      properties.put( "cascading.flowconnector.appjar.class", type );
     }
 
-  public static Class getJarClass( Map<Object, Object> properties )
+  public static Class getApplicationJarClass( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.flowconnector.jar.class", (Class) null );
+    return Util.getProperty( properties, "cascading.flowconnector.appjar.class", (Class) null );
     }
 
   /**
@@ -142,15 +142,15 @@ public class FlowConnector
    * @param properties of type Map
    * @param path       of type String
    */
-  public static void setJarPath( Map<Object, Object> properties, String path )
+  public static void setApplicationJarPath( Map<Object, Object> properties, String path )
     {
     if( path != null )
-      properties.put( "cascading.flowconnector.jar.path", path );
+      properties.put( "cascading.flowconnector.appjar.path", path );
     }
 
-  public static String getJarPath( Map<Object, Object> properties )
+  public static String getApplicationJarPath( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.flowconnector.jar.path", (String) null );
+    return Util.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );
     }
 
   /** Constructor FlowConnector creates a new FlowConnector instance. */
@@ -391,6 +391,11 @@ public class FlowConnector
     for( int i = 0; i < pipes.length; i++ )
       names[ i ] = pipes[ i ].getName();
 
-    return Util.join( names, "+" );
+    String name = Util.join( names, "+" );
+
+    if( name.length() > 32 )
+      name = name.substring( 0, 32 );
+
+    return name;
     }
   }

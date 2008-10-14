@@ -22,7 +22,9 @@
 package cascading.operation.assertion;
 
 import cascading.CascadingTestCase;
+import cascading.flow.FlowSession;
 import cascading.operation.AssertionException;
+import cascading.operation.OperationCall;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -47,7 +49,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     {
     try
       {
-      assertion.doAssert( tupleEntry );
+      assertion.doAssert( FlowSession.NULL, getOperationCall( tupleEntry ) );
       fail();
       }
     catch( AssertionException exception )
@@ -56,9 +58,16 @@ public class ValueAssertionsTest extends CascadingTestCase
       }
     }
 
+  private OperationCall getOperationCall( TupleEntry tupleEntry )
+    {
+    OperationCall operationCall = new OperationCall();
+    operationCall.setArguments( tupleEntry );
+    return operationCall;
+    }
+
   private void assertPass( ValueAssertion assertion, TupleEntry tupleEntry )
     {
-    assertion.doAssert( tupleEntry );
+    assertion.doAssert( null, getOperationCall( tupleEntry ) );
     }
 
   public void testNotNull()

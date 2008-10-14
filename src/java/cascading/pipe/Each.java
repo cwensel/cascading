@@ -25,11 +25,15 @@ import java.util.Set;
 
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Filter;
+import cascading.operation.FilterCall;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -285,26 +289,26 @@ public class Each extends Operator
     return operation instanceof Filter;
     }
 
-  private void applyAssertion( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+  private void applyAssertion( FlowSession flowSession, FlowCollector flowCollector, TupleEntry input, OperationCall operationCall )
     {
-    getValueAssertion().doAssert( arguments );
+    getValueAssertion().doAssert( flowSession, operationCall );
 
     flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFilter( FlowCollector flowCollector, TupleEntry input, TupleEntry arguments )
+  private void applyFilter( FlowSession flowSession, FlowCollector flowCollector, TupleEntry input, FilterCall filterCall )
     {
     boolean isRemove = false;
 
-    isRemove = getFilter().isRemove( arguments );
+    isRemove = getFilter().isRemove( flowSession, filterCall );
 
     if( !isRemove )
       flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFunction( TupleEntry arguments, TupleCollector tupleCollector )
+  private void applyFunction( FlowSession flowSession, FunctionCall functionCall )
     {
-    getFunction().operate( arguments, tupleCollector ); // adds results to collector
+    getFunction().operate( flowSession, functionCall ); // adds results to collector
     }
 
   // FIELDS
@@ -376,14 +380,16 @@ public class Each extends Operator
     {
     FlowCollector flowCollector;
     final Scope scope;
+    protected OperationCall operationCall;
 
     protected EachHandler( FlowCollector flowCollector, Scope scope )
       {
       this.flowCollector = flowCollector;
       this.scope = scope;
+      operationCall = new OperationCall();
       }
 
-    public void operate( TupleEntry input )
+    public void operate( FlowSession flowSession, TupleEntry input )
       {
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " incoming entry: " + input );
@@ -393,10 +399,10 @@ public class Each extends Operator
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " arg entry: " + arguments );
 
-      handle( input, arguments );
+      handle( flowSession, input, arguments );
       }
 
-    abstract void handle( TupleEntry input, TupleEntry arguments );
+    abstract void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments );
 
     public FlowElement getEach()
       {
@@ -431,25 +437,30 @@ public class Each extends Operator
         flowCollector.collect( makeResult( scope.getOutValuesSelector(), input, scope.getDeclaredEntry(), tuple ) );
         }
       };
+
+      operationCall.setOutputCollector( tupleCollector );
       }
 
-    void handle( TupleEntry input, TupleEntry arguments )
+    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
       {
       tupleCollector.input = input;
-      applyFunction( arguments, tupleCollector );
+      operationCall.setArguments( arguments );
+      applyFunction( flowSession, operationCall );
       }
     }
 
   public class EachFilterHandler extends EachHandler
     {
+
     public EachFilterHandler( FlowCollector flowCollector, Scope scope )
       {
       super( flowCollector, scope );
       }
 
-    void handle( TupleEntry input, TupleEntry arguments )
+    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
       {
-      applyFilter( flowCollector, input, arguments );
+      operationCall.setArguments( arguments );
+      applyFilter( flowSession, flowCollector, input, operationCall );
       }
     }
 
@@ -460,9 +471,10 @@ public class Each extends Operator
       super( flowCollector, scope );
       }
 
-    void handle( TupleEntry input, TupleEntry arguments )
+    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
       {
-      applyAssertion( flowCollector, input, arguments );
+      operationCall.setArguments( arguments );
+      applyAssertion( flowSession, flowCollector, input, operationCall );
       }
     }
   }

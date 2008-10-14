@@ -21,6 +21,7 @@
 
 package cascading.operation;
 
+import cascading.flow.FlowSession;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
@@ -87,15 +88,15 @@ public class Identity extends BaseOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession, FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    if( types == null || types.length == 0 )
-      {
-      outputCollector.add( input );
-      return;
-      }
+    TupleEntry input = functionCall.getArguments();
+    TupleCollector outputCollector = functionCall.getOutputCollector();
 
-    outputCollector.add( Tuples.coerce( input.getTuple(), types ) );
+    if( types == null || types.length == 0 )
+      outputCollector.add( input );
+    else
+      outputCollector.add( Tuples.coerce( input.getTuple(), types ) );
     }
   }

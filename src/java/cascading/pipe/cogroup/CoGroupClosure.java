@@ -23,10 +23,11 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
+import cascading.flow.FlowSession;
 import cascading.tuple.Fields;
+import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /** Class CoGroupClosure ... */
@@ -41,10 +42,10 @@ public class CoGroupClosure extends GroupClosure
   /** Field groups */
   SpillableTupleList[] groups;
 
-  public CoGroupClosure( JobConf jobConf, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
+  public CoGroupClosure( FlowSession flowSession, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
     super( groupingFields, valueFields, key, values );
-    build( jobConf, repeat );
+    build( flowSession, repeat );
     }
 
   @Override
@@ -67,18 +68,18 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ];
     }
 
-  public void build( JobConf jobConf, int repeat )
+  public void build( FlowSession flowSession, int repeat )
     {
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, repeat )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( jobConf.getInt( SPILL_THRESHOLD, defaultThreshold ) );
+      groups[ i ] = new SpillableTupleList( getLong( flowSession, SPILL_THRESHOLD, defaultThreshold ) );
 
     while( values.hasNext() )
       {
-      Tuple current = (Tuple) values.next();
-      Integer pos = (Integer) current.get( 0 );
+      IndexTuple current = (IndexTuple) values.next();
+      int pos = current.getIndex();
 
       if( LOG.isDebugEnabled() )
         {
@@ -88,10 +89,20 @@ public class CoGroupClosure extends GroupClosure
           LOG.debug( "repeating: " + repeat );
         }
 
-      groups[ pos ].add( (Tuple) current.get( 1 ) ); // get the value tuple, skipping over the name
+      groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
       }
 
     for( int i = 1; i < repeat; i++ )
       groups[ i ] = groups[ 0 ];
+    }
+
+  private long getLong( FlowSession flowSession, String key, long defaultValue )
+    {
+    String value = (String) flowSession.getCurrentProcess().getProperty( key );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Long.parseLong( value );
     }
   }

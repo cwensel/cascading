@@ -26,12 +26,17 @@ import java.io.IOException;
 import cascading.tuple.TuplePair;
 
 /**
- *
+ * Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}.
  */
-public class TuplePairComparator extends TupleComparator<TuplePair>
+public class TuplePairComparator extends DeserializerComparator<TuplePair>
   {
-  public TuplePairComparator() throws IOException
+  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
-    super( TuplePair.class );
+    setDeserializer( tupleSerialization.getTuplePairDeserializer() );
+    }
+
+  public int compare( TuplePair lhs, TuplePair rhs )
+    {
+    return lhs.compareTo( rhs );
     }
   }

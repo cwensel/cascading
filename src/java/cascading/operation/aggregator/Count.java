@@ -21,21 +21,19 @@
 
 package cascading.operation.aggregator;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class Count is an {@link Aggregator} that calculates the number of items in the current group.
  * </p>
  * Note the resulting value for count is always a long. So any comparisons should be against a long value.
  */
-public class Count extends BaseOperation implements Aggregator
+public class Count extends BaseOperation implements Aggregator<Long[]>
   {
   /** Field COUNT */
   public static final String FIELD_NAME = "count";
@@ -56,24 +54,26 @@ public class Count extends BaseOperation implements Aggregator
     super( fieldDeclaration ); // allow ANY number of arguments
     }
 
-  /** @see Aggregator#start(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
     {
-    context.put( FIELD_NAME, 0L );
+    if( aggregatorCall.getContext() == null )
+      aggregatorCall.setContext( new Long[]{0L} );
+    else
+      aggregatorCall.getContext()[ 0 ] = 0L;
     }
 
-  /** @see Aggregator#aggregate(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
     {
-    context.put( FIELD_NAME, (Long) context.get( FIELD_NAME ) + 1L );
+    aggregatorCall.getContext()[ 0 ] += 1L;
     }
 
-  /** @see Aggregator#complete(Map, TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
     {
-    outputCollector.add( new Tuple( (Comparable) context.get( FIELD_NAME ) ) );
+    aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
+    }
+
+  protected Tuple getResult( AggregatorCall<Long[]> aggregatorCall )
+    {
+    return new Tuple( (Comparable) aggregatorCall.getContext()[ 0 ] );
     }
   }

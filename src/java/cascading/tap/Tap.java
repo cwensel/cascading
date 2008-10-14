@@ -34,6 +34,7 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -235,14 +236,12 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method sink emits the sink value(s) to the OutputCollector
    *
-   * @param fields          of type Fields
-   * @param tuple           of type Tuple
-   * @param outputCollector of type OutputCollector
-   * @throws IOException when the resource cannot be written to
+   * @param tupleEntry
+   * @param outputCollector of type OutputCollector @throws IOException when the resource cannot be written to
    */
-  public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
-    scheme.sink( fields, tuple, outputCollector );
+    scheme.sink( tupleEntry, outputCollector );
     }
 
   /** @see FlowElement#outgoingScopeFor(Set<Scope>) */

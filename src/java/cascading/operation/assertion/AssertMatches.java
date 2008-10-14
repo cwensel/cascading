@@ -21,9 +21,11 @@
 
 package cascading.operation.assertion;
 
+import cascading.flow.FlowSession;
 import cascading.operation.ValueAssertion;
+import cascading.operation.ValueAssertionCall;
 import cascading.operation.regex.RegexMatcher;
-import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuple;
 
 /**
  * Class AssertMatches matches the given regular expression patternString against the whole argument
@@ -56,10 +58,12 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion
     super( patternString, negateMatch );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
     {
-    if( matchWholeTuple( input.getTuple() ) )
-      BaseAssertion.throwFail( message, input.getTuple().print(), patternString );
+    Tuple tuple = assertionCall.getArguments().getTuple();
+
+    if( matchWholeTuple( tuple ) )
+      BaseAssertion.throwFail( message, tuple.print(), patternString );
     }
   }

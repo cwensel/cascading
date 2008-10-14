@@ -25,7 +25,9 @@ import java.io.IOException;
 
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
-import cascading.tuple.Tuples;
+import cascading.tuple.TupleEntry;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
@@ -54,6 +56,8 @@ public class TapCollector extends TupleCollector implements OutputCollector
   private String filename;
   /** Field tap */
   private Tap tap;
+  /** Field outputEntry */
+  private TupleEntry outputEntry;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -66,13 +70,14 @@ public class TapCollector extends TupleCollector implements OutputCollector
     {
     this.tap = tap;
     this.conf = new JobConf( conf );
+    this.outputEntry = new TupleEntry( tap.getSinkFields() );
 
     initalize();
     }
 
   private void initalize() throws IOException
     {
-    tap.sinkInit( conf );
+    tap.sinkInit( conf ); // tap should not delete if called within a task
 
     if( !tap.makeDirs( conf ) ) // required
       throw new TapException( "unable to make dirs for: " + tap.toString() );
@@ -82,11 +87,14 @@ public class TapCollector extends TupleCollector implements OutputCollector
     if( outputFormat instanceof JobConfigurable )
       ( (JobConfigurable) outputFormat ).configure( conf );
 
+    Path outputPath = FileOutputFormat.getOutputPath( conf );
+    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
+
     filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
 
-    // hack to support running in local mode
-    if( outputFormat instanceof FileOutputFormat )
-      conf.set( "mapred.work.output.dir", FileOutputFormat.getOutputPath( conf ).toString() );
+    conf.set( "mapred.work.output.dir", outputPath.toString() );
+
+    fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ) );
 
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
@@ -95,7 +103,9 @@ public class TapCollector extends TupleCollector implements OutputCollector
     {
     try
       {
-      writer.write( Tuples.NULL, tuple );
+      outputEntry.setTuple( tuple );
+
+      tap.sink( outputEntry, this );
       }
     catch( IOException exception )
       {
@@ -109,6 +119,12 @@ public class TapCollector extends TupleCollector implements OutputCollector
     try
       {
       writer.close( Reporter.NULL );
+
+      // remove _temporary directory
+      Path outputPath = FileOutputFormat.getOutputPath( conf );
+      FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
+
+      fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ), true );
       }
     catch( IOException exception )
       {

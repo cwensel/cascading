@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -51,7 +51,7 @@ public abstract class SourceTap extends Tap
     }
 
   @Override
-  public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
     }

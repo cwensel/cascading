@@ -24,11 +24,12 @@ package cascading.assembly;
 import java.util.Set;
 import java.util.TreeSet;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class SortElements ... */
@@ -42,9 +43,11 @@ public class SortElements extends BaseOperation implements Function
     this.fields = fields;
     }
 
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     Set<Tuple> set = new TreeSet<Tuple>();
+
+    TupleEntry input = functionCall.getArguments();
 
     for( Fields field : fields )
       set.add( input.selectTuple( field ) );
@@ -53,6 +56,6 @@ public class SortElements extends BaseOperation implements Function
     for( Tuple tuple : set )
       input.getTuple().put( input.getFields(), fields[ i++ ], tuple );
 
-    outputCollector.add( input );
+    functionCall.getOutputCollector().add( input );
     }
   }

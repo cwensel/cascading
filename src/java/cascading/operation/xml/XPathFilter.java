@@ -26,9 +26,10 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Filter;
+import cascading.operation.FilterCall;
 import cascading.operation.OperationException;
-import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
 
@@ -68,10 +69,10 @@ public class XPathFilter extends XPathOperation implements Filter
     this.removeMatch = removeMatch;
     }
 
-  /** @see cascading.operation.Filter#isRemove(TupleEntry) */
-  public boolean isRemove( TupleEntry input )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
-    InputSource source = new InputSource( new StringReader( (String) input.get( 0 ) ) );
+    InputSource source = new InputSource( new StringReader( (String) filterCall.getArguments().get( 0 ) ) );
     XPathExpression expression = getExpressions().get( 0 );
 
     try

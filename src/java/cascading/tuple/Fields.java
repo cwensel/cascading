@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,24 +59,24 @@ import cascading.util.Util;
  * and last positions would be the same, and would throw an error on there being duplicate field names in the selected
  * Tuple instance.
  * <p/>
- * Additionally, there are six predefined Fields sets used for different purposes; {@link #ALL}, {@link #KEYS}, {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, and {@link #UNKNOWN}.
+ * Additionally, there are six predefined Fields sets used for different purposes; {@link #ALL}, {@link #GROUP}, {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, and {@link #UNKNOWN}.
  * <p/>
  * The ALL Fields set is a "wildcard" that represents all the current available fields.
  * <p/>
- * The KEYS Fields set represents all the fields used as grouping values in a previous {@link Group}. If there is no previous
- * Group in the pipe assembly, the KEYS represents all the current field names.
+ * The GROUP Fields set represents all the fields used as grouping values in a previous {@link Group}. If there is no previous
+ * Group in the pipe assembly, the GROUP represents all the current field names.
  * <p/>
  * The VALUES Fields set represent all the fields not used as grouping fields in a previous Group.
  * <p/>
  */
-public final class Fields implements Comparable, Serializable
+public final class Fields implements Comparable, Iterable, Serializable
   {
   /** Field UNKNOWN */
   public static final Fields UNKNOWN = new Fields( Kind.UNKNOWN );
   /** Field ALL represents a wildcard for all fields */
   public static final Fields ALL = new Fields( Kind.ALL );
   /** Field KEYS represents all fields used as they key for the last grouping */
-  public static final Fields KEYS = new Fields( Kind.KEYS );
+  public static final Fields GROUP = new Fields( Kind.GROUP );
   /** Field VALUES represents all fields used as values for the last grouping */
   public static final Fields VALUES = new Fields( Kind.VALUES );
   /** Field ARGS represents all fields used as the arguments for the current operation */
@@ -94,7 +95,7 @@ public final class Fields implements Comparable, Serializable
    */
   static enum Kind
     {
-      ALL, KEYS, VALUES, ARGS, RESULTS, UNKNOWN;
+      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN;
     }
 
   /** Field fields */
@@ -407,25 +408,25 @@ public final class Fields implements Comparable, Serializable
     }
 
   /**
-   * Method isArgSelector returns true if this instance is 'defined' or the field set {@link #ALL}, {@link #KEYS}, or
+   * Method isArgSelector returns true if this instance is 'defined' or the field set {@link #ALL}, {@link #GROUP}, or
    * {@link #VALUES}.
    *
    * @return the argSelector (type boolean) of this Fields object.
    */
   public boolean isArgSelector()
     {
-    return isAll() || isKeys() || isValues() || isDefined();
+    return isAll() || isGroup() || isValues() || isDefined();
     }
 
   /**
    * Method isDeclarator returns true if this can be used as a declarator. Specifically if it is 'defined' or
-   * {@link #UNKNOWN}, {@link #ALL}, {@link #ARGS}, {@link #KEYS}, or {@link #VALUES}.
+   * {@link #UNKNOWN}, {@link #ALL}, {@link #ARGS}, {@link #GROUP}, or {@link #VALUES}.
    *
    * @return the declarator (type boolean) of this Fields object.
    */
   public boolean isDeclarator()
     {
-    return isUnknown() || isAll() || isArguments() || isKeys() || isValues() || isDefined();
+    return isUnknown() || isAll() || isArguments() || isGroup() || isValues() || isDefined();
     }
 
   /**
@@ -479,24 +480,24 @@ public final class Fields implements Comparable, Serializable
     }
 
   /**
-   * Method isKeys returns true if this instance is the {@link #KEYS} field set.
+   * Method isKeys returns true if this instance is the {@link #GROUP} field set.
    *
    * @return the keys (type boolean) of this Fields object.
    */
-  public boolean isKeys()
+  public boolean isGroup()
     {
-    return kind == Kind.KEYS;
+    return kind == Kind.GROUP;
     }
 
   /**
    * Method isSubstitution returns true if this instance is a substitution fields set. Specifically if it is the field
-   * set {@link #ALL}, {@link #ARGS}, {@link #KEYS}, or {@link #VALUES}.
+   * set {@link #ALL}, {@link #ARGS}, {@link #GROUP}, or {@link #VALUES}.
    *
    * @return the substitution (type boolean) of this Fields object.
    */
   public boolean isSubstitution()
     {
-    return isAll() || isArguments() || isKeys() || isValues();
+    return isAll() || isArguments() || isGroup() || isValues();
     }
 
   private Comparable[] validate( Comparable[] fields )
@@ -649,7 +650,10 @@ public final class Fields implements Comparable, Serializable
    */
   public int getPos( Comparable field )
     {
-    return indexOf( field );
+    if( field instanceof Number )
+      return translatePos( (Integer) field );
+    else
+      return indexOf( field );
     }
 
   private final Map<Comparable, Integer> getIndex()
@@ -683,6 +687,17 @@ public final class Fields implements Comparable, Serializable
       return -1;
 
     return result;
+    }
+
+  /**
+   * Method iterator return an unmodifiable iterator of field values. if {@link #isSubstitution()} returns true,
+   * this iterator will be empty.
+   *
+   * @return Iterator
+   */
+  public Iterator iterator()
+    {
+    return Collections.unmodifiableList( Arrays.asList( fields ) ).iterator();
     }
 
   /**

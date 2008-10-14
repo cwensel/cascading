@@ -19,14 +19,25 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.pipe;
+package cascading.operation;
 
-/**
- * The class PipeAssembly only exists to provide backwards compatibility. Please use {@link SubAssembly} as a
- * replacement. This class will be removed in the near future.
- *
- * @deprecated use SubAssembly instead
- */
-public abstract class PipeAssembly extends SubAssembly
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntry;
+
+/** Interface FunctionCall provides access to the current {@link Function} invocation arguments. */
+public interface FunctionCall
   {
+  /**
+   * Returns {@link TupleEntry} of argument values.
+   *
+   * @return TupleEntry
+   */
+  TupleEntry getArguments();
+
+  /**
+   * Returns the {@link TupleCollector} used to emit result values.
+   *
+   * @return TupleCollector
+   */
+  TupleCollector getOutputCollector();
   }

@@ -23,15 +23,14 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
-import cascading.operation.generator.Generator;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class RegexGenerator will emit a new Tuple for every matched regex group. */
-public class RegexGenerator extends RegexOperation implements Generator
+public class RegexGenerator extends RegexOperation implements Function
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -57,10 +56,10 @@ public class RegexGenerator extends RegexOperation implements Generator
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    String value = input.getTuple().getString( 0 );
+    String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
@@ -68,6 +67,6 @@ public class RegexGenerator extends RegexOperation implements Generator
     Matcher matcher = getPattern().matcher( value );
 
     while( matcher.find() )
-      outputCollector.add( new Tuple( matcher.group() ) );
+      functionCall.getOutputCollector().add( new Tuple( matcher.group() ) );
     }
   }

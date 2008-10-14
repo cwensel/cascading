@@ -23,7 +23,7 @@ package cascading.operation;
 
 import java.io.PrintStream;
 
-import cascading.tuple.TupleEntry;
+import cascading.flow.FlowSession;
 
 /**
  * Class Debug is a {@link Filter} that will never remove an item from a stream, but will print the Tuple to either
@@ -138,15 +138,15 @@ public class Debug extends BaseOperation implements Filter
     this.printFields = printFields;
     }
 
-  /** @see Filter#isRemove(TupleEntry) */
-  public boolean isRemove( TupleEntry input )
+  /** @see Filter#isRemove(cascading.flow.FlowSession, FilterCall) */
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
     PrintStream stream = output == Output.STDOUT ? System.out : System.err;
 
     if( printFields )
-      print( stream, input.getFields().print() );
+      print( stream, filterCall.getArguments().getFields().print() );
 
-    print( stream, input.getTuple().print() );
+    print( stream, filterCall.getArguments().getTuple().print() );
 
     return false;
     }

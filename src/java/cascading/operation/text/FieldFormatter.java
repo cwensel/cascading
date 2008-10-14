@@ -23,12 +23,12 @@ package cascading.operation.text;
 
 import java.util.Formatter;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class FieldFormatter formats the values in a Tuple with a given format and stuffs the result into a new field.
@@ -79,9 +79,9 @@ public class FieldFormatter extends BaseOperation implements Function
     return format;
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    outputCollector.add( new Tuple( input.getTuple().format( format ) ) );
+    functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().format( format ) ) );
     }
   }

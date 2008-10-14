@@ -21,8 +21,6 @@
 
 package cascading.operation.aggregator;
 
-import java.util.Map;
-
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -35,13 +33,10 @@ import cascading.tuple.TupleEntry;
  */
 public class First extends ExtentBase
   {
-  /** Field FIELD_NAME */
-  private static final String FIELD_NAME = "first";
-
   /** Selects and returns the first argument Tuple encountered. */
   public First()
     {
-    super( Fields.ARGS, FIELD_NAME );
+    super( Fields.ARGS );
     }
 
   /**
@@ -51,7 +46,7 @@ public class First extends ExtentBase
    */
   public First( Fields fieldDeclaration )
     {
-    super( fieldDeclaration.size(), fieldDeclaration, FIELD_NAME );
+    super( fieldDeclaration.size(), fieldDeclaration );
     }
 
   /**
@@ -63,14 +58,13 @@ public class First extends ExtentBase
    */
   public First( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
-    super( fieldDeclaration, FIELD_NAME, ignoreTuples );
+    super( fieldDeclaration, ignoreTuples );
     }
 
-  @SuppressWarnings("unchecked")
-  protected void performOperation( Map context, TupleEntry entry )
+  protected void performOperation( Tuple[] context, TupleEntry entry )
     {
-    if( !context.containsKey( FIELD_NAME ) )
-      context.put( FIELD_NAME, entry.getTuple() );
+    if( context[ 0 ] == null )
+      context[ 0 ] = new Tuple( entry.getTuple() );
     }
 
   }

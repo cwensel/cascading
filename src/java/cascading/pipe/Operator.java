@@ -270,7 +270,7 @@ public abstract class Operator extends Pipe
     if( outputSelector.isArguments() )
       return argumentSelector;
 
-    if( outputSelector.isKeys() )
+    if( outputSelector.isGroup() )
       return incomingScope.getOutGroupingFields();
 
     if( outputSelector.isValues() )
@@ -289,7 +289,7 @@ public abstract class Operator extends Pipe
       if( argumentSelector.isAll() )
         return resolveIncomingOperationFields( incomingScope );
 
-      if( argumentSelector.isKeys() )
+      if( argumentSelector.isGroup() )
         return incomingScope.getOutGroupingFields();
 
       if( argumentSelector.isValues() )
@@ -319,7 +319,7 @@ public abstract class Operator extends Pipe
       if( fieldDeclaration.isAll() )
         return resolveFields( incomingScope );
 
-      if( fieldDeclaration.isKeys() )
+      if( fieldDeclaration.isGroup() )
         return incomingScope.getOutGroupingFields();
 
       // VALUES is the diff between all fields and group fields

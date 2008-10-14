@@ -27,6 +27,7 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tap.TapCollector;
@@ -42,13 +43,13 @@ class TapReducerStackElement extends ReducerStackElement
   private final Tap sink;
   private TapCollector tapCollector;
 
-  public TapReducerStackElement( StackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf jobConf ) throws IOException
+  public TapReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, incomingScope, jobConf, null );
+    super( previous, flowSession, incomingScope, null );
     this.sink = sink;
 
     if( useTapCollector )
-      this.tapCollector = (TapCollector) sink.openForWrite( jobConf );
+      this.tapCollector = (TapCollector) sink.openForWrite( getJobConf() );
     }
 
   public FlowElement getFlowElement()
@@ -77,9 +78,9 @@ class TapReducerStackElement extends ReducerStackElement
     try
       {
       if( tapCollector != null )
-        ( (Tap) getFlowElement() ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), tapCollector );
+        ( (Tap) getFlowElement() ).sink( tupleEntry, tapCollector );
       else
-        ( (Tap) getFlowElement() ).sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
+        ( (Tap) getFlowElement() ).sink( tupleEntry, lastOutput );
       }
     catch( OutOfMemoryError error )
       {

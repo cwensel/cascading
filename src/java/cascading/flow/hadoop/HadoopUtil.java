@@ -21,6 +21,7 @@
 
 package cascading.flow.hadoop;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.mapred.JobConf;
@@ -67,5 +68,15 @@ public class HadoopUtil
       }
 
     return jobConf;
+    }
+
+  public static Map<Object, Object> createProperties( JobConf jobConf )
+    {
+    Map<Object, Object> properties = new HashMap<Object, Object>();
+
+    for( Map.Entry<String, String> entry : jobConf )
+      properties.put( entry.getKey(), entry.getValue() );
+
+    return properties;
     }
   }

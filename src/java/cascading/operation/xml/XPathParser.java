@@ -25,12 +25,12 @@ import java.io.StringReader;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -72,11 +72,11 @@ public class XPathParser extends XPathOperation implements Function
     super( 1, fieldDeclaration, null, paths );
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     Tuple tuple = new Tuple();
-    InputSource source = new InputSource( new StringReader( (String) input.get( 0 ) ) );
+    InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().get( 0 ) ) );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {
@@ -99,6 +99,6 @@ public class XPathParser extends XPathOperation implements Function
         }
       }
 
-    outputCollector.add( tuple );
+    functionCall.getOutputCollector().add( tuple );
     }
   }

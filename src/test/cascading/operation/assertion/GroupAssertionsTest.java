@@ -21,12 +21,11 @@
 
 package cascading.operation.assertion;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.CascadingTestCase;
+import cascading.flow.FlowSession;
 import cascading.operation.AssertionException;
 import cascading.operation.GroupAssertion;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -48,15 +47,22 @@ public class GroupAssertionsTest extends CascadingTestCase
 
   private void assertFail( GroupAssertion assertion, TupleEntry groupEntry, TupleEntry... values )
     {
-    Map context = new HashMap();
-    assertion.start( context, groupEntry );
+    OperationCall operationCall = new OperationCall();
+
+    operationCall.setGroup( groupEntry );
+
+    assertion.start( FlowSession.NULL, operationCall );
 
     for( TupleEntry value : values )
-      assertion.aggregate( context, value );
+      {
+      operationCall.setArguments( value );
+      assertion.aggregate( FlowSession.NULL, operationCall );
+      }
 
     try
       {
-      assertion.doAssert( context );
+      operationCall.setArguments( null );
+      assertion.doAssert( FlowSession.NULL, operationCall );
       fail();
       }
     catch( AssertionException exception )
@@ -68,13 +74,20 @@ public class GroupAssertionsTest extends CascadingTestCase
 
   private void assertPass( GroupAssertion assertion, TupleEntry groupEntry, TupleEntry... values )
     {
-    Map context = new HashMap();
-    assertion.start( context, groupEntry );
+    OperationCall operationCall = new OperationCall();
+
+    operationCall.setGroup( groupEntry );
+
+    assertion.start( null, operationCall );
 
     for( TupleEntry value : values )
-      assertion.aggregate( context, value );
+      {
+      operationCall.setArguments( value );
+      assertion.aggregate( FlowSession.NULL, operationCall );
+      }
 
-    assertion.doAssert( context );
+    operationCall.setArguments( null );
+    assertion.doAssert( FlowSession.NULL, operationCall );
     }
 
   public void testSizeEquals()

@@ -22,6 +22,7 @@
 package cascading.flow.stack;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
 import cascading.tap.Tap;
@@ -37,9 +38,9 @@ class EachMapperStackElement extends MapperStackElement
   private final Each each;
   private Each.EachHandler eachHandler;
 
-  public EachMapperStackElement( MapperStackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each each )
+  public EachMapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Each each )
     {
-    super( previous, incomingScope, jobConf, trap );
+    super( previous, flowSession, incomingScope, trap );
     this.each = each;
     }
 
@@ -73,7 +74,7 @@ class EachMapperStackElement extends MapperStackElement
     {
     try
       {
-      eachHandler.operate( tupleEntry );
+      eachHandler.operate( flowSession, tupleEntry );
       }
     catch( Exception exception )
       {

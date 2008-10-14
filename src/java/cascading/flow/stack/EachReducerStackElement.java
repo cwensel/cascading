@@ -24,6 +24,7 @@ package cascading.flow.stack;
 import java.util.Iterator;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
 import cascading.tap.Tap;
@@ -39,9 +40,9 @@ class EachReducerStackElement extends ReducerStackElement
   private final Each each;
   private Each.EachHandler eachHandler;
 
-  public EachReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap, Each each )
+  public EachReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Each each )
     {
-    super( previous, incomingScope, jobConf, trap );
+    super( previous, flowSession, incomingScope, trap );
     this.each = each;
     }
 
@@ -83,7 +84,7 @@ class EachReducerStackElement extends ReducerStackElement
     {
     try
       {
-      eachHandler.operate( tupleEntry );
+      eachHandler.operate( flowSession, tupleEntry );
       }
     catch( Exception exception )
       {

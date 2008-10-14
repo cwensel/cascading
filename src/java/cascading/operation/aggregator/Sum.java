@@ -21,18 +21,16 @@
 
 package cascading.operation.aggregator;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
-public class Sum extends BaseOperation implements Aggregator
+public class Sum extends BaseOperation implements Aggregator<Double[]>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "sum";
@@ -73,24 +71,27 @@ public class Sum extends BaseOperation implements Aggregator
     this.type = type;
     }
 
-  /** @see Aggregator#start(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
     {
-    context.put( FIELD_NAME, 0.0d );
+    if( aggregatorCall.getContext() == null )
+      aggregatorCall.setContext( new Double[]{0.0D} );
+    else
+      aggregatorCall.getContext()[ 0 ] = 0.0D;
     }
 
-  /** @see Aggregator#aggregate(Map, TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
     {
-    context.put( FIELD_NAME, (Double) context.get( FIELD_NAME ) + entry.getTuple().getDouble( 0 ) );
+    aggregatorCall.getContext()[ 0 ] += aggregatorCall.getArguments().getDouble( 0 );
     }
 
-  /** @see Aggregator#complete(Map, TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
     {
-    outputCollector.add( new Tuple( (Comparable) Tuples.coerce( new Tuple( (Comparable) context.get( FIELD_NAME ) ), 0, type ) ) );
+    aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
+    }
+
+  protected Tuple getResult( AggregatorCall<Double[]> aggregatorCall )
+    {
+    Tuple tuple = new Tuple( (Comparable) aggregatorCall.getContext()[ 0 ] );
+    return new Tuple( (Comparable) Tuples.coerce( tuple, 0, type ) );
     }
   }

@@ -24,11 +24,11 @@ package cascading.operation.text;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /**
  * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp
@@ -60,12 +60,12 @@ public class DateFormatter extends DateOperation implements Function
     super( 1, fieldDeclaration, dateFormatString );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     Tuple output = new Tuple();
 
-    long ts = input.getTuple().getLong( 0 );
+    long ts = functionCall.getArguments().getLong( 0 );
 
     Calendar calendar = getCalendar();
 
@@ -73,7 +73,7 @@ public class DateFormatter extends DateOperation implements Function
 
     output.add( getDateFormat().format( calendar.getTime() ) );
 
-    outputCollector.add( output );
+    functionCall.getOutputCollector().add( output );
     }
 
   }

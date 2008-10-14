@@ -21,9 +21,10 @@
 
 package cascading.operation.expression;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Filter;
+import cascading.operation.FilterCall;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import org.codehaus.janino.ExpressionEvaluator;
 
 /**
@@ -55,9 +56,9 @@ public class ExpressionFilter extends ExpressionOperation implements Filter
     super( expression, parameterTypes );
     }
 
-  /** @see cascading.operation.Filter#isRemove(TupleEntry) */
-  public boolean isRemove( TupleEntry input )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
-    return (Boolean) evaluate( input );
+    return (Boolean) evaluate( filterCall.getArguments() );
     }
   }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -84,9 +85,9 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public void sink( Fields inFields, Tuple tuple, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
-    Tuple result = getSinkFields() != null ? tuple.get( inFields, getSinkFields() ) : tuple;
+    Tuple result = getSinkFields() != null ? tupleEntry.selectTuple( getSinkFields() ) : tupleEntry.getTuple();
 
     outputCollector.collect( Tuples.NULL, result );
     }

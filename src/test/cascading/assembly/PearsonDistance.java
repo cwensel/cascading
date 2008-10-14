@@ -21,12 +21,14 @@
 
 package cascading.assembly;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.FlowSession;
+import cascading.operation.AggregatorCall;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -46,7 +48,7 @@ public class PearsonDistance extends CrossTab
     super( previous, argumentFieldSelector, new Pearson(), fieldDeclaration );
     }
 
-  private static class Pearson extends CrossTabOperation
+  private static class Pearson extends CrossTabOperation<Map<String, Double>>
     {
     private static final String COUNT = "count";
     private static final String SUM1 = "sum1";
@@ -60,8 +62,13 @@ public class PearsonDistance extends CrossTab
       super( new Fields( "pearson" ) );
       }
 
-    public void start( Map context, TupleEntry groupEntry )
+    public void start( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
+      if( aggregatorCall.getContext() == null )
+        aggregatorCall.setContext( new HashMap<String, Double>() );
+
+      Map<String, Double> context = aggregatorCall.getContext();
+
       context.put( COUNT, 0d );
       context.put( SUM1, 0d );
       context.put( SUM2, 0d );
@@ -70,8 +77,11 @@ public class PearsonDistance extends CrossTab
       context.put( SUMPROD, 0d );
       }
 
-    public void aggregate( Map context, TupleEntry entry )
+    public void aggregate( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
+      Map<String, Double> context = aggregatorCall.getContext();
+      TupleEntry entry = aggregatorCall.getArguments();
+
       context.put( COUNT, ( (Double) context.get( COUNT ) ) + 1d );
 
       context.put( SUM1, ( (Double) context.get( SUM1 ) ) + entry.getTuple().getDouble( 0 ) );
@@ -83,8 +93,9 @@ public class PearsonDistance extends CrossTab
       context.put( SUMPROD, ( (Double) context.get( SUMPROD ) ) + ( entry.getTuple().getDouble( 0 ) * entry.getTuple().getDouble( 1 ) ) );
       }
 
-    public void complete( Map context, TupleCollector outputCollector )
+    public void complete( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
+      Map<String, Double> context = aggregatorCall.getContext();
       Double count = (Double) context.get( COUNT );
       Double sum1 = (Double) context.get( SUM1 );
       Double sum2 = (Double) context.get( SUM2 );
@@ -93,9 +104,9 @@ public class PearsonDistance extends CrossTab
       double den = Math.sqrt( ( (Double) context.get( SUMSQRS1 ) - Math.pow( sum1, 2 ) / count ) * ( (Double) context.get( SUMSQRS2 ) - Math.pow( sum2, 2 ) / count ) );
 
       if( den == 0 )
-        outputCollector.add( new Tuple( 0 ) );
+        aggregatorCall.getOutputCollector().add( new Tuple( 0 ) );
       else
-        outputCollector.add( new Tuple( num / den ) );
+        aggregatorCall.getOutputCollector().add( new Tuple( num / den ) );
       }
     }
   }

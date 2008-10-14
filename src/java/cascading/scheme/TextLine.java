@@ -27,11 +27,14 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
@@ -162,7 +165,7 @@ public class TextLine extends Scheme
   @Override
   public void sourceInit( Tap tap, JobConf conf )
     {
-    if( hasZippedFiles( conf.getInputPaths() ) )
+    if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
       conf.setInputFormat( ZipInputFormat.class );
     else
       conf.setInputFormat( TextInputFormat.class );
@@ -185,7 +188,7 @@ public class TextLine extends Scheme
   public void sinkInit( Tap tap, JobConf conf ) throws IOException
     {
     if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
-      throw new IllegalStateException( "cannot write zip files: " + conf.getOutputPath() );
+      throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
 
     if( getSinkCompression() == Compress.DISABLE )
       conf.setBoolean( "mapred.output.compress", false );
@@ -209,10 +212,10 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sink( Fields inFields, Tuple tuple, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
     // it's ok to use NULL here so the collector does not write anything
-    outputCollector.collect( null, tuple.get( inFields, sinkFields ) );
+    outputCollector.collect( null, tupleEntry.selectTuple( sinkFields ) );
     }
 
   }

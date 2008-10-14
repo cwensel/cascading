@@ -21,8 +21,7 @@
 
 package cascading.operation;
 
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
+import cascading.flow.FlowSession;
 
 /** Interface Function marks a given {@link BaseOperation} as a function, as opposed to being a {@link Filter}. */
 public interface Function extends Operation
@@ -30,8 +29,8 @@ public interface Function extends Operation
   /**
    * Method operate provides the implementation of this Function.
    *
-   * @param input           of type TupleEntry
-   * @param outputCollector of type TupleEntryListIterator
+   * @param flowSession  of type FlowSession
+   * @param functionCall of type FunctionCall
    */
-  void operate( TupleEntry input, TupleCollector outputCollector );
+  void operate( FlowSession flowSession, FunctionCall functionCall );
   }

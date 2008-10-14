@@ -23,18 +23,20 @@ package cascading;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Map;
 
 import cascading.assembly.EuclideanDistance;
 import cascading.assembly.PearsonDistance;
 import cascading.assembly.SortElements;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowSession;
+import cascading.operation.AggregatorCall;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.aggregator.Sum;
-import cascading.operation.generator.UnGroup;
+import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.Regexes;
 import cascading.pipe.Each;
@@ -47,10 +49,8 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleIterator;
-import cascading.tuple.TupleListCollector;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
 public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
@@ -107,9 +107,10 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( TupleEntry input, TupleCollector outputCollector )
+    public void operate( FlowSession flowSession, FunctionCall functionCall )
       {
-      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      TupleEntry input = functionCall.getArguments();
+      functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -121,13 +122,11 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( Map context, TupleCollector outputCollector )
+    public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
       {
-      TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "result" ) );
-      super.complete( context, resultEntryCollector );
-      Tuple tuple = resultEntryCollector.iterator().next();
+      Tuple tuple = super.getResult( aggregatorCall );
 
-      outputCollector.add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
+      aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
       }
     };
 
@@ -197,9 +196,10 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( TupleEntry input, TupleCollector outputCollector )
+    public void operate( FlowSession flowSession, FunctionCall functionCall )
       {
-      outputCollector.add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+      TupleEntry input = functionCall.getArguments();
+      functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
       }
     };
 
@@ -211,13 +211,11 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( Map context, TupleCollector outputCollector )
+    public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
       {
-      TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-      super.complete( context, resultEntryCollector );
-      Tuple tuple = resultEntryCollector.iterator().next();
+      Tuple tuple = super.getResult( aggregatorCall );
 
-      outputCollector.add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
+      aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
       }
     };
 

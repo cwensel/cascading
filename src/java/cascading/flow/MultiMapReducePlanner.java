@@ -147,11 +147,11 @@ public class MultiMapReducePlanner extends FlowPlanner
     jobConf = HadoopUtil.createJobConf( properties, getJobConf( properties ) );
     intermediateSchemeClass = FlowConnector.getIntermediateSchemeClass( properties );
 
-    Class type = FlowConnector.getJarClass( properties );
+    Class type = FlowConnector.getApplicationJarClass( properties );
     if( jobConf.getJar() == null && type != null )
       jobConf.setJarByClass( type );
 
-    String path = FlowConnector.getJarPath( properties );
+    String path = FlowConnector.getApplicationJarPath( properties );
     if( jobConf.getJar() == null && path != null )
       jobConf.setJar( path );
 

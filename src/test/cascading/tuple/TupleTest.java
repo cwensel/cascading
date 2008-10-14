@@ -23,8 +23,6 @@ package cascading.tuple;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import cascading.CascadingTestCase;
@@ -267,18 +265,18 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0" );
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    DataOutputStream dataOutputStream = new DataOutputStream( byteArrayOutputStream );
+    TupleOutputStream dataOutputStream = new TupleOutputStream( byteArrayOutputStream );
 
-    aTuple.write( dataOutputStream );
+    dataOutputStream.writeTuple( aTuple );
 
     dataOutputStream.flush();
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray() );
-    DataInputStream dataInputStream = new DataInputStream( byteArrayInputStream );
+    TupleInputStream dataInputStream = new TupleInputStream( byteArrayInputStream );
 
     Tuple newTuple = new Tuple();
 
-    newTuple.readFields( dataInputStream );
+    dataInputStream.readTuple( newTuple );
 
     assertEquals( aTuple, newTuple );
     }

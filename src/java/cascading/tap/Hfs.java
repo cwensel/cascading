@@ -29,6 +29,7 @@ import java.util.Map;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -270,12 +271,15 @@ public class Hfs extends Tap
     super.sourceInit( conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
+
+    TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
     }
 
   @Override
   public void sinkInit( JobConf conf ) throws IOException
     {
-    if( deleteOnSinkInit )
+    // do not delete if initialized from within a task
+    if( deleteOnSinkInit && conf.get( "mapred.task.partition" ) == null )
       deletePath( conf );
 
     Path qualifiedPath = getQualifiedPath( conf );
@@ -284,6 +288,8 @@ public class Hfs extends Tap
     super.sinkInit( conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
+
+    TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
     }
 
   private void makeLocal( JobConf conf, Path qualifiedPath, String infoMessage )
@@ -312,7 +318,7 @@ public class Hfs extends Tap
     if( LOG.isDebugEnabled() )
       LOG.debug( "deleting: " + getQualifiedPath( conf ) );
 
-    return getFileSystem( conf ).delete( getPath() );
+    return getFileSystem( conf ).delete( getPath(), true );
     }
 
   @Override

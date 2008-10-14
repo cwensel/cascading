@@ -46,6 +46,7 @@ public abstract class StreamedFileSystem extends FileSystem
     throw new UnsupportedOperationException( "not supported" );
     }
 
+  @Deprecated
   @Override
   public boolean delete( Path path ) throws IOException
     {

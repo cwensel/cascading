@@ -21,11 +21,11 @@
 
 package cascading.operation.regex;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class RegexSplitter will split an incoming argument value by the given regex delimiter patternString. */
 public class RegexSplitter extends RegexOperation implements Function
@@ -61,10 +61,10 @@ public class RegexSplitter extends RegexOperation implements Function
     super( 1, fieldDeclaration, patternString );
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    String value = input.getTuple().getString( 0 );
+    String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
@@ -78,6 +78,6 @@ public class RegexSplitter extends RegexOperation implements Function
     for( int i = 0; i < split.length; i++ )
       output.add( split[ i ] );
 
-    outputCollector.add( output );
+    functionCall.getOutputCollector().add( output );
     }
   }

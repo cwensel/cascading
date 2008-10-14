@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.CascadingException;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowReducerStack;
 import org.apache.hadoop.mapred.JobConf;
@@ -36,7 +37,10 @@ import org.apache.hadoop.mapred.Reporter;
 /** Class FlowReducer ... */
 public class FlowReducer extends MapReduceBase implements Reducer
   {
+  /** Field flowReducerStack */
   private FlowReducerStack flowReducerStack;
+  /** Field currentProcess */
+  private HadoopFlowProcess currentProcess;
 
   /** Constructor FlowReducer creates a new FlowReducer instance. */
   public FlowReducer()
@@ -50,7 +54,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
-      flowReducerStack = new FlowReducerStack( jobConf );
+      currentProcess = new HadoopFlowProcess( jobConf );
+      flowReducerStack = new FlowReducerStack( jobConf, new FlowSession( currentProcess ) );
       }
     catch( Throwable throwable )
       {
@@ -63,6 +68,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
   public void reduce( Object key, Iterator values, OutputCollector output, Reporter reporter ) throws IOException
     {
+    currentProcess.setReporter( reporter );
+
     try
       {
       flowReducerStack.reduce( key, values, output );

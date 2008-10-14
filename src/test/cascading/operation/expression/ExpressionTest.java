@@ -57,8 +57,7 @@ public class ExpressionTest extends CascadingTestCase
 
   private ExpressionFunction getFunction( String expression, Class... classes )
     {
-    ExpressionFunction function = new ExpressionFunction( new Fields( "result" ), expression, classes );
-    return function;
+    return new ExpressionFunction( new Fields( "result" ), expression, classes );
     }
 
   private TupleEntry getEntry( Comparable lhs, Comparable rhs )

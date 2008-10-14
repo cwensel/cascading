@@ -26,6 +26,7 @@ import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -53,6 +54,8 @@ public class FlowMapperStack
   private final Tap currentSource;
   /** Field jobConf */
   private final JobConf jobConf;
+  /** Field flowSession */
+  private final FlowSession flowSession;
 
   /** Field stack */
   private Stack stacks[];
@@ -66,9 +69,10 @@ public class FlowMapperStack
     MapperStackElement tail;
     }
 
-  public FlowMapperStack( JobConf jobConf ) throws IOException
+  public FlowMapperStack( JobConf jobConf, FlowSession flowSession ) throws IOException
     {
     this.jobConf = jobConf;
+    this.flowSession = flowSession;
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
 
     // is set by the MultiInputSplit
@@ -99,7 +103,7 @@ public class FlowMapperStack
       while( operator instanceof Each )
         {
         Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, (Each) operator );
+        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, trap, (Each) operator );
 
         incomingScope = step.getNextScope( operator );
         operator = step.getNextFlowElement( incomingScope );
@@ -119,13 +123,13 @@ public class FlowMapperStack
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
 
         Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, incomingScope, jobConf, trap, (Group) operator, outgoingScope );
+        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, trap, (Group) operator, outgoingScope );
         }
       else if( operator instanceof Tap )
         {
         useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
 
-        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, incomingScope, (Tap) operator, useTapCollector, jobConf );
+        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, (Tap) operator, useTapCollector );
         }
       else
         throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );

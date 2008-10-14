@@ -21,15 +21,15 @@
 
 package cascading.pipe;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
 import cascading.operation.GroupAssertion;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
@@ -225,19 +225,20 @@ public class Every extends Operator
     public final Scope outgoingScope;
     /** Field outputCollector */
     public FlowCollector outputCollector;
-    /** Field context */
-    final Map context = new HashMap();
+    /** Field operationCall */
+    OperationCall operationCall;
 
     public EveryHandler( Scope outgoingScope )
       {
       this.outgoingScope = outgoingScope;
+      this.operationCall = new OperationCall();
       }
 
-    public abstract void start( TupleEntry groupEntry );
+    public abstract void start( FlowSession flowSession, TupleEntry groupEntry );
 
-    public abstract void operate( TupleEntry inputEntry );
+    public abstract void operate( FlowSession flowSession, TupleEntry inputEntry );
 
-    public abstract void complete( TupleEntry value );
+    public abstract void complete( FlowSession flowSession, TupleEntry value );
 
 
     @Override
@@ -279,19 +280,22 @@ public class Every extends Operator
       };
       }
 
-    public void start( TupleEntry groupEntry )
+    public void start( FlowSession flowSession, TupleEntry groupEntry )
       {
-      context.clear();
-      getAggregator().start( context, groupEntry );
+      operationCall.setOutputCollector( null ); // zero it out
+      operationCall.setGroup( groupEntry );
+      getAggregator().start( flowSession, operationCall );
       }
 
-    public void operate( TupleEntry inputEntry )
+    public void operate( FlowSession flowSession, TupleEntry inputEntry )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
+      operationCall.setArguments( arguments );
+
       try
         {
-        getAggregator().aggregate( context, arguments );
+        getAggregator().aggregate( flowSession, operationCall );
         }
       catch( Throwable throwable )
         {
@@ -299,11 +303,14 @@ public class Every extends Operator
         }
       }
 
-    public void complete( TupleEntry value )
+    public void complete( FlowSession flowSession, TupleEntry value )
       {
       tupleCollector.value = value;
 
-      getAggregator().complete( context, tupleCollector );
+      operationCall.setArguments( null );
+      operationCall.setOutputCollector( tupleCollector );
+
+      getAggregator().complete( flowSession, operationCall );
       }
     }
 
@@ -314,22 +321,27 @@ public class Every extends Operator
       super( outgoingScope );
       }
 
-    public void start( TupleEntry groupEntry )
+    public void start( FlowSession flowSession, TupleEntry groupEntry )
       {
-      context.clear();
-      getGroupAssertion().start( context, groupEntry );
+      operationCall.setOutputCollector( null ); // zero it out
+      operationCall.setGroup( groupEntry );
+
+      getGroupAssertion().start( flowSession, operationCall );
       }
 
-    public void operate( TupleEntry inputEntry )
+    public void operate( FlowSession flowSession, TupleEntry inputEntry )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
-      getGroupAssertion().aggregate( context, arguments );
+      operationCall.setArguments( arguments );
+
+      getGroupAssertion().aggregate( flowSession, operationCall );
       }
 
-    public void complete( TupleEntry groupEntry )
+    public void complete( FlowSession flowSession, TupleEntry groupEntry )
       {
-      getGroupAssertion().doAssert( context );
+      operationCall.setArguments( null );
+      getGroupAssertion().doAssert( flowSession, operationCall );
 
       outputCollector.collect( groupEntry.getTuple() );
       }

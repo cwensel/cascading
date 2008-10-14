@@ -21,74 +21,68 @@
 
 package cascading.operation.aggregator;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import cascading.CascadingTestCase;
+import cascading.flow.FlowSession;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
-import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
 
 /** Test class for {@link cascading.operation.aggregator.First} */
-public class LastTest
+public class LastTest extends CascadingTestCase
   {
-
   /** class under test */
   private Last last;
+  private OperationCall operationCall;
 
-  /** @throws Exception  */
-  @Before
+  public LastTest()
+    {
+    super( "last tests" );
+    }
+
   public void setUp() throws Exception
     {
     last = new Last();
+    operationCall = new OperationCall();
     }
 
-  /** @throws Exception  */
-  @After
   public void tearDown() throws Exception
     {
     last = null;
     }
 
-  /** Test method for {@link First#First()}. */
-  @Test
   public final void testFirst()
     {
     assertEquals( "Got expected number of args", Integer.MAX_VALUE, last.getNumArgs() );
     assertEquals( "Got expected fields", Fields.ARGS, last.getFieldDeclaration() );
     }
 
-  /** Test method for {@link cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry)}. */
-  @Test
   public final void testStart()
     {
-    Map<String, Double> context = new HashMap<String, Double>();
-    last.start( context, null );
+    last.start( FlowSession.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-    last.complete( context, resultEntryCollector );
+    operationCall.setOutputCollector( resultEntryCollector );
+    last.complete( FlowSession.NULL, operationCall );
 
     assertEquals( "Got expected initial value on start", false, resultEntryCollector.iterator().hasNext() );
     }
 
-  /**
-   * Test method for {@link First#aggregate(java.util.Map, cascading.tuple.TupleEntry)}.
-   * Test method for {@link cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector)}.
-   */
-  @Test
   public final void testAggregateComplete()
     {
-    Map<String, Double> context = new HashMap<String, Double>();
-    last.start( context, null );
-    last.aggregate( context, new TupleEntry( new Tuple( new Double( 0.0 ) ) ) );
-    last.aggregate( context, new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
+    last.start( FlowSession.NULL, operationCall );
+
+
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( 0.0 ) ) ) );
+    last.aggregate( FlowSession.NULL, operationCall );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
+    last.aggregate( FlowSession.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
-    last.complete( context, resultEntryCollector );
+    operationCall.setOutputCollector( resultEntryCollector );
+    last.complete( FlowSession.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 1.0, tuple.getDouble( 0 ), 0.0d );

@@ -851,7 +851,7 @@ public class Flow implements Runnable
       return new ArrayList<Future<Throwable>>();
 
     executor = Executors.newFixedThreadPool( numThreads );
-    List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
+    List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() ); // todo: consider submit()
     executor.shutdown(); // don't accept any more work
     return futures;
     }

@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -47,9 +48,9 @@ abstract class MapperStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  MapperStackElement( MapperStackElement previous, Scope incomingScope, JobConf jobConf, Tap trap )
+  MapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap )
     {
-    super( jobConf, trap );
+    super( flowSession, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }

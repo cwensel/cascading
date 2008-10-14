@@ -21,9 +21,10 @@
 
 package cascading.operation.filter;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
-import cascading.tuple.TupleEntry;
+import cascading.operation.FilterCall;
 
 /**
  * Class FilterNull verifies that every value in the argument values {@link cascading.tuple.Tuple}
@@ -33,9 +34,9 @@ import cascading.tuple.TupleEntry;
  */
 public class FilterNull extends BaseOperation implements Filter
   {
-  public boolean isRemove( TupleEntry input )
+  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
     {
-    for( Object value : input.getTuple() )
+    for( Object value : filterCall.getArguments().getTuple() )
       {
       if( value == null )
         return true;

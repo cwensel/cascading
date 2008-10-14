@@ -54,11 +54,10 @@ public class ZipSplit extends FileSplit
    * @param file      the zip archive name
    * @param entryPath the path of the file to be read within the zip archive.
    * @param length    the uncompressed size of the file within the zip archive.
-   * @param conf      see {@link JobConf}
    */
-  public ZipSplit( Path file, String entryPath, long length, JobConf conf )
+  public ZipSplit( Path file, String entryPath, long length )
     {
-    super( file, 0, length, conf );
+    super( file, 0, length, (String[])null );
     this.entryPath = entryPath;
     }
 
@@ -67,11 +66,10 @@ public class ZipSplit extends FileSplit
    *
    * @param file   of type Path
    * @param length of type long
-   * @param conf   of type JobConf
    */
-  public ZipSplit( Path file, long length, JobConf conf )
+  public ZipSplit( Path file, long length )
     {
-    super( file, 0, length, conf );
+    super( file, 0, length, (String[])null );
     }
 
   /**

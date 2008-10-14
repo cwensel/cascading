@@ -21,7 +21,9 @@
 
 package cascading.operation.assertion;
 
+import cascading.flow.FlowSession;
 import cascading.operation.ValueAssertion;
+import cascading.operation.ValueAssertionCall;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -45,9 +47,11 @@ public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion
     this.size = size;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
     {
+    TupleEntry input = assertionCall.getArguments();
+
     if( input.size() >= size )
       fail( input.size(), size, input.getTuple().print() );
     }

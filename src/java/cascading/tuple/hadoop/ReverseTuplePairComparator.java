@@ -21,19 +21,13 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.IOException;
-
 import cascading.tuple.TuplePair;
 
 /**
- *
+ * Class ReverseTuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}.
  */
 public class ReverseTuplePairComparator extends TuplePairComparator
   {
-  public ReverseTuplePairComparator() throws IOException
-    {
-    }
-
   @Override
   public int compare( TuplePair lhs, TuplePair rhs )
     {

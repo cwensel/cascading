@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -51,16 +52,16 @@ abstract class ReducerStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  ReducerStackElement( StackElement previous, Scope incomingScope, JobConf jobConf, Tap trap )
+  ReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap )
     {
-    super( jobConf, trap );
+    super( flowSession, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }
 
-  ReducerStackElement( JobConf jobConf, Tap trap, Fields outGroupingFields )
+  ReducerStackElement( Tap trap, Fields outGroupingFields, FlowSession flowSession )
     {
-    super( jobConf, trap );
+    super( flowSession, trap );
     this.outGroupingFields = outGroupingFields;
     }
 

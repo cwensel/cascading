@@ -35,6 +35,7 @@ import cascading.tap.Tap;
 import cascading.tap.TapIterator;
 import cascading.tap.TempHfs;
 import cascading.tap.hadoop.MultiInputFormat;
+import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 import cascading.tuple.TuplePair;
@@ -43,6 +44,7 @@ import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
 import cascading.tuple.hadoop.TupleComparator;
 import cascading.tuple.hadoop.TuplePairComparator;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -128,19 +130,14 @@ public class FlowStep implements Serializable
     conf.setMapperClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
-//    conf.set( "io.serializations", Util.join( ",", conf.get( "io.serializations" ), TupleSerialization.class.getName() ) );
+    // set for use by the shuffling phase
+    TupleSerialization.setSerializations( conf );
 
     initFromSources( conf );
 
     initFromSink( conf );
 
-    if( !traps.isEmpty() )
-      {
-      JobConf tempConf = new JobConf( conf );
-
-      for( Tap tap : traps.values() )
-        tap.sourceInit( tempConf );
-      }
+    initFromTraps( conf );
 
     if( sink.getScheme().getNumSinkParts() != 0 )
       {
@@ -157,24 +154,41 @@ public class FlowStep implements Serializable
       {
       conf.setNumReduceTasks( 0 ); // disable reducers
       }
-    else if( group.isSorted() )
+    else
       {
-      conf.setPartitionerClass( GroupingPartitioner.class );
-      conf.setMapOutputKeyClass( TuplePair.class );
+      if( !group.isGroupBy() )
+        conf.setMapOutputValueClass( IndexTuple.class );
 
-      if( group.isSortReversed() )
-        conf.setOutputKeyComparatorClass( ReverseTuplePairComparator.class );
-      else
-        conf.setOutputKeyComparatorClass( TuplePairComparator.class );
+      if( group.isSorted() )
+        {
+        conf.setPartitionerClass( GroupingPartitioner.class );
+        conf.setMapOutputKeyClass( TuplePair.class );
 
-      // no need to supply a reverse comparator, only equality is checked
-      conf.setOutputValueGroupingComparator( GroupingComparator.class );
+        if( group.isSortReversed() )
+          conf.setOutputKeyComparatorClass( ReverseTuplePairComparator.class );
+        else
+          conf.setOutputKeyComparatorClass( TuplePairComparator.class );
+
+        // no need to supply a reverse comparator, only equality is checked
+        conf.setOutputValueGroupingComparator( GroupingComparator.class );
+        }
       }
 
     // perform last so init above will pass to tasks
     conf.set( FlowConstants.FLOW_STEP, Util.serializeBase64( this ) );
 
     return conf;
+    }
+
+  private void initFromTraps( JobConf conf ) throws IOException
+    {
+    if( !traps.isEmpty() )
+      {
+      JobConf trapConf = new JobConf( conf );
+
+      for( Tap tap : traps.values() )
+        tap.sinkInit( trapConf );
+      }
     }
 
   private void initFromSources( JobConf conf ) throws IOException

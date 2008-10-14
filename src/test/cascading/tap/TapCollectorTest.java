@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class TapCollectorTest extends CascadingTestCase
   {
-  String outputPath = "build/test/output/fields/";
+  String outputPath = "build/test/output/tap/";
 
   public TapCollectorTest()
     {

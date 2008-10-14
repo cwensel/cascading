@@ -25,12 +25,12 @@ import java.io.StringReader;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
-import cascading.operation.generator.Generator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
@@ -40,7 +40,7 @@ import org.xml.sax.InputSource;
  * XPathGenerator is a Generator function that will emit a new Tuple for every Node returned by
  * the given XPath expression.
  */
-public class XPathGenerator extends XPathOperation implements Generator
+public class XPathGenerator extends XPathOperation implements Function
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathGenerator.class );
@@ -61,9 +61,11 @@ public class XPathGenerator extends XPathOperation implements Generator
 
     }
 
-  /** @see Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
+    TupleEntry input = functionCall.getArguments();
+
     if( input.get( 0 ) == null || !( input.get( 0 ) instanceof String ) )
       return;
 
@@ -84,7 +86,7 @@ public class XPathGenerator extends XPathOperation implements Generator
           LOG.debug( "xpath: " + paths[ i ] + " was: " + ( nodeList != null && nodeList.getLength() != 0 ) );
 
         for( int j = 0; j < nodeList.getLength(); j++ )
-          outputCollector.add( new Tuple( writeAsXML( nodeList.item( j ) ) ) );
+          functionCall.getOutputCollector().add( new Tuple( writeAsXML( nodeList.item( j ) ) ) );
 
         }
       catch( XPathExpressionException exception )

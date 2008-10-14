@@ -24,68 +24,67 @@ package cascading.operation.aggregator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /** Class ExtentBase is the base class for First and Last. */
-public abstract class ExtentBase extends BaseOperation implements Aggregator
+public abstract class ExtentBase extends BaseOperation implements Aggregator<Tuple[]>
   {
-  /** Field defaultFieldName */
-  private final String defaultFieldName;
   /** Field ignoreTuples */
   private final Collection<Tuple> ignoreTuples;
 
-  protected ExtentBase( Fields fieldDeclaration, String defaultFieldName )
+  protected ExtentBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
-    this.defaultFieldName = defaultFieldName;
     this.ignoreTuples = null;
     }
 
-  protected ExtentBase( int numArgs, Fields fieldDeclaration, String defaultFieldName )
+  protected ExtentBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
-    this.defaultFieldName = defaultFieldName;
     ignoreTuples = null;
     }
 
-  protected ExtentBase( Fields fieldDeclaration, String defaultFieldName, Tuple... ignoreTuples )
+  protected ExtentBase( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
     super( fieldDeclaration );
-    this.defaultFieldName = defaultFieldName;
     this.ignoreTuples = new HashSet<Tuple>();
     Collections.addAll( this.ignoreTuples, ignoreTuples );
     }
 
   @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
     {
-    // no-op
+    if( aggregatorCall.getContext() == null )
+      aggregatorCall.setContext( new Tuple[1] );
+    else
+      aggregatorCall.getContext()[ 0 ] = null;
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
     {
-    if( ignoreTuples != null && ignoreTuples.contains( entry.getTuple() ) )
+    if( ignoreTuples != null && ignoreTuples.contains( aggregatorCall.getArguments().getTuple() ) )
       return;
 
-    performOperation( context, entry );
+    performOperation( aggregatorCall.getContext(), aggregatorCall.getArguments() );
     }
 
-  protected abstract void performOperation( Map context, TupleEntry entry );
+  protected abstract void performOperation( Tuple[] context, TupleEntry entry );
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map, cascading.tuple.TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
     {
-    if( context.containsKey( defaultFieldName ) )
-      outputCollector.add( (Tuple) context.get( defaultFieldName ) );
+    if( aggregatorCall.getContext()[ 0 ] != null )
+      aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
+    }
+
+  protected Tuple getResult( AggregatorCall<Tuple[]> aggregatorCall )
+    {
+    return aggregatorCall.getContext()[ 0 ];
     }
   }

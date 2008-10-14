@@ -42,6 +42,7 @@ public class TapIterator implements TupleIterator
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TapIterator.class );
 
+  /** Field tap */
   private final Tap tap;
   /** Field inputFormat */
   private InputFormat inputFormat;
@@ -96,10 +97,20 @@ public class TapIterator implements TupleIterator
     reader = makeReader( currentSplit );
     key = reader.createKey();
     value = reader.createValue();
+
+    if( LOG.isDebugEnabled() )
+      {
+      LOG.debug( "found splits: " + splits.length );
+      LOG.debug( "using key: " + key.getClass().getName() );
+      LOG.debug( "using value: " + value.getClass().getName() );
+      }
     }
 
   private RecordReader makeReader( int currentSplit ) throws IOException
     {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "reading split: " + currentSplit );
+
     return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
     }
 
@@ -147,6 +158,7 @@ public class TapIterator implements TupleIterator
         }
       else if( currentSplit < splits.length - 1 )
         {
+        reader.close();
         reader = makeReader( ++currentSplit );
         getNextTuple();
         }

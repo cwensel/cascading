@@ -32,6 +32,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 
@@ -65,8 +67,8 @@ public class MapReduceFlowTest extends CascadingTestCase
     conf.setInputFormat( TextInputFormat.class );
     conf.setOutputFormat( TextOutputFormat.class );
 
-    conf.setInputPath( new Path( inputFileApache ) );
-    conf.setOutputPath( new Path( outputPath ) );
+    FileInputFormat.setInputPaths( conf, new Path( inputFileApache ) );
+    FileOutputFormat.setOutputPath( conf, new Path( outputPath ) );
 
     Flow flow = new MapReduceFlow( "mrflow", conf, true );
 
@@ -91,8 +93,8 @@ public class MapReduceFlowTest extends CascadingTestCase
     firstConf.setInputFormat( TextInputFormat.class );
     firstConf.setOutputFormat( TextOutputFormat.class );
 
-    firstConf.setInputPath( new Path( inputFileApache ) );
-    firstConf.setOutputPath( new Path( outputPath1 ) );
+    FileInputFormat.setInputPaths( firstConf, new Path( inputFileApache ) );
+    FileOutputFormat.setOutputPath( firstConf, new Path( outputPath1 ) );
 
     Flow firstFlow = new MapReduceFlow( firstConf, true );
 
@@ -108,8 +110,8 @@ public class MapReduceFlowTest extends CascadingTestCase
     secondConf.setInputFormat( TextInputFormat.class );
     secondConf.setOutputFormat( TextOutputFormat.class );
 
-    secondConf.setInputPath( new Path( outputPath1 ) );
-    secondConf.setOutputPath( new Path( outputPath2 ) );
+    FileInputFormat.setInputPaths( secondConf, new Path( outputPath1 ) );
+    FileOutputFormat.setOutputPath( secondConf, new Path( outputPath2 ) );
 
     Flow secondFlow = new MapReduceFlow( secondConf, true );
 
@@ -125,8 +127,8 @@ public class MapReduceFlowTest extends CascadingTestCase
     thirdConf.setInputFormat( TextInputFormat.class );
     thirdConf.setOutputFormat( TextOutputFormat.class );
 
-    thirdConf.setInputPath( new Path( outputPath2 ) );
-    thirdConf.setOutputPath( new Path( outputPath3 ) );
+    FileInputFormat.setInputPaths( thirdConf, new Path( outputPath2 ) );
+    FileOutputFormat.setOutputPath( thirdConf, new Path( outputPath3 ) );
 
     Flow thirdFlow = new MapReduceFlow( thirdConf, true );
 

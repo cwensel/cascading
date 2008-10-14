@@ -27,12 +27,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.FlowSession;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
@@ -112,8 +112,8 @@ public class TagSoupParser extends BaseOperation implements Function
     features.put( feature, value );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.tuple.TupleEntry,cascading.tuple.TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see cascading.operation.Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
     try
       {
@@ -123,13 +123,13 @@ public class TagSoupParser extends BaseOperation implements Function
       xmlWriter.setPrefix( getSchema().getURI(), "" );
       xmlWriter.setOutputProperty( XMLWriter.OMIT_XML_DECLARATION, "yes" );
 
-      InputSource source = new InputSource( new StringReader( (String) input.get( 0 ) ) );
+      InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().get( 0 ) ) );
 
       getParser().setContentHandler( xmlWriter );
 
       getParser().parse( source );
 
-      outputCollector.add( new Tuple( writer.getBuffer().toString() ) );
+      functionCall.getOutputCollector().add( new Tuple( writer.getBuffer().toString() ) );
       }
     catch( SAXNotRecognizedException exception )
       {

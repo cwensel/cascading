@@ -26,6 +26,7 @@ import java.io.IOException;
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tap.TapCollector;
@@ -41,13 +42,13 @@ class TapMapperStackElement extends MapperStackElement
   private final Tap sink;
   private TapCollector tapCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, Scope incomingScope, Tap sink, boolean useTapCollector, JobConf jobConf ) throws IOException
+  public TapMapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, incomingScope, jobConf, null );
+    super( previous, flowSession, incomingScope, null );
     this.sink = sink;
 
     if( useTapCollector )
-      this.tapCollector = (TapCollector) sink.openForWrite( jobConf );
+      this.tapCollector = (TapCollector) sink.openForWrite( getJobConf() );
     }
 
   protected FlowElement getFlowElement()
@@ -68,9 +69,9 @@ class TapMapperStackElement extends MapperStackElement
     try
       {
       if( tapCollector != null )
-        sink.sink( tupleEntry.getFields(), tupleEntry.getTuple(), tapCollector );
+        sink.sink( tupleEntry, tapCollector );
       else
-        sink.sink( tupleEntry.getFields(), tupleEntry.getTuple(), lastOutput );
+        sink.sink( tupleEntry, lastOutput );
       }
     catch( OutOfMemoryError error )
       {

@@ -24,6 +24,7 @@ package cascading.flow;
 import java.io.IOException;
 
 import cascading.CascadingException;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowMapperStack;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,6 +38,8 @@ public class FlowMapper extends MapReduceBase implements Mapper
   {
   /** Field flowMapperStack */
   private FlowMapperStack flowMapperStack;
+  /** Field currentProcess */
+  private HadoopFlowProcess currentProcess;
 
   /** Constructor FlowMapper creates a new FlowMapper instance. */
   public FlowMapper()
@@ -50,7 +53,9 @@ public class FlowMapper extends MapReduceBase implements Mapper
       {
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
-      flowMapperStack = new FlowMapperStack( jobConf );
+
+      currentProcess = new HadoopFlowProcess( jobConf );
+      flowMapperStack = new FlowMapperStack( jobConf, new FlowSession( currentProcess ) );
       }
     catch( Throwable throwable )
       {
@@ -63,6 +68,8 @@ public class FlowMapper extends MapReduceBase implements Mapper
 
   public void map( Object key, Object value, OutputCollector output, Reporter reporter ) throws IOException
     {
+    currentProcess.setReporter( reporter );
+
     try
       {
       flowMapperStack.map( key, value, output );

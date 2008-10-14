@@ -28,9 +28,11 @@ import java.util.Map;
 import cascading.scheme.Scheme;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
-import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -131,7 +133,7 @@ public class MapReduceFlow extends Flow
 
   private Map<String, Tap> createSources( JobConf jobConf )
     {
-    Path[] paths = jobConf.getInputPaths();
+    Path[] paths = FileInputFormat.getInputPaths( jobConf );
 
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
@@ -145,7 +147,7 @@ public class MapReduceFlow extends Flow
     {
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
-    String path = jobConf.getOutputPath().toString();
+    String path = FileOutputFormat.getOutputPath( jobConf ).toString();
 
     taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ) );
 
@@ -181,7 +183,7 @@ public class MapReduceFlow extends Flow
       return getClass().getSimpleName();
       }
 
-    public void sink( Fields fields, Tuple tuple, OutputCollector outputCollector ) throws IOException
+    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
       {
       throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
       }

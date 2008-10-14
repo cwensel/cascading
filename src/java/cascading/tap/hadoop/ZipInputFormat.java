@@ -34,6 +34,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -103,10 +104,9 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     return splitable;
     }
 
-  @Override
-  protected Path[] listPaths( JobConf jobConf ) throws IOException
+  protected Path[] listPathsInternal( JobConf jobConf ) throws IOException
     {
-    Path[] dirs = jobConf.getInputPaths();
+    Path[] dirs = FileInputFormat.getInputPaths( jobConf );
 
     if( dirs.length == 0 )
       throw new IOException( "no input paths specified in job" );
@@ -122,8 +122,23 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     return dirs;
     }
 
+  @Override
+  protected FileStatus[] listStatus( JobConf jobConf ) throws IOException
+    {
+    Path[] paths = listPathsInternal( jobConf );
+    FileStatus[] statuses = new FileStatus[paths.length];
+
+    for( int i = 0; i < paths.length; i++ )
+      {
+      Path path = paths[ i ];
+      statuses[ i ] = path.getFileSystem( jobConf ).getFileStatus( path );
+      }
+
+    return statuses;
+    }
+
   /**
-   * Splits files returned by {@link #listPaths(JobConf)}. Each file is
+   * Splits files returned by {@link #listPathsInternal(JobConf)}. Each file is
    * expected to be in zip format and each split corresponds to
    * {@link ZipEntry}.
    *
@@ -136,7 +151,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     if( LOG.isDebugEnabled() )
       LOG.debug( "start splitting input ZIP files" );
 
-    Path[] files = listPaths( job );
+    Path[] files = listPathsInternal( job );
 
     for( int i = 0; i < files.length; i++ )
       { // check we have valid files
@@ -176,7 +191,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       LOG.debug( "creating split for zip: " + file );
 
     // unknown uncompressed size. if set to compressed size, data will be truncated
-    splits.add( new ZipSplit( file, -1, job ) );
+    splits.add( new ZipSplit( file, -1 ) );
     }
 
   private void makeSplits( JobConf job, ArrayList<ZipSplit> splits, FileSystem fs, Path file ) throws IOException
@@ -189,7 +204,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
 
       while( ( zipEntry = zipInputStream.getNextEntry() ) != null )
         {
-        ZipSplit zipSplit = new ZipSplit( file, zipEntry.getName(), zipEntry.getSize(), job );
+        ZipSplit zipSplit = new ZipSplit( file, zipEntry.getName(), zipEntry.getSize() );
 
         if( LOG.isDebugEnabled() )
           LOG.debug( String.format( "creating split for zip entry: %s size: %d method: %s compressed size: %d", zipEntry.getName(), zipEntry.getSize(), ZipEntry.DEFLATED == zipEntry.getMethod() ? "DEFLATED" : "STORED", zipEntry.getCompressedSize() ) );
@@ -336,7 +351,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
       }
     };
 
-    return new LineRecordReader( new SequenceInputStream( enumeration ), 0, Long.MAX_VALUE )
+    return new LineRecordReader( new SequenceInputStream( enumeration ), 0, Long.MAX_VALUE, Integer.MAX_VALUE )
     {
     @Override
     public float getProgress()
@@ -359,7 +374,7 @@ public class ZipInputFormat extends FileInputFormat<LongWritable, Text> implemen
     while( zipEntry != null && !zipEntry.getName().equals( entryPath ) )
       zipEntry = zipInputStream.getNextEntry();
 
-    return new LineRecordReader( zipInputStream, 0, length );
+    return new LineRecordReader( zipInputStream, 0, length, Integer.MAX_VALUE );
     }
 
   protected boolean isAllowSplits( FileSystem fs )

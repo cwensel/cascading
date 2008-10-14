@@ -43,31 +43,15 @@ import java.io.IOException;
 
 import cascading.tuple.Tuple;
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.serializer.Deserializer;
 
-public class TupleComparator<T extends Tuple> extends DeserializerComparator<T> implements Configurable
+public class TupleComparator extends DeserializerComparator<Tuple> implements Configurable
   {
-  public TupleComparator() throws IOException
+  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
-    super( (Deserializer<T>) new TupleSerialization.TupleDeserializer( Tuple.class ) );
+    setDeserializer( tupleSerialization.getTupleDeserializer() );
     }
 
-  TupleComparator( Class type ) throws IOException
-    {
-    super( (Deserializer<T>) new TupleSerialization.TupleDeserializer( type ) );
-    }
-
-  @Override
-  public void setConf( Configuration conf )
-    {
-    super.setConf( conf );
-
-    if( deserializer != null )
-      ( (Configurable) deserializer ).setConf( conf );
-    }
-
-  public int compare( T lhs, T rhs )
+  public int compare( Tuple lhs, Tuple rhs )
     {
     return lhs.compareTo( rhs );
     }

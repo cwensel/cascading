@@ -30,16 +30,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.pipe.cogroup.CoGroupClosure;
 import cascading.pipe.cogroup.CoGrouper;
 import cascading.pipe.cogroup.GroupClosure;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
+import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TuplePair;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
@@ -752,7 +753,7 @@ public class Group extends Pipe
     if( isGroupBy() )
       output.collect( groupKey, valuesTuple );
     else
-      output.collect( groupKey, new Tuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
+      output.collect( groupKey, new IndexTuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
     }
 
   /**
@@ -769,14 +770,14 @@ public class Group extends Pipe
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
-   * @param jobConf        of type JobConf
+   * @param flowSession    of type FlowSession
    * @param incomingScopes of type Set<Scope>
    * @param outgoingScope  of type Scope
    * @param key            of type WritableComparable
    * @param values         of type Iterator @return Iterator<Tuple>
    * @return a Tuple Iterator
    */
-  public Iterator<Tuple> iterateReduceValues( JobConf jobConf, Set<Scope> incomingScopes, Scope outgoingScope, Tuple key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( FlowSession flowSession, Set<Scope> incomingScopes, Scope outgoingScope, Tuple key, Iterator values )
     {
     GroupClosure closure;
 
@@ -801,7 +802,7 @@ public class Group extends Pipe
         valuesFields[ pos ] = incomingScope.getOutValuesFields();
         }
 
-      closure = new CoGroupClosure( jobConf, repeat, groupFields, valuesFields, (Tuple) key, values );
+      closure = new CoGroupClosure( flowSession, repeat, groupFields, valuesFields, (Tuple) key, values );
       }
 
     if( coGrouper == null )
@@ -810,7 +811,12 @@ public class Group extends Pipe
       return coGrouper.getIterator( closure );
     }
 
-  private boolean isGroupBy()
+  /**
+   * Method isGroupBy returns true if this Group instance will perform a GroupBy operation.
+   *
+   * @return the groupBy (type boolean) of this Group object.
+   */
+  public boolean isGroupBy()
     {
     return isGroupBy;
     }
@@ -871,7 +877,7 @@ public class Group extends Pipe
 
       if( selector.isAll() )
         incomingFields = resolveFields( incomingScope );
-      else if( selector.isKeys() )
+      else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
         incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );

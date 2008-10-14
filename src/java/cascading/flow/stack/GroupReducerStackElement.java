@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowSession;
 import cascading.flow.Scope;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
@@ -42,9 +43,9 @@ class GroupReducerStackElement extends ReducerStackElement
   private final Set<Scope> incomingScopes;
   private final Scope thisScope;
 
-  public GroupReducerStackElement( Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, JobConf jobConf, Tap trap )
+  public GroupReducerStackElement( FlowSession flowSession, Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, Tap trap )
     {
-    super( jobConf, trap, outGroupingFields );
+    super( trap, outGroupingFields, flowSession );
     this.group = group;
     this.incomingScopes = incomingScopes;
     this.thisScope = thisScope;
@@ -69,7 +70,7 @@ class GroupReducerStackElement extends ReducerStackElement
     // this can be one big tuple. the values iterator will have one Tuple of the format:
     // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
     // this can be nasty
-    values = group.iterateReduceValues( getJobConf(), incomingScopes, thisScope, key, values );
+    values = group.iterateReduceValues( getFlowSession(), incomingScopes, thisScope, key, values );
 
     values = new TupleEntryIterator( ( (ReducerStackElement) next ).resolveIncomingOperationFields(), values );
 

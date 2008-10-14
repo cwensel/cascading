@@ -21,27 +21,18 @@
 
 package cascading.tuple;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
 
 /**
  * A Tuple represents a set of values. Consider a Tuple the same as a data base record where every value is a column in that table.
@@ -50,18 +41,23 @@ import org.apache.hadoop.io.WritableUtils;
  * A Tuple is a collection of elements. These elements must be of type Comparable, so that Tuple instances can
  * be compared. Tuple itself is Comparable and subsequently can hold elements of type Tuple.
  * <p/>
- * Tuples are mutable for sake of efficiency. They are also Hadoop Writable so they can be streamed in/out as binary.
- * The obvious limitation here is that what are streamed via Hadoop must also be Hadoop Writable, or simply primitive types.
+ * Tuples are mutable for sake of efficiency. Since Tuples are mutable, it is not a good idea to hold an instance
+ * around with out first copying it via its copy constructor, a subsequent {@link Pipe} could change the Tuple in
+ * place. This is especially true for {@link Aggregator} operators.
  * <p/>
- * Since Tuples are mutable, it is not a good idea to hold an instance around with out first copying it via its copy
- * constructor, a subsequent {@link Pipe} could change the Tuple in place. This is especially true for {@link Aggregator}
- * operators.
+ * Because a Tuple can hold any Comparable type, it is suitable for storing custom types. But all custom types
+ * must have a serialization support per the underlying framework.
+ * <p/>
+ * For Hadoop, a {@link org.apache.hadoop.io.serializer.Serialization} implementation
+ * must be registered with Hadoop. For further performance improvements, see the
+ * {@link cascading.tuple.hadoop.SerializationToken} Java annotation.
+ *
+ * @see Comparable
+ * @see org.apache.hadoop.io.serializer.Serialization
+ * @see cascading.tuple.hadoop.SerializationToken
  */
-public class Tuple implements WritableComparable, Iterable, Serializable
+public class Tuple implements Comparable, Iterable, Serializable
   {
-  /** Field classCache */
-  private static Map<String, Constructor> classCache = new HashMap<String, Constructor>();
-
   /** Field elements */
   private List<Comparable> elements;
   /** Field printDelim */
@@ -129,6 +125,17 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     return result;
     }
 
+  /**
+   * Returns a reference to the private elements of the given Tuple.
+   *
+   * @param tuple of type Tuple
+   * @return List<Comparable>
+   */
+  static List<Comparable> elements( Tuple tuple )
+    {
+    return tuple.elements;
+    }
+
   protected Tuple( List<Comparable> elements )
     {
     this.elements = elements;
@@ -176,23 +183,23 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method get returns the element at the given position i.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return Comparable
    */
-  public Comparable get( int i )
+  public Comparable get( int pos )
     {
-    return elements.get( i );
+    return elements.get( pos );
     }
 
   /**
    * Method getString returns the element at the given position i as a String.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return String
    */
-  public String getString( int i )
+  public String getString( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value == null )
       return null;
@@ -203,12 +210,12 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method getFloat returns the element at the given position i as a float. Zero if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return float
    */
-  public float getFloat( int i )
+  public float getFloat( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Number )
       return ( (Number) value ).floatValue();
@@ -221,12 +228,12 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method getDouble returns the element at the given position i as a double. Zero if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return double
    */
-  public double getDouble( int i )
+  public double getDouble( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Number )
       return ( (Number) value ).doubleValue();
@@ -239,12 +246,12 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method getInteger returns the element at the given position i as an int. Zero if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return int
    */
-  public int getInteger( int i )
+  public int getInteger( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Number )
       return ( (Number) value ).intValue();
@@ -257,12 +264,12 @@ public class Tuple implements WritableComparable, Iterable, Serializable
   /**
    * Method getLong returns the element at the given position i as an long. Zero if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return long
    */
-  public long getLong( int i )
+  public long getLong( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Number )
       return ( (Number) value ).longValue();
@@ -273,14 +280,14 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
-   * Method getShort returns the element at the given position i as an long. Zero if null.
+   * Method getShort returns the element at the given position i as an short. Zero if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return long
    */
-  public short getShort( int i )
+  public short getShort( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Number )
       return ( (Number) value ).shortValue();
@@ -291,15 +298,15 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     }
 
   /**
-   * Method getBoolean returns the element at the given position as a boolean. If the value is (case ignored) the string 'true', a true value
-   * will be returned. False if null.
+   * Method getBoolean returns the element at the given position as a boolean. If the value is (case ignored) the
+   * string 'true', a {@code true} value will be returned. {@code false} if null.
    *
-   * @param i of type int
+   * @param pos of type int
    * @return boolean
    */
-  public boolean getBoolean( int i )
+  public boolean getBoolean( int pos )
     {
-    Comparable value = get( i );
+    Comparable value = get( pos );
 
     if( value instanceof Boolean )
       return ( (Boolean) value ).booleanValue();
@@ -354,7 +361,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
     {
     Tuple results = remove( pos );
 
-    List temp = results.elements;
+    List<Comparable> temp = results.elements;
     results.elements = this.elements;
     this.elements = temp;
 
@@ -476,6 +483,7 @@ public class Tuple implements WritableComparable, Iterable, Serializable
    * @param selector   of type Fields
    * @return Tuple
    */
+  @Deprecated
   public Tuple extract( Fields declarator, Fields selector )
     {
     return extract( declarator.getPos( selector ) );
@@ -583,182 +591,6 @@ public class Tuple implements WritableComparable, Iterable, Serializable
       result.addAll( tuple );
 
     return result;
-    }
-
-  /**
-   * Method write is used by Hadoop to write this Tuple instance out to a file.
-   *
-   * @param out of type DataOutput
-   * @throws IOException when
-   */
-  public void write( DataOutput out ) throws IOException
-    {
-    WritableUtils.writeVInt( out, elements.size() );
-
-    for( Object element : elements )
-      {
-      if( element == null )
-        {
-        WritableUtils.writeVInt( out, 0 );
-        continue;
-        }
-
-      Class type = element.getClass();
-
-      if( String.class == type )
-        {
-        WritableUtils.writeVInt( out, 1 );
-        WritableUtils.writeString( out, (String) element );
-        }
-      else if( Float.class == type )
-        {
-        WritableUtils.writeVInt( out, 2 );
-        out.writeFloat( (Float) element );
-        }
-      else if( Double.class == type )
-        {
-        WritableUtils.writeVInt( out, 3 );
-        out.writeDouble( (Double) element );
-        }
-      else if( Integer.class == type )
-        {
-        WritableUtils.writeVInt( out, 4 );
-        WritableUtils.writeVInt( out, (Integer) element );
-        }
-      else if( Long.class == type )
-        {
-        WritableUtils.writeVInt( out, 5 );
-        WritableUtils.writeVLong( out, (Long) element );
-        }
-      else if( Short.class == type )
-        {
-        WritableUtils.writeVInt( out, 6 );
-        out.writeShort( (Short) element );
-        }
-      else if( element instanceof Tuple )
-        {
-        WritableUtils.writeVInt( out, 7 );
-        ( (Tuple) element ).write( out );
-        }
-      else if( element instanceof WritableComparable )
-        {
-        WritableUtils.writeVInt( out, 8 );
-        WritableUtils.writeString( out, element.getClass().getName() );
-        ( (WritableComparable) element ).write( out );
-        }
-      else
-        {
-        throw new IOException( "could not write unknown element type: " + element.getClass().getName() );
-        }
-      }
-    }
-
-  /**
-   * Method readFields is used by Hadoop to read this Tuple instance from a file.
-   *
-   * @param in of type DataInput
-   * @throws IOException when
-   */
-  public void readFields( DataInput in ) throws IOException
-    {
-    elements.clear();
-    int len = WritableUtils.readVInt( in );
-
-    for( int i = 0; i < len; i++ )
-      elements.add( readType( WritableUtils.readVInt( in ), in ) );
-    }
-
-  private final Comparable readType( int type, DataInput in ) throws IOException
-    {
-    switch( type )
-      {
-      case 0:
-        return null;
-      case 1:
-        return WritableUtils.readString( in );
-      case 2:
-        return in.readFloat();
-      case 3:
-        return in.readDouble();
-      case 4:
-        return WritableUtils.readVInt( in );
-      case 5:
-        return WritableUtils.readVLong( in );
-      case 6:
-        return in.readShort();
-      case 7:
-        return readNewTuple( in );
-      case 8:
-        return readNewWritable( in );
-      default:
-        throw new IOException( "could not read unknown element type: " + type );
-      }
-    }
-
-  private Comparable readNewWritable( DataInput in ) throws IOException
-    {
-    String className = WritableUtils.readString( in );
-
-    try
-      {
-      WritableComparable result = (WritableComparable) getConstructorFor( className ).newInstance();
-
-      result.readFields( in );
-
-      return result;
-      }
-    catch( ClassNotFoundException exception )
-      {
-      throw new TupleException( "unable to load WritableComparable named: " + className, exception );
-      }
-    catch( IllegalAccessException exception )
-      {
-      throw new TupleException( "unable to access WritableComparable named: " + className, exception );
-      }
-    catch( InstantiationException exception )
-      {
-      throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
-      }
-    catch( NoSuchMethodException exception )
-      {
-      throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
-      }
-    catch( InvocationTargetException exception )
-      {
-      throw new TupleException( "unable to instantiate WritableComparable named: " + className, exception );
-      }
-    }
-
-  private static Constructor getConstructorFor( String className ) throws ClassNotFoundException, NoSuchMethodException
-    {
-    Constructor constructor = classCache.get( className );
-
-    if( constructor != null )
-      return constructor;
-
-    Class type = Thread.currentThread().getContextClassLoader().loadClass( className );
-
-    constructor = type.getDeclaredConstructor();
-
-    classCache.put( className, constructor );
-
-    return constructor;
-    }
-
-  /**
-   * Read a new Tuple instance from the given DataInput stream.
-   *
-   * @param in of type DataInput
-   * @return Tuple
-   * @throws IOException
-   */
-  public static Tuple readNewTuple( DataInput in ) throws IOException
-    {
-    Tuple tuple = new Tuple();
-
-    tuple.readFields( in );
-
-    return tuple;
     }
 
   /**

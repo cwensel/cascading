@@ -21,14 +21,12 @@
 
 package cascading;
 
-import java.util.Map;
-
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/TestAggregator.java#2 $ */
 public class TestAggregator extends BaseOperation implements Aggregator
@@ -79,31 +77,25 @@ public class TestAggregator extends BaseOperation implements Aggregator
     this.duplicates = duplicates;
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map,cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     if( groupFields == null )
       return;
 
-    if( !groupFields.equals( groupEntry.getFields() ) )
-      throw new RuntimeException( "fields do not match: " + groupFields.print() + " != " + groupEntry.getFields().print() );
+    if( !groupFields.equals( aggregatorCall.getGroup().getFields() ) )
+      throw new RuntimeException( "fields do not match: " + groupFields.print() + " != " + aggregatorCall.getGroup().getFields().print() );
     }
 
-  /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     }
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map,cascading.tuple.TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
     {
     for( int i = 0; i < duplicates; i++ )
       {
       for( Tuple tuple : value )
-        outputCollector.add( tuple );
+        aggregatorCall.getOutputCollector().add( tuple );
       }
     }
   }

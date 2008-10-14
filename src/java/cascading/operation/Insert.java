@@ -21,10 +21,9 @@
 
 package cascading.operation;
 
+import cascading.flow.FlowSession;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleEntry;
 
 /** Class Insert adds literal values to the Tuple stream. */
 public class Insert extends BaseOperation implements Function
@@ -47,9 +46,9 @@ public class Insert extends BaseOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
     }
 
-  /** @see Function#operate(TupleEntry, TupleCollector) */
-  public void operate( TupleEntry input, TupleCollector outputCollector )
+  /** @see Function#operate(cascading.flow.FlowSession, FunctionCall) */
+  public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
-    outputCollector.add( new Tuple( values ) );
+    functionCall.getOutputCollector().add( new Tuple( values ) );
     }
   }

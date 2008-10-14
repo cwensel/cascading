@@ -41,11 +41,14 @@ package cascading.tuple.hadoop;
 
 import java.io.IOException;
 
+import cascading.CascadingException;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.InputBuffer;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.serializer.Deserializer;
 
+/** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
   {
   InputBuffer buffer = new InputBuffer();
@@ -54,9 +57,27 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
   private T key1;
   private T key2;
 
-  protected DeserializerComparator( Deserializer<T> deserializer ) throws IOException
+  @Override
+  public void setConf( Configuration conf )
     {
+    super.setConf( conf );
 
+    TupleSerialization tupleSerialization = new TupleSerialization( conf );
+
+    try
+      {
+      setDeserializer( tupleSerialization );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to create deserializer", exception );
+      }
+    }
+
+  abstract void setDeserializer( TupleSerialization tupleSerialization ) throws IOException;
+
+  void setDeserializer( Deserializer<T> deserializer ) throws IOException
+    {
     this.deserializer = deserializer;
     this.deserializer.open( buffer );
     }
@@ -80,5 +101,4 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     return compare( key1, key2 );
     }
-
   }

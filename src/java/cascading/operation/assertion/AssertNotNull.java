@@ -21,7 +21,9 @@
 
 package cascading.operation.assertion;
 
+import cascading.flow.FlowSession;
 import cascading.operation.ValueAssertion;
+import cascading.operation.ValueAssertionCall;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
@@ -35,9 +37,10 @@ public class AssertNotNull extends BaseAssertion implements ValueAssertion
     super( "argument '%s' value was null, in tuple: %s" );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(TupleEntry) */
-  public void doAssert( TupleEntry input )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
     {
+    TupleEntry input = assertionCall.getArguments();
     int pos = 0;
 
     for( Object value : input.getTuple() )

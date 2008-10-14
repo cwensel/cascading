@@ -36,7 +36,6 @@ public class SpillableTupleTest extends CascadingTestCase
     super( "spillable tuple list test" );
     }
 
-
   public void testSpill()
     {
     long time = System.currentTimeMillis();

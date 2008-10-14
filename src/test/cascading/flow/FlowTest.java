@@ -32,6 +32,7 @@ import cascading.ClusterTestCase;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
 import cascading.operation.Filter;
+import cascading.operation.FilterCall;
 import cascading.operation.Function;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
@@ -43,7 +44,6 @@ import cascading.tap.Hfs;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
 
 /**
  *
@@ -200,7 +200,7 @@ public class FlowTest extends ClusterTestCase
     {
     private Object object = new Object(); // intentional
 
-    public boolean isRemove( TupleEntry input )
+    public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
       {
       return false;
       }
@@ -299,7 +299,7 @@ public class FlowTest extends ClusterTestCase
       pipeLower = new Each( pipeLower, new Debug()
       {
       @Override
-      public boolean isRemove( TupleEntry input )
+      public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
         {
         throw new RuntimeException( "failing inside pipe assembly intentionally" );
         }

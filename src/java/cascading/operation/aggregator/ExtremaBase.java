@@ -24,27 +24,42 @@ package cascading.operation.aggregator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 
+import cascading.flow.FlowSession;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 
 /**
  * Class ExtremaBase is the base class for Max and Min. The unique thing about Max and Min are that they return the original,
  * un-coerced, argument value, though a coerced version of the argument is used for the comparison.
  */
-public abstract class ExtremaBase extends BaseOperation implements Aggregator
+public abstract class ExtremaBase extends BaseOperation implements Aggregator<ExtremaBase.Context>
   {
-  /** Field FIELD_NAME */
-  private static final String KEY_EXTREMA = "extrema";
-  /** Field KEY_VALUE */
-  private static final String KEY_VALUE = "value";
   /** Field ignoreValues */
   protected final Collection ignoreValues;
+
+  protected static class Context
+    {
+    Number extrema;
+    Object value;
+
+    public Context( Number extrema )
+      {
+      this.extrema = extrema;
+      }
+
+    public Context reset( Number extrema )
+      {
+      this.extrema = extrema;
+      this.value = null;
+
+      return this;
+      }
+    }
 
   public ExtremaBase( Fields fieldDeclaration )
     {
@@ -68,20 +83,22 @@ public abstract class ExtremaBase extends BaseOperation implements Aggregator
     Collections.addAll( this.ignoreValues, ignoreValues );
     }
 
-  /** @see cascading.operation.Aggregator#start(java.util.Map , cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void start( Map context, TupleEntry groupEntry )
+  public void start( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    context.put( KEY_VALUE, getInitialValue() );
+    if( aggregatorCall.getContext() == null )
+      aggregatorCall.setContext( new Context( getInitialValue() ) );
+    else
+      aggregatorCall.getContext().reset( getInitialValue() );
     }
 
   protected abstract double getInitialValue();
 
-  /** @see cascading.operation.Aggregator#aggregate(java.util.Map, cascading.tuple.TupleEntry) */
-  @SuppressWarnings("unchecked")
-  public void aggregate( Map context, TupleEntry entry )
+  public void aggregate( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    Comparable arg = entry.getTuple().get( 0 );
+    TupleEntry entry = aggregatorCall.getArguments();
+    Context context = aggregatorCall.getContext();
+
+    Comparable arg = entry.get( 0 );
 
     if( ignoreValues != null && ignoreValues.contains( arg ) )
       return;
@@ -91,23 +108,26 @@ public abstract class ExtremaBase extends BaseOperation implements Aggregator
     if( arg instanceof Number )
       rhs = (Number) arg;
     else
-      rhs = entry.getTuple().getDouble( 0 );
+      rhs = entry.getDouble( 0 );
 
-    Number lhs = (Number) context.get( KEY_VALUE );
+    Number lhs = context.extrema;
 
     if( compare( lhs, rhs ) )
       {
-      context.put( KEY_EXTREMA, arg ); // keep and return original value
-      context.put( KEY_VALUE, rhs );
+      context.value = arg; // keep and return original value
+      context.extrema = rhs;
       }
     }
 
   protected abstract boolean compare( Number lhs, Number rhs );
 
-  /** @see cascading.operation.Aggregator#complete(java.util.Map, cascading.tuple.TupleCollector) */
-  @SuppressWarnings("unchecked")
-  public void complete( Map context, TupleCollector outputCollector )
+  public void complete( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
     {
-    outputCollector.add( new Tuple( (Comparable) context.get( KEY_EXTREMA ) ) );
+    aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
+    }
+
+  protected Tuple getResult( AggregatorCall<Context> aggregatorCall )
+    {
+    return new Tuple( (Comparable) aggregatorCall.getContext().value );
     }
   }
