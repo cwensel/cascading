@@ -28,7 +28,7 @@ import java.util.Map;
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -69,7 +69,7 @@ public class SerializedPipesTest extends ClusterTestCase
       this.asBytes = asBytes;
       }
 
-    public void operate( FlowSession flowSession, FunctionCall functionCall )
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
       functionCall.getOutputCollector().add( new Tuple( new BytesWritable( asBytes.getBytes() ) ) );
       }
@@ -85,7 +85,7 @@ public class SerializedPipesTest extends ClusterTestCase
       this.asBoolean = asBoolean;
       }
 
-    public void operate( FlowSession flowSession, FunctionCall functionCall )
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
       functionCall.getOutputCollector().add( new Tuple( new BooleanWritable( asBoolean ) ) );
       }

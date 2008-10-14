@@ -21,7 +21,7 @@
 
 package cascading.operation.aggregator;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -71,7 +71,7 @@ public class Sum extends BaseOperation implements Aggregator<Double[]>
     this.type = type;
     }
 
-  public void start( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
     {
     if( aggregatorCall.getContext() == null )
       aggregatorCall.setContext( new Double[]{0.0D} );
@@ -79,12 +79,12 @@ public class Sum extends BaseOperation implements Aggregator<Double[]>
       aggregatorCall.getContext()[ 0 ] = 0.0D;
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
     {
     aggregatorCall.getContext()[ 0 ] += aggregatorCall.getArguments().getDouble( 0 );
     }
 
-  public void complete( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }

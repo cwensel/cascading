@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.cogroup.CoGroupClosure;
 import cascading.pipe.cogroup.CoGrouper;
@@ -770,14 +770,14 @@ public class Group extends Pipe
   /**
    * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
    *
-   * @param flowSession    of type FlowSession
+   * @param flowProcess    of type FlowSession
    * @param incomingScopes of type Set<Scope>
    * @param outgoingScope  of type Scope
    * @param key            of type WritableComparable
    * @param values         of type Iterator @return Iterator<Tuple>
    * @return a Tuple Iterator
    */
-  public Iterator<Tuple> iterateReduceValues( FlowSession flowSession, Set<Scope> incomingScopes, Scope outgoingScope, Tuple key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( FlowProcess flowProcess, Set<Scope> incomingScopes, Scope outgoingScope, Tuple key, Iterator values )
     {
     GroupClosure closure;
 
@@ -802,7 +802,7 @@ public class Group extends Pipe
         valuesFields[ pos ] = incomingScope.getOutValuesFields();
         }
 
-      closure = new CoGroupClosure( flowSession, repeat, groupFields, valuesFields, (Tuple) key, values );
+      closure = new CoGroupClosure( flowProcess, repeat, groupFields, valuesFields, (Tuple) key, values );
       }
 
     if( coGrouper == null )

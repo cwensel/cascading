@@ -21,7 +21,7 @@
 
 package cascading.operation.filter;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -30,7 +30,7 @@ import cascading.operation.FilterCall;
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
  * instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall)} returns {@code true} for the given instance,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for the given instance,
  * this filter will return the opposite, {@code false}.
  *
  * @see And
@@ -55,9 +55,9 @@ public class Not extends BaseOperation implements Filter
       throw new IllegalArgumentException( "filter may not be null" );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    return !filter.isRemove( flowSession, filterCall );
+    return !filter.isRemove( flowProcess, filterCall );
     }
   }

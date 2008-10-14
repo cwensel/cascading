@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -83,7 +83,7 @@ public abstract class ExtremaBase extends BaseOperation implements Aggregator<Ex
     Collections.addAll( this.ignoreValues, ignoreValues );
     }
 
-  public void start( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     if( aggregatorCall.getContext() == null )
       aggregatorCall.setContext( new Context( getInitialValue() ) );
@@ -93,7 +93,7 @@ public abstract class ExtremaBase extends BaseOperation implements Aggregator<Ex
 
   protected abstract double getInitialValue();
 
-  public void aggregate( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     TupleEntry entry = aggregatorCall.getArguments();
     Context context = aggregatorCall.getContext();
@@ -121,7 +121,7 @@ public abstract class ExtremaBase extends BaseOperation implements Aggregator<Ex
 
   protected abstract boolean compare( Number lhs, Number rhs );
 
-  public void complete( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }

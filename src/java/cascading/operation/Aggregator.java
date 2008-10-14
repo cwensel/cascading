@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -30,7 +30,7 @@ import cascading.tuple.TupleEntry;
  * {@link cascading.operation.aggregator.Count}, and {@link cascading.operation.aggregator.Average} are good examples.
  * <p/>
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
- * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowSession, AggregatorCall)}
+ * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowProcess, AggregatorCall}
  * method provides a mechanism for maintaining a 'context' object to hold intermedite values.
  * <p/>
  * Note {@link TupleEntry} instances are reused internally so should not be stored. Instead use the TupleEntry or Tuple
@@ -51,15 +51,15 @@ public interface Aggregator<C> extends Operation
    * remove any previous state/values.
    * <p/>
    * For example, if a Map is used to hold the intermediate data for each subsequent
-   * {@link #aggregate(cascading.flow.FlowSession, AggregatorCall)} call,
+   * {@link #aggregate(cascading.flow.FlowProcess, AggregatorCall)} call,
    * new HashMap() should be set on the AggregatorCall instance when {@link cascading.operation.AggregatorCall#getContext()} is null.
    * On the next grouping, start() will be called again, but this time with the old Map instance. In this case,
    * map.clear() should be invoked before returning.
    *
-   * @param flowSession    of type FlowSession is the current session
+   * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void start( FlowSession flowSession, AggregatorCall<C> aggregatorCall );
+  void start( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
@@ -67,19 +67,19 @@ public interface Aggregator<C> extends Operation
    * TupleEntry entry, or entry.getTuple() should not be stored directly in the context. A copy of the tuple
    * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
    *
-   * @param flowSession    of type FlowSession is the current session
+   * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void aggregate( FlowSession flowSession, AggregatorCall<C> aggregatorCall );
+  void aggregate( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
 
   /**
    * Method complete will be issued last after every {@link TupleEntry} has been passed to the
-   * {@link #aggregate(cascading.flow.FlowSession, AggregatorCall)}
+   * {@link #aggregate(cascading.flow.FlowProcess, AggregatorCall)}
    * method.  Any final calculation should be completed
    * here and passed to the outputCollector.
    *
-   * @param flowSession    of type FlowSession is the current session
+   * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void complete( FlowSession flowSession, AggregatorCall<C> aggregatorCall );
+  void complete( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
   }

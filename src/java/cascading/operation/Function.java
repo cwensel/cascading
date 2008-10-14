@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 
 /** Interface Function marks a given {@link BaseOperation} as a function, as opposed to being a {@link Filter}. */
 public interface Function extends Operation
@@ -29,8 +29,8 @@ public interface Function extends Operation
   /**
    * Method operate provides the implementation of this Function.
    *
-   * @param flowSession  of type FlowSession
+   * @param flowProcess  of type FlowProcess
    * @param functionCall of type FunctionCall
    */
-  void operate( FlowSession flowSession, FunctionCall functionCall );
+  void operate( FlowProcess flowProcess, FunctionCall functionCall );
   }

@@ -21,7 +21,7 @@
 
 package cascading.operation.aggregator;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -54,7 +54,7 @@ public class Count extends BaseOperation implements Aggregator<Long[]>
     super( fieldDeclaration ); // allow ANY number of arguments
     }
 
-  public void start( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
     {
     if( aggregatorCall.getContext() == null )
       aggregatorCall.setContext( new Long[]{0L} );
@@ -62,12 +62,12 @@ public class Count extends BaseOperation implements Aggregator<Long[]>
       aggregatorCall.getContext()[ 0 ] = 0L;
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
     {
     aggregatorCall.getContext()[ 0 ] += 1L;
     }
 
-  public void complete( FlowSession flowSession, AggregatorCall<Long[]> aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }

@@ -22,7 +22,7 @@
 package cascading.operation.assertion;
 
 import cascading.CascadingTestCase;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
 import cascading.operation.GroupAssertion;
 import cascading.operation.OperationCall;
@@ -51,18 +51,18 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     operationCall.setGroup( groupEntry );
 
-    assertion.start( FlowSession.NULL, operationCall );
+    assertion.start( FlowProcess.NULL, operationCall );
 
     for( TupleEntry value : values )
       {
       operationCall.setArguments( value );
-      assertion.aggregate( FlowSession.NULL, operationCall );
+      assertion.aggregate( FlowProcess.NULL, operationCall );
       }
 
     try
       {
       operationCall.setArguments( null );
-      assertion.doAssert( FlowSession.NULL, operationCall );
+      assertion.doAssert( FlowProcess.NULL, operationCall );
       fail();
       }
     catch( AssertionException exception )
@@ -83,11 +83,11 @@ public class GroupAssertionsTest extends CascadingTestCase
     for( TupleEntry value : values )
       {
       operationCall.setArguments( value );
-      assertion.aggregate( FlowSession.NULL, operationCall );
+      assertion.aggregate( FlowProcess.NULL, operationCall );
       }
 
     operationCall.setArguments( null );
-    assertion.doAssert( FlowSession.NULL, operationCall );
+    assertion.doAssert( FlowProcess.NULL, operationCall );
     }
 
   public void testSizeEquals()

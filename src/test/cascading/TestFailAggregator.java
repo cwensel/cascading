@@ -21,7 +21,7 @@
 
 package cascading;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -44,19 +44,19 @@ public class TestFailAggregator extends BaseOperation implements Aggregator
     this.fail = fail;
     }
 
-  public void start( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     if( fail == 0 )
       throw new RuntimeException( "failed" );
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     if( fail == 1 )
       throw new RuntimeException( "failed" );
     }
 
-  public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     if( fail == 2 )
       throw new RuntimeException( "failed" );

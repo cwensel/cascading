@@ -24,7 +24,7 @@ package cascading.assembly;
 import java.util.Set;
 import java.util.TreeSet;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -43,7 +43,7 @@ public class SortElements extends BaseOperation implements Function
     this.fields = fields;
     }
 
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     Set<Tuple> set = new TreeSet<Tuple>();
 

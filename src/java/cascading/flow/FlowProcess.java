@@ -26,15 +26,16 @@ package cascading.flow;
  * {@link cascading.operation.Operation} is given a reference to a particluar implemenation, allowing them
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>
- * Depending on the underlying system, FlowSession instances are not continuous across all operations in a {@link cascading.flow.Flow}.
+ * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link cascading.flow.Flow}.
  * Thus, a call to {@link #increment(Enum, int)} may start incrementing from zero if the operation making the call
  * belongs to a subsquent 'job' or 'step' from any previous operations calling increment.
  */
-public interface FlowProcess
+public abstract class FlowProcess
   {
   /** Field NULL is a noop implemenation of FlowSession. */
-  FlowProcess NULL = new FlowProcess()
+  public static FlowProcess NULL = new FlowProcess( FlowSession.NULL )
   {
+
   public Object getProperty( String key )
     {
     return null;
@@ -49,6 +50,40 @@ public interface FlowProcess
     }
   };
 
+  /** Field currentSession */
+  private FlowSession currentSession;
+
+  protected FlowProcess()
+    {
+    }
+
+  protected FlowProcess( FlowSession currentSession )
+    {
+    setCurrentSession( currentSession );
+    }
+
+  /**
+   * Method getCurrentSession returns the currentSession of this FlowProcess object.
+   *
+   * @return the currentSession (type FlowSession) of this FlowProcess object.
+   */
+  public FlowSession getCurrentSession()
+    {
+    return currentSession;
+    }
+
+  /**
+   * Method setCurrentSession sets the currentSession of this FlowProcess object.
+   *
+   * @param currentSession the currentSession of this FlowProcess object.
+   */
+  public void setCurrentSession( FlowSession currentSession )
+    {
+    this.currentSession = currentSession;
+
+    currentSession.setCurrentProcess( this );
+    }
+
   /**
    * Method getProperty should be used to return configuration parameters from the underlying system.
    * <p/>
@@ -57,14 +92,14 @@ public interface FlowProcess
    * @param key of type String
    * @return an Object
    */
-  Object getProperty( String key );
+  public abstract Object getProperty( String key );
 
   /**
    * Method keepAlive notifies the system that the current process is still alive. Use this method if a particular
    * {@link cascading.operation.Operation} takes some moments to complete. Each system is different, so calling
    * ping every few seconds to every minute or so would be best.
    */
-  void keepAlive();
+  public abstract void keepAlive();
 
   /**
    * Method increement is used to increment a custom counter. Counters must be of type Enum. The amount
@@ -73,6 +108,6 @@ public interface FlowProcess
    * @param counter of type Enum
    * @param amount  of type int
    */
-  void increment( Enum counter, int amount );
+  public abstract void increment( Enum counter, int amount );
 
   }

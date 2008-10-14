@@ -21,7 +21,14 @@
 
 package cascading.flow;
 
-/** FlowSession implementations provide a call-back interface into the current computing system. */
+/**
+ * FlowSession implementations provide a call-back interface into the current flow management system, if any.
+ * <p/>
+ * A FlowSession is effectively unique to the current {@link Flow}, where a {@link FlowProcess} is unique
+ * to each underlying 'job'.
+ *
+ * @see FlowProcess
+ */
 public class FlowSession
   {
   private FlowProcess currentProcess;
@@ -39,11 +46,21 @@ public class FlowSession
     this.currentProcess = currentProcess;
     }
 
+  /**
+   * Method setCurrentProcess sets the currentProcess of this FlowSession object.
+   *
+   * @param currentProcess the currentProcess of this FlowSession object.
+   */
   public void setCurrentProcess( FlowProcess currentProcess )
     {
     this.currentProcess = currentProcess;
     }
 
+  /**
+   * Method getCurrentProcess returns the currentProcess of this FlowSession object.
+   *
+   * @return the currentProcess (type FlowProcess) of this FlowSession object.
+   */
   public FlowProcess getCurrentProcess()
     {
     return currentProcess;

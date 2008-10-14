@@ -25,13 +25,12 @@ import java.util.Iterator;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -48,9 +47,9 @@ abstract class MapperStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  MapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap )
+  MapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap )
     {
-    super( flowSession, trap );
+    super( flowProcess, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }

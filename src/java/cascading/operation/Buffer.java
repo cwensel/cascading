@@ -21,12 +21,12 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 
 /**
  * A Buffer is similiar to an {@link Aggregator} by the fact that it operates on unique groups of values. It differs
  * by the fact that an {@link java.util.Iterator} is provided and it is the responsibility
- * of the {@link #operate(cascading.flow.FlowSession, BufferCall)} method to iterate overall all the input
+ * of the {@link #operate(cascading.flow.FlowProcess, BufferCall)} method to iterate overall all the input
  * arguments returned by this Iterator.
  * <p/>
  * Buffer is very useful when header or footer values need to be inserted into a grouping, or if values need to be
@@ -51,8 +51,8 @@ public interface Buffer extends Operation
    * TupleEntry entry, or entry.getTuple() should not be stored directly in a collection or modified.
    * A copy of the tuple should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
    *
-   * @param flowSession of type FlowSession is the current session
+   * @param flowProcess of type FlowProcess
    * @param bufferCall  of type BufferCall
    */
-  void operate( FlowSession flowSession, BufferCall bufferCall );
+  void operate( FlowProcess flowProcess, BufferCall bufferCall );
   }

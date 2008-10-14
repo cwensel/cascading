@@ -25,7 +25,7 @@ import java.util.Set;
 
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
@@ -289,26 +289,26 @@ public class Each extends Operator
     return operation instanceof Filter;
     }
 
-  private void applyAssertion( FlowSession flowSession, FlowCollector flowCollector, TupleEntry input, OperationCall operationCall )
+  private void applyAssertion( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, OperationCall operationCall )
     {
-    getValueAssertion().doAssert( flowSession, operationCall );
+    getValueAssertion().doAssert( flowProcess, operationCall );
 
     flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFilter( FlowSession flowSession, FlowCollector flowCollector, TupleEntry input, FilterCall filterCall )
+  private void applyFilter( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, FilterCall filterCall )
     {
     boolean isRemove = false;
 
-    isRemove = getFilter().isRemove( flowSession, filterCall );
+    isRemove = getFilter().isRemove( flowProcess, filterCall );
 
     if( !isRemove )
       flowCollector.collect( input.getTuple() );
     }
 
-  private void applyFunction( FlowSession flowSession, FunctionCall functionCall )
+  private void applyFunction( FlowProcess flowProcess, FunctionCall functionCall )
     {
-    getFunction().operate( flowSession, functionCall ); // adds results to collector
+    getFunction().operate( flowProcess, functionCall ); // adds results to collector
     }
 
   // FIELDS
@@ -389,7 +389,7 @@ public class Each extends Operator
       operationCall = new OperationCall();
       }
 
-    public void operate( FlowSession flowSession, TupleEntry input )
+    public void operate( FlowProcess flowProcess, TupleEntry input )
       {
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " incoming entry: " + input );
@@ -399,10 +399,10 @@ public class Each extends Operator
       if( LOG.isDebugEnabled() )
         LOG.debug( operation + " arg entry: " + arguments );
 
-      handle( flowSession, input, arguments );
+      handle( flowProcess, input, arguments );
       }
 
-    abstract void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments );
+    abstract void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments );
 
     public FlowElement getEach()
       {
@@ -441,11 +441,11 @@ public class Each extends Operator
       operationCall.setOutputCollector( tupleCollector );
       }
 
-    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
+    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
       {
       tupleCollector.input = input;
       operationCall.setArguments( arguments );
-      applyFunction( flowSession, operationCall );
+      applyFunction( flowProcess, operationCall );
       }
     }
 
@@ -457,10 +457,10 @@ public class Each extends Operator
       super( flowCollector, scope );
       }
 
-    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
+    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
       {
       operationCall.setArguments( arguments );
-      applyFilter( flowSession, flowCollector, input, operationCall );
+      applyFilter( flowProcess, flowCollector, input, operationCall );
       }
     }
 
@@ -471,10 +471,10 @@ public class Each extends Operator
       super( flowCollector, scope );
       }
 
-    void handle( FlowSession flowSession, TupleEntry input, TupleEntry arguments )
+    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
       {
       operationCall.setArguments( arguments );
-      applyAssertion( flowSession, flowCollector, input, operationCall );
+      applyAssertion( flowProcess, flowCollector, input, operationCall );
       }
     }
   }

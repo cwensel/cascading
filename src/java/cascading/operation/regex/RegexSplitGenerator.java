@@ -21,7 +21,7 @@
 
 package cascading.operation.regex;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
@@ -58,8 +58,8 @@ public class RegexSplitGenerator extends RegexOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 

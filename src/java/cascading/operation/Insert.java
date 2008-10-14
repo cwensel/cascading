@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -46,8 +46,8 @@ public class Insert extends BaseOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession, FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess, FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     functionCall.getOutputCollector().add( new Tuple( values ) );
     }

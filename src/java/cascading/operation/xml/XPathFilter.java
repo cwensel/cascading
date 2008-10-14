@@ -26,7 +26,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationException;
@@ -69,8 +69,8 @@ public class XPathFilter extends XPathOperation implements Filter
     this.removeMatch = removeMatch;
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     InputSource source = new InputSource( new StringReader( (String) filterCall.getArguments().get( 0 ) ) );
     XPathExpression expression = getExpressions().get( 0 );

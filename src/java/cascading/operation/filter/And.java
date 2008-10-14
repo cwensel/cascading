@@ -21,7 +21,7 @@
 
 package cascading.operation.filter;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
  * Class And is a {@link Filter} class that will logically 'and' the results of the constructor provided Filter
  * instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall)} returns {@code true} for all given instances,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for all given instances,
  * this filter will return {@code true}.
  *
  * @see Or
@@ -74,8 +74,8 @@ public class And extends Logic
     super( argumentSelectors, filters );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     for( int i = 0; i < argumentSelectors.length; i++ )
       {
@@ -83,7 +83,7 @@ public class And extends Logic
 
       entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
 
-      if( !filters[ i ].isRemove( flowSession, filterCall ) )
+      if( !filters[ i ].isRemove( flowProcess, filterCall ) )
         return false;
       }
 

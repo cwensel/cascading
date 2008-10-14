@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
 import cascading.tap.Tap;
@@ -42,9 +42,9 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
   private final Map<String, Tap> traps;
   private final List<Every.EveryHandler> everyHandlers;
 
-  public EveryAllAggregatorReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
+  public EveryAllAggregatorReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
     {
-    super( previous, flowSession, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null );
     this.traps = traps;
     this.everyHandlers = everyHandlers;
     }
@@ -70,7 +70,7 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
       {
       try
         {
-        handler.start( flowSession, keyEntry );
+        handler.start( flowProcess, keyEntry );
         }
       catch( Exception exception )
         {
@@ -86,7 +86,7 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
         {
         try
           {
-          handler.operate( flowSession, null, valueEntry, null );
+          handler.operate( flowProcess, null, valueEntry, null );
           }
         catch( Exception exception )
           {

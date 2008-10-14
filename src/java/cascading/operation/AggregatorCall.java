@@ -27,23 +27,23 @@ import cascading.tuple.TupleEntry;
 /**
  * Interface AggregatorCall provides access to the current {@link Aggregator} invocation arguments.
  * <p/>
- * This interface is generic, allowing the user to set a custom 'context' object when {@link Aggregator#start(cascading.flow.FlowSession, AggregatorCall)}
+ * This interface is generic, allowing the user to set a custom 'context' object when {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall}
  * is called.
  */
 public interface AggregatorCall<C>
   {
   /**
    * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called
-   * during {@link Aggregator#start(cascading.flow.FlowSession, AggregatorCall)}.
+   * during {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall}.
    *
    * @return user defined object
    */
   C getContext();
 
   /**
-   * Sets the 'context' object used by code in {@link Aggregator#aggregate(cascading.flow.FlowSession, AggregatorCall)}.
+   * Sets the 'context' object used by code in {@link Aggregator#aggregate(cascading.flow.FlowProcess, AggregatorCall}.
    * <p/>
-   * This method should only be called in the {@link Aggregator#start(cascading.flow.FlowSession, AggregatorCall)}
+   * This method should only be called in the {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall}
    * method. Further, if {@link #getContext()} does not return null, consider 'resetting' the current instance. For
    * example, if the 'context' is a Map or Set, call the clear() method instead of creating a new Map instance.
    *
@@ -61,7 +61,7 @@ public interface AggregatorCall<C>
   /**
    * Returns {@link TupleEntry} of argument values.
    * <p/>
-   * Will return {@code null} unless called in {@link Aggregator#aggregate(cascading.flow.FlowSession, AggregatorCall)}.
+   * Will return {@code null} unless called in {@link Aggregator#aggregate(cascading.flow.FlowProcess, AggregatorCall}.
    *
    * @return TupleEntry
    */
@@ -70,7 +70,7 @@ public interface AggregatorCall<C>
   /**
    * Returns the {@link TupleCollector} used to emit result values.
    * <p/>
-   * Will return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowSession, AggregatorCall)}.
+   * Will return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowProcess, AggregatorCall}.
    *
    * @return TupleCollector
    */

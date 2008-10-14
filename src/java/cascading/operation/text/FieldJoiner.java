@@ -21,7 +21,7 @@
 
 package cascading.operation.text;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -80,8 +80,8 @@ public class FieldJoiner extends BaseOperation implements Function
     return delimiter;
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().toString( delimiter ) ) );
     }

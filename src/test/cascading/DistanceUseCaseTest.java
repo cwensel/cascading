@@ -29,7 +29,7 @@ import cascading.assembly.PearsonDistance;
 import cascading.assembly.SortElements;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.AggregatorCall;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -107,7 +107,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( FlowSession flowSession, FunctionCall functionCall )
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
       TupleEntry input = functionCall.getArguments();
       functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
@@ -122,7 +122,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
+    public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
       {
       Tuple tuple = super.getResult( aggregatorCall );
 
@@ -196,7 +196,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
     {
-    public void operate( FlowSession flowSession, FunctionCall functionCall )
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
       TupleEntry input = functionCall.getArguments();
       functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
@@ -211,7 +211,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
-    public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
+    public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
       {
       Tuple tuple = super.getResult( aggregatorCall );
 

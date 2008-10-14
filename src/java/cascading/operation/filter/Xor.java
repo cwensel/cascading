@@ -21,7 +21,7 @@
 
 package cascading.operation.filter;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
  * Class Xor is a {@link Filter} class that will logically 'xor' (exclusive or) the results of the
  * constructor provided Filter instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall)} returns {@code true} for all given instances,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for all given instances,
  * or returns {@code false} for all given instances, this filter will return {@code true}.
  * <p/>
  * Note that Xor can only be applied to two values.
@@ -65,8 +65,8 @@ public class Xor extends Logic
     super( lhsArgumentSelector, lhsFilter, rhsArgumentSelector, rhsFilter );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     TupleEntry lhsEntry = getArgumentEntries()[ 0 ];
     TupleEntry rhsEntry = getArgumentEntries()[ 1 ];
@@ -74,8 +74,8 @@ public class Xor extends Logic
     lhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 0 ] ) );
     rhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 1 ] ) );
 
-    boolean lhsResult = filters[ 0 ].isRemove( flowSession, filterCall );
-    boolean rhsResult = filters[ 1 ].isRemove( flowSession, filterCall );
+    boolean lhsResult = filters[ 0 ].isRemove( flowProcess, filterCall );
+    boolean rhsResult = filters[ 1 ].isRemove( flowProcess, filterCall );
 
     return lhsResult != rhsResult;
     }

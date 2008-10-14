@@ -54,8 +54,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
-      currentProcess = new HadoopFlowProcess( jobConf );
-      flowReducerStack = new FlowReducerStack( jobConf, new FlowSession( currentProcess ) );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf );
+      flowReducerStack = new FlowReducerStack( currentProcess );
       }
     catch( Throwable throwable )
       {

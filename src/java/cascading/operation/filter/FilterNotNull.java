@@ -21,7 +21,7 @@
 
 package cascading.operation.filter;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -34,7 +34,7 @@ import cascading.operation.FilterCall;
  */
 public class FilterNotNull extends BaseOperation implements Filter
   {
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     for( Object value : filterCall.getArguments().getTuple() )
       {

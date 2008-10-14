@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -44,30 +44,30 @@ public interface GroupAssertion<C> extends Assertion
    * remove any previous state/values.
    * <p/>
    * For example, if a Map is used to hold the intermediate data for each subsequent
-   * {@link #aggregate(cascading.flow.FlowSession, GroupAssertionCall)} call,
+   * {@link #aggregate(cascading.flow.FlowProcess, GroupAssertionCall)} call,
    * new HashMap() should be set on the AggregatorCall instance when {@link cascading.operation.AggregatorCall#getContext()} is null.
    * On the next grouping, start() will be called again, but this time with the old Map instance. In this case,
    * map.clear() should be invoked before returning.
    *
-   * @param flowSession   of type FlowSession is the current session
+   * @param flowProcess   of type FlowProcess
    * @param assertionCall of type GroupAssertionCall
    */
-  void start( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
+  void start( FlowProcess flowProcess, GroupAssertionCall<C> assertionCall );
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
    *
-   * @param flowSession   of type FlowSession
+   * @param flowProcess   of type FlowProcess
    * @param assertionCall of type GroupAssertionCall
    */
-  void aggregate( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
+  void aggregate( FlowProcess flowProcess, GroupAssertionCall<C> assertionCall );
 
   /**
    * Method doAssert performs the assertion.
    *
-   * @param flowSession   of type FlowSession
+   * @param flowProcess   of type FlowProcess
    * @param assertionCall of type GroupAssertionCall
    */
-  void doAssert( FlowSession flowSession, GroupAssertionCall<C> assertionCall );
+  void doAssert( FlowProcess flowProcess, GroupAssertionCall<C> assertionCall );
 
   }

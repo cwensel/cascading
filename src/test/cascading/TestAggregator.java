@@ -21,7 +21,7 @@
 
 package cascading;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -77,7 +77,7 @@ public class TestAggregator extends BaseOperation implements Aggregator
     this.duplicates = duplicates;
     }
 
-  public void start( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     if( groupFields == null )
       return;
@@ -86,11 +86,11 @@ public class TestAggregator extends BaseOperation implements Aggregator
       throw new RuntimeException( "fields do not match: " + groupFields.print() + " != " + aggregatorCall.getGroup().getFields().print() );
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     }
 
-  public void complete( FlowSession flowSession, AggregatorCall aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
     for( int i = 0; i < duplicates; i++ )
       {

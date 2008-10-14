@@ -22,13 +22,12 @@
 package cascading.flow.stack;
 
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -38,9 +37,9 @@ class EachMapperStackElement extends MapperStackElement
   private final Each each;
   private Each.EachHandler eachHandler;
 
-  public EachMapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Each each )
+  public EachMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Each each )
     {
-    super( previous, flowSession, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, trap );
     this.each = each;
     }
 
@@ -74,7 +73,7 @@ class EachMapperStackElement extends MapperStackElement
     {
     try
       {
-      eachHandler.operate( flowSession, tupleEntry );
+      eachHandler.operate( flowProcess, tupleEntry );
       }
     catch( Exception exception )
       {

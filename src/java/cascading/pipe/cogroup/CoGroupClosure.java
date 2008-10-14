@@ -23,7 +23,7 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
@@ -42,10 +42,10 @@ public class CoGroupClosure extends GroupClosure
   /** Field groups */
   SpillableTupleList[] groups;
 
-  public CoGroupClosure( FlowSession flowSession, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
+  public CoGroupClosure( FlowProcess flowProcess, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
     super( groupingFields, valueFields, key, values );
-    build( flowSession, repeat );
+    build( flowProcess, repeat );
     }
 
   @Override
@@ -68,13 +68,13 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ];
     }
 
-  public void build( FlowSession flowSession, int repeat )
+  public void build( FlowProcess flowProcess, int repeat )
     {
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, repeat )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( getLong( flowSession, SPILL_THRESHOLD, defaultThreshold ) );
+      groups[ i ] = new SpillableTupleList( getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold ) );
 
     while( values.hasNext() )
       {
@@ -96,9 +96,9 @@ public class CoGroupClosure extends GroupClosure
       groups[ i ] = groups[ 0 ];
     }
 
-  private long getLong( FlowSession flowSession, String key, long defaultValue )
+  private long getLong( FlowProcess flowProcess, String key, long defaultValue )
     {
-    String value = (String) flowSession.getCurrentProcess().getProperty( key );
+    String value = (String) flowProcess.getProperty( key );
 
     if( value == null || value.length() == 0 )
       return defaultValue;

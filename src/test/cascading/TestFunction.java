@@ -21,7 +21,7 @@
 
 package cascading;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -39,7 +39,7 @@ public class TestFunction extends BaseOperation implements Function
     this.value = value;
     }
 
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     if( value == null )
       throw new RuntimeException( "function failed" );

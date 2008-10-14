@@ -24,7 +24,7 @@ package cascading.flow.stack;
 import java.util.Iterator;
 
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
 import cascading.tap.Tap;
@@ -40,9 +40,9 @@ class EveryBufferReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
-  public EveryBufferReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
+  public EveryBufferReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
     {
-    super( previous, flowSession, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, trap );
     this.everyHandler = everyHandler;
     }
 
@@ -76,7 +76,7 @@ class EveryBufferReducerStackElement extends ReducerStackElement
 
     try
       {
-      everyHandler.operate( flowSession, groupingEntry, null, (TupleEntryIterator) values );
+      everyHandler.operate( flowProcess, groupingEntry, null, (TupleEntryIterator) values );
       }
     catch( Exception exception )
       {

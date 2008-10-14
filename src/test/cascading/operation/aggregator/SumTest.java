@@ -22,7 +22,7 @@
 package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -68,11 +68,11 @@ public class SumTest extends CascadingTestCase
 
   public final void testStart()
     {
-    sum.start( FlowSession.NULL, operationCall );
+    sum.start( FlowProcess.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
     operationCall.setOutputCollector( resultEntryCollector );
-    sum.complete( FlowSession.NULL, operationCall );
+    sum.complete( FlowProcess.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected initial value on start", 0.0, tuple.getDouble( 0 ), 0.0d );
@@ -80,21 +80,21 @@ public class SumTest extends CascadingTestCase
 
   public final void testAggregateCompleteDouble()
     {
-    sum.start( FlowSession.NULL, operationCall );
+    sum.start( FlowProcess.NULL, operationCall );
 
 
     operationCall.setArguments( new TupleEntry( new Tuple( new Double( 1.0 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Double( 3.0 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Double( 2.0 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Double( -4.0 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
     operationCall.setOutputCollector( resultEntryCollector );
-    sum.complete( FlowSession.NULL, operationCall );
+    sum.complete( FlowProcess.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 2.0, (Double) tuple.get( 0 ), 0.0d );
@@ -103,21 +103,21 @@ public class SumTest extends CascadingTestCase
   public final void testAggregateCompleteInteger()
     {
     Sum sum = new Sum( new Fields( "sum" ), Integer.class );
-    sum.start( FlowSession.NULL, operationCall );
+    sum.start( FlowProcess.NULL, operationCall );
 
 
     operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 1 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 3 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Integer( 2 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
     operationCall.setArguments( new TupleEntry( new Tuple( new Integer( -4 ) ) ) );
-    sum.aggregate( FlowSession.NULL, operationCall );
+    sum.aggregate( FlowProcess.NULL, operationCall );
 
     TupleListCollector resultEntryCollector = new TupleListCollector( new Fields( "field" ) );
     operationCall.setOutputCollector( resultEntryCollector );
-    sum.complete( FlowSession.NULL, operationCall );
+    sum.complete( FlowProcess.NULL, operationCall );
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "Got expected value after aggregate", 2, tuple.get( 0 ) );

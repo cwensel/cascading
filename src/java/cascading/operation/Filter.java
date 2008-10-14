@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 
 /**
  * Interface Filter marks a given {@link BaseOperation} as a filter, as opposed to being a {@link Function}.
@@ -33,9 +33,9 @@ public interface Filter extends Operation
   /**
    * Method isRemove returns true if input should be removed from the tuple stream.
    *
-   * @param flowSession of type FlowSession
-   * @param filterCall
+   * @param flowProcess of type FlowProcess
+   * @param filterCall  of type FilterCall
    * @return boolean
    */
-  boolean isRemove( FlowSession flowSession, FilterCall filterCall );
+  boolean isRemove( FlowProcess flowProcess, FilterCall filterCall );
   }

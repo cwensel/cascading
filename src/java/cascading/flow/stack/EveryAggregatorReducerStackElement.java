@@ -22,7 +22,7 @@
 package cascading.flow.stack;
 
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Every;
 import cascading.tap.Tap;
@@ -37,9 +37,9 @@ class EveryAggregatorReducerStackElement extends ReducerStackElement
   {
   private final Every.EveryHandler everyHandler;
 
-  public EveryAggregatorReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
+  public EveryAggregatorReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
     {
-    super( previous, flowSession, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, trap );
     this.everyHandler = everyHandler;
     }
 
@@ -75,7 +75,7 @@ class EveryAggregatorReducerStackElement extends ReducerStackElement
     {
     try
       {
-      everyHandler.complete( flowSession, keyEntry );
+      everyHandler.complete( flowProcess, keyEntry );
       }
     catch( Exception exception )
       {

@@ -24,7 +24,7 @@ package cascading.assembly;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.AggregatorCall;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
@@ -62,7 +62,7 @@ public class PearsonDistance extends CrossTab
       super( new Fields( "pearson" ) );
       }
 
-    public void start( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
+    public void start( FlowProcess flowProcess, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
       if( aggregatorCall.getContext() == null )
         aggregatorCall.setContext( new HashMap<String, Double>() );
@@ -77,7 +77,7 @@ public class PearsonDistance extends CrossTab
       context.put( SUMPROD, 0d );
       }
 
-    public void aggregate( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
+    public void aggregate( FlowProcess flowProcess, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
       Map<String, Double> context = aggregatorCall.getContext();
       TupleEntry entry = aggregatorCall.getArguments();
@@ -93,7 +93,7 @@ public class PearsonDistance extends CrossTab
       context.put( SUMPROD, ( (Double) context.get( SUMPROD ) ) + ( entry.getTuple().getDouble( 0 ) * entry.getTuple().getDouble( 1 ) ) );
       }
 
-    public void complete( FlowSession flowSession, AggregatorCall<Map<String, Double>> aggregatorCall )
+    public void complete( FlowProcess flowProcess, AggregatorCall<Map<String, Double>> aggregatorCall )
       {
       Map<String, Double> context = aggregatorCall.getContext();
       Double count = (Double) context.get( COUNT );

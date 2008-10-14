@@ -23,7 +23,7 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
@@ -100,13 +100,13 @@ public class RegexParser extends RegexOperation implements Function
     }
 
   @Override
-  public void prepare( FlowSession flowSession )
+  public void prepare( FlowProcess flowProcess )
     {
     matcher = getPattern().matcher( "" );
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 

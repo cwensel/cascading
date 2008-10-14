@@ -38,7 +38,7 @@ public interface BufferCall
 
   /**
    * Returns an {@link Iterator} of {@link TupleEntry} instances representing the arguments for the called
-   * {@link Buffer#operate(cascading.flow.FlowSession, BufferCall)} method.
+   * {@link Buffer#operate(cascading.flow.FlowProcess, BufferCall)} method.
    *
    * @return Iterator<TupleEntry>
    */

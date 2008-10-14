@@ -21,7 +21,7 @@
 
 package cascading.operation.function;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -97,7 +97,7 @@ public class UnGroup extends BaseOperation implements Function
     this.size = size;
     }
 
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     if( resultFieldSelectors != null )
       useResultSelectors( functionCall.getArguments(), functionCall.getOutputCollector() );

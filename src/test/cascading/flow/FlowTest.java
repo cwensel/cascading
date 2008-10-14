@@ -199,7 +199,7 @@ public class FlowTest extends ClusterTestCase
     {
     private Object object = new Object(); // intentional
 
-    public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+    public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
       {
       return false;
       }
@@ -298,7 +298,7 @@ public class FlowTest extends ClusterTestCase
       pipeLower = new Each( pipeLower, new Debug()
       {
       @Override
-      public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+      public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
         {
         throw new RuntimeException( "failing inside pipe assembly intentionally" );
         }

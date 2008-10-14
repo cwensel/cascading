@@ -21,7 +21,7 @@
 
 package cascading.operation.regex;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
@@ -61,8 +61,8 @@ public class RegexSplitter extends RegexOperation implements Function
     super( 1, fieldDeclaration, patternString );
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 

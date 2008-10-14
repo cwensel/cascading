@@ -23,8 +23,8 @@ package cascading.operation;
 
 import java.io.Serializable;
 
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.flow.FlowSession;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;
@@ -114,17 +114,19 @@ public abstract class BaseOperation implements Serializable, Operation
     }
 
   /**
-   * @see Operation#prepare(FlowSession)
+   * @param flowProcess
+   * @see Operation#prepare(cascading.flow.FlowProcess)
    */
-  public void prepare( FlowSession flowSession )
+  public void prepare( FlowProcess flowProcess )
     {
     // do nothing
     }
 
   /**
-   * @see Operation#cleanup(FlowSession)
+   * @param flowProcess
+   * @see Operation#cleanup(cascading.flow.FlowProcess)
    */
-  public void cleanup( FlowSession flowSession )
+  public void cleanup( FlowProcess flowProcess )
     {
     // do nothing
     }

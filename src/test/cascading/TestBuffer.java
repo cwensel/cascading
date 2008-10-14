@@ -21,7 +21,7 @@
 
 package cascading;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
 import cascading.operation.BufferCall;
@@ -69,7 +69,7 @@ public class TestBuffer extends BaseOperation implements Buffer
     this.value = value;
     }
 
-  public void operate( FlowSession flowSession, BufferCall bufferCall )
+  public void operate( FlowProcess flowProcess, BufferCall bufferCall )
     {
     if( insertHeader )
       bufferCall.getOutputCollector().add( new Tuple( value ) );

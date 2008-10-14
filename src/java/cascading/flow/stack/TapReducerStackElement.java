@@ -27,13 +27,12 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tap.TapCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -43,9 +42,9 @@ class TapReducerStackElement extends ReducerStackElement
   private final Tap sink;
   private TapCollector tapCollector;
 
-  public TapReducerStackElement( StackElement previous, FlowSession flowSession, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
+  public TapReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, flowSession, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null );
     this.sink = sink;
 
     if( useTapCollector )

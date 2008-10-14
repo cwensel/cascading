@@ -21,7 +21,7 @@
 
 package cascading.operation.expression;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Tuple;
@@ -56,8 +56,8 @@ public class ExpressionFilter extends ExpressionOperation implements Filter
     super( expression, parameterTypes );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     return (Boolean) evaluate( filterCall.getArguments() );
     }

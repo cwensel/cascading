@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.FlowCollector;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapCollector;
@@ -36,16 +36,16 @@ import org.apache.hadoop.mapred.JobConf;
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
   {
-  final FlowSession flowSession;
+  final FlowProcess flowProcess;
   private final Tap trap;
 
   StackElement previous;
   StackElement next;
   private Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
 
-  public StackElement( FlowSession flowSession, Tap trap )
+  public StackElement( FlowProcess flowProcess, Tap trap )
     {
-    this.flowSession = flowSession;
+    this.flowProcess = flowProcess;
     this.trap = trap;
     }
 
@@ -67,14 +67,14 @@ abstract class StackElement implements FlowCollector
     return this;
     }
 
-  public FlowSession getFlowSession()
+  public FlowProcess getFlowProcess()
     {
-    return flowSession;
+    return flowProcess;
     }
 
   public JobConf getJobConf()
     {
-    return ( (HadoopFlowProcess) flowSession.getCurrentProcess() ).getJobConf();
+    return ( (HadoopFlowProcess) flowProcess ).getJobConf();
     }
 
   protected void handleException( Exception exception, TupleEntry tupleEntry )

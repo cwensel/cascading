@@ -54,8 +54,8 @@ public class FlowMapper extends MapReduceBase implements Mapper
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
 
-      currentProcess = new HadoopFlowProcess( jobConf );
-      flowMapperStack = new FlowMapperStack( jobConf, new FlowSession( currentProcess ) );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf );
+      flowMapperStack = new FlowMapperStack( currentProcess );
       }
     catch( Throwable throwable )
       {

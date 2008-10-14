@@ -24,7 +24,7 @@ package cascading.operation.text;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
@@ -60,8 +60,8 @@ public class DateFormatter extends DateOperation implements Function
     super( 1, fieldDeclaration, dateFormatString );
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     Tuple output = new Tuple();
 

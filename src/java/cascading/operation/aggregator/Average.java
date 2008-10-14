@@ -21,7 +21,7 @@
 
 package cascading.operation.aggregator;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -69,7 +69,7 @@ public class Average extends BaseOperation implements Aggregator<Average.Context
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  public void start( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     if( aggregatorCall.getContext() != null )
       aggregatorCall.getContext().reset();
@@ -77,7 +77,7 @@ public class Average extends BaseOperation implements Aggregator<Average.Context
       aggregatorCall.setContext( new Context() );
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     Context context = aggregatorCall.getContext();
     TupleEntry arguments = aggregatorCall.getArguments();
@@ -86,7 +86,7 @@ public class Average extends BaseOperation implements Aggregator<Average.Context
     context.count += 1d;
     }
 
-  public void complete( FlowSession flowSession, AggregatorCall<Context> aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }

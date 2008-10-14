@@ -28,16 +28,16 @@ public interface GroupAssertionCall<C>
   {
   /**
    * Returns the user set context object, C. Will return null if {@link #setContext(Object)} was not called
-   * during {@link GroupAssertion#start(cascading.flow.FlowSession, GroupAssertionCall)}.
+   * during {@link GroupAssertion#start(cascading.flow.FlowProcess, GroupAssertionCall}.
    *
    * @return user defined object
    */
   C getContext();
 
   /**
-   * Sets the 'context' object used by code in {@link GroupAssertion#aggregate(cascading.flow.FlowSession, GroupAssertionCall)}.
+   * Sets the 'context' object used by code in {@link GroupAssertion#aggregate(cascading.flow.FlowProcess, GroupAssertionCall}.
    * <p/>
-   * This method should only be called in the {@link GroupAssertion#start(cascading.flow.FlowSession, GroupAssertionCall)}
+   * This method should only be called in the {@link GroupAssertion#start(cascading.flow.FlowProcess, GroupAssertionCall}
    * method. Further, if {@link #getContext()} does not return null, consider 'resetting' the current instance. For
    * example, if the 'context' is a Map or Set, call the clear() method instead of creating a new Map instance.
    *

@@ -23,7 +23,7 @@ package cascading.operation.text;
 
 import java.util.Formatter;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -79,8 +79,8 @@ public class FieldFormatter extends BaseOperation implements Function
     return format;
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().format( format ) ) );
     }

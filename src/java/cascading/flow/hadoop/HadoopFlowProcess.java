@@ -27,17 +27,17 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Class HadoopFlowSession is an implemenation of {@link FlowSession} for Hadoop. Use this interfact to get direct
+ * Class HadoopFlowProcess is an implemenation of {@link FlowProcess} for Hadoop. Use this interfact to get direct
  * access to the Hadoop JobConf and Reporter interfaces.
  * <p/>
- * Be warned that coupling to this implemenation, will cause custom {@link cascading.operation.Operation}s to
+ * Be warned that coupling to this implemenation will cause custom {@link cascading.operation.Operation}s to
  * fail if they are executed on a system other than Hadoop.
  *
  * @see cascading.flow.FlowSession
  * @see JobConf
  * @see Reporter
  */
-public class HadoopFlowProcess implements FlowProcess
+public class HadoopFlowProcess extends FlowProcess
   {
   /** Field jobConf */
   JobConf jobConf;
@@ -47,10 +47,12 @@ public class HadoopFlowProcess implements FlowProcess
   /**
    * Constructor HFlowSession creates a new HFlowSession instance.
    *
-   * @param jobConf of type JobConf
+   * @param flowSession of type FlowSession
+   * @param jobConf     of type JobConf
    */
-  public HadoopFlowProcess( JobConf jobConf )
+  public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf )
     {
+    super( flowSession );
     this.jobConf = jobConf;
     }
 
@@ -84,16 +86,19 @@ public class HadoopFlowProcess implements FlowProcess
     return reporter;
     }
 
+  /** @see cascading.flow.FlowProcess#getProperty(String) */
   public Object getProperty( String key )
     {
     return jobConf.get( key );
     }
 
+  /** @see cascading.flow.FlowProcess#keepAlive() */
   public void keepAlive()
     {
     reporter.progress();
     }
 
+  /** @see cascading.flow.FlowProcess#increment(Enum, int) */
   public void increment( Enum counter, int amount )
     {
     reporter.incrCounter( counter, amount );

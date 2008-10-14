@@ -25,7 +25,7 @@ import java.io.StringReader;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
@@ -72,8 +72,8 @@ public class XPathParser extends XPathOperation implements Function
     super( 1, fieldDeclaration, null, paths );
     }
 
-  /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     Tuple tuple = new Tuple();
     InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().get( 0 ) ) );

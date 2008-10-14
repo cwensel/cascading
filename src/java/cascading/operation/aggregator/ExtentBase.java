@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
@@ -59,7 +59,7 @@ public abstract class ExtentBase extends BaseOperation implements Aggregator<Tup
     }
 
   @SuppressWarnings("unchecked")
-  public void start( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
+  public void start( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( aggregatorCall.getContext() == null )
       aggregatorCall.setContext( new Tuple[1] );
@@ -67,7 +67,7 @@ public abstract class ExtentBase extends BaseOperation implements Aggregator<Tup
       aggregatorCall.getContext()[ 0 ] = null;
     }
 
-  public void aggregate( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( ignoreTuples != null && ignoreTuples.contains( aggregatorCall.getArguments().getTuple() ) )
       return;
@@ -77,7 +77,7 @@ public abstract class ExtentBase extends BaseOperation implements Aggregator<Tup
 
   protected abstract void performOperation( Tuple[] context, TupleEntry entry );
 
-  public void complete( FlowSession flowSession, AggregatorCall<Tuple[]> aggregatorCall )
+  public void complete( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( aggregatorCall.getContext()[ 0 ] != null )
       aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );

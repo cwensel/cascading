@@ -30,9 +30,9 @@ import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.Operation;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
@@ -58,7 +58,7 @@ public class FlowReducerStack
   /** Field jobConf */
   private final JobConf jobConf;
   /** Field flowSession */
-  private final FlowSession flowSession;
+  private final HadoopFlowProcess flowProcess;
 
   /** Field stackHead */
   private ReducerStackElement stackHead;
@@ -67,10 +67,10 @@ public class FlowReducerStack
   /** Field allOperations */
   private Collection<Operation> allOperations;
 
-  public FlowReducerStack( JobConf jobConf, FlowSession flowSession ) throws IOException
+  public FlowReducerStack( HadoopFlowProcess flowProcess ) throws IOException
     {
-    this.jobConf = jobConf;
-    this.flowSession = flowSession;
+    this.flowProcess = flowProcess;
+    this.jobConf = flowProcess.getJobConf();
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
 
     buildStack();
@@ -78,7 +78,7 @@ public class FlowReducerStack
     allOperations = step.getAllOperations();
 
     for( Operation operation : allOperations )
-      operation.prepare( flowSession );
+      operation.prepare( flowProcess );
     }
 
   private void buildStack() throws IOException
@@ -87,7 +87,7 @@ public class FlowReducerStack
     Scope nextScope = step.getNextScope( step.group );
     Tap trap = step.getTrap( ( (Pipe) step.group ).getName() );
 
-    stackTail = new GroupReducerStackElement( flowSession, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
+    stackTail = new GroupReducerStackElement( flowProcess, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
@@ -96,7 +96,7 @@ public class FlowReducerStack
       List<Every.EveryHandler> allAggregators = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowSession, incomingScope, step.traps, allAggregators );
+      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, step.traps, allAggregators );
 
       while( operator instanceof Every && !( (Every) operator ).isBuffer() )
         {
@@ -106,7 +106,7 @@ public class FlowReducerStack
         allAggregators.add( everyHandler );
 
         trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stackTail = new EveryAggregatorReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
+        stackTail = new EveryAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );
@@ -122,7 +122,7 @@ public class FlowReducerStack
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
 
         trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stackTail = new EveryBufferReducerStackElement( stackTail, flowSession, incomingScope, trap, everyHandler );
+        stackTail = new EveryBufferReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
         operator = step.getNextFlowElement( nextScope );
@@ -132,7 +132,7 @@ public class FlowReducerStack
     while( operator instanceof Each )
       {
       trap = step.getTrap( ( (Pipe) operator ).getName() );
-      stackTail = new EachReducerStackElement( stackTail, flowSession, nextScope, trap, (Each) operator );
+      stackTail = new EachReducerStackElement( stackTail, flowProcess, nextScope, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );
       operator = step.getNextFlowElement( nextScope );
@@ -149,7 +149,7 @@ public class FlowReducerStack
 
     useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
 
-    stackTail = new TapReducerStackElement( stackTail, flowSession, nextScope, (Tap) operator, useTapCollector );
+    stackTail = new TapReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator, useTapCollector );
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
@@ -181,6 +181,6 @@ public class FlowReducerStack
     stackTail.close();
 
     for( Operation operation : allOperations )
-      operation.cleanup( flowSession );
+      operation.cleanup( flowProcess );
     }
   }

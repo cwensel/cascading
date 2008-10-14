@@ -21,7 +21,7 @@
 
 package cascading.operation.regex;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 
@@ -80,8 +80,8 @@ public class RegexFilter extends RegexMatcher implements Filter
     this.matchEachElement = matchEachElement;
     }
 
-  /** @see Filter#isRemove(cascading.flow.FlowSession,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowSession flowSession, FilterCall filterCall )
+  /** @see Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     if( matchEachElement )
       return matchEachElement( filterCall.getArguments().getTuple() );

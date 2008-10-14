@@ -27,9 +27,9 @@ import java.util.Set;
 
 import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.Operation;
 import cascading.pipe.Each;
 import cascading.pipe.EndPipe;
@@ -57,7 +57,7 @@ public class FlowMapperStack
   /** Field jobConf */
   private final JobConf jobConf;
   /** Field flowSession */
-  private final FlowSession flowSession;
+  private final HadoopFlowProcess flowProcess;
 
   /** Field stack */
   private Stack stacks[];
@@ -73,10 +73,10 @@ public class FlowMapperStack
     MapperStackElement tail;
     }
 
-  public FlowMapperStack( JobConf jobConf, FlowSession flowSession ) throws IOException
+  public FlowMapperStack( HadoopFlowProcess flowProcess ) throws IOException
     {
-    this.jobConf = jobConf;
-    this.flowSession = flowSession;
+    this.flowProcess = flowProcess;
+    this.jobConf = flowProcess.getJobConf();
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
 
     // is set by the MultiInputSplit
@@ -90,7 +90,7 @@ public class FlowMapperStack
     allOperations = step.getAllOperations();
 
     for( Operation operation : allOperations )
-      operation.prepare( flowSession );
+      operation.prepare( flowProcess );
     }
 
   private void buildStack() throws IOException
@@ -112,7 +112,7 @@ public class FlowMapperStack
       while( operator instanceof Each )
         {
         Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, trap, (Each) operator );
+        stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Each) operator );
 
         incomingScope = step.getNextScope( operator );
         operator = step.getNextFlowElement( incomingScope );
@@ -132,13 +132,13 @@ public class FlowMapperStack
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
 
         Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, trap, (Group) operator, outgoingScope );
+        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope );
         }
       else if( operator instanceof Tap )
         {
         useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
 
-        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowSession, incomingScope, (Tap) operator, useTapCollector );
+        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator, useTapCollector );
         }
       else
         throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
@@ -187,6 +187,6 @@ public class FlowMapperStack
       stacks[ i ].tail.close();
 
     for( Operation operation : allOperations )
-      operation.cleanup( flowSession );
+      operation.cleanup( flowProcess );
     }
   }

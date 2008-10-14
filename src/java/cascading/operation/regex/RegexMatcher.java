@@ -23,7 +23,7 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -57,7 +57,7 @@ public class RegexMatcher extends RegexOperation
     }
 
   @Override
-  public void prepare( FlowSession flowSession )
+  public void prepare( FlowProcess flowProcess )
     {
     matcher = getPattern().matcher( "" );
     }

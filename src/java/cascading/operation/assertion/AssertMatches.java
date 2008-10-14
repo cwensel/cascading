@@ -21,7 +21,7 @@
 
 package cascading.operation.assertion;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.operation.regex.RegexMatcher;
@@ -63,8 +63,8 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion
     super( patternString, negateMatch );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowSession,cascading.operation.ValueAssertionCall) */
-  public void doAssert( FlowSession flowSession, ValueAssertionCall assertionCall )
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
+  public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {
     Tuple tuple = assertionCall.getArguments().getTuple();
 

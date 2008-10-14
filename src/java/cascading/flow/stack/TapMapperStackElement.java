@@ -26,13 +26,12 @@ import java.io.IOException;
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.tap.TapCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -42,9 +41,9 @@ class TapMapperStackElement extends MapperStackElement
   private final Tap sink;
   private TapCollector tapCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, FlowSession flowSession, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
+  public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, flowSession, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null );
     this.sink = sink;
 
     if( useTapCollector )

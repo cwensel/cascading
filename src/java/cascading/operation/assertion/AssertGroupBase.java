@@ -24,7 +24,7 @@ package cascading.operation.assertion;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.GroupAssertion;
 import cascading.operation.GroupAssertionCall;
 import cascading.tuple.Tuple;
@@ -112,7 +112,7 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
     return matcher.matches();
     }
 
-  public void start( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
+  public void start( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     if( assertionCall.getContext() == null )
       assertionCall.setContext( new Context() );
@@ -127,7 +127,7 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
       context.set( 0L, groupEntry.getFields().print(), groupEntry.getTuple().print() );
     }
 
-  public void aggregate( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
+  public void aggregate( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     Long groupSize = (Long) assertionCall.getContext().count;
 
@@ -136,7 +136,7 @@ public abstract class AssertGroupBase extends BaseAssertion implements GroupAsse
       assertionCall.getContext().count += 1L;
     }
 
-  public void doAssert( FlowSession flowSession, GroupAssertionCall<Context> assertionCall )
+  public void doAssert( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     Context context = assertionCall.getContext();
     Long groupSize = context.count;

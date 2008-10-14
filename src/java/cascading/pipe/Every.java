@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowCollector;
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
@@ -315,11 +315,11 @@ public class Every extends Operator
       this.operationCall = new OperationCall();
       }
 
-    public abstract void start( FlowSession flowSession, TupleEntry groupEntry );
+    public abstract void start( FlowProcess flowProcess, TupleEntry groupEntry );
 
-    public abstract void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator );
+    public abstract void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator );
 
-    public abstract void complete( FlowSession flowSession, TupleEntry groupEntry );
+    public abstract void complete( FlowProcess flowProcess, TupleEntry groupEntry );
 
 
     @Override
@@ -361,15 +361,15 @@ public class Every extends Operator
       };
       }
 
-    public void start( FlowSession flowSession, TupleEntry groupEntry )
+    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       operationCall.setArguments( null );  // zero it out
       operationCall.setOutputCollector( null ); // zero it out
       operationCall.setGroup( groupEntry );
-      getAggregator().start( flowSession, operationCall );
+      getAggregator().start( flowProcess, operationCall );
       }
 
-    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
+    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
@@ -377,7 +377,7 @@ public class Every extends Operator
 
       try
         {
-        getAggregator().aggregate( flowSession, operationCall );
+        getAggregator().aggregate( flowProcess, operationCall );
         }
       catch( Throwable throwable )
         {
@@ -385,14 +385,14 @@ public class Every extends Operator
         }
       }
 
-    public void complete( FlowSession flowSession, TupleEntry groupEntry )
+    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       tupleCollector.value = groupEntry;
 
       operationCall.setArguments( null );
       operationCall.setOutputCollector( tupleCollector );
 
-      getAggregator().complete( flowSession, operationCall );
+      getAggregator().complete( flowProcess, operationCall );
       }
     }
 
@@ -428,11 +428,11 @@ public class Every extends Operator
       return tupleCollector.value;
       }
 
-    public void start( FlowSession flowSession, TupleEntry groupEntry )
+    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       }
 
-    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, final TupleEntryIterator tupleEntryIterator )
+    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, final TupleEntryIterator tupleEntryIterator )
       {
       // we want to null out any 'values' before and after the iterator begins/ends
       // this allows buffers to emit tuples before next() and when hasNext() return false;
@@ -471,7 +471,7 @@ public class Every extends Operator
 
       try
         {
-        getReducer().operate( flowSession, operationCall );
+        getReducer().operate( flowProcess, operationCall );
         }
       catch( Throwable throwable )
         {
@@ -479,7 +479,7 @@ public class Every extends Operator
         }
       }
 
-    public void complete( FlowSession flowSession, TupleEntry groupEntry )
+    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       }
     }
@@ -491,28 +491,28 @@ public class Every extends Operator
       super( outgoingScope );
       }
 
-    public void start( FlowSession flowSession, TupleEntry groupEntry )
+    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       operationCall.setArguments( null );
       operationCall.setOutputCollector( null ); // zero it out
       operationCall.setGroup( groupEntry );
 
-      getGroupAssertion().start( flowSession, operationCall );
+      getGroupAssertion().start( flowProcess, operationCall );
       }
 
-    public void operate( FlowSession flowSession, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
+    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
       {
       TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
 
       operationCall.setArguments( arguments );
 
-      getGroupAssertion().aggregate( flowSession, operationCall );
+      getGroupAssertion().aggregate( flowProcess, operationCall );
       }
 
-    public void complete( FlowSession flowSession, TupleEntry groupEntry )
+    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
       {
       operationCall.setArguments( null );
-      getGroupAssertion().doAssert( flowSession, operationCall );
+      getGroupAssertion().doAssert( flowProcess, operationCall );
 
       outputCollector.collect( groupEntry.getTuple() );
       }

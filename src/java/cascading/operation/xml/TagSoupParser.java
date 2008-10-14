@@ -27,7 +27,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -112,8 +112,8 @@ public class TagSoupParser extends BaseOperation implements Function
     features.put( feature, value );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
-  public void operate( FlowSession flowSession, FunctionCall functionCall )
+  /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     try
       {

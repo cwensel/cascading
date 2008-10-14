@@ -21,7 +21,7 @@
 
 package cascading.assembly;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.operation.AggregatorCall;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
@@ -70,18 +70,18 @@ public class EuclideanDistance extends CrossTab
       super( new Fields( "euclidean" ) );
       }
 
-    public void start( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+    public void start( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
       {
       aggregatorCall.setContext( new Double[]{0d} );
       }
 
-    public void aggregate( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+    public void aggregate( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
       {
       TupleEntry entry = aggregatorCall.getArguments();
       aggregatorCall.getContext()[ 0 ] += Math.pow( entry.getDouble( 0 ) - entry.getDouble( 1 ), 2 );
       }
 
-    public void complete( FlowSession flowSession, AggregatorCall<Double[]> aggregatorCall )
+    public void complete( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
       {
       aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + aggregatorCall.getContext()[ 0 ] ) ) );
       }
