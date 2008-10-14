@@ -28,7 +28,7 @@ import cascading.flow.FlowProcess;
  * <p/>
  * Implementors must also extend {@link BaseOperation}.
  */
-public interface ValueAssertion extends Assertion
+public interface ValueAssertion<PC> extends Assertion<PC>
   {
   /**
    * Method doAssert performs the assertion.
@@ -36,5 +36,5 @@ public interface ValueAssertion extends Assertion
    * @param flowProcess
    * @param assertionCall
    */
-  void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall );
+  void doAssert( FlowProcess<PC> flowProcess, ValueAssertionCall assertionCall );
   }

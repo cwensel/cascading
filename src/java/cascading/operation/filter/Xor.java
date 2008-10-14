@@ -74,9 +74,21 @@ public class Xor extends Logic
     lhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 0 ] ) );
     rhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 1 ] ) );
 
+    Object[] contexts = (Object[]) flowProcess.getContext();
+
+    flowProcess.setContext( contexts[ 0 ] );
     boolean lhsResult = filters[ 0 ].isRemove( flowProcess, filterCall );
+
+    flowProcess.setContext( contexts[ 1 ] );
     boolean rhsResult = filters[ 1 ].isRemove( flowProcess, filterCall );
 
-    return lhsResult != rhsResult;
+    try
+      {
+      return lhsResult != rhsResult;
+      }
+    finally
+      {
+      flowProcess.setContext( contexts );
+      }
     }
   }

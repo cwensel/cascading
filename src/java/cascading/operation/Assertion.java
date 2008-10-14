@@ -22,6 +22,6 @@
 package cascading.operation;
 
 /** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link BaseOperation}. */
-public interface Assertion extends Operation
+public interface Assertion<PC> extends Operation<PC>
   {
   }

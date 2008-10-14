@@ -33,7 +33,7 @@ import cascading.tuple.Fields;
  *
  * @see cascading.operation.BaseOperation
  */
-public interface Operation
+public interface Operation<PC>
   {
   /** Field ANY denotes that a given Operation will take any number of argument values */
   int ANY = Integer.MAX_VALUE;
@@ -47,7 +47,7 @@ public interface Operation
    *
    * @param flowProcess
    */
-  void prepare( FlowProcess flowProcess );
+  void prepare( FlowProcess<PC> flowProcess );
 
   /**
    * The cleanup method is called immediately after the current Operation instance is taken out of play. This method
@@ -58,7 +58,7 @@ public interface Operation
    *
    * @param flowProcess
    */
-  void cleanup( FlowProcess flowProcess );
+  void cleanup( FlowProcess<PC> flowProcess );
 
   /**
    * Returns the fields created by this Operation instance. If this instance is a {@link Filter}, it should always

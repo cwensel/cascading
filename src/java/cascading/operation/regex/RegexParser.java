@@ -31,12 +31,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /** Class RegexParser is used to extract a matched regex from an incoming argument value. */
-public class RegexParser extends RegexOperation implements Function
+public class RegexParser extends RegexOperation<Matcher> implements Function<Matcher>
   {
   /** Field groups */
   private int[] groups = new int[]{0};
-  /** Field matcher */
-  private Matcher matcher;
 
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
@@ -100,13 +98,13 @@ public class RegexParser extends RegexOperation implements Function
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess<Matcher> flowProcess )
     {
-    matcher = getPattern().matcher( "" );
+    flowProcess.setContext( getPattern().matcher( "" ) );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess<Matcher> flowProcess, FunctionCall functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
@@ -115,7 +113,7 @@ public class RegexParser extends RegexOperation implements Function
 
     Tuple output = new Tuple();
 
-    matcher.reset( value );
+    Matcher matcher = flowProcess.getContext().reset( value );
 
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );

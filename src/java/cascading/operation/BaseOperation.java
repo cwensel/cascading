@@ -37,7 +37,7 @@ import cascading.tuple.Tuple;
  * </p>
  * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, and {@link Assertion}.
  */
-public abstract class BaseOperation implements Serializable, Operation
+public abstract class BaseOperation<PC> implements Serializable, Operation<PC>
   {
 
   /** Field fieldDeclaration */
@@ -114,19 +114,21 @@ public abstract class BaseOperation implements Serializable, Operation
     }
 
   /**
-   * @param flowProcess
+   * Method prepare does nothing, and may safely be overridden.
+   *
    * @see Operation#prepare(cascading.flow.FlowProcess)
    */
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess<PC> flowProcess )
     {
     // do nothing
     }
 
   /**
-   * @param flowProcess
+   * Method cleanup does nothing, and may safely be overridden.
+   *
    * @see Operation#cleanup(cascading.flow.FlowProcess)
    */
-  public void cleanup( FlowProcess flowProcess )
+  public void cleanup( FlowProcess<PC> flowProcess )
     {
     // do nothing
     }

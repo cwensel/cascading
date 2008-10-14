@@ -21,6 +21,8 @@
 
 package cascading.operation.assertion;
 
+import java.util.regex.Matcher;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
@@ -37,7 +39,7 @@ import cascading.tuple.TupleEntry;
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
  */
-public class AssertMatchesAll extends RegexMatcher implements ValueAssertion
+public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Matcher>
   {
   /** Field message */
   private final String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
@@ -68,7 +70,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion
     {
     TupleEntry input = assertionCall.getArguments();
 
-    int pos = matchEachElementPos( input.getTuple() );
+    int pos = matchEachElementPos( flowProcess, input.getTuple() );
 
     if( pos != -1 )
       BaseAssertion.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );

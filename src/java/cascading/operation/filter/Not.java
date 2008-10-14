@@ -55,6 +55,18 @@ public class Not extends BaseOperation implements Filter
       throw new IllegalArgumentException( "filter may not be null" );
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess )
+    {
+    filter.prepare( flowProcess );
+    }
+
+  @Override
+  public void cleanup( FlowProcess flowProcess )
+    {
+    filter.cleanup( flowProcess );
+    }
+
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {

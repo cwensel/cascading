@@ -300,7 +300,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    Filter filter = new And( new RegexFilter( "^68.*" ), new RegexFilter( "^1000.*" ) );
+    Filter filter = new And( new RegexFilter( "^68.*$" ), new RegexFilter( "^1000.*$" ) );
 
     pipe = new Each( pipe, new Fields( "line" ), filter );
 

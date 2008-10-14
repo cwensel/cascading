@@ -77,16 +77,27 @@ public class And extends Logic
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    for( int i = 0; i < argumentSelectors.length; i++ )
+    Object[] contexts = (Object[]) flowProcess.getContext();
+
+    try
       {
-      TupleEntry entry = getArgumentEntries()[ i ];
+      for( int i = 0; i < argumentSelectors.length; i++ )
+        {
+        TupleEntry entry = getArgumentEntries()[ i ];
 
-      entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
+        entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
 
-      if( !filters[ i ].isRemove( flowProcess, filterCall ) )
-        return false;
+        flowProcess.setContext( contexts[ i ] );
+
+        if( !filters[ i ].isRemove( flowProcess, filterCall ) )
+          return false;
+        }
+
+      return true;
       }
-
-    return true;
+    finally
+      {
+      flowProcess.setContext( contexts );
+      }
     }
   }

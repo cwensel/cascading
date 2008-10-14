@@ -28,7 +28,7 @@ import cascading.flow.FlowProcess;
  * <p/>
  * It is important that all filters call {@code super(Fields.ALL); } in their constructors.
  */
-public interface Filter extends Operation
+public interface Filter<PC> extends Operation<PC>
   {
   /**
    * Method isRemove returns true if input should be removed from the tuple stream.
@@ -37,5 +37,5 @@ public interface Filter extends Operation
    * @param filterCall  of type FilterCall
    * @return boolean
    */
-  boolean isRemove( FlowProcess flowProcess, FilterCall filterCall );
+  boolean isRemove( FlowProcess<PC> flowProcess, FilterCall filterCall );
   }

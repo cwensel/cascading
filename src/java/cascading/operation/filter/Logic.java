@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.tuple.Fields;
@@ -102,6 +103,40 @@ public abstract class Logic extends BaseOperation implements Filter
       {
       if( filter == null )
         throw new IllegalArgumentException( "given filters must not be null" );
+      }
+    }
+
+  @Override
+  public void prepare( FlowProcess flowProcess )
+    {
+    Object[] contexts = new Object[filters.length];
+
+    for( int i = 0; i < filters.length; i++ )
+      {
+      Filter filter = filters[ i ];
+
+      filter.prepare( flowProcess );
+
+      contexts[ i ] = flowProcess.getContext();
+
+      flowProcess.setContext( null );
+      }
+
+    flowProcess.setContext( contexts );
+    }
+
+  @Override
+  public void cleanup( FlowProcess flowProcess )
+    {
+    Object[] contexts = (Object[]) flowProcess.getContext();
+
+    for( int i = 0; i < filters.length; i++ )
+      {
+      Filter filter = filters[ i ];
+
+      flowProcess.setContext( contexts[ i ] );
+
+      filter.prepare( flowProcess );
       }
     }
 

@@ -35,14 +35,12 @@ import org.apache.log4j.Logger;
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
  */
-public class RegexMatcher extends RegexOperation
+public class RegexMatcher extends RegexOperation<Matcher>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( RegexMatcher.class );
   /** Field removeMatch */
   protected final boolean negateMatch;
-  /** Field matcher */
-  private transient Matcher matcher;
 
   protected RegexMatcher( String patternString )
     {
@@ -57,39 +55,41 @@ public class RegexMatcher extends RegexOperation
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess )
+  public void prepare( FlowProcess<Matcher> flowProcess )
     {
-    matcher = getPattern().matcher( "" );
+    flowProcess.setContext( getPattern().matcher( "" ) );
     }
 
   /**
    * Method matchWholeTuple ...
    *
-   * @param input of type Tuple
-   * @return boolean
+   * @param flowProcess
+   * @param input       of type Tuple @return boolean
    */
-  protected boolean matchWholeTuple( Tuple input )
+  protected boolean matchWholeTuple( FlowProcess<Matcher> flowProcess, Tuple input )
     {
-    Matcher matcher = getPattern().matcher( input.toString( "\t" ) );
+    Matcher matcher = flowProcess.getContext().reset( input.toString( "\t" ) );
+
+    boolean matchFound = matcher.find();
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() );
+      LOG.debug( "pattern: " + getPattern() + ", matches: " + matchFound );
 
-    return matcher.matches() == negateMatch;
+    return matchFound == negateMatch;
     }
 
   /**
    * Method matchEachElement ...
    *
-   * @param input of type Tuple
-   * @return boolean
+   * @param flowProcess
+   * @param input       of type Tuple @return boolean
    */
-  protected boolean matchEachElement( Tuple input )
+  protected boolean matchEachElement( FlowProcess<Matcher> flowProcess, Tuple input )
     {
-    return matchEachElementPos( input ) != -1;
+    return matchEachElementPos( flowProcess, input ) != -1;
     }
 
-  protected int matchEachElementPos( Tuple input )
+  protected int matchEachElementPos( FlowProcess<Matcher> flowProcess, Tuple input )
     {
     int pos = 0;
     for( Object value : input )
@@ -97,7 +97,7 @@ public class RegexMatcher extends RegexOperation
       if( value == null )
         value = "";
 
-      matcher.reset( value.toString() );
+      Matcher matcher = flowProcess.getContext().reset( value.toString() );
 
       boolean matchFound = matcher.find();
 

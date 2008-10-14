@@ -21,6 +21,8 @@
 
 package cascading.operation.regex;
 
+import java.util.regex.Matcher;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -40,7 +42,7 @@ import cascading.operation.FilterCall;
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
  */
-public class RegexFilter extends RegexMatcher implements Filter
+public class RegexFilter extends RegexMatcher implements Filter<Matcher>
   {
   /** Field matchEachElement */
   protected final boolean matchEachElement;
@@ -84,9 +86,9 @@ public class RegexFilter extends RegexMatcher implements Filter
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     if( matchEachElement )
-      return matchEachElement( filterCall.getArguments().getTuple() );
+      return matchEachElement( flowProcess, filterCall.getArguments().getTuple() );
     else
-      return matchWholeTuple( filterCall.getArguments().getTuple() );
+      return matchWholeTuple( flowProcess, filterCall.getArguments().getTuple() );
     }
 
   }
