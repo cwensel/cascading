@@ -35,6 +35,8 @@ public class RegexParser extends RegexOperation implements Function
   {
   /** Field groups */
   private int[] groups = new int[]{0};
+  /** Field matcher */
+  private Matcher matcher;
 
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
@@ -97,6 +99,12 @@ public class RegexParser extends RegexOperation implements Function
     this.groups = groups;
     }
 
+  @Override
+  public void prepare( FlowSession flowSession )
+    {
+    matcher = getPattern().matcher( "" );
+    }
+
   /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
   public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
@@ -107,8 +115,7 @@ public class RegexParser extends RegexOperation implements Function
 
     Tuple output = new Tuple();
 
-    // todo: reuse the matcher via the .reset() method. need to confirm only one thread will fire through this
-    Matcher matcher = getPattern().matcher( value );
+    matcher.reset( value );
 
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );

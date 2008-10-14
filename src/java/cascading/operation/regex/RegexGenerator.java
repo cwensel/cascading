@@ -32,6 +32,9 @@ import cascading.tuple.Tuple;
 /** Class RegexGenerator will emit a new Tuple for every matched regex group. */
 public class RegexGenerator extends RegexOperation implements Function
   {
+  /** Field matcher */
+  private Matcher matcher;
+
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
    *
@@ -56,6 +59,12 @@ public class RegexGenerator extends RegexOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
+  @Override
+  public void prepare( FlowSession flowSession )
+    {
+    matcher = getPattern().matcher( "" );
+    }
+
   /** @see Function#operate(cascading.flow.FlowSession,cascading.operation.FunctionCall) */
   public void operate( FlowSession flowSession, FunctionCall functionCall )
     {
@@ -64,7 +73,7 @@ public class RegexGenerator extends RegexOperation implements Function
     if( value == null )
       value = "";
 
-    Matcher matcher = getPattern().matcher( value );
+    matcher.reset( value );
 
     while( matcher.find() )
       functionCall.getOutputCollector().add( new Tuple( matcher.group() ) );

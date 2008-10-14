@@ -23,13 +23,14 @@ package cascading.operation.regex;
 
 import java.util.regex.Matcher;
 
+import cascading.flow.FlowSession;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
 /**
  * Class RegexMatcher is the base class for common regular expression operations.
  * <p/>
- * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#matches()}.
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -40,6 +41,8 @@ public class RegexMatcher extends RegexOperation
   private static final Logger LOG = Logger.getLogger( RegexMatcher.class );
   /** Field removeMatch */
   protected final boolean negateMatch;
+  /** Field matcher */
+  private transient Matcher matcher;
 
   protected RegexMatcher( String patternString )
     {
@@ -51,6 +54,12 @@ public class RegexMatcher extends RegexOperation
     {
     super( patternString );
     this.negateMatch = negateMatch;
+    }
+
+  @Override
+  public void prepare( FlowSession flowSession )
+    {
+    matcher = getPattern().matcher( "" );
     }
 
   /**
@@ -88,12 +97,14 @@ public class RegexMatcher extends RegexOperation
       if( value == null )
         value = "";
 
-      Matcher matcher = getPattern().matcher( value.toString() );
+      matcher.reset( value.toString() );
+
+      boolean matchFound = matcher.find();
 
       if( LOG.isDebugEnabled() )
-        LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() + ", element: '" + value + "'" );
+        LOG.debug( "pattern: " + getPattern() + ", matches: " + matchFound + ", element: '" + value + "'" );
 
-      if( matcher.matches() == negateMatch )
+      if( matchFound == negateMatch )
         return pos;
 
       pos++;

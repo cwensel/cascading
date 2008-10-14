@@ -32,7 +32,7 @@ import cascading.tuple.Tuple;
  * {@link cascading.tuple.Tuple} by joining each individual element of the Tuple with a tab character (\t).
  * See {@link AssertMatchesAll} if you need to match the patternString regex against each individual tuple element.
  * <p/>
- * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#matches()}.
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern

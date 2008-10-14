@@ -22,7 +22,7 @@
 package cascading.flow;
 
 /**
- * FlowSession implementations provide a call-back interface into the current computing system. Each
+ * FlowProcess implementations provide a call-back interface into the current computing system. Each
  * {@link cascading.operation.Operation} is given a reference to a particluar implemenation, allowing them
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>

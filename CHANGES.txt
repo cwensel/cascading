@@ -2,9 +2,13 @@ Cascading Change Log
 
 unreleased
 
+  Updated c.o.r.RegexMatcher base class to use j.u.r.Matcher#find() instead of #matches(). This is more consistent
+  with default behaviors of popular languages. Matcher is now also initialized in prepare() and reset() in
+  the operation to reduce overhead.
+
   Added new lifecycle methods to c.o.Operation, prepare and cleanup. These methods are called so that an Operation
   instance can initialize and destroy any resources. They may be called more than once before the instance is
-  garbage collected. 
+  garbage collected.
 
   Added a new operation called c.o.Buffer. Buffers are similiar to Reduce in MapReduce. They are given an Iterator
   of input arguments and can emit any number of result c.t.Tuple instances. For many problems, this is more
