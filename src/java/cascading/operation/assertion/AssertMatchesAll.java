@@ -31,6 +31,11 @@ import cascading.tuple.TupleEntry;
  * Class AssertMatchesAll matches the given regular expression patternString against each argument
  * {@link cascading.tuple.Tuple} element individually. See {@link AssertMatches} if you need to match the patternString regex against
  * the tuple as a whole.
+ * <p/>
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#matches()}.
+ *
+ * @see java.util.regex.Matcher
+ * @see java.util.regex.Pattern
  */
 public class AssertMatchesAll extends RegexMatcher implements ValueAssertion
   {

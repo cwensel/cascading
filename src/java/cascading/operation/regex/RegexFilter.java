@@ -34,6 +34,11 @@ import cascading.operation.FilterCall;
  * <p/>
  * Also, by default, the whole Tuple is matched against the given patternString (tab delimited). If matchEachElement
  * is set to true, the pattern is applied to each Tuple value individually.
+ * <p/>
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#matches()}.
+ *
+ * @see java.util.regex.Matcher
+ * @see java.util.regex.Pattern
  */
 public class RegexFilter extends RegexMatcher implements Filter
   {

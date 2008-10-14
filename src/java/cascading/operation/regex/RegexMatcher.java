@@ -26,7 +26,14 @@ import java.util.regex.Matcher;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
-/** Class RegexMatcher is the base class for common regular expression operations. */
+/**
+ * Class RegexMatcher is the base class for common regular expression operations.
+ * <p/>
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#matches()}.
+ *
+ * @see java.util.regex.Matcher
+ * @see java.util.regex.Pattern
+ */
 public class RegexMatcher extends RegexOperation
   {
   /** Field LOG */
