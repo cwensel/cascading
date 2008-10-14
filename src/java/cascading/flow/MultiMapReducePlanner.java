@@ -185,6 +185,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       // rules
       failOnLoneGroupAssertion( elementGraph );
       failOnMissingGroup( elementGraph );
+      failOnMisusedBuffer( elementGraph );
 
       // m/r specific
       handleSplits( elementGraph );

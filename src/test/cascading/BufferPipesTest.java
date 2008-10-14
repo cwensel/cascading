@@ -25,10 +25,6 @@ import java.io.File;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.flow.FlowSession;
-import cascading.operation.BaseOperation;
-import cascading.operation.Buffer;
-import cascading.operation.BufferCall;
 import cascading.operation.Insert;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -39,8 +35,6 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
@@ -68,28 +62,6 @@ public class BufferPipesTest extends ClusterTestCase
     super( "reducer pipes", false );
     }
 
-  public static class TestBuffer extends BaseOperation implements Buffer
-    {
-    private String value;
-
-    public TestBuffer( Fields fieldDeclaration, String value )
-      {
-      super( fieldDeclaration );
-      this.value = value;
-      }
-
-    public void operate( FlowSession flowSession, BufferCall bufferCall )
-      {
-      bufferCall.getOutputCollector().add( new Tuple( value ) );
-
-      while( bufferCall.getArgumentsIterator().hasNext() )
-        {
-        TupleEntry arguments = bufferCall.getArgumentsIterator().next();
-        bufferCall.getOutputCollector().add( new Tuple( value ) );
-        }
-      }
-    }
-
   public void testSimpleReducer() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )
@@ -106,7 +78,7 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new GroupBy( pipe, new Fields( "num" ) );
 
-    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), "next" ) );
+    pipe = new Every( pipe, new TestBuffer( new Fields( "next" ), true, "next" ) );
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 

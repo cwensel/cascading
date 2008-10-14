@@ -253,4 +253,47 @@ public class FlowPlanner
         }
       }
     }
+
+  protected void failOnMisusedBuffer( ElementGraph elementGraph )
+    {
+    List<Every> everies = elementGraph.findAllEveries();
+
+    // walk Every instances after Group
+    for( Every every : everies )
+      {
+      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( every ) )
+        {
+        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is every
+        Collections.reverse( flowElements ); // first element is every
+
+        Every last = null;
+        boolean foundBuffer = false;
+        int foundEveries = -1;
+
+        for( FlowElement flowElement : flowElements )
+          {
+          foundEveries++;
+
+          if( flowElement instanceof Each )
+            throw new PlannerException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+
+          if( flowElement instanceof Every )
+            {
+            boolean isBuffer = ( (Every) flowElement ).isBuffer();
+
+            if( foundEveries != 0 && ( isBuffer || foundEveries != 0 ) )
+              throw new PlannerException( "Only one Every Buffer may follow a Group pipe, found: " + flowElement + " before: " + last );
+
+            if( !foundBuffer )
+              foundBuffer = isBuffer;
+
+            last = (Every) flowElement;
+            }
+
+          if( flowElement instanceof Group )
+            break;
+          }
+        }
+      }
+    }
   }

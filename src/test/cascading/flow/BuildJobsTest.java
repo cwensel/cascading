@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.CascadingTestCase;
+import cascading.TestBuffer;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -1060,6 +1061,88 @@ public class BuildJobsTest extends CascadingTestCase
       // do nothing
       }
     }
+
+  public void testBuffer() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+
+    Pipe pipe = new Pipe( "count" );
+    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
+
+    List steps = new FlowConnector().connect( sources, sinks, pipe ).getSteps();
+
+    assertEquals( "wrong size", 1, steps.size() );
+
+    FlowStep step = (FlowStep) steps.get( 0 );
+
+    step.getJobConf(); // called init the step
+
+    assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
+    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.sink", step.sink );
+
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    assertEquals( "not equal: mapDist", 0, mapDist );
+
+    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    }
+
+  public void testBufferFail() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+
+    Pipe pipe = new Pipe( "count" );
+    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
+
+    try
+      {
+      new FlowConnector().connect( sources, sinks, pipe );
+      fail( "did not throw planner exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+//      exception.printStackTrace();
+      }
+    }
+
+  public void testBufferFail2() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
+    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+
+    Pipe pipe = new Pipe( "count" );
+    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
+
+    try
+      {
+      new FlowConnector().connect( sources, sinks, pipe );
+      fail( "did not throw planner exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+//      exception.printStackTrace();
+      }
+    }
+
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
     {
