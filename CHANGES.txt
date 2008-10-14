@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Changed all operations so that incoming c.t.Tuple and c.t.TupleEntry instances are unmodifiable. An
+  UnsupportedOperationException will be thrown on any attempt to modify argument tuples within an operation.
+  This enforces the rule argument tuples should not be modified to protect against concurrent modification in
+  parallel threads.
+
   Updated c.o.r.RegexMatcher base class to use j.u.r.Matcher#find() instead of #matches(). This is more consistent
   with default behaviors of popular languages. Matcher is now also initialized in prepare() and reset() in
   the operation to reduce overhead.

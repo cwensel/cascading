@@ -168,6 +168,16 @@ public class TupleEntry
     }
 
   /**
+   * Method isUnmodifiable returns true if this TupleEntry is unmodifiable.
+   *
+   * @return boolean
+   */
+  public boolean isUnmodifiable()
+    {
+    return isUnmodifiable;
+    }
+
+  /**
    * Method getFields returns the fields of this TupleEntry object.
    *
    * @return the fields (type Fields) of this TupleEntry object.

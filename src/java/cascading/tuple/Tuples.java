@@ -115,7 +115,8 @@ public class Tuples
   /**
    * Method extractTuple returns a new Tuple based on the given selector. But sets the values of this entries Tuple to null.
    *
-   * @param selector of type Fields
+   * @param tupleEntry of type TupleEntry
+   * @param selector   of type Fields
    * @return Tuple
    */
   public static Tuple extractTuple( TupleEntry tupleEntry, Fields selector )
@@ -149,6 +150,15 @@ public class Tuples
   public static Tuple extract( TupleEntry tupleEntry, Fields selector )
     {
     return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector ) );
+    }
+
+  public static Tuple setOnEmpty( TupleEntry baseEntry, TupleEntry valuesEntry )
+    {
+    Tuple emptyTuple = Tuple.size( baseEntry.getFields().size() );
+
+    emptyTuple.set( baseEntry.getFields(), valuesEntry.getFields(), valuesEntry.getTuple() );
+
+    return emptyTuple;
     }
 
   }

@@ -37,6 +37,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.Tuples;
 
 /**
  * The Every operator applies an {@link Aggregator} to every grouping. Any number of Every instances may follow other
@@ -447,9 +448,8 @@ public class Every extends Operator
       // we want to null out any 'values' before and after the iterator begins/ends
       // this allows buffers to emit tuples before next() and when hasNext() return false;
       final TupleEntry tupleEntry = tupleEntryIterator.getTupleEntry();
-      final Tuple emptyTuple = Tuple.size( tupleEntry.getFields().size() );
-      tupleEntry.setTuple( emptyTuple );
-      tupleEntry.set( groupEntry );
+      final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, groupEntry );
+      tupleEntry.setTuple( valueNulledTuple );
 
       tupleCollector.value = tupleEntry; // null out header entries
 
@@ -463,7 +463,7 @@ public class Every extends Operator
         boolean hasNext = tupleEntryIterator.hasNext();
 
         if( !hasNext )
-          tupleEntry.setTuple( emptyTuple ); // null out footer entries
+          tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
 
         return hasNext;
         }
