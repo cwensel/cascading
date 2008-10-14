@@ -325,7 +325,7 @@ public class FlowTest extends ClusterTestCase
     System.out.println( "calling start" );
     flow.start();
 
-    assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not start", listener.started.tryAcquire( 120, TimeUnit.SECONDS ) );
 
     if( onFail == FailingFlowListener.OnFail.STOPPING )
       {
