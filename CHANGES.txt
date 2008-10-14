@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Fixed dot file writing so GraphViz can properly load.
+
+  Upgraded jgrapht library, requires JDK 1.6.
+
   Fixed bug where selecting postions from a c.t.Fields.UNKNOWN declaration would return the first position, not
   the specified position.
 

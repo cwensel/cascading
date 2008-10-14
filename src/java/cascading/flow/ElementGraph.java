@@ -343,7 +343,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     {
     public String getEdgeName( Scope object )
       {
-      return object.toString().replaceAll( "\"", "\'" );
+      return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
       }
     } );
 

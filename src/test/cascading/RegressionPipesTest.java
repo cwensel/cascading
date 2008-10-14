@@ -25,7 +25,6 @@ import java.io.File;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
@@ -62,6 +61,11 @@ public class RegressionPipesTest extends ClusterTestCase
     }
 
 
+  /**
+   * tests that a selector will select something other than the first position from an UNKNOWN tuple
+   *
+   * @throws Exception
+   */
   public void testUnknown() throws Exception
     {
     if( !new File( inputFileJoined ).exists() )
@@ -76,19 +80,19 @@ public class RegressionPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( Fields.UNKNOWN ) );
 
-    pipe = new Each( pipe, new Debug() );
+//    pipe = new Each( pipe, new Debug() );
 
     pipe = new Each( pipe, new Fields( 2 ), new Identity( new Fields( "label" ) ) );
 
-    pipe = new Each( pipe, new Debug() );
+//    pipe = new Each( pipe, new Debug() );
 
     pipe = new Each( pipe, new Fields( "label" ), new RegexFilter( "[A-Z]*" ) );
 
-    pipe = new Each( pipe, new Debug() );
+//    pipe = new Each( pipe, new Debug() );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-//    flow.writeDOT( "ungroup.dot" );
+    flow.writeDOT( "unknownselect.dot" );
 
     flow.complete();
 
