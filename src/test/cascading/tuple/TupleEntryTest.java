@@ -103,7 +103,7 @@ public class TupleEntryTest extends CascadingTestCase
 
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c", "d" ), new Tuple( "a", "b", "c", "d" ) );
 
-    Tuple tuple = entryA.extractTuple( selector );
+    Tuple tuple = Tuples.extractTuple( entryA, selector );
 
     assertEquals( "wrong size", 2, tuple.size() );
     assertEquals( "not equal: tuple.get(0)", "b", tuple.get( 0 ) );
@@ -124,7 +124,7 @@ public class TupleEntryTest extends CascadingTestCase
 
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c", "d" ), new Tuple( "a", "b", "c", "d" ) );
 
-    Tuple tuple = entryA.extractTuple( selector );
+    Tuple tuple = Tuples.extractTuple( entryA, selector );
 
     assertEquals( "wrong size", 2, tuple.size() );
     assertEquals( "not equal: tuple.get(0)", "d", tuple.get( 0 ) );
@@ -138,4 +138,37 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(2)", "c", entryA.get( 2 ) );
     assertEquals( "not equal: tuple.get(3)", "D", entryA.get( 3 ) );
     }
+
+  public void testUnmodifiable()
+    {
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b" ), true );
+
+    Tuple tuple = new Tuple( "a", "b" );
+
+    entryA.setTuple( tuple );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "a", tuple.get( 0 ) );
+
+    try
+      {
+      entryA.set( "a", "A" );
+      fail( "did not fail" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+
+    try
+      {
+      entryA.getTuple().set( 0, "A" );
+      fail( "did not fail" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+    }
+
   }

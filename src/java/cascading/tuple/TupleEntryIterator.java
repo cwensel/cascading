@@ -30,7 +30,7 @@ import java.util.Iterator;
 public class TupleEntryIterator implements Iterator<TupleEntry>
   {
   /** Field entry */
-  final TupleEntry entry = new TupleEntry();
+  final TupleEntry entry = new TupleEntry( true );
   /** Field iterator */
   final Iterator iterator;
 
@@ -86,7 +86,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
    */
   public TupleEntry next()
     {
-    entry.tuple = (Tuple) iterator.next();
+    entry.setTuple( (Tuple) iterator.next() );
 
     return entry;
     }

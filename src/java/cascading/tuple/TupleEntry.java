@@ -35,6 +35,8 @@ public class TupleEntry
   {
   /** Field fields */
   Fields fields;
+  /** Field isUnmodifiable */
+  private boolean isUnmodifiable = false;
   /** Field tuple */
   Tuple tuple;
 
@@ -109,6 +111,12 @@ public class TupleEntry
     this.fields = new Fields();
     }
 
+  public TupleEntry( boolean isUnmodifiable )
+    {
+    this.fields = new Fields();
+    this.isUnmodifiable = isUnmodifiable;
+    }
+
   /**
    * Constructor TupleEntry creates a new TupleEntry instance.
    *
@@ -117,6 +125,12 @@ public class TupleEntry
   public TupleEntry( Fields fields )
     {
     this.fields = fields;
+    }
+
+  public TupleEntry( Fields fields, boolean isUnmodifiable )
+    {
+    this.fields = fields;
+    this.isUnmodifiable = isUnmodifiable;
     }
 
   /**
@@ -180,7 +194,10 @@ public class TupleEntry
    */
   public void setTuple( Tuple tuple )
     {
-    this.tuple = tuple;
+    if( isUnmodifiable )
+      this.tuple = Tuple.asUnmodifiable( tuple );
+    else
+      this.tuple = tuple;
     }
 
   /**
@@ -339,34 +356,6 @@ public class TupleEntry
     try
       {
       return tuple.get( fields, selector );
-      }
-    catch( Exception exception )
-      {
-      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
-      }
-    }
-
-  /**
-   * Method extractTuple returns a new Tuple based on the given selector. But sets the values of this entries Tuple to null.
-   *
-   * @param selector of type Fields
-   * @return Tuple
-   */
-  @Deprecated
-  public Tuple extractTuple( Fields selector )
-    {
-    if( selector == null || selector.isAll() )
-      {
-      Tuple result = this.tuple;
-
-      this.tuple = Tuple.size( result.size() );
-
-      return result;
-      }
-
-    try
-      {
-      return tuple.extract( fields, selector );
       }
     catch( Exception exception )
       {

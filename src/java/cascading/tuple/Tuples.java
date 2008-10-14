@@ -111,4 +111,44 @@ public class Tuples
     {
     return new Tuple( (Comparable[]) asArray( tuple, types, new Comparable[types.length] ) );
     }
+
+  /**
+   * Method extractTuple returns a new Tuple based on the given selector. But sets the values of this entries Tuple to null.
+   *
+   * @param selector of type Fields
+   * @return Tuple
+   */
+  public static Tuple extractTuple( TupleEntry tupleEntry, Fields selector )
+    {
+    if( selector == null || selector.isAll() )
+      {
+      Tuple result = tupleEntry.tuple;
+
+      tupleEntry.tuple = Tuple.size( result.size() );
+
+      return result;
+      }
+
+    try
+      {
+      return extract( tupleEntry, selector );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to select from: " + tupleEntry.fields.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  /**
+   * Method extract creates a new Tuple from the given selector, but sets the values in the current tuple to null.
+   *
+   * @param tupleEntry of type TupleEntry
+   * @param selector   of type Fields
+   * @return Tuple
+   */
+  public static Tuple extract( TupleEntry tupleEntry, Fields selector )
+    {
+    return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector ) );
+    }
+
   }

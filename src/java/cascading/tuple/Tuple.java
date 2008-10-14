@@ -58,10 +58,19 @@ import cascading.util.Util;
  */
 public class Tuple implements Comparable, Iterable, Serializable
   {
+  /** Field isUnmodifiable */
+  protected boolean isUnmodifiable = false;
   /** Field elements */
-  private List<Comparable> elements;
+  protected List<Comparable> elements;
   /** Field printDelim */
   private final String printDelim = "\t";
+
+  public static Tuple asUnmodifiable( Tuple tuple )
+    {
+    tuple.isUnmodifiable = true;
+
+    return tuple;
+    }
 
   /**
    * Method size returns a new Tuple instance of the given size with nulls as its element values.
@@ -178,6 +187,16 @@ public class Tuple implements Comparable, Iterable, Serializable
     {
     this();
     Collections.addAll( elements, values );
+    }
+
+  /**
+   * Method isUnmodifiable returns true if this Tuple instance is unmodifiable.
+   *
+   * @return boolean
+   */
+  public boolean isUnmodifiable()
+    {
+    return isUnmodifiable;
     }
 
   /**
@@ -359,6 +378,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public Tuple leave( int[] pos )
     {
+    verifyModifiable();
+
     Tuple results = remove( pos );
 
     List<Comparable> temp = results.elements;
@@ -375,6 +396,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void add( Comparable value )
     {
+    verifyModifiable();
+
     elements.add( value );
     }
 
@@ -385,6 +408,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void addAll( Comparable... values )
     {
+    verifyModifiable();
+
     if( values.length == 1 && values[ 0 ] instanceof Tuple )
       addAll( (Tuple) values[ 0 ] );
     else
@@ -398,6 +423,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void addAll( Tuple tuple )
     {
+    verifyModifiable();
+
     if( tuple != null )
       elements.addAll( tuple.elements );
     }
@@ -410,6 +437,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void set( int index, Comparable value )
     {
+    verifyModifiable();
+
     elements.set( index, value );
     }
 
@@ -423,6 +452,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void put( Fields declarator, Fields fields, Tuple tuple )
     {
+    verifyModifiable();
+
     int[] pos = declarator.getPos( fields );
 
     for( int i = 0; i < pos.length; i++ )
@@ -438,6 +469,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public Tuple remove( int[] pos )
     {
+    verifyModifiable();
+
     Tuple results = new Tuple();
 
     for( int i : pos )
@@ -475,21 +508,6 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
-   * Method extract creates a new Tuple from the given selector, but sets the values in the current tuple to null.
-   * <p/>
-   * Use this method in conjunction with {@link #set}.
-   *
-   * @param declarator of type Fields
-   * @param selector   of type Fields
-   * @return Tuple
-   */
-  @Deprecated
-  public Tuple extract( Fields declarator, Fields selector )
-    {
-    return extract( declarator.getPos( selector ) );
-    }
-
-  /**
    * Sets the values in the given positions to the values from the given Tuple.
    *
    * @param pos   of type int[]
@@ -497,6 +515,8 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   void set( int[] pos, Tuple tuple )
     {
+    verifyModifiable();
+
     if( pos.length != tuple.size() )
       throw new TupleException( "given tuple not same size as position array, tuple: " + tuple.print() );
 
@@ -739,6 +759,12 @@ public class Tuple implements Comparable, Iterable, Serializable
     buffer.append( "]" );
 
     return buffer;
+    }
+
+  private final void verifyModifiable()
+    {
+    if( isUnmodifiable )
+      throw new UnsupportedOperationException( "this tuple is unmodifiable" );
     }
 
   }

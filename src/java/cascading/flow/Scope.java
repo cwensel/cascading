@@ -261,7 +261,7 @@ public class Scope implements Serializable
     if( argumentsEntry != null )
       return argumentsEntry;
 
-    argumentsEntry = new TupleEntry( getArguments() );
+    argumentsEntry = new TupleEntry( getArguments(), true );
 
     return argumentsEntry;
     }

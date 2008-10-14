@@ -41,6 +41,7 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TuplePair;
+import cascading.tuple.Tuples;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
@@ -744,7 +745,7 @@ public class Group extends Pipe
       LOG.debug( "cogroup: [" + incomingScope + "] key pos: [" + groupFields + "]" );
 
     // todo: would be nice to delegate this back to the GroupClosure
-    Tuple groupTuple = entry.extractTuple( groupFields ); // we are nulling dupe values here to reduce bandwidth usage
+    Tuple groupTuple = Tuples.extractTuple( entry, groupFields ); // we are nulling dupe values here to reduce bandwidth usage
     Tuple sortTuple = sortFields == null ? null : entry.selectTuple( sortFields );
     Tuple valuesTuple = entry.getTuple();
 

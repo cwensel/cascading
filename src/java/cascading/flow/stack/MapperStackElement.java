@@ -77,7 +77,7 @@ abstract class MapperStackElement extends StackElement
   TupleEntry getTupleEntry( Tuple tuple )
     {
     if( tupleEntry == null )
-      tupleEntry = new TupleEntry( resolveIncomingFields() );
+      tupleEntry = new TupleEntry( resolveIncomingFields(), true );
 
     tupleEntry.setTuple( tuple );
 

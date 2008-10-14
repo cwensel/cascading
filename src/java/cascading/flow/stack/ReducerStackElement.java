@@ -110,7 +110,7 @@ abstract class ReducerStackElement extends StackElement
   TupleEntry getGroupingTupleEntry( Tuple tuple )
     {
     if( groupingTupleEntry == null )
-      groupingTupleEntry = new TupleEntry( getOutGroupingFields() );
+      groupingTupleEntry = new TupleEntry( getOutGroupingFields(), true );
 
     groupingTupleEntry.setTuple( tuple );
 
@@ -120,7 +120,7 @@ abstract class ReducerStackElement extends StackElement
   TupleEntry getTupleEntry( Tuple tuple )
     {
     if( tupleEntry == null )
-      tupleEntry = new TupleEntry( resolveIncomingFields() );
+      tupleEntry = new TupleEntry( resolveIncomingFields(), true );
 
     tupleEntry.setTuple( tuple );
 
