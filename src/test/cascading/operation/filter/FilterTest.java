@@ -112,28 +112,28 @@ public class FilterTest extends CascadingTestCase
     Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
     Filter filter = new And( fields, filters );
 
-
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
     filter = new And( fields, filters );
 
-
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
     filter = new And( fields, filters );
 
-
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
     filter = new And( fields, filters );
 
-
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
     }
@@ -145,12 +145,14 @@ public class FilterTest extends CascadingTestCase
     Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
     Filter filter = new Or( fields, filters );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
     filter = new Or( fields, filters );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
@@ -158,13 +160,14 @@ public class FilterTest extends CascadingTestCase
     filter = new Or( fields, filters );
 
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
     filter = new Or( fields, filters );
 
-
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
     }
@@ -176,24 +179,28 @@ public class FilterTest extends CascadingTestCase
     Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
     Filter filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
     filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
     filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
     filter = new Xor( fields[ 0 ], filters[ 0 ], fields[ 1 ], filters[ 1 ] );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
     }
@@ -205,24 +212,28 @@ public class FilterTest extends CascadingTestCase
     Filter[] filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( true )};
     Filter filter = new Not( new Or( fields, filters ) );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( true ), new BooleanFilter( false )};
     filter = new Not( new Or( fields, filters ) );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( true )};
     filter = new Not( new Or( fields, filters ) );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertFalse( filter.isRemove( null, operationCall ) );
 
     filters = new Filter[]{new BooleanFilter( false ), new BooleanFilter( false )};
     filter = new Not( new Or( fields, filters ) );
 
+    filter.prepare( FlowProcess.NULL, operationCall );
     operationCall.setArguments( getEntry( new Tuple( 1, 2 ) ) );
     assertTrue( filter.isRemove( null, operationCall ) );
     }
