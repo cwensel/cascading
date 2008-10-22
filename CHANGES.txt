@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added support for Hadoop 0.19.x. This release skips Hadoop 0.18.x.
+
   Changed project structure so that XML functions live in their own sub-project. This includes renaming the base
   Cascading tree and jars to 'core'.
 
@@ -65,8 +67,6 @@ unreleased
   registered with Hadoop. Note all primitive types are handled directly by Tuple, but custom types must
   have a Serialization implementation, or must be Hadoop WritableComparable so that the default WritableSerialization
   implementation will write them out.
-
-  Added support for Hadoop 0.18.x.
 
 0.8.2
 

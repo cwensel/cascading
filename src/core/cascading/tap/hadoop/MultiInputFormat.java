@@ -148,19 +148,6 @@ public class MultiInputFormat implements InputFormat
     return inputFormats;
     }
 
-  /**
-   * Method validateInput delegates to the appropriate InputFormat.
-   *
-   * @param job of type JobConf
-   * @throws IOException when
-   */
-  @Deprecated
-  public void validateInput( JobConf job ) throws IOException
-    {
-    for( JobConf jobConf : getJobConfs( job, getConfigs( job ) ) )
-      jobConf.getInputFormat().validateInput( jobConf );
-    }
-
   private List<Map<String, String>> getConfigs( JobConf job ) throws IOException
     {
     return (List<Map<String, String>>) Util.deserializeBase64( job.get( "cascading.multiinputformats" ) );
