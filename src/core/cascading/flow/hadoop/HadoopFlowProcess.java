@@ -21,8 +21,13 @@
 
 package cascading.flow.hadoop;
 
+import java.io.IOException;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
+import cascading.tap.Tap;
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
 
@@ -102,5 +107,17 @@ public class HadoopFlowProcess extends FlowProcess
   public void increment( Enum counter, int amount )
     {
     reporter.incrCounter( counter, amount );
+    }
+
+  /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
+  public TupleIterator openTapForRead( Tap tap ) throws IOException
+    {
+    return tap.openForRead( getJobConf() );
+    }
+
+  /** @see cascading.flow.FlowProcess#openTapForWrite(Tap) */
+  public TupleCollector openTapForWrite( Tap tap ) throws IOException
+    {
+    return tap.openForWrite( getJobConf() );
     }
   }

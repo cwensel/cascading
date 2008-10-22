@@ -744,7 +744,7 @@ public class Flow implements Runnable
    *
    * @param tap of type Tap
    * @return TupleIterator
-   * @throws IOException when
+   * @throws IOException when there is an error opening the resource
    */
   public TupleIterator openTapForRead( Tap tap ) throws IOException
     {
@@ -756,7 +756,7 @@ public class Flow implements Runnable
    *
    * @param tap of type Tap
    * @return TupleCollector
-   * @throws IOException when
+   * @throws IOException when there is an error opening the resource
    */
   public TupleCollector openTapForWrite( Tap tap ) throws IOException
     {
