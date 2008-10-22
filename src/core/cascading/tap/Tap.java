@@ -112,7 +112,7 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method isUseTapCollector returns true if this instances {@link TapCollector} should be used to sink values.
+   * Method isUseTapCollector returns true if this instances {@link cascading.tap.hadoop.TapCollector} should be used to sink values.
    *
    * @return the writeDirect (type boolean) of this Tap object.
    */
@@ -122,7 +122,7 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method setUseTapCollector should be set to true if this instances {@link TapCollector} should be used to sink values.
+   * Method setUseTapCollector should be set to true if this instances {@link cascading.tap.hadoop.TapCollector} should be used to sink values.
    *
    * @param useTapCollector the writeDirect of this Tap object.
    */
@@ -213,24 +213,18 @@ public abstract class Tap implements FlowElement, Serializable
    *
    * @param conf of type JobConf
    * @return TupleIterator
-   * @throws IOException when the resource cannot be opened
+   * @throws java.io.IOException when the resource cannot be opened
    */
-  public TupleIterator openForRead( JobConf conf ) throws IOException
-    {
-    return new TapIterator( this, conf );
-    }
+  public abstract TupleIterator openForRead( JobConf conf ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
    * @param conf of type JobConf
    * @return TupleCollector
-   * @throws IOException when
+   * @throws java.io.IOException when
    */
-  public TupleCollector openForWrite( JobConf conf ) throws IOException
-    {
-    return new TapCollector( this, conf );
-    }
+  public abstract TupleCollector openForWrite( JobConf conf ) throws IOException;
 
   /**
    * Method source returns the source value as an instance of {@link Tuple}

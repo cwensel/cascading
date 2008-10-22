@@ -19,13 +19,15 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.tap;
+package cascading.tap.hadoop;
 
 import java.io.IOException;
 
 import cascading.CascadingTestCase;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
+import cascading.tap.Lfs;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;

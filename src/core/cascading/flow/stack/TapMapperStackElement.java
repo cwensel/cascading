@@ -29,7 +29,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
-import cascading.tap.TapCollector;
+import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 

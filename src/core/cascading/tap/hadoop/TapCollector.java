@@ -19,10 +19,12 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.tap;
+package cascading.tap.hadoop;
 
 import java.io.IOException;
 
+import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
@@ -39,7 +41,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Class TapCollector is a kind of {@link TupleCollector} that writes tuples to the resource managed by
- * a particular {@link Tap} instance.
+ * a particular {@link cascading.tap.Tap} instance.
  */
 public class TapCollector extends TupleCollector implements OutputCollector
   {

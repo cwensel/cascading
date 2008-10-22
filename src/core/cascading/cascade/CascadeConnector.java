@@ -29,6 +29,8 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.tap.Tap;
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleIterator;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -202,6 +204,16 @@ public class CascadeConnector
     public long getPathModified( JobConf conf ) throws IOException
       {
       return 0;
+      }
+
+    public TupleIterator openForRead( JobConf conf ) throws IOException
+      {
+      return null;
+      }
+
+    public TupleCollector openForWrite( JobConf conf ) throws IOException
+      {
+      return null;
       }
     }
 

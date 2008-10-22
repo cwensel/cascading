@@ -28,7 +28,11 @@ import java.util.Map;
 
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
+import cascading.tap.hadoop.TapCollector;
+import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleIterator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
@@ -429,5 +433,15 @@ public class Hfs extends Tap
     int result = super.hashCode();
     result = 31 * result + ( stringPath != null ? stringPath.hashCode() : 0 );
     return result;
+    }
+
+  public TupleIterator openForRead( JobConf conf ) throws IOException
+    {
+    return new TapIterator( this, conf );
+    }
+
+  public TupleCollector openForWrite( JobConf conf ) throws IOException
+    {
+    return new TapCollector( this, conf );
     }
   }

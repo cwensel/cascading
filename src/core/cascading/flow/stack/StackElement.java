@@ -29,7 +29,7 @@ import cascading.flow.FlowCollector;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
-import cascading.tap.TapCollector;
+import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
 

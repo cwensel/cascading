@@ -19,10 +19,12 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.tap;
+package cascading.tap.hadoop;
 
 import java.io.IOException;
 
+import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.InputFormat;
@@ -34,7 +36,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
 /**
- * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link Tap} instances when
+ * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link cascading.tap.Tap} instances when
  * opening the taps resource for reading.
  */
 public class TapIterator implements TupleIterator
