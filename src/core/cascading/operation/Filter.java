@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.flow.FlowProcess;
 
 /**
- * Interface Filter marks a given {@link BaseOperation} as a filter, as opposed to being a {@link Function}.
+ * Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}.
  * <p/>
  * It is important that all filters call {@code super(Fields.ALL); } in their constructors.
  */

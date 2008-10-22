@@ -5,11 +5,11 @@ General Information:
 
   Project and contact information: http://www.cascading.org/
 
-  This distribution includes three Cascading jar files:
+  This distribution includes four Cascading jar files:
 
-  cascading.jar  - Cascading class files and libraries in the 'lib' folder
-  cascading-lib.jar - all Cascading class files
-  cascading-examples.jar - compiled classes from 'src/examples'
+  cascading.jar      - all relevant Cascading class files and libraries, with a 'lib' folder
+  cascading-core.jar - all Cascading Core class files
+  cascading-xml.jar  - all Cascading XML sub-project class files
 
   To use with Hadoop, you only need the cascading.jar. We suggest merging your class files and libraries with this jar
   and executing via 'hadoop jar your.jar <your args>'. Hadoop will unpack the jar and add any libraries in 'lib' to the

@@ -25,7 +25,7 @@ import java.util.Set;
 
 import cascading.tuple.Fields;
 
-/** Interface FlowElement ... */
+/** Interface FlowElement is a utility interface used internally to simplify DAG management. */
 public interface FlowElement
   {
   /**

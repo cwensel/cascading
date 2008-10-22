@@ -21,7 +21,7 @@
 
 package cascading;
 
-/** Class CascadingException ... */
+/** Class CascadingException is the base class of all Cascading exceptions. */
 public class CascadingException extends RuntimeException
   {
   /** Constructor CascadingException creates a new CascadingException instance. */

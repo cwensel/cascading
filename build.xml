@@ -170,8 +170,10 @@
              destdir="${javadoc}"
              packagenames="cascading.*"
              windowtitle="Cascading">
-      <link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+      <link href="http://java.sun.com/javase/6/docs/api/"/>
       <link href="http://www.janino.net/javadoc/"/>
+      <link href="http://www.jgrapht.org/javadoc/"/>
+      <link href="http://hadoop.apache.org/core/docs/current/api/index.html"/>
       <bottom><![CDATA[<i>Copyright &#169; 2007-2008 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
     </javadoc>
 

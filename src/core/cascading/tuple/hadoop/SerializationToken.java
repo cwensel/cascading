@@ -34,8 +34,7 @@ import java.lang.annotation.Target;
  * <p/>
  * For example:<br/>
  * <pre>
- *
- * @SerializationToken(tokens={222, 223}, classNames = {"example.PersonObject", "example.SiteObject"})
+ * &#64;SerializationToken(tokens={222, 223}, classNames = {"example.PersonObject", "example.SiteObject"})
  * public class MySerialization implements org.apache.hadoop.io.serializer.Serialization
  * {
  * public MySerialization()
@@ -50,6 +49,7 @@ import java.lang.annotation.Target;
  * {@link org.apache.hadoop.io.serializer.Serialization#accept(Class)} more than one class.
  * <p/>
  * Note that the token integer value must be 128 or greater to save room for internal types.
+ *
  * @see cascading.tuple.TupleInputStream
  * @see cascading.tuple.TupleOutputStream
  * @see TupleSerialization

@@ -45,7 +45,7 @@ public class HadoopFlowProcess extends FlowProcess
   Reporter reporter;
 
   /**
-   * Constructor HFlowSession creates a new HFlowSession instance.
+   * Constructor HadoopFlowProcess creates a new HadoopFlowProcess instance.
    *
    * @param flowSession of type FlowSession
    * @param jobConf     of type JobConf
@@ -57,9 +57,9 @@ public class HadoopFlowProcess extends FlowProcess
     }
 
   /**
-   * Method getJobConf returns the jobConf of this HFlowSession object.
+   * Method getJobConf returns the jobConf of this HadoopFlowProcess object.
    *
-   * @return the jobConf (type JobConf) of this HFlowSession object.
+   * @return the jobConf (type JobConf) of this HadoopFlowProcess object.
    */
   public JobConf getJobConf()
     {
@@ -67,9 +67,9 @@ public class HadoopFlowProcess extends FlowProcess
     }
 
   /**
-   * Method setReporter sets the reporter of this HFlowSession object.
+   * Method setReporter sets the reporter of this HadoopFlowProcess object.
    *
-   * @param reporter the reporter of this HFlowSession object.
+   * @param reporter the reporter of this HadoopFlowProcess object.
    */
   public void setReporter( Reporter reporter )
     {
@@ -77,9 +77,9 @@ public class HadoopFlowProcess extends FlowProcess
     }
 
   /**
-   * Method getReporter returns the reporter of this HFlowSession object.
+   * Method getReporter returns the reporter of this HadoopFlowProcess object.
    *
-   * @return the reporter (type Reporter) of this HFlowSession object.
+   * @return the reporter (type Reporter) of this HadoopFlowProcess object.
    */
   public Reporter getReporter()
     {

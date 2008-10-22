@@ -59,8 +59,8 @@ import org.apache.log4j.Logger;
  * <p/>
  * <strong>Properties</strong><br/>
  * <ul>
- * <li>cascading.flowconnector.jar.class</li>
- * <li>cascading.flowconnector.jar.path</li>
+ * <li>cascading.flowconnector.appjar.class</li>
+ * <li>cascading.flowconnector.appjar.path</li>
  * <li>cascading.flowconnector.assertionlevel</li>
  * <li>cascading.flowconnector.intermediateschemeclass</li>
  * </ul>

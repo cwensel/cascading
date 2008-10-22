@@ -27,11 +27,16 @@ import cascading.tuple.Fields;
 /**
  * Interface Operation is the base interface for all functions applied to {@link cascading.tuple.Tuple} streams.
  * <p/>
- * Specificlly {@link Function}, {@link Filter}, {@link Aggregator}, and {@link Assertion}.
+ * Specificlly {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer}, and {@link Assertion}.
  * <p/>
  * Use {@link BaseOperation} for a convenient way to create new Operation types.
  *
  * @see cascading.operation.BaseOperation
+ * @see Function
+ * @see Filter
+ * @see Aggregator
+ * @see Buffer
+ * @see Assertion
  */
 public interface Operation<C>
   {
