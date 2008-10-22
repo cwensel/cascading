@@ -57,7 +57,7 @@ public class ZipSplit extends FileSplit
    */
   public ZipSplit( Path file, String entryPath, long length )
     {
-    super( file, 0, length, (String[])null );
+    super( file, 0, length, (String[]) null );
     this.entryPath = entryPath;
     }
 
@@ -69,7 +69,7 @@ public class ZipSplit extends FileSplit
    */
   public ZipSplit( Path file, long length )
     {
-    super( file, 0, length, (String[])null );
+    super( file, 0, length, (String[]) null );
     }
 
   /**

@@ -25,9 +25,7 @@ import java.io.IOException;
 
 import cascading.tuple.TuplePair;
 
-/**
- * Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. 
- */
+/** Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
 public class GroupingComparator extends DeserializerComparator<TuplePair>
   {
   void setDeserializer( TupleSerialization tupleSerialization ) throws IOException

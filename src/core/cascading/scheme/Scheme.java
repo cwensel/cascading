@@ -199,7 +199,7 @@ public abstract class Scheme implements Serializable
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.
    *
    * @param tupleEntry
-   *@param outputCollector of type OutputCollector @throws IOException when
+   * @param outputCollector of type OutputCollector @throws IOException when
    */
   public abstract void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException;
 

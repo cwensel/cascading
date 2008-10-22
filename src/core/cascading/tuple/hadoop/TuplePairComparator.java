@@ -21,23 +21,20 @@
 
 package cascading.tuple.hadoop;
 
-import cascading.tuple.Tuple;
-import cascading.tuple.TuplePair;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Partitioner;
+import java.io.IOException;
 
-/**
- * Class GroupingPartitioner is an implementation of {@link Partitioner}.
- */
-public class GroupingPartitioner implements Partitioner<TuplePair, Tuple>
+import cascading.tuple.TuplePair;
+
+/** Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
+public class TuplePairComparator extends DeserializerComparator<TuplePair>
   {
-  public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
+  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
-    return ( key.getLhs().hashCode() & Integer.MAX_VALUE ) % numReduceTasks;
+    setDeserializer( tupleSerialization.getTuplePairDeserializer() );
     }
 
-  public void configure( JobConf jobConf )
+  public int compare( TuplePair lhs, TuplePair rhs )
     {
-
+    return lhs.compareTo( rhs );
     }
   }

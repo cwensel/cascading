@@ -22,7 +22,6 @@
 package cascading.pipe;
 
 import java.util.Set;
-import java.io.Serializable;
 
 import cascading.flow.Scope;
 import cascading.operation.Assertion;

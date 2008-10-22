@@ -21,22 +21,14 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.IOException;
-
 import cascading.tuple.TuplePair;
 
-/**
- * Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}.
- */
-public class TuplePairComparator extends DeserializerComparator<TuplePair>
+/** Class ReverseTuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
+public class ReverseTuplePairComparator extends TuplePairComparator
   {
-  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
-    {
-    setDeserializer( tupleSerialization.getTuplePairDeserializer() );
-    }
-
+  @Override
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return lhs.compareTo( rhs );
+    return rhs.compareTo( lhs ); // swap arguments
     }
   }

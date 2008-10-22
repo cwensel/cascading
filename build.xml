@@ -35,12 +35,14 @@
   <property name="test.haltonerror" value="true"/>
 
   <property name="src" location="${cascading.basedir}/src"/>
-  <property name="src.java" location="${src}/java"/>
+  <property name="src.core" location="${src}/core"/>
+  <property name="src.xml" location="${src}/xml"/>
   <property name="src.test" location="${src}/test"/>
 
   <property name="build" location="${cascading.basedir}/build/"/>
   <property name="build.classes" location="${build}"/>
-  <property name="build.java" location="${build.classes}/java"/>
+  <property name="build.core" location="${build.classes}/core"/>
+  <property name="build.xml" location="${build.classes}/xml"/>
   <property name="build.test" location="${build.classes}/test"/>
 
   <property name="test.results" location="${build}/testresults"/>
@@ -49,6 +51,7 @@
   <property name="test.cluster.enabled" value="true"/>
 
   <property name="lib" location="${cascading.basedir}/lib"/>
+  <property name="lib.xml" location="${lib}/xml"/>
   <property name="lib.build" location="${lib}/build"/>
   <property name="dist" location="${cascading.basedir}/dist"/>
   <property name="javadoc" location="${cascading.basedir}/javadoc"/>
@@ -57,15 +60,22 @@
   <property name="hadoop.home" location="${cascading.basedir}/../hadoop"/>
 
   <property name="jar.cascading" value="cascading-${cascading.release.version}.jar"/>
-  <property name="jar.cascading-lib" value="cascading-lib-${cascading.release.version}.jar"/>
+  <property name="jar.cascading-core" value="cascading-core-${cascading.release.version}.jar"/>
+  <property name="jar.cascading-xml" value="cascading-xml-${cascading.release.version}.jar"/>
   <property name="jar.cascading-test" value="cascading-test-${cascading.release.version}.jar"/>
 
   <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
 
   <path id="project.class.path">
-    <pathelement location="${build.java}"/>
+    <pathelement location="${build.core}"/>
+    <pathelement location="${build.xml}"/>
     <pathelement location="${build.test}"/>
+
     <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+
+    <fileset dir="${lib.xml}">
       <include name="*.jar"/>
     </fileset>
 
@@ -94,19 +104,22 @@
   </path>
 
   <path id="project.src.path">
-    <pathelement location="${src.java}"/>
+    <pathelement location="${src.core}"/>
+    <pathelement location="${src.xml}"/>
     <pathelement location="${src.test}"/>
   </path>
 
   <path id="javadoc.src.path">
-    <pathelement location="${src.java}"/>
+    <pathelement location="${src.core}"/>
+    <pathelement location="${src.xml}"/>
   </path>
 
   <!-- sets up environment -->
   <target name="init">
     <echo message="initializing cascading environment..."/>
 
-    <mkdir dir="${build.java}"/>
+    <mkdir dir="${build.core}"/>
+    <mkdir dir="${build.xml}"/>
     <mkdir dir="${build.test}"/>
     <mkdir dir="${test.results}"/>
 
@@ -115,14 +128,24 @@
   </target>
 
   <target name="compile" depends="init">
-    <echo message="building cascade..."/>
+    <echo message="building cascading..."/>
 
-    <javac srcdir="${src.java}" destdir="${build.java}" verbose="off" debug="${javac.debug}">
+    <javac srcdir="${src.core}" destdir="${build.core}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
     </javac>
 
-    <copy todir="${build.java}">
-      <fileset dir="${src.java}">
+    <copy todir="${build.core}">
+      <fileset dir="${src.core}">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+
+    <javac srcdir="${src.xml}" destdir="${build.xml}" verbose="off" debug="${javac.debug}">
+      <classpath refid="project.class.path"/>
+    </javac>
+
+    <copy todir="${build.xml}">
+      <fileset dir="${src.xml}">
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
@@ -213,17 +236,22 @@
 
     <echo message="jarring cascading..."/>
     <delete file="${build}/${jar.cascading}"/>
-    <delete file="${build}/${jar.cascading-lib}"/>
+    <delete file="${build}/${jar.cascading-core}"/>
+    <delete file="${build}/${jar.cascading-xml}"/>
     <delete file="${build}/${jar.cascading-test}"/>
-    <delete dir="${build.java}/lib"/>
+    <delete dir="${build.core}/lib"/>
 
     <manifest file="${build}/MANIFEST.MF">
       <attribute name="Built-By" value="${user.name}"/>
       <!--<attribute name="Main-Class" value="cascade.Main"/>-->
     </manifest>
 
-    <jar jarfile="${build}/${jar.cascading-lib}" manifest="${build}/MANIFEST.MF" compress="yes">
-      <fileset dir="${build.java}"/>
+    <jar jarfile="${build}/${jar.cascading-core}" manifest="${build}/MANIFEST.MF" compress="yes">
+      <fileset dir="${build.core}"/>
+    </jar>
+
+    <jar jarfile="${build}/${jar.cascading-xml}" manifest="${build}/MANIFEST.MF" compress="yes">
+      <fileset dir="${build.xml}"/>
     </jar>
 
     <jar jarfile="${build}/${jar.cascading-test}" manifest="${build}/MANIFEST.MF" compress="yes">
@@ -235,18 +263,29 @@
     </jar>
 
     <!-- hadoop supports jars in a lib directory -->
-    <mkdir dir="${build.java}/lib"/>
+    <mkdir dir="${build.core}/lib"/>
 
-    <copy todir="${build.java}/lib">
-      <fileset dir="./lib">
+    <copy todir="${build.core}/lib">
+      <fileset dir="${lib}">
         <include name="*.jar"/>
       </fileset>
     </copy>
 
-    <delete dir="${build.java}/META-INF"/>
+    <delete dir="${build.core}/META-INF"/>
+
+    <mkdir dir="${build.xml}/lib"/>
+
+    <copy todir="${build.xml}/lib">
+      <fileset dir="${lib.xml}">
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <delete dir="${build.core}/META-INF"/>
 
     <jar jarfile="${build}/${jar.cascading}" manifest="${build}/MANIFEST.MF" compress="yes">
-      <fileset dir="${build.java}"/>
+      <fileset dir="${build.core}"/>
+      <fileset dir="${build.xml}"/>
     </jar>
 
   </target>
@@ -273,7 +312,8 @@
     </copy>
 
     <copy file="${build}/${jar.cascading}" todir="${dist}"/>
-    <copy file="${build}/${jar.cascading-lib}" todir="${dist}"/>
+    <copy file="${build}/${jar.cascading-core}" todir="${dist}"/>
+    <copy file="${build}/${jar.cascading-xml}" todir="${dist}"/>
 
   </target>
 

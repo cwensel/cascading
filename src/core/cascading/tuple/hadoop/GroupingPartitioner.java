@@ -21,16 +21,21 @@
 
 package cascading.tuple.hadoop;
 
+import cascading.tuple.Tuple;
 import cascading.tuple.TuplePair;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Partitioner;
 
-/**
- * Class ReverseTuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}.
- */
-public class ReverseTuplePairComparator extends TuplePairComparator
+/** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
+public class GroupingPartitioner implements Partitioner<TuplePair, Tuple>
   {
-  @Override
-  public int compare( TuplePair lhs, TuplePair rhs )
+  public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
     {
-    return rhs.compareTo( lhs ); // swap arguments
+    return ( key.getLhs().hashCode() & Integer.MAX_VALUE ) % numReduceTasks;
+    }
+
+  public void configure( JobConf jobConf )
+    {
+
     }
   }

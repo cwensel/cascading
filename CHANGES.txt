@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Changed project structure so that XML functions live in their own sub-project. This includes renaming the base
+  Cascading tree and jars to 'core'.
+
   Fixed bug that prevented Fields.UNKNOWN input sources from begin fed into a c.p.CoGroup for joining.
 
   Changed all operations so that incoming c.t.Tuple and c.t.TupleEntry instances are unmodifiable. An
