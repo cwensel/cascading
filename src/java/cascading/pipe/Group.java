@@ -927,11 +927,18 @@ public class Group extends Pipe
           throw new OperatorException( "self joins without intermediate operators are not permitted, see 'repeat' constructor or identity function" );
 
         int size = 0;
+        boolean foundUnknown = false;
 
         for( Scope incomingScope : incomingScopes )
-          size += resolveFields( incomingScope ).size();
+          {
+          Fields fields = resolveFields( incomingScope );
 
-        if( declaredFields.size() != size * repeat )
+          foundUnknown = foundUnknown || fields.isUnknown();
+          size += fields.size();
+          }
+
+        // we must relax field checking in the face of unkown fields
+        if( !foundUnknown && declaredFields.size() != size * repeat )
           throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;

@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug that prevented Fields.UNKNOWN input sources from begin fed into a c.p.CoGroup for joining.
+
   Changed all operations so that incoming c.t.Tuple and c.t.TupleEntry instances are unmodifiable. An
   UnsupportedOperationException will be thrown on any attempt to modify argument tuples within an operation.
   This enforces the rule argument tuples should not be modified to protect against concurrent modification in

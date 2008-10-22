@@ -118,6 +118,49 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testCoGroupWithUnkowns() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( Fields.UNKNOWN, " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ), Fields.size( 4 ) );
+
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 5, null );
+
+    TupleIterator iterator = countFlow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
   /**
    * this test intentionally filters out all values so the intermediate tap is empty. this tap is cogrouped with
    * a new stream using an outerjoin.
