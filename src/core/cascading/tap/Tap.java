@@ -64,6 +64,8 @@ public abstract class Tap implements FlowElement, Serializable
 
   /** Field writeDirect */
   boolean useTapCollector = false;
+  /** Field mode */
+  SinkMode sinkMode = SinkMode.Keep;
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -83,6 +85,15 @@ public abstract class Tap implements FlowElement, Serializable
   protected Tap( Scheme scheme )
     {
     this.scheme = scheme;
+    }
+
+  protected Tap( Scheme scheme, SinkMode sinkMode )
+    {
+    this.scheme = scheme;
+    this.sinkMode = sinkMode;
+
+    if( sinkMode == SinkMode.Append )
+      throw new IllegalArgumentException( "appends are not supported" );
     }
 
   protected void setScheme( Scheme scheme )
@@ -340,14 +351,25 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract long getPathModified( JobConf conf ) throws IOException;
 
   /**
-   * Method isDeleteOnSinkInit indicates whether the resource represented by this instance should be deleted if it
+   * Method isOverwrite indicates whether the resource represented by this instance should be deleted if it
    * already exists when the tap is initialized.
    *
    * @return boolean
    */
-  public boolean isDeleteOnSinkInit()
+  public boolean isOverwrite()
     {
-    return false;
+    return sinkMode == SinkMode.Replace;
+    }
+
+  /**
+   * Method isAppend indicates whether the resrouce represented by this instance should be appended to if it already
+   * exists. Otherwise a new resource will be created.
+   *
+   * @return the append (type boolean) of this Tap object.
+   */
+  public boolean isAppend()
+    {
+    return sinkMode == SinkMode.Append;
     }
 
   /**

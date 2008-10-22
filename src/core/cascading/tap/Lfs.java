@@ -75,13 +75,13 @@ public class Lfs extends Hfs
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param scheme           of type Scheme
-   * @param stringPath       of type String
-   * @param deleteOnSinkInit of type boolean
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
-  public Lfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
+  public Lfs( Scheme scheme, String stringPath, boolean replace )
     {
-    super( scheme, stringPath, deleteOnSinkInit );
+    super( scheme, stringPath, replace );
     }
 
   protected void setStringPath( String stringPath )

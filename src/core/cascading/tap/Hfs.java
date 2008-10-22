@@ -60,8 +60,6 @@ public class Hfs extends Tap
   /** Field TEMPORARY_DIRECTORY */
   private static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
 
-  /** Field deleteOnSinkInit */
-  boolean deleteOnSinkInit = false;
   /** Field stringPath */
   String stringPath;
   /** Field uriScheme */
@@ -117,15 +115,27 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param sourceFields     of type Fields
-   * @param stringPath       of type String
-   * @param deleteOnSinkInit of type boolean
+   * @param sourceFields of type Fields
+   * @param stringPath   of type String
+   * @param replace      of type boolean
    */
-  public Hfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
+  public Hfs( Fields sourceFields, String stringPath, boolean replace )
     {
-    super( new SequenceFile( sourceFields ) );
+    super( new SequenceFile( sourceFields ), replace ? SinkMode.Replace : SinkMode.Keep );
     setStringPath( stringPath );
-    this.deleteOnSinkInit = deleteOnSinkInit;
+    }
+
+  /**
+   * Constructor Hfs creates a new Hfs instance.
+   *
+   * @param sourceFields of type Fields
+   * @param stringPath   of type String
+   * @param sinkMode     of type SinkMode
+   */
+  public Hfs( Fields sourceFields, String stringPath, SinkMode sinkMode )
+    {
+    super( new SequenceFile( sourceFields ), sinkMode );
+    setStringPath( stringPath );
     }
 
   /**
@@ -143,15 +153,27 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param scheme           of type Scheme
-   * @param stringPath       of type String
-   * @param deleteOnSinkInit of type boolean
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
-  public Hfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
+  public Hfs( Scheme scheme, String stringPath, boolean replace )
     {
-    super( scheme );
+    super( scheme, replace ? SinkMode.Replace : SinkMode.Keep );
     setStringPath( stringPath );
-    this.deleteOnSinkInit = deleteOnSinkInit;
+    }
+
+  /**
+   * Constructor Hfs creates a new Hfs instance.
+   *
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
+   */
+  public Hfs( Scheme scheme, String stringPath, SinkMode sinkMode )
+    {
+    super( scheme, sinkMode );
+    setStringPath( stringPath );
     }
 
   protected void setStringPath( String stringPath )
@@ -248,13 +270,6 @@ public class Hfs extends Tap
     return getPath().makeQualified( getFileSystem( conf ) );
     }
 
-  /** @see Tap#isDeleteOnSinkInit() */
-  @Override
-  public boolean isDeleteOnSinkInit()
-    {
-    return deleteOnSinkInit;
-    }
-
   @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
@@ -279,7 +294,7 @@ public class Hfs extends Tap
   public void sinkInit( JobConf conf ) throws IOException
     {
     // do not delete if initialized from within a task
-    if( deleteOnSinkInit && conf.get( "mapred.task.partition" ) == null )
+    if( isOverwrite() && conf.get( "mapred.task.partition" ) == null )
       deletePath( conf );
 
     Path qualifiedPath = getQualifiedPath( conf );

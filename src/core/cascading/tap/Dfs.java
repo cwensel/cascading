@@ -56,13 +56,13 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields     of type Fields
-   * @param uri              of type URI
-   * @param deleteOnSinkInit of type boolean
+   * @param sourceFields of type Fields
+   * @param uri          of type URI
+   * @param replace      of type boolean
    */
-  public Dfs( Fields sourceFields, URI uri, boolean deleteOnSinkInit )
+  public Dfs( Fields sourceFields, URI uri, boolean replace )
     {
-    super( sourceFields, uri.getPath(), deleteOnSinkInit );
+    super( sourceFields, uri.getPath(), replace );
 
     if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
       throw new IllegalArgumentException( "uri must use the hdfs scheme" );
@@ -84,13 +84,13 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields     of type Fields
-   * @param stringPath       of type String
-   * @param deleteOnSinkInit of type boolean
+   * @param sourceFields of type Fields
+   * @param stringPath   of type String
+   * @param replace      of type boolean
    */
-  public Dfs( Fields sourceFields, String stringPath, boolean deleteOnSinkInit )
+  public Dfs( Fields sourceFields, String stringPath, boolean replace )
     {
-    super( sourceFields, stringPath, deleteOnSinkInit );
+    super( sourceFields, stringPath, replace );
     }
 
   Dfs( Scheme scheme )
@@ -117,13 +117,13 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param scheme           of type Scheme
-   * @param uri              of type URI
-   * @param deleteOnSinkInit of type boolean
+   * @param scheme  of type Scheme
+   * @param uri     of type URI
+   * @param replace of type boolean
    */
-  public Dfs( Scheme scheme, URI uri, boolean deleteOnSinkInit )
+  public Dfs( Scheme scheme, URI uri, boolean replace )
     {
-    super( scheme, uri.getPath(), deleteOnSinkInit );
+    super( scheme, uri.getPath(), replace );
 
     if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
       throw new IllegalArgumentException( "uri must use the hdfs scheme" );
@@ -145,13 +145,13 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param scheme           of type Scheme
-   * @param stringPath       of type String
-   * @param deleteOnSinkInit of type boolean
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
-  public Dfs( Scheme scheme, String stringPath, boolean deleteOnSinkInit )
+  public Dfs( Scheme scheme, String stringPath, boolean replace )
     {
-    super( scheme, stringPath, deleteOnSinkInit );
+    super( scheme, stringPath, replace );
     }
 
   protected void setStringPath( String stringPath )

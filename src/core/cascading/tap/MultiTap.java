@@ -99,7 +99,7 @@ public class MultiTap extends SourceTap
     }
 
   @Override
-  public boolean isDeleteOnSinkInit()
+  public boolean isOverwrite()
     {
     return false; // cannot be used as sink
     }

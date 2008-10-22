@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Updated c.t.Tap api to support c.t.SinkMode enums. This opens up ability to support appends in the near future.
+
   Added support for Hadoop 0.19.x. This release skips Hadoop 0.18.x.
 
   Changed project structure so that XML functions live in their own sub-project. This includes renaming the base
