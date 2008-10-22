@@ -32,69 +32,99 @@ import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 
 /**
- * For the given field positions, emit a new Tuple for every value.
- * Used for:
+ * Class UnGroup is a {@link Function} that will 'un-group' data from a given dataset.
  * <p/>
+ * That is, for the given field positions, this function will emit a new Tuple for every value. For example:
+ * <p/>
+ * <pre>
  * A, x, y
  * B, x, z
  * C, y, z
+ * </pre>
  * <p/>
  * to:
  * <p/>
+ * <pre>
  * A, x
  * A, y
  * B, x
  * B, z
  * C, y
  * C, z
+ * </pre>
  */
 public class UnGroup extends BaseOperation implements Function
   {
+  /** Field LOG */
   private static final Logger LOG = Logger.getLogger( UnGroup.class );
 
+  /** Field groupFieldSelector */
   private Fields groupFieldSelector;
+  /** Field resultFieldSelectors */
   private Fields[] resultFieldSelectors;
+  /** Field size */
   private int size = 1;
 
-  public UnGroup( Fields groupFieldSelector, Fields[] resultFieldSelectors )
+  /**
+   * Constructor UnGroup creates a new UnGroup instance.
+   *
+   * @param groupSelector  of type Fields
+   * @param valueSelectors of type Fields[]
+   */
+  public UnGroup( Fields groupSelector, Fields[] valueSelectors )
     {
     int size = 0;
 
-    for( Fields resultFieldSelector : resultFieldSelectors )
+    for( Fields resultFieldSelector : valueSelectors )
       {
       size = resultFieldSelector.size();
-      numArgs = groupFieldSelector.size() + size;
+      numArgs = groupSelector.size() + size;
 
       if( fieldDeclaration.size() != numArgs )
         throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
-    this.groupFieldSelector = groupFieldSelector;
-    this.resultFieldSelectors = resultFieldSelectors;
-    this.fieldDeclaration = Fields.size( groupFieldSelector.size() + size );
+    this.groupFieldSelector = groupSelector;
+    this.resultFieldSelectors = valueSelectors;
+    this.fieldDeclaration = Fields.size( groupSelector.size() + size );
     }
 
-  public UnGroup( Fields fieldDeclaration, Fields groupFieldSelector, Fields[] resultFieldSelectors )
+  /**
+   * Constructor UnGroup creates a new UnGroup instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param groupSelector    of type Fields
+   * @param valueSelectors   of type Fields[]
+   */
+  public UnGroup( Fields fieldDeclaration, Fields groupSelector, Fields[] valueSelectors )
     {
     super( fieldDeclaration );
 
-    for( Fields resultFieldSelector : resultFieldSelectors )
+    for( Fields resultFieldSelector : valueSelectors )
       {
-      numArgs = groupFieldSelector.size() + resultFieldSelector.size();
+      numArgs = groupSelector.size() + resultFieldSelector.size();
 
       if( fieldDeclaration.size() != numArgs )
         throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
-    this.groupFieldSelector = groupFieldSelector;
-    this.resultFieldSelectors = resultFieldSelectors;
+    this.groupFieldSelector = groupSelector;
+    this.resultFieldSelectors = valueSelectors;
     }
 
-  public UnGroup( Fields fieldDeclaration, Fields groupFieldSelector, int size )
+  /**
+   * Constructor UnGroup creates a new UnGroup instance. Where the numValues argument specifies the number
+   * of values to include.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param groupSelector    of type Fields
+   * @param numValues        of type int
+   */
+  public UnGroup( Fields fieldDeclaration, Fields groupSelector, int numValues )
     {
     super( fieldDeclaration );
-    this.groupFieldSelector = groupFieldSelector;
-    this.size = size;
+    this.groupFieldSelector = groupSelector;
+    this.size = numValues;
     }
 
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
