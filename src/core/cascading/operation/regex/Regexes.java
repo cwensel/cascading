@@ -26,25 +26,31 @@ import cascading.tuple.Fields;
 /**
  *
  */
+@Deprecated
 public class Regexes
   {
   /** Field TAB_SPLITTER is a predefined {@link RegexSplitter} for splitting on the TAB character */
+  @Deprecated
   public static final RegexSplitter TAB_SPLITTER = new RegexSplitter( "\t" );
 
   /** Field APACHE_GROUPS defines the significant regex groups used in {@link #APACHE_COMMON_GROUP_FIELDS} */
+  @Deprecated
   public static final int[] APACHE_COMMON_GROUPS = new int[]{1, 2, 3, 4, 5, 6};
 
   /**
    * Field APACHE_GROUP_FIELDS are the field names of the groups returned by the APACHE_REGEX.<br/>
    * These fields are: "time", "method", "event", "status", and "size"
    */
+  @Deprecated
   public static final Fields APACHE_COMMON_GROUP_FIELDS = new Fields( "ip", "time", "method", "event", "status", "size" );
   /**
    * Field APACHE_REGEX is used to parse Apache log files.<br/>
    * <code>^[^ ]* +[^ ]* +[^ ]* +\[([^]]*)\] +\"([^ ]*) ([^ ]*) [^ ]*\" ([^ ]*) ([^ ]*).*$</code>
    */
+  @Deprecated
   public static final String APACHE_COMMON_REGEX = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
 
   /** Field APACHE_PARSER is a predefined {@link RegexParser} for parsing Apache log files */
+  @Deprecated
   public static final RegexParser APACHE_COMMON_PARSER = new RegexParser( APACHE_COMMON_GROUP_FIELDS, APACHE_COMMON_REGEX, APACHE_COMMON_GROUPS );
   }

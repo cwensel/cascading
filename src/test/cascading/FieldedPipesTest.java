@@ -364,7 +364,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    String regex = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{1, 2, 3, 4, 5, 6} ) );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
 

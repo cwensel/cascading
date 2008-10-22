@@ -38,7 +38,7 @@ import cascading.operation.aggregator.First;
 import cascading.operation.aggregator.Sum;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
-import cascading.operation.regex.Regexes;
+import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -83,7 +83,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     Pipe pipe = new Pipe( "euclidean" );
 
     // unknown number of elements
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.TAB_SPLITTER );
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( "\t" ) );
 
     // break not names and movies
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), new Fields( 0 ), 2 ) );
@@ -171,7 +171,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/short", true );
 
     // unknown number of elements
-    Pipe pipe = new Each( "euclidean", new Fields( "line" ), Regexes.TAB_SPLITTER );
+    Pipe pipe = new Each( "euclidean", new Fields( "line" ), new RegexSplitter( "\t" ) );
 
     // break not names and movies
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
@@ -255,7 +255,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/composite", true );
 
     // unknown number of elements
-    Pipe pipe = new Each( "euclidean", new Fields( "line" ), Regexes.TAB_SPLITTER );
+    Pipe pipe = new Each( "euclidean", new Fields( "line" ), new RegexSplitter( "\t" ) );
 
     // break not names and movies
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
@@ -297,7 +297,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     Tap sink = new Hfs( new TextLine(), outputPathPearson + "/composite", true );
 
     // unknown number of elements
-    Pipe pipe = new Each( "pearson", new Fields( "line" ), Regexes.TAB_SPLITTER );
+    Pipe pipe = new Each( "pearson", new Fields( "line" ), new RegexSplitter( "\t" ) );
 
     // break not names and movies
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );

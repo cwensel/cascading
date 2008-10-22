@@ -34,8 +34,9 @@ import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
+import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.Regexes;
-import cascading.operation.text.Texts;
+import cascading.operation.text.DateParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
@@ -54,6 +55,8 @@ public class SortedValuesTest extends ClusterTestCase
   String inputFileApache = "build/test/data/apache.200.txt";
 
   String outputPath = "build/test/output/sorting/";
+  private String apacheCommonRegex = Regexes.APACHE_COMMON_REGEX;
+  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{1, 2, 3, 4, 5, 6} );
 
   public SortedValuesTest()
     {
@@ -81,12 +84,12 @@ public class SortedValuesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "apache" );
 
     // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
 
     // DateParser.APACHE declares: "ts"
-    pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+    pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
     pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "status" ), sorted );
 
@@ -125,7 +128,7 @@ public class SortedValuesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "apache" );
 
     // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new GroupBy( pipe, new Fields( "status" ) );
 
@@ -159,12 +162,12 @@ public class SortedValuesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "apache" );
 
     // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
 
     // DateParser.APACHE declares: "ts"
-    pipe = new Each( pipe, new Fields( "time" ), Texts.APACHE_DATE_PARSER, new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+    pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
     pipe = new GroupBy( pipe, new Fields( "col" ), new Fields( "does-not-exist" ) );
 

@@ -24,17 +24,21 @@ package cascading.operation.text;
 /**
  *
  */
+@Deprecated
 public class Texts
   {
   /**
    * Field APACHE_DATE_FORMAT is the text date format of date in an Apache log file. <br/>
    * <code>dd/MMM/yyyy:HH:mm:ss Z</code>
    */
+  @Deprecated
   public static final String APACHE_DATE_FORMAT = "dd/MMM/yyyy:HH:mm:ss Z";
 
   /** Field APACHE_DATE_PARSER is a convenience {@link DateParser} instance for parsing the date from an Apache log file */
+  @Deprecated
   public static final DateParser APACHE_DATE_PARSER = new DateParser( APACHE_DATE_FORMAT );
 
   /** Field TAB_JOINER is a predfined {@link FieldJoiner} for joining field values with the TAB character. */
+  @Deprecated
   public static final FieldJoiner TAB_JOINER = new FieldJoiner( "\t" );
   }

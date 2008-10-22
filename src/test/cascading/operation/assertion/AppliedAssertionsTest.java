@@ -31,6 +31,7 @@ import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
+import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.Regexes;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -48,6 +49,8 @@ public class AppliedAssertionsTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
   String outputPath = "build/test/output/assertions/";
+  private String apacheCommonRegex = Regexes.APACHE_COMMON_REGEX;
+  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{1, 2, 3, 4, 5, 6} );
 
   public AppliedAssertionsTest()
     {
@@ -66,7 +69,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 
@@ -99,7 +102,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 
@@ -148,7 +151,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, setLevel, new AssertNotNull() );
 
@@ -199,7 +202,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 
@@ -232,7 +235,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 
@@ -281,7 +284,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
 
     pipe = new Each( pipe, setLevel, new AssertNotNull() );
 
