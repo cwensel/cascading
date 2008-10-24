@@ -437,11 +437,17 @@ public class Hfs extends Tap
 
   public TupleIterator openForRead( JobConf conf ) throws IOException
     {
+    if( !pathExists( conf ) )
+      throw new IOException( "resource does not exist, cannot open for reading" );
+
     return new TapIterator( this, conf );
     }
 
   public TupleCollector openForWrite( JobConf conf ) throws IOException
     {
+    if( pathExists( conf ) )
+      throw new IOException( "resource exists, cannot open for writing" );
+
     return new TapCollector( this, conf );
     }
   }

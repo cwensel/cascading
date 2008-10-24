@@ -28,12 +28,15 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleCollector;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputCommitter;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
@@ -60,6 +63,8 @@ public class TapCollector extends TupleCollector implements OutputCollector
   private Tap tap;
   /** Field outputEntry */
   private TupleEntry outputEntry;
+  private OutputCommitter outputCommitter;
+  private JobContext jobContext;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -84,10 +89,8 @@ public class TapCollector extends TupleCollector implements OutputCollector
     if( !tap.makeDirs( conf ) ) // required
       throw new TapException( "unable to make dirs for: " + tap.toString() );
 
-    OutputFormat outputFormat = conf.getOutputFormat();
 
-    if( outputFormat instanceof JobConfigurable )
-      ( (JobConfigurable) outputFormat ).configure( conf );
+    OutputFormat outputFormat = conf.getOutputFormat();
 
     Path outputPath = FileOutputFormat.getOutputPath( conf );
     FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
@@ -96,7 +99,8 @@ public class TapCollector extends TupleCollector implements OutputCollector
 
     conf.set( "mapred.work.output.dir", outputPath.toString() );
 
-    fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ) );
+    if( conf.getOutputCommitter() instanceof FileOutputCommitter ) // only file based writing uses temp dirs
+      fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ) );
 
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
@@ -115,6 +119,36 @@ public class TapCollector extends TupleCollector implements OutputCollector
       }
     }
 
+  private void moveTaskOutputs() throws IOException
+    {
+    Path outputPath = FileOutputFormat.getOutputPath( conf );
+    Path taskPath = FileOutputFormat.getTaskOutputPath( conf, "_unused_" ).getParent();
+
+    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
+
+    if( !fileSystem.getFileStatus( taskPath ).isDir() )
+      throw new IOException( "path is not a directory: " + taskPath );
+
+    FileStatus[] statuses = fileSystem.listStatus( taskPath );
+
+    for( FileStatus status : statuses )
+      {
+      Path sourcePath = status.getPath();
+
+      if( status.isDir() )
+        throw new IOException( "path is a directory, no support for nested directories: " + sourcePath );
+
+      Path targetPath = new Path( outputPath, sourcePath.getName() );
+
+      fileSystem.rename( sourcePath, targetPath );
+
+      LOG.debug( "moved " + sourcePath + " to " + targetPath );
+      }
+
+    // remove _temporary directory
+    fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ), true );
+    }
+
   @Override
   public void close()
     {
@@ -122,11 +156,9 @@ public class TapCollector extends TupleCollector implements OutputCollector
       {
       writer.close( Reporter.NULL );
 
-      // remove _temporary directory
-      Path outputPath = FileOutputFormat.getOutputPath( conf );
-      FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
+      if( conf.getOutputCommitter() instanceof FileOutputCommitter )
+        moveTaskOutputs();
 
-      fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ), true );
       }
     catch( IOException exception )
       {
