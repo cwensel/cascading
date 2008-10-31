@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<book>
+  <bookinfo>
+    <title></title>
+
+    <author>
+      <firstname></firstname>
+
+      <surname></surname>
+
+      <affiliation>
+        <orgname></orgname>
+      </affiliation>
+    </author>
+
+    <pubdate></pubdate>
+  </bookinfo>
+
+  <chapter>
+    <title>Introduction to Cascading</title>
+
+    <section>
+      <title>Fundamental Concepts</title>
+
+      <para>Cascading is a feature rich API for defining and executing complex
+      and fault tolerant data processing workflows on a Hadoop cluster.
+      </para>
+
+      <para>The processing API lets the developer quickly assemble complex
+      distributed processes without having to "think" in MapReduce. And to
+      efficiently schedule them based on their dependencies and other
+      available meta-data.</para>
+
+      <para>This simple Java API is based on a pipe and filters metaphor, so
+      it provides features like splitting and joining of data streams. For
+      filters and functions to be applied to the stream. As well as grouping
+      on keys and aggregation of the keys multiple values. When a collection
+      of these functions, filters, grouping, etc, are plugged in with each
+      other, the result is what we call a 'pipe assembly', to help stick with
+      the underlying metaphor. </para>
+    </section>
+
+    <section>
+      <title>Who should use Cascading</title>
+
+      <para><note>
+          <para>indeed who? common usage or who should be interested in this
+          doc</para>
+        </note></para>
+    </section>
+
+    <section>
+      <title>Core Components</title>
+
+      <para>There are five core components. The Tuple, Pipe, Tap, Flow, and
+      Cascade.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>Tuple</term>
+
+          <listitem>
+            <para>In Cascading, we call each record a Tuple, and a series of
+            tuples are a tuple stream. </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>Pipe</term>
+
+          <listitem>
+            <para>Pipes apply functions to each Tuple in the stream.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>Tap</term>
+
+          <listitem>
+            <para>A Tap represents a resource like a data file on the local
+            filesystem, on a Hadoop distributed file system, or even on Amazon
+            S3. Note that Taps are both sinks and sources when shared between
+            Flow instances.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>Flow</term>
+
+          <listitem>
+            <para>Pipe instances are assembled into assemblies, and connect
+            with Tap instances into a Flow.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>Cascade</term>
+
+          <listitem>
+            <para>Optionally, multiple Flow instances are connected into a
+            Cascade, typically when a given Flow must participate in multiple
+            processes. Cascades act like build or make files, when run they
+            only execute Flows that have stale targets.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <section>
+        <title>Sub-components</title>
+
+        <para>There are three subtypes of Pipe: Each, Group, and Every. The
+        Each pipe applies a function or filter to each record that passes
+        through it. The Every pipe applies an aggregate function (like count,
+        or sum) to every group of records that pass through it. The Group pipe
+        performs the grouping on any set of fields in the Record.</para>
+
+        <para>Further, Group is subtyped into GroupBy and CoGroup, where
+        GroupBy manages one input, and CoGroup can handle two or more inputs.
+        By default CoGroup performs an inner join.</para>
+      </section>
+
+      <section>
+        <title>A Simple Example - Parsing Apache Log File</title>
+
+        <para>To illustrate the funtionalities of the core components, we will
+        review a simple example here.</para>
+
+        <para>We will read an Apache log file, parse it into a few fields, and
+        then write it back out as a text file. This is pretty much the
+        simplest thing you can do with Cascading, but once you get these
+        basics down, you can continue to add more complexity as needed. See
+        more advanced examples in the later sections.</para>
+
+        <para><example>
+            <title>Parsing Apache Log</title>
+
+            <para>Dump in the apache example</para>
+          </example></para>
+      </section>
+    </section>
+
+    <section>
+      <title>Getting Cascading to run</title>
+
+      <para>Cascading is nothing more than a Java library that should be
+      included in both your development and runtime CLASSPATH. </para>
+
+      <para>When executing Cascading as a Hadoop job, the Cascading jar
+      (cascading-lib-x.y.z.jar) file should be added to the job jar 'lib'
+      directory along with all cascadings dependent jar files. Alternately
+      cascading-x.y.z.jar can be unpacked into a directory containing your
+      class files, and then packed back up as it already includes the 'lib'
+      directory. </para>
+
+      <para>Each of the available examples includes a generalized Ant build
+      script that can be used as a starting point for most any Cascading
+      project. Alternatively, you can get a sample build file directly from
+      svn.</para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Cascading Features</title>
+
+    <section>
+      <title>Scheduling</title>
+
+      <para>Cascading has a simple utility that will take a collection of
+      Cascading jobs, or Flows as they are called, groups them into a Cascade
+      object, and will execute them on the target cluster in dependency
+      order.</para>
+
+      <section>
+        <title>Topological Scheduler</title>
+
+        <para>dump in example</para>
+      </section>
+
+      <section>
+        <title>Event Notification</title>
+
+        <para>dump in example</para>
+      </section>
+
+      <section>
+        <title>MapReduce Job Planner</title>
+
+        <para>dump in example</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Testing</title>
+
+      <para></para>
+
+      <section>
+        <title>Stream Assertions</title>
+
+        <para>dump in example</para>
+      </section>
+
+      <section>
+        <title>Failure Traps</title>
+
+        <para>dump in example</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Scripting</title>
+
+      <para>Currently Cascading provides a Groovy based DSL called
+      Cascading.groovy.</para>
+
+      <para>With the Cascading sub-project Cascading.groovy, users can create
+      sophisticated data processing applications using the Groovy scripting
+      language. We think Cascading.groovy will be a great tool for those
+      groups that need to expose Hadoop to the 'casual' user who needs to get
+      and manipulate valuable data on an organizations Hadoop cluster, but who
+      possibly doesn't have the time to learn Java, the Hadoop API, or to
+      think in MapReduce to solve their problems and access data. </para>
+
+      <para>No Groovy code is run in the cluster, it is only used as a means
+      to build complex Cascading Flows and Cascades. Think of it as an Ant
+      build file. Ant is configured by XML build files which represent
+      internal graph of tasks the Ant tool needs to execute. We find XML
+      tedious for such applications and figured Groovy to be a better
+      alternative.</para>
+
+      <para><example>
+          <title>Word Count</title>
+
+          <para>dump in word count example</para>
+        </example></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Examples</title>
+
+    <para>Here are a few examples to get you started. To run the examples, you
+    must initialize your local Hadoop environment. For example, call</para>
+
+    <para><command>export HADOOP_HOME=~/hadoop</command></para>
+
+    <para><command>export PATH=$HADOOP_HOME/bin/:$PATH</command></para>
+
+    <para>where <command>HADOOP_HOME</command> points to the root of your
+    Hadoop installation. </para>
+
+    <para>Per the README.TXT file in your example application, call </para>
+
+    <para><command>ant jar </command></para>
+
+    <para><command>hadoop jar ./build/example.jar args... </command></para>
+
+    <para>Note these examples work great with a cluster enabled. So if some
+    files/directories don't show up in the current directory, check your HDFS
+    user directory.</para>
+
+    <section>
+      <title>Calculating Pearson Distance</title>
+
+      <para><example>
+          <title>Pearson Distance</title>
+
+          <para>dump in pearson distance example</para>
+        </example></para>
+    </section>
+
+    <section>
+      <title>Crawl Data Word Count</title>
+
+      <para><example>
+          <title>Crawl Data Word Count</title>
+
+          <para>dump in crawl data word count example</para>
+
+          <para><note>
+              <para>do we need the apache log example here again as example
+              #3?</para>
+            </note></para>
+        </example></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>How It Works</title>
+
+    <para><note>
+        <para>Basically a technical overview, if needed. Can use the example
+        from http://www.cascading.org/documentation/overview.html.</para>
+      </note></para>
+  </chapter>
+
+  <chapter>
+    <title>Common Patterns</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>Copy a value</term>
+
+        <listitem>
+          <para><code>pipe = new Each( pipe, new Fields( "field" ), new
+          Identity( new Fields( "copy" ) ), Fields.ALL );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Rename a field</term>
+
+        <listitem>
+          <para><code>// two incoming fields: "other" and "field"</code>
+          </para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "field" ), new
+          Identity( new Fields( "renamed" ) ), new Fields( "other", "renamed"
+          ) );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Convert strings to primitive types</term>
+
+        <listitem>
+          <para><code>Class[] types = new Class[] {Long.class, Float.class,
+          Boolean.class};</code> </para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "longField",
+          "floatField", "booleanField" ), new Identity( types )
+          );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Reorder fields</term>
+
+        <listitem>
+          <para><code>// two incoming fields: "field1" and "field2"</code>
+          </para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "field2", "field1" ),
+          new Identity() );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Discard unused fields</term>
+
+        <listitem>
+          <para><code>// two incoming fields: "field1" and "field2"
+          </code></para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "field2" ), new
+          Identity() );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Sort values passed to Aggregator</term>
+
+        <listitem>
+          <para><code>pipe = new GroupBy( pipe, new Fields( "group1", "group2"
+          ), new Fields( "value" ) );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Insert constant values into a value stream</term>
+
+        <listitem>
+          <para><code>pipe = new Each( pipe, new Insert( new Fields( "field1",
+          "field2" ), "value1", "value2" ), Fields.ALL );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Create 'timestamp' from date/time fields</term>
+
+        <listitem>
+          <para><code>// build 'datetime' string</code></para>
+
+          <para><code>FieldFormatter formatter = new FieldFormatter( new
+          Fields( "datetime" ), "%s:%s:%s:%s:%s:%s.%s" ); </code></para>
+
+          <para><code>Fields timeFields = new Fields( "year", "month", "day",
+          "hour", "minute", "second", "millisecond" ); </code></para>
+
+          <para><code>pipe = new Each( pipe, timeFields, formatter, Fields.ALL
+          ); </code></para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "datetime" ), new
+          DateParser( new Fields( "ts" ), "yyyy:MM:dd:HH:mm:ss.SSS" ),
+          Fields.ALL );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Create date/time string from 'timestamp' field</term>
+
+        <listitem>
+          <para><code>DateFormatter timeFormatter = new DateFormatter( new
+          Fields( "datetime" ), "HH:mm:ss.SSS" );</code> </para>
+
+          <para><code>// pass field "ts" into the timeFormatter function,
+          which returns a "datetime" field</code> </para>
+
+          <para><code>pipe = new Each( pipe, new Fields( "ts" ),
+          timeFormatter, Fields.ALL ); </code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <variablelist>
+      <varlistentry>
+        <term>Get 'DISTINCT' values from a Tuple stream</term>
+
+        <listitem>
+          <para><code>// group on all values</code> </para>
+
+          <para><code>pipe = new GroupBy( pipe, Fields.ALL );</code> </para>
+
+          <para><code>// only take the first value in the grouping, ignore the
+          rest</code> </para>
+
+          <para><code>pipe = new Every( pipe, Fields.ALL, new First(),
+          Fields.RESULTS );</code></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </chapter>
+
+  <chapter>
+    <title>Common FAQs</title>
+
+    <para></para>
+
+    <section>
+      <title>How to ...</title>
+
+      <para></para>
+    </section>
+  </chapter>
+</book>
