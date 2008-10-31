@@ -23,8 +23,9 @@
       meta-data.
     </para>
 
-    <para>Cascading 1.0 relies on Apache Hadoop. To use Cascading, Hadoop must be installed locally for development and
-      testing, and a Hadoop cluster must be deployed for production applications.
+    <para>Cascading 1.0 relies on Apache Hadoop. To use Cascading, Hadoop must
+      be installed locally for development and testing, and a Hadoop cluster
+      must be deployed for production applications.
     </para>
   </preface>
 
@@ -34,76 +35,84 @@
     <section>
       <title>Who should use Cascading</title>
 
-      <para>
-        Cascading was developed to allow organizations to rapidly develop complex data processing applications.
-        These applications come in two extremes.
+      <para>Cascading was developed to allow organizations to rapidly develop
+        complex data processing applications. These applications come in two
+        extremes.
       </para>
 
-      <para>On one hand, there is to much data for a single computing system to manage effecitively. Developers
-        have decided to adopt Apache Hadoop as the base computing infrastructure, but realize that developing
-        reasonably useful applications on Hadoop is not trivial. Cascadig eases the burden on developers by allowing
-        them to rapidly create, refactor, test, and execute complex applications that scale linearly across a cluster
-        of computers.
+      <para>On one hand, there is to much data for a single computing system
+        to manage effecitively. Developers have decided to adopt Apache Hadoop
+        as the base computing infrastructure, but realize that developing
+        reasonably useful applications on Hadoop is not trivial. Cascadig eases
+        the burden on developers by allowing them to rapidly create, refactor,
+        test, and execute complex applications that scale linearly across a
+        cluster of computers.
       </para>
 
-      <para>On the other hand, managers and developers realize the complexity of the processes in their datacenter
-        is getting out of hand with one-off data-processing applications living wherever there is enough disk space
-        to store intermediate or final datasets. Subsequently they have decided to adopt Apache Hadoop to gain access to
-        its "Global Namespace" filesystem which allows for a single reliable storage framework. Cascading eases the
-        learning curve for developers to convert their existing applications for execution on a Hadoop cluster. It
-        further
-        allows for developers to create re-usable libraries and application for use by analysts who need to extract
-        data from the Hadoop filesystem.
+      <para>On the other hand, managers and developers realize the complexity
+        of the processes in their datacenter is getting out of hand with one-off
+        data-processing applications living wherever there is enough disk space
+        to store intermediate or final datasets. Subsequently they have decided
+        to adopt Apache Hadoop to gain access to its "Global Namespace"
+        filesystem which allows for a single reliable storage framework.
+        Cascading eases the learning curve for developers to convert their
+        existing applications for execution on a Hadoop cluster. It further
+        allows for developers to create re-usable libraries and application for
+        use by analysts who need to extract data from the Hadoop
+        filesystem.
       </para>
     </section>
 
     <section>
       <title>User Roles</title>
 
-      <para>Cascading supports three user roles. The application Executor, application Assembler, and the
-        functional operation Developer.
+      <para>Cascading supports three user roles. The application Executor,
+        application Assembler, and the functional operation Developer.
       </para>
 
-      <para>The application Executor is someone, a developer or analyst, who runs a data processing
-        application on a given cluster. This is typically done via the command
-        line using a pre-packaged jar compiled against Hadoop and Cascading.
-        This application may accept parameters to customize it for an given
-        execution and generally results in a set of data the user will export
-        from the Hadoop filesystem for some specific purpose.
+      <para>The application Executor is someone, a developer or analyst, who
+        runs a data processing application on a given cluster. This is typically
+        done via the command line using a pre-packaged jar compiled against
+        Hadoop and Cascading. This application may accept parameters to
+        customize it for an given execution and generally results in a set of
+        data the user will export from the Hadoop filesystem for some specific
+        purpose.
       </para>
 
       <para>The application Assembler is someone who assembles data processing
         workflows into unique applications. This is generally a development task
         of chaining together operations that act on input data sets to produce
-        one or more output data sets. This task can be done using the raw Java Cascading API or via
-        a scripting language like Groovy, JRuby, or Jython.
+        one or more output data sets. This task can be done using the raw Java
+        Cascading API or via a scripting language like Groovy, JRuby, or
+        Jython.
       </para>
 
       <para>The operation Developer is someone who writes individual functions
-        or operations, typically in Java, that act on the data that pass through the data processing
-        workflow. A simple example would be a Integer parser that takes a string
-        and converts it to an Integer. Operations are equivalent to Java
-        functions in the sense that they take input arguments and return data.
-        And they can execute at any granularity, simply parsing a string, or performing
-        some complex routine on the argument data using third-party libraries.
+        or operations, typically in Java, that act on the data that pass through
+        the data processing workflow. A simple example would be a Integer parser
+        that takes a string and converts it to an Integer. Operations are
+        equivalent to Java functions in the sense that they take input arguments
+        and return data. And they can execute at any granularity, simply parsing
+        a string, or performing some complex routine on the argument data using
+        third-party libraries.
       </para>
-
     </section>
 
     <section>
-      <title>Cascading Processing Model</title>
+      <title>Cascading Process Model</title>
 
-      <para>The Cascading processing modle is based on a pipe and filters metaphor, so it supports features
-        like splitting and merging of data streams. For filters and functions to
-        be applied to the stream. As well as grouping on fields and aggregation of
-        the grouped values. When a collection of these functions, filters,
-        grouping, etc, are plugged into each other, the result is what we
-        call a 'pipe assembly'. A pipe assembly defines what should be done to the input data, without specifying
-        which data to do it to.
+      <para>The Cascading processing modle is based on a pipe and filters
+        metaphor, so it supports features like splitting and merging of data
+        streams. For filters and functions to be applied to the stream. As well
+        as grouping on fields and aggregation of the grouped values. When a
+        collection of these functions, filters, grouping, etc, are plugged into
+        each other, the result is what we call a 'pipe assembly'. A pipe
+        assembly defines what should be done to the input data, without
+        specifying which data to do it to.
       </para>
 
-      <para>There are six core elements to the Cascading processing model. The Tuple, Pipe, Operation, Tap, Flow, and
-        Cascade.
+      <para>There are six core elements to the Cascading processing model. The
+        Tuple, Pipe, Operation, Tap, Flow, and Cascade.
       </para>
 
       <variablelist>
@@ -111,141 +120,181 @@
           <term>Tuple</term>
 
           <listitem>
-            <para>In Cascading, we call each record of data a Tuple, and a series of
-              tuples are a tuple stream. Think of a Tuple as an Array of values.
+            <para>In Cascading, we call each record of data a Tuple, and a
+              series of tuples are a tuple stream. Think of a Tuple as an Array
+              of values.
             </para>
           </listitem>
         </varlistentry>
-      </variablelist>
 
-      <variablelist>
         <varlistentry>
           <term>Pipe</term>
 
           <listitem>
-            <para>Pipes apply user defined Operations to each Tuple in the stream.</para>
+            <para>Pipes apply user defined Operations to each Tuple in the
+              stream.
+            </para>
           </listitem>
         </varlistentry>
-      </variablelist>
 
-      <variablelist>
         <varlistentry>
           <term>Operation</term>
 
           <listitem>
-            <para>Operations do all the work. They accept an input argument Tuple, and output zero or more
-              result Tuples. There are a few sub-types of operations defined below.
+            <para>Operations do all the work. They accept an input argument
+              Tuple, and output zero or more result Tuples. There are a few
+              sub-types of operations defined below.
             </para>
           </listitem>
         </varlistentry>
-      </variablelist>
 
-      <variablelist>
         <varlistentry>
           <term>Tap</term>
 
           <listitem>
             <para>A Tap represents a resource like a data file on the local
               filesystem, on a Hadoop distributed filesystem, or even on Amazon
-              S3. Taps can be read from, a "source", or written to, a "sink". Taps can act as both sinks and sources
-              when shared between Flows.
+              S3. Taps can be read from, a "source", or written to, a "sink".
+              Taps can act as both sinks and sources when shared between
+              Flows.
             </para>
           </listitem>
         </varlistentry>
-      </variablelist>
 
-      <variablelist>
         <varlistentry>
           <term>Flow</term>
 
           <listitem>
-            <para>When pipe assemblies are bound to source and sink Taps, a Flow is created. Flows are executable,
-              in the sense that once created, they can be "started" and will begin execution on a configured Hadoop
-              cluster.
-              Think of a Flow as a data processing workflow that reads data from sources, processes the data as defined
-              by the pipe assembly, and writes data to the sinks. Input source data does not need to exist when the Flow
-              is created, but it must exist when the Flow is executed.
+            <para>When pipe assemblies are bound to source and sink Taps, a
+              Flow is created. Flows are executable, in the sense that once
+              created, they can be "started" and will begin execution on a
+              configured Hadoop cluster. Think of a Flow as a data processing
+              workflow that reads data from sources, processes the data as
+              defined by the pipe assembly, and writes data to the sinks. Input
+              source data does not need to exist when the Flow is created, but
+              it must exist when the Flow is executed.
             </para>
           </listitem>
         </varlistentry>
-      </variablelist>
 
-      <variablelist>
         <varlistentry>
           <term>Cascade</term>
 
           <listitem>
             <para>Optionally, multiple Flow instances can be connected into a
-              Cascade. Cascades act like build or make files, when run they
-              only execute Flows that have stale sinks (output data that is older than the input data). Cascades manage
-              all the complexities involved in "scheduling" Flows that do not yet have input data because they depend
-              on another Flow to complete first.
+              Cascade. Cascades act like ant build or unix "make" files, when
+              run they only execute Flows that have stale sinks (output data
+              that is older than the input data). Cascades manage all the
+              complexities involved in "scheduling" Flows that do not yet have
+              input data because they depend on another Flow to complete
+              first.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>Process Definition Elements</title>
+
+      <para>Pipe elements process data in tuple streams by applying Operations
+        to values in each Tuple. To do that, the values in the Tuple typically
+        are named in the same fashion columns are named in a database so that
+        they can be referenced or selected.
+        <variablelist>
+          <varlistentry>
+            <term>Fields</term>
+
+            <listitem>
+              <para>Fields either declare the field names in a Tuple. Or
+                reference values in a Tuple as a selector. Fields can either be
+                string names ("first_name"), numeric positions (-1 for last), or
+                a substitution or wildcard (ALL for all fields in the
+                Tuple).
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+
+      <para>Fields are used to delcare the field names in a Tuple. Or to
+        select values as input arguments to an Operation, or select values as
+        the input Tuple to the next Pipe element.
+      </para>
+
+      <para>There are three subtypes of Pipe.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>Each</term>
+
+          <listitem>
+            <para>Each pipe applies a function or filter to each Tuple that
+              passes through it.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Group</term>
+
+          <listitem>
+            <para>The Every pipe applies an aggregator (like count, or sum) or
+              buffer to every group of Tuples that pass through it.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Every</term>
+
+          <listitem>
+            <para>The Group pipe performs the grouping of a set of Tuples
+              based on common values (like group-by on 'dept-id').
             </para>
           </listitem>
         </varlistentry>
       </variablelist>
 
-      <section>
-        <title>Sub-components</title>
+      <para>Further, Group is subtyped.</para>
 
-        <para>There are three subtypes of Pipe: Each, Group, and Every. The
-          Each pipe applies a function or filter to each Tuple that passes
-          through it. The Every pipe applies an aggregator (like count,
-          or sum) or buffer to every group of Tuples that pass through it. The Group pipe
-          performs the grouping of a set of Tuples based on common values (like group-by on 'dept-id')
-        </para>
+      <variablelist>
+        <varlistentry>
+          <term>GroupBy</term>
 
-        <para>Further, Group is subtyped into GroupBy and CoGroup, where
-          GroupBy manages one input Tuple stream, and CoGroup can handle two or more Tuple stream.
-          The results of CoGroup are then "joined" by an Inner, Outer, Left, or Right join.
-        </para>
-      </section>
+          <listitem>
+            <para>GroupBy manages one input Tuple stream.</para>
+          </listitem>
+        </varlistentry>
 
-      <section>
-        <title>A Simple Example - Parsing Apache Log File</title>
+        <varlistentry>
+          <term>CoGroup</term>
 
-        <para>To illustrate the funtionalities of the core components, we will
-          review a simple example here.
-        </para>
-
-        <para>We will read an Apache log file, parse it into a few fields, and
-          then write it back out as a text file. This is pretty much the
-          simplest thing you can do with Cascading, but once you get these
-          basics down, you can continue to add more complexity as needed. See
-          more advanced examples in the later sections.
-        </para>
-
-        <para>
-          <example>
-            <title>Parsing Apache Log</title>
-
-            <para>Dump in the apache example</para>
-          </example>
-        </para>
-      </section>
+          <listitem>
+            <para>CoGroup can handle two or more Tuple stream. The results of
+              CoGroup are then "joined" by an Inner, Outer, Left, or Right
+              join.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
 
     <section>
-      <title>Getting Cascading to run</title>
+      <title>Our First Example - Word Count</title>
 
-      <para>Cascading is nothing more than a Java library that should be
-        included in both your development and runtime CLASSPATH.
+      <para>Word counting is the most common example presented to new Hadoop developers, it is the MapReduce equivalent
+        to "Hello World".
       </para>
 
-      <para>When executing Cascading as a Hadoop job, the Cascading jar
-        (cascading-lib-x.y.z.jar) file should be added to the job jar 'lib'
-        directory along with all cascadings dependent jar files. Alternately
-        cascading-x.y.z.jar can be unpacked into a directory containing your
-        class files, and then packed back up as it already includes the 'lib'
-        directory.
+      <para>Word counting is where a document is parsed into individual words, and those words are counted.</para>
+
+      <para>In our example, we will read each line of text from a file (our document), parse it into words, then count
+        the number of time the word is encountered.
       </para>
 
-      <para>Each of the available examples includes a generalized Ant build
-        script that can be used as a starting point for most any Cascading
-        project. Alternatively, you can get a sample build file directly from
-        svn.
-      </para>
     </section>
+
   </chapter>
 
   <chapter>
@@ -329,6 +378,32 @@
         </example>
       </para>
     </section>
+  </chapter>
+  <chapter>
+    <title>Getting Started</title>
+
+    <section>
+      <title>Getting Cascading to run</title>
+
+      <para>Cascading is nothing more than a Java library that should be
+        included in both your development and runtime CLASSPATH.
+      </para>
+
+      <para>When executing Cascading as a Hadoop job, the Cascading jar
+        (cascading-lib-x.y.z.jar) file should be added to the job jar 'lib'
+        directory along with all cascadings dependent jar files. Alternately
+        cascading-x.y.z.jar can be unpacked into a directory containing your
+        class files, and then packed back up as it already includes the 'lib'
+        directory.
+      </para>
+
+      <para>Each of the available examples includes a generalized Ant build
+        script that can be used as a starting point for most any Cascading
+        project. Alternatively, you can get a sample build file directly from
+        svn.
+      </para>
+    </section>
+
   </chapter>
 
   <chapter>
@@ -435,8 +510,7 @@
 
         <listitem>
           <para>
-            <code>// two incoming fields: "other" and
-              "field"
+            <code>// two incoming fields: "other" and "field"
             </code>
           </para>
 
@@ -463,8 +537,7 @@
 
           <para>
             <code>pipe = new Each( pipe, new Fields( "longField",
-              "floatField", "booleanField" ), new Identity( types )
-              );
+              "floatField", "booleanField" ), new Identity( types ) );
             </code>
           </para>
         </listitem>
@@ -477,8 +550,7 @@
 
         <listitem>
           <para>
-            <code>// two incoming fields: "field1" and
-              "field2"
+            <code>// two incoming fields: "field1" and "field2"
             </code>
           </para>
 
