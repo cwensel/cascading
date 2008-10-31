@@ -11,8 +11,6 @@
   <preface>
     <title>Preface</title>
 
-    <para>[notes on high leve use of cascading]</para>
-
     <para>Cascading is a feature rich API for defining and executing complex
       and fault tolerant data processing workflows on a Hadoop cluster.
     </para>
@@ -301,49 +299,33 @@
     <title>Cascading Features</title>
 
     <section>
-      <title>Scheduling</title>
+      <title>Topological Scheduler</title>
 
-      <para>Cascading has a simple utility that will take a collection of
-        Cascading jobs, or Flows as they are called, groups them into a Cascade
-        object, and will execute them on the target cluster in dependency
-        order.
-      </para>
-
-      <section>
-        <title>Topological Scheduler</title>
-
-        <para>dump in example</para>
-      </section>
-
-      <section>
-        <title>Event Notification</title>
-
-        <para>dump in example</para>
-      </section>
-
-      <section>
-        <title>MapReduce Job Planner</title>
-
-        <para>dump in example</para>
-      </section>
+      <para>dump in example</para>
     </section>
 
     <section>
-      <title>Testing</title>
+      <title>Event Notification</title>
 
-      <para></para>
+      <para>dump in example</para>
+    </section>
 
-      <section>
-        <title>Stream Assertions</title>
+    <section>
+      <title>MapReduce Job Planner</title>
 
-        <para>dump in example</para>
-      </section>
+      <para>dump in example</para>
+    </section>
 
-      <section>
-        <title>Failure Traps</title>
+    <section>
+      <title>Stream Assertions</title>
 
-        <para>dump in example</para>
-      </section>
+      <para>dump in example</para>
+    </section>
+
+    <section>
+      <title>Failure Traps</title>
+
+      <para>dump in example</para>
     </section>
 
     <section>
@@ -379,6 +361,7 @@
       </para>
     </section>
   </chapter>
+
   <chapter>
     <title>Getting Started</title>
 
