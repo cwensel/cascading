@@ -102,6 +102,9 @@ public class TapCollector extends TupleCollector implements OutputCollector
     if( conf.getOutputCommitter() instanceof FileOutputCommitter ) // only file based writing uses temp dirs
       fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ) );
 
+    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
+      conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_m_000000_0", Math.rint( System.currentTimeMillis() ) ) );
+
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
 
