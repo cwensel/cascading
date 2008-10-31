@@ -1,6 +1,10 @@
 Cascading Change Log
 
-  unreleased
+0.8.3
+
+  Fix for c.p.CoGroup declared fields being generated out of order.
+
+0.8.2
 
   Added new properties via c.f.FlowConnector.setJarClass and c.f.FlowConnector.setJarPath for
   setting the application jar file.

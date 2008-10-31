@@ -949,11 +949,16 @@ public class Group extends Pipe
         }
       else
         {
+        Map<String, Scope> scopesMap = new HashMap<String, Scope>();
+
+        for( Scope incomingScope : incomingScopes )
+          scopesMap.put( incomingScope.getName(), incomingScope );
+
         Fields appendedFields = new Fields();
 
         // will throwFail on name collisions
-        for( Scope incomingScope : incomingScopes )
-          appendedFields = appendedFields.append( resolveFields( incomingScope ) );
+        for( Pipe pipe : pipes )
+          appendedFields = appendedFields.append( resolveFields( scopesMap.get( pipe.getName() ) ) );
 
         return appendedFields;
         }
