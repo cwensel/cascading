@@ -27,11 +27,11 @@ import cascading.tuple.Tuple;
 
 /**
  * Class MixedJoin will return an {@link java.util.Iterator} that will iterate over a given
- * {@link cascading.pipe.cogroup.CoGrouper} and return tuples that represent a join as defined by the given boolean array.
+ * {@link Joiner} and return tuples that represent a join as defined by the given boolean array.
  * <p/>
  * So if joining three streams, {@code boolean []{true,false,false}} will result in a 'inner', 'outer', 'outer' join.
  */
-public class MixedJoin implements CoGrouper
+public class MixedJoin implements Joiner
   {
   public static boolean INNER = true;
   public static boolean OUTER = false;

@@ -21,8 +21,8 @@
 
 package cascading.pipe;
 
-import cascading.pipe.cogroup.CoGrouper;
 import cascading.pipe.cogroup.InnerJoin;
+import cascading.pipe.cogroup.Joiner;
 import cascading.tuple.Fields;
 
 /**
@@ -33,7 +33,7 @@ import cascading.tuple.Fields;
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
  * to overcome field name collisions.
  * <p/>
- * By default CoGroup performs an inner join via the {@link InnerJoin} {@link CoGrouper} class.
+ * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
  *
  * @see cascading.pipe.cogroup.InnerJoin
  * @see cascading.pipe.cogroup.OuterJoin
@@ -65,11 +65,11 @@ public class CoGroup extends Group
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
-    super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, coGrouper );
+    super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
     }
 
   /**
@@ -79,11 +79,11 @@ public class CoGroup extends Group
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
-    super( lhs, lhsGroupFields, rhs, rhsGroupFields, coGrouper );
+    super( lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
     }
 
   /**
@@ -126,11 +126,11 @@ public class CoGroup extends Group
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
-    super( pipes, groupFields, declaredFields, coGrouper );
+    super( pipes, groupFields, declaredFields, joiner );
     }
 
   /**
@@ -165,11 +165,11 @@ public class CoGroup extends Group
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
-    super( groupName, pipes, groupFields, declaredFields, coGrouper );
+    super( groupName, pipes, groupFields, declaredFields, joiner );
     }
 
   /**
@@ -196,11 +196,11 @@ public class CoGroup extends Group
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
-    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, coGrouper );
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
     }
 
   /**
@@ -211,11 +211,11 @@ public class CoGroup extends Group
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
-    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, coGrouper );
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
     }
 
   /**
@@ -265,11 +265,11 @@ public class CoGroup extends Group
    * @param groupFields    of type Fields
    * @param repeat         of type int
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
     {
-    super( pipe, groupFields, repeat, declaredFields, coGrouper );
+    super( pipe, groupFields, repeat, declaredFields, joiner );
     }
 
   /**
@@ -279,11 +279,11 @@ public class CoGroup extends Group
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    * @param repeat      of type int
-   * @param coGrouper   of type CoGrouper
+   * @param joiner      of type CoGrouper
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
     {
-    super( pipe, groupFields, repeat, coGrouper );
+    super( pipe, groupFields, repeat, joiner );
     }
 
   /**
@@ -323,11 +323,11 @@ public class CoGroup extends Group
    * @param groupFields    of type Fields
    * @param repeat         of type int
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
     {
-    super( groupName, pipe, groupFields, repeat, declaredFields, coGrouper );
+    super( groupName, pipe, groupFields, repeat, declaredFields, joiner );
     }
 
   /**
@@ -338,11 +338,11 @@ public class CoGroup extends Group
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    * @param repeat      of type int
-   * @param coGrouper   of type CoGrouper
+   * @param joiner      of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
     {
-    super( groupName, pipe, groupFields, repeat, coGrouper );
+    super( groupName, pipe, groupFields, repeat, joiner );
     }
 
   /**

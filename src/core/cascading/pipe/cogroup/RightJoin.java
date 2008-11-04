@@ -26,7 +26,7 @@ import java.util.Iterator;
 import cascading.tuple.Tuple;
 
 /**
- * Class RightJoin will return an {@link Iterator} that will iterate over a given {@link CoGrouper} and return tuples that represent
+ * Class RightJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * a left outer, right inner join of the CoGrouper internal grouped tuple collections.
  * <p/>
  * Note only the farthest left tuple stream will be used as the outer join. All following joins to the right will
@@ -34,7 +34,7 @@ import cascading.tuple.Tuple;
  *
  * @see cascading.pipe.cogroup.MixedJoin
  */
-public class RightJoin implements CoGrouper
+public class RightJoin implements Joiner
   {
 
   public Iterator<Tuple> getIterator( GroupClosure closure )

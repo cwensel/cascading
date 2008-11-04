@@ -33,9 +33,9 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.cogroup.CoGroupClosure;
-import cascading.pipe.cogroup.CoGrouper;
 import cascading.pipe.cogroup.GroupClosure;
 import cascading.pipe.cogroup.InnerJoin;
+import cascading.pipe.cogroup.Joiner;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
@@ -64,7 +64,7 @@ public class Group extends Pipe
   /** Field repeat */
   private int repeat = 1;
   /** Field coGrouper */
-  private CoGrouper coGrouper;
+  private Joiner joiner;
   /** Field groupName */
   private String groupName;
   /** Field isGroupBy */
@@ -95,13 +95,13 @@ public class Group extends Pipe
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields );
     this.declaredFields = declaredFields;
-    this.coGrouper = coGrouper;
+    this.joiner = joiner;
 
     verifyCoGrouper();
     }
@@ -113,11 +113,11 @@ public class Group extends Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields, null, coGrouper );
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, null, joiner );
     }
 
   /**
@@ -186,11 +186,11 @@ public class Group extends Pipe
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+  public Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
-    this( null, pipes, groupFields, declaredFields, coGrouper );
+    this( null, pipes, groupFields, declaredFields, joiner );
     }
 
   /**
@@ -200,9 +200,9 @@ public class Group extends Pipe
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, CoGrouper coGrouper )
+  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
     this.groupName = groupName;
 
@@ -225,7 +225,7 @@ public class Group extends Pipe
       }
 
     this.declaredFields = declaredFields;
-    this.coGrouper = coGrouper;
+    this.joiner = joiner;
 
     verifyCoGrouper();
     }
@@ -255,11 +255,11 @@ public class Group extends Pipe
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, CoGrouper coGrouper )
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, coGrouper );
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
     this.groupName = groupName;
     }
 
@@ -271,11 +271,11 @@ public class Group extends Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, CoGrouper coGrouper )
+  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields, coGrouper );
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
     this.groupName = groupName;
     }
 
@@ -327,12 +327,12 @@ public class Group extends Pipe
    * @param groupFields    of type Fields
    * @param repeat         of type int
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+  public Group( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
     {
     this( pipe, groupFields, repeat, declaredFields );
-    this.coGrouper = coGrouper;
+    this.joiner = joiner;
 
     verifyCoGrouper();
     }
@@ -343,12 +343,12 @@ public class Group extends Pipe
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    * @param repeat      of type int
-   * @param coGrouper   of type CoGrouper
+   * @param joiner      of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+  public Group( Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
     {
     this( pipe, groupFields, repeat );
-    this.coGrouper = coGrouper;
+    this.joiner = joiner;
 
     verifyCoGrouper();
     }
@@ -390,11 +390,11 @@ public class Group extends Pipe
    * @param groupFields    of type Fields
    * @param repeat         of type int
    * @param declaredFields of type Fields
-   * @param coGrouper      of type CoGrouper
+   * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, CoGrouper coGrouper )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
     {
-    this( pipe, groupFields, repeat, declaredFields, coGrouper );
+    this( pipe, groupFields, repeat, declaredFields, joiner );
     this.groupName = groupName;
     }
 
@@ -405,11 +405,11 @@ public class Group extends Pipe
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    * @param repeat      of type int
-   * @param coGrouper   of type CoGrouper
+   * @param joiner      of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, CoGrouper coGrouper )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
     {
-    this( pipe, groupFields, repeat, coGrouper );
+    this( pipe, groupFields, repeat, joiner );
     this.groupName = groupName;
     }
 
@@ -605,16 +605,16 @@ public class Group extends Pipe
 
   private void verifyCoGrouper()
     {
-    if( coGrouper == null )
+    if( joiner == null )
       return;
 
-    if( coGrouper.numJoins() == -1 )
+    if( joiner.numJoins() == -1 )
       return;
 
     int joins = Math.max( repeat, groupFieldsMap.size() );
 
-    if( joins != coGrouper.numJoins() )
-      throw new IllegalArgumentException( "invalid cogrouper, only accepts " + coGrouper.numJoins() + " joins, expects: " + joins );
+    if( joins != joiner.numJoins() )
+      throw new IllegalArgumentException( "invalid cogrouper, only accepts " + joiner.numJoins() + " joins, expects: " + joins );
     }
 
   /**
@@ -806,10 +806,10 @@ public class Group extends Pipe
       closure = new CoGroupClosure( flowProcess, repeat, groupFields, valuesFields, (Tuple) key, values );
       }
 
-    if( coGrouper == null )
+    if( joiner == null )
       return new InnerJoin().getIterator( closure );
     else
-      return coGrouper.getIterator( closure );
+      return joiner.getIterator( closure );
     }
 
   /**

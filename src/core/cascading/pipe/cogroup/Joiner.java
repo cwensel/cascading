@@ -27,7 +27,7 @@ import java.util.Iterator;
 import cascading.tuple.Tuple;
 
 /** Interface CoGrouper allows for custom join strategies against a {@link GroupClosure}. */
-public interface CoGrouper extends Serializable
+public interface Joiner extends Serializable
   {
   /**
    * Returns an interator that joins the given GroupClosure co-groups.
@@ -43,5 +43,4 @@ public interface CoGrouper extends Serializable
    * @return an int
    */
   int numJoins();
-
   }

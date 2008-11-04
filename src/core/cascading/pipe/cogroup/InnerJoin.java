@@ -27,10 +27,10 @@ import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
 /**
- * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link CoGrouper} and return tuples that represent
+ * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * and inner join of the CoGrouper internal grouped tuple collections.
  */
-public class InnerJoin implements CoGrouper
+public class InnerJoin implements Joiner
   {
   private static final Logger LOG = Logger.getLogger( InnerJoin.class );
 

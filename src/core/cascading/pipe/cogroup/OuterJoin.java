@@ -28,10 +28,10 @@ import java.util.List;
 import cascading.tuple.Tuple;
 
 /**
- * Class OuterJoin will return an {@link Iterator} that will iterate over a given {@link CoGrouper} and return tuples that represent
+ * Class OuterJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * and outer join of the CoGrouper internal grouped tuple collections.
  */
-public class OuterJoin implements CoGrouper
+public class OuterJoin implements Joiner
   {
   public Iterator<Tuple> getIterator( GroupClosure closure )
     {
