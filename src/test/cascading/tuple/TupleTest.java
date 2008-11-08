@@ -94,6 +94,19 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 1 ) );
     }
 
+  public void testRemove2()
+    {
+    Tuple aTuple = tuple.remove( new int[]{2, 4} );
+    assertEquals( "not equal: aTuple.size()", 2, aTuple.size() );
+    assertEquals( "not equal: aTuple.get( 0 )", "c", aTuple.get( 0 ) );
+
+
+    assertEquals( "not equal: tuple.size()", 3, tuple.size() );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "d", tuple.get( 2 ) );
+    }
+
   public void testLeave()
     {
     Tuple aTuple = tuple.leave( new int[]{0} );

@@ -24,6 +24,7 @@ package cascading.tuple;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -474,7 +475,13 @@ public class Tuple implements Comparable, Iterable, Serializable
     Tuple results = new Tuple();
 
     for( int i : pos )
-      results.add( elements.remove( i ) );
+      results.add( elements.get( i ) );
+
+    int[] copy = Arrays.copyOf( pos, pos.length );
+    Arrays.sort( copy );
+
+    for( int i = 0; i < copy.length; i++ )
+      elements.remove( copy[ copy.length - i - 1 ] );
 
     return results;
     }

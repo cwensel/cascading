@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug with c.t.Tuple#remove() method not correctly removing values from Tuple.
+
   Updated c.t.Tap api to support c.t.SinkMode enums. This opens up ability to support appends in the near future.
 
   Added support for Hadoop 0.19.x. This release skips Hadoop 0.18.x.
@@ -71,7 +73,7 @@ unreleased
   implementation will write them out.
 
 0.8.3
-  
+
   Fix for c.p.CoGroup declared fields being generated out of order.
 
 0.8.2

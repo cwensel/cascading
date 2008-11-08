@@ -66,6 +66,7 @@ public class FieldedPipesTest extends ClusterTestCase
   String inputFileLower = "build/test/data/lower.txt";
   String inputFileLowerOffset = "build/test/data/lower-offset.txt";
   String inputFileJoined = "build/test/data/lower+upper.txt";
+  String inputFileJoinedExtra = "build/test/data/random+lower+upper.txt";
 
   String inputFileLhs = "build/test/data/lhs.txt";
   String inputFileRhs = "build/test/data/rhs.txt";
@@ -253,6 +254,31 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ) ) );
 
     pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "ungroup.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+    }
+
+  public void testUnGroupBySize() throws Exception
+    {
+    if( !new File( inputFileJoinedExtra ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoinedExtra );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoinedExtra );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped_size", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num1", "num2", "lower", "upper" ) ) );
+
+    pipe = new Each( pipe, new UnGroup( new Fields( "num1", "num2", "char" ), new Fields( "num1", "num2" ), 1 ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
