@@ -135,6 +135,9 @@ public abstract class Tap implements FlowElement, Serializable
    * Method flowInit allows this Tap instance to initalize itself in context of the given {@link Flow} instance.
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
+   * <p/>
+   * This method will be called once per Flow, and before {@link #sourceInit(org.apache.hadoop.mapred.JobConf)} and
+   * {@link #sinkInit(org.apache.hadoop.mapred.JobConf)} methods.
    *
    * @param flow of type Flow
    */
