@@ -66,7 +66,7 @@ public class FieldedPipesTest extends ClusterTestCase
   String inputFileLower = "build/test/data/lower.txt";
   String inputFileLowerOffset = "build/test/data/lower-offset.txt";
   String inputFileJoined = "build/test/data/lower+upper.txt";
-  String inputFileJoinedExtra = "build/test/data/random+lower+upper.txt";
+  String inputFileJoinedExtra = "build/test/data/extra+lower+upper.txt";
 
   String inputFileLhs = "build/test/data/lhs.txt";
   String inputFileRhs = "build/test/data/rhs.txt";
@@ -287,6 +287,16 @@ public class FieldedPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 10, null );
+
+    TupleIterator iterator = flow.openSink();
+
+    Comparable line = iterator.next().get( 1 );
+    assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\ta" ) );
+    line = iterator.next().get( 1 );
+    assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\tA" ) );
+
+    iterator.close();
+
     }
 
   public void testFilter() throws Exception
