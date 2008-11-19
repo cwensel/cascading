@@ -348,8 +348,19 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract long getPathModified( JobConf conf ) throws IOException;
 
   /**
+   * Method isKeep indicates whether the resource represented by this instance should be kept if it
+   * already exists when the Flow is started.
+   *
+   * @return boolean
+   */
+  public boolean isKeep()
+    {
+    return sinkMode == SinkMode.KEEP;
+    }
+
+  /**
    * Method isReplace indicates whether the resource represented by this instance should be deleted if it
-   * already exists when the tap is initialized.
+   * already exists when the Flow is started.
    *
    * @return boolean
    */
@@ -360,9 +371,9 @@ public abstract class Tap implements FlowElement, Serializable
 
   /**
    * Method isAppend indicates whether the resrouce represented by this instance should be appended to if it already
-   * exists. Otherwise a new resource will be created.
+   * exists. Otherwise a new resource will be created when the Flow is started..
    *
-   * @return the append (type boolean) of this Tap object.
+   * @return boolean
    */
   public boolean isAppend()
     {
@@ -372,7 +383,7 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method isSink returns true if this Tap instance can be used as a sink.
    *
-   * @return the sink (type boolean) of this Tap object.
+   * @return boolean
    */
   public boolean isSink()
     {
@@ -382,7 +393,7 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method isSource returns true if this Tap instance can be used as a source.
    *
-   * @return the source (type boolean) of this Tap object.
+   * @return boolean
    */
   public boolean isSource()
     {
