@@ -46,7 +46,7 @@ public class Pipe implements FlowElement, Serializable
   /** Field previous */
   protected Pipe previous;
   /** Field debugTrace */
-  private String trace;
+  private String trace = Util.captureDebugTrace( getClass() );
 
   /**
    * Convenience method to create an array of Pipe instances.
@@ -61,14 +61,11 @@ public class Pipe implements FlowElement, Serializable
 
   protected Pipe()
     {
-    captureDebugTrace();
     }
 
   protected Pipe( Pipe previous )
     {
     this.previous = previous;
-
-    captureDebugTrace();
 
     verifyPipe();
     }
@@ -82,8 +79,6 @@ public class Pipe implements FlowElement, Serializable
   public Pipe( String name )
     {
     this.name = name;
-
-    captureDebugTrace();
     }
 
   /**
@@ -97,8 +92,6 @@ public class Pipe implements FlowElement, Serializable
     {
     this.name = name;
     this.previous = previous;
-
-    captureDebugTrace();
 
     verifyPipe();
     }
@@ -245,21 +238,5 @@ public class Pipe implements FlowElement, Serializable
   protected void printInternal( StringBuffer buffer, Scope scope )
     {
     buffer.append( getClass().getSimpleName() ).append( "('" ).append( getName() ).append( "')" );
-    }
-
-  protected void captureDebugTrace()
-    {
-    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-    for( int i = 3; i < stackTrace.length; i++ )
-      {
-      StackTraceElement stackTraceElement = stackTrace[ i ];
-
-      if( stackTraceElement.getClassName().startsWith( getClass().getPackage().getName() ) )
-        continue;
-
-      trace = stackTraceElement.toString();
-      break;
-      }
     }
   }

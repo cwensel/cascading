@@ -30,6 +30,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Util;
 
 /**
  * Class BaseOperation is the base class of predicate types that are applied to {@link Tuple} streams via
@@ -44,6 +45,8 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   protected Fields fieldDeclaration;
   /** Field numArgs */
   protected int numArgs = Operation.ANY;
+  /** Field trace */
+  protected String trace = Util.captureDebugTrace( getClass() );
 
   // initialize this operation based on its subclass
   {
@@ -135,6 +138,11 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   public int getNumArgs()
     {
     return numArgs;
+    }
+
+  public String getTrace()
+    {
+    return trace;
     }
 
   @Override

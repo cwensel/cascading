@@ -23,6 +23,7 @@ package cascading.operation.assertion;
 
 import cascading.operation.AssertionException;
 import cascading.operation.BaseOperation;
+import cascading.util.Util;
 
 /**
  * Class BaseAssertion is a convenience class for {@link cascading.operation.Assertion} implementations. Subclassing
@@ -64,12 +65,12 @@ public abstract class BaseAssertion<C> extends BaseOperation<C>
 
   protected void fail()
     {
-    throwFail( getMessage() );
+    throwFail( Util.formatTrace( this, getMessage() ) );
     }
 
   protected void fail( Object... args )
     {
-    throwFail( getMessage(), args );
+    throwFail( Util.formatTrace( this, getMessage() ), args );
     }
 
   /**

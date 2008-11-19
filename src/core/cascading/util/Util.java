@@ -39,6 +39,8 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
 import cascading.pipe.Pipe;
+import cascading.operation.Operation;
+import cascading.operation.BaseOperation;
 import org.apache.commons.codec.binary.Base64;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
@@ -339,5 +341,35 @@ public class Util
       return message;
 
     return "[" + trace + "] " + message;
+    }
+
+  public static String formatTrace( Operation operation, String message )
+    {
+    if( !( operation instanceof BaseOperation ) )
+      return message;
+
+    String trace = ( (BaseOperation) operation ).getTrace();
+
+    if( trace == null )
+      return message;
+
+    return "[" + trace + "] " + message;
+    }
+
+  public static String captureDebugTrace( Class type )
+    {
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+    for( int i = 3; i < stackTrace.length; i++ )
+      {
+      StackTraceElement stackTraceElement = stackTrace[ i ];
+
+      if( stackTraceElement.getClassName().startsWith( type.getPackage().getName() ) )
+        continue;
+
+      return stackTraceElement.toString();
+      }
+
+    return null;
     }
   }
