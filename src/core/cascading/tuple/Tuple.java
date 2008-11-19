@@ -24,7 +24,6 @@ package cascading.tuple;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -472,16 +471,24 @@ public class Tuple implements Comparable, Iterable, Serializable
     {
     verifyModifiable();
 
+    // calculate offsets to apply when removing values from elements
+    int offset[] = new int[pos.length];
+
+    for( int i = 0; i < pos.length; i++ )
+      {
+      offset[ i ] = 0;
+
+      for( int j = 0; j < i; j++ )
+        {
+        if( pos[ j ] < pos[ i ] )
+          offset[ i ]++;
+        }
+      }
+
     Tuple results = new Tuple();
 
-    for( int i : pos )
-      results.add( elements.get( i ) );
-
-    int[] copy = Arrays.copyOf( pos, pos.length );
-    Arrays.sort( copy );
-
-    for( int i = 0; i < copy.length; i++ )
-      elements.remove( copy[ copy.length - i - 1 ] );
+    for( int i = 0; i < pos.length; i++ )
+      results.add( elements.remove( pos[ i ] - offset[ i ] ) );
 
     return results;
     }
