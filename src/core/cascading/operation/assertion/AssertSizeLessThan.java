@@ -29,7 +29,7 @@ import cascading.tuple.TupleEntry;
 /**
  * Class AssertSizeLessThan asserts that the current {@link cascading.tuple.Tuple} in the stream has a size less than (&lt;) the given size.
  * </p>
- * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values.
+ * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values).
  */
 public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion
   {

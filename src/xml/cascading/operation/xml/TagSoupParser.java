@@ -43,7 +43,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
 /**
- * Class TagSoupParser used the <a href="http://home.ccil.org/~cowan/XML/tagsoup/">Tag Soup</a> library to convert
+ * Class TagSoupParser uses the <a href="http://home.ccil.org/~cowan/XML/tagsoup/">Tag Soup</a> library to convert
  * incoming HTML to clean XHTML.
  */
 public class TagSoupParser extends BaseOperation implements Function

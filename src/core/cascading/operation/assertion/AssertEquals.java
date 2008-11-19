@@ -27,8 +27,8 @@ import cascading.operation.ValueAssertionCall;
 import cascading.tuple.Tuple;
 
 /**
- * Class AssertEquals either asserts the number of constructor values is equal
- * to the number of arguments to the assertion and each value is equal to its corresponding argument.
+ * Class AssertEquals asserts the number of constructor values is equal
+ * to the number of argument values {@link Tuple} and each constructor value is {@code .equals()} to its corresponding argument value.
  */
 public class AssertEquals extends BaseAssertion implements ValueAssertion
   {

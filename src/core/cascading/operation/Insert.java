@@ -43,7 +43,7 @@ public class Insert extends BaseOperation implements Function
     this.values = new Tuple( values );
 
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != values.length )
-      throw new IllegalArgumentException( "fieldDeclaratin must be the same size as the given values" );
+      throw new IllegalArgumentException( "fieldDeclaration must be the same size as the given values" );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess, FunctionCall) */

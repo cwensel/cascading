@@ -29,7 +29,7 @@ import cascading.operation.OperationCall;
 
 /**
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
- * instances.
+ * instance.
  * <p/>
  * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for the given instance,
  * this filter will return the opposite, {@code false}.

@@ -15,21 +15,44 @@ General Information:
   and executing via 'hadoop jar your.jar <your args>'. Hadoop will unpack the jar and add any libraries in 'lib' to the
   classpath.
 
-  This ant task works quite well:
+  This ant snippet works quite well:
 
-    <target name="jar" depends="build">
+  <property name="cascading.home" location="${basedir}/../cascading"/>
+  <property file="${cascading.home}/version.properties"/>
+  <property name="cascading.release.version" value="x.y.z"/>
+  <property name="cascading.filename.core" value="cascading-core-${cascading.release.version}.jar"/>
+  <property name="cascading.filename.xml" value="cascading-xml-${cascading.release.version}.jar"/>
+  <property name="cascading.libs" value="${cascading.home}/lib"/>
+  <property name="cascading.libs.core" value="${cascading.libs}"/>
+  <property name="cascading.libs.xml" value="${cascading.libs}/xml"/>
 
-      <unjar dest="${build.classes}" src="${cascading.lib}"/>
+  <condition property="cascading.path" value="${cascading.home}/"
+             else="${cascading.home}/build">
+    <available file="${cascading.home}/${cascading.filename.core}"/>
+  </condition>
 
-      <jar jarfile="${build.dir}/${ant.project.name}.jar">
-        <fileset dir="${build.classes}"/>
-        <fileset dir="${basedir}" includes="lib/"/>
-        <manifest>
-          <attribute name="Main-Class" value="${ant.project.name}/Main"/>
-        </manifest>
-      </jar>
+  <property name="cascading.lib.core" value="${cascading.path}/${cascading.filename.core}"/>
+  <property name="cascading.lib.xml" value="${cascading.path}/${cascading.filename.xml}"/>
 
-    </target>
+  <target name="jar" depends="build" description="creates a Hadoop ready jar will all dependencies">
+
+    <!-- copy Cascading classes and libraries -->
+    <copy todir="${build.classes}/lib" file="${cascading.lib.core}"/>
+    <copy todir="${build.classes}/lib" file="${cascading.lib.xml}"/>
+    <copy todir="${build.classes}/lib">
+      <fileset dir="${cascading.libs.core}" includes="*.jar"/>
+      <fileset dir="${cascading.libs.xml}" includes="*.jar"/>
+    </copy>
+
+    <jar jarfile="${build.dir}/${ant.project.name}.jar">
+      <fileset dir="${build.classes}"/>
+      <fileset dir="${basedir}" includes="lib/"/>
+      <manifest>
+        <attribute name="Main-Class" value="${ant.project.name}/Main"/>
+      </manifest>
+    </jar>
+
+  </target>
 
   Where the 'cascading.lib' property points to the cascading.jar. Remember cascading.jar already has a 'lib' folder
   embedded in it.
@@ -50,3 +73,7 @@ License:
 
   You should have received a copy of the GNU General Public License
   along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+
+Third-party Licenses:
+
+  All third-party licenses are included in the 'lib' folder and subfolders.

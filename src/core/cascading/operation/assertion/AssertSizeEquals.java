@@ -29,7 +29,7 @@ import cascading.tuple.TupleEntry;
 /**
  * Class AssertSizeEquals asserts that the current {@link cascading.tuple.Tuple} in the stream is exactly the given size.
  * </p>
- * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values.
+ * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values).
  */
 public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
   {
