@@ -79,10 +79,10 @@ public class Flow implements Runnable
 
   /** Field name */
   private String name;
-  /** Field skipIfSourceExists */
-  private boolean skipIfSinkExists = false;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
+  /** Field skipStrategy */
+  private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkStale();
   /** Field flowStats */
   private final FlowStats flowStats = new FlowStats(); // don't use a listener to set values
   /** Field sources */
@@ -395,53 +395,48 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method isSkipIfSinkExists returns the skipIfSinkExists of this Flow object.
+   * Method getFlowSkipStrategy returns the current {@link cascading.flow.FlowSkipStrategy} used by this Flow.
    *
-   * @return the skipIfSinkExists (type boolean) of this Flow object.
+   * @return FlowSkipStrategy
    */
-  public boolean isSkipIfSinkExists()
+  public FlowSkipStrategy getFlowSkipStrategy()
     {
-    return skipIfSinkExists;
+    return flowSkipStrategy;
     }
 
   /**
-   * Method setSkipIfSinkExists sets the skipIfSinkExists of this Flow object. Defaults to false. Set to
-   * true if this Flow instance should complete immediately if the {@link Tap#pathExists(JobConf)} returns true.
+   * Method setFlowSkipStrategy sets a new {@link cascading.flow.FlowSkipStrategy}, the current strategy is returned.
    * <p/>
-   * If {@link Tap#isReplace()} returns true, this Flow instance will execute after deleting
-   * the Tap resource.
+   * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link cascading.flow.FlowSkipIfSinkStale}.
+   * An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
+   * <p/>
+   * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start(org.apache.hadoop.mapred.JobConf)}
    *
-   * @param skipIfSinkExists the skipIfSinkExists of this Flow object.
+   * @param flowSkipStrategy
+   * @return FlowSkipStrategy
    */
-  public void setSkipIfSinkExists( boolean skipIfSinkExists )
+  public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
     {
-    this.skipIfSinkExists = skipIfSinkExists;
+    try
+      {
+      return this.flowSkipStrategy;
+      }
+    finally
+      {
+      this.flowSkipStrategy = flowSkipStrategy;
+      }
     }
 
   /**
    * Method isSkipFlow returns true if the parent {@link Cascade} should skip this Flow instance. True is returned
-   * if isSkipIfSinkExists returns true and any of the sinks exist and are not
-   * {@link Tap#isReplace()}. Or is the sinks are newer than the sources.
+   * if the current {@link cascading.flow.FlowSkipStrategy} returns true.
    *
    * @return the skipFlow (type boolean) of this Flow object.
    * @throws IOException when
    */
   public boolean isSkipFlow() throws IOException
     {
-    long sinkModified = getSinkModified();
-
-    if( sinkModified <= 0 ) // do not skip, sinks don't exist
-      return false;
-
-    if( isSkipIfSinkExists() ) // skip, even if sink is older
-      {
-      if( LOG.isInfoEnabled() )
-        logInfo( "flow is marked for skip if sink exists" );
-
-      return true;
-      }
-
-    return !areSourcesNewer( sinkModified ); // skip if sinks are not stale
+    return flowSkipStrategy.skipFlow( this );
     }
 
   /**

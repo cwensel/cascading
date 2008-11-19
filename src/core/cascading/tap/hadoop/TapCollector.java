@@ -89,7 +89,6 @@ public class TapCollector extends TupleCollector implements OutputCollector
     if( !tap.makeDirs( conf ) ) // required
       throw new TapException( "unable to make dirs for: " + tap.toString() );
 
-
     OutputFormat outputFormat = conf.getOutputFormat();
 
     Path outputPath = FileOutputFormat.getOutputPath( conf );

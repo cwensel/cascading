@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Added c.f.FlowSkipStrategy interface to allow for pluggable rules for when to skip executing a c.f.Flow participating
+  in a c.c.Cascade. The default implementation is c.f.FlowSkipIfSinkStale, with an optional c.f.FlowSkipIfSinkExists.
+
   Fixed bug with c.t.Tuple#remove() method not correctly removing values from Tuple.
 
   Updated c.t.Tap api to support c.t.SinkMode enums. This opens up ability to support appends in the near future.
