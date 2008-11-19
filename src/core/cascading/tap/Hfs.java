@@ -125,7 +125,7 @@ public class Hfs extends Tap
    */
   public Hfs( Fields sourceFields, String stringPath, boolean replace )
     {
-    super( new SequenceFile( sourceFields ), replace ? SinkMode.Replace : SinkMode.Keep );
+    super( new SequenceFile( sourceFields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
     }
 
@@ -163,7 +163,7 @@ public class Hfs extends Tap
    */
   public Hfs( Scheme scheme, String stringPath, boolean replace )
     {
-    super( scheme, replace ? SinkMode.Replace : SinkMode.Keep );
+    super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
     }
 

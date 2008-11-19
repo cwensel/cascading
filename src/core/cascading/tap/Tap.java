@@ -65,7 +65,7 @@ public abstract class Tap implements FlowElement, Serializable
   /** Field writeDirect */
   boolean useTapCollector = false;
   /** Field mode */
-  SinkMode sinkMode = SinkMode.Keep;
+  SinkMode sinkMode = SinkMode.KEEP;
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -92,7 +92,7 @@ public abstract class Tap implements FlowElement, Serializable
     this.scheme = scheme;
     this.sinkMode = sinkMode;
 
-    if( sinkMode == SinkMode.Append )
+    if( sinkMode == SinkMode.APPEND )
       throw new IllegalArgumentException( "appends are not supported" );
     }
 
@@ -355,7 +355,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public boolean isOverwrite()
     {
-    return sinkMode == SinkMode.Replace;
+    return sinkMode == SinkMode.REPLACE;
     }
 
   /**
@@ -366,7 +366,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public boolean isAppend()
     {
-    return sinkMode == SinkMode.Append;
+    return sinkMode == SinkMode.APPEND;
     }
 
   /**

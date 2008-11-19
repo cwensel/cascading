@@ -24,16 +24,16 @@ package cascading.tap;
 /**
  * Enum SinkMode identifies supported modes a Tap may utilize when used as a sink.
  * <p/>
- * Mode Keep is the default. Typically a failure will result if the resource exists and there is an attempt to
+ * Mode KEEP is the default. Typically a failure will result if the resource exists and there is an attempt to
  * write to it.
  * <p/>
- * Mode Replace will delete/remove the resource before any attempts to write.
+ * Mode REPLACE will delete/remove the resource before any attempts to write.
  * <p/>
- * Mode Append will attempt to append to the resource, if supported.
+ * Mode APPEND will attempt to append to the resource, if supported.
  */
 public enum SinkMode
   {
-    Keep,
-    Replace,
-    Append
+    KEEP,
+    REPLACE,
+    APPEND
   }
