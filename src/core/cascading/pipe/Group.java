@@ -654,7 +654,12 @@ public class Group extends Pipe
     for( Pipe pipe : pipes )
       {
       if( buffer.length() != 0 )
-        buffer.append( "+" );
+        {
+        if( isGroupBy )
+          buffer.append( "+" );
+        else
+          buffer.append( "*" ); // more semantically correct
+        }
 
       buffer.append( pipe.getName() );
       }
@@ -881,9 +886,9 @@ public class Group extends Pipe
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
-        incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
-      else
-        incomingFields = resolveFields( incomingScope ).select( selector );
+          incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+        else
+          incomingFields = resolveFields( incomingScope ).select( selector );
 
       resolvedFields.put( incomingScope.getName(), incomingFields );
       }
