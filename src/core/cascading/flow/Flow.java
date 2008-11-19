@@ -551,18 +551,6 @@ public class Flow implements Runnable
 
   /**
    * Method start begins the execution of this Flow instance. It will return immediately. Use the method {@link #complete()}
-   * to block until this Flow completes. The given JobConf instance will replace any previous value.
-   *
-   * @param jobConf of type JobConf
-   */
-  public void start( JobConf jobConf )
-    {
-    setJobConf( jobConf );
-    start();
-    }
-
-  /**
-   * Method start begins the execution of this Flow instance. It will return immediately. Use the method {@link #complete()}
    * to block until this Flow completes.
    */
   public synchronized void start()
