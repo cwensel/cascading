@@ -183,6 +183,8 @@
   <target name="test" depends="init, compile">
     <echo message="running all cascading tests..."/>
 
+    <mkdir dir="build/test/log"/>
+
     <junit printsummary="true" showoutput="${test.showoutput}" fork="yes" haltonerror="no" haltonfailure="no" dir="."
            maxmemory="756m">
 
