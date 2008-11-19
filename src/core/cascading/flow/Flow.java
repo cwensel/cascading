@@ -410,7 +410,8 @@ public class Flow implements Runnable
    * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link cascading.flow.FlowSkipIfSinkStale}.
    * An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
    * <p/>
-   * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start(org.apache.hadoop.mapred.JobConf)}
+   * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()} or {@link #complete()}. Only
+   * when the Flow is executed through a {@link Cascade} instance.
    *
    * @param flowSkipStrategy
    * @return FlowSkipStrategy

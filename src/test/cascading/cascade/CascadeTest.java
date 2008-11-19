@@ -31,6 +31,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowStep;
 import cascading.flow.LockingFlowListener;
+import cascading.flow.FlowSkipStrategy;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -117,6 +118,34 @@ public class CascadeTest extends ClusterTestCase
     cascade.complete();
 
     validateLength( fourth, 20 );
+    }
+
+  public void testSkippedCascade() throws IOException
+    {
+    copyFromLocal( inputFile );
+
+    String path = "skipped";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    cascade.setFlowSkipStrategy( new FlowSkipStrategy() {
+
+    public boolean skipFlow( Flow flow ) throws IOException
+      {
+      return true;
+      }
+    });
+
+    cascade.start();
+
+    cascade.complete();
+
+    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getJobConf() ) );
     }
 
   public void testSimpleCascadeStop() throws IOException, InterruptedException
