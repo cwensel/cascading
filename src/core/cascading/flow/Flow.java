@@ -408,7 +408,7 @@ public class Flow implements Runnable
    * Method setSkipIfSinkExists sets the skipIfSinkExists of this Flow object. Defaults to false. Set to
    * true if this Flow instance should complete immediately if the {@link Tap#pathExists(JobConf)} returns true.
    * <p/>
-   * If {@link Tap#isOverwrite()} returns true, this Flow instance will execute after deleting
+   * If {@link Tap#isReplace()} returns true, this Flow instance will execute after deleting
    * the Tap resource.
    *
    * @param skipIfSinkExists the skipIfSinkExists of this Flow object.
@@ -421,7 +421,7 @@ public class Flow implements Runnable
   /**
    * Method isSkipFlow returns true if the parent {@link Cascade} should skip this Flow instance. True is returned
    * if isSkipIfSinkExists returns true and any of the sinks exist and are not
-   * {@link Tap#isOverwrite()}. Or is the sinks are newer than the sources.
+   * {@link Tap#isReplace()}. Or is the sinks are newer than the sources.
    *
    * @return the skipFlow (type boolean) of this Flow object.
    * @throws IOException when
@@ -446,7 +446,7 @@ public class Flow implements Runnable
 
   /**
    * Method areSinksStale returns true if any of the sinks referenced are out of date in relation to the sources. Or
-   * if any sink method {@link Tap#isOverwrite()} returns true.
+   * if any sink method {@link Tap#isReplace()} returns true.
    *
    * @return boolean
    * @throws IOException when
@@ -494,7 +494,7 @@ public class Flow implements Runnable
    * Method getSinkModified returns the youngest modified date of any sink {@link Tap} managed by this Flow instance.
    * <p/>
    * If zero (0) is returned, atleast one of the sink resources does not exist. If minus one (-1) is returned,
-   * atleast one of the sinks are marked for delete ({@link Tap#isOverwrite() returns true}).
+   * atleast one of the sinks are marked for delete ({@link Tap#isReplace() returns true}).
    *
    * @return the sinkModified (type long) of this Flow object.
    * @throws IOException when
@@ -506,7 +506,7 @@ public class Flow implements Runnable
 
     for( Tap sink : sinks.values() )
       {
-      if( sink.isOverwrite() )
+      if( sink.isReplace() )
         sinkModified = -1L;
       else
         {

@@ -298,7 +298,7 @@ public class Hfs extends Tap
   public void sinkInit( JobConf conf ) throws IOException
     {
     // do not delete if initialized from within a task
-    if( isOverwrite() && conf.get( "mapred.task.partition" ) == null )
+    if( isReplace() && conf.get( "mapred.task.partition" ) == null )
       deletePath( conf );
 
     Path qualifiedPath = getQualifiedPath( conf );

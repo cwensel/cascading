@@ -348,12 +348,12 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract long getPathModified( JobConf conf ) throws IOException;
 
   /**
-   * Method isOverwrite indicates whether the resource represented by this instance should be deleted if it
+   * Method isReplace indicates whether the resource represented by this instance should be deleted if it
    * already exists when the tap is initialized.
    *
    * @return boolean
    */
-  public boolean isOverwrite()
+  public boolean isReplace()
     {
     return sinkMode == SinkMode.REPLACE;
     }
