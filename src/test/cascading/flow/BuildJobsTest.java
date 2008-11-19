@@ -1143,6 +1143,42 @@ public class BuildJobsTest extends CascadingTestCase
       }
     }
 
+  public void testErrorMessages() throws Exception
+    {
+    Tap source10 = new Hfs( new TextLine( new Fields( "num" ) ), "foo" );
+    Tap source20 = new Hfs( new TextLine( new Fields( "num" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "source20", source20 );
+    sources.put( "source101", source10 );
+    sources.put( "source102", source10 );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "baz", true );
+
+    Pipe pipeNum20 = new Pipe( "source20" );
+    Pipe pipeNum101 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source102" );
+
+    Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
+
+    Pipe splice2 = new CoGroup( splice1, new Fields( "num9" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
+
+    FlowConnector flowConnector = new FlowConnector();
+
+    try
+      {
+      Flow flow = flowConnector.connect( sources, sink, splice2 );
+      fail( "did not fail on bad field" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      assertTrue( "missing message", exception.getMessage().contains( "BuildJobsTest.testErrorMessages" ) );
+      }
+    }
+
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
     {

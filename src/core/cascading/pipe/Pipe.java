@@ -45,6 +45,8 @@ public class Pipe implements FlowElement, Serializable
   private String name;
   /** Field previous */
   protected Pipe previous;
+  /** Field debugTrace */
+  private String trace;
 
   /**
    * Convenience method to create an array of Pipe instances.
@@ -59,11 +61,14 @@ public class Pipe implements FlowElement, Serializable
 
   protected Pipe()
     {
+    captureDebugTrace();
     }
 
   protected Pipe( Pipe previous )
     {
     this.previous = previous;
+
+    captureDebugTrace();
 
     verifyPipe();
     }
@@ -77,6 +82,8 @@ public class Pipe implements FlowElement, Serializable
   public Pipe( String name )
     {
     this.name = name;
+
+    captureDebugTrace();
     }
 
   /**
@@ -90,6 +97,8 @@ public class Pipe implements FlowElement, Serializable
     {
     this.name = name;
     this.previous = previous;
+
+    captureDebugTrace();
 
     verifyPipe();
     }
@@ -175,6 +184,16 @@ public class Pipe implements FlowElement, Serializable
     throw new IllegalStateException( "resolveFields should never be called" );
     }
 
+  /**
+   * Method getTrace returns a String that pinpoint where this instance was created for debugging.
+   *
+   * @return String
+   */
+  public String getTrace()
+    {
+    return trace;
+    }
+
   @Override
   public String toString()
     {
@@ -226,5 +245,21 @@ public class Pipe implements FlowElement, Serializable
   protected void printInternal( StringBuffer buffer, Scope scope )
     {
     buffer.append( getClass().getSimpleName() ).append( "('" ).append( getName() ).append( "')" );
+    }
+
+  protected void captureDebugTrace()
+    {
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+    for( int i = 3; i < stackTrace.length; i++ )
+      {
+      StackTraceElement stackTraceElement = stackTrace[ i ];
+
+      if( stackTraceElement.getClassName().startsWith( getClass().getPackage().getName() ) )
+        continue;
+
+      trace = stackTraceElement.toString();
+      break;
+      }
     }
   }

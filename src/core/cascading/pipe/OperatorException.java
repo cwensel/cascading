@@ -22,12 +22,23 @@
 package cascading.pipe;
 
 import cascading.CascadingException;
+import cascading.util.Util;
 
-/** Class OperatorException ... */
+/** Class OperatorException is thrown during field name resolution during planning */
 public class OperatorException extends CascadingException
   {
   public OperatorException()
     {
+    }
+
+  public OperatorException( Pipe pipe, String string )
+    {
+    super( Util.formatTrace( pipe, string ) );
+    }
+
+  public OperatorException( Pipe pipe, String string, Throwable throwable )
+    {
+    super( Util.formatTrace( pipe, string ), throwable );
     }
 
   public OperatorException( String string )

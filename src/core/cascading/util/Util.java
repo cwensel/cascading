@@ -38,6 +38,7 @@ import java.util.Map;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
+import cascading.pipe.Pipe;
 import org.apache.commons.codec.binary.Base64;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
@@ -328,5 +329,15 @@ public class Util
     {
     while( list.remove( null ) )
       ;
+    }
+
+  public static String formatTrace( Pipe pipe, String message )
+    {
+    String trace = pipe.getTrace();
+
+    if( trace == null )
+      return message;
+
+    return "[" + trace + "] " + message;
     }
   }

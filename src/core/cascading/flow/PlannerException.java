@@ -22,6 +22,8 @@
 package cascading.flow;
 
 import org.jgrapht.graph.SimpleDirectedGraph;
+import cascading.pipe.Pipe;
+import cascading.util.Util;
 
 /**
  * Class PlannerException is thrown when a job planner fails.
@@ -39,6 +41,29 @@ public class PlannerException extends FlowException
   /** Constructor PlannerException creates a new PlannerException instance. */
   public PlannerException()
     {
+    }
+
+  /**
+   * Constructor PlannerException creates a new PlannerException instance.
+   *
+   * @param pipe of type Pipe
+   * @param string of type String
+   */
+  public PlannerException( Pipe pipe, String string )
+    {
+    super( Util.formatTrace( pipe, string ) );
+    }
+
+  /**
+   * Constructor PlannerException creates a new PlannerException instance.
+   *
+   * @param pipe     of type Pipe
+   * @param string    of type String
+   * @param throwable of type Throwable
+   */
+  public PlannerException( Pipe pipe, String string, Throwable throwable )
+    {
+    super( Util.formatTrace( pipe, string ), throwable );
     }
 
   /**

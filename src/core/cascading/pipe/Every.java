@@ -244,7 +244,7 @@ public class Every extends Operator
     Scope scope = getFirst( incomingScopes );
 
     if( scope.isEvery() && argumentSelector.contains( scope.getDeclaredFields() ) )
-      throw new OperatorException( "arguments may not select a declared field from a previous Every" );
+      throw new OperatorException( this, "arguments may not select a declared field from a previous Every" );
 
     Fields declared = resolveDeclared( incomingScopes, argumentSelector );
 

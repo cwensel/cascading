@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  c.p.Pipe instances now capture line numbers and classnames where they are instantiated so this information
+  can be printed out during planner failures.
+
   Added c.f.FlowSkipStrategy interface to allow for pluggable rules for when to skip executing a c.f.Flow participating
   in a c.c.Cascade. The default implementation is c.f.FlowSkipIfSinkStale, with an optional c.f.FlowSkipIfSinkExists.
   Setting a skip strategy on a Cascade overrides all Flow instance strategies.

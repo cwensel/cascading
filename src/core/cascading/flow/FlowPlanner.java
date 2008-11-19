@@ -127,12 +127,12 @@ public class FlowPlanner
         for( String tailName : ( (SubAssembly) pipe ).getTailNames() )
           {
           if( !names.contains( tailName ) )
-            throw new PlannerException( "pipe name not found in either sink or source map: " + tailName );
+            throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
           }
         }
       else if( !names.contains( pipe.getName() ) )
         {
-        throw new PlannerException( "pipe name not found in either sink or source map: " + pipe.getName() );
+        throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + pipe.getName() );
         }
       }
 
@@ -142,7 +142,7 @@ public class FlowPlanner
       for( Pipe head : pipe.getHeads() )
         {
         if( !names.contains( head.getName() ) )
-          throw new PlannerException( "pipe name not found in either sink or source map: " + head.getName() );
+          throw new PlannerException( head, "pipe name not found in either sink or source map: " + head.getName() );
         }
       }
     }
@@ -242,7 +242,7 @@ public class FlowPlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new PlannerException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( (Pipe) flowElement, "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             continue;
@@ -273,7 +273,7 @@ public class FlowPlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new PlannerException( "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( (Pipe) flowElement, "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             {
@@ -282,7 +282,7 @@ public class FlowPlanner
             boolean isBuffer = ( (Every) flowElement ).isBuffer();
 
             if( foundEveries != 0 && ( isBuffer || foundBuffer ) )
-              throw new PlannerException( "Only one Every Buffer may follow a Group pipe, found: " + flowElement + " before: " + last );
+              throw new PlannerException( (Pipe) flowElement, "Only one Every Buffer may follow a Group pipe, found: " + flowElement + " before: " + last );
 
             if( !foundBuffer )
               foundBuffer = isBuffer;

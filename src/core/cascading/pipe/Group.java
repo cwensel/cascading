@@ -855,7 +855,7 @@ public class Group extends Pipe
         Fields groupingField = iterator.next();
 
         if( groupingField.size() != size )
-          throw new OperatorException( "all grouping fields must be same size:" + toString() );
+          throw new OperatorException( this, "all grouping fields must be same size:" + toString() );
 
         size = groupingField.size();
         }
@@ -864,7 +864,7 @@ public class Group extends Pipe
       }
     catch( RuntimeException exception )
       {
-      throw new OperatorException( "could not resolve grouping selector in: " + this, exception );
+      throw new OperatorException( this, "could not resolve grouping selector in: " + this, exception );
       }
     }
 
@@ -877,7 +877,7 @@ public class Group extends Pipe
       Fields selector = selectors.get( incomingScope.getName() );
 
       if( selector == null )
-        throw new OperatorException( "no " + type + " selector found for: " + incomingScope.getName() );
+        throw new OperatorException( this, "no " + type + " selector found for: " + incomingScope.getName() );
 
       Fields incomingFields;
 
@@ -929,7 +929,7 @@ public class Group extends Pipe
       if( declaredFields != null ) // null for GroupBy
         {
         if( incomingScopes.size() != pipes.size() && repeat == 1 )
-          throw new OperatorException( "self joins without intermediate operators are not permitted, see 'repeat' constructor or identity function" );
+          throw new OperatorException( this, "self joins without intermediate operators are not permitted, see 'repeat' constructor or identity function" );
 
         int size = 0;
         boolean foundUnknown = false;
@@ -944,7 +944,7 @@ public class Group extends Pipe
 
         // we must relax field checking in the face of unkown fields
         if( !foundUnknown && declaredFields.size() != size * repeat )
-          throw new OperatorException( "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
 
         return declaredFields;
         }
@@ -961,7 +961,7 @@ public class Group extends Pipe
           if( commonFields == null )
             commonFields = fields;
           else if( !commonFields.equals( fields ) )
-            throw new OperatorException( "merged streams must declare the same field names, expected: " + commonFields.print() + " found: " + fields.print() );
+            throw new OperatorException( this, "merged streams must declare the same field names, expected: " + commonFields.print() + " found: " + fields.print() );
           }
 
         return commonFields;
