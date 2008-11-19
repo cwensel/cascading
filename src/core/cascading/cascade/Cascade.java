@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import cascading.CascadingException;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
+import cascading.flow.FlowSkipStrategy;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -74,6 +75,8 @@ public class Cascade implements Runnable
   private Map<String, Callable<Throwable>> jobsMap;
   /** Field stop */
   private boolean stop;
+  /** Field flowSkipStrategy */
+  private FlowSkipStrategy flowSkipStrategy = null;
 
   Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
     {
@@ -116,6 +119,16 @@ public class Cascade implements Runnable
       flows.add( topoIterator.next() );
 
     return flows;
+    }
+
+  public FlowSkipStrategy getFlowSkipStrategy()
+    {
+    return flowSkipStrategy;
+    }
+
+  public void setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
+    {
+    this.flowSkipStrategy = flowSkipStrategy;
     }
 
   /**

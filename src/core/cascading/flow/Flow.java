@@ -417,6 +417,9 @@ public class Flow implements Runnable
    */
   public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
     {
+    if( flowSkipStrategy == null )
+      throw new IllegalArgumentException( "flowSkipStrategy may not be null" );
+
     try
       {
       return this.flowSkipStrategy;
