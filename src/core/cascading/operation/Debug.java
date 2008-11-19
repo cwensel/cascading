@@ -28,8 +28,13 @@ import cascading.flow.FlowProcess;
 /**
  * Class Debug is a {@link Filter} that will never remove an item from a stream, but will print the Tuple to either
  * stdout or stderr.
+ * <p/>
+ * Currently, if printFields is true, they will print every 10 Tuples.
+ * <p/>
+ * The frequency that fields and tuples are printed can be set via {@link #setPrintFieldsEvery(int)} and
+ * {@link #setPrintTupleEvery(int)} methods, respectively.
  */
-public class Debug extends BaseOperation implements Filter
+public class Debug extends BaseOperation<Long> implements Filter<Long>
   {
   static public enum Output
     {
@@ -42,6 +47,11 @@ public class Debug extends BaseOperation implements Filter
   private String prefix = null;
   /** Field printFields */
   private boolean printFields = false;
+
+  /** Field printFieldsEvery */
+  private int printFieldsEvery = 10;
+  /** Field printTupleEvery */
+  private int printTupleEvery = 1;
 
   /**
    * Constructor Debug creates a new Debug instance that prints to stderr by default, and does not print
@@ -138,15 +148,68 @@ public class Debug extends BaseOperation implements Filter
     this.printFields = printFields;
     }
 
+  /**
+   * Method getPrintFieldsEvery returns the printFieldsEvery interval value of this Debug object.
+   *
+   * @return the printFieldsEvery (type int) of this Debug object.
+   */
+  public int getPrintFieldsEvery()
+    {
+    return printFieldsEvery;
+    }
+
+  /**
+   * Method setPrintFieldsEvery sets the printFieldsEvery interval value of this Debug object.
+   *
+   * @param printFieldsEvery the printFieldsEvery of this Debug object.
+   *
+   */
+  public void setPrintFieldsEvery( int printFieldsEvery )
+    {
+    this.printFieldsEvery = printFieldsEvery;
+    }
+
+  /**
+   * Method getPrintTupleEvery returns the printTupleEvery interval value of this Debug object.
+   *
+   * @return the printTupleEvery (type int) of this Debug object.
+   */
+  public int getPrintTupleEvery()
+    {
+    return printTupleEvery;
+    }
+
+  /**
+   * Method setPrintTupleEvery sets the printTupleEvery interval value of this Debug object.
+   *
+   * @param printTupleEvery the printTupleEvery of this Debug object.
+   *
+   */
+  public void setPrintTupleEvery( int printTupleEvery )
+    {
+    this.printTupleEvery = printTupleEvery;
+    }
+
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Long> operationCall )
+    {
+    super.prepare( flowProcess, operationCall );
+
+    operationCall.setContext( 0L );
+    }
+
   /** @see Filter#isRemove(cascading.flow.FlowProcess, FilterCall) */
-  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
+  public boolean isRemove( FlowProcess flowProcess, FilterCall<Long> filterCall )
     {
     PrintStream stream = output == Output.STDOUT ? System.out : System.err;
 
-    if( printFields )
+    if( printFields && filterCall.getContext() % printFieldsEvery == 0 )
       print( stream, filterCall.getArguments().getFields().print() );
 
-    print( stream, filterCall.getArguments().getTuple().print() );
+    if( filterCall.getContext() % printTupleEvery == 0 )
+      print( stream, filterCall.getArguments().getTuple().print() );
+
+    filterCall.setContext( filterCall.getContext() + 1 );
 
     return false;
     }

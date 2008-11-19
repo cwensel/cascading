@@ -180,7 +180,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       // generic
       verifyAssembly( pipes, sources, sinks, traps );
 
-      elementGraph = createElementGraph( pipes, sources, sinks );
+      elementGraph = createElementGraph( pipes, sources, sinks, traps );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );

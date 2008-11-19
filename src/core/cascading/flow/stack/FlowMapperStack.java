@@ -105,7 +105,7 @@ public class FlowMapperStack
 
       while( operator instanceof Each )
         {
-        Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+        Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
         stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Each) operator );
 
         incomingScope = step.getNextScope( operator );
@@ -125,7 +125,7 @@ public class FlowMapperStack
         {
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
 
-        Tap trap = step.getTrap( ( (Pipe) operator ).getName() );
+        Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
         stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope );
         }
       else if( operator instanceof Tap )

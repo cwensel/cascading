@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
@@ -68,7 +69,7 @@ public class FlowPlanner
     verifyTaps( traps, false, false );
 
     verifyPipeAssemblyEndPoints( sources, sinks, pipes );
-    verifyTraps( traps, pipes );
+    verifyTraps( traps, pipes, sources, sinks );
     }
 
   /**
@@ -77,11 +78,12 @@ public class FlowPlanner
    * @param pipes
    * @param sources
    * @param sinks
+   * @param traps
    * @return
    */
-  protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
+  protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
-    return new ElementGraph( pipes, sources, sinks, assertionLevel );
+    return new ElementGraph( pipes, sources, sinks, traps, assertionLevel );
     }
 
   /**
@@ -147,14 +149,10 @@ public class FlowPlanner
       }
     }
 
-  /**
-   * Method verifyTraps ...
-   *
-   * @param traps of type Map<String, Tap>
-   * @param pipes of type Pipe[]
-   */
-  protected void verifyTraps( Map<String, Tap> traps, Pipe[] pipes )
+  protected void verifyTraps( Map<String, Tap> traps, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
+    verifyTrapsNotSourcesSinks( traps, sources, sinks );
+
     Set<String> names = new HashSet<String>();
 
     collectNames( pipes, names );
@@ -182,6 +180,21 @@ public class FlowPlanner
         names.add( pipe.getName() );
 
       collectNames( SubAssembly.unwind( pipe.getPrevious() ), names );
+      }
+    }
+
+  private void verifyTrapsNotSourcesSinks( Map<String, Tap> traps, Map<String, Tap> sources, Map<String, Tap> sinks )
+    {
+    Collection<Tap> sourceTaps = sources.values();
+    Collection<Tap> sinkTaps = sinks.values();
+
+    for( Tap tap : traps.values() )
+      {
+      if( sourceTaps.contains( tap ) )
+        throw new PlannerException( "tap may not be used as both a trap and a source in the same Flow: " + tap );
+
+      if( sinkTaps.contains( tap ) )
+        throw new PlannerException( "tap may not be used as both a trap and a sink in the same Flow: " + tap );
       }
     }
 

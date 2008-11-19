@@ -34,6 +34,7 @@ import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.And;
+import cascading.operation.filter.Limit;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -49,6 +50,7 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
+import cascading.tap.Lfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
@@ -422,6 +424,31 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 0, null );
     }
 
+//  public void testLimitFilter() throws Exception
+//    {
+//    if( !new File( inputFileApache ).exists() )
+//      fail( "data file not found" );
+//
+//    copyFromLocal( inputFileApache );
+//
+//    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+//    Tap sink = new Lfs( new TextLine(), outputPath + "/limitfilter", true );
+//
+//    Pipe pipe = new Pipe( "test" );
+//
+//    Filter filter = new Limit( 7 );
+//
+//    pipe = new Each( pipe, new Fields( "line" ), filter );
+//
+//    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+//
+////    flow.writeDOT( "flow.dot" );
+//
+//    flow.complete();
+//
+//    validateLength( flow, 7, null );
+//    }
+//
   public void testCross() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )

@@ -23,6 +23,7 @@ package cascading;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -32,11 +33,13 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
+import cascading.pipe.GroupBy;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.cascade.Cascades;
 
 /**
  *
@@ -60,10 +63,10 @@ public class TrapTest extends ClusterTestCase
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "none/tap", true );
@@ -86,14 +89,14 @@ public class TrapTest extends ClusterTestCase
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     // always fail
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -116,20 +119,22 @@ public class TrapTest extends ClusterTestCase
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     // always fail
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/tap", true );
     Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/trap", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+//    flow.writeDOT( "traps.dot" );
 
     flow.complete();
 
@@ -161,18 +166,20 @@ public class TrapTest extends ClusterTestCase
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
     pipe = new Every( pipe, new TestFailAggregator( new Fields( "fail" ), failAt ), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + path + "/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + path + "/trap", true );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Map<String, Tap> traps = Cascades.tapsMap( "reduce", trap );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, traps, pipe );
 
     flow.complete();
 

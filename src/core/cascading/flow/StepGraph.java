@@ -24,6 +24,8 @@ package cascading.flow;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
@@ -59,6 +61,45 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     this();
 
     makeStepGraph( elementGraph, traps );
+
+    validateGraph( traps );
+    }
+
+  private void validateGraph( Map<String, Tap> traps )
+    {
+    verifyTrapsAreUnique( traps );
+
+    traps = new HashMap<String, Tap>( traps ); // make copy
+
+    TopologicalOrderIterator<FlowStep, Integer> iterator = getTopologicalIterator();
+
+    while( iterator.hasNext() )
+      {
+      FlowStep step = iterator.next();
+
+      verifyTraps( traps, step.mapperTraps );
+      verifyTraps( traps, step.reducerTraps );
+      }
+    }
+
+  private void verifyTrapsAreUnique( Map<String, Tap> traps )
+    {
+    for( Tap tap : traps.values() )
+      {
+      if( Collections.frequency( traps.values(), tap ) != 1 )
+        throw new PlannerException( "traps must be unique, cannot be reused on different branches: " + tap );
+      }
+    }
+
+  private void verifyTraps( Map<String, Tap> traps, Map<String, Tap> map )
+    {
+    for( String name : map.keySet() )
+      {
+      if( !traps.containsKey( name ) )
+        throw new PlannerException( "traps may not cross Map and Reduce boundaries: " + name );
+      else
+        traps.remove( name );
+      }
     }
 
   /**
@@ -141,6 +182,8 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
           step.graph.addVertex( lhs );
 
+          boolean onMapSide = true;
+
           for( Scope scope : scopes )
             {
             FlowElement rhs = elementGraph.getEdgeTarget( scope );
@@ -149,14 +192,21 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
             step.graph.addEdge( lhs, rhs, scope );
 
             if( rhs instanceof Group )
+              {
               step.group = (Group) rhs;
-
-            if( rhs instanceof Pipe ) // add relevant traps to step
+              onMapSide = false;
+              }
+            else if( rhs instanceof Pipe ) // add relevant traps to step
               {
               String name = ( (Pipe) rhs ).getName();
 
               if( traps.containsKey( name ) )
-                step.traps.put( name, traps.get( name ) );
+                {
+                if( onMapSide )
+                  step.mapperTraps.put( name, traps.get( name ) );
+                else
+                  step.reducerTraps.put( name, traps.get( name ) );
+                }
               }
 
             lhs = rhs;
@@ -180,6 +230,11 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
       }
 
     return count > 2;
+    }
+
+  public TopologicalOrderIterator<FlowStep, Integer> getTopologicalIterator()
+    {
+    return new TopologicalOrderIterator<FlowStep, Integer>( this );
     }
 
   }

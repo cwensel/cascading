@@ -62,8 +62,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   final Extent tail = new Extent( "tail" );
   /** Field resolved */
   private boolean resolved;
+  /** Field traps */
+  private Map<String, Tap> traps;
   /** Field assertionLevel */
   private AssertionLevel assertionLevel;
+
 
   ElementGraph()
     {
@@ -78,9 +81,10 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    * @param sinks          of type Map<String, Tap>
    * @param assertionLevel of type AssertionLevel
    */
-  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, AssertionLevel assertionLevel )
+  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, AssertionLevel assertionLevel )
     {
     super( Scope.class );
+    this.traps = traps;
     this.assertionLevel = assertionLevel;
 
     assembleGraph( pipes, sources, sinks );
@@ -136,6 +140,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     {
     ElementGraph copy = new ElementGraph();
     Graphs.addGraph( copy, this );
+
+    copy.traps = new HashMap<String, Tap>( this.traps );
 
     return copy;
     }
@@ -307,7 +313,45 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public void writeDOT( String filename )
     {
-    printElementGraph( filename, this );
+    printElementGraph( filename, this.copyWithTraps() );
+    }
+
+  private SimpleDirectedGraph<FlowElement, Scope> copyWithTraps()
+    {
+    ElementGraph copy = this.copyElementGraph();
+
+    copy.addTraps();
+
+    return copy;
+    }
+
+  private void addTraps()
+    {
+    DepthFirstIterator<FlowElement, Scope> iterator = getDepthFirstIterator();
+
+    while(iterator.hasNext())
+      {
+      FlowElement element = iterator.next();
+
+      if( !( element instanceof Pipe ) )
+        continue;
+
+      Pipe pipe = (Pipe) element;
+      Tap trap = traps.get( pipe.getName() );
+
+      if(trap == null)
+        continue;
+
+      addVertex( trap );
+
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "adding trap edge: " + pipe + " -> " + trap );
+
+      if( getEdge( pipe, trap ) != null )
+        continue;
+
+      addEdge( pipe, trap ).setName( pipe.getName() ); // name scope after previous pipe
+      }
     }
 
   protected void printElementGraph( String filename, SimpleDirectedGraph<FlowElement, Scope> graph )

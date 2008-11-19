@@ -89,14 +89,14 @@ public class BasicTrapTest extends CascadingTestCase
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     // always fail
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new Group( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -106,9 +106,9 @@ public class BasicTrapTest extends CascadingTestCase
     Map<String, Tap> sinks = new HashMap<String, Tap>();
     Map<String, Tap> traps = new HashMap<String, Tap>();
 
-    sources.put( "test", source );
-    sinks.put( "test", sink );
-    traps.put( "test", trap );
+    sources.put( "map", source );
+    sinks.put( "reduce", sink );
+    traps.put( "map", trap );
 
     new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
@@ -117,14 +117,14 @@ public class BasicTrapTest extends CascadingTestCase
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
-    Pipe pipe = new Pipe( "test" );
+    Pipe pipe = new Pipe( "map" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     pipe = new Pipe( "middle", pipe );
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new Group("reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -134,8 +134,8 @@ public class BasicTrapTest extends CascadingTestCase
     Map<String, Tap> sinks = new HashMap<String, Tap>();
     Map<String, Tap> traps = new HashMap<String, Tap>();
 
-    sources.put( "test", source );
-    sinks.put( "middle", sink );
+    sources.put( "map", source );
+    sinks.put( "reduce", sink );
     traps.put( "middle", trap );
 
     new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );

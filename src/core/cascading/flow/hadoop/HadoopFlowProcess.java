@@ -46,6 +46,7 @@ public class HadoopFlowProcess extends FlowProcess
   {
   /** Field jobConf */
   JobConf jobConf;
+  private boolean isMapper;
   /** Field reporter */
   Reporter reporter;
 
@@ -55,10 +56,11 @@ public class HadoopFlowProcess extends FlowProcess
    * @param flowSession of type FlowSession
    * @param jobConf     of type JobConf
    */
-  public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf )
+  public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf, boolean isMapper )
     {
     super( flowSession );
     this.jobConf = jobConf;
+    this.isMapper = isMapper;
     }
 
   /**
@@ -69,6 +71,36 @@ public class HadoopFlowProcess extends FlowProcess
   public JobConf getJobConf()
     {
     return jobConf;
+    }
+
+  /**
+   * Method isMapper returns true if this part of the FlowProcess is a MapReduce mapper. If false, it is a reducer.
+   *
+   * @return boolean
+   */
+  public boolean isMapper()
+    {
+    return isMapper;
+    }
+
+  public int getCurrentNumMappers()
+    {
+    return getJobConf().getNumMapTasks();
+    }
+
+  public int getCurrentNumReducers()
+    {
+    return getJobConf().getNumReduceTasks();
+    }
+
+  /**
+   * Method getCurrentTaskNum returns the task number of this task. Task 0 is the first task.
+   *
+   * @return int
+   */
+  public int getCurrentTaskNum()
+    {
+    return getJobConf().getInt( "mapred.task.partition", 0 );
     }
 
   /**

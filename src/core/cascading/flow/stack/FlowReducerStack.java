@@ -78,7 +78,7 @@ public class FlowReducerStack
     {
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
-    Tap trap = step.getTrap( ( (Pipe) step.group ).getName() );
+    Tap trap = step.getReducerTrap( ( (Pipe) step.group ).getName() );
 
     stackTail = new GroupReducerStackElement( flowProcess, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
 
@@ -89,7 +89,7 @@ public class FlowReducerStack
       List<Every.EveryHandler> allAggregators = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, step.traps, allAggregators );
+      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, step.reducerTraps, allAggregators );
 
       while( operator instanceof Every && !( (Every) operator ).isBuffer() )
         {
@@ -98,7 +98,7 @@ public class FlowReducerStack
 
         allAggregators.add( everyHandler );
 
-        trap = step.getTrap( ( (Pipe) operator ).getName() );
+        trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
         stackTail = new EveryAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
@@ -114,7 +114,7 @@ public class FlowReducerStack
         nextScope = step.getNextScope( operator );
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
 
-        trap = step.getTrap( ( (Pipe) operator ).getName() );
+        trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
         stackTail = new EveryBufferReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
@@ -124,7 +124,7 @@ public class FlowReducerStack
 
     while( operator instanceof Each )
       {
-      trap = step.getTrap( ( (Pipe) operator ).getName() );
+      trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
       stackTail = new EachReducerStackElement( stackTail, flowProcess, nextScope, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );

@@ -38,7 +38,8 @@ import java.util.Map;
 /**
  *
  */
-public class ClusterTestCase extends CascadingTestCase {
+public class ClusterTestCase extends CascadingTestCase
+  {
   public static final String CLUSTER_TESTING_PROPERTY = "test.cluster.enabled";
 
   transient private MiniDFSCluster dfs;
@@ -53,92 +54,110 @@ public class ClusterTestCase extends CascadingTestCase {
 
   private String logger;
 
-  public ClusterTestCase(String string, boolean enableCluster) {
-    super(string);
+  public ClusterTestCase( String string, boolean enableCluster )
+    {
+    super( string );
 
-    if (!enableCluster)
+    if( !enableCluster )
       this.enableCluster = false;
     else
-      this.enableCluster = Boolean.parseBoolean(System.getProperty(CLUSTER_TESTING_PROPERTY, Boolean.toString(enableCluster)));
+      this.enableCluster = Boolean.parseBoolean( System.getProperty( CLUSTER_TESTING_PROPERTY, Boolean.toString( enableCluster ) ) );
 
-    this.logger = System.getProperty("log4j.logger");
-  }
+    this.logger = System.getProperty( "log4j.logger" );
+    }
 
-  public ClusterTestCase(String string, boolean enableCluster, int numMapTasks, int numReduceTasks) {
-    this(string, enableCluster);
+  public ClusterTestCase( String string, boolean enableCluster, int numMapTasks, int numReduceTasks )
+    {
+    this( string, enableCluster );
     this.numMapTasks = numMapTasks;
     this.numReduceTasks = numReduceTasks;
-  }
+    }
 
-  public ClusterTestCase(String string) {
-    super(string);
-  }
+  public ClusterTestCase( String string )
+    {
+    super( string );
+    }
 
-  public ClusterTestCase() {
-  }
+  public ClusterTestCase()
+    {
+    }
 
-  public void setUp() throws IOException {
-    if (!enableCluster) {
+  public void setUp() throws IOException
+    {
+    if( !enableCluster )
+      {
       jobConf = new JobConf();
-    } else {
-      System.setProperty("test.build.data", "build");
-      System.setProperty("hadoop.log.dir", "build/test/log");
+      }
+    else
+      {
+      System.setProperty( "test.build.data", "build" );
+      new File("build/test/log").mkdirs();
+      System.setProperty( "hadoop.log.dir", "build/test/log" );
       Configuration conf = new Configuration();
 
-      dfs = new MiniDFSCluster(conf, 4, true, null);
+      dfs = new MiniDFSCluster( conf, 4, true, null );
       fileSys = dfs.getFileSystem();
-      mr = new MiniMRCluster(4, fileSys.getUri().toString(), 1);
+      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
 
       jobConf = mr.createJobConf();
 
-      jobConf.set("mapred.child.java.opts", "-Xmx512m");
-      jobConf.set("mapred.map.tasks.speculative.execution", "false");
-      jobConf.set("mapred.reduce.tasks.speculative.execution", "false");
+      jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
+      jobConf.set( "mapred.map.tasks.speculative.execution", "false" );
+      jobConf.set( "mapred.reduce.tasks.speculative.execution", "false" );
+      }
+
+    jobConf.setNumMapTasks( numMapTasks );
+    jobConf.setNumReduceTasks( numReduceTasks );
+
+    if( logger != null )
+      properties.put( "log4j.logger", logger );
+
+    MultiMapReducePlanner.setJobConf( properties, jobConf );
     }
 
-    jobConf.setNumMapTasks(numMapTasks);
-    jobConf.setNumReduceTasks(numReduceTasks);
+  public Map<Object, Object> getProperties()
+    {
+    return new HashMap<Object, Object>( properties );
+    }
 
-    if (logger != null)
-      properties.put("log4j.logger", logger);
-
-    MultiMapReducePlanner.setJobConf(properties, jobConf);
-  }
-
-  public Map<Object, Object> getProperties() {
-    return new HashMap<Object, Object>(properties);
-  }
-
-  protected void copyFromLocal(String inputFile) throws IOException {
-    if (!enableCluster)
+  protected void copyFromLocal( String inputFile ) throws IOException
+    {
+    if( !enableCluster )
       return;
 
-    Path path = new Path(inputFile);
+    Path path = new Path( inputFile );
 
-    if (!fileSys.exists(path))
-      FileUtil.copy(new File(inputFile), fileSys, path, false, jobConf);
-  }
+    if( !fileSys.exists( path ) )
+      FileUtil.copy( new File( inputFile ), fileSys, path, false, jobConf );
+    }
 
-  public void tearDown() throws IOException {
-    try {
-      if (fileSys != null)
+  public void tearDown() throws IOException
+    {
+    try
+      {
+      if( fileSys != null )
         fileSys.close();
-    }
-    catch (IOException exception) {
-    }
+      }
+    catch( IOException exception )
+      {
+      }
 
-    try {
-      if (dfs != null)
+    try
+      {
+      if( dfs != null )
         dfs.shutdown();
-    }
-    catch (Exception exception) {
-    }
+      }
+    catch( Exception exception )
+      {
+      }
 
-    try {
-      if (mr != null)
+    try
+      {
+      if( mr != null )
         mr.shutdown();
-    }
-    catch (Exception exception) {
+      }
+    catch( Exception exception )
+      {
+      }
     }
   }
-}

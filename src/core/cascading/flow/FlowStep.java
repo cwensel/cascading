@@ -75,8 +75,10 @@ public class FlowStep implements Serializable
   final Map<Tap, String> sources = new HashMap<Tap, String>();   // all sources and all sinks must have same scheme
   /** Field sink */
   Tap sink;
-  /** Field traps */
-  public final Map<String, Tap> traps = new HashMap<String, Tap>();
+  /** Field mapperTraps */
+  public final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
+  /** Field reducerTraps */
+  public final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
   /** Field tempSink */
   TempHfs tempSink; // used if we need to bypass
   /** Field group */
@@ -186,6 +188,12 @@ public class FlowStep implements Serializable
 
   private void initFromTraps( JobConf conf ) throws IOException
     {
+    initFromTraps( conf, mapperTraps );
+    initFromTraps( conf, reducerTraps );
+    }
+
+  private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
+    {
     if( !traps.isEmpty() )
       {
       JobConf trapConf = new JobConf( conf );
@@ -229,9 +237,14 @@ public class FlowStep implements Serializable
     return sink.openForRead( conf );
     }
 
-  public Tap getTrap( String name )
+  public Tap getMapperTrap( String name )
     {
-    return traps.get( name );
+    return mapperTraps.get( name );
+    }
+
+  public Tap getReducerTrap( String name )
+    {
+    return reducerTraps.get( name );
     }
 
   /**
