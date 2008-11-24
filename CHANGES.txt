@@ -1,8 +1,8 @@
 Cascading Change Log
 
-unreleased
+0.9.0
 
-  Updated c.o.Debug to allow for printing field names and tuple values in intervals. 
+  Updated c.o.Debug to allow for printing field names and tuple values in intervals.
 
   Changed planner to fail if traps are not contained within single Map or Reduce tasks. This prevents the chance of
   multiple tasks writing to the same output location. Hadoop only partially supports appends, so it is not currently
