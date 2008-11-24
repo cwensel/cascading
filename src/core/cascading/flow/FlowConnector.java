@@ -309,6 +309,29 @@ public class FlowConnector
     }
 
   /**
+   * Method connect links the named trap Taps, source and sink Tap to the given pipe assembly.
+   *
+   * @param name    of type String
+   * @param source  of type Tap
+   * @param sink    of type Tap
+   * @param traps   of type Map<String, Tap>
+   * @param pipe    of type Pipe
+   * @return Flow
+   */
+  public Flow connect( String name, Tap source, Tap sink, Map<String, Tap> traps, Pipe pipe )
+    {
+    Map<String, Tap> sources = new HashMap<String, Tap>();
+
+    sources.put( pipe.getHeads()[ 0 ].getName(), source );
+
+    Map<String, Tap> sinks = new HashMap<String, Tap>();
+
+    sinks.put( pipe.getName(), sink );
+
+    return connect( name, sources, sinks, traps, pipe );
+    }
+
+  /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
    * <p/>
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
