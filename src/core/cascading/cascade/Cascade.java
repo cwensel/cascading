@@ -121,6 +121,16 @@ public class Cascade implements Runnable
     return flows;
     }
 
+  public FlowSkipStrategy getFlowSkipStrategy()
+    {
+    return flowSkipStrategy;
+    }
+
+  public void setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
+    {
+    this.flowSkipStrategy = flowSkipStrategy;
+    }
+
   /**
    * Method getFlowSkipStrategy returns the current {@link cascading.flow.FlowSkipStrategy} used by this Flow.
    *
