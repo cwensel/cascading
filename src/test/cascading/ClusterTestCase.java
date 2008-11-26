@@ -42,12 +42,12 @@ public class ClusterTestCase extends CascadingTestCase
   {
   public static final String CLUSTER_TESTING_PROPERTY = "test.cluster.enabled";
 
-  transient private MiniDFSCluster dfs;
-  transient private FileSystem fileSys;
-  transient private MiniMRCluster mr;
-  transient private JobConf jobConf;
+  transient private static MiniDFSCluster dfs;
+  transient private static FileSystem fileSys;
+  transient private static MiniMRCluster mr;
+  transient private static JobConf jobConf;
+  transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
   transient private boolean enableCluster;
-  transient private Map<Object, Object> properties = new HashMap<Object, Object>();
 
   int numMapTasks = 4;
   int numReduceTasks = 1;
@@ -84,6 +84,9 @@ public class ClusterTestCase extends CascadingTestCase
 
   public void setUp() throws IOException
     {
+    if( jobConf != null )
+      return;
+
     if( !enableCluster )
       {
       jobConf = new JobConf();
@@ -133,31 +136,6 @@ public class ClusterTestCase extends CascadingTestCase
 
   public void tearDown() throws IOException
     {
-    try
-      {
-      if( fileSys != null )
-        fileSys.close();
-      }
-    catch( IOException exception )
-      {
-      }
-
-    try
-      {
-      if( dfs != null )
-        dfs.shutdown();
-      }
-    catch( Exception exception )
-      {
-      }
-
-    try
-      {
-      if( mr != null )
-        mr.shutdown();
-      }
-    catch( Exception exception )
-      {
-      }
+    // do nothing, let the jvm shut things down
     }
   }
