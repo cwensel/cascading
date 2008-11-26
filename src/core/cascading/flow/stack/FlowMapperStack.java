@@ -151,6 +151,9 @@ public class FlowMapperStack
 
       if( LOG.isDebugEnabled() )
         {
+        if( tuple == null )
+          LOG.debug( "map skipping key and value" );
+
         if( key instanceof Tuple )
           LOG.debug( "map key: " + ( (Tuple) key ).print() );
         else
@@ -158,6 +161,10 @@ public class FlowMapperStack
 
         LOG.debug( "map value: " + tuple.print() );
         }
+
+      // skip the key/value pair if null is returned from the source
+      if( tuple == null )
+        return;
 
       stacks[ i ].tail.setLastOutput( output );
 

@@ -22,18 +22,32 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.io.File;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import cascading.ClusterTestCase;
+import cascading.operation.regex.RegexSplitter;
+import cascading.operation.Identity;
+import cascading.pipe.Pipe;
+import cascading.pipe.Each;
+import cascading.scheme.TextLine;
 import cascading.flow.MultiMapReducePlanner;
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleIterator;
+import cascading.tuple.Tuple;
 
 /**
  *
  */
-public class TapTest extends ClusterTestCase
+public class TapTest extends ClusterTestCase implements Serializable
   {
+  private String inputFileComments = "build/test/data/comments+lower.txt";
+  String outputPath = "build/test/output/tap/";
+
   public TapTest()
     {
     super( "tap tests", true );
@@ -109,5 +123,57 @@ public class TapTest extends ClusterTestCase
     catch( Exception exception )
       {
       }
+    }
+
+  public class CommentScheme extends TextLine
+    {
+    public CommentScheme()
+      {
+      }
+
+    public CommentScheme( Fields sourceFields )
+      {
+      super( sourceFields );
+      }
+
+    @Override
+    public Tuple source( Object key, Object value )
+      {
+      if( value.toString().matches( "^\\s*#.*$" ) )
+        return null;
+
+      return super.source( key, value );
+      }
+    }
+
+  public void testNullsFromScheme() throws IOException
+    {
+    if( !new File( inputFileComments ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileComments );
+
+    Tap source = new Hfs( new CommentScheme( new Fields( "line" ) ), inputFileComments );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Identity() );
+
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/testnulls", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TupleIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1 a", iterator.next().get( 1 ) );
+
+    iterator.close();
+
+    // confirm the tuple iterator can handle nulls from the source
+    validateLength( flow.openSource(), 5 );
     }
   }

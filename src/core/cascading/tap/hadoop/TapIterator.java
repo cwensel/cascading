@@ -156,7 +156,8 @@ public class TapIterator implements TupleIterator
       {
       if( reader.next( key, value ) )
         {
-        currentTuple = tap.getScheme().source( key, value );
+        currentTuple = tap.source( key, value );
+        getNextTuple(); // handles case where currentTuple is returned null from the source
         }
       else if( currentSplit < splits.length - 1 )
         {

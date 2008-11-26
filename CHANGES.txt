@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased
 
+  Changed Cascading to support null values returned from c.t.Tap#source() and subsequently c.t.Scheme#source().
+  This allows for Schemes to skip records returned by an internal Hadoop InputFormat without having to implement
+  a custom Hadoop InputFormat or instrument a pipe assembly with a c.o.Filter.
+
 0.9.0
 
   Updated c.o.Debug to allow for printing field names and tuple values in intervals.
