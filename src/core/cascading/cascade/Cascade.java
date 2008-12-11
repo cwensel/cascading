@@ -158,41 +158,6 @@ public class Cascade implements Runnable
     }
 
   /**
-   * Method getFlowSkipStrategy returns the current {@link cascading.flow.FlowSkipStrategy} used by this Flow.
-   *
-   * @return FlowSkipStrategy
-   */
-  public FlowSkipStrategy getFlowSkipStrategy()
-    {
-    return flowSkipStrategy;
-    }
-
-  /**
-   * Method setFlowSkipStrategy sets a new {@link cascading.flow.FlowSkipStrategy}, the current strategy, if any, is returned.
-   * If a strategy is given, it will be used as the strategy for all {@link Flow} instances managed by this Cascade instance.
-   * To revert back to consulting the strategies associated with each Flow instance, re-set this value to {@code null}, its
-   * default value.
-   * <p/>
-   * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link cascading.flow.FlowSkipIfSinkStale}
-   * and is inherited from the Flow instance in question. An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
-   * <p/>
-   * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()}
-   * @param flowSkipStrategy
-   * @return FlowSkipStrategy
-   */
-  public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
-    {
-    try
-      {
-      return this.flowSkipStrategy;
-      }
-    finally
-      {
-      this.flowSkipStrategy = flowSkipStrategy;
-      }
-    }
-
-  /**
    * Method start begins the current Cascade process. It returns immediately. See method {@link #complete()} to block
    * until the Cascade completes.
    */
