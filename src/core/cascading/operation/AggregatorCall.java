@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -53,11 +53,11 @@ public interface AggregatorCall<C> extends OperationCall<C>
   TupleEntry getArguments();
 
   /**
-   * Returns the {@link TupleCollector} used to emit result values.
+   * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values.
    * <p/>
    * Will return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowProcess, AggregatorCall)}.
    *
    * @return TupleCollector
    */
-  TupleCollector getOutputCollector();
+  TupleEntryCollector getOutputCollector();
   }

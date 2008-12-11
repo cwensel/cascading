@@ -25,9 +25,9 @@ import java.io.IOException;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -76,12 +76,12 @@ public abstract class SourceTap extends Tap
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
 
-  public TupleIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
     }
 
-  public TupleCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

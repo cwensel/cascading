@@ -23,7 +23,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 
 /** Interface BufferCall provides access to the current {@link cascading.operation.Buffer} invocation arguments. */
@@ -46,9 +46,9 @@ public interface BufferCall<C> extends OperationCall<C>
 
 
   /**
-   * Returns the {@link cascading.tuple.TupleCollector} used to emit result values. Zero or more entries may be emitted.
+   * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values. Zero or more entries may be emitted.
    *
    * @return TupleCollector
    */
-  TupleCollector getOutputCollector();
+  TupleEntryCollector getOutputCollector();
   }

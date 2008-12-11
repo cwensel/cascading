@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import junit.framework.TestCase;
 
 /**
@@ -48,11 +49,11 @@ public class CascadingTestCase extends TestCase
 
   protected void validateLength( Flow flow, int length, String name ) throws IOException
     {
-    TupleIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
+    TupleEntryIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
     validateLength( iterator, length );
     }
 
-  protected void validateLength( TupleIterator iterator, int length )
+  protected void validateLength( TupleEntryIterator iterator, int length )
     {
     int count = 0;
     while( iterator.hasNext() )

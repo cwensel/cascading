@@ -44,25 +44,38 @@ import cascading.tuple.TupleEntry;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class AssertExpression extends ExpressionOperation implements ValueAssertion
+public class AssertExpression extends ExpressionOperation implements ValueAssertion<ExpressionOperation.Context>
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
    * @param expression     of type String
+   * @param parameterType of type Class
+   */
+  public AssertExpression( String expression, Class parameterType )
+    {
+    super( Fields.ALL, expression, parameterType );
+    }
+
+  /**
+   * Constructor AssertExpression creates a new AssertExpression instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param expression of type String
+   * @param parameterNames of type String[]
    * @param parameterTypes of type Class[]
    */
-  public AssertExpression( String expression, Class... parameterTypes )
+  public AssertExpression( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
-    super( Fields.ALL, expression, parameterTypes );
+    super( fieldDeclaration, expression, parameterNames, parameterTypes );
     }
 
   /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
-  public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
+  public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Context> assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();
 
-    if( !(Boolean) evaluate( input ) )
+    if( !(Boolean) evaluate( assertionCall.getContext(), input ) )
       BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
     }
   }

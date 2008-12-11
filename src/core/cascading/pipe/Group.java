@@ -42,10 +42,17 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
+import cascading.tuple.TupleException;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
-/** The base class for {@link GroupBy} and {@link CoGroup}. */
+/**
+ * The base class for {@link GroupBy} and {@link CoGroup}. This class should not be used directly.
+ *
+ * @see GroupBy
+ * @see CoGroup
+ */
 public class Group extends Pipe
   {
   /** Field LOG */
@@ -837,7 +844,7 @@ public class Group extends Pipe
     Fields declared = resolveDeclared( incomingScopes );
 
     // for Group, the outgoing fields are the same as those declared
-    return new Scope( getName(), declared, groupingSelectors, sortingSelectors, declared );
+    return new Scope( getName(), declared, groupingSelectors, sortingSelectors, declared, isGroupBy() );
     }
 
   Map<String, Fields> resolveGroupingSelectors( Set<Scope> incomingScopes )
@@ -934,17 +941,26 @@ public class Group extends Pipe
         int size = 0;
         boolean foundUnknown = false;
 
+        List<Fields> resolvedFields = new ArrayList<Fields>();
+
         for( Scope incomingScope : incomingScopes )
           {
           Fields fields = resolveFields( incomingScope );
 
           foundUnknown = foundUnknown || fields.isUnknown();
           size += fields.size();
+
+          resolvedFields.add( fields );
           }
 
         // we must relax field checking in the face of unkown fields
         if( !foundUnknown && declaredFields.size() != size * repeat )
-          throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.size() + " != size: " + size * repeat );
+          {
+          if( repeat != 1 )
+            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " != size: " + size * repeat );
+          else
+            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " resolved: " + Util.print( resolvedFields, "" ) );
+          }
 
         return declaredFields;
         }
@@ -973,14 +989,35 @@ public class Group extends Pipe
         for( Scope incomingScope : incomingScopes )
           scopesMap.put( incomingScope.getName(), incomingScope );
 
+        List<Fields> appendableFields = new ArrayList<Fields>();
+
+        for( Pipe pipe : pipes )
+          appendableFields.add( resolveFields( scopesMap.get( pipe.getName() ) ) );
+
         Fields appendedFields = new Fields();
 
-        // will throwFail on name collisions
-        for( Pipe pipe : pipes )
-          appendedFields = appendedFields.append( resolveFields( scopesMap.get( pipe.getName() ) ) );
+        try
+          {
+          // will throwFail on name collisions
+          for( Fields appendableField : appendableFields )
+            appendedFields = appendedFields.append( appendableField );
+          }
+        catch( TupleException exception )
+          {
+          String fields = "";
+
+          for( Fields appendableField : appendableFields )
+            fields += appendableField.print();
+
+          throw new OperatorException( this, "found duplicate field names in cogrouped tuple stream: " + fields, exception );
+          }
 
         return appendedFields;
         }
+      }
+    catch( OperatorException exception )
+      {
+      throw exception;
       }
     catch( RuntimeException exception )
       {

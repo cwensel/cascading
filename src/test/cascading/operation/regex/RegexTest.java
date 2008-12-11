@@ -113,11 +113,189 @@ public class RegexTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "foo-bar", tuple.get( 0 ) );
     }
 
-  public void testParser()
+  public void testParserDeclared()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 2 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    }
+
+  public void testParserDeclared2()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 2 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)" );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    }
+
+  public void testParserDeclared3()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+" );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "wrong tupel size", 1, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    }
+
+  public void testParserDeclared4()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "lhs" ), "\\S+\\s+\\S+" );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "wrong tupel size", 1, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "foo\tbar", tuple.get( 0 ) );
+    }
+
+  /** Contributed by gicode */
+  public void testParserDeclared5()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "bar" ), "^GET /foo\\?bar=([^\\&]+)&" );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "GET /foo?bar=z123&baz=2" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "wrong tuple size", 1, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "z123", tuple.get( 0 ) );
+    }
+
+  public void testParserDeclared6()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
+
+    RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+", new int[]{1} );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "wrong tupel size", 1, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    }
+
+
+  public void testParserUnknown()
     {
     TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
 
     RegexParser splitter = new RegexParser( Fields.UNKNOWN, "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    }
+
+  public void testParserUnknown2()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
+
+    RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+
+    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
+    operationCall.setOutputCollector( collector );
+    splitter.prepare( null, operationCall );
+    splitter.operate( null, operationCall );
+    splitter.cleanup( null, operationCall );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    }
+
+  public void testParserUnknown3()
+    {
+    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
+
+    RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)" );
 
     operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
     operationCall.setOutputCollector( collector );

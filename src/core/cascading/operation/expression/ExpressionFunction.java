@@ -43,27 +43,48 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class ExpressionFunction extends ExpressionOperation implements Function
+public class ExpressionFunction extends ExpressionOperation implements Function<ExpressionOperation.Context>
   {
   /**
    * Constructor ExpressionFunction creates a new ExpressionFunction instance.
+   * <p/>
+   * This constructor assumes all parameter are of the same type.
    *
    * @param fieldDeclaration of type Fields
    * @param expression       of type String
-   * @param parameterTypes   of type Class[]
+   * @param parameterType   of type Class
    */
-  public ExpressionFunction( Fields fieldDeclaration, String expression, Class... parameterTypes )
+  public ExpressionFunction( Fields fieldDeclaration, String expression, Class parameterType )
     {
-    super( fieldDeclaration, expression, parameterTypes );
+    super( fieldDeclaration, expression, parameterType );
+
+    if( fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
+    }
+
+  /**
+   * Constructor ExpressionFunction creates a new ExpressionFunction instance.
+   * <p/>
+   * This constructor expects all parameter type names to be declared with their types. Positional parameters must
+   * be named the same as in the given expression with the "$" sign prepended.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param expression of type String
+   * @param parameterNames of type String[]
+   * @param parameterTypes of type Class[]
+   */
+  public ExpressionFunction( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
+    {
+    super( fieldDeclaration, expression, parameterNames, parameterTypes );
 
     if( fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {
-    functionCall.getOutputCollector().add( new Tuple( evaluate( functionCall.getArguments() ) ) );
+    functionCall.getOutputCollector().add( new Tuple( evaluate( functionCall.getContext(), functionCall.getArguments() ) ) );
     }
 
   }

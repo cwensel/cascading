@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
  * <p/>
- * Set {@code deleteSinkOnInit} to true if the outputPath in the jobConf should be deleted before executing the MapReduce job.
+ * Set the parameter {@code deleteSinkOnInit} to {@code true} if the outputPath in the jobConf should be deleted before executing the MapReduce job.
  */
 public class MapReduceFlow extends Flow
   {
@@ -125,6 +125,8 @@ public class MapReduceFlow extends Flow
 
     Tap sink = getSinks().values().iterator().next();
     FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );
+
+    step.setParentFlowName( getName() );
 
     stepGraph.addVertex( step );
 

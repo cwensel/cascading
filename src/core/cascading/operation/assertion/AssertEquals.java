@@ -42,7 +42,8 @@ public class AssertEquals extends BaseAssertion implements ValueAssertion
    */
   public AssertEquals( Comparable... values )
     {
-    super( values.length, "argument tuple: %s was not equal to values: %s" );
+    // set to 1 if null, will fail immediately afterwards
+    super( values == null ? 1 : values.length, "argument tuple: %s was not equal to values: %s" );
 
     if( values == null )
       throw new IllegalArgumentException( "values may not be null" );

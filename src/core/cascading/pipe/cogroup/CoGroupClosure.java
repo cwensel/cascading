@@ -30,7 +30,9 @@ import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
-/** Class CoGroupClosure ... */
+/**
+ * Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams.
+ */
 public class CoGroupClosure extends GroupClosure
   {
   public static final String SPILL_THRESHOLD = "cascading.cogroup.spill.threshold";

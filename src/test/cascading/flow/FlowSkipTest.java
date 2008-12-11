@@ -22,39 +22,18 @@
 package cascading.flow;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Filter;
-import cascading.operation.Function;
-import cascading.operation.Identity;
-import cascading.operation.aggregator.Count;
-import cascading.operation.expression.ExpressionFunction;
-import cascading.operation.filter.And;
-import cascading.operation.function.UnGroup;
-import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
-import cascading.operation.regex.RegexSplitter;
-import cascading.operation.regex.Regexes;
 import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.Group;
-import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
-import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tap.SinkMode;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
 import cascading.ClusterTestCase;
-import cascading.TestAggregator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class FlowSkipTest extends ClusterTestCase

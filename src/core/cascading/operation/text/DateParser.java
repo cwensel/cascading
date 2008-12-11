@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -96,7 +97,7 @@ public class DateParser extends DateOperation implements Function
   public DateParser( Fields fieldDeclaration, int[] calendarFields, TimeZone zone, Locale locale, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString, zone, locale );
-    this.calendarFields = calendarFields;
+    this.calendarFields = Arrays.copyOf( calendarFields, calendarFields.length );
 
     if( fieldDeclaration.size() != calendarFields.length )
       throw new IllegalArgumentException( "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );

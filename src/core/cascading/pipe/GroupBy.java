@@ -151,6 +151,10 @@ public class GroupBy extends Group
    * <p/>
    * The assumption is that the first fields in all streams are logically the same field, which should be true
    * as merging assumes all incoming streams have the same fields in the same order.
+   * <p/>
+   * To get the best performance, choose a field(s) that has many unique values, by using the constructor that takes
+   * a groupFields argument. If the first field has few unqiue values, data will only be sent to that number of reducers,
+   * or less, in the cluster, making the reduce phase a larger bottleneck.
    *
    * @param pipes of type Pipe
    */

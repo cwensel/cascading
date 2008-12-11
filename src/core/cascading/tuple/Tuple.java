@@ -654,7 +654,7 @@ public class Tuple implements Comparable, Iterable, Serializable
       else if( lhs != null && rhs == null )
         return 1;
 
-      int c = lhs.compareTo( rhs );
+      int c = lhs.compareTo( rhs ); // guaranteed to not be null
       if( c != 0 )
         return c;
       }

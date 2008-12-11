@@ -193,6 +193,28 @@ public class Util
       }
     }
 
+  public static String print( Collection collection, String delim )
+    {
+    StringBuffer buffer = new StringBuffer();
+
+    print( buffer, collection, delim );
+
+    return buffer.toString();
+    }
+
+  public static void print( StringBuffer buffer, Collection collection, String delim )
+    {
+    for( Object s : collection )
+      {
+      if( buffer.length() != 0 )
+        buffer.append( delim );
+
+      buffer.append( "[" );
+      buffer.append( s );
+      buffer.append( "]" );
+      }
+    }
+
   /**
    * This method attempts to remove any username and password from the given url String.
    *
@@ -335,12 +357,15 @@ public class Util
 
   public static String formatTrace( Pipe pipe, String message )
     {
+    if( pipe == null )
+      return message;
+
     String trace = pipe.getTrace();
 
     if( trace == null )
       return message;
 
-    return "[" + trace + "] " + message;
+    return "[" + truncate( pipe.getName(), 25 ) + "][" + trace + "] " + message;
     }
 
   public static String formatTrace( Operation operation, String message )
@@ -371,5 +396,12 @@ public class Util
       }
 
     return null;
+    }
+
+  public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
+    {
+    DOTExporter dot = new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider );
+
+    dot.export( writer, graph );
     }
   }

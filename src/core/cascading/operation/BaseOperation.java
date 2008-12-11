@@ -36,7 +36,8 @@ import cascading.util.Util;
  * Class BaseOperation is the base class of predicate types that are applied to {@link Tuple} streams via
  * the {@link Each} or {@link Every} {@link Pipe}.
  * </p>
- * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, and {@link Assertion}.
+ * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer},
+ * and {@link Assertion}.
  */
 public abstract class BaseOperation<C> implements Serializable, Operation<C>
   {
@@ -44,7 +45,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   /** Field fieldDeclaration */
   protected Fields fieldDeclaration;
   /** Field numArgs */
-  protected int numArgs = Operation.ANY;
+  protected int numArgs = ANY;
   /** Field trace */
   protected String trace = Util.captureDebugTrace( getClass() );
 
@@ -140,6 +141,11 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
     return numArgs;
     }
 
+  /**
+   * Method getTrace returns the trace of this BaseOperation object.
+   *
+   * @return the trace (type String) of this BaseOperation object.
+   */
   public String getTrace()
     {
     return trace;
@@ -164,7 +170,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
     if( operation.getFieldDeclaration() != null )
       buffer.append( "[decl:" ).append( operation.getFieldDeclaration() ).append( "]" );
 
-    if( operation.getNumArgs() != Operation.ANY )
+    if( operation.getNumArgs() != ANY )
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
 
     return buffer.toString();
@@ -182,7 +188,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
     if( scope.getDeclaredFields() != null )
       buffer.append( "[decl:" ).append( scope.getDeclaredFields() ).append( "]" );
 
-    if( operation.getNumArgs() != Operation.ANY )
+    if( operation.getNumArgs() != ANY )
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
     }
 

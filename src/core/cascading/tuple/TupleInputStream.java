@@ -31,7 +31,7 @@ import org.apache.hadoop.io.WritableUtils;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * Class TupleInputStream is used internally to read Tuples from storage.
  */
 public class TupleInputStream extends DataInputStream
   {
@@ -122,12 +122,14 @@ public class TupleInputStream extends DataInputStream
       case 5:
         return WritableUtils.readVLong( this );
       case 6:
-        return readShort();
+        return readBoolean();
       case 7:
-        return readTuple();
+        return readShort();
       case 8:
-        return readTuplePair();
+        return readTuple();
       case 9:
+        return readTuplePair();
+      case 10:
         return readIndexTuple();
       default:
         return elementReader.read( type, this );

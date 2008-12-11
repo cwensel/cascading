@@ -29,8 +29,8 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.tap.Tap;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -39,7 +39,12 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-/** Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance. */
+/**
+ * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
+ * <p/>
+ * Note order is not significant when adding passing Flow instances to the {@link #connect(String, cascading.flow.Flow[])}
+ * method. This connector will order them based on their dependencies, if any.
+ */
 public class CascadeConnector
   {
   /** Field LOG */
@@ -99,23 +104,6 @@ public class CascadeConnector
       names[ i ] = flows[ i ].getName();
 
     return Util.join( names, "+" );
-    }
-
-  private Tap getRoots( SimpleDirectedGraph<Tap, Flow.FlowHolder> graph )
-    {
-    Tap rootTap = new RootTap();
-
-    graph.addVertex( rootTap );
-
-    Set<Tap> taps = graph.vertexSet();
-
-    for( Tap tap : taps )
-      {
-      if( !( tap instanceof RootTap ) && graph.inDegreeOf( tap ) == 0 )
-        graph.addEdge( rootTap, tap );
-      }
-
-    return rootTap;
     }
 
   private void makeTapGraph( SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph, Flow[] flows )
@@ -206,12 +194,12 @@ public class CascadeConnector
       return 0;
       }
 
-    public TupleIterator openForRead( JobConf conf ) throws IOException
+    public TupleEntryIterator openForRead( JobConf conf ) throws IOException
       {
       return null;
       }
 
-    public TupleCollector openForWrite( JobConf conf ) throws IOException
+    public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
       {
       return null;
       }

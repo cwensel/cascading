@@ -24,8 +24,8 @@ package cascading.flow;
 import java.io.IOException;
 
 import cascading.tap.Tap;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
@@ -46,7 +46,6 @@ public abstract class FlowProcess
   /** Field NULL is a noop implemenation of FlowSession. */
   public static FlowProcess NULL = new FlowProcess( FlowSession.NULL )
   {
-
   public Object getProperty( String key )
     {
     return null;
@@ -60,12 +59,12 @@ public abstract class FlowProcess
     {
     }
 
-  public TupleIterator openTapForRead( Tap tap ) throws IOException
+  public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
     return null;
     }
 
-  public TupleCollector openTapForWrite( Tap tap ) throws IOException
+  public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
     return null;
     }
@@ -138,7 +137,7 @@ public abstract class FlowProcess
    * @return TupleIterator
    * @throws java.io.IOException when there is a failure opening the resource
    */
-  public abstract TupleIterator openTapForRead( Tap tap ) throws IOException;
+  public abstract TupleEntryIterator openTapForRead( Tap tap ) throws IOException;
 
   /**
    * Method openTapForWrite returns a (@link TupleCollector} for the given Tap instance.
@@ -147,5 +146,5 @@ public abstract class FlowProcess
    * @return TupleCollector
    * @throws java.io.IOException when there is a failure opening the resource
    */
-  public abstract TupleCollector openTapForWrite( Tap tap ) throws IOException;
+  public abstract TupleEntryCollector openTapForWrite( Tap tap ) throws IOException;
   }

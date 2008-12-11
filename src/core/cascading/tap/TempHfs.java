@@ -121,7 +121,7 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public boolean isUseTapCollector()
+  public boolean isWriteDirect()
     {
     return false;
     }

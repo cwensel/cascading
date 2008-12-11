@@ -24,7 +24,8 @@ package cascading.flow;
 import java.io.IOException;
 
 /**
- *
+ * Class FlowSkipIfSinkExists is a {@link cascading.flow.FlowSkipStrategy} implementation that returns
+ * {@code true} if the Flow sink exists, regardless if it is stale or not.
  */
 public class FlowSkipIfSinkExists implements FlowSkipStrategy
   {

@@ -84,7 +84,7 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
 
     int taskNum = process.getCurrentTaskNum();
 
-    context.limit = (long) Math.floor( limit / numTasks );
+    context.limit = (long) Math.floor( (double) limit / (double) numTasks );
 
     long remainingLimit = limit % numTasks;
 

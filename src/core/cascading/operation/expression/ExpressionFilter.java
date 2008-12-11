@@ -25,6 +25,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Tuple;
+import cascading.tuple.Fields;
 import org.codehaus.janino.ExpressionEvaluator;
 
 /**
@@ -43,22 +44,34 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class ExpressionFilter extends ExpressionOperation implements Filter
+public class ExpressionFilter extends ExpressionOperation implements Filter<ExpressionOperation.Context>
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
    * @param expression     of type String
+   * @param parameterType of type Class
+   */
+  public ExpressionFilter( String expression, Class parameterType )
+    {
+    super( expression, parameterType );
+    }
+
+  /**
+   * Constructor ExpressionFilter creates a new ExpressionFilter instance.
+   *
+   * @param expression of type String
+   * @param parameterNames of type String[]
    * @param parameterTypes of type Class[]
    */
-  public ExpressionFilter( String expression, Class... parameterTypes )
+  public ExpressionFilter( String expression, String[] parameterNames, Class[] parameterTypes )
     {
-    super( expression, parameterTypes );
+    super( expression, parameterNames, parameterTypes );
     }
 
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
+  public boolean isRemove( FlowProcess flowProcess, FilterCall<Context> filterCall )
     {
-    return (Boolean) evaluate( filterCall.getArguments() );
+    return (Boolean) evaluate( filterCall.getContext(), filterCall.getArguments() );
     }
   }

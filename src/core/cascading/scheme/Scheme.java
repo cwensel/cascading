@@ -38,7 +38,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * <p/>
  * A Scheme defines the type of resource data will be sourced from or sinked to.
  * <p/>
- * The given fieldNames only label the values in the {@link Tuple}s as they are sourced.
+ * The given sourcFields only label the values in the {@link Tuple}s as they are sourced.
  * It does not necessarily filter the output since a given implemenation may choose to
  * collapse values and ignore keys depending on the format.
  * <p/>

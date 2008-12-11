@@ -31,8 +31,8 @@ import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleCollector;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
@@ -238,9 +238,9 @@ public class Hfs extends Tap
     }
 
   @Override
-  public boolean isUseTapCollector()
+  public boolean isWriteDirect()
     {
-    return super.isUseTapCollector() || stringPath != null && stringPath.matches( "(^https?://.*$)|(^s3tp://.*$)" );
+    return super.isWriteDirect() || stringPath != null && stringPath.matches( "(^https?://.*$)|(^s3tp://.*$)" );
     }
 
   protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
@@ -435,12 +435,12 @@ public class Hfs extends Tap
     return result;
     }
 
-  public TupleIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
     {
-    return new TapIterator( this, conf );
+    return new TupleEntryIterator( getSourceFields(), new TapIterator( this, conf ) );
     }
 
-  public TupleCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
     {
     return new TapCollector( this, conf );
     }

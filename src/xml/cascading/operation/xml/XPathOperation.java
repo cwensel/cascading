@@ -52,7 +52,7 @@ import org.w3c.dom.Node;
 public class XPathOperation extends BaseOperation
   {
   /** Field NAMESPACE_XHTML */
-  public static String[][] NAMESPACE_XHTML = new String[][]{new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};
+  public static final String[][] NAMESPACE_XHTML = new String[][]{new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};
 
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathOperation.class );

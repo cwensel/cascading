@@ -33,8 +33,8 @@ public interface ValueAssertion<C> extends Assertion<C>
   /**
    * Method doAssert performs the assertion.
    *
-   * @param flowProcess
-   * @param assertionCall
+   * @param flowProcess of type FlowProcess
+   * @param assertionCall of type ValueAssertionCall
    */
   void doAssert( FlowProcess flowProcess, ValueAssertionCall<C> assertionCall );
   }

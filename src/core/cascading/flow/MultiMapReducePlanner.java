@@ -34,6 +34,7 @@ import cascading.flow.hadoop.HadoopUtil;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
+import cascading.pipe.OperatorException;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
@@ -164,14 +165,14 @@ public class MultiMapReducePlanner extends FlowPlanner
   /**
    * Method buildFlow renders the actual Flow instance.
    *
-   * @param name    of type String
+   * @param flowName    of type String
    * @param pipes   of type Pipe[]
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
    * @param traps   of type Map<String, Tap>
    * @return Flow
    */
-  public Flow buildFlow( String name, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  public Flow buildFlow( String flowName, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     ElementGraph elementGraph = null;
 
@@ -199,20 +200,33 @@ public class MultiMapReducePlanner extends FlowPlanner
       elementGraph.resolveFields();
 
       // m/r specific
-      StepGraph stepGraph = new StepGraph( elementGraph, traps );
+      StepGraph stepGraph = new StepGraph( flowName, elementGraph, traps );
 
       // clone data
       sources = new HashMap<String, Tap>( sources );
       sinks = new HashMap<String, Tap>( sinks );
       traps = new HashMap<String, Tap>( traps );
 
-      return new Flow( properties, jobConf, name, elementGraph, stepGraph, sources, sinks, traps );
+      return new Flow( properties, jobConf, flowName, elementGraph, stepGraph, sources, sinks, traps );
       }
     catch( PlannerException exception )
       {
       exception.elementGraph = elementGraph;
 
       throw exception;
+      }
+    catch( ElementGraphException exception )
+      {
+      Throwable cause = exception.getCause();
+
+      // captures pipegraph for debugging
+      // forward message in case cause or trace is lost
+      String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
+
+      if(cause instanceof OperatorException )
+        throw new PlannerException( message, cause, elementGraph );
+
+      throw new PlannerException( (Pipe) exception.getFlowElement(), message, cause, elementGraph );
       }
     catch( Exception exception )
       {
@@ -440,7 +454,11 @@ public class MultiMapReducePlanner extends FlowPlanner
   private TempHfs makeTemp( Pipe pipe )
     {
     // must give Taps unique names
-    return new TempHfs( pipe.getName().replace( ' ', '_' ) + "/" + (int) ( Math.random() * 100000 ) + "/", intermediateSchemeClass );
+    String name = pipe.getName();
+
+    name = name.substring( 0, name.length() < 25 ? name.length() : 25 ).replaceAll( " |\\*|\\+", "_" );
+
+    return new TempHfs( name + "/" + (int) ( Math.random() * 100000 ) + "/", intermediateSchemeClass );
     }
 
   private Class getSchemeClass( Tap tap )

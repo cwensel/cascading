@@ -27,30 +27,47 @@ import cascading.util.Util;
 /** Class OperatorException is thrown during field name resolution during planning */
 public class OperatorException extends CascadingException
   {
+  /** @see cascading.CascadingException#CascadingException() */
   public OperatorException()
     {
     }
 
+  /**
+   * Constructor OperatorException creates a new OperatorException instance.
+   *
+   * @param pipe of type Pipe
+   * @param string of type String
+   */
   public OperatorException( Pipe pipe, String string )
     {
     super( Util.formatTrace( pipe, string ) );
     }
 
+  /**
+   * Constructor OperatorException creates a new OperatorException instance.
+   *
+   * @param pipe of type Pipe
+   * @param string of type String
+   * @param throwable of type Throwable
+   */
   public OperatorException( Pipe pipe, String string, Throwable throwable )
     {
     super( Util.formatTrace( pipe, string ), throwable );
     }
 
+  /** @see cascading.CascadingException#CascadingException(String) */
   public OperatorException( String string )
     {
     super( string );
     }
 
+  /** @see cascading.CascadingException#CascadingException(String, Throwable) */
   public OperatorException( String string, Throwable throwable )
     {
     super( string, throwable );
     }
 
+  /** @see cascading.CascadingException#CascadingException(Throwable) */
   public OperatorException( Throwable throwable )
     {
     super( throwable );

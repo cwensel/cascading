@@ -27,7 +27,7 @@ import java.util.Map;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
-/** Class Scope ... */
+/** Class Scope is an internal representation of the linkages between operations. */
 public class Scope implements Serializable
   {
   static public enum Kind
@@ -43,6 +43,7 @@ public class Scope implements Serializable
   private Fields argumentSelector;
   /** Field declaredFields */
   private Fields declaredFields; // fields declared by the operation
+  private boolean isGroupBy;
   /** Field groupingSelectors */
   private Map<String, Fields> groupingSelectors;
   /** Field sortingSelectors */
@@ -144,10 +145,11 @@ public class Scope implements Serializable
    * @param groupingSelectors of type Map<String, Fields>
    * @param outValuesFields   of type Fields
    */
-  public Scope( String name, Fields declaredFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields )
+  public Scope( String name, Fields declaredFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
     {
     this.name = name;
     this.kind = Kind.GROUP;
+    this.isGroupBy = isGroupBy;
 
     if( groupingSelectors == null )
       throw new IllegalArgumentException( "grouping may not be null" );
@@ -348,7 +350,7 @@ public class Scope implements Serializable
 
     Fields first = groupingSelectors.values().iterator().next();
 
-    if( groupingSelectors.size() == 1 )
+    if( groupingSelectors.size() == 1 || isGroup() && isGroupBy )
       return first;
 
     return Fields.size( first.size() );
@@ -382,6 +384,7 @@ public class Scope implements Serializable
   public void copyFields( Scope scope )
     {
     this.kind = scope.kind;
+    this.isGroupBy = scope.isGroupBy;
     this.argumentSelector = scope.argumentSelector;
     this.declaredFields = scope.declaredFields;
     this.groupingSelectors = scope.groupingSelectors;

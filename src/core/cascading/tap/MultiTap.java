@@ -52,7 +52,7 @@ public class MultiTap extends SourceTap
 
   public MultiTap( Tap... taps )
     {
-    this.taps = taps;
+    this.taps = Arrays.copyOf( taps, taps.length );
 
     verifyTaps();
     }
@@ -78,7 +78,7 @@ public class MultiTap extends SourceTap
    */
   public Tap[] getTaps()
     {
-    return taps;
+    return Arrays.copyOf( taps, taps.length );
     }
 
   /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
@@ -105,22 +105,10 @@ public class MultiTap extends SourceTap
     }
 
   @Override
-  public Fields getSourceFields()
-    {
-    return getScheme().getSourceFields();
-    }
-
-  @Override
   public void sourceInit( JobConf conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       tap.sourceInit( conf );
-    }
-
-  @Override
-  public Tuple source( Object key, Object value )
-    {
-    return getScheme().source( key, value );
     }
 
   public boolean pathExists( JobConf conf ) throws IOException

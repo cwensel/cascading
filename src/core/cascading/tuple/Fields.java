@@ -559,7 +559,7 @@ public final class Fields implements Comparable, Iterable, Serializable
   public int[] getPos()
     {
     if( thisPos != null )
-      return thisPos;
+      return thisPos; // do not clone
 
     if( isAll() || isUnknown() )
       thisPos = EMPTY_INT;

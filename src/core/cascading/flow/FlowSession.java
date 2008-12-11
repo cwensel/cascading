@@ -31,16 +31,25 @@ package cascading.flow;
  */
 public class FlowSession
   {
+  /** Field currentProcess  */
   private FlowProcess currentProcess;
 
   /** Field NULL is a noop implemenation of FlowSession. */
-  public static FlowSession NULL = new FlowSession();
+  public static final FlowSession NULL = new FlowSession();
 
 
+  /**
+   * Constructor FlowSession creates a new FlowSession instance.
+   */
   public FlowSession()
     {
     }
 
+  /**
+   * Constructor FlowSession creates a new FlowSession instance.
+   *
+   * @param currentProcess of type FlowProcess
+   */
   public FlowSession( FlowProcess currentProcess )
     {
     this.currentProcess = currentProcess;

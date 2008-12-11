@@ -26,7 +26,7 @@ import java.io.IOException;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,19 +34,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputCommitter;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
 /**
- * Class TapCollector is a kind of {@link TupleCollector} that writes tuples to the resource managed by
+ * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class TapCollector extends TupleCollector implements OutputCollector
+public class TapCollector extends TupleEntryCollector implements OutputCollector
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TapCollector.class );
@@ -63,8 +61,6 @@ public class TapCollector extends TupleCollector implements OutputCollector
   private Tap tap;
   /** Field outputEntry */
   private TupleEntry outputEntry;
-  private OutputCommitter outputCommitter;
-  private JobContext jobContext;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.

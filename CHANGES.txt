@@ -2,6 +2,29 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug with temporary filename generation where path created was too long.
+
+  Fixed Janino c.o.expression operations to require parameter names and types. Janino
+  was returning guessed parameter names in an undeterministic order.
+
+  Fixed boolean type c.t.Tuple serialization.
+
+  Fixed c.p.GroupBy merging case where grouping field names were not properly resolved.
+
+  Changed c.o.r.RegexParser to emit variable sized Tuples if a fieldDeclaration is not given. Also will emit group
+  matches if they are any, otherwise the match is emitted.
+
+  Removed deprecated classes; c.o.t.Texts, c.o.r.Regexes, c.p.EndPipe.
+
+  Removed experimental c.p.EndPipe class.
+
+  Changed c.t.Tap#isUseTapCollector to Tap#isWriteDirect.
+
+  Changed c.t.Tap and c.f.Flow to return c.t.TupleEntryIterator instead of c.t.TupleIterator. This is more consistent
+  and more useful.
+
+  Added c.t.TemplateTap to support dynamically writing out c.t.Tuple values to unique directories.
+
   Changed Cascading to support null values returned from c.t.Tap#source() and subsequently c.t.Scheme#source().
   This allows for Schemes to skip records returned by an internal Hadoop InputFormat without having to implement
   a custom Hadoop InputFormat or instrument a pipe assembly with a c.o.Filter.

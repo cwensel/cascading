@@ -96,7 +96,7 @@ public class S3Util
     else if( accessKey == null )
       throw new IllegalArgumentException( "AWS Access Key ID must be specified as the username of the given URI" );
     else if( secretAccessKey == null )
-      throw new IllegalArgumentException( "AWS Secret Access Key must be specified as the password of the given URI" );
+        throw new IllegalArgumentException( "AWS Secret Access Key must be specified as the password of the given URI" );
 
     return new String[]{accessKey, secretAccessKey};
     }
@@ -172,11 +172,11 @@ public class S3Util
       else if( type == Request.CREATE_DIR )
         return makeObject( s3Bucket, keyName, MIME_DIRECTORY, null );
       else if( type == Request.DETAILS )
-        return s3Service.getObjectDetails( s3Bucket, keyName );
-      else if( type == Request.OBJECT )
-        return s3Service.getObject( s3Bucket, keyName );
-      else
-        throw new IllegalArgumentException( "unrecognized request type: " + type );
+          return s3Service.getObjectDetails( s3Bucket, keyName );
+        else if( type == Request.OBJECT )
+            return s3Service.getObject( s3Bucket, keyName );
+          else
+            throw new IllegalArgumentException( "unrecognized request type: " + type );
       }
     catch( S3ServiceException exception )
       {
@@ -235,7 +235,7 @@ public class S3Util
 //    catch( UnsupportedEncodingException exception ) // for hadoop 0.18
     catch( Exception exception )
       {
-      throw new IOException( "could not create object: " + bucket.getName() + "/" + object.getKey() + " " + exception.getMessage() );
+      throw new IOException( "could not create object: " + bucket.getName() + "/" + keyName + " " + exception.getMessage() );
       }
 
     if( mimeType != null )

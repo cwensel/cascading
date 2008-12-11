@@ -49,6 +49,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleListCollector;
+import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
 public class BasicPipesTest extends CascadingTestCase
@@ -90,14 +91,14 @@ public class BasicPipesTest extends CascadingTestCase
     flow.start();
     flow.complete();
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
     Function splitter = new RegexSplitter( Fields.size( 2 ) );
 
     boolean found = false;
 
     while( iterator.hasNext() )
       {
-      Tuple tuple = iterator.next();
+      Tuple tuple = iterator.next().getTuple();
 
 //      System.out.println( "tuple = " + tuple );
 
@@ -218,7 +219,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     validateLength( countFlow, 5 );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );

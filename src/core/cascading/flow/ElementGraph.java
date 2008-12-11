@@ -35,14 +35,15 @@ import cascading.operation.AssertionLevel;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
+import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
+import cascading.util.Util;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
-import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
@@ -109,7 +110,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     if( vertexSet().isEmpty() )
       return;
 
-    // need to verify that only EndPipe instances are origins in this graph. Otherwise a Tap was not properly connected
+    // need to verify that only Extent instances are origins in this graph. Otherwise a Tap was not properly connected
     TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
 
     while( iterator.hasNext() )
@@ -306,16 +307,6 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return new DepthFirstIterator<FlowElement, Scope>( this, head );
     }
 
-  /**
-   * Method writeDOT writes this element graph to a DOT file for easy vizualization and debugging.
-   *
-   * @param filename of type String
-   */
-  public void writeDOT( String filename )
-    {
-    printElementGraph( filename, this.copyWithTraps() );
-    }
-
   private SimpleDirectedGraph<FlowElement, Scope> copyWithTraps()
     {
     ElementGraph copy = this.copyElementGraph();
@@ -329,7 +320,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     {
     DepthFirstIterator<FlowElement, Scope> iterator = getDepthFirstIterator();
 
-    while(iterator.hasNext())
+    while( iterator.hasNext() )
       {
       FlowElement element = iterator.next();
 
@@ -339,7 +330,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       Pipe pipe = (Pipe) element;
       Tap trap = traps.get( pipe.getName() );
 
-      if(trap == null)
+      if( trap == null )
         continue;
 
       addVertex( trap );
@@ -354,13 +345,40 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       }
     }
 
-  protected void printElementGraph( String filename, SimpleDirectedGraph<FlowElement, Scope> graph )
+  /**
+   * Method writeDOT writes this element graph to a DOT file for easy vizualization and debugging.
+   *
+   * @param filename of type String
+   */
+  public void writeDOT( String filename )
+    {
+    printElementGraph( filename, this.copyWithTraps() );
+    }
+
+  protected void printElementGraph( String filename, final SimpleDirectedGraph<FlowElement, Scope> graph )
     {
     try
       {
       Writer writer = new FileWriter( filename );
 
-      printElementGraph( writer, graph );
+      Util.writeDOT( writer, graph, new IntegerNameProvider<FlowElement>(), new VertexNameProvider<FlowElement>()
+      {
+      public String getVertexName( FlowElement object )
+        {
+        if( object instanceof Tap || object instanceof Extent )
+          return object.toString().replaceAll( "\"", "\'" );
+
+        Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
+
+        return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
+        }
+      }, new EdgeNameProvider<Scope>()
+      {
+      public String getEdgeName( Scope object )
+        {
+        return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+        }
+      } );
 
       writer.close();
       }
@@ -368,30 +386,6 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       exception.printStackTrace();
       }
-    }
-
-  protected void printElementGraph( Writer writer, final SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    DOTExporter dot = new DOTExporter<FlowElement, Scope>( new IntegerNameProvider<FlowElement>(), new VertexNameProvider<FlowElement>()
-    {
-    public String getVertexName( FlowElement object )
-      {
-      if( object instanceof Tap || object instanceof Extent )
-        return object.toString().replaceAll( "\"", "\'" );
-
-      Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
-
-      return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
-      }
-    }, new EdgeNameProvider<Scope>()
-    {
-    public String getEdgeName( Scope object )
-      {
-      return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
-      }
-    } );
-
-    dot.export( writer, graph );
     }
 
   /** Method removeEmptyPipes performs a depth first traversal and removes instance of {@link cascading.pipe.Pipe} or {@link cascading.pipe.SubAssembly}. */
@@ -458,7 +452,18 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
 
     while( iterator.hasNext() )
-      resolveFields( iterator.next() );
+      {
+      FlowElement element = iterator.next();
+
+      try
+        {
+        resolveFields( element );
+        }
+      catch( OperatorException exception )
+        {
+        throw new ElementGraphException( element, "could not resolve fields", exception );
+        }
+      }
 
     resolved = true;
     }

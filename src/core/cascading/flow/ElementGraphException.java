@@ -22,22 +22,46 @@
 package cascading.flow;
 
 /**
- * Class PlannerException is thrown when a job planner fails.
- * <p/>
- * For debugging purposes, the PlannerException holds a copy of the internal job representation which can be
- * written out to disk and visualized with tools that support the
- * <a href="http://en.wikipedia.org/wiki/DOT_language">DOT file format</a> using the {@link #writeDOT(String)}
- * method.
+ * Class ElementGraphException is thrown during rendering of a pipe assembly to
+ * the Cascading internal "graph" representation.
  */
 public class ElementGraphException extends FlowException
   {
-  /** Constructor PlannerException creates a new PlannerException instance. */
+  /** Field flowElement  */
+  private FlowElement flowElement;
+
+  /** Constructor ElementGraphException creates a new ElementGraphException instance. */
   public ElementGraphException()
     {
     }
 
   /**
-   * Constructor PlannerException creates a new PlannerException instance.
+   * Constructor ElementGraphException creates a new ElementGraphException instance.
+   *
+   * @param flowElement of type FlowElement
+   * @param message of type String
+   */
+  public ElementGraphException( FlowElement flowElement, String message )
+    {
+    super( message );
+    this.flowElement = flowElement;
+    }
+
+  /**
+   * Constructor ElementGraphException creates a new ElementGraphException instance.
+   *
+   * @param flowElement of type FlowElement
+   * @param message of type String
+   * @param throwable of type Throwable
+   */
+  public ElementGraphException( FlowElement flowElement, String message, Throwable throwable )
+    {
+    super( message, throwable );
+    this.flowElement = flowElement;
+    }
+
+  /**
+   * Constructor ElementGraphException creates a new ElementGraphException instance.
    *
    * @param string of type String
    */
@@ -47,7 +71,7 @@ public class ElementGraphException extends FlowException
     }
 
   /**
-   * Constructor PlannerException creates a new PlannerException instance.
+   * Constructor ElementGraphException creates a new ElementGraphException instance.
    *
    * @param string    of type String
    * @param throwable of type Throwable
@@ -58,12 +82,22 @@ public class ElementGraphException extends FlowException
     }
 
   /**
-   * Constructor PlannerException creates a new PlannerException instance.
+   * Constructor ElementGraphException creates a new ElementGraphException instance.
    *
    * @param throwable of type Throwable
    */
   public ElementGraphException( Throwable throwable )
     {
     super( throwable );
+    }
+
+  /**
+   * Method getFlowElement returns the flowElement of this ElementGraphException object.
+   *
+   * @return the flowElement (type FlowElement) of this ElementGraphException object.
+   */
+  public FlowElement getFlowElement()
+    {
+    return flowElement;
     }
   }

@@ -31,6 +31,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -71,7 +72,7 @@ public class TapCollectorTest extends CascadingTestCase
 
     collector.close();
 
-    TupleIterator iterator = tap.openForRead( conf );
+    TupleEntryIterator iterator = tap.openForRead( conf );
 
     int count = 0;
     while( iterator.hasNext() )

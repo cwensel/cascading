@@ -22,24 +22,29 @@
 package cascading.operation;
 
 /**
- *
+ * Class AssertionException is the exception that must be thrown when an {@link cascading.operation.Assertion}
+ * fails.
  */
 public class AssertionException extends OperationException
   {
+  /** @see OperationException#OperationException() */
   public AssertionException()
     {
     }
 
+  /** @see OperationException#OperationException(String) */
   public AssertionException( String string )
     {
     super( string );
     }
 
+  /** @see OperationException#OperationException(String, Throwable) */
   public AssertionException( String string, Throwable throwable )
     {
     super( string, throwable );
     }
 
+  /** @see OperationException#OperationException(Throwable) */
   public AssertionException( Throwable throwable )
     {
     super( throwable );

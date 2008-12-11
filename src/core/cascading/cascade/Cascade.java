@@ -141,7 +141,8 @@ public class Cascade implements Runnable
    * and is inherited from the Flow instance in question. An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
    * <p/>
    * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()}
-   * @param flowSkipStrategy
+   *
+   * @param flowSkipStrategy of type FlowSkipStrategy
    * @return FlowSkipStrategy
    */
   public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )

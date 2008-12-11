@@ -21,13 +21,13 @@
 
 package cascading.tuple;
 
-/** Interface TupleCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
-public abstract class TupleCollector
+/** Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
+public abstract class TupleEntryCollector
   {
   /** Field declared */
   protected Fields declared;
 
-  protected TupleCollector()
+  protected TupleEntryCollector()
     {
     }
 
@@ -36,7 +36,7 @@ public abstract class TupleCollector
    *
    * @param declared of type Fields
    */
-  public TupleCollector( Fields declared )
+  public TupleEntryCollector( Fields declared )
     {
     if( declared == null )
       throw new IllegalArgumentException( "declared fields must not be null" );

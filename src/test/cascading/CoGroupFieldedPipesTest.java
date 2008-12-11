@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -49,6 +51,7 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class CoGroupFieldedPipesTest extends ClusterTestCase
@@ -110,7 +113,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -153,7 +156,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -204,7 +207,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\tnull\tnull", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\tnull\tnull", iterator.next().get( 1 ) );
@@ -246,7 +249,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
@@ -309,7 +312,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -372,7 +375,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 3, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
@@ -439,7 +442,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 7, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB", iterator.next().get( 1 ) );
@@ -507,7 +510,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 4, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
@@ -574,7 +577,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 6, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB", iterator.next().get( 1 ) );
@@ -658,14 +661,23 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 6, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "null\tnull\t2\tB\t2\tb", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "null\tnull\t3\tC\t3\tc", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "null\tnull\t4\tD\t4\td", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE\t5\te", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "5\te\t5\tE\t5\te", iterator.next().get( 1 ) );
+    Set<String> results = new HashSet<String>();
+
+    results.add( "1\ta\t1\tA\t1\ta" );
+    results.add( "null\tnull\t2\tB\t2\tb" );
+    results.add( "null\tnull\t3\tC\t3\tc" );
+    results.add( "null\tnull\t4\tD\t4\td" );
+    results.add( "5\tb\t5\tE\t5\te" );
+    results.add( "5\te\t5\tE\t5\te" );
+
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -705,7 +717,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -752,7 +764,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
@@ -790,7 +802,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 5, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
@@ -839,7 +851,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( countFlow, 5, null );
 
-    TupleIterator iterator = countFlow.openSink();
+    TupleEntryIterator iterator = countFlow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB\t2\tB", iterator.next().get( 1 ) );
@@ -903,7 +915,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\t1\t1", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "10\t10\t10", iterator.next().get( 1 ) );

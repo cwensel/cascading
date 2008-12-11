@@ -24,7 +24,12 @@ package cascading.flow;
 import java.io.IOException;
 
 /**
+ * Interface FlowSkipStrategy is used to create new strategies that decide when a {@link Flow} should
+ * be skipped when executed in a {@link cascading.cascade.Cascade}. The default strategy is
+ * {@link cascading.flow.FlowSkipIfSinkStale}. 
  *
+ * @see cascading.flow.FlowSkipIfSinkExists
+ * @see cascading.flow.FlowSkipIfSinkStale
  */
 public interface FlowSkipStrategy
   {

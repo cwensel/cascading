@@ -22,6 +22,7 @@
 package cascading.operation.regex;
 
 import java.util.regex.Matcher;
+import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -35,25 +36,37 @@ import cascading.tuple.Tuple;
 public class RegexParser extends RegexOperation<Matcher> implements Function<Matcher>
   {
   /** Field groups */
-  private int[] groups = new int[]{0};
+  private int[] groups = null;
 
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
-   * in a new field.
+   * in a new Tuple.
+   * <p/>
+   * If the given patternString declares regular expression groups, each group will be returned as a value in the
+   * resulting Tuple. If no groups are declared, the match will be returned as the only value in the resulting Tuple.
+   * <p/>
+   * The fields returned will be {@link Fields#UNKNOWN}, so a variable number of values may be emitted based on the
+   * regular expression given.
    *
    * @param patternString of type String
    */
   public RegexParser( String patternString )
     {
-    super( 1, Fields.size( 1 ), patternString );
+    super( 1, patternString );
     }
 
   /**
-   * Constructor RegexParser creates a new RegexParser instance, where the patternString is a simple regular expression
-   * whose match value is stored in the new field named by the given fieldDeclaration.
+   * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
+   * as the given Field.
    * <p/>
-   * If the fieldDeclaration declares more tha one field, it will be assumed the pattrnString defines the same number
-   * of sub-groups. Subsequently each sub-group will be returned in its corresponding field.
+   * If the given patternString declares regular expression groups, each group will be returned as a value in the
+   * resulting Tuple. If no groups are declared, the match will be returned as the only value in the resulting Tuple.
+   * <p/>
+   * If the number of fields in the fieldDeclaration does not match the number of groups matched, an {@link OperationException}
+   * will be thrown during runtime.
+   * <p/>
+   * To overcome this, either use the constructors that take an array of groups, or use the {@code (?: ...)} sequence
+   * to tell the regular expression matcher to not capture the group.
    *
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
@@ -61,32 +74,26 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
   public RegexParser( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );
-
-    if( fieldDeclaration.size() == 1 )
-      return;
-
-    groups = new int[fieldDeclaration.size()];
-
-    for( int i = 0; i < fieldDeclaration.size(); i++ )
-      groups[ i ] = i + 1;
     }
 
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the patternString is a regular expression
-   * with match groups and whose groups designated by groupPos are stored in the appropriate number of new fields.
+   * with match groups and whose groups designated by {@code groups} are stored in the appropriate number of new fields.
+   * <p/>
+   * The number of resulting fields will match the number of groups given ({@code groups.length}).
    *
    * @param patternString of type String
    * @param groups        of type int[]
    */
   public RegexParser( String patternString, int[] groups )
     {
-    super( 1, patternString );
-    this.groups = groups;
+    super( 1, Fields.size( groups.length ), patternString );
+    this.groups = Arrays.copyOf( groups, groups.length );
     }
 
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the patternString is a regular expression
-   * with match groups and whose groups designated by groupPos are stored in the named fieldDeclarations.
+   * with match groups and whose groups designated by {@code groups} are stored in the named fieldDeclarations.
    *
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
@@ -95,7 +102,10 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
   public RegexParser( Fields fieldDeclaration, String patternString, int[] groups )
     {
     super( 1, fieldDeclaration, patternString );
-    this.groups = groups;
+    this.groups = Arrays.copyOf( groups, groups.length );
+
+    if( !fieldDeclaration.isUnknown() && fieldDeclaration.size() != groups.length )
+      throw new IllegalArgumentException( "fieldDeclaration must equal number of groups to be captured, fields: " + fieldDeclaration.print() );
     }
 
   @Override
@@ -112,13 +122,38 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     if( value == null )
       value = "";
 
-    Tuple output = new Tuple();
-
     Matcher matcher = functionCall.getContext().reset( value );
 
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );
 
+    Tuple output = new Tuple();
+
+    if( groups != null )
+      onGivenGroups( functionCall, matcher, output );
+    else
+      onFoundGroups( functionCall, matcher, output );
+    }
+
+  private final void onFoundGroups( FunctionCall<Matcher> functionCall, Matcher matcher, Tuple output )
+    {
+    int count = matcher.groupCount();
+
+    if( count == 0 )
+      {
+      output.add( matcher.group( 0 ) );
+      }
+    else
+      {
+      for( int i = 0; i < count; i++ )
+        output.add( matcher.group( i + 1 ) ); // skip group 0
+      }
+
+    functionCall.getOutputCollector().add( output );
+    }
+
+  private final void onGivenGroups( FunctionCall<Matcher> functionCall, Matcher matcher, Tuple output )
+    {
     for( int pos : groups )
       output.add( matcher.group( pos ) );
 

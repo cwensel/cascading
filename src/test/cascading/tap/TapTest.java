@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import cascading.ClusterTestCase;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.Identity;
+import cascading.operation.Debug;
 import cascading.pipe.Pipe;
 import cascading.pipe.Each;
 import cascading.scheme.TextLine;
@@ -39,13 +40,16 @@ import cascading.flow.FlowConnector;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleIterator;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  *
  */
 public class TapTest extends ClusterTestCase implements Serializable
   {
-  private String inputFileComments = "build/test/data/comments+lower.txt";
+  String inputFileComments = "build/test/data/comments+lower.txt";
+  String inputFileJoined = "build/test/data/lower+upper.txt";
+
   String outputPath = "build/test/output/tap/";
 
   public TapTest()
@@ -167,7 +171,7 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     validateLength( flow, 5, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1 a", iterator.next().get( 1 ) );
 
@@ -175,5 +179,33 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     // confirm the tuple iterator can handle nulls from the source
     validateLength( flow.openSource(), 5 );
+    }
+
+  public void testTemplateTap() throws IOException
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/testtemplates", true );
+
+    sink = new TemplateTap( (Hfs) sink, "%s-%s" );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = new Hfs( new TextLine( 1 ), sink.getPath().toString() + "/1-a" );
+    validateLength( flow.openTapForRead( test ), 1 );
+
+    test = new Hfs( new TextLine( 1 ), sink.getPath().toString() + "/2-b" );
+    validateLength( flow.openTapForRead( test ), 1 );
     }
   }

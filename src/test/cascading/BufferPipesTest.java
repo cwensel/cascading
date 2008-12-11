@@ -36,6 +36,7 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class BufferPipesTest extends ClusterTestCase
@@ -90,7 +91,7 @@ public class BufferPipesTest extends ClusterTestCase
 
     validateLength( flow, 23, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\tnull\tnext\tfinal", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", iterator.next().get( 1 ) );
@@ -129,7 +130,7 @@ public class BufferPipesTest extends ClusterTestCase
 
     validateLength( flow, 18, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     Comparable line = iterator.next().get( 1 );
     assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );

@@ -34,7 +34,9 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-/** Class FlowReducer ... */
+/**
+ * Class FlowReducer is the Hadoop Reducer implementation.
+ */
 public class FlowReducer extends MapReduceBase implements Reducer
   {
   /** Field flowReducerStack */

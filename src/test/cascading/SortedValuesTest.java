@@ -35,7 +35,7 @@ import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
-import cascading.operation.regex.Regexes;
+import cascading.TestConstants;
 import cascading.operation.text.DateParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -46,7 +46,7 @@ import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/ArrivalUseCaseTest.java#2 $ */
@@ -55,7 +55,7 @@ public class SortedValuesTest extends ClusterTestCase
   String inputFileApache = "build/test/data/apache.200.txt";
 
   String outputPath = "build/test/output/sorting/";
-  private String apacheCommonRegex = Regexes.APACHE_COMMON_REGEX;
+  private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
   private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{1, 2, 3, 4, 5, 6} );
 
   public SortedValuesTest()
@@ -190,7 +190,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed, int comparePosition ) throws IOException, ParseException
     {
-    TupleIterator iterator = tap.openForRead( new JobConf() );
+    TupleEntryIterator iterator = tap.openForRead( new JobConf() );
 
     Set<Integer> values = new HashSet<Integer>();
 
@@ -199,7 +199,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     while( iterator.hasNext() )
       {
-      Tuple tuple = iterator.next();
+      Tuple tuple = iterator.next().getTuple();
       count++;
 
       tuple = new Tuple( tuple.getString( 1 ).split( "\t" ) );

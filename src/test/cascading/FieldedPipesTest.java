@@ -32,14 +32,14 @@ import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
+import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.And;
-import cascading.operation.filter.Limit;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.operation.regex.Regexes;
+import cascading.TestConstants;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -50,10 +50,9 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
-import cascading.tap.Lfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class FieldedPipesTest extends ClusterTestCase
@@ -157,7 +156,7 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
 
-    pipe = new Each( pipe, new Fields( "count1", "count2" ), new ExpressionFunction( new Fields( "sum" ), "count1 + count2", int.class, int.class ), Fields.ALL );
+    pipe = new Each( pipe, new Fields( "count1", "count2" ), new ExpressionFunction( new Fields( "sum" ), "count1 + count2", int.class ), Fields.ALL );
     Tap sink = new Hfs( new TextLine(), outputPath + "/chaineach", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
@@ -191,7 +190,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "75.185.76.245", iterator.next().get( 1 ) );
 
@@ -230,7 +229,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     Comparable line = iterator.next().get( 1 );
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
@@ -238,6 +237,51 @@ public class FieldedPipesTest extends ClusterTestCase
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
 
     iterator.close();
+    }
+
+  /**
+   * Specifically tests GroupBy will return the correct grouping fields to the following Every
+   * @throws Exception
+   */
+  public void testSimpleMergeThree() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+    copyFromLocal( inputFileLowerOffset );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLowerOffset = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "offset", sourceLowerOffset );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/mergethree/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper, pipeOffset ), new Fields( "num" ) );
+
+    splice = new Every( splice, new Fields( "char" ), new First( new Fields( "first" ) ) );
+
+    splice = new Each( splice, new Fields( "num", "first" ), new Identity() );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 6, null );
     }
 
 
@@ -290,7 +334,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     Comparable line = iterator.next().get( 1 );
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\ta" ) );
@@ -364,7 +408,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
 //    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new Each( pipe, new Fields( "line" ), Regexes.APACHE_COMMON_PARSER );
+    pipe = new Each( pipe, new Fields( "line" ), TestConstants.APACHE_COMMON_PARSER );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
@@ -448,7 +492,8 @@ public class FieldedPipesTest extends ClusterTestCase
 //
 //    validateLength( flow, 7, null );
 //    }
-//
+
+  //
   public void testCross() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )
@@ -478,7 +523,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 37, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tB", iterator.next().get( 1 ) );

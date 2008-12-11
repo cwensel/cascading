@@ -21,7 +21,7 @@
 
 package cascading.tuple;
 
-/** Class IndexTuple allows for managing an int index value with a Tuple instance. Used for co-grouping values. */
+/** Class IndexTuple allows for managing an int index value with a Tuple instance. Used internally for co-grouping values. */
 public class IndexTuple implements Comparable
   {
   int index;
@@ -80,5 +80,31 @@ public class IndexTuple implements Comparable
       return c;
 
     return this.tuple.compareTo( indexTuple.tuple );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+
+    IndexTuple that = (IndexTuple) object;
+
+    if( index != that.index )
+      return false;
+    if( tuple != null ? !tuple.equals( that.tuple ) : that.tuple != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = index;
+    result = 31 * result + ( tuple != null ? tuple.hashCode() : 0 );
+    return result;
     }
   }

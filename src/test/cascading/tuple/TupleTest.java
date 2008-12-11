@@ -275,7 +275,7 @@ public class TupleTest extends CascadingTestCase
 
   public void testWritableCompareReadWrite() throws IOException
     {
-    Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0" );
+    Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0", true );
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     TupleOutputStream dataOutputStream = new TupleOutputStream( byteArrayOutputStream );

@@ -38,6 +38,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -202,7 +203,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
     if( resultLength != -1 )
       validateLength( flow, resultLength, null );
 
-    TupleIterator iterator = flow.openSink();
+    TupleEntryIterator iterator = flow.openSink();
     Comparable result = iterator.next().get( 1 );
 
     if( resultTuple != null )

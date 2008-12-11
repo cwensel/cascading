@@ -24,45 +24,78 @@ package cascading.operation.expression;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import cascading.operation.BaseOperation;
 import cascading.operation.OperationException;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
+import cascading.flow.FlowProcess;
 import org.codehaus.janino.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
 import org.codehaus.janino.Parser;
 import org.codehaus.janino.Scanner;
 
-/** Class ExpressionOperation is the base class for {@link ExpressionFunction} and {@link ExpressionFilter}. */
-public class ExpressionOperation extends BaseOperation
+/**
+ * Class ExpressionOperation is the base class for {@link ExpressionFunction}, {@link ExpressionFilter},
+ * {@link cascading.operation.assertion.AssertExpression}.
+ */
+public class ExpressionOperation extends BaseOperation<ExpressionOperation.Context>
   {
   /** Field expression */
   protected String expression;
+
   /** Field parameterTypes */
-  protected Class[] parameterTypes;
-  /** Field expressionEvaluator */
-  private transient ExpressionEvaluator expressionEvaluator;
-  /** Field parameterFields */
-  private transient Fields parameterFields;
+  private Class[] parameterTypes;
   /** Field parameterNames */
   private String[] parameterNames;
 
-  protected ExpressionOperation( Fields fieldDeclaration, String expression, Class... parameterTypes )
+  public static class Context
     {
-    super( parameterTypes.length, fieldDeclaration );
-    this.parameterTypes = parameterTypes;
+    private Class[] parameterTypes;
+    private ExpressionEvaluator expressionEvaluator;
+    private Fields parameterFields;
+    private String[] parameterNames;
+    }
+
+  protected ExpressionOperation( Fields fieldDeclaration, String expression, Class parameterType )
+    {
+    super( fieldDeclaration );
+    this.parameterTypes = new Class[]{parameterType};
     this.expression = expression;
     }
 
-  protected ExpressionOperation( String expression, Class... parameterTypes )
+  protected ExpressionOperation( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
-    super( parameterTypes.length );
-    this.parameterTypes = parameterTypes;
+    super( parameterTypes.length, fieldDeclaration );
+    this.parameterTypes = Arrays.copyOf( parameterTypes, parameterTypes.length );
+    this.parameterNames = Arrays.copyOf( parameterNames, parameterNames.length );
+    this.expression = expression;
+
+    if( parameterNames.length != parameterTypes.length )
+      throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
+    }
+
+  protected ExpressionOperation( String expression, Class parameterType )
+    {
+    this.parameterTypes = new Class[]{parameterType};
     this.expression = expression;
     }
+
+  protected ExpressionOperation( String expression, String[] parameterNames, Class[] parameterTypes )
+    {
+    super( parameterTypes.length );
+    this.parameterTypes = Arrays.copyOf( parameterTypes, parameterTypes.length );
+    this.parameterNames = Arrays.copyOf( parameterNames, parameterNames.length );
+    this.expression = expression;
+
+    if( parameterNames.length != parameterTypes.length )
+      throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
+    }
+
 
   private String[] getParameterNames()
     {
@@ -91,20 +124,31 @@ public class ExpressionOperation extends BaseOperation
 
   private Fields getParameterFields()
     {
-    if( parameterFields == null )
-      parameterFields = makeFields( getParameterNames() );
-
-    return parameterFields;
+    return makeFields( getParameterNames() );
     }
 
-  private ExpressionEvaluator getExpressionEvaluator()
+  private Class[] getParameterTypes( String[] parameterNames )
     {
-    if( expressionEvaluator != null )
-      return expressionEvaluator;
+    if( parameterNames.length == parameterTypes.length )
+      return parameterTypes;
 
+    if( parameterTypes.length != 1 )
+      throw new IllegalStateException( "wrong number of parameter types, expects: " + parameterNames.length );
+
+    Class[] types = new Class[parameterNames.length];
+
+    Arrays.fill( types, parameterTypes[ 0 ] );
+
+    parameterTypes = types;
+
+    return parameterTypes;
+    }
+
+  private ExpressionEvaluator getExpressionEvaluator( String[] parameterNames, Class[] parameterTypes )
+    {
     try
       {
-      expressionEvaluator = new ExpressionEvaluator( expression, Comparable.class, getParameterNames(), parameterTypes );
+      return new ExpressionEvaluator( expression, Comparable.class, parameterNames, parameterTypes );
       }
     catch( CompileException exception )
       {
@@ -118,8 +162,6 @@ public class ExpressionOperation extends BaseOperation
       {
       throw new OperationException( "could not scan expression: " + expression, exception );
       }
-
-    return expressionEvaluator;
     }
 
   private Fields makeFields( String[] parameters )
@@ -139,21 +181,35 @@ public class ExpressionOperation extends BaseOperation
     return new Fields( fields );
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
+    {
+    if( operationCall.getContext() == null )
+      operationCall.setContext( new Context() );
+
+    Context context = operationCall.getContext();
+
+    context.parameterNames = getParameterNames();
+    context.parameterFields = getParameterFields();
+    context.parameterTypes = getParameterTypes( context.parameterNames );
+    context.expressionEvaluator = getExpressionEvaluator( context.parameterNames, context.parameterTypes );
+    }
+
   /**
    * Performs the actual expression evaluation.
    *
-   * @param input of type TupleEntry
-   * @return Comparable
+   * @param context
+   * @param input   of type TupleEntry @return Comparable
    */
-  protected Comparable evaluate( TupleEntry input )
+  protected Comparable evaluate( Context context, TupleEntry input )
     {
-    Tuple parameterTuple = input.selectTuple( getParameterFields() );
+    Tuple parameterTuple = input.selectTuple( context.parameterFields );
 
     Comparable value = null;
 
     try
       {
-      value = (Comparable) getExpressionEvaluator().evaluate( Tuples.asArray( parameterTuple, parameterTypes ) );
+      value = (Comparable) context.expressionEvaluator.evaluate( Tuples.asArray( parameterTuple, context.parameterTypes ) );
       }
     catch( InvocationTargetException exception )
       {

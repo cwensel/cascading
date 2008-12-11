@@ -35,9 +35,10 @@ import cascading.operation.FilterCall;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.ValueAssertion;
+import cascading.operation.AssertionException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 
@@ -391,15 +392,26 @@ public class Each extends Operator
 
     public void operate( FlowProcess flowProcess, TupleEntry input )
       {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( operation + " incoming entry: " + input );
+      try
+        {
+        if( LOG.isDebugEnabled() )
+          LOG.debug( operation + " incoming entry: " + input );
 
-      TupleEntry arguments = scope.getArgumentsEntry( input );
+        TupleEntry arguments = scope.getArgumentsEntry( input );
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( operation + " arg entry: " + arguments );
+        if( LOG.isDebugEnabled() )
+          LOG.debug( operation + " arg entry: " + arguments );
 
-      handle( flowProcess, input, arguments );
+        handle( flowProcess, input, arguments );
+        }
+      catch( AssertionException exception )
+        {
+        throw exception;
+        }
+      catch( Exception exception )
+        {
+        throw new OperatorException( Each.this, "operator Each failed executing operation", exception );
+        }
       }
 
     abstract void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments );
@@ -424,7 +436,7 @@ public class Each extends Operator
     {
     EachTupleCollector tupleCollector;
 
-    private abstract class EachTupleCollector extends TupleCollector
+    private abstract class EachTupleCollector extends TupleEntryCollector
       {
       Scope scope;
       TupleEntry input;

@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 
 /** Interface FunctionCall provides access to the current {@link Function} invocation arguments. */
@@ -35,9 +35,9 @@ public interface FunctionCall<C> extends OperationCall<C>
   TupleEntry getArguments();
 
   /**
-   * Returns the {@link TupleCollector} used to emit result values.
+   * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values.
    *
    * @return TupleCollector
    */
-  TupleCollector getOutputCollector();
+  TupleEntryCollector getOutputCollector();
   }

@@ -41,8 +41,8 @@ import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TuplePair;
+import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
@@ -57,7 +57,10 @@ import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-/** Class FlowStep ... */
+/**
+ * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
+ * planning, pipe assemblies are broken down into "steps" and encapsulated in this class.
+ */
 public class FlowStep implements Serializable
   {
   /** Field LOG */
@@ -89,6 +92,11 @@ public class FlowStep implements Serializable
     this.name = name;
     }
 
+  /**
+   * Method getName returns the name of this FlowStep object.
+   *
+   * @return the name (type String) of this FlowStep object.
+   */
   public String getName()
     {
     return name;
@@ -181,7 +189,7 @@ public class FlowStep implements Serializable
       }
 
     // perform last so init above will pass to tasks
-    conf.set( FlowConstants.FLOW_STEP, Util.serializeBase64( this ) );
+    conf.set( "cascading.flow.step", Util.serializeBase64( this ) );
 
     return conf;
     }
@@ -212,7 +220,7 @@ public class FlowStep implements Serializable
       {
       fromJobs[ i ] = new JobConf( conf );
       tap.sourceInit( fromJobs[ i ] );
-      fromJobs[ i ].set( FlowConstants.STEP_SOURCE, Util.serializeBase64( tap ) );
+      fromJobs[ i ].set( "cascading.step.source", Util.serializeBase64( tap ) );
       i++;
       }
 
@@ -232,7 +240,7 @@ public class FlowStep implements Serializable
     return new TapIterator( sources.keySet().iterator().next(), conf );
     }
 
-  public TupleIterator openSinkForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openSinkForRead( JobConf conf ) throws IOException
     {
     return sink.openForRead( conf );
     }
@@ -314,7 +322,7 @@ public class FlowStep implements Serializable
         }
       catch( IOException exception )
         {
-        LOG.warn( "unable to remove temporary file: " + sink, exception );
+        logWarn( "unable to remove temporary file: " + sink, exception );
         }
       }
 
@@ -326,7 +334,7 @@ public class FlowStep implements Serializable
         }
       catch( IOException exception )
         {
-        LOG.warn( "unable to remove temporary file: " + sink, exception );
+        logWarn( "unable to remove temporary file: " + sink, exception );
         }
       }
     }
@@ -389,7 +397,7 @@ public class FlowStep implements Serializable
     public void stop()
       {
       if( LOG.isInfoEnabled() )
-        LOG.info( "stopping: " + stepName );
+        logInfo( "stopping: " + stepName );
 
       stop = true;
 
@@ -400,7 +408,7 @@ public class FlowStep implements Serializable
         }
       catch( IOException exception )
         {
-        LOG.warn( "unable to kill job: " + stepName, exception );
+        logWarn( "unable to kill job: " + stepName, exception );
         }
       }
 
@@ -417,7 +425,7 @@ public class FlowStep implements Serializable
           {
           if( !predecessor.isSuccessful() )
             {
-            LOG.warn( "abandoning step: " + stepName + ", predecessor failed: " + predecessor.stepName );
+            logWarn( "abandoning step: " + stepName + ", predecessor failed: " + predecessor.stepName );
 
             return null;
             }
@@ -427,7 +435,7 @@ public class FlowStep implements Serializable
           return null;
 
         if( LOG.isInfoEnabled() )
-          LOG.info( "starting step: " + stepName );
+          logInfo( "starting step: " + stepName );
 
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
@@ -462,14 +470,14 @@ public class FlowStep implements Serializable
           return;
 
         TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-        LOG.warn( "completion events count: " + events.length );
+        logWarn( "completion events count: " + events.length );
 
         for( TaskCompletionEvent event : events )
-          LOG.warn( "event = " + event );
+          logWarn( "event = " + event );
         }
       catch( IOException exception )
         {
-        LOG.error( "failed reading completion events", exception );
+        logError( "failed reading completion events", exception );
         }
       }
 
@@ -488,11 +496,11 @@ public class FlowStep implements Serializable
         }
       catch( InterruptedException exception )
         {
-        LOG.warn( "latch interrupted", exception );
+        logWarn( "latch interrupted", exception );
         }
       catch( IOException exception )
         {
-        LOG.warn( "error querying job", exception );
+        logWarn( "error querying job", exception );
         }
 
       return false;
@@ -507,5 +515,25 @@ public class FlowStep implements Serializable
       {
       return runningJob != null;
       }
+    }
+
+  private void logInfo( String message )
+    {
+    LOG.info( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    }
+
+  private void logWarn( String message )
+    {
+    LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    }
+
+  private void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
+    }
+
+  private void logError( String message, Throwable throwable )
+    {
+    LOG.error( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
     }
   }

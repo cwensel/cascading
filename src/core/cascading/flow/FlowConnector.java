@@ -36,7 +36,6 @@ import cascading.scheme.SequenceFile;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 
 /**
  * Use the FlowConnector to link sink and source {@link Tap} instances with an assembly of {@link Pipe} instances into
@@ -49,7 +48,9 @@ import org.apache.log4j.Logger;
  * map can be populated through static methods on FlowConnector and MultiMapReducePlanner.
  * <p/>
  * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or {@link #setApplicationJarPath(java.util.Map, String)}
- * so that the correct application jar file is passed through to all child processes.
+ * so that the correct application jar file is passed through to all child processes. The Class or path must reference
+ * the custom application jar, not a Cascading library class or jar. The easiest thing to do is give setApplicationJarClass
+ * the Class with your static main function and let Cascading figure out which jar to use.
  * <p/>
  * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
  * runtime from a configuation file.
@@ -69,18 +70,27 @@ import org.apache.log4j.Logger;
  */
 public class FlowConnector
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( FlowConnector.class );
-
   /** Field properties */
   private Map<Object, Object> properties;
 
+  /**
+   * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @param assertionLevel of type AssertionLevel
+   */
   public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
     {
     if( assertionLevel != null )
       properties.put( "cascading.flowconnector.assertionlevel", assertionLevel.toString() );
     }
 
+  /**
+   * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return AssertionLevel the configured AssertionLevel
+   */
   public static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
     {
     String assertionLevel = Util.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
@@ -88,16 +98,34 @@ public class FlowConnector
     return AssertionLevel.valueOf( assertionLevel );
     }
 
+  /**
+   * Method setIntermediateSchemeClass is used for debugging. The default Scheme for intermediate files is {@link SequenceFile}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @param intermediateSchemeClass of type Class
+   */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class intermediateSchemeClass )
     {
     properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
     }
 
+  /**
+   * Method setIntermediateSchemeClass is used for debugging. The default Scheme for intermediate files is {@link SequenceFile}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @param intermediateSchemeClass of type String
+   */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClass )
     {
     properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
     }
 
+  /**
+   * Method getIntermediateSchemeClass is used for debugging. The default Scheme for intermediate files is {@link SequenceFile}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return Class
+   */
   public static Class getIntermediateSchemeClass( Map<Object, Object> properties )
     {
     // supporting stuffed classes to overcome classloading issue
@@ -120,7 +148,11 @@ public class FlowConnector
     }
 
   /**
-   * Method setJarClass is used to set the application jar file.
+   * Method setApplicationJarClass is used to set the application jar file.
+   * </p>
+   * All cluster executed Cascading applications
+   * need to call setApplicationJarClass(java.util.Map, Class) or
+   * {@link #setApplicationJarPath(java.util.Map, String)}, otherwise ClassNotFound exceptions are likely.
    *
    * @param properties of type Map
    * @param type       of type Class
@@ -131,14 +163,24 @@ public class FlowConnector
       properties.put( "cascading.flowconnector.appjar.class", type );
     }
 
+  /**
+   * Method getApplicationJarClass returns the Class set by the setApplicationJarClass method.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return Class
+   */
   public static Class getApplicationJarClass( Map<Object, Object> properties )
     {
     return Util.getProperty( properties, "cascading.flowconnector.appjar.class", (Class) null );
     }
 
   /**
-   * Method setJarClass is used to set the application jar file.
-   *
+   * Method setApplicationJarPath is used to set the application jar file.
+   * </p>
+   * All cluster executed Cascading applications
+   * need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
+   * setApplicationJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.
+
    * @param properties of type Map
    * @param path       of type String
    */
@@ -148,6 +190,12 @@ public class FlowConnector
       properties.put( "cascading.flowconnector.appjar.path", path );
     }
 
+  /**
+   * Method getApplicationJarPath return the path set by the setApplicationJarPath method.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return String
+   */
   public static String getApplicationJarPath( Map<Object, Object> properties )
     {
     return Util.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );

@@ -23,7 +23,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -41,7 +41,7 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   /** Field argumentsIterator */
   private Iterator<TupleEntry> argumentsIterator;
   /** Field outputCollector */
-  private TupleCollector outputCollector;
+  private TupleEntryCollector outputCollector;
 
   /** Constructor OperationCall creates a new OperationCall instance. */
   public ConcreteCall()
@@ -54,7 +54,7 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
    * @param arguments       of type TupleEntry
    * @param outputCollector of type TupleCollector
    */
-  public ConcreteCall( TupleEntry arguments, TupleCollector outputCollector )
+  public ConcreteCall( TupleEntry arguments, TupleEntryCollector outputCollector )
     {
     this.arguments = arguments;
     this.outputCollector = outputCollector;
@@ -105,12 +105,12 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
     }
 
   /** @see FunctionCall#getOutputCollector() */
-  public TupleCollector getOutputCollector()
+  public TupleEntryCollector getOutputCollector()
     {
     return outputCollector;
     }
 
-  public void setOutputCollector( TupleCollector outputCollector )
+  public void setOutputCollector( TupleEntryCollector outputCollector )
     {
     this.outputCollector = outputCollector;
     }

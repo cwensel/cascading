@@ -85,6 +85,9 @@ public class XPathGenerator extends XPathOperation implements Function
         if( LOG.isDebugEnabled() )
           LOG.debug( "xpath: " + paths[ i ] + " was: " + ( nodeList != null && nodeList.getLength() != 0 ) );
 
+        if( nodeList == null )
+          continue;
+
         for( int j = 0; j < nodeList.getLength(); j++ )
           functionCall.getOutputCollector().add( new Tuple( writeAsXML( nodeList.item( j ) ) ) );
 

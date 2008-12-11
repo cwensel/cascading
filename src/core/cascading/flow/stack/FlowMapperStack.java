@@ -24,13 +24,11 @@ package cascading.flow.stack;
 import java.io.IOException;
 import java.util.Set;
 
-import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.pipe.Each;
-import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -73,10 +71,10 @@ public class FlowMapperStack
     {
     this.flowProcess = flowProcess;
     this.jobConf = flowProcess.getJobConf();
-    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
+    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
     // is set by the MultiInputSplit
-    currentSource = (Tap) Util.deserializeBase64( jobConf.getRaw( FlowConstants.STEP_SOURCE ) );
+    currentSource = (Tap) Util.deserializeBase64( jobConf.getRaw( "cascading.step.source" ) );
 
     if( LOG.isDebugEnabled() )
       LOG.debug( "map current source: " + currentSource );
@@ -114,13 +112,6 @@ public class FlowMapperStack
 
       boolean useTapCollector = false;
 
-      while( operator instanceof EndPipe )
-        {
-        useTapCollector = true;
-        incomingScope = step.getNextScope( operator );
-        operator = step.getNextFlowElement( incomingScope );
-        }
-
       if( operator instanceof Group )
         {
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
@@ -130,7 +121,7 @@ public class FlowMapperStack
         }
       else if( operator instanceof Tap )
         {
-        useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
+        useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
 
         stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator, useTapCollector );
         }
@@ -159,7 +150,8 @@ public class FlowMapperStack
         else
           LOG.debug( "map key: [" + key + "]" );
 
-        LOG.debug( "map value: " + tuple.print() );
+        if( tuple != null )
+          LOG.debug( "map value: " + tuple.print() );
         }
 
       // skip the key/value pair if null is returned from the source

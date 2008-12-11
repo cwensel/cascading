@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
  */
 public class InnerJoin implements Joiner
   {
+  /** Field LOG  */
   private static final Logger LOG = Logger.getLogger( InnerJoin.class );
 
   public Iterator<Tuple> getIterator( GroupClosure closure )

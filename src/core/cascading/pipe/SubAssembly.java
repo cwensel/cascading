@@ -24,15 +24,19 @@ package cascading.pipe;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Arrays;
 
 import cascading.util.Util;
 
 /**
  * Subclasses of SubAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
- * a Pipe is used. That is, a typical SubAssembly subclass will accept a 'previous' Pipe instance, and a few
- * arguments for configuring the resulting sub-assembly. If the SubAssembly represents a split in the pipeline process,
- * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe[])}.
+ * a Pipe is used.
  * <p/>
+ * That is, a typical SubAssembly subclass will accept a 'previous' Pipe instance, and a few
+ * arguments for configuring the resulting sub-assembly.
+ * <p/>
+ * If the SubAssembly represents a split in the pipeline process,
+ * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe[])}.
  */
 public abstract class SubAssembly extends Pipe
   {
@@ -56,7 +60,7 @@ public abstract class SubAssembly extends Pipe
    */
   public Pipe[] getTails()
     {
-    return tails;
+    return getPrevious(); // just returns a clone of tails
     }
 
   /**
@@ -83,7 +87,7 @@ public abstract class SubAssembly extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
-    return tails;
+    return Arrays.copyOf( tails, tails.length );
     }
 
   /**

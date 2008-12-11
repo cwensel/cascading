@@ -28,7 +28,7 @@ import java.util.LinkedList;
  * TupleEntryCollector is a convenience class for managing a list of tuples. More specifically it can simultaneously
  * append and modify in place elements of the list through the use of a ListIterator.
  */
-public class TupleListCollector extends TupleCollector implements Iterable<Tuple>
+public class TupleListCollector extends TupleEntryCollector implements Iterable<Tuple>
   {
   /** Field tuples */
   private final LinkedList<Tuple> tuples = new LinkedList<Tuple>();

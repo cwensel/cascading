@@ -21,24 +21,31 @@
 
 package cascading.flow;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
+import java.util.Set;
+import java.io.Writer;
+import java.io.FileWriter;
+import java.io.IOException;
 
-import cascading.pipe.EndPipe;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
+import cascading.util.Util;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.jgrapht.ext.IntegerNameProvider;
+import org.jgrapht.ext.VertexNameProvider;
+import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-/** Class StepGraph ... */
+/** Class StepGraph is an internal representation of {@link FlowStep} instances. */
 public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   {
   /** Field LOG */
@@ -56,11 +63,11 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
    * @param elementGraph of type ElementGraph
    * @param traps        of type Map<String, Tap>
    */
-  StepGraph( ElementGraph elementGraph, Map<String, Tap> traps )
+  StepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
     {
     this();
 
-    makeStepGraph( elementGraph, traps );
+    makeStepGraph( flowName, elementGraph, traps );
 
     validateGraph( traps );
     }
@@ -105,21 +112,24 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   /**
    * Method getCreateFlowStep ...
    *
-   * @param steps of type Map<String, FlowStep>
-   * @param name  of type String
-   * @return FlowStep
+   * @param flowName
+   *@param steps    of type Map<String, FlowStep>
+   * @param sinkPath of type String
+   * @param numJobs @return FlowStep
    */
-  private FlowStep getCreateFlowStep( Map<String, FlowStep> steps, String name )
+  private FlowStep getCreateFlowStep( String flowName, Map<String, FlowStep> steps, String sinkPath, int numJobs )
     {
-    if( steps.containsKey( name ) )
-      return steps.get( name );
+    if( steps.containsKey( sinkPath ) )
+      return steps.get( sinkPath );
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "creating step: " + name );
+      LOG.debug( "creating step: " + sinkPath );
 
-    FlowStep step = new FlowStep( name );
+    FlowStep step = new FlowStep( ( steps.size() + 1 ) + "/" + numJobs );
 
-    steps.put( name, step );
+    step.setParentFlowName( flowName );
+
+    steps.put( sinkPath, step );
 
     return step;
     }
@@ -127,12 +137,15 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   /**
    * Creates the map reduce step graph.
    *
+   * @param flowName
    * @param elementGraph
    * @param traps
    */
-  private void makeStepGraph( ElementGraph elementGraph, Map<String, Tap> traps )
+  private void makeStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
     {
     SimpleDirectedGraph<Tap, Integer> tapGraph = elementGraph.makeTapGraph();
+
+    int numJobs = countNumJobs( tapGraph );
 
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
     TopologicalOrderIterator<Tap, Integer> topoIterator = new TopologicalOrderIterator<Tap, Integer>( tapGraph );
@@ -152,7 +165,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
         if( LOG.isDebugEnabled() )
           LOG.debug( "handling path: " + source + " -> " + sink );
 
-        FlowStep step = getCreateFlowStep( steps, sink.toString() );
+        FlowStep step = getCreateFlowStep( flowName, steps, sink.toString(), numJobs );
 
         addVertex( step );
 
@@ -175,7 +188,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
           step.sources.put( (Tap) source, sourceName );
           step.sink = sink;
 
-          if( step.sink.isUseTapCollector() || Graphs.predecessorListOf( elementGraph, sink ).get( 0 ) instanceof EndPipe )
+          if( step.sink.isWriteDirect() )
             step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
 
           FlowElement lhs = source;
@@ -216,6 +229,20 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
       }
     }
 
+  private int countNumJobs( SimpleDirectedGraph<Tap, Integer> tapGraph )
+    {
+    Set<Tap> vertices = tapGraph.vertexSet();
+    int count = 0;
+
+    for( Tap vertice : vertices )
+      {
+      if( tapGraph.inDegreeOf( vertice ) != 0 )
+        count++;
+      }
+
+    return count;
+    }
+
   private boolean pathContainsTap( GraphPath<FlowElement, Scope> path )
     {
     List<FlowElement> flowElements = Graphs.getPathVertexList( path );
@@ -235,6 +262,47 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   public TopologicalOrderIterator<FlowStep, Integer> getTopologicalIterator()
     {
     return new TopologicalOrderIterator<FlowStep, Integer>( this );
+    }
+
+  /**
+   * Method writeDOT writes this element graph to a DOT file for easy vizualization and debugging.
+   *
+   * @param filename of type String
+   */
+  public void writeDOT( String filename )
+    {
+    printElementGraph( filename, this );
+    }
+
+  protected void printElementGraph( String filename, final SimpleDirectedGraph<FlowStep, Integer> graph )
+    {
+    try
+      {
+      Writer writer = new FileWriter( filename );
+
+      Util.writeDOT( writer, graph, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
+      {
+      public String getVertexName( FlowStep object )
+        {
+        String groupName = object.group == null ? "" : object.group.getName();
+
+        return ( "["+object.getName()+"]" + groupName ).replaceAll( "\"", "\'" );
+        }
+      }, new EdgeNameProvider<Integer>()
+      {
+      public String getEdgeName( Integer object )
+        {
+//        return graph.getEdgeSource( object ).sink.toString().replaceAll( "\"", "\'" );
+        return "";
+        }
+      } );
+
+      writer.close();
+      }
+    catch( IOException exception )
+      {
+      exception.printStackTrace();
+      }
     }
 
   }

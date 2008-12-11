@@ -22,6 +22,7 @@
 package cascading.pipe.cogroup;
 
 import java.util.Iterator;
+import java.util.Arrays;
 
 import cascading.tuple.Tuple;
 
@@ -33,14 +34,21 @@ import cascading.tuple.Tuple;
  */
 public class MixedJoin implements Joiner
   {
+  /** Field INNER  */
   public static boolean INNER = true;
+  /** Field OUTER  */
   public static boolean OUTER = false;
 
   boolean asInner[];
 
+  /**
+   * Constructor MixedJoin creates a new MixedJoin instance.
+   *
+   * @param asInner of type boolean[]
+   */
   public MixedJoin( boolean[] asInner )
     {
-    this.asInner = asInner;
+    this.asInner = Arrays.copyOf( asInner, asInner.length );
     }
 
   public Iterator<Tuple> getIterator( GroupClosure closure )

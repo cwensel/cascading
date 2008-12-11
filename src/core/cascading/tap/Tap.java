@@ -33,9 +33,9 @@ import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -60,10 +60,10 @@ import org.apache.hadoop.mapred.OutputCollector;
 public abstract class Tap implements FlowElement, Serializable
   {
   /** Field scheme */
-  Scheme scheme;
+  private Scheme scheme;
 
   /** Field writeDirect */
-  boolean useTapCollector = false;
+  boolean writeDirect = false;
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
 
@@ -84,12 +84,12 @@ public abstract class Tap implements FlowElement, Serializable
 
   protected Tap( Scheme scheme )
     {
-    this.scheme = scheme;
+    this.setScheme( scheme );
     }
 
   protected Tap( Scheme scheme, SinkMode sinkMode )
     {
-    this.scheme = scheme;
+    this.setScheme( scheme );
     this.sinkMode = sinkMode;
 
     if( sinkMode == SinkMode.APPEND )
@@ -112,23 +112,23 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method isUseTapCollector returns true if this instances {@link cascading.tap.hadoop.TapCollector} should be used to sink values.
+   * Method isWriteDirect returns true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
    *
    * @return the writeDirect (type boolean) of this Tap object.
    */
-  public boolean isUseTapCollector()
+  public boolean isWriteDirect()
     {
-    return useTapCollector;
+    return writeDirect;
     }
 
   /**
-   * Method setUseTapCollector should be set to true if this instances {@link cascading.tap.hadoop.TapCollector} should be used to sink values.
+   * Method setWriteDirect should be set to true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
    *
-   * @param useTapCollector the writeDirect of this Tap object.
+   * @param writeDirect the writeDirect of this Tap object.
    */
-  public void setUseTapCollector( boolean useTapCollector )
+  public void setWriteDirect( boolean writeDirect )
     {
-    this.useTapCollector = useTapCollector;
+    this.writeDirect = writeDirect;
     }
 
   /**
@@ -161,7 +161,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public void sourceInit( JobConf conf ) throws IOException
     {
-    scheme.sourceInit( this, conf );
+    getScheme().sourceInit( this, conf );
     }
 
   /**
@@ -181,7 +181,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public void sinkInit( JobConf conf ) throws IOException
     {
-    scheme.sinkInit( this, conf );
+    getScheme().sinkInit( this, conf );
     }
 
   /**
@@ -198,7 +198,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public Fields getSourceFields()
     {
-    return scheme.getSourceFields();
+    return getScheme().getSourceFields();
     }
 
   /**
@@ -208,26 +208,26 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public Fields getSinkFields()
     {
-    return scheme.getSinkFields();
+    return getScheme().getSinkFields();
     }
 
   /**
    * Method openForRead opens the resource represented by this Tap instance.
    *
    * @param conf of type JobConf
-   * @return TupleIterator
+   * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleIterator openForRead( JobConf conf ) throws IOException;
+  public abstract TupleEntryIterator openForRead( JobConf conf ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
    * @param conf of type JobConf
-   * @return TupleCollector
+   * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleCollector openForWrite( JobConf conf ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( JobConf conf ) throws IOException;
 
   /**
    * Method source returns the source value as an instance of {@link Tuple}
@@ -238,18 +238,19 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public Tuple source( Object key, Object value )
     {
-    return scheme.source( key, value );
+    return getScheme().source( key, value );
     }
 
   /**
    * Method sink emits the sink value(s) to the OutputCollector
    *
-   * @param tupleEntry
-   * @param outputCollector of type OutputCollector @throws IOException when the resource cannot be written to
+   * @param tupleEntry of type TupleEntry
+   * @param outputCollector of type OutputCollector
+   * @throws java.io.IOException when the resource cannot be written to
    */
   public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
-    scheme.sink( tupleEntry, outputCollector );
+    getScheme().sink( tupleEntry, outputCollector );
     }
 
   /** @see FlowElement#outgoingScopeFor(Set<Scope>) */
@@ -410,7 +411,7 @@ public abstract class Tap implements FlowElement, Serializable
 
     Tap tap = (Tap) object;
 
-    if( scheme != null ? !scheme.equals( tap.scheme ) : tap.scheme != null )
+    if( getScheme() != null ? !getScheme().equals( tap.getScheme() ) : tap.getScheme() != null )
       return false;
 
     return true;
@@ -419,7 +420,7 @@ public abstract class Tap implements FlowElement, Serializable
   @Override
   public int hashCode()
     {
-    return scheme != null ? scheme.hashCode() : 0;
+    return getScheme() != null ? getScheme().hashCode() : 0;
     }
 
   }

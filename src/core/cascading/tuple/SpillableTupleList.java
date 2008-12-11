@@ -238,6 +238,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     }
 
 
+  /**
+   * Method iterator returns a Tuple Iterator of all the values in this collection.
+   * @return Iterator<Tuple>
+   */
   public Iterator<Tuple> iterator()
     {
     if( files.isEmpty() )
@@ -246,6 +250,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     return new SpilledListIterator();
     }
 
+  /**
+   * Method entryIterator returns a TupleEntry Iterator of all the alues in this collection.
+   * @return Iterator<TupleEntry>
+   */
   public Iterator<TupleEntry> entryIterator()
     {
     if( files.isEmpty() )

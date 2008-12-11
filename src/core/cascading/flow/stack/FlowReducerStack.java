@@ -27,13 +27,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import cascading.flow.FlowConstants;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.pipe.Each;
-import cascading.pipe.EndPipe;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -67,7 +65,7 @@ public class FlowReducerStack
     {
     this.flowProcess = flowProcess;
     this.jobConf = flowProcess.getJobConf();
-    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( FlowConstants.FLOW_STEP ) );
+    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
     buildStack();
 
@@ -133,14 +131,7 @@ public class FlowReducerStack
 
     boolean useTapCollector = false;
 
-    while( operator instanceof EndPipe )
-      {
-      useTapCollector = true;
-      nextScope = step.getNextScope( operator );
-      operator = step.getNextFlowElement( nextScope );
-      }
-
-    useTapCollector = useTapCollector || ( (Tap) operator ).isUseTapCollector();
+    useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
 
     stackTail = new TapReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator, useTapCollector );
     stackHead = (ReducerStackElement) stackTail.resolveStack();

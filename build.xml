@@ -201,7 +201,7 @@
       </classpath>
       <formatter type="plain" usefile="true"/>
 
-      <test name="${testcase}" todir="${test.results}" if="testcase"/>
+      <test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/>
       <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>

@@ -193,7 +193,7 @@ public class MultiInputFormat implements InputFormat
       }
 
     for( int i = 0; i < inputSizes.length; i++ )
-      indexedSplits[ i ] = (int) Math.ceil( numSplits * inputSizes[ i ] / totalSize );
+      indexedSplits[ i ] = (int) Math.ceil( (double) numSplits * inputSizes[ i ] / (double) totalSize );
 
     return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
     }

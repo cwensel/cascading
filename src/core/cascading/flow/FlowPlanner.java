@@ -57,10 +57,6 @@ public class FlowPlanner
   /**
    * Must be called to determine if all elements of the base pipe assembly are available
    *
-   * @param pipes
-   * @param sources
-   * @param sinks
-   * @param traps
    */
   protected void verifyAssembly( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
@@ -75,11 +71,6 @@ public class FlowPlanner
   /**
    * Creates a new ElementGraph instance.
    *
-   * @param pipes
-   * @param sources
-   * @param sinks
-   * @param traps
-   * @return
    */
   protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
@@ -201,8 +192,6 @@ public class FlowPlanner
   /**
    * Verifies that there are not only GroupAssertions following any given Group instance. This will adversely
    * affect the stream entering any subsquent Tap of Each instances.
-   *
-   * @param elementGraph
    */
   protected void failOnLoneGroupAssertion( ElementGraph elementGraph )
     {

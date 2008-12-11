@@ -29,6 +29,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.Tuple;
@@ -77,9 +78,14 @@ class TapReducerStackElement extends ReducerStackElement
     try
       {
       if( tapCollector != null )
+        {
+        ( (HadoopFlowProcess) getFlowProcess() ).getReporter().progress();
         ( (Tap) getFlowElement() ).sink( tupleEntry, tapCollector );
+        }
       else
+        {
         ( (Tap) getFlowElement() ).sink( tupleEntry, lastOutput );
+        }
       }
     catch( OutOfMemoryError error )
       {

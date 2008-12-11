@@ -43,8 +43,9 @@ import cascading.stats.FlowStats;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.tap.hadoop.S3HttpFileSystem;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -413,7 +414,7 @@ public class Flow implements Runnable
    * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()} or {@link #complete()}. Only
    * when the Flow is executed through a {@link Cascade} instance.
    *
-   * @param flowSkipStrategy
+   * @param flowSkipStrategy of type FlowSkipStrategy
    * @return FlowSkipStrategy
    */
   public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
@@ -639,7 +640,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openSource() throws IOException
+  public TupleEntryIterator openSource() throws IOException
     {
     return sources.values().iterator().next().openForRead( getJobConf() );
     }
@@ -651,7 +652,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openSource( String name ) throws IOException
+  public TupleEntryIterator openSource( String name ) throws IOException
     {
     return sources.get( name ).openForRead( getJobConf() );
     }
@@ -662,7 +663,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openSink() throws IOException
+  public TupleEntryIterator openSink() throws IOException
     {
     return sinks.values().iterator().next().openForRead( getJobConf() );
     }
@@ -674,7 +675,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openSink( String name ) throws IOException
+  public TupleEntryIterator openSink( String name ) throws IOException
     {
     return sinks.get( name ).openForRead( getJobConf() );
     }
@@ -685,7 +686,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openTrap() throws IOException
+  public TupleEntryIterator openTrap() throws IOException
     {
     return traps.values().iterator().next().openForRead( getJobConf() );
     }
@@ -697,7 +698,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when
    */
-  public TupleIterator openTrap( String name ) throws IOException
+  public TupleEntryIterator openTrap( String name ) throws IOException
     {
     return traps.get( name ).openForRead( getJobConf() );
     }
@@ -733,7 +734,7 @@ public class Flow implements Runnable
    * @return TupleIterator
    * @throws IOException when there is an error opening the resource
    */
-  public TupleIterator openTapForRead( Tap tap ) throws IOException
+  public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
     return tap.openForRead( getJobConf() );
     }
@@ -745,7 +746,7 @@ public class Flow implements Runnable
    * @return TupleCollector
    * @throws IOException when there is an error opening the resource
    */
-  public TupleCollector openTapForWrite( Tap tap ) throws IOException
+  public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
     return tap.openForWrite( getJobConf() );
     }
@@ -862,12 +863,11 @@ public class Flow implements Runnable
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-    TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( stepGraph );
+    TopologicalOrderIterator topoIterator = stepGraph.getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       {
       FlowStep step = (FlowStep) topoIterator.next();
-      step.setParentFlowName( getName() );
       FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
 
       jobsMap.put( step.getName(), flowStepJob );
@@ -1051,6 +1051,19 @@ public class Flow implements Runnable
       throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
 
     pipeGraph.writeDOT( filename );
+    }
+
+  /**
+   * Method writeStepsDOT writes this Flow step graph to the given filename as a DOT file for import into a graphics package.
+   *
+   * @param filename of type String
+   */
+  public void writeStepsDOT( String filename )
+    {
+    if( stepGraph == null )
+      throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
+
+    stepGraph.writeDOT( filename );
     }
 
   /**

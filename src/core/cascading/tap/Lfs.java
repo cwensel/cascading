@@ -34,8 +34,8 @@ import org.apache.log4j.Logger;
 /**
  * Class Lfs is a {@link Tap} class that provides access to the Local File System via Hadoop.
  * <p/>
- * Note that using a Lfs {@link Tap} instance in a {@link Flow} will force the flow to be executed
- * in "local" mode force the flow to execute in the current JVM. Mixing with {@link Dfs} and other Tap
+ * Note that using a Lfs {@link Tap} instance in a {@link Flow} will force a portion of not the whole Flow to be executed
+ * in "local" mode forcing the Flow to execute in the current JVM. Mixing with {@link Dfs} and other Tap
  * types is possible, providing a means to implement complex file/data management functions.
  * <p/>
  * Use {@link Hfs} if you need a Tap instance that inherits the default {@link FileSystem} used by Hadoop.

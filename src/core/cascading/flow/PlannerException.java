@@ -47,23 +47,37 @@ public class PlannerException extends FlowException
    * Constructor PlannerException creates a new PlannerException instance.
    *
    * @param pipe of type Pipe
-   * @param string of type String
+   * @param message of type String
    */
-  public PlannerException( Pipe pipe, String string )
+  public PlannerException( Pipe pipe, String message )
     {
-    super( Util.formatTrace( pipe, string ) );
+    super( Util.formatTrace( pipe, message ) );
     }
 
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
    * @param pipe     of type Pipe
-   * @param string    of type String
+   * @param message    of type String
    * @param throwable of type Throwable
    */
-  public PlannerException( Pipe pipe, String string, Throwable throwable )
+  public PlannerException( Pipe pipe, String message, Throwable throwable )
     {
-    super( Util.formatTrace( pipe, string ), throwable );
+    super( Util.formatTrace( pipe, message ), throwable );
+    }
+
+  /**
+   * Constructor PlannerException creates a new PlannerException instance.
+   *
+   * @param pipe of type Pipe
+   * @param message of type String
+   * @param throwable of type Throwable
+   * @param elementGraph of type ElementGraph
+   */
+  public PlannerException( Pipe pipe, String message, Throwable throwable, ElementGraph elementGraph )
+    {
+    super( Util.formatTrace( pipe, message ), throwable );
+    this.elementGraph = elementGraph;
     }
 
   /**

@@ -26,7 +26,8 @@ import java.util.Iterator;
 import cascading.tuple.Tuple;
 
 /**
- *
+ * Interface FlowCollector is the base "collector" interface used internally to pass {@link Tuple} instances
+ * between operations.
  */
 public interface FlowCollector
   {

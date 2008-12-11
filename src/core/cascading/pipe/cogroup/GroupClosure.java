@@ -22,11 +22,14 @@
 package cascading.pipe.cogroup;
 
 import java.util.Iterator;
+import java.util.Arrays;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** Class GroupClosure ... */
+/**
+ * Class GroupClosure is used internally to represent groups of tuples during grouping.
+ */
 public class GroupClosure
   {
   final Fields[] groupingFields;
@@ -36,8 +39,8 @@ public class GroupClosure
 
   public GroupClosure( Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
-    this.groupingFields = groupingFields;
-    this.valueFields = valueFields;
+    this.groupingFields = Arrays.copyOf( groupingFields, groupingFields.length );
+    this.valueFields = Arrays.copyOf( valueFields, valueFields.length );
     this.grouping = key;
     this.values = values;
     }

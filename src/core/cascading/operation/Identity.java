@@ -21,9 +21,11 @@
 
 package cascading.operation;
 
+import java.util.Arrays;
+
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
@@ -53,7 +55,7 @@ public class Identity extends BaseOperation implements Function
   public Identity( Class... types )
     {
     super( Fields.ARGS );
-    this.types = types;
+    this.types = Arrays.copyOf( types, types.length );
     }
 
   /**
@@ -67,11 +69,6 @@ public class Identity extends BaseOperation implements Function
     super( fieldDeclaration ); // don't need to set size, default is ANY
     }
 
-  protected Identity( int numArgs, Fields fieldDeclaration )
-    {
-    super( numArgs, fieldDeclaration );
-    }
-
   /**
    * Constructor Identity creates a new Identity instance that will rename the argument fields to the given
    * fieldDeclaration, and coerce the values to the give types.
@@ -82,7 +79,7 @@ public class Identity extends BaseOperation implements Function
   public Identity( Fields fieldDeclaration, Class... types )
     {
     super( fieldDeclaration );
-    this.types = types;
+    this.types = Arrays.copyOf( types, types.length );
 
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != types.length )
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
@@ -92,7 +89,7 @@ public class Identity extends BaseOperation implements Function
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     TupleEntry input = functionCall.getArguments();
-    TupleCollector outputCollector = functionCall.getOutputCollector();
+    TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 
     if( types == null || types.length == 0 )
       outputCollector.add( input );

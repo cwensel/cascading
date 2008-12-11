@@ -32,10 +32,23 @@ import cascading.tuple.Fields;
 import cascading.util.Util;
 
 /**
- * Pipes are chained together through their constructors. To effect a split in the pipe,
+ * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
+ * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy}, and
+ * {@link CoGroup}.
+ * <p/>
+ * Pipes are chained together through their constructors.
+ * <p/>
+ * To effect a split in the pipe,
  * simply pass a Pipe instance to two or more constructors of subsequent Pipe instances.
- * A join can be achieved by passing two or more Pipe instances to a {@link Group} pipe
- * (specifically the {@link CoGroup} class).
+ * </p>
+ * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} pipe.
+ * <p/>
+ * A merge can be achieved by passing two or more Pipe instances to a {@link GroupBy} pipe.
+ *
+ * @see Each
+ * @see Every
+ * @see GroupBy
+ * @see CoGroup
  */
 public class Pipe implements FlowElement, Serializable
   {

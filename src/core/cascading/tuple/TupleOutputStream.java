@@ -31,15 +31,17 @@ import org.apache.hadoop.io.WritableUtils;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * Class TupleOutputStream is used internally to write Tuples to storage.
  */
 public class TupleOutputStream extends DataOutputStream
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
 
+  /** Field WRITABLE_TOKEN  */
   public static final int WRITABLE_TOKEN = 32;
 
+  /** Field elementWriter  */
   ElementWriter elementWriter;
 
   public static interface ElementWriter
@@ -126,24 +128,29 @@ public class TupleOutputStream extends DataOutputStream
         WritableUtils.writeVInt( this, 5 );
         WritableUtils.writeVLong( this, (Long) element );
         }
-      else if( Short.class == type )
+      else if( Boolean.class == type )
         {
         WritableUtils.writeVInt( this, 6 );
+        writeBoolean( (Boolean) element );
+        }
+      else if( Short.class == type )
+        {
+        WritableUtils.writeVInt( this, 7 );
         writeShort( (Short) element );
         }
       else if( Tuple.class == type )
         {
-        WritableUtils.writeVInt( this, 7 );
+        WritableUtils.writeVInt( this, 8 );
         writeTuple( (Tuple) element );
         }
       else if( TuplePair.class == type )
         {
-        WritableUtils.writeVInt( this, 8 );
+        WritableUtils.writeVInt( this, 9 );
         writeTuplePair( (TuplePair) element );
         }
       else if( IndexTuple.class == type )
         {
-        WritableUtils.writeVInt( this, 9 );
+        WritableUtils.writeVInt( this, 10 );
         writeIndexTuple( (IndexTuple) element );
         }
       else if( element instanceof Comparable )

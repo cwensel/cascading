@@ -96,4 +96,13 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
     {
     iterator.remove();
     }
+
+  /**
+   * Method close closes all underlying resources.
+   */
+  public void close()
+    {
+    if( iterator instanceof TupleIterator )
+      ( (TupleIterator) iterator ).close();
+    }
   }

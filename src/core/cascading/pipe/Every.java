@@ -34,7 +34,7 @@ import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.Tuples;
@@ -349,7 +349,7 @@ public class Every extends Operator
     {
     EveryTupleCollector tupleCollector;
 
-    private abstract class EveryTupleCollector extends TupleCollector
+    private abstract class EveryTupleCollector extends TupleEntryCollector
       {
       TupleEntry value;
 
@@ -377,22 +377,30 @@ public class Every extends Operator
       operationCall.setArguments( null );  // zero it out
       operationCall.setOutputCollector( null ); // zero it out
       operationCall.setGroup( groupEntry );
-      getAggregator().start( flowProcess, operationCall );
+
+      try
+        {
+        getAggregator().start( flowProcess, operationCall );
+        }
+      catch( Exception exception )
+        {
+        throw new OperatorException( Every.this, "operator Every failed starting aggregator", exception );
+        }
       }
 
     public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
       {
-      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
-
-      operationCall.setArguments( arguments );
-
       try
         {
+        TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
+
+        operationCall.setArguments( arguments );
+
         getAggregator().aggregate( flowProcess, operationCall );
         }
       catch( Throwable throwable )
         {
-        throw new OperatorException( "operator Every failed executing aggregator: " + operation, throwable );
+        throw new OperatorException( Every.this, "operator Every failed executing aggregator: " + operation, throwable );
         }
       }
 
@@ -403,7 +411,14 @@ public class Every extends Operator
       operationCall.setArguments( null );
       operationCall.setOutputCollector( tupleCollector );
 
-      getAggregator().complete( flowProcess, operationCall );
+      try
+        {
+        getAggregator().complete( flowProcess, operationCall );
+        }
+      catch( Exception exception )
+        {
+        throw new OperatorException( Every.this, "operator Every failed completing aggregator", exception );
+        }
       }
     }
 
@@ -411,7 +426,7 @@ public class Every extends Operator
     {
     EveryTupleCollector tupleCollector;
 
-    private abstract class EveryTupleCollector extends TupleCollector
+    private abstract class EveryTupleCollector extends TupleEntryCollector
       {
       TupleEntry value;
 
@@ -485,7 +500,7 @@ public class Every extends Operator
         }
       catch( Throwable throwable )
         {
-        throw new OperatorException( "operator Every failed executing buffer: " + operation, throwable );
+        throw new OperatorException( Every.this, "operator Every failed executing buffer: " + operation, throwable );
         }
       }
 
@@ -516,7 +531,7 @@ public class Every extends Operator
 
       operationCall.setArguments( arguments );
 
-      getGroupAssertion().aggregate( flowProcess, operationCall );
+      getGroupAssertion().aggregate( flowProcess, operationCall ); // don't catch exceptions
       }
 
     public void complete( FlowProcess flowProcess, TupleEntry groupEntry )

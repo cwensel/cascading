@@ -21,13 +21,15 @@
 
 package cascading.operation.function;
 
+import java.util.Arrays;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollector;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
 
@@ -85,7 +87,7 @@ public class UnGroup extends BaseOperation implements Function
       }
 
     this.groupFieldSelector = groupSelector;
-    this.resultFieldSelectors = valueSelectors;
+    this.resultFieldSelectors = Arrays.copyOf( valueSelectors, valueSelectors.length );
     this.fieldDeclaration = Fields.size( groupSelector.size() + size );
     }
 
@@ -109,7 +111,7 @@ public class UnGroup extends BaseOperation implements Function
       }
 
     this.groupFieldSelector = groupSelector;
-    this.resultFieldSelectors = valueSelectors;
+    this.resultFieldSelectors = Arrays.copyOf( valueSelectors, valueSelectors.length );
     }
 
   /**
@@ -135,7 +137,7 @@ public class UnGroup extends BaseOperation implements Function
       useSize( functionCall.getArguments(), functionCall.getOutputCollector() );
     }
 
-  private void useSize( TupleEntry input, TupleCollector outputCollector )
+  private void useSize( TupleEntry input, TupleEntryCollector outputCollector )
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "using size: " + size );
@@ -152,7 +154,7 @@ public class UnGroup extends BaseOperation implements Function
       }
     }
 
-  private void useResultSelectors( TupleEntry input, TupleCollector outputCollector )
+  private void useResultSelectors( TupleEntry input, TupleEntryCollector outputCollector )
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "using result selectors: " + resultFieldSelectors.length );
