@@ -118,7 +118,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public boolean isWriteDirect()
     {
-    return writeDirect;
+    return writeDirect || getScheme().isWriteDirect();
     }
 
   /**
@@ -244,7 +244,7 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method sink emits the sink value(s) to the OutputCollector
    *
-   * @param tupleEntry of type TupleEntry
+   * @param tupleEntry      of type TupleEntry
    * @param outputCollector of type OutputCollector
    * @throws java.io.IOException when the resource cannot be written to
    */

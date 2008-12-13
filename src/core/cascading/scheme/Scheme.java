@@ -169,6 +169,16 @@ public abstract class Scheme implements Serializable
     }
 
   /**
+   * Method isWriteDirect returns true if the parent {@link Tap} instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
+   *
+   * @return the writeDirect (type boolean) of this Tap object.
+   */
+  public boolean isWriteDirect()
+    {
+    return false;
+    }
+
+  /**
    * Method sourceInit initializes this instance as a source.
    *
    * @param tap  of type Tap
