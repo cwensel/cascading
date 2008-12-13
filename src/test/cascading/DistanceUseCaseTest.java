@@ -90,7 +90,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), new Fields( 0 ), 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
@@ -178,7 +178,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 2, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new Group( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
