@@ -79,6 +79,23 @@ public class S3fs extends Hfs
    * Constructor S3fs creates a new S3fs instance.
    *
    * @param sourceFields of type Fields
+   * @param uri of type URI
+   * @param sinkMode of type SinkMode
+   */
+  public S3fs( Fields sourceFields, URI uri, SinkMode sinkMode )
+    {
+    super( sourceFields, uri.getPath(), sinkMode );
+
+    if( !uri.getScheme().equalsIgnoreCase( "s3" ) )
+      throw new IllegalArgumentException( "uri must use the s3 scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
+   * @param sourceFields of type Fields
    * @param stringPath   of type String
    */
   public S3fs( Fields sourceFields, String stringPath )
@@ -162,6 +179,22 @@ public class S3fs extends Hfs
   /**
    * Constructor S3fs creates a new S3fs instance.
    *
+   * @param scheme of type Scheme
+   * @param id of type String
+   * @param secret of type String
+   * @param bucket of type String
+   * @param stringPath of type String
+   * @param sinkMode of type SinkMode
+   */
+  public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath, SinkMode sinkMode )
+    {
+    super( scheme, stringPath, sinkMode );
+    setUriScheme( makeURI( id, secret, bucket ) );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
    * @param scheme     of type Scheme
    * @param stringPath of type String
    * @param replace    of type boolean
@@ -169,6 +202,18 @@ public class S3fs extends Hfs
   public S3fs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
+    }
+
+  /**
+   * Constructor S3fs creates a new S3fs instance.
+   *
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
+   */
+  public S3fs( Scheme scheme, String stringPath, SinkMode sinkMode )
+    {
+    super( scheme, stringPath, sinkMode );
     }
 
   @Override

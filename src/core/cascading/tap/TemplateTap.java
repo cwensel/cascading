@@ -131,6 +131,21 @@ public class TemplateTap extends SinkTap
     }
 
   /**
+   * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
+   * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
+   *
+   * @param parent       of type Tap
+   * @param pathTemplate of type String
+   * @param sinkMode     of type SinkMode
+   */
+  public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode )
+    {
+    super( parent.getScheme(), sinkMode );
+    this.parent = parent;
+    this.pathTemplate = pathTemplate;
+    }
+
+  /**
    * Method getParent returns the parent Tap of this TemplateTap object.
    *
    * @return the parent (type Tap) of this TemplateTap object.
@@ -156,6 +171,7 @@ public class TemplateTap extends SinkTap
     return true;
     }
 
+  /** @see Tap#getPath() */
   public Path getPath()
     {
     return parent.getPath();
@@ -167,21 +183,25 @@ public class TemplateTap extends SinkTap
     return new TemplateCollector( conf );
     }
 
+  /** @see Tap#makeDirs(JobConf) */
   public boolean makeDirs( JobConf conf ) throws IOException
     {
     return parent.makeDirs( conf );
     }
 
+  /** @see Tap#deletePath(JobConf) */
   public boolean deletePath( JobConf conf ) throws IOException
     {
     return parent.deletePath( conf );
     }
 
+  /** @see Tap#pathExists(JobConf) */
   public boolean pathExists( JobConf conf ) throws IOException
     {
     return parent.pathExists( conf );
     }
 
+  /** @see Tap#getPathModified(JobConf) */
   public long getPathModified( JobConf conf ) throws IOException
     {
     return parent.getPathModified( conf );

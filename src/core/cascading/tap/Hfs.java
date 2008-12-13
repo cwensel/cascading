@@ -107,38 +107,38 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param stringPath   of type String
    */
-  public Hfs( Fields sourceFields, String stringPath )
+  public Hfs( Fields fields, String stringPath )
     {
-    super( new SequenceFile( sourceFields ) );
+    super( new SequenceFile( fields ) );
     setStringPath( stringPath );
     }
 
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param stringPath   of type String
    * @param replace      of type boolean
    */
-  public Hfs( Fields sourceFields, String stringPath, boolean replace )
+  public Hfs( Fields fields, String stringPath, boolean replace )
     {
-    super( new SequenceFile( sourceFields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
+    super( new SequenceFile( fields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
     }
 
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param stringPath   of type String
    * @param sinkMode     of type SinkMode
    */
-  public Hfs( Fields sourceFields, String stringPath, SinkMode sinkMode )
+  public Hfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
-    super( new SequenceFile( sourceFields ), sinkMode );
+    super( new SequenceFile( fields ), sinkMode );
     setStringPath( stringPath );
     }
 

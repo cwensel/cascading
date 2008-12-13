@@ -40,12 +40,12 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param uri          of type URI
    */
-  public Dfs( Fields sourceFields, URI uri )
+  public Dfs( Fields fields, URI uri )
     {
-    super( sourceFields, uri.getPath() );
+    super( fields, uri.getPath() );
 
     if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
       throw new IllegalArgumentException( "uri must use the hdfs scheme" );
@@ -56,13 +56,13 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param uri          of type URI
    * @param replace      of type boolean
    */
-  public Dfs( Fields sourceFields, URI uri, boolean replace )
+  public Dfs( Fields fields, URI uri, boolean replace )
     {
-    super( sourceFields, uri.getPath(), replace );
+    super( fields, uri.getPath(), replace );
 
     if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
       throw new IllegalArgumentException( "uri must use the hdfs scheme" );
@@ -73,24 +73,53 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields of type Fields
-   * @param stringPath   of type String
+   * @param fields of type Fields
+   * @param uri of type URI
+   * @param sinkMode of type SinkMode
    */
-  public Dfs( Fields sourceFields, String stringPath )
+  public Dfs( Fields fields, URI uri, SinkMode sinkMode )
     {
-    super( sourceFields, stringPath );
+    super( fields, uri.getPath(), sinkMode );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
     }
 
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
+   * @param stringPath   of type String
+   */
+  public Dfs( Fields fields, String stringPath )
+    {
+    super( fields, stringPath );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param fields of type Fields
    * @param stringPath   of type String
    * @param replace      of type boolean
    */
-  public Dfs( Fields sourceFields, String stringPath, boolean replace )
+  public Dfs( Fields fields, String stringPath, boolean replace )
     {
-    super( sourceFields, stringPath, replace );
+    super( fields, stringPath, replace );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param fields of type Fields
+   * @param stringPath   of type String
+   * @param sinkMode     of type SinkMode
+   */
+  public Dfs( Fields fields, String stringPath, SinkMode sinkMode )
+    {
+    super( fields, stringPath, sinkMode );
     }
 
   Dfs( Scheme scheme )
@@ -134,6 +163,23 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
+   * @param scheme of type Scheme
+   * @param uri of type URI
+   * @param sinkMode of type SinkMode
+   */
+  public Dfs( Scheme scheme, URI uri, SinkMode sinkMode )
+    {
+    super( scheme, uri.getPath(), sinkMode );
+
+    if( !uri.getScheme().equalsIgnoreCase( "hdfs" ) )
+      throw new IllegalArgumentException( "uri must use the hdfs scheme" );
+
+    setUriScheme( URI.create( uri.getScheme() + "://" + uri.getAuthority() ) );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
@@ -152,6 +198,18 @@ public class Dfs extends Hfs
   public Dfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
+    }
+
+  /**
+   * Constructor Dfs creates a new Dfs instance.
+   *
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
+   */
+  public Dfs( Scheme scheme, String stringPath, SinkMode sinkMode )
+    {
+    super( scheme, stringPath, sinkMode );
     }
 
   protected void setStringPath( String stringPath )

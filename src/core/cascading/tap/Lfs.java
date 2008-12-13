@@ -42,23 +42,20 @@ import org.apache.log4j.Logger;
  */
 public class Lfs extends Hfs
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Lfs.class );
+  Lfs( Scheme scheme )
+    {
+    super( scheme );
+    }
 
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param sourceFields of type Fields
+   * @param fields of type Fields
    * @param stringPath   of type String
    */
-  public Lfs( Fields sourceFields, String stringPath )
+  public Lfs( Fields fields, String stringPath )
     {
-    super( new SequenceFile( sourceFields ), stringPath );
-    }
-
-  Lfs( Scheme scheme )
-    {
-    super( scheme );
+    super( fields, stringPath );
     }
 
   /**
@@ -82,6 +79,30 @@ public class Lfs extends Hfs
   public Lfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
+    }
+
+  /**
+   * Constructor Lfs creates a new Lfs instance.
+   *
+   * @param fields of type Fields
+   * @param stringPath   of type String
+   * @param sinkMode     of type SinkMode
+   */
+  public Lfs( Fields fields, String stringPath, SinkMode sinkMode )
+    {
+    super( fields, stringPath, sinkMode );
+    }
+
+  /**
+   * Constructor Lfs creates a new Lfs instance.
+   *
+   * @param scheme     of type Scheme
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
+   */
+  public Lfs( Scheme scheme, String stringPath, SinkMode sinkMode )
+    {
+    super( scheme, stringPath, sinkMode );
     }
 
   protected void setStringPath( String stringPath )

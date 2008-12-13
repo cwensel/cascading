@@ -45,6 +45,11 @@ public abstract class SinkTap extends Tap
     super( scheme );
     }
 
+  protected SinkTap( Scheme scheme, SinkMode sinkMode )
+    {
+    super(scheme, sinkMode );
+    }
+
   @Override
   public Fields getSourceFields()
     {
