@@ -47,11 +47,13 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleIterator;
-import cascading.tuple.TupleListCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleListCollector;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/BasicPipesTest.java#2 $ */
+/**
+ * These tests execute basic function using field positions, not names. so there will be duplicates with
+ * FieldedPipestest
+ */
 public class BasicPipesTest extends CascadingTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";

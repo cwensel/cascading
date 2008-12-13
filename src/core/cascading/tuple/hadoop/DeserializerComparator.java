@@ -96,9 +96,16 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       }
     catch( IOException e )
       {
-      throw new RuntimeException( e );
+      throw new CascadingException( e );
       }
 
-    return compare( key1, key2 );
+    try
+      {
+      return compare( key1, key2 );
+      }
+    catch( ClassCastException exception )
+      {
+      throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of different types", exception );
+      }
     }
   }
