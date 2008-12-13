@@ -400,8 +400,6 @@ public class Util
 
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
-    DOTExporter dot = new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider );
-
-    dot.export( writer, graph );
+    new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
     }
   }

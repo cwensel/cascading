@@ -113,9 +113,9 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
    * Method getCreateFlowStep ...
    *
    * @param flowName
-   *@param steps    of type Map<String, FlowStep>
+   * @param steps    of type Map<String, FlowStep>
    * @param sinkPath of type String
-   * @param numJobs @return FlowStep
+   * @param numJobs  @return FlowStep
    */
   private FlowStep getCreateFlowStep( String flowName, Map<String, FlowStep> steps, String sinkPath, int numJobs )
     {
@@ -153,12 +153,12 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
     while( topoIterator.hasNext() )
       {
-      FlowElement source = topoIterator.next();
+      Tap source = topoIterator.next();
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling source: " + source );
 
-      List<Tap> sinks = Graphs.successorListOf( tapGraph, (Tap) source );
+      List<Tap> sinks = Graphs.successorListOf( tapGraph, source );
 
       for( Tap sink : sinks )
         {
@@ -271,31 +271,47 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
    */
   public void writeDOT( String filename )
     {
-    printElementGraph( filename, this );
+    printElementGraph( filename );
     }
 
-  protected void printElementGraph( String filename, final SimpleDirectedGraph<FlowStep, Integer> graph )
+  protected void printElementGraph( String filename )
     {
     try
       {
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, graph, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
+      Util.writeDOT( writer, this, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
       {
       public String getVertexName( FlowStep object )
         {
+        String sourceName = "";
+
+        for( Tap source : object.sources.keySet() )
+          {
+          if( source instanceof TempHfs )
+            continue;
+
+          sourceName += "[" + source.getPath() + "]";
+          }
+
+        String sinkName = object.sink instanceof TempHfs ? "" : "[" + object.sink.getPath() + "]";
+
         String groupName = object.group == null ? "" : object.group.getName();
 
-        return ( "["+object.getName()+"]" + groupName ).replaceAll( "\"", "\'" );
+        String name = "[" + object.getName() + "]";
+
+        if( sourceName.length() != 0 )
+          name += "\\nsrc:" + sourceName;
+
+        if( groupName.length() != 0 )
+          name += "\\n" + groupName;
+
+        if( sinkName.length() != 0 )
+          name += "\\nsnk:" + sinkName;
+
+        return name.replaceAll( "\"", "\'" );
         }
-      }, new EdgeNameProvider<Integer>()
-      {
-      public String getEdgeName( Integer object )
-        {
-//        return graph.getEdgeSource( object ).sink.toString().replaceAll( "\"", "\'" );
-        return "";
-        }
-      } );
+      }, null );
 
       writer.close();
       }
