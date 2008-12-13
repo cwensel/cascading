@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+0.10.0
 
   Changed c.p.CoGroup "repeat" parameter to numSelfJoins to respresent the actual number of self joins to be performed.
   Thus a value of 1, will cause a single self join of a pipe. Users will need to decrement the current value by 1.
