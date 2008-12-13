@@ -44,10 +44,10 @@ public class CoGroupClosure extends GroupClosure
   /** Field groups */
   SpillableTupleList[] groups;
 
-  public CoGroupClosure( FlowProcess flowProcess, int repeat, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
+  public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
     {
     super( groupingFields, valueFields, key, values );
-    build( flowProcess, repeat );
+    build( flowProcess, numSelfJoins );
     }
 
   @Override
@@ -70,10 +70,10 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ];
     }
 
-  public void build( FlowProcess flowProcess, int repeat )
+  public void build( FlowProcess flowProcess, int numSelfJoins )
     {
     int numPipes = groupingFields.length;
-    groups = new SpillableTupleList[Math.max( numPipes, repeat )];
+    groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
       groups[ i ] = new SpillableTupleList( getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold ) );
@@ -87,14 +87,14 @@ public class CoGroupClosure extends GroupClosure
         {
         LOG.debug( "group pos: " + pos );
 
-        if( repeat != 1 )
-          LOG.debug( "repeating: " + repeat );
+        if( numSelfJoins != 0 )
+          LOG.debug( "numSelfJoins: " + numSelfJoins );
         }
 
       groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
       }
 
-    for( int i = 1; i < repeat; i++ )
+    for( int i = 1; i < numSelfJoins + 1; i++ )
       groups[ i ] = groups[ 0 ];
     }
 

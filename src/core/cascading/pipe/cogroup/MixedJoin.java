@@ -56,9 +56,10 @@ public class MixedJoin implements Joiner
     return new JoinIterator( closure );
     }
 
+  /** @see Joiner#numJoins() */
   public int numJoins()
     {
-    return asInner.length;
+    return asInner.length - 1;
     }
 
   protected class JoinIterator extends OuterJoin.JoinIterator

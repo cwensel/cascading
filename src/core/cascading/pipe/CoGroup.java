@@ -34,6 +34,9 @@ import cascading.tuple.Fields;
  * to overcome field name collisions.
  * <p/>
  * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
+ * <p/>
+ * Self joins an be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
+ * 1 for numSelfJoins will join the Pipe with itself once.
  *
  * @see cascading.pipe.cogroup.InnerJoin
  * @see cascading.pipe.cogroup.OuterJoin
@@ -244,118 +247,118 @@ public class CoGroup extends Group
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins         of type int
    * @param declaredFields of type Fields
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
-    super( pipe, groupFields, repeat, declaredFields );
+    super( pipe, groupFields, numSelfJoins, declaredFields );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins         of type int
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
-    super( pipe, groupFields, repeat, declaredFields, joiner );
+    super( pipe, groupFields, numSelfJoins, declaredFields, joiner );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param numSelfJoins      of type int
    * @param joiner      of type CoGrouper
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
-    super( pipe, groupFields, repeat, joiner );
+    super( pipe, groupFields, numSelfJoins, joiner );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param numSelfJoins      of type int
    */
-  public CoGroup( Pipe pipe, Fields groupFields, int repeat )
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins )
     {
-    super( pipe, groupFields, repeat );
+    super( pipe, groupFields, numSelfJoins );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param groupName      of type String
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins         of type int
    * @param declaredFields of type Fields
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
-    super( groupName, pipe, groupFields, repeat, declaredFields );
+    super( groupName, pipe, groupFields, numSelfJoins, declaredFields );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param groupName      of type String
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins         of type int
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
-    super( groupName, pipe, groupFields, repeat, declaredFields, joiner );
+    super( groupName, pipe, groupFields, numSelfJoins, declaredFields, joiner );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param groupName   of type String
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param numSelfJoins      of type int
    * @param joiner      of type CoGrouper
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
-    super( groupName, pipe, groupFields, repeat, joiner );
+    super( groupName, pipe, groupFields, numSelfJoins, joiner );
     }
 
   /**
-   * Constructor CoGroup creates a new CoGroup instance that performs repeat number of self joins on the
+   * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
    * @param groupName   of type String
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param numSelfJoins      of type int
    */
-  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int repeat )
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins )
     {
-    super( groupName, pipe, groupFields, repeat );
+    super( groupName, pipe, groupFields, numSelfJoins );
     }
   }

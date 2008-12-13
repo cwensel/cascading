@@ -69,7 +69,7 @@ public class Group extends Pipe
   /** Field declaredFields */
   protected Fields declaredFields;
   /** Field repeat */
-  private int repeat = 1;
+  private int numSelfJoins = 0;
   /** Field coGrouper */
   private Joiner joiner;
   /** Field groupName */
@@ -318,12 +318,12 @@ public class Group extends Pipe
    *
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
-    this( pipe, groupFields, repeat );
+    this( pipe, groupFields, numSelfJoins );
     this.declaredFields = declaredFields;
     }
 
@@ -332,13 +332,13 @@ public class Group extends Pipe
    *
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
+  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
-    this( pipe, groupFields, repeat, declaredFields );
+    this( pipe, groupFields, numSelfJoins, declaredFields );
     this.joiner = joiner;
 
     verifyCoGrouper();
@@ -347,14 +347,14 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param repeat      of type int
-   * @param joiner      of type CoGrouper
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param numSelfJoins of type int
+   * @param joiner       of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
+  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
-    this( pipe, groupFields, repeat );
+    this( pipe, groupFields, numSelfJoins );
     this.joiner = joiner;
 
     verifyCoGrouper();
@@ -363,15 +363,15 @@ public class Group extends Pipe
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param numSelfJoins of type int
    */
-  public Group( Pipe pipe, Fields groupFields, int repeat )
+  public Group( Pipe pipe, Fields groupFields, int numSelfJoins )
     {
     addPipe( pipe );
     this.groupFieldsMap.put( pipe.getName(), groupFields );
-    this.repeat = repeat;
+    this.numSelfJoins = numSelfJoins;
     }
 
   /**
@@ -380,12 +380,12 @@ public class Group extends Pipe
    * @param groupName      of type String
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
-    this( pipe, groupFields, repeat, declaredFields );
+    this( pipe, groupFields, numSelfJoins, declaredFields );
     this.groupName = groupName;
     }
 
@@ -395,42 +395,42 @@ public class Group extends Pipe
    * @param groupName      of type String
    * @param pipe           of type Pipe
    * @param groupFields    of type Fields
-   * @param repeat         of type int
+   * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Fields declaredFields, Joiner joiner )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
-    this( pipe, groupFields, repeat, declaredFields, joiner );
+    this( pipe, groupFields, numSelfJoins, declaredFields, joiner );
     this.groupName = groupName;
     }
 
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName   of type String
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param repeat      of type int
-   * @param joiner      of type CoGrouper
+   * @param groupName    of type String
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param numSelfJoins of type int
+   * @param joiner       of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat, Joiner joiner )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
-    this( pipe, groupFields, repeat, joiner );
+    this( pipe, groupFields, numSelfJoins, joiner );
     this.groupName = groupName;
     }
 
   /**
    * Constructor Group creates a new Group instance.
    *
-   * @param groupName   of type String
-   * @param pipe        of type Pipe
-   * @param groupFields of type Fields
-   * @param repeat      of type int
+   * @param groupName    of type String
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param numSelfJoins of type int
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int repeat )
+  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins )
     {
-    this( pipe, groupFields, repeat );
+    this( pipe, groupFields, numSelfJoins );
     this.groupName = groupName;
     }
 
@@ -618,10 +618,10 @@ public class Group extends Pipe
     if( joiner.numJoins() == -1 )
       return;
 
-    int joins = Math.max( repeat, groupFieldsMap.size() );
+    int joins = Math.max( numSelfJoins, groupFieldsMap.size() - 1 ); // joining two streams is one join
 
     if( joins != joiner.numJoins() )
-      throw new IllegalArgumentException( "invalid cogrouper, only accepts " + joiner.numJoins() + " joins, expects: " + joins );
+      throw new IllegalArgumentException( "invalid cogrouper, only accepts " + joiner.numJoins() + " joins, there are: " + joins );
     }
 
   /**
@@ -815,7 +815,7 @@ public class Group extends Pipe
         valuesFields[ pos ] = incomingScope.getOutValuesFields();
         }
 
-      closure = new CoGroupClosure( flowProcess, repeat, groupFields, valuesFields, (Tuple) key, values );
+      closure = new CoGroupClosure( flowProcess, numSelfJoins, groupFields, valuesFields, (Tuple) key, values );
       }
 
     if( joiner == null )
@@ -832,6 +832,11 @@ public class Group extends Pipe
   public boolean isGroupBy()
     {
     return isGroupBy;
+    }
+
+  boolean isSelfJoin()
+    {
+    return numSelfJoins != 0;
     }
 
   // FIELDS
@@ -935,8 +940,8 @@ public class Group extends Pipe
 
       if( declaredFields != null ) // null for GroupBy
         {
-        if( incomingScopes.size() != pipes.size() && repeat == 1 )
-          throw new OperatorException( this, "self joins without intermediate operators are not permitted, see 'repeat' constructor or identity function" );
+        if( incomingScopes.size() != pipes.size() && isSelfJoin() )
+          throw new OperatorException( this, "self joins without intermediate operators are not permitted, see 'numSelfJoins' constructor or identity function" );
 
         int size = 0;
         boolean foundUnknown = false;
@@ -954,10 +959,10 @@ public class Group extends Pipe
           }
 
         // we must relax field checking in the face of unkown fields
-        if( !foundUnknown && declaredFields.size() != size * repeat )
+        if( !foundUnknown && declaredFields.size() != size * ( numSelfJoins + 1 ) )
           {
-          if( repeat != 1 )
-            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " != size: " + size * repeat );
+          if( isSelfJoin() )
+            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " != size: " + size * ( numSelfJoins + 1 ) );
           else
             throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " resolved: " + Util.print( resolvedFields, "" ) );
           }
@@ -1080,8 +1085,8 @@ public class Group extends Pipe
       buffer.append( groupFieldsMap.get( name ).print() );
       }
 
-    if( repeat != 1 )
-      buffer.append( "[repeat:" ).append( repeat ).append( "]" );
+    if( isSelfJoin() )
+      buffer.append( "[numSelfJoins:" ).append( numSelfJoins ).append( "]" );
 
     buffer.append( "]" );
 
@@ -1106,8 +1111,8 @@ public class Group extends Pipe
         buffer.append( map.get( name ).print() );
         }
 
-      if( repeat != 1 )
-        buffer.append( "[repeat:" ).append( repeat ).append( "]" );
+      if( isSelfJoin() )
+        buffer.append( "[numSelfJoins:" ).append( numSelfJoins ).append( "]" );
       }
 
     buffer.append( "]" );
