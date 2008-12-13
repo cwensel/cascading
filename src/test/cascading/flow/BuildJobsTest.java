@@ -451,7 +451,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Pipe pipe = new Pipe( "pipe" );
 
-    Pipe merge = new CoGroup( "cogroup", pipe, new Fields( "offset" ), 2, Fields.size( 4 ) );
+    Pipe merge = new CoGroup( "cogroup", pipe, new Fields( "offset" ), 1, Fields.size( 4 ) );
 
     Map sources = new HashMap();
     sources.put( "pipe", source1 );
