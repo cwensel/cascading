@@ -21,6 +21,8 @@
 
 package cascading.flow;
 
+import cascading.pipe.Pipe;
+
 /**
  * Class ElementGraphException is thrown during rendering of a pipe assembly to
  * the Cascading internal "graph" representation.
@@ -99,5 +101,13 @@ public class ElementGraphException extends FlowException
   public FlowElement getFlowElement()
     {
     return flowElement;
+    }
+
+  Pipe getPipe()
+    {
+    if(flowElement instanceof Pipe)
+      return (Pipe) flowElement;
+
+    return null;
     }
   }

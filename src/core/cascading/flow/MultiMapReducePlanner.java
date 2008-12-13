@@ -226,10 +226,10 @@ public class MultiMapReducePlanner extends FlowPlanner
       if(cause instanceof OperatorException )
         throw new PlannerException( message, cause, elementGraph );
 
-      throw new PlannerException( (Pipe) exception.getFlowElement(), message, cause, elementGraph );
+      throw new PlannerException( exception.getPipe(), message, cause, elementGraph );
       }
     catch( Exception exception )
-      {
+      {                                
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );

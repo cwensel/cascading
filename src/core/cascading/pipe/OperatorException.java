@@ -56,19 +56,19 @@ public class OperatorException extends CascadingException
     }
 
   /** @see cascading.CascadingException#CascadingException(String) */
-  public OperatorException( String string )
+  protected OperatorException( String string )
     {
     super( string );
     }
 
   /** @see cascading.CascadingException#CascadingException(String, Throwable) */
-  public OperatorException( String string, Throwable throwable )
+  protected OperatorException( String string, Throwable throwable )
     {
     super( string, throwable );
     }
 
   /** @see cascading.CascadingException#CascadingException(Throwable) */
-  public OperatorException( Throwable throwable )
+  protected OperatorException( Throwable throwable )
     {
     super( throwable );
     }

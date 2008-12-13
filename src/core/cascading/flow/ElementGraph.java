@@ -124,11 +124,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         continue;
 
       if( flowElement instanceof Pipe )
-        throw new ElementGraphException( "no Tap instance given to connect Pipe " + flowElement.toString() );
+        throw new ElementGraphException( flowElement, "no Tap instance given to connect Pipe " + flowElement.toString() );
       else if( flowElement instanceof Tap )
-        throw new ElementGraphException( "no Pipe instance given to connect Tap " + flowElement.toString() );
+        throw new ElementGraphException( flowElement, "no Pipe instance given to connect Tap " + flowElement.toString() );
       else
-        throw new ElementGraphException( "unknown element type: " + flowElement );
+        throw new ElementGraphException( flowElement, "unknown element type: " + flowElement );
       }
     }
 
@@ -237,7 +237,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         LOG.debug( "adding edge: " + previous + " -> " + current );
 
       if( getEdge( previous, current ) != null )
-        throw new ElementGraphException( "cannot distinguish pipe branches, give pipe unique name: " + previous );
+        throw new ElementGraphException( previous, "cannot distinguish pipe branches, give pipe unique name: " + previous );
 
       addEdge( previous, current ).setName( previous.getName() ); // name scope after previous pipe
       }
@@ -452,18 +452,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
 
     while( iterator.hasNext() )
-      {
-      FlowElement element = iterator.next();
-
-      try
-        {
-        resolveFields( element );
-        }
-      catch( OperatorException exception )
-        {
-        throw new ElementGraphException( element, "could not resolve fields", exception );
-        }
-      }
+      resolveFields( iterator.next() );
 
     resolved = true;
     }

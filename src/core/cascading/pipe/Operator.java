@@ -309,7 +309,7 @@ public abstract class Operator extends Pipe
       }
     catch( Exception exception )
       {
-      throw new OperatorException( "could not resolve argument selector in: " + this, exception );
+      throw new OperatorException( this, "could not resolve argument selector in: " + this, exception );
       }
     }
 
@@ -340,7 +340,7 @@ public abstract class Operator extends Pipe
       }
     catch( Exception exception )
       {
-      throw new OperatorException( "could not resolve declared fields in:  " + this, exception );
+      throw new OperatorException( this, "could not resolve declared fields in:  " + this, exception );
       }
     }
 

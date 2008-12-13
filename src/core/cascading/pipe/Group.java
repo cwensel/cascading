@@ -914,7 +914,7 @@ public class Group extends Pipe
       }
     catch( RuntimeException exception )
       {
-      throw new OperatorException( "could not resolve sorting selector in: " + this, exception );
+      throw new OperatorException( this, "could not resolve sorting selector in: " + this, exception );
       }
     }
 
@@ -1021,7 +1021,7 @@ public class Group extends Pipe
       }
     catch( RuntimeException exception )
       {
-      throw new OperatorException( "could not resolve declared fields in: " + this, exception );
+      throw new OperatorException( this, "could not resolve declared fields in: " + this, exception );
       }
     }
 

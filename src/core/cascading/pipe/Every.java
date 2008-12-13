@@ -267,7 +267,7 @@ public class Every extends Operator
       }
     catch( Exception exception )
       {
-      throw new OperatorException( "could not resolve outgoing grouping in: " + this, exception );
+      throw new OperatorException( this, "could not resolve outgoing grouping in: " + this, exception );
       }
     }
 
@@ -280,7 +280,7 @@ public class Every extends Operator
       }
     catch( Exception exception )
       {
-      throw new OperatorException( "could not resolve outgoing values selector in: " + this, exception );
+      throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
       }
     }
 
