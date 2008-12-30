@@ -87,7 +87,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
     assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
 
-    fields = fields.minus( aFields );
+    fields = fields.subtract( aFields );
 
     assertEquals( "not equal: tuple.size()", 4, tuple.size() );
     assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( fields, new Fields( "two" ) ).get( 0 ) );

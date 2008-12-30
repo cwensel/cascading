@@ -898,7 +898,7 @@ public class Group extends Pipe
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
-          incomingFields = incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+          incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
         else
           incomingFields = resolveFields( incomingScope ).select( selector );
 

@@ -104,7 +104,7 @@ public class FieldsTest extends CascadingTestCase
     Fields fieldA = new Fields( "a", "b" );
     Fields fieldB = new Fields( "a" );
 
-    Fields diff = fieldA.minus( fieldB );
+    Fields diff = fieldA.subtract( fieldB );
 
     assertEquals( "not equal: ", 1, diff.size() );
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
@@ -126,7 +126,7 @@ public class FieldsTest extends CascadingTestCase
     Fields fieldA = new Fields( "a", "b" );
     Fields fieldB = new Fields( "b", "a" );
 
-    Fields diff = fieldA.minus( fieldB );
+    Fields diff = fieldA.subtract( fieldB );
 
     assertEquals( "not equal: ", 0, diff.size() );
     }
@@ -136,7 +136,7 @@ public class FieldsTest extends CascadingTestCase
     Fields fieldA = new Fields( "a", "b" );
     Fields fieldB = new Fields( 0 );
 
-    Fields diff = fieldA.minus( fieldB );
+    Fields diff = fieldA.subtract( fieldB );
 
     assertEquals( "not equal: ", 1, diff.size() );
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
@@ -147,7 +147,7 @@ public class FieldsTest extends CascadingTestCase
     Fields fieldA = new Fields( "a", "b" );
     Fields fieldB = new Fields( 1 );
 
-    Fields diff = fieldA.minus( fieldB );
+    Fields diff = fieldA.subtract( fieldB );
 
     assertEquals( "not equal: ", 1, diff.size() );
     assertEquals( "not equal: ", "a", diff.get( 0 ) );
@@ -160,7 +160,7 @@ public class FieldsTest extends CascadingTestCase
 
     try
       {
-      Fields diff = fieldA.minus( fieldB );
+      Fields diff = fieldA.subtract( fieldB );
       fail( "did not throw exception" );
       }
     catch( Exception exception )

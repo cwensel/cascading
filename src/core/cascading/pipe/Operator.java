@@ -284,7 +284,7 @@ public abstract class Operator extends Pipe
       return incomingScope.getOutGroupingFields();
 
     if( outputSelector.isValues() )
-      return incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+      return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
     return Fields.resolve( outputSelector, resolveFields( incomingScope ), declared );
     }
@@ -303,7 +303,7 @@ public abstract class Operator extends Pipe
         return incomingScope.getOutGroupingFields();
 
       if( argumentSelector.isValues() )
-        return incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+        return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
       return resolveIncomingOperationFields( incomingScope ).select( argumentSelector );
       }
@@ -334,7 +334,7 @@ public abstract class Operator extends Pipe
 
       // VALUES is the diff between all fields and group fields
       if( fieldDeclaration.isValues() )
-        return incomingScope.getOutValuesFields().minus( incomingScope.getOutGroupingFields() );
+        return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
       return fieldDeclaration;
       }

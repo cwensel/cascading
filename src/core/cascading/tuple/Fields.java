@@ -744,12 +744,14 @@ public final class Fields implements Comparable, Iterable, Serializable
     }
 
   /**
-   * Method minus returns the difference between this instance and the given fields instance.
+   * Method subtract returns the difference between this instance and the given fields instance.
+   * <p/>
+   * See {@link #append(Fields)} for adding field names.
    *
    * @param fields of type Fields
    * @return Fields
    */
-  public Fields minus( Fields fields )
+  public Fields subtract( Fields fields )
     {
     Fields minus = new Fields();
 
@@ -772,6 +774,8 @@ public final class Fields implements Comparable, Iterable, Serializable
 
   /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
+   * <p/>
+   * See {@link #subtract(Fields)} for removing field names.
    *
    * @param fields of type Fields
    * @return Fields
