@@ -25,7 +25,9 @@ import java.io.File;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.operation.AssertionLevel;
 import cascading.operation.Identity;
+import cascading.operation.assertion.AssertSizeMoreThan;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -118,7 +120,7 @@ public class RegressionPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( Fields.UNKNOWN ) );
 
-//    pipe = new Each( pipe, new Debug() );
+    pipe = new Each( pipe, AssertionLevel.STRICT, new AssertSizeMoreThan( 3 ) );
 
     pipe = new Each( pipe, new Fields( 0, 1, -1 ), new Identity( new Fields( "name", "second", "last" ) ) );
 
