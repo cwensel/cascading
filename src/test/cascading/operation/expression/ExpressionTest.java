@@ -22,8 +22,8 @@
 package cascading.operation.expression;
 
 import cascading.CascadingTestCase;
-import cascading.operation.ConcreteCall;
 import cascading.flow.FlowProcess;
+import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -71,8 +71,11 @@ public class ExpressionTest extends CascadingTestCase
 
     names = new String[]{"a", "b", "c"};
     types = new Class[]{float.class, String.class, String.class};
-
     assertEquals( true, evaluate( "b.equals(\"1\") && (a == 2.0) && c.equals(\"2\")", names, types, getEntry( 2.0, "1", "2" ) ) );
+
+    names = new String[]{"a", "b", "$2"};
+    types = new Class[]{float.class, String.class, String.class};
+    assertEquals( true, evaluate( "b.equals(\"1\") && (a == 2.0) && $2.equals(\"2\")", names, types, getEntry( 2.0, "1", "2" ) ) );
     }
 
   private Comparable evaluate( String expression, Class type, TupleEntry tupleEntry )
