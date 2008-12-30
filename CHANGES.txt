@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Renamed c.t.Fields#minus to subtract.
+
 0.10.0
 
   Changed c.p.CoGroup "repeat" parameter to numSelfJoins to respresent the actual number of self joins to be performed.
