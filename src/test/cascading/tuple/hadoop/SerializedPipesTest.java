@@ -38,7 +38,7 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
@@ -111,7 +111,7 @@ public class SerializedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new InsertBytes( new Fields( "bytes" ), "inserted text as bytes" ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 

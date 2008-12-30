@@ -42,7 +42,6 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
@@ -93,7 +92,7 @@ public class BuildJobsTest extends CascadingTestCase
   public void testName()
     {
     Pipe count = new Pipe( "count" );
-    Pipe pipe = new Group( count, new Fields( 1 ) );
+    Pipe pipe = new GroupBy( count, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
     assertEquals( "not equal: count.getName()", "count", count.getName() );
@@ -112,7 +111,7 @@ public class BuildJobsTest extends CascadingTestCase
     sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
-    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
     List steps = new FlowConnector().connect( sources, sinks, pipe ).getSteps();
@@ -145,7 +144,7 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipe = new Pipe( "count" );
     pipe = new Each( pipe, new Fields( 1 ), new Identity(), new Fields( 2 ) ); // in:second out:all
     pipe = new Each( pipe, new Fields( 0 ), new Identity( new Fields( "_all" ) ), new Fields( 1 ) ); // in:all out:_all
-    pipe = new Group( pipe, new Fields( 0 ) ); // in:_all out:_all
+    pipe = new GroupBy( pipe, new Fields( 0 ) ); // in:_all out:_all
     pipe = new Every( pipe, new Fields( 0 ), new Count(), new Fields( 0, 1 ) ); // in:_all out:_all,count
 
     List steps = new FlowConnector().connect( sources, sinks, pipe ).getSteps();
@@ -178,7 +177,7 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe splice = new Group( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
+    Pipe splice = new CoGroup( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
 
     sinks.put( splice.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
@@ -215,7 +214,7 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe cogroup = new Group( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
+    Pipe cogroup = new CoGroup( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
 
     cogroup = new Each( cogroup, new Identity() );
 
@@ -251,7 +250,7 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe splice = new Group( pipeA, pipeB );
+    Pipe splice = new CoGroup( pipeA, pipeB );
 
     splice = new Each( splice, new Identity() );
 
@@ -341,7 +340,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Fields( "ip" ), new Count(), new Fields( "ip", "count" ) );
 
@@ -959,8 +958,8 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "a" );
 
-    Pipe group1 = new Group( "a1", pipeA );
-    Pipe group2 = new Group( "a2", pipeB );
+    Pipe group1 = new GroupBy( "a1", pipeA, Fields.FIRST );
+    Pipe group2 = new GroupBy( "a2", pipeB, Fields.FIRST );
 
     Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
 
@@ -988,8 +987,8 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe group1 = new Group( pipeA );
-    Pipe group2 = new Group( pipeB );
+    Pipe group1 = new GroupBy( pipeA );
+    Pipe group2 = new GroupBy( pipeB );
 
     Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
 
@@ -1014,8 +1013,8 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe group1 = new Group( pipeA );
-    Pipe group2 = new Group( pipeB );
+    Pipe group1 = new GroupBy( pipeA );
+    Pipe group2 = new GroupBy( pipeB );
 
     Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
 
@@ -1044,8 +1043,8 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
-    Pipe group1 = new Group( pipeA );
-    Pipe group2 = new Group( pipeB );
+    Pipe group1 = new GroupBy( pipeA );
+    Pipe group2 = new GroupBy( pipeB );
 
     Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
 
@@ -1071,7 +1070,7 @@ public class BuildJobsTest extends CascadingTestCase
     sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
-    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
 
     List steps = new FlowConnector().connect( sources, sinks, pipe ).getSteps();
@@ -1102,7 +1101,7 @@ public class BuildJobsTest extends CascadingTestCase
     sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
-    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
@@ -1127,7 +1126,7 @@ public class BuildJobsTest extends CascadingTestCase
     sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
-    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
 

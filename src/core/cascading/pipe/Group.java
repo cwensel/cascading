@@ -40,9 +40,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleException;
 import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
-import cascading.tuple.TupleException;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
@@ -89,7 +89,7 @@ public class Group extends Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, null );
     }
@@ -104,7 +104,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields );
     this.declaredFields = declaredFields;
@@ -122,7 +122,7 @@ public class Group extends Pipe
    * @param rhsGroupFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, null, joiner );
     }
@@ -135,7 +135,7 @@ public class Group extends Pipe
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    */
-  public Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
     {
     this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ) );
     }
@@ -145,7 +145,7 @@ public class Group extends Pipe
    *
    * @param pipes of type Pipe...
    */
-  public Group( Pipe... pipes )
+  protected Group( Pipe... pipes )
     {
     this( pipes, (Fields[]) null );
     }
@@ -156,7 +156,7 @@ public class Group extends Pipe
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
    */
-  public Group( Pipe[] pipes, Fields[] groupFields )
+  protected Group( Pipe[] pipes, Fields[] groupFields )
     {
     this( null, pipes, groupFields, null, null );
     }
@@ -169,7 +169,7 @@ public class Group extends Pipe
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
    */
-  public Group( String groupName, Pipe[] pipes, Fields[] groupFields )
+  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields )
     {
     this( groupName, pipes, groupFields, null, null );
     }
@@ -182,7 +182,7 @@ public class Group extends Pipe
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
    */
-  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields )
+  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields )
     {
     this( groupName, pipes, groupFields, declaredFields, null );
     }
@@ -195,7 +195,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
+  protected Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
     this( null, pipes, groupFields, declaredFields, joiner );
     }
@@ -209,7 +209,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
+  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
     this.groupName = groupName;
 
@@ -247,7 +247,7 @@ public class Group extends Pipe
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
     this.groupName = groupName;
@@ -264,7 +264,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
     this.groupName = groupName;
@@ -280,7 +280,7 @@ public class Group extends Pipe
    * @param rhsGroupFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
     this.groupName = groupName;
@@ -295,7 +295,7 @@ public class Group extends Pipe
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    */
-  public Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields );
     this.groupName = groupName;
@@ -307,7 +307,7 @@ public class Group extends Pipe
    * @param groupName of type String
    * @param pipes     of type Pipe...
    */
-  public Group( String groupName, Pipe... pipes )
+  protected Group( String groupName, Pipe... pipes )
     {
     this( pipes );
     this.groupName = groupName;
@@ -321,7 +321,7 @@ public class Group extends Pipe
    * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
-  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
     this( pipe, groupFields, numSelfJoins );
     this.declaredFields = declaredFields;
@@ -336,7 +336,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields );
     this.joiner = joiner;
@@ -352,7 +352,7 @@ public class Group extends Pipe
    * @param numSelfJoins of type int
    * @param joiner       of type CoGrouper
    */
-  public Group( Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins );
     this.joiner = joiner;
@@ -367,7 +367,7 @@ public class Group extends Pipe
    * @param groupFields  of type Fields
    * @param numSelfJoins of type int
    */
-  public Group( Pipe pipe, Fields groupFields, int numSelfJoins )
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins )
     {
     addPipe( pipe );
     this.groupFieldsMap.put( pipe.getName(), groupFields );
@@ -383,7 +383,7 @@ public class Group extends Pipe
    * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields );
     this.groupName = groupName;
@@ -399,7 +399,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields, joiner );
     this.groupName = groupName;
@@ -414,7 +414,7 @@ public class Group extends Pipe
    * @param numSelfJoins of type int
    * @param joiner       of type CoGrouper
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, joiner );
     this.groupName = groupName;
@@ -428,7 +428,7 @@ public class Group extends Pipe
    * @param groupFields  of type Fields
    * @param numSelfJoins of type int
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins )
     {
     this( pipe, groupFields, numSelfJoins );
     this.groupName = groupName;
@@ -443,7 +443,7 @@ public class Group extends Pipe
    *
    * @param pipe of type Pipe
    */
-  public Group( Pipe pipe )
+  protected Group( Pipe pipe )
     {
     this( null, pipe, Fields.ALL, null, false );
     }
@@ -454,7 +454,7 @@ public class Group extends Pipe
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    */
-  public Group( Pipe pipe, Fields groupFields )
+  protected Group( Pipe pipe, Fields groupFields )
     {
     this( null, pipe, groupFields, null, false );
     }
@@ -466,7 +466,7 @@ public class Group extends Pipe
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields )
+  protected Group( String groupName, Pipe pipe, Fields groupFields )
     {
     this( groupName, pipe, groupFields, null, false );
     }
@@ -478,7 +478,7 @@ public class Group extends Pipe
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
-  public Group( Pipe pipe, Fields groupFields, Fields sortFields )
+  protected Group( Pipe pipe, Fields groupFields, Fields sortFields )
     {
     this( null, pipe, groupFields, sortFields, false );
     }
@@ -491,7 +491,7 @@ public class Group extends Pipe
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields )
     {
     this( groupName, pipe, groupFields, sortFields, false );
     }
@@ -504,7 +504,7 @@ public class Group extends Pipe
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
-  public Group( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
+  protected Group( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     this( null, pipe, groupFields, sortFields, reverseOrder );
     }
@@ -518,7 +518,7 @@ public class Group extends Pipe
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
-  public Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
+  protected Group( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     this( groupName, Pipe.pipes( pipe ), groupFields, sortFields, reverseOrder );
     }
@@ -529,7 +529,7 @@ public class Group extends Pipe
    * @param pipes       of type Pipe
    * @param groupFields of type Fields
    */
-  public Group( Pipe[] pipes, Fields groupFields )
+  protected Group( Pipe[] pipes, Fields groupFields )
     {
     this( null, pipes, groupFields, null, false );
     }
@@ -541,7 +541,7 @@ public class Group extends Pipe
    * @param pipes       of type Pipe
    * @param groupFields of type Fields
    */
-  public Group( String groupName, Pipe[] pipes, Fields groupFields )
+  protected Group( String groupName, Pipe[] pipes, Fields groupFields )
     {
     this( groupName, pipes, groupFields, null, false );
     }
@@ -553,7 +553,7 @@ public class Group extends Pipe
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
-  public Group( Pipe[] pipes, Fields groupFields, Fields sortFields )
+  protected Group( Pipe[] pipes, Fields groupFields, Fields sortFields )
     {
     this( null, pipes, groupFields, sortFields, false );
     }
@@ -566,7 +566,7 @@ public class Group extends Pipe
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
-  public Group( String groupName, Pipe[] pipe, Fields groupFields, Fields sortFields )
+  protected Group( String groupName, Pipe[] pipe, Fields groupFields, Fields sortFields )
     {
     this( groupName, pipe, groupFields, sortFields, false );
     }
@@ -579,7 +579,7 @@ public class Group extends Pipe
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
-  public Group( Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+  protected Group( Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     this( null, pipes, groupFields, sortFields, reverseOrder );
     }
@@ -593,7 +593,7 @@ public class Group extends Pipe
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
-  public Group( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
+  protected Group( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     this.isGroupBy = true;
     this.groupName = groupName;

@@ -22,15 +22,15 @@
 package cascading.operation.assertion;
 
 import cascading.CascadingTestCase;
+import cascading.TestConstants;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
-import cascading.TestConstants;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -68,7 +68,7 @@ public class BuildAssertionsTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 7L ) );
 

@@ -31,13 +31,12 @@ import cascading.operation.Insert;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 
 /**
@@ -67,7 +66,7 @@ public class FunctionTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Insert( new Fields( "A", "B" ), "a", "b" ) );
 
-    pipe = new Group( pipe, new Fields( "A" ) );
+    pipe = new GroupBy( pipe, new Fields( "A" ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 

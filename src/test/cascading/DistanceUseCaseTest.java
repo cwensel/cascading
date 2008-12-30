@@ -39,9 +39,9 @@ import cascading.operation.aggregator.Sum;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
@@ -50,7 +50,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
@@ -90,7 +89,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), new Fields( 0 ), 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new CoGroup( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
@@ -102,7 +101,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new SortElements( new Fields( "name1", "rate1" ), new Fields( "name2", "rate2" ) ) );
 
     // unique the pipe
-    pipe = new Group( pipe, Fields.ALL );
+    pipe = new GroupBy( pipe, Fields.ALL );
     pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     // calculate square of diff
@@ -119,7 +118,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new Fields( "rate1", "rate2" ), sqDiff, Fields.ALL );
 
     // sum and sqr for each name pair
-    pipe = new Group( pipe, new Fields( "name1", "name2" ) );
+    pipe = new GroupBy( pipe, new Fields( "name1", "name2" ) );
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {
@@ -178,7 +177,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new UnGroup( new Fields( "name", "movie", "rate" ), Fields.FIRST, 2 ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
+    pipe = new CoGroup( pipe, new Fields( "movie" ), 1, new Fields( "name1", "movie", "rate1", "name2", "movie2", "rate2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Fields( "movie", "name1", "rate1", "name2", "rate2" ), new Identity() );
@@ -208,7 +207,7 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     pipe = new Each( pipe, new Fields( "rate1", "rate2" ), sqDiff, Fields.ALL );
 
     // sum and sqr for each name pair
-    pipe = new Group( pipe, new Fields( "name1", "name2" ) );
+    pipe = new GroupBy( pipe, new Fields( "name1", "name2" ) );
 
     Sum distance = new Sum( new Fields( "distance" ) )
     {

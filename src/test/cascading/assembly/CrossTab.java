@@ -26,9 +26,9 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
@@ -56,7 +56,7 @@ public class CrossTab extends SubAssembly
     Pipe pipe = new Each( previous, argumentFieldSelector, new Identity( new Fields( "n", "l", "v" ) ) );
 
     // name and rate against others of same movie
-    pipe = new Group( pipe, new Fields( "l" ), 1, new Fields( "n1", "l", "v1", "n2", "l2", "v2" ) );
+    pipe = new CoGroup( pipe, new Fields( "l" ), 1, new Fields( "n1", "l", "v1", "n2", "l2", "v2" ) );
 
     // remove useless fields
     pipe = new Each( pipe, new Fields( "l", "n1", "v1", "n2", "v2" ), new Identity() );
@@ -73,7 +73,7 @@ public class CrossTab extends SubAssembly
     pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     // out: name1, name2, movie, name1, rate1, name2, rate2
-    pipe = new Group( pipe, new Fields( "n1", "n2" ) );
+    pipe = new GroupBy( pipe, new Fields( "n1", "n2" ) );
 
     // out: movie, name1, rate1, name2, rate2, score
     pipe = new Every( pipe, new Fields( "v1", "v2" ), crossTabOperation );

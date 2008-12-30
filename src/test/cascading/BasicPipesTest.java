@@ -37,9 +37,10 @@ import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -85,7 +86,7 @@ public class BasicPipesTest extends CascadingTestCase
     Tap sink = new Hfs( new TextLine(), outputPath + "/count", true );
 
     Pipe pipe = new Pipe( "count" );
-    pipe = new Group( pipe, new Fields( 1 ) );
+    pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
@@ -145,7 +146,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( 1 ), parser, new Fields( 2 ) );
 
-    pipe = new Group( pipe, new Fields( 0 ) );
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
 
     Aggregator counter = new Count();
 
@@ -174,7 +175,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( -1 ), parser, new Fields( -1 ) );
 
-    pipe = new Group( pipe, new Fields( 0 ) );
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
 
     Aggregator counter = new Count();
 
@@ -210,7 +211,7 @@ public class BasicPipesTest extends CascadingTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( 1 ), splitter, Fields.RESULTS );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( 1 ), splitter, Fields.RESULTS );
 
-    Pipe splice = new Group( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ) );
+    Pipe splice = new CoGroup( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ) );
 
     Flow countFlow = new FlowConnector().connect( sources, sink, splice );
 
@@ -308,12 +309,12 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( 1 ), parser, new Fields( 2 ) );
 
-    pipe = new Group( pipe, new Fields( 0 ) );
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
 
     pipe = new Every( pipe, new Fields( 0 ), new Count(), new Fields( 0, 1 ) );
 
     // add a second group to force a new map/red
-    pipe = new Group( pipe, new Fields( 0 ) );
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 

@@ -23,7 +23,7 @@ package cascading.detail;
 
 import cascading.TestAggregator;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -33,7 +33,7 @@ public class EveryAssemblyFactory extends AssemblyFactory
   {
   public Pipe createAssembly( Pipe pipe, Fields argFields, Fields declFields, String fieldValue, Fields selectFields )
     {
-    pipe = new Group( pipe, Fields.ALL );
+    pipe = new GroupBy( pipe, Fields.ALL );
 
     return new Every( pipe, argFields, new TestAggregator( declFields, new Tuple( fieldValue ) ), selectFields );
     }

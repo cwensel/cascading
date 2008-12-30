@@ -35,7 +35,7 @@ import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -77,7 +77,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
@@ -110,7 +110,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
@@ -159,7 +159,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), setLevel, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
@@ -210,7 +210,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
@@ -243,7 +243,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), AssertionLevel.STRICT, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 
@@ -292,7 +292,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), setLevel, new AssertMatches( "^POST" ) );
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "method", "count" ) ); // count is a long value
 

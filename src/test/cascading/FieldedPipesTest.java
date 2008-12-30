@@ -39,10 +39,9 @@ import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.TestConstants;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
@@ -93,7 +92,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
@@ -122,7 +121,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
@@ -151,7 +150,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
@@ -221,7 +220,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
     Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
@@ -241,6 +240,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   /**
    * Specifically tests GroupBy will return the correct grouping fields to the following Every
+   *
    * @throws Exception
    */
   public void testSimpleMergeThree() throws Exception
@@ -415,7 +415,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), new Identity( new Fields( "value" ) ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "value" ) );
+    pipe = new GroupBy( pipe, new Fields( "value" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
 
@@ -451,11 +451,11 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
 
-    pipe = new Group( pipe, new Fields( "method" ) );
+    pipe = new GroupBy( pipe, new Fields( "method" ) );
 
     pipe = new Each( pipe, new Fields( "method" ), new Identity( new Fields( "value" ) ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "value" ) );
+    pipe = new GroupBy( pipe, new Fields( "value" ) );
 
     pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
 
@@ -494,6 +494,7 @@ public class FieldedPipesTest extends ClusterTestCase
 //    }
 
   //
+
   public void testCross() throws Exception
     {
     if( !new File( inputFileLhs ).exists() )
@@ -510,7 +511,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
     Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
 
-    Pipe cross = new Group( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+    Pipe cross = new CoGroup( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cross/", true );
@@ -627,7 +628,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new Fields( "ip" ), new Count(), new Fields( "ip", "count" ) );
 
@@ -695,7 +696,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
     pipe = new Every( pipe, new TestAggregator( new Fields( "count1" ), new Fields( "ip" ), new Tuple( "first1" ), new Tuple( "first2" ) ) );
     pipe = new Every( pipe, new TestAggregator( new Fields( "count2" ), new Fields( "ip" ), new Tuple( "second" ), new Tuple( "second2" ), new Tuple( "second3" ) ) );

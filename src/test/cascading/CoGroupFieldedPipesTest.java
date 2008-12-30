@@ -24,8 +24,8 @@ package cascading;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
@@ -39,7 +39,6 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.LeftJoin;
@@ -50,7 +49,6 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
@@ -194,7 +192,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
     pipeUpper = new Each( pipeUpper, new Fields( "num" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
-    pipeUpper = new Group( pipeUpper, new Fields( "num" ) );
+    pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
 
@@ -717,7 +715,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
 
-    Pipe cogroup = new Group( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+    Pipe cogroup = new CoGroup( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 
@@ -802,7 +800,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
-    Pipe cogroup = new Group( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 

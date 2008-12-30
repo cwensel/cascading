@@ -29,7 +29,7 @@ import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -60,7 +60,7 @@ public class BasicTrapTest extends CascadingTestCase
     // always fail
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -96,7 +96,7 @@ public class BasicTrapTest extends CascadingTestCase
     // always fail
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( "reduce", pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -124,7 +124,7 @@ public class BasicTrapTest extends CascadingTestCase
     pipe = new Pipe( "middle", pipe );
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group("reduce", pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
@@ -151,7 +151,7 @@ public class BasicTrapTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
 
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
     pipe = new Pipe( "first", pipe );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
     pipe = new Pipe( "second", pipe );

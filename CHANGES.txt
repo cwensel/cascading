@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed all constructors on c.p.Group to be protected. Must now use subclasses to construct.
+
   Renamed c.t.Fields#minus to subtract.
 
 0.10.0

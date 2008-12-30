@@ -29,7 +29,7 @@ import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -59,7 +59,7 @@ public class UseTapCollectorTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new Group( pipe, new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "tap", true );
