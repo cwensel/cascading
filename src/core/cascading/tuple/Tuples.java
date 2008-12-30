@@ -83,19 +83,19 @@ public class Tuples
     else if( type == String.class )
       return tuple.getString( pos );
     else if( type == Integer.class || type == int.class )
-      return tuple.getInteger( pos );
-    else if( type == Long.class || type == long.class )
-      return tuple.getLong( pos );
-    else if( type == Double.class || type == double.class )
-      return tuple.getDouble( pos );
-    else if( type == Float.class || type == float.class )
-      return tuple.getFloat( pos );
-    else if( type == Short.class || type == short.class )
-      return tuple.getShort( pos );
-    else if( type == Boolean.class || type == boolean.class )
-      return tuple.getBoolean( pos );
-    else if( type != null )
-      throw new OperationException( "could not coerce value, " + tuple.get( pos ) + " to type: " + type.getName() );
+        return tuple.getInteger( pos );
+      else if( type == Long.class || type == long.class )
+          return tuple.getLong( pos );
+        else if( type == Double.class || type == double.class )
+            return tuple.getDouble( pos );
+          else if( type == Float.class || type == float.class )
+              return tuple.getFloat( pos );
+            else if( type == Short.class || type == short.class )
+                return tuple.getShort( pos );
+              else if( type == Boolean.class || type == boolean.class )
+                  return tuple.getBoolean( pos );
+                else if( type != null )
+                    throw new OperationException( "could not coerce value, " + tuple.get( pos ) + " to type: " + type.getName() );
 
     return null;
     }
@@ -149,7 +149,7 @@ public class Tuples
    */
   public static Tuple extract( TupleEntry tupleEntry, Fields selector )
     {
-    return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector ) );
+    return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
     }
 
   public static Tuple setOnEmpty( TupleEntry baseEntry, TupleEntry valuesEntry )

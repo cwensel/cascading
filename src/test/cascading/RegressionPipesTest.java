@@ -99,4 +99,37 @@ public class RegressionPipesTest extends ClusterTestCase
     validateLength( flow, 5, null );
     }
 
+  /**
+   * tests that a selector will select something other than the first position from an UNKNOWN tuple
+   *
+   * @throws Exception
+   */
+  public void testVarWidth() throws Exception
+    {
+    if( !new File( inputFileCritics ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileCritics );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileCritics );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/varwidth", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( Fields.UNKNOWN ) );
+
+//    pipe = new Each( pipe, new Debug() );
+
+    pipe = new Each( pipe, new Fields( 0, 1, -1 ), new Identity( new Fields( "name", "second", "last" ) ) );
+
+//    pipe = new Each( pipe, new Debug() );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "unknownselect.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 7 );
+    }
   }

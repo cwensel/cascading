@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where positional selectors failed against Fields.UNKNOWN.
+
   Changed all constructors on c.p.Group to be protected. Must now use subclasses to construct.
 
   Renamed c.t.Fields#minus to subtract.

@@ -603,7 +603,13 @@ public final class Fields implements Comparable, Iterable, Serializable
 
   final int[] getPos( Fields fields )
     {
-    if( getPosCache().containsKey( fields ) )
+    return getPos( fields, -1 );
+    }
+
+  final int[] getPos( Fields fields, int tupleSize )
+    {
+    // test for key, as we stuff a null value
+    if( !isUnknown() && getPosCache().containsKey( fields ) )
       return getPosCache().get( fields );
 
     if( fields.isAll() )
@@ -612,9 +618,17 @@ public final class Fields implements Comparable, Iterable, Serializable
     if( isAll() )
       return putReturn( fields, fields.getPos() );
 
+    // don't cache unknown
     if( size() == 0 && isUnknown() )
-      return putReturn( fields, fields.getPos() );
+      return translatePos( fields, tupleSize );
 
+    int[] pos = translatePos( fields, size() );
+
+    return putReturn( fields, pos );
+    }
+
+  private int[] translatePos( Fields fields, int fieldSize )
+    {
     int[] pos = new int[fields.size()];
 
     for( int i = 0; i < fields.size(); i++ )
@@ -622,12 +636,12 @@ public final class Fields implements Comparable, Iterable, Serializable
       Comparable field = fields.get( i );
 
       if( field instanceof Number )
-        pos[ i ] = translatePos( (Integer) field );
+        pos[ i ] = translatePos( (Integer) field, fieldSize );
       else
         pos[ i ] = indexOf( field );
       }
 
-    return putReturn( fields, pos );
+    return pos;
     }
 
   final int translatePos( Integer integer )
@@ -760,7 +774,7 @@ public final class Fields implements Comparable, Iterable, Serializable
 
     List<Comparable> list = new LinkedList<Comparable>();
     Collections.addAll( list, this.get() );
-    int[] pos = getPos( fields );
+    int[] pos = getPos( fields, -1 );
 
     for( int i : pos )
       list.set( i, null );

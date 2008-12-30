@@ -367,7 +367,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     if( !declarator.isUnknown() && elements.size() != declarator.size() )
       throw new TupleException( "field declaration: " + declarator.print() + ", does not match tuple: " + print() );
 
-    return get( declarator.getPos( selector ) );
+    return get( declarator.getPos( selector, size() ) );
     }
 
   /**
@@ -454,7 +454,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     {
     verifyModifiable();
 
-    int[] pos = declarator.getPos( fields );
+    int[] pos = declarator.getPos( fields, size() );
 
     for( int i = 0; i < pos.length; i++ )
       elements.set( pos[ i ], tuple.get( i ) );
@@ -502,7 +502,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public Tuple remove( Fields declarator, Fields selector )
     {
-    return remove( declarator.getPos( selector ) );
+    return remove( declarator.getPos( selector, size() ) );
     }
 
   /**
