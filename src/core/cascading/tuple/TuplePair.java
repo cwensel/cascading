@@ -154,4 +154,10 @@ public class TuplePair extends Tuple
     {
     return tuples[ 0 ].print() + tuples[ 1 ].print();
     }
+
+  @Override
+  public String print()
+    {
+    return tuples[ 0 ].print() + tuples[ 1 ].print();
+    }
   }

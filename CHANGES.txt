@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.t.TuplePair threw a NPE during dubugging.
+
   Fixed bug where positional selectors failed against Fields.UNKNOWN.
 
   Changed all constructors on c.p.Group to be protected. Must now use subclasses to construct.
