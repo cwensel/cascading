@@ -64,23 +64,6 @@ unreleased
   in a c.c.Cascade. The default implementation is c.f.FlowSkipIfSinkStale, with an optional c.f.FlowSkipIfSinkExists.
   Setting a skip strategy on a Cascade overrides all Flow instance strategies.
 
-  Updated c.o.Debug to allow for printing field names and tuple values in intervals.
-
-  Changed planner to fail if traps are not contained within single Map or Reduce tasks. This prevents the chance of
-  multiple tasks writing to the same output location. Hadoop only partially supports appends, so it is not currently
-  possible to append subsequent jobs to existing trap files. Naming sections of a pipe assembly allows traps to be
-  bound to smaller sections of assemblies.
-
-  c.o.f.Sample and c.o.f.Limit Filters. Sample allows a given percentage of Tuples to pass. Limit only allows the
-  specified number of Tuples to pass.
-
-  c.p.Pipe instances now capture line numbers and classnames where they are instantiated so this information
-  can be printed out during planner failures.
-
-  Added c.f.FlowSkipStrategy interface to allow for pluggable rules for when to skip executing a c.f.Flow participating
-  in a c.c.Cascade. The default implementation is c.f.FlowSkipIfSinkStale, with an optional c.f.FlowSkipIfSinkExists.
-  Setting a skip strategy on a Cascade overrides all Flow instance strategies.
-
   Fixed bug with c.t.Tuple#remove() method not correctly removing values from Tuple.
 
   Updated c.t.Tap api to support c.t.SinkMode enums. This opens up ability to support appends in the near future.
