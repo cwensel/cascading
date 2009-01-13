@@ -375,10 +375,6 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     TupleEntryIterator iterator = countFlow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
-
     Set<String> results = new HashSet<String>();
 
     results.add( "1\ta\t1\tA" );
