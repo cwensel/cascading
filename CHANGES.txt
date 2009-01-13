@@ -1,6 +1,8 @@
 Cascading Change Log
 
-unreleased
+1.0.0
+
+  Updated copyright messages.
 
   Fixed bug where c.t.TuplePair threw a NPE during dubugging.
 

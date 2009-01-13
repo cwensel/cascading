@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * Interface FlowSkipStrategy is used to create new strategies that decide when a {@link Flow} should
  * be skipped when executed in a {@link cascading.cascade.Cascade}. The default strategy is
- * {@link cascading.flow.FlowSkipIfSinkStale}. 
+ * {@link cascading.flow.FlowSkipIfSinkStale}.
  *
  * @see cascading.flow.FlowSkipIfSinkExists
  * @see cascading.flow.FlowSkipIfSinkStale

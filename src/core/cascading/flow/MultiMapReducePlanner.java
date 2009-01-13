@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -229,7 +229,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       throw new PlannerException( exception.getPipe(), message, cause, elementGraph );
       }
     catch( Exception exception )
-      {                                
+      {
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
