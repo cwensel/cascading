@@ -375,9 +375,19 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     TupleEntryIterator iterator = countFlow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "5\tb\t5\tE", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "5\te\t5\tE", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "", iterator.next().get( 1 ) );
+
+    Set<String> results = new HashSet<String>();
+
+    results.add( "1\ta\t1\tA" );
+    results.add( "5\tb\t5\tE" );
+    results.add( "5\te\t5\tE" );
+
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -603,6 +613,8 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\tb\t5\tE" );
     results.add( "5\te\t5\tE" );
 
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
     assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
     assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
     assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
