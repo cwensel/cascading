@@ -66,11 +66,27 @@
 
   <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
 
-  <path id="project.class.path">
+  <path id="build.class.path">
     <pathelement location="${build.core}"/>
     <pathelement location="${build.xml}"/>
     <pathelement location="${build.test}"/>
+  </path>
 
+  <path id="jars.class.path">
+    <fileset dir="${build}" erroronmissingdir="false">
+      <include name="cascading-core-*.jar"/>
+      <include name="cascading-xml-*.jar"/>
+      <include name="cascading-test-*.jar"/>
+    </fileset>
+
+    <fileset dir="${basedir}" erroronmissingdir="false">
+      <include name="cascading-core-*.jar"/>
+      <include name="cascading-xml-*.jar"/>
+      <include name="cascading-test-*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="deps.class.path">
     <fileset dir="${lib}">
       <include name="*.jar"/>
     </fileset>
@@ -101,6 +117,16 @@
     <fileset dir="${hadoop.home}/lib/jetty-ext">
       <include name="*.jar"/>
     </fileset>
+  </path>
+
+  <path id="project.class.path">
+    <path refid="build.class.path"/>
+    <path refid="deps.class.path"/>
+  </path>
+
+  <path id="package.class.path">
+    <path refid="jars.class.path"/>
+    <path refid="deps.class.path"/>
   </path>
 
   <path id="project.src.path">
@@ -192,8 +218,7 @@
       <sysproperty key="test.build.data" value="data"/>
       <sysproperty key="hadoop.log.dir" value="build/test/log"/>
 
-      <!--<jvmarg value="-Xdebug"/>-->
-      <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
+      <!--<jvmarg value="-Xdebug"/>--><!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
 
       <classpath>
         <path refid="project.class.path"/>
@@ -203,6 +228,60 @@
 
       <test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/>
       <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
+        <fileset dir="${src.test}">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+  </target>
+
+  <target name="run-test-package">
+    <echo message="running all packaged cascading tests..."/>
+
+    <mkdir dir="package-tests"/>
+
+    <untar src="cascading-${cascading.release.version}.tgz" compression="gzip" dest="package-tests"/>
+
+    <!-- hack to support data files in test packages -->
+    <unzip src="package-tests/cascading-${cascading.release.version}/${jar.cascading-test}"
+           dest="package-tests/cascading-${cascading.release.version}/build/test">
+      <patternset>
+        <include name="data/**"/>
+      </patternset>
+    </unzip>
+
+    <ant inheritAll="false" antfile="package-tests/cascading-${cascading.release.version}/build.xml"
+         target="test-package">
+      <property name="hadoop.home" value="${hadoop.home}"/>
+    </ant>
+
+  </target>
+
+  <target name="test-package">
+    <echo message="running all packaged cascading tests..."/>
+
+    <mkdir dir="tests"/>
+    <mkdir dir="tests/log"/>
+    <mkdir dir="tests/results"/>
+
+    <junit printsummary="true" showoutput="${test.showoutput}" fork="yes" haltonerror="no" haltonfailure="no" dir="."
+           maxmemory="756m">
+
+      <sysproperty key="test.cluster.enabled" value="${test.cluster.enabled}"/>
+      <sysproperty key="test.build.data" value="tests/data"/>
+      <sysproperty key="hadoop.log.dir" value="tests/log"/>
+
+      <!--<jvmarg value="-Xdebug"/>--><!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
+
+      <classpath>
+        <path refid="package.class.path"/>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+      <formatter type="plain" usefile="true"/>
+
+      <test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/>
+      <batchtest todir="tests/results" haltonfailure="${test.haltonerror}" unless="testcase">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>
         </fileset>
@@ -261,6 +340,7 @@
     <jar jarfile="${build}/${jar.cascading-test}" manifest="${build}/MANIFEST.MF" compress="yes">
       <fileset dir="${build.test}">
         <include name="cascading/**"/>
+        <include name="data/**"/>
         <include name="log4j.properties"/>
         <include name="hadoop-site.xml"/>
       </fileset>
@@ -304,6 +384,8 @@
 
         <exclude name="build/**"/>
         <exclude name="dist/**"/>
+        <exclude name="tests/**"/>
+        <exclude name="package-tests/**"/>
         <exclude name="www/**"/>
         <exclude name="log/**"/>
 
@@ -318,6 +400,7 @@
     <copy file="${build}/${jar.cascading}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-core}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-xml}" todir="${dist}"/>
+    <copy file="${build}/${jar.cascading-test}" todir="${dist}"/>
 
   </target>
 
