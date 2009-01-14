@@ -304,6 +304,8 @@
     <delete dir="${javadoc}"/>
     <delete dir="${dist}"/>
     <delete dir="${log}"/>
+    <delete dir="package-tests"/>
+    <delete dir="tests"/>
 
     <delete>
       <fileset dir="." includes="${ant.project.name}*.tgz"/>
