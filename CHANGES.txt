@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where unsafe filename characters were leaking into temporary filenames.
+
   Changed SinkMode.APPEND support checks to be done in c.t.Hfs, instead of c.t.Tap.
 
 1.0.0

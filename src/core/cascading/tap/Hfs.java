@@ -383,7 +383,7 @@ public class Hfs extends Tap
 
   protected String makeTemporaryPathDir( String name )
     {
-    return name.replaceAll( " ", "_" ).replaceAll( "/", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
+    return name.replaceAll( "[//W//s]", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
     }
 
   /**
