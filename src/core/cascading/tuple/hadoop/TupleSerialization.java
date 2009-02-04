@@ -281,12 +281,26 @@ public class TupleSerialization extends Configured implements Serialization
 
   Serializer getNewSerializer( Class type )
     {
-    return getSerializationFactory().getSerializer( type );
+    try
+      {
+      return getSerializationFactory().getSerializer( type );
+      }
+    catch( NullPointerException exception )
+      {
+      throw new CascadingException("unable to load serializer for: " + type.getName() + " from: " + getSerializationFactory().getClass().getName() );
+      }
     }
 
   Deserializer getNewDeserializer( String className )
     {
-    return getSerializationFactory().getDeserializer( getClass( className ) );
+    try
+      {
+      return getSerializationFactory().getDeserializer( getClass( className ) );
+      }
+    catch( NullPointerException exception )
+      {
+      throw new CascadingException("unable to load deserializer for: " + className + " from: " + getSerializationFactory().getClass().getName() );
+      }
     }
 
   TuplePairDeserializer getTuplePairDeserializer()

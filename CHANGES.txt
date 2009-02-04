@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Improved error message for the case a Hadoop serializer/deserializer cannot be found.
+
   Changed c.s.Scheme sourceFields default to Fields.UKNOWN. sinkFields default remains Fields.ALL.
 
   Fixed bug where unsafe filename characters were leaking into temporary filenames.
