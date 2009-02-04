@@ -140,6 +140,9 @@ public class Hfs extends Tap
     {
     super( new SequenceFile( fields ), sinkMode );
     setStringPath( stringPath );
+
+    if( sinkMode == SinkMode.APPEND )
+      throw new IllegalArgumentException( "appends are not supported" );
     }
 
   /**

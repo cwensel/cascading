@@ -91,9 +91,6 @@ public abstract class Tap implements FlowElement, Serializable
     {
     this.setScheme( scheme );
     this.sinkMode = sinkMode;
-
-    if( sinkMode == SinkMode.APPEND )
-      throw new IllegalArgumentException( "appends are not supported" );
     }
 
   protected void setScheme( Scheme scheme )

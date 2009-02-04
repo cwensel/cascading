@@ -1,6 +1,10 @@
 Cascading Change Log
 
-1.0.0 
+unreleased
+
+  Changed SinkMode.APPEND support checks to be done in c.t.Hfs, instead of c.t.Tap.
+
+1.0.0
 
   Updated copyright messages.
 
