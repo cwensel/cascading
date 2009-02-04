@@ -287,7 +287,7 @@ public class TupleSerialization extends Configured implements Serialization
       }
     catch( NullPointerException exception )
       {
-      throw new CascadingException("unable to load serializer for: " + type.getName() + " from: " + getSerializationFactory().getClass().getName() );
+      throw new CascadingException( "unable to load serializer for: " + type.getName() + " from: " + getSerializationFactory().getClass().getName() );
       }
     }
 
@@ -299,7 +299,7 @@ public class TupleSerialization extends Configured implements Serialization
       }
     catch( NullPointerException exception )
       {
-      throw new CascadingException("unable to load deserializer for: " + className + " from: " + getSerializationFactory().getClass().getName() );
+      throw new CascadingException( "unable to load deserializer for: " + className + " from: " + getSerializationFactory().getClass().getName() );
       }
     }
 
@@ -377,7 +377,7 @@ public class TupleSerialization extends Configured implements Serialization
     else if( c == TuplePair.class )
       return getTuplePairDeserializer();
     else if( c == IndexTuple.class )
-      return getIndexTupleDeserializer();
+        return getIndexTupleDeserializer();
 
     throw new IllegalArgumentException( "unknown class, cannot deserialize: " + c.getName() );
     }
@@ -395,7 +395,7 @@ public class TupleSerialization extends Configured implements Serialization
     else if( c == TuplePair.class )
       return getTuplePairSerializer();
     else if( c == IndexTuple.class )
-      return getIndexTupleSerializer();
+        return getIndexTupleSerializer();
 
     throw new IllegalArgumentException( "unknown class, cannot serialize: " + c.getName() );
     }
