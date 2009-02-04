@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.s.Scheme sourceFields default to Fields.UKNOWN. sinkFields default remains Fields.ALL.
+
   Fixed bug where unsafe filename characters were leaking into temporary filenames.
 
   Changed SinkMode.APPEND support checks to be done in c.t.Hfs, instead of c.t.Tap.

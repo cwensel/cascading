@@ -51,7 +51,7 @@ public abstract class Scheme implements Serializable
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;
   /** Field sourceFields */
-  Fields sourceFields;
+  Fields sourceFields = Fields.UNKNOWN;
   /** Field numSinkParts */
   int numSinkParts;
 
