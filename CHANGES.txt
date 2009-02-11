@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug preventing c.t.TemplateTap from being written to in Reducer.
+
 1.0.1
 
   Improved error message for the case a Hadoop serializer/deserializer cannot be found.
