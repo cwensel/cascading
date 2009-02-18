@@ -930,6 +930,17 @@ public final class Fields implements Comparable, Iterable, Serializable
     return "[" + toString() + "]";
     }
 
+  /**
+   * Method printLong returns a String representation of this instance along with the size.
+   *
+   * @return String
+   */
+  public String printVerbose()
+    {
+    return "[{" + ( isDefined() ? size() : "?" ) + "}" + toString() + "]";
+    }
+
+
   @Override
   public String toString()
     {

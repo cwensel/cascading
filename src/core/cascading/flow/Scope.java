@@ -409,16 +409,16 @@ public class Scope implements Serializable
         {
         if( buffer.length() != 0 )
           buffer.append( "," );
-        buffer.append( name ).append( groupingSelectors.get( name ).print() );
+        buffer.append( name ).append( groupingSelectors.get( name ).printVerbose() );
         }
 
       buffer.append( "\n" );
       }
 
     if( outGroupingFields != null )
-      buffer.append( getOutGroupingFields().print() ).append( "\n" );
+      buffer.append( getOutGroupingFields().printVerbose() ).append( "\n" );
 
-    buffer.append( getOutValuesFields().print() );
+    buffer.append( getOutValuesFields().printVerbose() );
 
     return buffer.toString();
     }

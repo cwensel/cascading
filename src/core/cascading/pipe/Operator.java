@@ -254,19 +254,19 @@ public abstract class Operator extends Pipe
   void verifyDeclared( Fields declared )
     {
     if( declared.isDefined() && declared.size() == 0 )
-      throw new OperatorException( this, "field declaration: " + getFieldDeclaration().print() + ", resolves to an empty field set, current grouping is on all fields" );
+      throw new OperatorException( this, "field declaration: " + getFieldDeclaration().printVerbose() + ", resolves to an empty field set, current grouping is on all fields" );
     }
 
   void verifyOutputSelector( Fields outputSelector )
     {
     if( outputSelector.isDefined() && outputSelector.size() == 0 )
-      throw new OperatorException( this, "output selector: " + getOutputSelector().print() + ", resolves to an empty field set, current grouping is on all fields" );
+      throw new OperatorException( this, "output selector: " + getOutputSelector().printVerbose() + ", resolves to an empty field set, current grouping is on all fields" );
     }
 
   void verifyArguments( Fields argumentSelector )
     {
     if( operation.getNumArgs() != Operation.ANY && argumentSelector.size() < operation.getNumArgs() )
-      throw new OperatorException( this, "resolved wrong number of arguments: " + argumentSelector.print() + ", expected: " + operation.getNumArgs() );
+      throw new OperatorException( this, "resolved wrong number of arguments: " + argumentSelector.printVerbose() + ", expected: " + operation.getNumArgs() );
     }
 
   Fields resolveOutgoingSelector( Set<Scope> incomingScopes, Fields argumentSelector, Fields declared )

@@ -962,9 +962,9 @@ public class Group extends Pipe
         if( !foundUnknown && declaredFields.size() != size * ( numSelfJoins + 1 ) )
           {
           if( isSelfJoin() )
-            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " != size: " + size * ( numSelfJoins + 1 ) );
+            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.printVerbose() + " != size: " + size * ( numSelfJoins + 1 ) );
           else
-            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.print() + " resolved: " + Util.print( resolvedFields, "" ) );
+            throw new OperatorException( this, "declared grouped fields not same size as grouped values, declared: " + declaredFields.printVerbose() + " resolved: " + Util.print( resolvedFields, "" ) );
           }
 
         return declaredFields;
@@ -982,7 +982,7 @@ public class Group extends Pipe
           if( commonFields == null )
             commonFields = fields;
           else if( !commonFields.equals( fields ) )
-            throw new OperatorException( this, "merged streams must declare the same field names, expected: " + commonFields.print() + " found: " + fields.print() );
+            throw new OperatorException( this, "merged streams must declare the same field names, expected: " + commonFields.printVerbose() + " found: " + fields.print() );
           }
 
         return commonFields;
@@ -1082,7 +1082,7 @@ public class Group extends Pipe
       if( groupFieldsMap.size() > 1 )
         buffer.append( name ).append( ":" );
 
-      buffer.append( groupFieldsMap.get( name ).print() );
+      buffer.append( groupFieldsMap.get( name ).printVerbose() );
       }
 
     if( isSelfJoin() )
