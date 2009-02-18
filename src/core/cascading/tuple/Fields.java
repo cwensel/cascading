@@ -940,7 +940,7 @@ public final class Fields implements Comparable, Iterable, Serializable
    */
   public String printVerbose()
     {
-    return "[{" + ( isDefined() ? size() : "?" ) + "}" + toString() + "]";
+    return "[{" + ( isDefined() ? size() : "?" ) + "}:" + toString() + "]";
     }
 
 
