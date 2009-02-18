@@ -33,8 +33,8 @@ import java.util.Set;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
-import cascading.pipe.Pipe;
 import cascading.pipe.OperatorException;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
@@ -51,7 +51,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
  * Notes:
  * <p/>
  * <strong>Custom JobConf properties</strong><br/>
- * A custo JobConf instance can be passed to this planner by calling {@link #setJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
+ * A custom JobConf instance can be passed to this planner by calling {@link #setJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
  * on a map properties object before constructing a new {@link FlowConnector}.
  * <p/>
  * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
@@ -60,19 +60,6 @@ import org.jgrapht.traverse.DepthFirstIterator;
  * <p/>
  * For example, {@code properties.set("mapred.child.java.opts","-Xmx512m");} would convince Hadoop
  * to spawn all child jvms with a heap of 512MB.
- * <p/>
- * <strong>Heterogeneous source Tap instances</strong><br/>
- * Currently Hadoop cannot have but one InputFormat per Mapper, but Cascading allows for any types of Taps
- * to be used as sinks in a given Flow.
- * <p/>
- * To overcome this issue, this planner will insert temporary Tap
- * instances immediately before a merge or join Group (GroupBy or CoGroup) if the source Taps do not share
- * the same Scheme class. By default temp Taps use the SequenceFile Scheme. So if the source Taps are custom
- * or use TextLine, a few extra jobs can leak into a given Flow.
- * <p/>
- * To overcome this, in turn, an intermediateSchemeClass must be passed from the FlowConnctor to the planner. This class
- * will be instantiated for every temp Tap instance. The intention is that the given intermedeiateSchemeClass
- * match all the source Tap schemes.
  * <p/>
  * <strong>Properties</strong><br/>
  * <ul>
@@ -116,7 +103,8 @@ public class MultiMapReducePlanner extends FlowPlanner
    * Method setNormalizeHeterogeneousSources adds the given doNormalize boolean to the given properites object.
    * Use this method if additional jobs should be planned in to handle incompatible InputFormat classes.
    * <p/>
-   * Normalization is off by default.
+   * Normalization is off by default and should only be enabled by advanced users. Typically this will decrease
+   * application performance.
    *
    * @param properties  of type Map
    * @param doNormalize of type boolean
@@ -165,11 +153,11 @@ public class MultiMapReducePlanner extends FlowPlanner
   /**
    * Method buildFlow renders the actual Flow instance.
    *
-   * @param flowName    of type String
-   * @param pipes   of type Pipe[]
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @param traps   of type Map<String, Tap>
+   * @param flowName of type String
+   * @param pipes    of type Pipe[]
+   * @param sources  of type Map<String, Tap>
+   * @param sinks    of type Map<String, Tap>
+   * @param traps    of type Map<String, Tap>
    * @return Flow
    */
   public Flow buildFlow( String flowName, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
@@ -223,7 +211,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
 
-      if(cause instanceof OperatorException )
+      if( cause instanceof OperatorException )
         throw new PlannerException( message, cause, elementGraph );
 
       throw new PlannerException( exception.getPipe(), message, cause, elementGraph );
@@ -409,16 +397,15 @@ public class MultiMapReducePlanner extends FlowPlanner
 
         if( flowElement instanceof ElementGraph.Extent ) // is an extent: head or tail
           continue;
-        else
-          if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof ElementGraph.Extent )  // is a source tap
-            continue;
+        else if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof ElementGraph.Extent )  // is a source tap
+          continue;
 
         if( flowElement instanceof Group && !foundGroup )
           foundGroup = true;
         else if( flowElement instanceof Group && foundGroup ) // add tap between groups
           tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
         else if( flowElement instanceof Tap )
-          foundGroup = false;
+            foundGroup = false;
         }
 
       for( Pipe pipe : tapInsertions )
