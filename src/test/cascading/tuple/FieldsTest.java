@@ -647,5 +647,21 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", join.get( 3 ) );
     }
 
+  public void testNestedFieldsFail()
+    {
+    Fields fieldA = new Fields( "a", "b" );
+    Fields fieldB = new Fields( "c", "d" );
+
+    try
+      {
+      new Fields( fieldA, fieldB );
+      fail( "did not throw exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      // ignore
+      }
+    }
+
 
   }

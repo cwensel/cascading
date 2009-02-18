@@ -518,6 +518,9 @@ public final class Fields implements Comparable, Iterable, Serializable
       {
       Comparable field = fields[ i ];
 
+      if( field instanceof Fields )
+        throw new IllegalArgumentException( "may not next Field instances within a Field instance" );
+
       if( names.contains( field ) )
         throw new TupleException( "duplicate field name found: " + field );
 

@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug that allowed c.t.Field instances to be nested in new Fields instances.
+
   Updated many error messages to print the number of fields along with a list of the field names.
 
   Fixed bug preventing custom c.s.Scheme types from using a different key/value classes in some situations.
