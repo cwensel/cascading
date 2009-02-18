@@ -59,6 +59,9 @@ public class SerializationElementWriter implements TupleOutputStream.ElementWrit
 
     if( token == null )
       {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "no serialization token found for classname: " + className );
+
       WritableUtils.writeVInt( outputStream, TupleOutputStream.WRITABLE_TOKEN ); // denotes to punt to hadoop serialization
       WritableUtils.writeString( outputStream, className );
       }
