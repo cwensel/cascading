@@ -2,6 +2,12 @@ Cascading Change Log
 
 unreleased
 
+  Allowing Fields.UNKNOWN to propagate through pipes that do not declare argument selectors. This is a relaxation
+  of the strict planning and seems very natural when assembling pipes to process unknown field sets. Reserving
+  the right to revert this feature if it causes unforseen issues.
+
+  Fixed bug in c.o.f.UnGroup where the num arg value was improperly calculated.
+
   Allow for white space in the serializations token property so it can be set in a config file simply.
 
   Added new log message if no serialization token is found for a class being serialized out.

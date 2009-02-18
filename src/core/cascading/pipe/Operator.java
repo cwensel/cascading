@@ -265,6 +265,9 @@ public abstract class Operator extends Pipe
 
   void verifyArguments( Fields argumentSelector )
     {
+    if( argumentSelector.isUnknown() )
+      return;
+
     if( operation.getNumArgs() != Operation.ANY && argumentSelector.size() < operation.getNumArgs() )
       throw new OperatorException( this, "resolved wrong number of arguments: " + argumentSelector.printVerbose() + ", expected: " + operation.getNumArgs() );
     }

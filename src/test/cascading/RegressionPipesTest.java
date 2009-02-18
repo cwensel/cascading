@@ -28,6 +28,7 @@ import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Identity;
 import cascading.operation.assertion.AssertSizeMoreThan;
+import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -134,4 +135,38 @@ public class RegressionPipesTest extends ClusterTestCase
 
     validateLength( flow, 7 );
     }
+
+  /**
+   * This test allows for Fields.UNKNOWN to propagate from the RegexSplitter through to the UnGroup (or any other
+   * operation).
+   * <p/>
+   * This could be dangerous but feels very natural and part of the intentions of having UNKNOWN
+   *
+   * @throws Exception
+   */
+  public void testUnGroupUnknown() throws Exception
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine(), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped-unknown", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    // emits Fields.UNKNOWN
+    pipe = new Each( pipe, new Fields( 1 ), new RegexSplitter( "\t" ), Fields.ALL );
+
+    // accepts Fields.UNKOWN
+    pipe = new Each( pipe, new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "ungroup.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
   }
