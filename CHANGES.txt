@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Allow for white space in the serializations token property so it can be set in a config file simply.
+
   Added new log message if no serialization token is found for a class being serialized out.
 
   Fixed bug that allowed c.t.Field instances to be nested in new Fields instances.

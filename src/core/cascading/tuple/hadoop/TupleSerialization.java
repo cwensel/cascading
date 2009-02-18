@@ -182,6 +182,8 @@ public class TupleSerialization extends Configured implements Serialization
 
     if( tokenProperty != null )
       {
+      tokenProperty = tokenProperty.replaceAll( "\\s", "" ); // allow for whitespace in token set
+
       for( String pair : tokenProperty.split( "," ) )
         {
         String[] elements = pair.split( "=" );
