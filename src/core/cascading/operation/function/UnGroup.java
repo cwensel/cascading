@@ -29,8 +29,8 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.log4j.Logger;
 
 /**
@@ -102,11 +102,20 @@ public class UnGroup extends BaseOperation implements Function
     {
     super( fieldDeclaration );
 
+    numArgs = groupSelector.size();
+    int selectorSize = -1;
+
     for( Fields resultFieldSelector : valueSelectors )
       {
-      numArgs = groupSelector.size() + resultFieldSelector.size();
+      numArgs += resultFieldSelector.size();
+      int fieldSize = groupSelector.size() + resultFieldSelector.size();
 
-      if( fieldDeclaration.size() != numArgs )
+      if( selectorSize != -1 && selectorSize != resultFieldSelector.size() )
+        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+
+      selectorSize = resultFieldSelector.size();
+
+      if( fieldDeclaration.size() != fieldSize )
         throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
