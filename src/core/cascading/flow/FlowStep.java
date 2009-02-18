@@ -41,8 +41,8 @@ import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
-import cascading.tuple.TuplePair;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TuplePair;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
@@ -170,6 +170,10 @@ public class FlowStep implements Serializable
       }
     else
       {
+      // must set map output defaults when performing a reduce
+      conf.setMapOutputKeyClass( Tuple.class );
+      conf.setMapOutputValueClass( Tuple.class );
+
       if( !group.isGroupBy() )
         conf.setMapOutputValueClass( IndexTuple.class );
 

@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug preventing custom c.s.Scheme types from using a different key/value classes in some situations. 
+
   Fixed bug preventing c.t.TemplateTap from being written to in Reducer.
 
 1.0.1

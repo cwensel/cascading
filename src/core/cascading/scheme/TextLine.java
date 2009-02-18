@@ -29,6 +29,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -195,6 +196,8 @@ public class TextLine extends Scheme
     else if( getSinkCompression() == Compress.ENABLE )
       conf.setBoolean( "mapred.output.compress", true );
 
+    conf.setOutputKeyClass( Text.class ); // be explicit
+    conf.setOutputValueClass( Text.class ); // be explicit
     conf.setOutputFormat( TextOutputFormat.class );
     }
 
