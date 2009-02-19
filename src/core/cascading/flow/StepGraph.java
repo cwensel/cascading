@@ -21,15 +21,15 @@
 
 package cascading.flow;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.io.Writer;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -41,7 +41,6 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
-import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -112,26 +111,36 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   /**
    * Method getCreateFlowStep ...
    *
-   * @param flowName
+   * @param flowName of type String
    * @param steps    of type Map<String, FlowStep>
-   * @param sinkPath of type String
-   * @param numJobs  @return FlowStep
+   * @param sinkName of type String
+   * @param numJobs  of type int
+   * @return FlowStep
    */
-  private FlowStep getCreateFlowStep( String flowName, Map<String, FlowStep> steps, String sinkPath, int numJobs )
+  private FlowStep getCreateFlowStep( String flowName, Map<String, FlowStep> steps, String sinkName, int numJobs )
     {
-    if( steps.containsKey( sinkPath ) )
-      return steps.get( sinkPath );
+    if( steps.containsKey( sinkName ) )
+      return steps.get( sinkName );
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "creating step: " + sinkPath );
+      LOG.debug( "creating step: " + sinkName );
 
-    FlowStep step = new FlowStep( ( steps.size() + 1 ) + "/" + numJobs );
+    FlowStep step = new FlowStep( makeStepName( steps, numJobs, sinkName ) );
 
     step.setParentFlowName( flowName );
 
-    steps.put( sinkPath, step );
+    steps.put( sinkName, step );
 
     return step;
+    }
+
+  private String makeStepName( Map<String, FlowStep> steps, int numJobs, String sinkPath )
+    {
+    // todo make the long form optional via a property
+    if( sinkPath.length() > 150 )
+      sinkPath = sinkPath.substring( sinkPath.length() - 150 );
+
+    return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
     }
 
   /**
