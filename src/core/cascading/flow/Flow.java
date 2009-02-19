@@ -44,8 +44,8 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.tap.hadoop.S3HttpFileSystem;
 import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleIterator;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -704,16 +704,37 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method deleteSinks deletes all sinks. Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
+   * Method deleteSinks deletes all sinks, whether or not they are configured for {@link cascading.tap.SinkMode#APPEND}.
+   * <p/>
    * Use with caution.
    *
    * @throws IOException when
+   * @see cascading.flow.Flow#deleteSinksIfNotAppend()
    */
   public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
       tap.deletePath( getJobConf() );
     }
+
+  /**
+   * Method deleteSinksIfNotAppend deletes all sinks if they are not configured with the {@link cascading.tap.SinkMode#APPEND} flag.
+   * <p/>
+   * Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
+   * <p/>
+   * Use with caution.
+   *
+   * @throws IOException when
+   */
+  public void deleteSinksIfNotAppend() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      {
+      if( !tap.isAppend() )
+        tap.deletePath( getJobConf() );
+      }
+    }
+
 
   /**
    * Method tapExists returns true if the resource represented by the given Tap instance exists.

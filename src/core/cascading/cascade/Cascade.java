@@ -46,13 +46,28 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
- * A Cascade is an assembly of {@link Flow} instances that share or depend the same {@link Tap} instances and are executed as
+ * A Cascade is an assembly of {@link Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
  * a single group. The most common case is where one Flow instance depends on a Tap created by a second Flow instance. This
  * dependency chain can continue as practical.
+ * <p/>
+ * Note Flow instances that have no shared dependencies will be executed in parallel.
  * <p/>
  * Additionally, a Cascade allows for incremental builds of complex data processing processes. If a given source {@link Tap} is newer than
  * a subsequent sink {@link Tap} in the assembly, the connecting {@link Flow}(s) will be executed
  * when the Cascade executed. If all the targets (sinks) are up to date, the Cascade exits immediately and does nothing.
+ * <p/>
+ * The concept of 'stale' is pluggable, see the {@link cascading.flow.FlowSkipStrategy} class.
+ * <p/>
+ * When a Cascade starts up, if first verifies which Flow instances have stale sinks, if the sinks are not stale, the
+ * method {@link cascading.flow.Flow#deleteSinksIfNotAppend()} is called. Before appends were supported (logically)
+ * the Cascade deleted all the sinks in a Flow.
+ * <p/>
+ * The new consequence of this is if the Cascade fails, but does compelete a Flow that appended data, re-running
+ * the Cascade (and the successful append Flow) will re-append data to the source. Some systems may be idempotent and
+ * may not have any side-effects. So plan accordingly.
+ *
+ * @see Flow
+ * @see cascading.flow.FlowSkipStrategy
  */
 public class Cascade implements Runnable
   {
@@ -400,7 +415,7 @@ public class Cascade implements Runnable
             return null;
             }
 
-          flow.deleteSinks();
+          flow.deleteSinksIfNotAppend(); // do not delete append mode taps
           flow.complete();
 
           if( LOG.isInfoEnabled() )

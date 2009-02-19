@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Update c.c.Cascade to not delete c.f.Flow sinks if they are appendable before the Flow is executed. 
+
   Updated error messages to warn when internal element graphs remove all place holders resulting in an empty graph
   usually due to missing linkages between pipe assemblies.
 
