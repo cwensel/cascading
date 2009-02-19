@@ -21,10 +21,10 @@
 
 package cascading.pipe;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Arrays;
 
 import cascading.util.Util;
 
@@ -70,6 +70,9 @@ public abstract class SubAssembly extends Pipe
    */
   public String[] getTailNames()
     {
+    if( tails == null )
+      throw new IllegalStateException( "setTails must be called in the constructor" );
+
     String[] names = new String[tails.length];
 
     for( int i = 0; i < tails.length; i++ )
@@ -87,6 +90,9 @@ public abstract class SubAssembly extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
+    if( tails == null )
+      throw new IllegalStateException( "setTails must be called in the constructor" );
+
     return Arrays.copyOf( tails, tails.length );
     }
 

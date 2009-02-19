@@ -35,7 +35,6 @@ import cascading.operation.AssertionLevel;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
-import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
@@ -393,6 +392,16 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     {
     while( !internalRemoveUnnecessaryPipes() )
       ;
+
+    int numPipes = 0;
+    for( FlowElement flowElement : vertexSet() )
+      {
+      if( flowElement instanceof Pipe )
+        numPipes++;
+      }
+
+    if( numPipes == 0 )
+      throw new ElementGraphException( "resulting graph has no pipe elements after removing empty Pipe, assertions, and SubAssembly containers" );
     }
 
   private boolean internalRemoveUnnecessaryPipes()

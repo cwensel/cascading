@@ -52,12 +52,19 @@ public class SubAssemblyTest extends CascadingTestCase
     {
     public TestAssembly( String name )
       {
+      this( name, false );
+      }
+
+    public TestAssembly( String name, boolean bad )
+      {
       Pipe pipe = new Pipe( name );
 
       pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-      setTails( pipe );
+      if( !bad )
+        setTails( pipe );
       }
+
     }
 
   /** Tests that proper pipe graph is assembled without throwing an internal error */
@@ -72,6 +79,25 @@ public class SubAssemblyTest extends CascadingTestCase
     List<FlowStep> steps = new FlowConnector().connect( source, sink, pipe ).getSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
+    }
+
+  public void testBadSubAssembly()
+    {
+    Pipe pipe = new TestAssembly( "test", true );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink = new Hfs( new TextLine(), "foo/split1", true );
+
+    try
+      {
+      new FlowConnector().connect( source, sink, pipe );
+      fail( "did not throw exception" );
+
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
     }
 
   public void testPipeAssemblySplit()

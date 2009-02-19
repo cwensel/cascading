@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Updated error messages to warn when internal element graphs remove all place holders resulting in an empty graph
+  usually due to missing linkages between pipe assemblies.
+
   Allowing Fields.UNKNOWN to propagate through pipes that do not declare argument selectors. This is a relaxation
   of the strict planning and seems very natural when assembling pipes to process unknown field sets. Reserving
   the right to revert this feature if it causes unforseen issues.
