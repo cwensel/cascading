@@ -7,15 +7,16 @@ General Information:
 
   This distribution includes four Cascading jar files:
 
-  cascading.jar      - all relevant Cascading class files and libraries, with a 'lib' folder
-  cascading-core.jar - all Cascading Core class files
-  cascading-xml.jar  - all Cascading XML sub-project class files
+  cascading-x.y.z.jar      - all relevant Cascading class files and libraries, with a 'lib' folder
+  cascading-core-x.y.z.jar - all Cascading Core class files
+  cascading-xml-x.y.z.jar  - all Cascading XML sub-project class files
+  cascadgin-test-x.y.z.jar - all Cascading tests and test utilities
 
-  To use with Hadoop, you only need the cascading.jar. We suggest merging your class files and libraries with this jar
-  and executing via 'hadoop jar your.jar <your args>'. Hadoop will unpack the jar and add any libraries in 'lib' to the
-  classpath.
+  To use with Hadoop, we suggest stuffing cascading-core and cascading-xml jar files in the 'lib' folder of your
+  job jar and executing via 'hadoop jar your.jar <your args>'.
+  Hadoop will unpack the jar and add any libraries in 'lib' to the classpath.
 
-  This ant snippet works quite well:
+  This ant snippet works quite well (you may need to override cascading.home):
 
   <property name="cascading.home" location="${basedir}/../cascading"/>
   <property file="${cascading.home}/version.properties"/>
@@ -53,9 +54,6 @@ General Information:
     </jar>
 
   </target>
-
-  Where the 'cascading.lib' property points to the cascading.jar. Remember cascading.jar already has a 'lib' folder
-  embedded in it.
 
 License:
 
