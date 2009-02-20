@@ -914,14 +914,14 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     sources.put( "source20", source20 );
     sources.put( "source101", source10 );
-    sources.put( "soucre102", source10 );
+    sources.put( "source102", source10 );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), stringPath, true );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
-    Pipe pipeNum102 = new Pipe( "source101" );
+    Pipe pipeNum102 = new Pipe( "source102" );
 
     Pipe splice1 = new CoGroup( pipeNum20, new Fields( "num" ), pipeNum101, new Fields( "num" ), new Fields( "num1", "num2" ) );
 
