@@ -78,6 +78,34 @@ public class ExpressionTest extends CascadingTestCase
     assertEquals( true, evaluate( "b.equals(\"1\") && (a == 2.0) && $2.equals(\"2\")", names, types, getEntry( 2.0, "1", "2" ) ) );
     }
 
+  public void testNoParamExpression()
+    {
+    String expression = "(int) (Math.random() * Integer.MAX_VALUE)";
+    Number integer = (Number) evaluate( expression, getEntry( "1", 2.0 ) );
+//    System.out.println( "integer = " + integer );
+    assertNotNull( integer );
+
+    try
+      {
+      evaluate( "(int) (Math.random() * Integer.MAX_VALUE) + parameter", getEntry( "1", 2.0 ) );
+      fail( "should throw exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+    }
+
+  private Comparable evaluate( String expression, TupleEntry tupleEntry )
+    {
+    ExpressionFunction function = getFunction( expression );
+
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>();
+    function.prepare( FlowProcess.NULL, call );
+
+    return function.evaluate( call.getContext(), tupleEntry );
+    }
+
   private Comparable evaluate( String expression, Class type, TupleEntry tupleEntry )
     {
     ExpressionFunction function = getFunction( expression, type );
@@ -96,6 +124,11 @@ public class ExpressionTest extends CascadingTestCase
     function.prepare( FlowProcess.NULL, call );
 
     return function.evaluate( call.getContext(), tupleEntry );
+    }
+
+  private ExpressionFunction getFunction( String expression )
+    {
+    return new ExpressionFunction( new Fields( "result" ), expression );
     }
 
   private ExpressionFunction getFunction( String expression, Class type )

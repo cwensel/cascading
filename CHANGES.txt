@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added support for c.o.e.ExpressionFunction to evaluate expressions with no input parameters.
+
   Reverted MR job naming to include sink c.t.Tap name. More verbose, but easier for degugging.
 
   Update c.c.Cascade to not delete c.f.Flow sinks if they are appendable before the Flow is executed.

@@ -48,11 +48,28 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
   /**
    * Constructor ExpressionFunction creates a new ExpressionFunction instance.
    * <p/>
+   * This constructor assumes the given expression expects no input parameters. This is useful when
+   * inserting random numbers for example, {@code (int) (Math.random() * Integer.MAX_VALUE) }.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param expression       of type String
+   */
+  public ExpressionFunction( Fields fieldDeclaration, String expression )
+    {
+    super( fieldDeclaration, expression );
+
+    if( fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
+    }
+
+  /**
+   * Constructor ExpressionFunction creates a new ExpressionFunction instance.
+   * <p/>
    * This constructor assumes all parameter are of the same type.
    *
    * @param fieldDeclaration of type Fields
    * @param expression       of type String
-   * @param parameterType   of type Class
+   * @param parameterType    of type Class
    */
   public ExpressionFunction( Fields fieldDeclaration, String expression, Class parameterType )
     {
@@ -69,9 +86,9 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
    * be named the same as in the given expression with the "$" sign prepended.
    *
    * @param fieldDeclaration of type Fields
-   * @param expression of type String
-   * @param parameterNames of type String[]
-   * @param parameterTypes of type Class[]
+   * @param expression       of type String
+   * @param parameterNames   of type String[]
+   * @param parameterTypes   of type Class[]
    */
   public ExpressionFunction( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {

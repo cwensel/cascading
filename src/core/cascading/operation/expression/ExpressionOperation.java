@@ -26,14 +26,14 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
-import cascading.operation.OperationException;
 import cascading.operation.OperationCall;
+import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
-import cascading.flow.FlowProcess;
 import org.codehaus.janino.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
 import org.codehaus.janino.Parser;
@@ -59,6 +59,13 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     private ExpressionEvaluator expressionEvaluator;
     private Fields parameterFields;
     private String[] parameterNames;
+    }
+
+  protected ExpressionOperation( Fields fieldDeclaration, String expression )
+    {
+    super( fieldDeclaration );
+    this.parameterTypes = new Class[]{};
+    this.expression = expression;
     }
 
   protected ExpressionOperation( Fields fieldDeclaration, String expression, Class parameterType )
@@ -203,19 +210,18 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
    */
   protected Comparable evaluate( Context context, TupleEntry input )
     {
-    Tuple parameterTuple = input.selectTuple( context.parameterFields );
-
-    Comparable value = null;
-
     try
       {
-      value = (Comparable) context.expressionEvaluator.evaluate( Tuples.asArray( parameterTuple, context.parameterTypes ) );
+      if( context.parameterTypes.length == 0 )
+        return (Comparable) context.expressionEvaluator.evaluate( null );
+
+      Tuple parameterTuple = input.selectTuple( context.parameterFields );
+
+      return (Comparable) context.expressionEvaluator.evaluate( Tuples.asArray( parameterTuple, context.parameterTypes ) );
       }
     catch( InvocationTargetException exception )
       {
       throw new OperationException( "could not evaluate expression: " + expression, exception );
       }
-
-    return value;
     }
   }
