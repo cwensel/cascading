@@ -506,7 +506,7 @@ public class Flow implements Runnable
 
     for( Tap sink : sinks.values() )
       {
-      if( sink.isReplace() )
+      if( sink.isReplace() || sink.isAppend() )
         sinkModified = -1L;
       else
         {
