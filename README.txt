@@ -12,9 +12,20 @@ General Information:
   cascading-xml-x.y.z.jar  - all Cascading XML sub-project class files
   cascadgin-test-x.y.z.jar - all Cascading tests and test utilities
 
-  To use with Hadoop, we suggest stuffing cascading-core and cascading-xml jar files in the 'lib' folder of your
-  job jar and executing via 'hadoop jar your.jar <your args>'.
-  Hadoop will unpack the jar and add any libraries in 'lib' to the classpath.
+  To use with Hadoop, we suggest stuffing cascading-core and cascading-xml jar files, and all third-party libs
+  into the 'lib' folder of your job jar and executing via 'hadoop jar your.jar <your args>'.
+
+  For example, your job jar would look like this (via: jar -t your.jar)
+
+    /<all your class and resource files>
+    /lib/cascading-core-x.y.z.jar
+    /lib/cascading-xml-x.y.z.jar
+    /lib/<cascading third-party jar files>
+
+  Hadoop will unpack the jar locally and remotely (in the cluster) and add any libraries in 'lib' to the classpath.
+  This is a feature specific to Hadoop. 
+
+  The cascading-x.y.z.jar file is typically used with scripting languages and is completely self contained.
 
   This ant snippet works quite well (you may need to override cascading.home):
 
