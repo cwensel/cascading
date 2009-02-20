@@ -22,12 +22,12 @@
 package cascading.flow;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
@@ -54,10 +54,7 @@ public class FlowPlanner
     this.assertionLevel = FlowConnector.getAssertionLevel( properties );
     }
 
-  /**
-   * Must be called to determine if all elements of the base pipe assembly are available
-   *
-   */
+  /** Must be called to determine if all elements of the base pipe assembly are available */
   protected void verifyAssembly( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     verifyTaps( sources, true, true );
@@ -68,10 +65,7 @@ public class FlowPlanner
     verifyTraps( traps, pipes, sources, sinks );
     }
 
-  /**
-   * Creates a new ElementGraph instance.
-   *
-   */
+  /** Creates a new ElementGraph instance. */
   protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     return new ElementGraph( pipes, sources, sinks, traps, assertionLevel );
@@ -99,7 +93,10 @@ public class FlowPlanner
     }
 
   /**
-   * Method verifyEndPoints ...
+   * Method verifyEndPoints verifies
+   * <p/>
+   * there aren't dupe names in heads or tails.
+   * all the sink and source tap names match up with tail and head pipes
    *
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
@@ -107,35 +104,67 @@ public class FlowPlanner
    */
   protected void verifyPipeAssemblyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
     {
-    Set<String> names = new HashSet<String>();
 
-    names.addAll( sources.keySet() );
-    names.addAll( sinks.keySet() );
+    Set<String> tapNames = new HashSet<String>();
+
+    tapNames.addAll( sources.keySet() );
+    tapNames.addAll( sinks.keySet() );
 
     // handle tails
+    Set<Pipe> tails = new HashSet<Pipe>();
+    Set<String> tailNames = new HashSet<String>();
+
     for( Pipe pipe : pipes )
       {
       if( pipe instanceof SubAssembly )
         {
-        for( String tailName : ( (SubAssembly) pipe ).getTailNames() )
+        for( Pipe tail : ( (SubAssembly) pipe ).getTails() )
           {
-          if( !names.contains( tailName ) )
+          String tailName = tail.getName();
+
+          if( !tapNames.contains( tailName ) )
             throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
+
+          if( tailNames.contains( tailName ) && !tails.contains( tail ) )
+            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+
+          tailNames.add( tailName );
+          tails.add( tail );
           }
         }
-      else if( !names.contains( pipe.getName() ) )
+      else
         {
-        throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + pipe.getName() );
+        String tailName = pipe.getName();
+
+        if( !tapNames.contains( tailName ) )
+          throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
+
+        if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
+          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+
+        tailNames.add( tailName );
+        tails.add( pipe );
         }
       }
 
     // handle heads
+    Set<Pipe> heads = new HashSet<Pipe>();
+    Set<String> headNames = new HashSet<String>();
+
     for( Pipe pipe : pipes )
       {
       for( Pipe head : pipe.getHeads() )
         {
-        if( !names.contains( head.getName() ) )
-          throw new PlannerException( head, "pipe name not found in either sink or source map: " + head.getName() );
+        String headName = head.getName();
+
+        if( !tapNames.contains( headName ) )
+          throw new PlannerException( head, "pipe name not found in either sink or source map: " + headName );
+
+        if( headNames.contains( headName ) && !heads.contains( head ) )
+          throw new PlannerException( pipe, "duplicate head name found: " + headName );
+
+        headNames.add( headName );
+        heads.add( head );
         }
       }
     }

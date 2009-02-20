@@ -22,7 +22,9 @@
 package cascading;
 
 import java.io.File;
+import java.util.Map;
 
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
@@ -32,6 +34,7 @@ import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -169,4 +172,59 @@ public class RegressionPipesTest extends ClusterTestCase
     validateLength( flow, 10 );
     }
 
+  public void testDupeHeadNames() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
+
+    Pipe lhs = new Pipe( "test" );
+
+    lhs = new Each( lhs, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    Pipe rhs = new Pipe( "test" );
+
+    rhs = new Each( rhs, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    Pipe group = new GroupBy( Pipe.pipes( lhs, rhs ), Fields.size( 3 ) );
+
+    try
+      {
+      new FlowConnector( getProperties() ).connect( source, sink, group );
+      fail( "did not fail on dupe head names" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+    }
+
+  public void testDupeTailNames() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    Pipe group = new GroupBy( pipe, Fields.size( 3 ) );
+
+    Pipe lhs = new Pipe( "tail", group );
+    lhs = new Each( group, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    Pipe rhs = new Pipe( "tail", group );
+    rhs = new Each( group, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    Map<String, Tap> sinks = Cascades.tapsMap( Pipe.pipes( lhs, rhs ), Tap.taps( sink, sink ) );
+
+    try
+      {
+      new FlowConnector( getProperties() ).connect( source, sinks, Pipe.pipes( lhs, rhs ) );
+      fail( "did not fail on dupe head names" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+    }
   }

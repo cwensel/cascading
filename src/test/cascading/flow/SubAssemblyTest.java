@@ -92,7 +92,6 @@ public class SubAssemblyTest extends CascadingTestCase
       {
       new FlowConnector().connect( source, sink, pipe );
       fail( "did not throw exception" );
-
       }
     catch( Exception exception )
       {

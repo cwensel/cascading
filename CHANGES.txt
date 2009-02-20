@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added rules to verify no duplicate head or tail names exist in an assembly when calling c.f.FlowConnector#connect().
+
   Added support for c.o.e.ExpressionFunction to evaluate expressions with no input parameters.
 
   Reverted MR job naming to include sink c.t.Tap name. More verbose, but easier for degugging.

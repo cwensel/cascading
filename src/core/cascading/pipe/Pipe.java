@@ -214,17 +214,8 @@ public class Pipe implements FlowElement, Serializable
   @Override
   public boolean equals( Object object )
     {
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-
-    Pipe pipe = (Pipe) object;
-
-    if( getName() != null ? !getName().equals( pipe.getName() ) : pipe.getName() != null )
-      return false;
-
-    return true;
+    // we cannot test equality by names for this class, prevents detection of dupe names in heads or tails
+    return this == object;
     }
 
   @Override
