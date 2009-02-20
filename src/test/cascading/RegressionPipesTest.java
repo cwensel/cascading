@@ -174,6 +174,10 @@ public class RegressionPipesTest extends ClusterTestCase
 
   public void testDupeHeadNames() throws Exception
     {
+    // todo: re-enable these tests on next major release
+    if( true )
+      return;
+
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
     Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
 
@@ -200,6 +204,10 @@ public class RegressionPipesTest extends ClusterTestCase
 
   public void testDupeTailNames() throws Exception
     {
+    // todo: re-enable these tests on next major release
+    if( true )
+      return;
+
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
     Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
 

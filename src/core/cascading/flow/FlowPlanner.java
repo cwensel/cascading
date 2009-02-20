@@ -36,12 +36,16 @@ import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
+import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public class FlowPlanner
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( FlowPlanner.class );
+
   /** Field properties */
   protected final Map<Object, Object> properties;
 
@@ -102,9 +106,9 @@ public class FlowPlanner
    * @param sinks   of type Map<String, Tap>
    * @param pipes   of type Pipe[]
    */
+  // todo: force dupe names to throw exceptions
   protected void verifyPipeAssemblyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
     {
-
     Set<String> tapNames = new HashSet<String>();
 
     tapNames.addAll( sources.keySet() );
@@ -126,7 +130,8 @@ public class FlowPlanner
             throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
-            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+            LOG.warn( "duplicate tail name found: " + tailName );
+//            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
           tailNames.add( tailName );
           tails.add( tail );
@@ -140,7 +145,8 @@ public class FlowPlanner
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+          LOG.warn( "duplicate tail name found: " + tailName );
+//          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
         tails.add( pipe );
@@ -161,7 +167,8 @@ public class FlowPlanner
           throw new PlannerException( head, "pipe name not found in either sink or source map: " + headName );
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
-          throw new PlannerException( pipe, "duplicate head name found: " + headName );
+          LOG.warn( "duplicate head name found: " + headName );
+//          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
         heads.add( head );

@@ -3,6 +3,9 @@ Cascading Change Log
 unreleased
 
   Added rules to verify no duplicate head or tail names exist in an assembly when calling c.f.FlowConnector#connect().
+  Currently a WARNING will be issued via the logger, next major release this will be an exception. This is a change
+  that was supported in prior releases, but turns out to allow error prone code. Two workarounds are availabe: bind
+  the same tap to both names in the tap map, or split from a single named c.p.Pipe instance.
 
   Added support for c.o.e.ExpressionFunction to evaluate expressions with no input parameters.
 
