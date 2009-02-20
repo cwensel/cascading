@@ -941,14 +941,47 @@ public class BuildJobsTest extends CascadingTestCase
     }
 
   /**
+   * DISABLED
+   * found having pipes with same names was too error prone. the workaround is to bind the tap to both names.
+   * if the process logically must use the same tap for each branch, then the branch should be split
+   *
    * This tests if two pipes can have the same name, and thus logically the same input source.
    * <p/>
    * Further, a GroupBy with two inputs would fail if the source was directly associated. but there is a Group
    * function between the source and the merge, so it passes.
    *
+   *
+   * @throws java.io.IOException
+   */
+//  public void testSameHeadName() throws IOException
+//    {
+//    Map sources = new HashMap();
+//    Map sinks = new HashMap();
+//
+//    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+//
+//    Pipe pipeA = new Pipe( "a" );
+//    Pipe pipeB = new Pipe( "a" );
+//
+//    Pipe group1 = new GroupBy( "a1", pipeA, Fields.FIRST );
+//    Pipe group2 = new GroupBy( "a2", pipeB, Fields.FIRST );
+//
+//    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+//
+//    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+//
+//    Flow flow = new FlowConnector().connect( sources, sinks, merge );
+//
+//    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
+//    }
+
+  /**
+   * This is an alternative to having two pipes with the same name, but uses one pipe that is split
+   * across two branches.
+   *
    * @throws IOException
    */
-  public void testSameHeadName() throws IOException
+  public void testSameSourceForBranch() throws IOException
     {
     Map sources = new HashMap();
     Map sinks = new HashMap();
@@ -956,10 +989,9 @@ public class BuildJobsTest extends CascadingTestCase
     sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
 
     Pipe pipeA = new Pipe( "a" );
-    Pipe pipeB = new Pipe( "a" );
 
     Pipe group1 = new GroupBy( "a1", pipeA, Fields.FIRST );
-    Pipe group2 = new GroupBy( "a2", pipeB, Fields.FIRST );
+    Pipe group2 = new GroupBy( "a2", pipeA, Fields.FIRST );
 
     Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
 
