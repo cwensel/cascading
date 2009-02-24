@@ -33,11 +33,11 @@ import cascading.tuple.TupleListCollector;
 /**
  *
  */
-public class RegexTest extends CascadingTestCase
+public class RegexesTest extends CascadingTestCase
   {
   private ConcreteCall operationCall;
 
-  public RegexTest()
+  public RegexesTest()
     {
     super( "regex test" );
     }

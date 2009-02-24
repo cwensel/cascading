@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.OperationCall;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -53,6 +54,28 @@ public class RegexMatcher extends RegexOperation<Matcher>
     {
     super( patternString );
     this.negateMatch = negateMatch;
+    }
+
+  protected RegexMatcher( Fields fieldDeclaration, String patternString )
+    {
+    super( ANY, fieldDeclaration, patternString );
+    this.negateMatch = false;
+
+    verify();
+    }
+
+  protected RegexMatcher( Fields fieldDeclaration, String patternString, boolean negateMatch )
+    {
+    super( ANY, fieldDeclaration, patternString );
+    this.negateMatch = negateMatch;
+
+    verify();
+    }
+
+  private void verify()
+    {
+    if( fieldDeclaration.size() != 1 )
+      throw new IllegalArgumentException( "num fields in fieldDeclaration must be one, found: " + fieldDeclaration.printVerbose() );
     }
 
   @Override
