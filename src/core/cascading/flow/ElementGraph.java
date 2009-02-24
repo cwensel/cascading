@@ -57,9 +57,9 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   private static final Logger LOG = Logger.getLogger( ElementGraph.class );
 
   /** Field head */
-  final Extent head = new Extent( "head" );
+  static final Extent head = new Extent( "head" );
   /** Field tail */
-  final Extent tail = new Extent( "tail" );
+  static final Extent tail = new Extent( "tail" );
   /** Field resolved */
   private boolean resolved;
   /** Field traps */
