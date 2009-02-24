@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug in c.o.t.DateFormatter and c.o.t.DateParser where the TimeZone value was not being properly set. This
+  fix could affect existing applications.
+
+1.0.2
+
   Added rules to verify no duplicate head or tail names exist in an assembly when calling c.f.FlowConnector#connect().
   Currently a WARNING will be issued via the logger, next major release this will be an exception. This is a change
   that was supported in prior releases, but turns out to allow error prone code. Two workarounds are availabe: bind

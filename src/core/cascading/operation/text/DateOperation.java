@@ -82,7 +82,10 @@ public class DateOperation extends BaseOperation
   public SimpleDateFormat getDateFormat()
     {
     if( dateFormat == null )
+      {
       dateFormat = new SimpleDateFormat( dateFormatString, getLocale() );
+      dateFormat.setTimeZone( getZone() );
+      }
 
     return dateFormat;
     }
@@ -105,7 +108,7 @@ public class DateOperation extends BaseOperation
 
   protected Calendar getCalendar()
     {
-    return Calendar.getInstance( getZone(), getLocale() );
+    return Calendar.getInstance( TimeZone.getTimeZone( "UTC" ), getLocale() );
     }
 
   }

@@ -23,6 +23,8 @@ package cascading.operation.text;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -33,6 +35,9 @@ import cascading.tuple.Tuple;
 /**
  * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp
  * is the number of milliseconds since January 1, 1970, 00:00:00 GMT,  using the {@link SimpleDateFormat} syntax.
+ * <p/>
+ * Note the timezone data is given to the SimpleDateFormat, not the internal Calendar instance which interprets
+ * the 'timestamp' value as it is assumed the timestamp is already in GMT.
  */
 public class DateFormatter extends DateOperation implements Function
   {
@@ -58,6 +63,31 @@ public class DateFormatter extends DateOperation implements Function
   public DateFormatter( Fields fieldDeclaration, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString );
+    }
+
+  /**
+   * Constructor DateFormatter creates a new DateFormatter instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param dateFormatString of type String
+   * @param zone             of type TimeZone
+   */
+  public DateFormatter( Fields fieldDeclaration, String dateFormatString, TimeZone zone )
+    {
+    super( 1, fieldDeclaration, dateFormatString, zone, null );
+    }
+
+  /**
+   * Constructor DateFormatter creates a new DateFormatter instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param dateFormatString of type String
+   * @param zone             of type TimeZone
+   * @param locale           of type Locale
+   */
+  public DateFormatter( Fields fieldDeclaration, String dateFormatString, TimeZone zone, Locale locale )
+    {
+    super( 1, fieldDeclaration, dateFormatString, zone, locale );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
