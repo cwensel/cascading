@@ -45,6 +45,7 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
+import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.MultiTap;
@@ -125,8 +126,10 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count( new Fields( "count1" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
+    pipe = new Every( pipe, new Count( new Fields( "count3" ) ) );
+    pipe = new Every( pipe, new Count( new Fields( "count4" ) ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simplechain", true );
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/simplechain", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
@@ -134,7 +137,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 8, null );
+    validateLength( flow, 8, 5 );
     }
 
   public void testChainEndingWithEach() throws Exception

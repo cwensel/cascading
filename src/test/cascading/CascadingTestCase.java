@@ -24,7 +24,7 @@ package cascading;
 import java.io.IOException;
 
 import cascading.flow.Flow;
-import cascading.tuple.TupleIterator;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import junit.framework.TestCase;
 
@@ -44,26 +44,45 @@ public class CascadingTestCase extends TestCase
 
   protected void validateLength( Flow flow, int length ) throws IOException
     {
-    validateLength( flow, length, null );
+    validateLength( flow, length, -1 );
+    }
+
+  protected void validateLength( Flow flow, int length, int size ) throws IOException
+    {
+    validateLength( flow, length, size, null );
     }
 
   protected void validateLength( Flow flow, int length, String name ) throws IOException
     {
+    validateLength( flow, length, -1, name );
+    }
+
+  protected void validateLength( Flow flow, int length, int size, String name ) throws IOException
+    {
     TupleEntryIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
-    validateLength( iterator, length );
+    validateLength( iterator, length, size );
     }
 
   protected void validateLength( TupleEntryIterator iterator, int length )
     {
+    validateLength( iterator, length, -1 );
+    }
+
+  protected void validateLength( TupleEntryIterator iterator, int length, int size )
+    {
     int count = 0;
     while( iterator.hasNext() )
       {
-      iterator.next();
+      TupleEntry tuple = iterator.next();
+
+      if( size != -1 )
+        assertEquals( "wrong number of elements", size, tuple.size() );
+
       count++;
       }
 
     iterator.close();
 
-    assertEquals( "wrong number of items", length, count );
+    assertEquals( "wrong number of lines", length, count );
     }
   }
