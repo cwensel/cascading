@@ -267,10 +267,12 @@ public class MultiMapReducePlanner extends FlowPlanner
       if( flowElement instanceof Tap || flowElement instanceof Group || flowElement instanceof Every )
         lastInsertable = flowElement;
 
-      if( flowElement instanceof Tap )
+      if( flowElement.getClass() == Pipe.class )
+        continue;
+      else if( flowElement instanceof Tap )
         continue;
       else if( elementGraph.outDegreeOf( flowElement ) <= 1 )
-        continue;
+          continue;
 
       // we are at the root of a split here
 

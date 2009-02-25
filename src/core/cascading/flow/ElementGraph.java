@@ -630,8 +630,19 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     int maxPaths = 0;
 
+    if( groups == null )
+      return 0;
+
     for( Group group : groups )
-      maxPaths = Math.max( maxPaths, getAllShortestPathsBetween( flowElement, group ).size() );
+      {
+      if( flowElement != group )
+        {
+        List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( flowElement, group );
+
+        if( paths != null )
+          maxPaths = Math.max( maxPaths, paths.size() );
+        }
+      }
 
     return maxPaths;
     }
