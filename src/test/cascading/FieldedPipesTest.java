@@ -593,7 +593,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, merged );
 
-    flow.writeDOT( "splitmerged.dot" );
+//    flow.writeDOT( "splitmerged.dot" );
 
     flow.complete();
 
