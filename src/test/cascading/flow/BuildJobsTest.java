@@ -796,7 +796,7 @@ public class BuildJobsTest extends CascadingTestCase
       throw exception;
       }
 
-    flow.writeDOT( "chainedcogroup.dot" );
+//    flow.writeDOT( "chainedcogroup.dot" );
 
     assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
     }
