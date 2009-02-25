@@ -384,6 +384,7 @@
       <fileset dir=".">
         <exclude name="build.properties"/>
 
+        <exclude name=".git/**"/>
         <exclude name="build/**"/>
         <exclude name="dist/**"/>
         <exclude name="tests/**"/>
