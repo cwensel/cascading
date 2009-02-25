@@ -279,7 +279,12 @@ public class FlowStep implements Serializable
    */
   public Scope getNextScope( FlowElement flowElement )
     {
-    return graph.outgoingEdgesOf( flowElement ).iterator().next();
+    Set<Scope> set = graph.outgoingEdgesOf( flowElement );
+
+    if( set.size() != 1 )
+      throw new IllegalStateException( "should only be one scope after current flow element: " + flowElement + " found: " + set.size() );
+
+    return set.iterator().next();
     }
 
   public Set<Scope> getNextScopes( FlowElement flowElement )

@@ -624,6 +624,18 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return tapGraph;
     }
 
+  public int getMaxNumPathsBetweenElementAndMergJoin( FlowElement flowElement )
+    {
+    List<Group> groups = findAllMergeJoinGroups();
+
+    int maxPaths = 0;
+
+    for( Group group : groups )
+      maxPaths = Math.max( maxPaths, getAllShortestPathsBetween( flowElement, group ).size() );
+
+    return maxPaths;
+    }
+
   public static class Extent extends Pipe
     {
 

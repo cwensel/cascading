@@ -447,7 +447,8 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
     String regex = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{1, 2, 3, 4, 5, 6} ) );
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{
+      1, 2, 3, 4, 5, 6} ) );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
 
@@ -567,6 +568,36 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 1, "left" );
     validateLength( flow, 2, "right" );
+    }
+
+  public void testSplitSameSourceMerged() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    // 46 192
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/splitsourcemerged", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
+
+    Pipe merged = new GroupBy( "merged", Pipe.pipes( left, right ), new Fields( "line" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, merged );
+
+    flow.writeDOT( "splitmerged.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 3 );
     }
 
   /**

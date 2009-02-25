@@ -36,6 +36,7 @@ import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.assertion.AssertNotNull;
 import cascading.operation.assertion.AssertNull;
+import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
@@ -559,6 +560,31 @@ public class BuildJobsTest extends CascadingTestCase
     List<FlowStep> steps = flow.getSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
+    }
+
+  /** Tests the case where the same source is split, then re-merged */
+  public void testMergeSameSourceSplit()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );
+
+    Tap sink = new Hfs( new TextLine(), "foo" );
+
+    Pipe head = new Pipe( "source" );
+
+    head = new Each( head, new Fields( "line" ), new ExpressionFilter( "line.length() != 0", String.class ) );
+
+    Pipe left = new Each( new Pipe( "left", head ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", head ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, merge );
+
+    flow.writeDOT( "mergedsamesource.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
   public void testCoGroupAroundCoGroup() throws Exception
