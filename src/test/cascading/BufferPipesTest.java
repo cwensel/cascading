@@ -35,10 +35,8 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class BufferPipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";

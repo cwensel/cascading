@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package cascading;
+
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.operation.Debug;
+import cascading.operation.Identity;
+import cascading.operation.regex.RegexFilter;
+import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.Each;
+import cascading.pipe.Pipe;
+import cascading.scheme.TextLine;
+import cascading.tap.Hfs;
+import cascading.tap.Tap;
+import cascading.tuple.Fields;
+
+public class RegressionMiscTest extends CascadingTestCase
+  {
+
+  String outputPath = "build/test/output/regressionmisc/";
+
+  public RegressionMiscTest()
+    {
+    super( "regression misc" );
+    }
+
+  /**
+   * sanity check to make sure writeDOT still works
+   *
+   * @throws Exception
+   */
+  public void testWriteDot() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "/input" );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( Fields.UNKNOWN ) );
+
+    pipe = new Each( pipe, new Debug() );
+
+    pipe = new Each( pipe, new Fields( 2 ), new Identity( new Fields( "label" ) ) );
+
+    pipe = new Each( pipe, new Debug() );
+
+    pipe = new Each( pipe, new Fields( "label" ), new RegexFilter( "[A-Z]*" ) );
+
+    pipe = new Each( pipe, new Debug() );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+    flow.writeDOT( outputPath + "/unknownselect.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+    }
+
+  }

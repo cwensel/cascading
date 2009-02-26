@@ -52,7 +52,6 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/DistanceUseCaseTest.java#4 $ */
 public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
   {
   String inputFileCritics = "build/test/data/critics.txt";

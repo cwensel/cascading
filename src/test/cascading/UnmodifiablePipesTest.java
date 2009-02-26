@@ -47,7 +47,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class UnmodifiablePipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";

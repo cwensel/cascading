@@ -28,7 +28,6 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
 public class TestFunction extends BaseOperation implements Function
   {
   private Tuple value;

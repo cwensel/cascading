@@ -44,7 +44,6 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/LargeDataTest.java#3 $ */
 public class LargeDataTest extends ClusterTestCase
   {
   String inputPageData = "build/test/data/url+page.200.txt";

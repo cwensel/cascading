@@ -41,7 +41,6 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
 public class RegressionPipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
