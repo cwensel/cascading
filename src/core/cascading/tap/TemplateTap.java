@@ -239,6 +239,6 @@ public class TemplateTap extends SinkTap
   @Override
   public String toString()
     {
-    return "TemplateTap{" + "parent=" + parent + ", pathTemplate='" + pathTemplate + '\'' + '}';
+    return getClass().getSimpleName() + "[\"" + parent + "\"]" + "[\"" + pathTemplate + "\"]";
     }
   }
