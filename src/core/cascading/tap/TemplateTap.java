@@ -235,4 +235,10 @@ public class TemplateTap extends SinkTap
     result = 31 * result + ( pathTemplate != null ? pathTemplate.hashCode() : 0 );
     return result;
     }
+
+  @Override
+  public String toString()
+    {
+    return "TemplateTap{" + "parent=" + parent + ", pathTemplate='" + pathTemplate + '\'' + '}';
+    }
   }
