@@ -53,6 +53,7 @@ import org.jets3t.service.model.S3Object;
  * Optionally these configuration/system properties can be set, instead of stuffing values into the URL authority:
  * "fs.s3tp.awsAccessKeyId" and "fs.s3tp.awsSecretAccessKey".
  */
+@Deprecated
 public class S3HttpFileSystem extends StreamedFileSystem
   {
   /** Field LOG */
