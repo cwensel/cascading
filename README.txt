@@ -9,7 +9,7 @@ General Information:
 
   cascading-x.y.z.jar      - all relevant Cascading class files and libraries, with a 'lib' folder
   cascading-core-x.y.z.jar - all Cascading Core class files
-  cascading-xml-x.y.z.jar  - all Cascading XML sub-project class files
+  cascading-xml-x.y.z.jar  - all Cascading XML operations class files
   cascadgin-test-x.y.z.jar - all Cascading tests and test utilities
 
   To use with Hadoop, we suggest stuffing cascading-core and cascading-xml jar files, and all third-party libs
@@ -23,7 +23,7 @@ General Information:
     /lib/<cascading third-party jar files>
 
   Hadoop will unpack the jar locally and remotely (in the cluster) and add any libraries in 'lib' to the classpath.
-  This is a feature specific to Hadoop. 
+  This is a feature specific to Hadoop.
 
   The cascading-x.y.z.jar file is typically used with scripting languages and is completely self contained.
 
