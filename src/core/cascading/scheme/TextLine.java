@@ -50,7 +50,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  */
 public class TextLine extends Scheme
   {
-  enum Compress
+  public enum Compress
     {
       DEFAULT, ENABLE, DISABLE
     }
@@ -109,6 +109,43 @@ public class TextLine extends Scheme
   public TextLine( Fields sourceFields, Fields sinkFields, int numSinkParts )
     {
     super( sourceFields, sinkFields, numSinkParts );
+
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
+    }
+
+  /**
+   * Constructor TextLine creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields    of type Fields
+   * @param sinkFields      of type Fields
+   * @param sinkCompression of type Compress
+   */
+  public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression )
+    {
+    super( sourceFields, sinkFields );
+
+    this.sinkCompression = sinkCompression;
+
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
+    }
+
+  /**
+   * Constructor TextLine creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields    of type Fields
+   * @param sinkFields      of type Fields
+   * @param sinkCompression of type Compress
+   * @param numSinkParts    of type int
+   */
+  public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression, int numSinkParts )
+    {
+    super( sourceFields, sinkFields, numSinkParts );
+
+    this.sinkCompression = sinkCompression;
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
       throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
