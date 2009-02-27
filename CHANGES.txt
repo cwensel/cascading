@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.3
 
   Fixed bug in c.f.MultiMapReducePlanner where split and joins with the same source were not handled properly.
 
