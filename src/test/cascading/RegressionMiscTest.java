@@ -21,6 +21,8 @@
 
 package cascading;
 
+import java.io.File;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Debug;
@@ -70,11 +72,9 @@ public class RegressionMiscTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
-    flow.writeDOT( outputPath + "/unknownselect.dot" );
+    new File( outputPath ).mkdirs();
 
-    flow.complete();
-
-    validateLength( flow, 5, null );
+    flow.writeDOT( outputPath + "/writedot.dot" );
     }
 
   }
