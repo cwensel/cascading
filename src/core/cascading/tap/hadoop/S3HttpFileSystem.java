@@ -67,6 +67,8 @@ public class S3HttpFileSystem extends StreamedFileSystem
   @Override
   public void initialize( URI uri, Configuration conf ) throws IOException
     {
+    LOG.warn( "the S3HttpFileSystem (s3tp://) is deprecated, please use the Hadoop NativeS3NativeFileSystem (s3n://)" );
+
     setConf( conf );
 
     String key = conf.get( "fs.s3tp.awsAccessKeyId", System.getProperty( "fs.s3tp.awsAccessKeyId" ) );
