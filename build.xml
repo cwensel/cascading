@@ -200,7 +200,7 @@
       <link href="http://www.janino.net/javadoc/"/>
       <link href="http://www.jgrapht.org/javadoc/"/>
       <link href="http://hadoop.apache.org/core/docs/current/api/index.html"/>
-      <bottom><![CDATA[<i>Copyright &#169; 2007-2008 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
+      <bottom><![CDATA[<i>Copyright &#169; 2007-2009 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
     </javadoc>
 
   </target>
@@ -299,7 +299,7 @@
 
   <!-- removes build -->
   <target name="nuke">
-    <echo message="nuking cascade..."/>
+    <echo message="nuking cascading..."/>
     <delete dir="${build}"/>
     <delete dir="${javadoc}"/>
     <delete dir="${dist}"/>
@@ -308,7 +308,7 @@
     <delete dir="tests"/>
 
     <delete>
-      <fileset dir="." includes="${ant.project.name}*.tgz"/>
+      <fileset dir="." includes="cascading*.tgz"/>
       <fileset dir="." includes="TEST-*"/>
       <fileset dir="." includes="junit*.properties"/>
       <fileset dir="." includes="**/.DS_Store"/>
