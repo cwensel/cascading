@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug where unsafe filename characters were leaking into temporary filenames, didn't take the first time. 
+
 1.0.3
 
   Fixed bug in c.f.MultiMapReducePlanner where split and joins with the same source were not handled properly.

@@ -107,8 +107,8 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
+   * @param fields     of type Fields
+   * @param stringPath of type String
    */
   public Hfs( Fields fields, String stringPath )
     {
@@ -119,9 +119,9 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param replace      of type boolean
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
   public Hfs( Fields fields, String stringPath, boolean replace )
     {
@@ -132,9 +132,9 @@ public class Hfs extends Tap
   /**
    * Constructor Hfs creates a new Hfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param sinkMode     of type SinkMode
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
    */
   public Hfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
@@ -383,7 +383,7 @@ public class Hfs extends Tap
 
   protected String makeTemporaryPathDir( String name )
     {
-    return name.replaceAll( "[//W//s]", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
+    return name.replaceAll( "[\\W\\s]", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
     }
 
   /**
