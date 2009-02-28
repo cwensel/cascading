@@ -234,4 +234,24 @@ public class RegressionPipesTest extends ClusterTestCase
       // ignore
       }
     }
+
+  public void testIllegalCharsInTempFiles() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/illegalchars", true );
+
+    Pipe pipe = new Pipe( "bar:bar@foo://blah/\t(*(**^**&%&%^@#@&&() :::: ///\\\\ \t illegal chars in it" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( " " ) );
+
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
+
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+    }
   }

@@ -455,7 +455,7 @@ public class MultiMapReducePlanner extends FlowPlanner
     // must give Taps unique names
     String name = pipe.getName();
 
-    name = name.substring( 0, name.length() < 25 ? name.length() : 25 ).replaceAll( " |\\*|\\+", "_" );
+    name = name.substring( 0, name.length() < 25 ? name.length() : 25 ).replaceAll( "\\s+|\\*|\\+", "_" );
 
     return new TempHfs( name + "/" + (int) ( Math.random() * 100000 ) + "/", intermediateSchemeClass );
     }
