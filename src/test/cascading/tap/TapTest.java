@@ -21,24 +21,23 @@
 
 package cascading.tap;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import cascading.ClusterTestCase;
-import cascading.operation.regex.RegexSplitter;
-import cascading.operation.Identity;
-import cascading.operation.Debug;
-import cascading.pipe.Pipe;
-import cascading.pipe.Each;
-import cascading.scheme.TextLine;
-import cascading.flow.MultiMapReducePlanner;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.MultiMapReducePlanner;
+import cascading.operation.Identity;
+import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.Each;
+import cascading.pipe.Pipe;
+import cascading.scheme.SequenceFile;
+import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 
@@ -207,5 +206,39 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     test = new Hfs( new TextLine( 1 ), sink.getPath().toString() + "/2-b" );
     validateLength( flow.openTapForRead( test ), 1 );
+    }
+
+  public void testTemplateTapView() throws IOException
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = new Hfs( new SequenceFile( new Fields( "upper" ) ), outputPath + "/testtemplatesview", true );
+
+    sink = new TemplateTap( (Hfs) sink, "%s-%s", new Fields( "number", "lower" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getPath().toString() + "/1-a" );
+    validateLength( flow.openTapForRead( test ), 1, 1 );
+
+    test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getPath().toString() + "/2-b" );
+    validateLength( flow.openTapForRead( test ), 1, 1 );
+
+    TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b
+
+    assertEquals( "wrong value", "B", input.next().get( 0 ) );
+
+    input.close();
     }
   }

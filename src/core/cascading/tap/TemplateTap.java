@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.scheme.Scheme;
 import cascading.tap.hadoop.TapCollector;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -116,6 +119,88 @@ public class TemplateTap extends SinkTap
       }
     }
 
+  public static class TemplateScheme extends Scheme
+    {
+    private final Scheme scheme;
+    private final Fields pathFields;
+    private final String pathTemplate;
+
+    public TemplateScheme( Scheme scheme )
+      {
+      this.scheme = scheme;
+      this.pathFields = null;
+      this.pathTemplate = null;
+      }
+
+    public TemplateScheme( Scheme scheme, String pathTemplate, Fields pathFields )
+      {
+      this.scheme = scheme;
+      this.pathFields = pathFields;
+      this.pathTemplate = pathTemplate;
+      }
+
+    public Fields getSinkFields()
+      {
+      return scheme.getSinkFields();
+      }
+
+    public void setSinkFields( Fields sinkFields )
+      {
+      scheme.setSinkFields( sinkFields );
+      }
+
+    public Fields getSourceFields()
+      {
+      return scheme.getSourceFields();
+      }
+
+    public void setSourceFields( Fields sourceFields )
+      {
+      scheme.setSourceFields( sourceFields );
+      }
+
+    public int getNumSinkParts()
+      {
+      return scheme.getNumSinkParts();
+      }
+
+    public void setNumSinkParts( int numSinkParts )
+      {
+      scheme.setNumSinkParts( numSinkParts );
+      }
+
+    public boolean isWriteDirect()
+      {
+      return scheme.isWriteDirect();
+      }
+
+    public void sourceInit( Tap tap, JobConf conf ) throws IOException
+      {
+      scheme.sourceInit( tap, conf );
+      }
+
+    public void sinkInit( Tap tap, JobConf conf ) throws IOException
+      {
+      scheme.sinkInit( tap, conf );
+      }
+
+    public Tuple source( Object key, Object value )
+      {
+      return scheme.source( key, value );
+      }
+
+    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+      {
+      if( pathFields != null )
+        {
+        Tuple values = tupleEntry.selectTuple( pathFields );
+        outputCollector = ( (TemplateCollector) outputCollector ).getCollector( values.format( pathTemplate ) );
+        }
+
+      scheme.sink( tupleEntry, outputCollector );
+      }
+    }
+
   /**
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
@@ -125,7 +210,7 @@ public class TemplateTap extends SinkTap
    */
   public TemplateTap( Hfs parent, String pathTemplate )
     {
-    super( parent.getScheme() );
+    super( new TemplateScheme( parent.getScheme() ) );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     }
@@ -140,7 +225,45 @@ public class TemplateTap extends SinkTap
    */
   public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode )
     {
-    super( parent.getScheme(), sinkMode );
+    super( new TemplateScheme( parent.getScheme() ), sinkMode );
+    this.parent = parent;
+    this.pathTemplate = pathTemplate;
+    }
+
+  /**
+   * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
+   * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
+   * The pathFields is a selector that selects and orders the fields to be used in the given pathTemplate.
+   * <p/>
+   * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
+   * data not in the result file to be used in the template path name.
+   *
+   * @param parent       of type Tap
+   * @param pathTemplate of type String
+   * @param pathFields   of type Fields
+   */
+  public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields )
+    {
+    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ) );
+    this.parent = parent;
+    this.pathTemplate = pathTemplate;
+    }
+
+  /**
+   * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
+   * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
+   * The pathFields is a selector that selects and orders the fields to be used in the given pathTemplate.
+   * <p/>
+   * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
+   * data not in the result file to be used in the template path name.
+   *
+   * @param parent       of type Tap
+   * @param pathTemplate of type String
+   * @param pathFields   of type Fields
+   */
+  public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode )
+    {
+    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     }
