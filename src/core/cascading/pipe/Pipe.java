@@ -218,24 +218,6 @@ public class Pipe implements FlowElement, Serializable
     return this == object;
     }
 
-//  @Override
-//  public boolean equals( Object object )
-//    {
-//    if( this == object )
-//      return true;
-//    if( !( object instanceof Pipe ) )
-//      return false;
-//
-//    Pipe pipe = (Pipe) object;
-//
-//    if( name != null ? !name.equals( pipe.name ) : pipe.name != null )
-//      return false;
-//    if( previous != null ? !previous.equals( pipe.previous ) : pipe.previous != null )
-//      return false;
-
-//    return true;
-//    }
-
   @Override
   public int hashCode()
     {
