@@ -254,25 +254,34 @@ public class MultiMapReducePlanner extends FlowPlanner
     // copy so we can modify the graph while iterating
     DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( elementGraph.copyElementGraph(), elementGraph.head );
 
+    FlowElement flowElement = null;
+    FlowElement previousElement = null;
     FlowElement lastInsertable = null;
 
     while( iterator.hasNext() )
       {
-      FlowElement flowElement = iterator.next();
+      previousElement = flowElement;
+      flowElement = iterator.next();
 
       if( flowElement instanceof ElementGraph.Extent )
+        {
+        previousElement = null; // reset previous when we hit tail
         continue;
+        }
 
       // if Tap, Group, or Every - we insert the tap here
       if( flowElement instanceof Tap || flowElement instanceof Group || flowElement instanceof Every )
         lastInsertable = flowElement;
 
-      if( flowElement.getClass() == Pipe.class )
+      // support splits on Pipe unless the previous is a Tap
+      if( flowElement.getClass() == Pipe.class && previousElement instanceof Tap )
         continue;
-      else if( flowElement instanceof Tap )
+
+      if( flowElement instanceof Tap )
         continue;
-      else if( elementGraph.outDegreeOf( flowElement ) <= 1 )
-          continue;
+
+      if( elementGraph.outDegreeOf( flowElement ) <= 1 )
+        continue;
 
       // we are at the root of a split here
 

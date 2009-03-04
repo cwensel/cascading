@@ -168,7 +168,14 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     addVertex( tail );
 
     for( String sink : sinks.keySet() )
-      addEdge( sinks.get( sink ), tail ).setName( sink );
+      {
+      Scope scope = addEdge( sinks.get( sink ), tail );
+
+      if( scope == null )
+        throw new ElementGraphException( "cannot sink to the same path from multiple branches: [" + Util.join( sinks.values() ) + "]" );
+
+      scope.setName( sink );
+      }
     }
 
   /**
@@ -668,6 +675,20 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     public String toString()
       {
       return "[" + getName() + "]";
+      }
+
+    public boolean equals( Object object )
+      {
+      if( object == null )
+        return false;
+
+      if( this == object )
+        return true;
+
+      if( object.getClass() != this.getClass() )
+        return false;
+
+      return this.getName().equals( ( (Pipe) object ).getName() );
       }
     }
   }

@@ -49,6 +49,7 @@ import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.tuple.Fields;
@@ -350,6 +351,64 @@ public class BuildJobsTest extends CascadingTestCase
     Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "ip" ), new RegexFilter( ".*46.*" ) );
 
     Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "ip" ), new RegexFilter( ".*192.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "splitcomplex.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+
+    FlowStep step = steps.get( 0 );
+
+    Scope nextScope = step.getNextScope( step.group );
+    FlowElement operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not an Every", operator instanceof Every );
+
+    nextScope = step.getNextScope( operator );
+    operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not a Each", operator instanceof Each );
+
+    nextScope = step.getNextScope( operator );
+    operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not a TempHfs", operator instanceof TempHfs );
+    }
+
+  /** same as splitComplex, except pipe/branch naming is after the Each, not before */
+  public void testSplitComplex2()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Fields( "ip" ), new Count(), new Fields( "ip", "count" ) );
+
+    pipe = new Each( pipe, new Fields( "ip" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( pipe, new Fields( "ip" ), new RegexFilter( ".*46.*" ) );
+
+    left = new Pipe( "left", left );
+
+    Pipe right = new Each( pipe, new Fields( "ip" ), new RegexFilter( ".*192.*" ) );
+
+    right = new Pipe( "right", right );
 
     Map sources = new HashMap();
     sources.put( "split", source );
@@ -796,7 +855,7 @@ public class BuildJobsTest extends CascadingTestCase
       throw exception;
       }
 
-//    flow.writeDOT( "chainedcogroup.dot" );
+//    flow.writeDOT( "multiplecogroupsimilarsources.dot" );
 
     assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
     }
@@ -1234,6 +1293,103 @@ public class BuildJobsTest extends CascadingTestCase
       // ignore
       assertTrue( "missing message", exception.getMessage().contains( "BuildJobsTest.testErrorMessages" ) );
       }
+    }
+
+  /**
+   * This test verifies splits on Pipe instances are recognized
+   * <p/>
+   * This flow intentionally splits to a Each and a Tap from a Each
+   * - T1
+   * .... E1
+   * - E2 - T2
+   * <p/>
+   * in theory the E2 should be fed T1
+   *
+   * @throws Exception
+   */
+  public void testSplitInMiddleBeforePipe() throws Exception
+    {
+    splitMiddle( true );
+    }
+
+  public void testSplitInMiddleAfterPipe() throws Exception
+    {
+    splitMiddle( false );
+    }
+
+  private void splitMiddle( boolean before )
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "lower" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "upper" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+
+    Tap sinkLeft = new Hfs( new SequenceFile( new Fields( "lower" ) ), "/splitmiddle/left", SinkMode.REPLACE );
+    Tap sinkRight = new Hfs( new SequenceFile( new Fields( "lower" ) ), "/splitmiddle/right", SinkMode.REPLACE );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "left", sinkLeft );
+    sinks.put( "right", sinkRight );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( "both", pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num", "lower", "num2", "upper" ) );
+
+    splice = new Each( splice, new Fields( "num" ), new RegexFilter( ".*" ) );
+
+    Pipe left = splice;
+
+    if( before )
+      left = new Pipe( "left", left );
+
+    left = new Each( left, new Fields( "num" ), new RegexFilter( ".*" ) );
+
+    if( !before )
+      left = new Pipe( "left", left );
+
+    Pipe right = left;
+
+    if( before )
+      right = new Pipe( "right", right );
+
+    right = new Each( right, new Fields( "num" ), new RegexFilter( ".*" ) );
+
+    if( !before )
+      right = new Pipe( "right", right );
+
+    Flow flow = new FlowConnector().connect( "splitmiddle", sources, sinks, left, right );
+
+//    flow.writeDOT( "splitmiddle.dot" );
+//    flow.writeStepsDOT( "splitmiddlesteps.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+
+    FlowStep step = steps.get( 0 );
+
+    Scope nextScope = step.getNextScope( step.group );
+    FlowElement operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not an Each", operator instanceof Each );
+
+    nextScope = step.getNextScope( operator );
+    operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not a Each", operator instanceof Each );
+
+    nextScope = step.getNextScope( operator );
+    operator = step.getNextFlowElement( nextScope );
+
+    assertTrue( "not a TempHfs", operator instanceof TempHfs );
     }
 
 

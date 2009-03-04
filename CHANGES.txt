@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.f.MultiMapReducePlanner was not properly handling splits on named Pipe instances.
+
   Added c.t.TemplateTap constructor arg that allows for independent tuple selection for use by template path.
 
   Fixed bug where unsafe filename characters were leaking into temporary filenames, didn't take the first time.
