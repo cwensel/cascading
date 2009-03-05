@@ -67,6 +67,9 @@ public class FlowReducerStack
     this.jobConf = flowProcess.getJobConf();
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
+    if( step.group == null )
+      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + " in step: " + step.getStepName() );
+
     buildStack();
 
     stackTail.open();
@@ -74,9 +77,6 @@ public class FlowReducerStack
 
   private void buildStack() throws IOException
     {
-    if( step.group == null )
-      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + "in step: " + step.getStepName() );
-
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
     Tap trap = step.getReducerTrap( ( (Pipe) step.group ).getName() );
