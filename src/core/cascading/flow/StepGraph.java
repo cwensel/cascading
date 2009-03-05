@@ -313,7 +313,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
           name += "\\nsrc:" + sourceName;
 
         if( groupName.length() != 0 )
-          name += "\\n" + groupName;
+          name += "\\ngrp:" + groupName;
 
         if( sinkName.length() != 0 )
           name += "\\nsnk:" + sinkName;
