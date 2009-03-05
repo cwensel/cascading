@@ -250,7 +250,7 @@ public class MultiMapReducePlanner extends FlowPlanner
    */
   private void handleSplit( ElementGraph elementGraph )
     {
-    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
+    // if there was a graph change, iterate paths again. 
     while( !internalSplit( elementGraph ) )
       ;
     }
