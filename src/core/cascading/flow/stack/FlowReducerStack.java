@@ -68,7 +68,7 @@ public class FlowReducerStack
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
     if( step.group == null )
-      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + " in step: " + step.getStepName() );
+      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + ", in step: " + step.getStepName() );
 
     buildStack();
 
