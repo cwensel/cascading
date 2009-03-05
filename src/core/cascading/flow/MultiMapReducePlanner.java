@@ -43,7 +43,6 @@ import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
-import org.jgrapht.traverse.DepthFirstIterator;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -177,7 +176,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       failOnMisusedBuffer( elementGraph );
 
       // m/r specific
-      handleSplits( elementGraph );
+      handleSplit( elementGraph );
       handleGroups( elementGraph );
 
       if( getNormalizeHeterogeneousSources( properties ) )
@@ -249,49 +248,62 @@ public class MultiMapReducePlanner extends FlowPlanner
    *
    * @param elementGraph
    */
-  private void handleSplits( ElementGraph elementGraph )
+  private void handleSplit( ElementGraph elementGraph )
     {
-    // copy so we can modify the graph while iterating
-    DepthFirstIterator<FlowElement, Scope> iterator = new DepthFirstIterator<FlowElement, Scope>( elementGraph.copyElementGraph(), elementGraph.head );
+    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
+    while( !internalSplit( elementGraph ) )
+      ;
+    }
 
-    FlowElement flowElement = null;
-    FlowElement previousElement = null;
-    FlowElement lastInsertable = null;
+  private boolean internalSplit( ElementGraph elementGraph )
+    {
+    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetweenExtents();
 
-    while( iterator.hasNext() )
+    for( GraphPath<FlowElement, Scope> path : paths )
       {
-      previousElement = flowElement;
-      flowElement = iterator.next();
+      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+      Set<Pipe> tapInsertions = new HashSet<Pipe>();
+      FlowElement lastInsertable = null;
 
-      if( flowElement instanceof ElementGraph.Extent )
+      for( int i = 0; i < flowElements.size(); i++ )
         {
-        previousElement = null; // reset previous when we hit tail
-        continue;
+        FlowElement flowElement = flowElements.get( i );
+
+        if( flowElement instanceof ElementGraph.Extent ) // is an extent: head or tail
+          continue;
+
+        // if Tap, Group, or Every - we insert the tap here
+        if( flowElement instanceof Tap || flowElement instanceof Group || flowElement instanceof Every )
+          lastInsertable = flowElement;
+
+        // support splits on Pipe unless the previous is a Tap
+        if( flowElement.getClass() == Pipe.class && flowElements.get( i - 1 ) instanceof Tap )
+          continue;
+
+        if( flowElement instanceof Tap )
+          continue;
+
+        if( elementGraph.outDegreeOf( flowElement ) <= 1 )
+          continue;
+
+        // we are at the root of a split here
+
+        // do any split paths converge on a single Group?
+        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergJoin( flowElement );
+        if( maxPaths <= 1 && lastInsertable instanceof Tap )
+          continue;
+
+        tapInsertions.add( (Pipe) flowElement );
         }
 
-      // if Tap, Group, or Every - we insert the tap here
-      if( flowElement instanceof Tap || flowElement instanceof Group || flowElement instanceof Every )
-        lastInsertable = flowElement;
+      for( Pipe pipe : tapInsertions )
+        insertTempTapAfter( elementGraph, pipe );
 
-      // support splits on Pipe unless the previous is a Tap
-      if( flowElement.getClass() == Pipe.class && previousElement instanceof Tap )
-        continue;
-
-      if( flowElement instanceof Tap )
-        continue;
-
-      if( elementGraph.outDegreeOf( flowElement ) <= 1 )
-        continue;
-
-      // we are at the root of a split here
-
-      // do any split paths converge on a single Group?
-      int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergJoin( flowElement );
-      if( maxPaths <= 1 && lastInsertable instanceof Tap )
-        continue;
-
-      insertTempTapAfter( elementGraph, (Pipe) flowElement );
+      if( !tapInsertions.isEmpty() )
+        return false;
       }
+
+    return true;
     }
 
   private void handleHeterogeneousSources( ElementGraph elementGraph )
