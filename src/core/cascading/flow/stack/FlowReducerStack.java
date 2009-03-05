@@ -74,6 +74,9 @@ public class FlowReducerStack
 
   private void buildStack() throws IOException
     {
+    if( step.group == null )
+      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() );
+
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
     Tap trap = step.getReducerTrap( ( (Pipe) step.group ).getName() );
