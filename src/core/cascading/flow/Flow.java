@@ -806,6 +806,9 @@ public class Flow implements Runnable
       // if jobs are run local, then only use one thread to force execution serially
       int numThreads = jobsAreLocal() ? 1 : jobsMap.size();
 
+      if( numThreads == 0 )
+        throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
+
       if( LOG.isInfoEnabled() )
         {
         logInfo( " parallel execution is enabled: " + !jobsAreLocal() );

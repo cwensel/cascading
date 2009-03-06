@@ -104,6 +104,27 @@ public class RegressionPipesTest extends ClusterTestCase
     validateLength( flow, 5, null );
     }
 
+  public void testCopy() throws Exception
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/copy", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "copy.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+    }
+
   /**
    * tests that a selector will select something other than the first position from an UNKNOWN tuple
    *
