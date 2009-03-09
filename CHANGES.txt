@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.4
 
   Updated split optimizer to perform a multipass optimization.
 
