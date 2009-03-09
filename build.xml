@@ -385,7 +385,7 @@
         <exclude name="build.properties"/>
         <exclude name="parent-build.xml"/>
 
-        <exclude name=".git/**"/>
+        <exclude name=".git*/**"/>
         <exclude name="build/**"/>
         <exclude name="dist/**"/>
         <exclude name="tests/**"/>
