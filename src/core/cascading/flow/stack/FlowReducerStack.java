@@ -67,6 +67,10 @@ public class FlowReducerStack
     this.jobConf = flowProcess.getJobConf();
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
+    // early versions of hadoop 0.19 instantiated this class with no intention of calling reduce()
+    if( jobConf.getNumReduceTasks() == 0 )
+      return;
+
     if( step.group == null )
       throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + ", in step: " + step.getStepName() );
 

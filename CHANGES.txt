@@ -1,5 +1,9 @@
 Cascading Change Log
 
+1.0.5
+
+  Added check if num reducers is zero, if so, assume #reduce() has no intention of being called and return silently.
+
 1.0.4
 
   Updated split optimizer to perform a multipass optimization.
