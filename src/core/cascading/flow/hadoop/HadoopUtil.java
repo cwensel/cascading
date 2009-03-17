@@ -22,7 +22,10 @@
 package cascading.flow.hadoop;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
@@ -57,7 +60,12 @@ public class HadoopUtil
     if( properties == null )
       return jobConf;
 
-    for( Object key : properties.keySet() )
+    Set<Object> keys = properties.keySet();
+
+    if( properties instanceof Properties )
+      keys = new HashSet<Object>( ( (Properties) properties ).stringPropertyNames() );
+
+    for( Object key : keys )
       {
       Object value = properties.get( key );
 

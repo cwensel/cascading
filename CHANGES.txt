@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug where default properties in nested j.u.Properties object were not being copied.
+
 1.0.5
 
   Added check if num reducers is zero, if so, assume #reduce() has no intention of being called and return silently.
