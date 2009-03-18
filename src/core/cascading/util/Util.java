@@ -38,10 +38,11 @@ import java.util.Map;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
-import cascading.pipe.Pipe;
-import cascading.operation.Operation;
 import cascading.operation.BaseOperation;
+import cascading.operation.Operation;
+import cascading.pipe.Pipe;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
@@ -52,6 +53,9 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 /** Class Util provides reusable operations. */
 public class Util
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( Util.class );
+
   /**
    * This method serializes the given Object instance and retunrs a String Base64 representation.
    *
@@ -396,6 +400,32 @@ public class Util
       }
 
     return null;
+    }
+
+  public static Class findMainClass( Class defaultType )
+    {
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+    for( StackTraceElement stackTraceElement : stackTrace )
+      {
+      if( stackTraceElement.getMethodName().equals( "main" ) && !stackTraceElement.getClassName().startsWith( "org.apache.hadoop" ) )
+        {
+        try
+          {
+          LOG.info( "resolving application jar from found main method on: " + stackTraceElement.getClassName() );
+
+          return Thread.currentThread().getContextClassLoader().loadClass( stackTraceElement.getClassName() );
+          }
+        catch( ClassNotFoundException exception )
+          {
+          LOG.warn( "unable to load class while discovering application jar: " + stackTraceElement.getClassName(), exception );
+          }
+        }
+      }
+
+    LOG.info( "using default application jar, may cause class not found exceptions on the cluster" );
+
+    return defaultType;
     }
 
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )

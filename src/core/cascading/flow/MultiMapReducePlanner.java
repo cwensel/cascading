@@ -144,7 +144,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       jobConf.setJar( path );
 
     if( jobConf.getJar() == null )
-      jobConf.setJarByClass( MultiMapReducePlanner.class );
+      jobConf.setJarByClass( Util.findMainClass( MultiMapReducePlanner.class ) );
 
     LOG.info( "using application jar: " + jobConf.getJar() );
     }
@@ -250,7 +250,7 @@ public class MultiMapReducePlanner extends FlowPlanner
    */
   private void handleSplit( ElementGraph elementGraph )
     {
-    // if there was a graph change, iterate paths again. 
+    // if there was a graph change, iterate paths again.
     while( !internalSplit( elementGraph ) )
       ;
     }

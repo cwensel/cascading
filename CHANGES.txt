@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Updated application jar discovery to provide more sane defaults supporting simple cases.
+
   Fixed bug where default properties in nested j.u.Properties object were not being copied.
 
 1.0.5
