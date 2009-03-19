@@ -23,11 +23,11 @@ package cascading.operation.text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -85,6 +85,20 @@ public class DateParser extends DateOperation implements Function
     }
 
   /**
+   * Constructor DateParser creates a new DateParser instance, where zone and locale are passed to the internal
+   * {@link SimpleDateFormat} instance.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param zone             of type TimeZone
+   * @param locale           of type Locale
+   * @param dateFormatString of type String
+   */
+  public DateParser( Fields fieldDeclaration, TimeZone zone, Locale locale, String dateFormatString )
+    {
+    this( fieldDeclaration, null, zone, locale, dateFormatString );
+    }
+
+  /**
    * Constructor DateParser creates a new DateParser instance, where calendarFields is an int[] of {@link Calendar} field
    * values. See {@link Calendar#get(int)}. The {@link TimeZone} and/or {@link Locale} may also be set.
    *
@@ -97,10 +111,19 @@ public class DateParser extends DateOperation implements Function
   public DateParser( Fields fieldDeclaration, int[] calendarFields, TimeZone zone, Locale locale, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString, zone, locale );
-    this.calendarFields = Arrays.copyOf( calendarFields, calendarFields.length );
 
-    if( fieldDeclaration.size() != calendarFields.length )
-      throw new IllegalArgumentException( "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
+    if( calendarFields != null )
+      {
+      this.calendarFields = Arrays.copyOf( calendarFields, calendarFields.length );
+
+      if( fieldDeclaration.size() != calendarFields.length )
+        throw new IllegalArgumentException( "fieldDeclaration must be same size as calendarFields, was " + fieldDeclaration.print() + " with calendar size: " + calendarFields.length );
+      }
+    else
+      {
+      if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
+        throw new IllegalArgumentException( "fieldDeclaration may only declare one field name, got " + fieldDeclaration.print() );
+      }
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
