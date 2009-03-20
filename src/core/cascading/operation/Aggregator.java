@@ -35,6 +35,13 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * Note {@link TupleEntry} instances are reused internally so should not be stored. Instead use the TupleEntry or Tuple
  * copy constructors to make safe copies.
+ * <p/>
+ * Since Aggregators can be chained, and Cascading pipelines all operation results, any Aggregators
+ * coming ahead of the current Aggregator must return a value before the {@link #complete(cascading.flow.FlowProcess, AggregatorCall)}
+ * method on this Aggregator is called. Subsequently, if any previous Aggregators return more than one Tuple result,
+ * this complete() method will be called for each Tuple emitted.
+ * <p/>
+ * Thus it is a best practice to implement a {@link Buffer} when emitting more than one, or zero Tuple results.
  *
  * @see AggregatorCall
  * @see OperationCall
@@ -76,8 +83,7 @@ public interface Aggregator<C> extends Operation<C>
   /**
    * Method complete will be issued last after every {@link TupleEntry} has been passed to the
    * {@link #aggregate(cascading.flow.FlowProcess, AggregatorCall)}
-   * method.  Any final calculation should be completed
-   * here and passed to the outputCollector.
+   * method.  Any final calculation should be completed here and passed to the outputCollector.
    *
    * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
