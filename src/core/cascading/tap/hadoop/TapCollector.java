@@ -26,12 +26,11 @@ import java.io.IOException;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -94,8 +93,8 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
     conf.set( "mapred.work.output.dir", outputPath.toString() );
 
-    if( conf.getOutputCommitter() instanceof FileOutputCommitter ) // only file based writing uses temp dirs
-      fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ) );
+    if( outputFormat instanceof FileOutputFormat ) // only file based writing uses temp dirs
+      fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ) );
 
     if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
       conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_m_000000_0", Math.rint( System.currentTimeMillis() ) ) );
@@ -144,7 +143,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
       }
 
     // remove _temporary directory
-    fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ), true );
+    fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ), true );
     }
 
   @Override
@@ -154,7 +153,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
       {
       writer.close( Reporter.NULL );
 
-      if( conf.getOutputCommitter() instanceof FileOutputCommitter )
+      if( conf.getOutputFormat() instanceof FileOutputFormat )
         moveTaskOutputs();
 
       }

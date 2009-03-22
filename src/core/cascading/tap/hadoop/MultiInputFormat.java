@@ -153,6 +153,12 @@ public class MultiInputFormat implements InputFormat
     return (List<Map<String, String>>) Util.deserializeBase64( job.get( "cascading.multiinputformats" ) );
     }
 
+  @Override
+  public void validateInput( JobConf job ) throws IOException
+    {
+    // do nothing, is deprecated
+    }
+
   /**
    * Method getSplits delegates to the appropriate InputFormat.
    *
