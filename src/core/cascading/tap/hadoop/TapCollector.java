@@ -28,6 +28,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -119,7 +120,13 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private void moveTaskOutputs() throws IOException
     {
     Path outputPath = FileOutputFormat.getOutputPath( conf );
-    Path taskPath = FileOutputFormat.getTaskOutputPath( conf, "_unused_" ).getParent();
+
+    String taskIdPath = conf.get( "mapred.task.id" );
+    Class[] classes = {JobConf.class, String.class};
+    Object[] parameters = {conf, "_temporary/" + taskIdPath};
+    Path taskPath = (Path) Util.invokeStaticMethod( FileOutputFormat.class, "getTaskOutputPath", parameters, classes );
+
+    taskPath = taskPath.getParent();
 
     FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
 
