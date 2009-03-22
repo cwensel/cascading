@@ -31,7 +31,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
@@ -447,9 +446,7 @@ public class Util
       }
     catch( Exception exception )
       {
-      exception.printStackTrace();
-
-      throw new FlowException("unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
       }
     }
   }
