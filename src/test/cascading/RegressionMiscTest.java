@@ -22,6 +22,7 @@
 package cascading;
 
 import java.io.File;
+import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -75,6 +76,32 @@ public class RegressionMiscTest extends CascadingTestCase
     new File( outputPath ).mkdirs();
 
     flow.writeDOT( outputPath + "/writedot.dot" );
+    }
+
+  /**
+   * verifies sink fields are consulted during planning
+   *
+   * @throws IOException
+   */
+  public void testSinkDeclaredFieldsFails() throws IOException
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), "/input" );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.ALL );
+
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "first", "second", "fifth" ) ), "output", true );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( source, sink, pipe );
+      fail( "did not fail on bad sink field names" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
     }
 
   }
