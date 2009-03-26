@@ -84,6 +84,19 @@ public class TextLine extends Scheme
     }
 
   /**
+   * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
+   * "offset" is the byte offset in the input file. By default, numSinkParts is set to 1.
+   *
+   * @param sinkCompression of type Compress
+   */
+  public TextLine( Compress sinkCompression )
+    {
+    super( DEFAULT_SOURCE_FIELDS );
+
+    this.sinkCompression = sinkCompression;
+    }
+
+  /**
    * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
    * subsequent tuples.
    *
