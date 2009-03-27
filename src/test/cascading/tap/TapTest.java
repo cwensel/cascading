@@ -48,6 +48,7 @@ public class TapTest extends ClusterTestCase implements Serializable
   {
   String inputFileComments = "build/test/data/comments+lower.txt";
   String inputFileJoined = "build/test/data/lower+upper.txt";
+  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
 
   String outputPath = "build/test/output/tap/";
 
@@ -241,4 +242,36 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     input.close();
     }
+
+  public void testSinkDeclaredFields() throws IOException
+    {
+    if( !new File( inputFileCross ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileCross );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.ALL );
+
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "second", "first", "third" ) ), outputPath + "/declaredsinks", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "declaredsinks.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    String line = iterator.next().getString( 0 );
+    assertTrue( "not equal: wrong values", line.matches( "[a-z]\t[0-9]\t[A-Z]" ) );
+
+    iterator.close();
+    }
+
   }

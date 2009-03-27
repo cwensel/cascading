@@ -481,14 +481,10 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     Set<Scope> incomingScopes = incomingEdgesOf( source );
     Set<Scope> outgoingScopes = outgoingEdgesOf( source );
 
-    // don't bother with sink taps
     List<FlowElement> flowElements = Graphs.successorListOf( this, source );
 
     if( flowElements.size() == 0 )
       throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
-
-    if( flowElements.get( 0 ) instanceof Extent )
-      return;
 
     Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
 

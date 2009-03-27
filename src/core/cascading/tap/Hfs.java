@@ -359,6 +359,10 @@ public class Hfs extends Tap
 
     makeStatuses( conf );
 
+    // statuses is empty, return 0
+    if( statuses == null || statuses.length == 0 )
+      return 0;
+
     long date = 0;
 
     // filter out directories as we don't recurse into sub dirs

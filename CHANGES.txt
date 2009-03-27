@@ -2,6 +2,12 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where a uri path to a s3n://bucket/ could cause an NPE when determining mod time on the path.
+
+  Fixed bug where sink c.s.Scheme sink fields were not being consulted during planning. This fix may
+  cause planner errors in existing applications where the sink fields are not actually available in the incoming
+  tuple stream.
+
   Updated application jar discovery to provide more sane defaults supporting simple cases.
 
   Fixed bug where default properties in nested j.u.Properties object were not being copied.
