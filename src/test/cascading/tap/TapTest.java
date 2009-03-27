@@ -269,7 +269,7 @@ public class TapTest extends ClusterTestCase implements Serializable
     TupleEntryIterator iterator = flow.openSink();
 
     String line = iterator.next().getString( 0 );
-    assertEquals( "not equal: wrong values", "a\t1\tA", line );
+    assertTrue( "not equal: wrong values", line.matches( "[a-z]\t[0-9]\t[A-Z]" ) );
 
     iterator.close();
     }
