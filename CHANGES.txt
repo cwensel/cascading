@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.6
 
   Fixed bug where a uri path to a s3n://bucket/ could cause an NPE when determining mod time on the path.
 

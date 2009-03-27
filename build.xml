@@ -30,6 +30,7 @@
   <property file="${cascading.basedir}/build.properties"/>
 
   <property name="cascading.release.version" value="x.y.z"/>
+  <property name="cascading.hadoop.compatible.version" value="current"/>
 
   <property name="javac.debug" value="true"/>
   <property name="test.haltonerror" value="true"/>
@@ -64,7 +65,9 @@
   <property name="jar.cascading-xml" value="cascading-xml-${cascading.release.version}.jar"/>
   <property name="jar.cascading-test" value="cascading-test-${cascading.release.version}.jar"/>
 
-  <property name="tar.cascading" value="cascading-${cascading.release.version}.tgz"/>
+  <property name="tar.cascading.prefix"
+            value="cascading-${cascading.release.version}-${cascading.hadoop.compatible.version}"/>
+  <property name="tar.cascading" value="${tar.cascading.prefix}.tgz"/>
 
   <path id="build.class.path">
     <pathelement location="${build.core}"/>
@@ -241,17 +244,17 @@
 
     <mkdir dir="package-tests"/>
 
-    <untar src="cascading-${cascading.release.version}.tgz" compression="gzip" dest="package-tests"/>
+    <untar src="${tar.cascading}" compression="gzip" dest="package-tests"/>
 
     <!-- hack to support data files in test packages -->
-    <unzip src="package-tests/cascading-${cascading.release.version}/${jar.cascading-test}"
-           dest="package-tests/cascading-${cascading.release.version}/build/test">
+    <unzip src="package-tests/${tar.cascading.prefix}/${jar.cascading-test}"
+           dest="package-tests/${tar.cascading.prefix}/build/test">
       <patternset>
         <include name="data/**"/>
       </patternset>
     </unzip>
 
-    <ant inheritAll="false" antfile="package-tests/cascading-${cascading.release.version}/build.xml"
+    <ant inheritAll="false" antfile="package-tests/${tar.cascading.prefix}/build.xml"
          target="test-package">
       <property name="hadoop.home" value="${hadoop.home}"/>
     </ant>
@@ -410,8 +413,8 @@
 
   <target name="package" depends="nuke,dist">
     <tar destfile="${tar.cascading}"
-         compression="gzip">
-      <tarfileset dir="dist/" prefix="cascading-${cascading.release.version}">
+         compression="gzip" longfile="gnu">
+      <tarfileset dir="dist/" prefix="${tar.cascading.prefix}">
         <include name="**/**"/>
       </tarfileset>
     </tar>
