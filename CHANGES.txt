@@ -1,5 +1,10 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug where c.t.Hfs caused a NPE from the NativeS3FileSytem when attempting to delete the root directory.
+  Hfs now detects a delete is attempted on the root dir, and returns immediately.
+
 1.0.6
 
   Fixed bug where a uri path to a s3n://bucket/ could cause an NPE when determining mod time on the path.

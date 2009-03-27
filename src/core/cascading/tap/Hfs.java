@@ -340,6 +340,10 @@ public class Hfs extends Tap
     if( LOG.isDebugEnabled() )
       LOG.debug( "deleting: " + getQualifiedPath( conf ) );
 
+    // do not delete the root directory
+    if( getQualifiedPath( conf ).depth() == 0 )
+      return true;
+
     return getFileSystem( conf ).delete( getPath(), true );
     }
 
