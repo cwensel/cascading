@@ -35,6 +35,7 @@ import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
 
 /** Class S3Util encapsulates calls to the JetS3t API. */
+@Deprecated
 public class S3Util
   {
   public static final String MIME_DIRECTORY = "application/x-directory";
@@ -54,6 +55,7 @@ public class S3Util
    * @param defaultSecretAccessKey
    * @return a String[] with accessKey and secretKey
    */
+  @Deprecated
   public static String[] parseAWSUri( URI uri, String defaultAccessKey, String defaultSecretAccessKey )
     {
     String accessKey = null;
@@ -101,11 +103,13 @@ public class S3Util
     return new String[]{accessKey, secretAccessKey};
     }
 
+  @Deprecated
   public static RestS3Service getS3Service( URI uri )
     {
     return getS3Service( uri, null, null );
     }
 
+  @Deprecated
   public static RestS3Service getS3Service( URI uri, String defaultAccessKey, String defaultSecretAccessKey )
     {
     try
@@ -123,6 +127,7 @@ public class S3Util
       }
     }
 
+  @Deprecated
   public static S3Bucket getS3Bucket( URI uri )
     {
     String bucketName = uri.getAuthority();
@@ -134,6 +139,7 @@ public class S3Util
     return new S3Bucket( bucketName );
     }
 
+  @Deprecated
   public static boolean deleteObject( S3Service s3Service, S3Bucket s3Bucket, Path path ) throws IOException
     {
     S3Object object = getObject( s3Service, s3Bucket, path, Request.DETAILS );
@@ -161,6 +167,7 @@ public class S3Util
    * @return null if the S3 service returns a 404
    * @throws IOException thrown if there is an error communicating to S3
    */
+  @Deprecated
   public static S3Object getObject( S3Service s3Service, S3Bucket s3Bucket, Path path, Request type ) throws IOException
     {
     try
@@ -191,11 +198,13 @@ public class S3Util
       }
     }
 
+  @Deprecated
   public static String getKeyFrom( Path path )
     {
     return path.toUri().getPath().substring( 1 );
     }
 
+  @Deprecated
   public static S3Object[] listObjects( S3Service s3Service, S3Bucket s3Bucket, Path path ) throws IOException
     {
     try
@@ -244,11 +253,13 @@ public class S3Util
     return object;
     }
 
+  @Deprecated
   public static boolean isDirectory( S3Object object )
     {
     return object.getContentType() != null && object.getContentType().equalsIgnoreCase( MIME_DIRECTORY );
     }
 
+  @Deprecated
   public static void putObject( S3Service s3Service, S3Bucket bucket, S3Object object ) throws IOException
     {
     try
@@ -264,6 +275,7 @@ public class S3Util
       }
     }
 
+  @Deprecated
   public static InputStream getObjectInputStream( S3Object object ) throws IOException
     {
     try
@@ -279,6 +291,4 @@ public class S3Util
       throw ioException;
       }
     }
-
-
   }

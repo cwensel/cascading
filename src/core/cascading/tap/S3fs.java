@@ -32,7 +32,10 @@ import org.apache.hadoop.mapred.JobConf;
  * Class S3fs is a {@link Tap} class that provides access to the Amazon S3 storage system.
  * <p/>
  * An Amazon AWS id, secret key, and a S3 bucket name are required.
+ *
+ * @deprecated
  */
+@Deprecated
 public class S3fs extends Hfs
   {
   /** Field S3FS_ID is the property key for the S3 id */
@@ -48,6 +51,7 @@ public class S3fs extends Hfs
    * @param sourceFields of type Fields
    * @param uri          of type URI
    */
+  @Deprecated
   public S3fs( Fields sourceFields, URI uri )
     {
     super( sourceFields, uri.getPath() );
@@ -65,6 +69,7 @@ public class S3fs extends Hfs
    * @param uri          of type URI
    * @param replace      of type boolean
    */
+  @Deprecated
   public S3fs( Fields sourceFields, URI uri, boolean replace )
     {
     super( sourceFields, uri.getPath(), replace );
@@ -79,9 +84,10 @@ public class S3fs extends Hfs
    * Constructor S3fs creates a new S3fs instance.
    *
    * @param sourceFields of type Fields
-   * @param uri of type URI
-   * @param sinkMode of type SinkMode
+   * @param uri          of type URI
+   * @param sinkMode     of type SinkMode
    */
+  @Deprecated
   public S3fs( Fields sourceFields, URI uri, SinkMode sinkMode )
     {
     super( sourceFields, uri.getPath(), sinkMode );
@@ -98,6 +104,7 @@ public class S3fs extends Hfs
    * @param sourceFields of type Fields
    * @param stringPath   of type String
    */
+  @Deprecated
   public S3fs( Fields sourceFields, String stringPath )
     {
     super( sourceFields, stringPath );
@@ -127,6 +134,7 @@ public class S3fs extends Hfs
    * @param bucket     of type String
    * @param stringPath of type String
    */
+  @Deprecated
   public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath )
     {
     super( scheme, stringPath );
@@ -139,6 +147,7 @@ public class S3fs extends Hfs
    * @param scheme of type Scheme
    * @param uri    of type URI
    */
+  @Deprecated
   public S3fs( Scheme scheme, URI uri )
     {
     super( scheme, uri.getPath() );
@@ -155,6 +164,7 @@ public class S3fs extends Hfs
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
+  @Deprecated
   public S3fs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
@@ -170,6 +180,7 @@ public class S3fs extends Hfs
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @Deprecated
   public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
@@ -179,13 +190,14 @@ public class S3fs extends Hfs
   /**
    * Constructor S3fs creates a new S3fs instance.
    *
-   * @param scheme of type Scheme
-   * @param id of type String
-   * @param secret of type String
-   * @param bucket of type String
+   * @param scheme     of type Scheme
+   * @param id         of type String
+   * @param secret     of type String
+   * @param bucket     of type String
    * @param stringPath of type String
-   * @param sinkMode of type SinkMode
+   * @param sinkMode   of type SinkMode
    */
+  @Deprecated
   public S3fs( Scheme scheme, String id, String secret, String bucket, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );
@@ -199,6 +211,7 @@ public class S3fs extends Hfs
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @Deprecated
   public S3fs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
@@ -211,6 +224,7 @@ public class S3fs extends Hfs
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
+  @Deprecated
   public S3fs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );
