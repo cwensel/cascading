@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Deprecated all S3 supporting classes, including c.t.S3fs. The s3n:// protocol is the preferred S3 interface.
+
   Fixed bug where c.t.Hfs caused a NPE from the NativeS3FileSytem when attempting to delete the root directory.
   Hfs now detects a delete is attempted on the root dir, and returns immediately.
 
