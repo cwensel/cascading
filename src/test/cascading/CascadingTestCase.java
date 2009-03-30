@@ -22,15 +22,27 @@
 package cascading;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowProcess;
+import cascading.operation.Aggregator;
+import cascading.operation.Buffer;
+import cascading.operation.ConcreteCall;
+import cascading.operation.Filter;
+import cascading.operation.Function;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleListCollector;
 import junit.framework.TestCase;
 
 /**
- *
+ * Class CascadingTestCase is the base class for all Cascading tests.
+ * <p/>
+ * It included a few helpful utility methods for testing Cascading applications.
  */
 public class CascadingTestCase extends TestCase
   {
@@ -108,5 +120,107 @@ public class CascadingTestCase extends TestCase
     iterator.close();
 
     assertEquals( "wrong number of lines", length, count );
+    }
+
+  protected TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )
+    {
+    return invokeFunction( function, new TupleEntry( arguments ), resultFields );
+    }
+
+  protected TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+    TupleListCollector collector = new TupleListCollector( resultFields );
+
+    operationCall.setArguments( arguments );
+    operationCall.setOutputCollector( collector );
+
+    function.prepare( FlowProcess.NULL, operationCall );
+    function.operate( FlowProcess.NULL, operationCall );
+    function.cleanup( FlowProcess.NULL, operationCall );
+
+    return collector;
+    }
+
+  protected boolean invokeFilter( Filter filter, Tuple arguments )
+    {
+    return invokeFilter( filter, new TupleEntry( arguments ) );
+    }
+
+  protected boolean invokeFilter( Filter filter, TupleEntry arguments )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+
+    operationCall.setArguments( arguments );
+
+    filter.prepare( FlowProcess.NULL, operationCall );
+
+    boolean isRemove = filter.isRemove( FlowProcess.NULL, operationCall );
+
+    filter.cleanup( FlowProcess.NULL, operationCall );
+
+    return isRemove;
+    }
+
+  protected TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
+    {
+    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
+
+    for( int i = 0; i < argumentsArray.length; i++ )
+      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+
+    return invokeAggregator( aggregator, entries, resultFields );
+    }
+
+  protected TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+
+    aggregator.prepare( FlowProcess.NULL, operationCall );
+
+    aggregator.start( FlowProcess.NULL, operationCall );
+
+    for( TupleEntry arguments : argumentsArray )
+      {
+      operationCall.setArguments( arguments );
+      aggregator.aggregate( FlowProcess.NULL, operationCall );
+      }
+
+    TupleListCollector collector = new TupleListCollector( resultFields );
+    operationCall.setOutputCollector( collector );
+
+    aggregator.complete( FlowProcess.NULL, operationCall );
+
+    aggregator.cleanup( null, operationCall );
+
+    return collector;
+    }
+
+  protected TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields )
+    {
+    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
+
+    for( int i = 0; i < argumentsArray.length; i++ )
+      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+
+    return invokeBuffer( buffer, entries, resultFields );
+    }
+
+  protected TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+
+    buffer.prepare( FlowProcess.NULL, operationCall );
+
+    operationCall.setArgumentsIterator( Arrays.asList( argumentsArray ).iterator() );
+
+    buffer.operate( FlowProcess.NULL, operationCall );
+
+    TupleListCollector collector = new TupleListCollector( resultFields );
+    operationCall.setOutputCollector( collector );
+
+    buffer.cleanup( null, operationCall );
+
+    return collector;
     }
   }
