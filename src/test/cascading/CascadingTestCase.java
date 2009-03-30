@@ -22,6 +22,7 @@
 package cascading;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
 import cascading.tuple.TupleEntry;
@@ -47,28 +48,48 @@ public class CascadingTestCase extends TestCase
     validateLength( flow, length, -1 );
     }
 
-  protected void validateLength( Flow flow, int length, int size ) throws IOException
-    {
-    validateLength( flow, length, size, null );
-    }
-
   protected void validateLength( Flow flow, int length, String name ) throws IOException
     {
-    validateLength( flow, length, -1, name );
+    validateLength( flow, length, -1, null, name );
     }
 
-  protected void validateLength( Flow flow, int length, int size, String name ) throws IOException
+  protected void validateLength( Flow flow, int length, int size ) throws IOException
+    {
+    validateLength( flow, length, size, null, null );
+    }
+
+  protected void validateLength( Flow flow, int length, int size, Pattern regex ) throws IOException
+    {
+    validateLength( flow, length, size, regex, null );
+    }
+
+  protected void validateLength( Flow flow, int length, Pattern regex, String name ) throws IOException
+    {
+    validateLength( flow, length, -1, regex, name );
+    }
+
+  protected void validateLength( Flow flow, int length, int size, Pattern regex, String name ) throws IOException
     {
     TupleEntryIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
-    validateLength( iterator, length, size );
+    validateLength( iterator, length, size, regex );
     }
 
   protected void validateLength( TupleEntryIterator iterator, int length )
     {
-    validateLength( iterator, length, -1 );
+    validateLength( iterator, length, -1, null );
     }
 
   protected void validateLength( TupleEntryIterator iterator, int length, int size )
+    {
+    validateLength( iterator, length, size, null );
+    }
+
+  protected void validateLength( TupleEntryIterator iterator, int length, Pattern regex )
+    {
+    validateLength( iterator, length, -1, regex );
+    }
+
+  protected void validateLength( TupleEntryIterator iterator, int length, int size, Pattern regex )
     {
     int count = 0;
     while( iterator.hasNext() )
@@ -77,6 +98,9 @@ public class CascadingTestCase extends TestCase
 
       if( size != -1 )
         assertEquals( "wrong number of elements", size, tuple.size() );
+
+      if( regex != null )
+        assertTrue( "regex: " + regex + " does not match: " + tuple.getTuple().toString(), regex.matcher( tuple.getTuple().toString() ).matches() );
 
       count++;
       }
