@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.o.r.RegexSplitter did not consistently split incoming values if the value had blank 
+  fields between the split delimiter. This only occurs if the incoming tuple is declared Fields.UNKNOWN
+  and won't affect any tuple with declared field names. Though this is an incompatible change, the bug
+  breaks the contract of the splitter.
+
   Deprecated all S3 supporting classes, including c.t.S3fs. The s3n:// protocol is the preferred S3 interface.
 
   Fixed bug where c.t.Hfs caused a NPE from the NativeS3FileSytem when attempting to delete the root directory.

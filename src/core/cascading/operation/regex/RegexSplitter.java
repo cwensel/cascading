@@ -72,7 +72,7 @@ public class RegexSplitter extends RegexOperation implements Function
     Tuple output = new Tuple();
 
     // TODO: optimize this
-    int length = fieldDeclaration.isUnknown() ? 0 : fieldDeclaration.size();
+    int length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
     String[] split = getPattern().split( value, length );
 
     for( int i = 0; i < split.length; i++ )
