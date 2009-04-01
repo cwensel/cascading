@@ -31,6 +31,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -431,5 +432,21 @@ public class Util
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
+    }
+
+  public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Method method = type.getDeclaredMethod( methodName, parameterTypes );
+
+      method.setAccessible( true );
+
+      return method.invoke( null, parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      }
     }
   }

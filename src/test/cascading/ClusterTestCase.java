@@ -21,19 +21,19 @@
 
 package cascading;
 
-import cascading.flow.MultiMapReducePlanner;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MiniMRCluster;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import cascading.flow.MultiMapReducePlanner;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.dfs.MiniDFSCluster;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MiniMRCluster;
 
 /**
  *
@@ -94,7 +94,7 @@ public class ClusterTestCase extends CascadingTestCase
     else
       {
       System.setProperty( "test.build.data", "build" );
-      new File("build/test/log").mkdirs();
+      new File( "build/test/log" ).mkdirs();
       System.setProperty( "hadoop.log.dir", "build/test/log" );
       Configuration conf = new Configuration();
 
