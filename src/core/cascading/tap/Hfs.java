@@ -38,6 +38,7 @@ import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -344,7 +345,20 @@ public class Hfs extends Tap
     if( getQualifiedPath( conf ).depth() == 0 )
       return true;
 
-    return getFileSystem( conf ).delete( getPath(), true );
+    FileSystem fileSystem = getFileSystem( conf );
+
+    try
+      {
+      return fileSystem.delete( getPath(), true );
+      }
+    catch( NullPointerException exception )
+      {
+      // hack to get around npe thrown when fs reaches root directory
+      if( !( fileSystem instanceof NativeS3FileSystem ) )
+        throw exception;
+      }
+
+    return true;
     }
 
   @Override
