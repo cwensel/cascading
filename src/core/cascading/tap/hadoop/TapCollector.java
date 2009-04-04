@@ -21,20 +21,14 @@
 
 package cascading.tap.hadoop;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import cascading.flow.FlowOutputCommitter;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.util.Util;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputCommitter;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
@@ -84,24 +78,15 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    if( !tap.makeDirs( conf ) ) // required
-      throw new TapException( "unable to make dirs for: " + tap.toString() );
+    if( !( conf.getOutputCommitter() instanceof FlowOutputCommitter ) )
+      {
+      conf.setOutputCommitter( FlowOutputCommitter.class );
+      FlowOutputCommitter.addBypassOutputPaths( conf, tap.getQualifiedPath( conf ).toString() );
+      }
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
-    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
-
     filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
-
-    conf.set( "mapred.work.output.dir", outputPath.toString() );
-
-    if( conf.getOutputCommitter() instanceof FileOutputCommitter ) // only file based writing uses temp dirs
-      fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ) );
-
-    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
-      conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_m_000000_0", Math.rint( System.currentTimeMillis() ) ) );
-
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
 
@@ -119,106 +104,12 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
       }
     }
 
-  private void moveTaskOutputs() throws IOException
-    {
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
-    Path taskPath = getTaskOutputPathRetry().getParent();
-
-    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
-
-    // this file shoul exist, retr 5 times
-    FileStatus fileStatus = getFileStatusRetry( taskPath, fileSystem );
-
-    if( fileStatus != null && !fileStatus.isDir() )
-      throw new IOException( "path is not a directory: " + taskPath );
-
-    FileStatus[] statuses = fileSystem.listStatus( taskPath );
-
-    for( FileStatus status : statuses )
-      {
-      Path sourcePath = status.getPath();
-
-      if( status.isDir() )
-        throw new IOException( "path is a directory, no support for nested directories: " + sourcePath );
-
-      Path targetPath = new Path( outputPath, sourcePath.getName() );
-
-      fileSystem.rename( sourcePath, targetPath );
-
-      LOG.debug( "moved " + sourcePath + " to " + targetPath );
-      }
-
-    // remove _temporary directory
-    fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ), true );
-    }
-
-  private Path getTaskOutputPathRetry() throws IOException
-    {
-    try
-      {
-      return Util.retry( LOG, 3, 20, "unable to get task output path", new Util.RetryOperator<Path>()
-      {
-      @Override
-      public Path operate() throws Exception
-        {
-        return FileOutputFormat.getTaskOutputPath( conf, "_unused_" );
-        }
-
-      @Override
-      public boolean rethrow( Exception exception )
-        {
-        return false;
-        }
-      } );
-      }
-    catch( Exception exception )
-      {
-      if( exception instanceof RuntimeException )
-        throw (RuntimeException) exception;
-      else
-        throw (IOException) exception;
-      }
-    }
-
-  private FileStatus getFileStatusRetry( final Path taskPath, final FileSystem fileSystem ) throws IOException
-    {
-    try
-      {
-      return Util.retry( LOG, 3, 20, "file not found for path: " + taskPath, new Util.RetryOperator<FileStatus>()
-      {
-      @Override
-      public FileStatus operate() throws Exception
-        {
-        return fileSystem.getFileStatus( taskPath );
-        }
-
-      @Override
-      public boolean rethrow( Exception exception )
-        {
-        // retry on FileNotFoundExceptions
-        return !( exception instanceof FileNotFoundException );
-        }
-      } );
-      }
-    catch( Exception exception )
-      {
-      if( exception instanceof RuntimeException )
-        throw (RuntimeException) exception;
-      else
-        throw (IOException) exception;
-      }
-    }
-
   @Override
   public void close()
     {
     try
       {
       writer.close( Reporter.NULL );
-
-      if( conf.getOutputCommitter() instanceof FileOutputCommitter )
-        moveTaskOutputs();
-
       }
     catch( IOException exception )
       {

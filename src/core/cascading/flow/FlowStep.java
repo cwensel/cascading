@@ -144,6 +144,8 @@ public class FlowStep implements Serializable
     conf.setMapperClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
+    conf.setOutputCommitter( FlowOutputCommitter.class );
+
     // set for use by the shuffling phase
     TupleSerialization.setSerializations( conf );
 
@@ -211,7 +213,10 @@ public class FlowStep implements Serializable
       JobConf trapConf = new JobConf( conf );
 
       for( Tap tap : traps.values() )
+        {
         tap.sinkInit( trapConf );
+        FlowOutputCommitter.addBypassOutputPaths( conf, tap.getQualifiedPath( conf ).toString() );
+        }
       }
     }
 
@@ -237,6 +242,9 @@ public class FlowStep implements Serializable
       tempSink.sinkInit( conf );
     else
       sink.sinkInit( conf );
+
+    if( sink.isWriteDirect() )
+      FlowOutputCommitter.addBypassOutputPaths( conf, sink.getQualifiedPath( conf ).toString() );
     }
 
   public TapIterator openSourceForRead( JobConf conf ) throws IOException
