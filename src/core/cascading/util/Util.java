@@ -432,4 +432,51 @@ public class Util
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
     }
+
+  public interface RetryOperator<T>
+    {
+    T operate() throws Exception;
+
+    boolean rethrow( Exception exception );
+    }
+
+  public static <T> T retry( Logger logger, int retries, int secondsDelay, String message, RetryOperator<T> operator ) throws Exception
+    {
+    Exception saved = null;
+
+    for( int i = 0; i < retries; i++ )
+      {
+      try
+        {
+        return operator.operate();
+        }
+      catch( Exception exception )
+        {
+        if( operator.rethrow( exception ) )
+          {
+          logger.warn( message + ", but not retrying", exception );
+
+          throw exception;
+          }
+
+        saved = exception;
+
+        logger.warn( message + ", attempt: " + ( i + 1 ), exception );
+
+        try
+          {
+          Thread.sleep( secondsDelay * 1000 );
+          }
+        catch( InterruptedException exception1 )
+          {
+          // do nothing
+          }
+        }
+      }
+
+    logger.warn( message + ", done retrying after attempts: " + retries, saved );
+
+    throw saved;
+    }
+
   }

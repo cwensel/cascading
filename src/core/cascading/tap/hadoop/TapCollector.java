@@ -21,13 +21,15 @@
 
 package cascading.tap.hadoop;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -120,11 +122,14 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private void moveTaskOutputs() throws IOException
     {
     Path outputPath = FileOutputFormat.getOutputPath( conf );
-    Path taskPath = FileOutputFormat.getTaskOutputPath( conf, "_unused_" ).getParent();
+    Path taskPath = getTaskOutputPathRetry().getParent();
 
     FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
 
-    if( !fileSystem.getFileStatus( taskPath ).isDir() )
+    // this file shoul exist, retr 5 times
+    FileStatus fileStatus = getFileStatusRetry( taskPath, fileSystem );
+
+    if( fileStatus != null && !fileStatus.isDir() )
       throw new IOException( "path is not a directory: " + taskPath );
 
     FileStatus[] statuses = fileSystem.listStatus( taskPath );
@@ -145,6 +150,63 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
     // remove _temporary directory
     fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), FileOutputCommitter.TEMP_DIR_NAME ), true );
+    }
+
+  private Path getTaskOutputPathRetry() throws IOException
+    {
+    try
+      {
+      return Util.retry( LOG, 3, 20, "unable to get task output path", new Util.RetryOperator<Path>()
+      {
+      @Override
+      public Path operate() throws Exception
+        {
+        return FileOutputFormat.getTaskOutputPath( conf, "_unused_" );
+        }
+
+      @Override
+      public boolean rethrow( Exception exception )
+        {
+        return false;
+        }
+      } );
+      }
+    catch( Exception exception )
+      {
+      if( exception instanceof RuntimeException )
+        throw (RuntimeException) exception;
+      else
+        throw (IOException) exception;
+      }
+    }
+
+  private FileStatus getFileStatusRetry( final Path taskPath, final FileSystem fileSystem ) throws IOException
+    {
+    try
+      {
+      return Util.retry( LOG, 3, 20, "file not found for path: " + taskPath, new Util.RetryOperator<FileStatus>()
+      {
+      @Override
+      public FileStatus operate() throws Exception
+        {
+        return fileSystem.getFileStatus( taskPath );
+        }
+
+      @Override
+      public boolean rethrow( Exception exception )
+        {
+        // retry on FileNotFoundExceptions
+        return !( exception instanceof FileNotFoundException );
+        }
+      } );
+      }
+    catch( Exception exception )
+      {
+      if( exception instanceof RuntimeException )
+        throw (RuntimeException) exception;
+      else
+        throw (IOException) exception;
+      }
     }
 
   @Override

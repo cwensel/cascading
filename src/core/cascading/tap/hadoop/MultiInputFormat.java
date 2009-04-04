@@ -39,6 +39,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
+import org.jets3t.service.S3ServiceException;
 
 /**
  * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
@@ -258,11 +259,35 @@ public class MultiInputFormat implements InputFormat
    * @return RecordReader
    * @throws IOException when
    */
-  public RecordReader getRecordReader( InputSplit split, JobConf job, Reporter reporter ) throws IOException
+  public RecordReader getRecordReader( InputSplit split, JobConf job, final Reporter reporter ) throws IOException
     {
-    MultiInputSplit multiSplit = (MultiInputSplit) split;
-    JobConf currentConf = mergeConf( job, multiSplit.config, true );
+    final MultiInputSplit multiSplit = (MultiInputSplit) split;
+    final JobConf currentConf = mergeConf( job, multiSplit.config, true );
 
-    return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
+    try
+      {
+      return Util.retry( LOG, 3, 20, "unable to get record reader", new Util.RetryOperator<RecordReader>()
+      {
+
+      @Override
+      public RecordReader operate() throws Exception
+        {
+        return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
+        }
+
+      @Override
+      public boolean rethrow( Exception exception )
+        {
+        return !( exception.getCause() instanceof S3ServiceException );
+        }
+      } );
+      }
+    catch( Exception exception )
+      {
+      if( exception instanceof RuntimeException )
+        throw (RuntimeException) exception;
+      else
+        throw (IOException) exception;
+      }
     }
   }
