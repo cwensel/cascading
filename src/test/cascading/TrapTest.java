@@ -206,13 +206,13 @@ public class TrapTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     // always fail
-    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), new Tuple( 1 ), 1 ), Fields.ALL );
-    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test2" ), new Tuple( 1 ), 2 ), Fields.ALL );
-    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test3" ), new Tuple( 1 ), 3 ), Fields.ALL );
-    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test4" ), new Tuple( 1 ), 4 ), Fields.ALL );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test" ), new Tuple( 1 ), 1 ), Fields.ALL );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test2" ), new Tuple( 2 ), 2 ), Fields.ALL );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test3" ), new Tuple( 3 ), 3 ), Fields.ALL );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test4" ), new Tuple( 4 ), 4 ), Fields.ALL );
 
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allchain/tap", true );
-    Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allchain/trap", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "allchain/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "allchain/trap", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 
@@ -220,8 +220,7 @@ public class TrapTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 4, null );
-    validateLength( flow.openTrap(), 6 );
+    validateLength( flow, 6, null );
+    validateLength( flow.openTrap(), 4 );
     }
-
   }

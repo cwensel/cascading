@@ -25,14 +25,14 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-public class TestFunction extends BaseOperation implements Function
+public class TestFunction extends BaseOperation<Integer> implements Function<Integer>
   {
   int failon = -1;
   private Tuple value;
-  int count = 0;
 
   public TestFunction( Fields fieldDeclaration, Tuple value )
     {
@@ -47,15 +47,27 @@ public class TestFunction extends BaseOperation implements Function
     this.failon = failon;
     }
 
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Integer> operationCall )
+    {
+    operationCall.setContext( 0 );
+    }
+
+  public void operate( FlowProcess flowProcess, FunctionCall<Integer> functionCall )
     {
     if( value == null )
       throw new RuntimeException( "function failed" );
 
-    if( count == failon )
-      throw new RuntimeException( "function failed" );
+    try
+      {
+      if( functionCall.getContext() == failon )
+        throw new RuntimeException( "function failed" );
+      }
+    finally
+      {
+      functionCall.setContext( functionCall.getContext() + 1 );
+      }
 
-    count++;
     functionCall.getOutputCollector().add( value );
     }
   }
