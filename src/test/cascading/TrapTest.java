@@ -39,6 +39,7 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 /**
  *
@@ -184,6 +185,43 @@ public class TrapTest extends ClusterTestCase
 
     validateLength( flow, 0, null );
     validateLength( flow.openTrap(), failSize );
+    }
+
+  /**
+   * verify we can fail in randome places into the same trap
+   *
+   * @throws Exception
+   */
+  public void testTrapEachAllChained() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), new Tuple( 1 ), 1 ), Fields.ALL );
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test2" ), new Tuple( 1 ), 2 ), Fields.ALL );
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test3" ), new Tuple( 1 ), 3 ), Fields.ALL );
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test4" ), new Tuple( 1 ), 4 ), Fields.ALL );
+
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allchain/tap", true );
+    Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allchain/trap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+//    flow.writeDOT( "traps.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 4, null );
+    validateLength( flow.openTrap(), 6 );
     }
 
   }

@@ -30,7 +30,9 @@ import cascading.tuple.Tuple;
 
 public class TestFunction extends BaseOperation implements Function
   {
+  int failon = -1;
   private Tuple value;
+  int count = 0;
 
   public TestFunction( Fields fieldDeclaration, Tuple value )
     {
@@ -38,11 +40,22 @@ public class TestFunction extends BaseOperation implements Function
     this.value = value;
     }
 
+  public TestFunction( Fields fieldDeclaration, Tuple value, int failon )
+    {
+    super( fieldDeclaration );
+    this.value = value;
+    this.failon = failon;
+    }
+
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     if( value == null )
       throw new RuntimeException( "function failed" );
 
+    if( count == failon )
+      throw new RuntimeException( "function failed" );
+
+    count++;
     functionCall.getOutputCollector().add( value );
     }
   }
