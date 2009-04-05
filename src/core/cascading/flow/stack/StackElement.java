@@ -36,12 +36,49 @@ import org.apache.hadoop.mapred.JobConf;
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
   {
+  private static Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
+
   final FlowProcess flowProcess;
   private final Tap trap;
-
   StackElement previous;
   StackElement next;
-  private Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
+
+  private static TapCollector getTrapCollector( Tap trap, JobConf jobConf )
+    {
+    TapCollector trapCollector = trapCollectors.get( trap );
+
+    if( trapCollector == null )
+      {
+      try
+        {
+        trapCollector = (TapCollector) trap.openForWrite( jobConf );
+        trapCollectors.put( trap, trapCollector );
+        }
+      catch( IOException exception )
+        {
+        throw new StackException( exception );
+        }
+      }
+
+    return trapCollector;
+    }
+
+  private static void closeTraps()
+    {
+    for( TapCollector trapCollector : trapCollectors.values() )
+      {
+      try
+        {
+        trapCollector.close();
+        }
+      catch( Exception exception )
+        {
+        // do nothing
+        }
+      }
+
+    trapCollectors.clear();
+    }
 
   public StackElement( FlowProcess flowProcess, Tap trap )
     {
@@ -94,27 +131,7 @@ abstract class StackElement implements FlowCollector
     if( trap == null )
       throw new StackException( exception );
 
-    getTrapCollector( trap ).add( tupleEntry );
-    }
-
-  private TapCollector getTrapCollector( Tap trap )
-    {
-    TapCollector trapCollector = trapCollectors.get( trap );
-
-    if( trapCollector == null )
-      {
-      try
-        {
-        trapCollector = (TapCollector) trap.openForWrite( getJobConf() );
-        trapCollectors.put( trap, trapCollector );
-        }
-      catch( IOException exception )
-        {
-        throw new StackException( exception );
-        }
-      }
-
-    return trapCollector;
+    getTrapCollector( trap, getJobConf() ).add( tupleEntry );
     }
 
   public void open() throws IOException
@@ -127,12 +144,24 @@ abstract class StackElement implements FlowCollector
 
   public void close() throws IOException
     {
-    cleanup();
-
-    for( TapCollector trapCollector : trapCollectors.values() )
-      trapCollector.close();
-
-    if( previous != null )
-      previous.close();
+    try
+      {
+      cleanup();
+      }
+    finally
+      {
+      try
+        {
+        // close if top of stack
+        if( previous == null )
+          closeTraps();
+        }
+      finally
+        {
+        if( previous != null )
+          previous.close();
+        }
+      }
     }
+
   }

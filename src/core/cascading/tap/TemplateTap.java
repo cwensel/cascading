@@ -81,13 +81,12 @@ public class TemplateTap extends SinkTap
 
       try
         {
-        Path fullPath = new Path( parent.getQualifiedPath( conf ), path );
-        Tap tap = new Hfs( parent.getScheme(), fullPath.toString() );
+        Tap tap = new Hfs( parent.getScheme(), parent.getQualifiedPath( conf ).toString() );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "creating collector for path: " + fullPath );
+          LOG.debug( "creating collector for path: " + new Path( parent.getQualifiedPath( conf ), path ) );
 
-        collector = (OutputCollector) new TapCollector( tap, conf );
+        collector = (OutputCollector) new TapCollector( tap, path, conf );
         }
       catch( IOException exception )
         {
@@ -107,10 +106,24 @@ public class TemplateTap extends SinkTap
       {
       super.close();
 
-      for( OutputCollector collector : collectors.values() )
-        ( (TupleEntryCollector) collector ).close();
-
-      collectors.clear();
+      try
+        {
+        for( OutputCollector collector : collectors.values() )
+          {
+          try
+            {
+            ( (TupleEntryCollector) collector ).close();
+            }
+          catch( Exception exception )
+            {
+            // do nothing
+            }
+          }
+        }
+      finally
+        {
+        collectors.clear();
+        }
       }
 
     public void collect( Object key, Object value ) throws IOException

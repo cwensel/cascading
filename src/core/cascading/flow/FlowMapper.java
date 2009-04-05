@@ -33,9 +33,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-/**
- * Class FlowMapper is the Hadoop Mapper implementation.
- */
+/** Class FlowMapper is the Hadoop Mapper implementation. */
 public class FlowMapper extends MapReduceBase implements Mapper
   {
   /** Field flowMapperStack */
@@ -92,8 +90,13 @@ public class FlowMapper extends MapReduceBase implements Mapper
   @Override
   public void close() throws IOException
     {
-    super.close();
-
-    flowMapperStack.close();
+    try
+      {
+      super.close();
+      }
+    finally
+      {
+      flowMapperStack.close();
+      }
     }
   }

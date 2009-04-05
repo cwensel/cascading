@@ -36,11 +36,16 @@ import org.apache.hadoop.util.StringUtils;
 /**
  *
  */
-public class FlowOutputCommitter extends OutputCommitter
+public class FlowOutputCommitter extends FileOutputCommitter
   {
-  public static String[] getBypassOutputPaths( JobConf jobConf )
+  public static String[] getBypassOutputPaths( JobConf jobConf, boolean isMapper )
     {
-    String[] list = jobConf.getStrings( "cascading.bypass.output.paths" );
+    String name = "cascading.bypass.output.paths." + ( isMapper ? "mapper" : "reducer" );
+    String[] list = jobConf.getStrings( name );
+
+    if( list == null )
+      return new String[0];
+
     String[] result = new String[list.length];
 
     for( int i = 0; i < list.length; i++ )
@@ -49,18 +54,20 @@ public class FlowOutputCommitter extends OutputCommitter
     return result;
     }
 
-  public static void addBypassOutputPaths( JobConf jobConf, String path )
+  public static void addBypassOutputPaths( JobConf jobConf, boolean isMapper, String path )
     {
     path = StringUtils.escapeString( path );
 
-    String paths = jobConf.get( "cascading.bypass.output.paths" );
-    jobConf.set( "cascading.bypass.output.paths", paths == null ? path : path + StringUtils.COMMA_STR + paths );
+    String name = "cascading.bypass.output.paths." + ( isMapper ? "mapper" : "reducer" );
+    String paths = jobConf.get( name );
+
+    jobConf.set( name, paths == null ? path : path + StringUtils.COMMA_STR + paths );
     }
 
   @Override
   public void setupJob( final JobContext jobContext ) throws IOException
     {
-    invoke( jobContext.getJobConf(), new Predicate()
+    invoke( jobContext.getJobConf(), true, new Predicate()
     {
     @Override
     public void invoke( OutputCommitter outputCommitter ) throws IOException
@@ -73,7 +80,7 @@ public class FlowOutputCommitter extends OutputCommitter
   @Override
   public void cleanupJob( final JobContext jobContext ) throws IOException
     {
-    invoke( jobContext.getJobConf(), new Predicate()
+    invoke( jobContext.getJobConf(), true, new Predicate()
     {
     @Override
     public void invoke( OutputCommitter outputCommitter ) throws IOException
@@ -86,7 +93,7 @@ public class FlowOutputCommitter extends OutputCommitter
   @Override
   public void setupTask( final TaskAttemptContext taskContext ) throws IOException
     {
-    invoke( taskContext.getJobConf(), new Predicate()
+    invoke( taskContext.getJobConf(), false, new Predicate()
     {
     @Override
     public void invoke( OutputCommitter outputCommitter ) throws IOException
@@ -99,13 +106,16 @@ public class FlowOutputCommitter extends OutputCommitter
   @Override
   public boolean needsTaskCommit( TaskAttemptContext taskContext ) throws IOException
     {
-    return newInstance( taskContext.getJobConf() ).needsTaskCommit( taskContext );
+    JobConf jobConf = taskContext.getJobConf();
+    boolean result = newInstance( jobConf ).needsTaskCommit( taskContext );
+
+    return result || getBypassOutputPaths( jobConf, jobConf.getBoolean( "mapred.task.is.map", true ) ).length != 0;
     }
 
   @Override
   public void commitTask( final TaskAttemptContext taskContext ) throws IOException
     {
-    invoke( taskContext.getJobConf(), new Predicate()
+    invoke( taskContext.getJobConf(), false, new Predicate()
     {
     @Override
     public void invoke( OutputCommitter outputCommitter ) throws IOException
@@ -118,7 +128,7 @@ public class FlowOutputCommitter extends OutputCommitter
   @Override
   public void abortTask( final TaskAttemptContext taskContext ) throws IOException
     {
-    invoke( taskContext.getJobConf(), new Predicate()
+    invoke( taskContext.getJobConf(), false, new Predicate()
     {
     @Override
     public void invoke( OutputCommitter outputCommitter ) throws IOException
@@ -133,7 +143,7 @@ public class FlowOutputCommitter extends OutputCommitter
     void invoke( OutputCommitter outputCommitter ) throws IOException;
     }
 
-  private void invoke( JobConf jobConf, Predicate predicate ) throws IOException
+  private void invoke( JobConf jobConf, boolean bypassAll, Predicate predicate ) throws IOException
     {
     predicate.invoke( newInstance( jobConf ) );
 
@@ -141,18 +151,29 @@ public class FlowOutputCommitter extends OutputCommitter
 
     try
       {
-      String[] paths = getBypassOutputPaths( jobConf );
-
-      for( int i = 0; i < paths.length; i++ )
+      if( bypassAll )
         {
-        FileOutputFormat.setOutputPath( jobConf, new Path( paths[ i ] ) );
-
-        predicate.invoke( newInstance( jobConf ) );
+        invokeOn( jobConf, predicate, getBypassOutputPaths( jobConf, true ) );
+        invokeOn( jobConf, predicate, getBypassOutputPaths( jobConf, false ) );
+        }
+      else
+        {
+        invokeOn( jobConf, predicate, getBypassOutputPaths( jobConf, jobConf.getBoolean( "mapred.task.is.map", true ) ) );
         }
       }
     finally
       {
       FileOutputFormat.setOutputPath( jobConf, originalPath );
+      }
+    }
+
+  private void invokeOn( JobConf jobConf, Predicate predicate, String[] outputPaths ) throws IOException
+    {
+    for( int i = 0; i < outputPaths.length; i++ )
+      {
+      FileOutputFormat.setOutputPath( jobConf, new Path( outputPaths[ i ] ) );
+
+      predicate.invoke( newInstance( jobConf ) );
       }
     }
 

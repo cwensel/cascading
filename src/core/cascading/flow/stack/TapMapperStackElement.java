@@ -105,9 +105,14 @@ class TapMapperStackElement extends MapperStackElement
   @Override
   public void close() throws IOException
     {
-    if( outputCollector != null )
-      ( (TupleEntryCollector) outputCollector ).close();
-
-    super.close();
+    try
+      {
+      if( outputCollector != null )
+        ( (TupleEntryCollector) outputCollector ).close();
+      }
+    finally
+      {
+      super.close();
+      }
     }
   }

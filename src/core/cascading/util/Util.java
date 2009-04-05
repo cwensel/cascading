@@ -31,6 +31,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -479,4 +480,21 @@ public class Util
     throw saved;
     }
 
+  public static Object createProtectedObject( Class type, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Constructor constructor = type.getDeclaredConstructor( parameterTypes );
+
+      constructor.setAccessible( true );
+
+      return constructor.newInstance( parameters );
+      }
+    catch( Exception exception )
+      {
+      exception.printStackTrace();
+
+      throw new FlowException( "unable to instantiate type: " + type.getName(), exception );
+      }
+    }
   }

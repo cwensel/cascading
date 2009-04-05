@@ -202,11 +202,11 @@ public class FlowStep implements Serializable
 
   private void initFromTraps( JobConf conf ) throws IOException
     {
-    initFromTraps( conf, mapperTraps );
-    initFromTraps( conf, reducerTraps );
+    initFromTraps( conf, mapperTraps, true );
+    initFromTraps( conf, reducerTraps, false );
     }
 
-  private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
+  private void initFromTraps( JobConf conf, Map<String, Tap> traps, boolean isMapper ) throws IOException
     {
     if( !traps.isEmpty() )
       {
@@ -215,7 +215,7 @@ public class FlowStep implements Serializable
       for( Tap tap : traps.values() )
         {
         tap.sinkInit( trapConf );
-        FlowOutputCommitter.addBypassOutputPaths( conf, tap.getQualifiedPath( conf ).toString() );
+        FlowOutputCommitter.addBypassOutputPaths( conf, isMapper, tap.getQualifiedPath( conf ).toString() );
         }
       }
     }
@@ -244,7 +244,7 @@ public class FlowStep implements Serializable
       sink.sinkInit( conf );
 
     if( sink.isWriteDirect() )
-      FlowOutputCommitter.addBypassOutputPaths( conf, sink.getQualifiedPath( conf ).toString() );
+      FlowOutputCommitter.addBypassOutputPaths( conf, group == null, sink.getQualifiedPath( conf ).toString() );
     }
 
   public TapIterator openSourceForRead( JobConf conf ) throws IOException

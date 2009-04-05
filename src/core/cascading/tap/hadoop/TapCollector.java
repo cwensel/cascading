@@ -29,11 +29,16 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputCommitter;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.TaskAttemptContext;
+import org.apache.hadoop.mapred.TaskAttemptID;
 import org.apache.log4j.Logger;
 
 /**
@@ -50,24 +55,42 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
-  private String filenamePattern = "part-%05d";
+  private String filenamePattern = "%s%spart-%05d";
   /** Field filename */
   private String filename;
   /** Field tap */
   private Tap tap;
+  /** Field prefix */
+  private String prefix;
   /** Field outputEntry */
   private TupleEntry outputEntry;
+  /** Field reporter */
+  private Reporter reporter = Reporter.NULL;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
    *
    * @param tap  of type Tap
    * @param conf of type JobConf
-   * @throws IOException when
+   * @throws IOException when fails to initialize
    */
   public TapCollector( Tap tap, JobConf conf ) throws IOException
     {
+    this( tap, null, conf );
+    }
+
+  /**
+   * Constructor TapCollector creates a new TapCollector instance.
+   *
+   * @param tap    of type Tap
+   * @param prefix of type String
+   * @param conf   of type JobConf
+   * @throws IOException when fails to initialize
+   */
+  public TapCollector( Tap tap, String prefix, JobConf conf ) throws IOException
+    {
     this.tap = tap;
+    this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.conf = new JobConf( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
 
@@ -78,16 +101,38 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    if( !( conf.getOutputCommitter() instanceof FlowOutputCommitter ) )
-      {
-      conf.setOutputCommitter( FlowOutputCommitter.class );
-      FlowOutputCommitter.addBypassOutputPaths( conf, tap.getQualifiedPath( conf ).toString() );
-      }
+    OutputCommitter outputCommitter = conf.getOutputCommitter();
+
+    if( !( outputCommitter instanceof FlowOutputCommitter ) )
+      outputCommitter.setupJob( getAttemptContext() );
+
+    if( prefix != null )
+      filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
+    else
+      filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
-    filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
+    }
+
+  public void setReporter( Reporter reporter )
+    {
+    this.reporter = reporter;
+    }
+
+  private TaskAttemptContext getAttemptContext()
+    {
+    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
+      {
+      String mapper = conf.getBoolean( "mapred.task.is.map", true ) ? "m" : "r";
+      conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_%s_000000_0", Math.rint( System.currentTimeMillis() ), mapper ) );
+      }
+
+    Class[] types = {JobConf.class, TaskAttemptID.class};
+    Object[] parameters = {conf, TaskAttemptID.forName( conf.get( "mapred.task.id" ) )};
+
+    return (TaskAttemptContext) Util.createProtectedObject( TaskAttemptContext.class, parameters, types );
     }
 
   protected void collect( Tuple tuple )
@@ -109,7 +154,21 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     try
       {
-      writer.close( Reporter.NULL );
+      LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
+
+      writer.close( reporter );
+
+      // only execute if not inside an executing flow
+      OutputCommitter outputCommitter = conf.getOutputCommitter();
+
+      if( !( outputCommitter instanceof FlowOutputCommitter ) )
+        {
+        TaskAttemptContext taskAttemptContext = getAttemptContext();
+
+        if( outputCommitter.needsTaskCommit( taskAttemptContext ) )
+          outputCommitter.cleanupJob( taskAttemptContext );
+        }
+
       }
     catch( IOException exception )
       {
@@ -127,6 +186,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
    */
   public void collect( Object writableComparable, Object writable ) throws IOException
     {
+    reporter.progress();
     writer.write( writableComparable, writable );
     }
   }

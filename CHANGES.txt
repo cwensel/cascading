@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixes for instabilities when using traps in some instances.
+
   Workaround for bug in o.a.h.f.s.NativeS3FileSystem where a null is returned when getting a FileStatus array
   in some cases.
 

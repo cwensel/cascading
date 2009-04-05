@@ -25,21 +25,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
-import cascading.pipe.Pipe;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.cascade.Cascades;
 
 /**
  *

@@ -34,9 +34,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-/**
- * Class FlowReducer is the Hadoop Reducer implementation.
- */
+/** Class FlowReducer is the Hadoop Reducer implementation. */
 public class FlowReducer extends MapReduceBase implements Reducer
   {
   /** Field flowReducerStack */
@@ -88,8 +86,13 @@ public class FlowReducer extends MapReduceBase implements Reducer
   @Override
   public void close() throws IOException
     {
-    super.close();
-
-    flowReducerStack.close();
+    try
+      {
+      super.close();
+      }
+    finally
+      {
+      flowReducerStack.close();
+      }
     }
   }
