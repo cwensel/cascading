@@ -126,16 +126,23 @@ public class FlowOutputCommitter extends FileOutputCommitter
     }
 
   @Override
-  public void abortTask( final TaskAttemptContext taskContext ) throws IOException
+  public void abortTask( final TaskAttemptContext taskContext )
     {
-    invoke( taskContext.getJobConf(), false, new Predicate()
-    {
-    @Override
-    public void invoke( OutputCommitter outputCommitter ) throws IOException
+    try
       {
-      outputCommitter.abortTask( taskContext );
+      invoke( taskContext.getJobConf(), false, new Predicate()
+      {
+      @Override
+      public void invoke( OutputCommitter outputCommitter ) throws IOException
+        {
+        outputCommitter.abortTask( taskContext );
+        }
+      } );
       }
-    } );
+    catch( IOException exception )
+      {
+      // do nothing, never thrown
+      }
     }
 
   public interface Predicate
