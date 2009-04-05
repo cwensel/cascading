@@ -126,7 +126,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
       {
       String mapper = conf.getBoolean( "mapred.task.is.map", true ) ? "m" : "r";
-      conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_%s_000000_0", Math.rint( System.currentTimeMillis() ), mapper ) );
+      conf.set( "mapred.task.id", String.format( "attempt_%012d_0000_%s_000000_0", (int) Math.rint( System.currentTimeMillis() ), mapper ) );
       }
 
     Class[] types = {JobConf.class, TaskAttemptID.class};
@@ -166,7 +166,10 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
         TaskAttemptContext taskAttemptContext = getAttemptContext();
 
         if( outputCommitter.needsTaskCommit( taskAttemptContext ) )
+          {
+          outputCommitter.commitTask( taskAttemptContext );
           outputCommitter.cleanupJob( taskAttemptContext );
+          }
         }
 
       }
