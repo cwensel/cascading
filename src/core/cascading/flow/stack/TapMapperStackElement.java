@@ -24,6 +24,7 @@ package cascading.flow.stack;
 import java.io.IOException;
 
 import cascading.CascadingException;
+import cascading.flow.StepCounters;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
@@ -78,7 +79,7 @@ class TapMapperStackElement extends MapperStackElement
         sink.sink( tupleEntry, lastOutput );
         }
 
-      getFlowProcess().increment( Counters.TUPLES_WRITTEN, 1 );
+      getFlowProcess().increment( StepCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {

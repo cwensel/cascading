@@ -24,6 +24,7 @@ package cascading.flow.stack;
 import java.io.IOException;
 import java.util.Set;
 
+import cascading.flow.StepCounters;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
@@ -135,7 +136,7 @@ public class FlowMapperStack
 
   public void map( Object key, Object value, OutputCollector output ) throws IOException
     {
-    flowProcess.increment( StackElement.Counters.TUPLES_READ, 1 );
+    flowProcess.increment( StepCounters.Tuples_Read, 1 );
 
     for( int i = 0; i < stacks.length; i++ )
       {

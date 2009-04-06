@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.FlowCollector;
+import cascading.flow.StepCounters;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
@@ -36,10 +37,6 @@ import org.apache.hadoop.mapred.JobConf;
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
   {
-  static enum Counters
-    {
-      TUPLES_READ, TUPLES_WRITTEN, TUPLES_TRAPPED
-    }
 
   private static Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
 
@@ -137,7 +134,7 @@ abstract class StackElement implements FlowCollector
       throw new StackException( exception );
 
     getTrapCollector( trap, getJobConf() ).add( tupleEntry );
-    getFlowProcess().increment( Counters.TUPLES_TRAPPED, 1 );
+    getFlowProcess().increment( StepCounters.Tuples_Trapped, 1 );
     }
 
   public void open() throws IOException
