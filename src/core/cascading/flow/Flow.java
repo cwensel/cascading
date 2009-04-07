@@ -78,6 +78,11 @@ public class Flow implements Runnable
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( Flow.class );
 
+  /** Field hdfsShutdown */
+  private static Thread hdfsShutdown = null;
+  /** Field shutdownCount */
+  private static int shutdownCount = 0;
+
   /** Field name */
   private String name;
   /** Field listeners */
@@ -1020,11 +1025,32 @@ public class Flow implements Runnable
     @Override
     public void run()
       {
+      getHdfsShutdownHook();
+
       Flow.this.stop();
+
+      callHdfsShutdownHook();
       }
     };
 
     Runtime.getRuntime().addShutdownHook( shutdownHook );
+    }
+
+  private synchronized static void callHdfsShutdownHook()
+    {
+    if( --shutdownCount != 0 )
+      return;
+
+    if( hdfsShutdown != null )
+      hdfsShutdown.start();
+    }
+
+  private synchronized static void getHdfsShutdownHook()
+    {
+    shutdownCount++;
+
+    if( hdfsShutdown == null )
+      hdfsShutdown = Util.getHDFSShutdownHook();
     }
 
   private void deregisterShutdownHook()

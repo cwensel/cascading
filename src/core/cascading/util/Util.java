@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
@@ -499,4 +501,35 @@ public class Util
       throw new FlowException( "unable to instantiate type: " + type.getName(), exception );
       }
     }
+
+  public static Thread getHDFSShutdownHook()
+    {
+    try
+      {
+      Field field = FileSystem.class.getDeclaredField( "clientFinalizer" );
+      field.setAccessible( true );
+
+      Thread finalizer = (Thread) field.get( null );
+
+      if( finalizer != null )
+        {
+        Runtime.getRuntime().removeShutdownHook( finalizer );
+        return finalizer;
+        }
+
+      }
+    catch( NoSuchFieldException exception )
+      {
+      LOG.warn( "unable to get finalizer", exception );
+      }
+    catch( IllegalAccessException exception )
+      {
+      LOG.warn( "unable to get finalizer", exception );
+      }
+
+    LOG.warn( "unable to find and remove client hdfs shutdown hook" );
+
+    return null;
+    }
+
   }
