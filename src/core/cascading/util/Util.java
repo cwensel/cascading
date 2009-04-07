@@ -394,7 +394,9 @@ public class Util
       {
       StackTraceElement stackTraceElement = stackTrace[ i ];
 
-      if( stackTraceElement.getClassName().startsWith( type.getPackage().getName() ) )
+      Package aPackage = type.getPackage();
+
+      if( aPackage != null && stackTraceElement.getClassName().startsWith( aPackage.getName() ) )
         continue;
 
       return stackTraceElement.toString();
