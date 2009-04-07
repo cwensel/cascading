@@ -226,13 +226,13 @@ public class MultiMapReducePlanner extends FlowPlanner
 
   /**
    * optimized for this case
+   * this should run in two map/red jobs, not 3.
    * <pre>
    *         e - t           e1 - e - t
    * t - e1 -       -- > t -
    *         e - t           e1 - e - t
    * </pre>
    * <p/>
-   * this should run in two map/red jobs, not 3. needs to be a flag on e1 to prevent this
    * <p/>
    * <pre>
    *        g - t                 g - t
@@ -242,7 +242,7 @@ public class MultiMapReducePlanner extends FlowPlanner
    * <p/>
    * <pre>
    *        g - t          e1 - g - t
-   * t - e1 -       --> g -
+   * t - e1 -       --> t -
    *        g - t          e1 - g - t
    * </pre>
    * <p/>
