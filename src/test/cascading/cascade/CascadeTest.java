@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowSkipStrategy;
 import cascading.flow.FlowStep;
 import cascading.flow.LockingFlowListener;
-import cascading.flow.FlowSkipStrategy;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -39,7 +39,8 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.Hfs;
+import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
@@ -56,13 +57,13 @@ public class CascadeTest extends ClusterTestCase
 
   private Flow firstFlow( String path )
     {
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
 
     Pipe pipe = new Pipe( "first" );
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/first", true );
+    Tap sink = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/first", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
@@ -73,7 +74,7 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + path + "/second", true );
+    Tap sink = new Hfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + path + "/second", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
@@ -84,7 +85,7 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + path + "/third", true );
+    Tap sink = new Hfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + path + "/third", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
@@ -95,7 +96,33 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + path + "/fourth", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + path + "/fourth", true );
+
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    }
+
+  private Flow previousMultiTapFlow( String path, String ordinal )
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
+
+    Pipe pipe = new Pipe( ordinal );
+
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
+
+    Tap sink = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/" + ordinal, true );
+
+    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    }
+
+
+  private Flow multiTapFlow( Tap[] sources, String path )
+    {
+    Pipe pipe = new Pipe( "multitap" );
+
+    pipe = new Each( pipe, new Identity() );
+
+    Tap source = new MultiTap( sources );
+    Tap sink = new Hfs( new TextLine(), outputPath + path + "/multitap", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );
     }
@@ -120,6 +147,25 @@ public class CascadeTest extends ClusterTestCase
     validateLength( fourth, 20 );
     }
 
+  public void testMultiTapCascade() throws IOException
+    {
+    copyFromLocal( inputFile );
+
+    String path = "multitap";
+
+    Flow first = previousMultiTapFlow( path, "first" );
+    Flow second = previousMultiTapFlow( path, "second" );
+    Flow multitap = multiTapFlow( Tap.taps( first.getSink(), second.getSink() ), path );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, multitap );
+
+    cascade.start();
+
+    cascade.complete();
+
+    validateLength( multitap, 40 );
+    }
+
   public void testSkippedCascade() throws IOException
     {
     copyFromLocal( inputFile );
@@ -133,13 +179,14 @@ public class CascadeTest extends ClusterTestCase
 
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
 
-    cascade.setFlowSkipStrategy( new FlowSkipStrategy() {
+    cascade.setFlowSkipStrategy( new FlowSkipStrategy()
+    {
 
     public boolean skipFlow( Flow flow ) throws IOException
       {
       return true;
       }
-    });
+    } );
 
     cascade.start();
 

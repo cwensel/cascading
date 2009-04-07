@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.t.MultiTap was not accounted for when planning a c.c.Cascade.
+
   Fixed bug where operations in the default package caused NPE when calculating the stacktrace.
 
   Added c.f.StepCounters enum and now increment the counters Tuples_Read, Tuples_Written, Tuples_Trapped.

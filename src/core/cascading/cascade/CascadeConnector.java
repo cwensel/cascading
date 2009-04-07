@@ -23,11 +23,13 @@ package cascading.cascade;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import cascading.flow.Flow;
+import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -110,8 +112,18 @@ public class CascadeConnector
     {
     for( Flow flow : flows )
       {
-      Collection<Tap> sources = flow.getSources().values();
+      Collection<Tap> sources = new HashSet<Tap>( flow.getSources().values() );
       Collection<Tap> sinks = flow.getSinks().values();
+
+      // account for MultiTap sources
+      for( Tap source : sources )
+        {
+        if( source instanceof MultiTap )
+          {
+          sources.remove( source );
+          Collections.addAll( sources, ( (MultiTap) source ).getTaps() );
+          }
+        }
 
       for( Tap source : sources )
         tapGraph.addVertex( source );
