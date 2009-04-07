@@ -327,6 +327,35 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
+  public void testSplitBasic()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new GroupBy( new Pipe( "left", pipe ), new Fields( "line" ) );
+    Pipe right = new GroupBy( new Pipe( "right", pipe ), new Fields( "line" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, left, right );
+
+    flow.writeDOT( "splitbasic.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 2, steps.size() );
+    }
+
   /**
    * This should result in a Temp Tap after the Each split.
    * <p/>
@@ -361,7 +390,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( sources, sinks, left, right );
 
-//    flow.writeDOT( "splitcomplex.dot" );
+    flow.writeDOT( "splitcomplex.dot" );
 
     List<FlowStep> steps = flow.getSteps();
 
@@ -639,7 +668,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     Flow flow = new FlowConnector().connect( source, sink, merge );
 
-//    flow.writeDOT( "mergedsamesource.dot" );
+    flow.writeDOT( "mergedsamesource.dot" );
 
     List<FlowStep> steps = flow.getSteps();
 

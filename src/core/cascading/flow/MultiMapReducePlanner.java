@@ -241,6 +241,12 @@ public class MultiMapReducePlanner extends FlowPlanner
    * </pre>
    * <p/>
    * <pre>
+   *        g - t          e1 - g - t
+   * t - e1 -       --> g -
+   *        g - t          e1 - g - t
+   * </pre>
+   * <p/>
+   * <pre>
    *             - e - e                            e - e
    * t - e1 - e2         - g  --> t - e1 - e2 - t -       - g
    *             - e - e                            e - e
@@ -290,10 +296,11 @@ public class MultiMapReducePlanner extends FlowPlanner
 
         // do any split paths converge on a single Group?
         int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergJoin( flowElement );
-        if( maxPaths <= 1 && lastInsertable instanceof Tap )
-          continue;
 
-        tapInsertions.add( (Pipe) flowElement );
+        // we must insert a tap after a Each (Each/Each) split
+        // stacks cannot multiplex within the stack
+        if( maxPaths > 1 || !( lastInsertable instanceof Tap ) )
+          tapInsertions.add( (Pipe) flowElement );
         }
 
       for( Pipe pipe : tapInsertions )
