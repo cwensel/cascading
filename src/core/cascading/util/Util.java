@@ -21,22 +21,6 @@
 
 package cascading.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
@@ -45,13 +29,17 @@ import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.MatrixExporter;
-import org.jgrapht.ext.VertexNameProvider;
+import org.jgrapht.ext.*;
 import org.jgrapht.graph.SimpleDirectedGraph;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /** Class Util provides reusable operations. */
 public class Util
@@ -506,6 +494,9 @@ public class Util
     {
     try
       {
+      // we must init the FS so the finalizer is registered
+      FileSystem.getLocal( new JobConf() );
+
       Field field = FileSystem.class.getDeclaredField( "clientFinalizer" );
       field.setAccessible( true );
 
@@ -525,6 +516,10 @@ public class Util
     catch( IllegalAccessException exception )
       {
       LOG.warn( "unable to get finalizer", exception );
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to init FileSystem", exception );
       }
 
     LOG.warn( "unable to find and remove client hdfs shutdown hook" );
