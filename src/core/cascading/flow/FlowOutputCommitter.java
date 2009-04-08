@@ -147,12 +147,12 @@ public class FlowOutputCommitter extends FileOutputCommitter
 
   private void invoke( JobConf jobConf, boolean bypassAll, Predicate predicate ) throws IOException
     {
-    predicate.invoke( newInstance( jobConf ) );
-
     Path originalPath = FileOutputFormat.getOutputPath( jobConf );
 
     if( originalPath == null )
       return;
+
+    predicate.invoke( newInstance( jobConf ) );
 
     try
       {
