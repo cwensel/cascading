@@ -21,18 +21,13 @@
 
 package cascading.tuple;
 
-import java.io.Serializable;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-
 import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
+
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.*;
 
 /**
  * A Tuple represents a set of values. Consider a Tuple the same as a data base record where every value is a column in that table.
@@ -439,7 +434,17 @@ public class Tuple implements Comparable, Iterable, Serializable
     {
     verifyModifiable();
 
-    elements.set( index, value );
+    try
+      {
+      elements.set( index, value );
+      }
+    catch( IndexOutOfBoundsException exception )
+      {
+      if( elements.size() != 0 )
+        throw new TupleException( "failed to set a value beyond the end of the tuple elements array, size: " + size() + " , index: " + index );
+      else
+        throw new TupleException( "failed to set a value, tuple may not be initialized with values, is zero length" );
+      }
     }
 
   /**
