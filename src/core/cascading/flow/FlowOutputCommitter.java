@@ -21,17 +21,12 @@
 
 package cascading.flow;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputCommitter;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobContext;
-import org.apache.hadoop.mapred.OutputCommitter;
-import org.apache.hadoop.mapred.TaskAttemptContext;
+import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
+
+import java.io.IOException;
 
 /**
  *
@@ -155,6 +150,9 @@ public class FlowOutputCommitter extends FileOutputCommitter
     predicate.invoke( newInstance( jobConf ) );
 
     Path originalPath = FileOutputFormat.getOutputPath( jobConf );
+
+    if( originalPath == null )
+      return;
 
     try
       {
