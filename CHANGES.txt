@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where Hadoop FS shutdown hooks prevented cleanup of c.f.Flow intermediate files.
+
   Fixed bug where c.t.MultiTap was not accounted for when planning a c.c.Cascade.
 
   Fixed bug where operations in the default package caused NPE when calculating the stacktrace.
