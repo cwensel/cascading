@@ -21,25 +21,16 @@
 
 package cascading.tap.hadoop;
 
-import java.io.IOException;
-
-import cascading.flow.FlowOutputCommitter;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputCommitter;
-import org.apache.hadoop.mapred.OutputFormat;
-import org.apache.hadoop.mapred.RecordWriter;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.TaskAttemptContext;
-import org.apache.hadoop.mapred.TaskAttemptID;
+import org.apache.hadoop.mapred.*;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
@@ -101,10 +92,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    OutputCommitter outputCommitter = conf.getOutputCommitter();
-
-    if( !( outputCommitter instanceof FlowOutputCommitter ) )
-      outputCommitter.setupJob( getAttemptContext() );
+    Hadoop19TapUtil.setupJob( conf );
 
     if( prefix != null )
       filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
@@ -119,20 +107,6 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   public void setReporter( Reporter reporter )
     {
     this.reporter = reporter;
-    }
-
-  private TaskAttemptContext getAttemptContext()
-    {
-    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
-      {
-      String mapper = conf.getBoolean( "mapred.task.is.map", true ) ? "m" : "r";
-      conf.set( "mapred.task.id", String.format( "attempt_%012d_0000_%s_000000_0", (int) Math.rint( System.currentTimeMillis() ), mapper ) );
-      }
-
-    Class[] types = {JobConf.class, TaskAttemptID.class};
-    Object[] parameters = {conf, TaskAttemptID.forName( conf.get( "mapred.task.id" ) )};
-
-    return (TaskAttemptContext) Util.createProtectedObject( TaskAttemptContext.class, parameters, types );
     }
 
   protected void collect( Tuple tuple )
@@ -158,19 +132,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       writer.close( reporter );
 
-      // only execute if not inside an executing flow
-      OutputCommitter outputCommitter = conf.getOutputCommitter();
-
-      if( !( outputCommitter instanceof FlowOutputCommitter ) )
-        {
-        TaskAttemptContext taskAttemptContext = getAttemptContext();
-
-        if( outputCommitter.needsTaskCommit( taskAttemptContext ) )
-          {
-          outputCommitter.commitTask( taskAttemptContext );
-          outputCommitter.cleanupJob( taskAttemptContext );
-          }
-        }
+      Hadoop19TapUtil.cleanupJob( conf );
 
       }
     catch( IOException exception )
