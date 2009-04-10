@@ -37,6 +37,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -527,4 +528,19 @@ public class Util
     return null;
     }
 
+  public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Method method = type.getDeclaredMethod( methodName, parameterTypes );
+
+      method.setAccessible( true );
+
+      return method.invoke( null, parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      }
+    }
   }

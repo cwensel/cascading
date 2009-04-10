@@ -21,16 +21,6 @@
 
 package cascading.flow;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -43,6 +33,11 @@ import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
 public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
@@ -137,8 +132,8 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   private String makeStepName( Map<String, FlowStep> steps, int numJobs, String sinkPath )
     {
     // todo make the long form optional via a property
-    if( sinkPath.length() > 150 )
-      sinkPath = sinkPath.substring( sinkPath.length() - 150 );
+    if( sinkPath.length() > 75 )
+      sinkPath = sinkPath.substring( sinkPath.length() - 75 );
 
     return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
     }

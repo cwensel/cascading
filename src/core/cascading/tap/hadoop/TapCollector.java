@@ -92,12 +92,14 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    Hadoop19TapUtil.setupJob( conf );
+    Hadoop18TapUtil.setupJob( conf );
 
     if( prefix != null )
       filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
     else
       filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
+
+    Hadoop18TapUtil.setupTask( conf );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
@@ -132,8 +134,10 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       writer.close( reporter );
 
-      Hadoop19TapUtil.cleanupJob( conf );
+      if( Hadoop18TapUtil.needsTaskCommit( conf ) )
+        Hadoop18TapUtil.commitTask( conf );
 
+      Hadoop18TapUtil.cleanupJob( conf );
       }
     catch( IOException exception )
       {
