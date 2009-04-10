@@ -226,18 +226,24 @@ public class MultiMapReducePlanner extends FlowPlanner
 
   /**
    * optimized for this case
+   * this should run in two map/red jobs, not 3.
    * <pre>
    *         e - t           e1 - e - t
    * t - e1 -       -- > t -
    *         e - t           e1 - e - t
    * </pre>
    * <p/>
-   * this should run in two map/red jobs, not 3. needs to be a flag on e1 to prevent this
    * <p/>
    * <pre>
    *        g - t                 g - t
    * g - e -       --> g - e - t -
    *        g - t                 g - t
+   * </pre>
+   * <p/>
+   * <pre>
+   *        g - t          e1 - g - t
+   * t - e1 -       --> t -
+   *        g - t          e1 - g - t
    * </pre>
    * <p/>
    * <pre>
@@ -290,10 +296,11 @@ public class MultiMapReducePlanner extends FlowPlanner
 
         // do any split paths converge on a single Group?
         int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergJoin( flowElement );
-        if( maxPaths <= 1 && lastInsertable instanceof Tap )
-          continue;
 
-        tapInsertions.add( (Pipe) flowElement );
+        // we must insert a tap after a Each (Each/Each) split
+        // stacks cannot multiplex within the stack
+        if( maxPaths > 1 || !( lastInsertable instanceof Tap ) )
+          tapInsertions.add( (Pipe) flowElement );
         }
 
       for( Pipe pipe : tapInsertions )
