@@ -776,9 +776,12 @@ public class Flow implements Runnable
     return getJobConf().get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
     }
 
-  /** Method run implements the Runnable run method. */
+  /** Method run implements the Runnable run method and should not be called by users. */
   public void run()
     {
+    if( thread == null )
+      throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
+
     try
       {
       flowStats.markRunning();
