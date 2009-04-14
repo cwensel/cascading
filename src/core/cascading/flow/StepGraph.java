@@ -133,7 +133,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     {
     // todo make the long form optional via a property
     if( sinkPath.length() > 110 )
-      sinkPath = String.format( "...%110s", sinkPath );
+      sinkPath = String.format( "...%110s", sinkPath.substring( sinkPath.length() - 110 ) );
 
     return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
     }
