@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.8
 
   Fixed bug where Hadoop FS shutdown hooks prevented cleanup of c.f.Flow intermediate files.
 
