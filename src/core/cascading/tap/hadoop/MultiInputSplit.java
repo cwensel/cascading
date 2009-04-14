@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.WritableUtils;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
@@ -42,6 +44,19 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
   InputSplit inputSplit;
   /** Field config */
   Map<String, String> config;
+
+  /**
+   * Method getCurrentTapSourcePath finds and returns the current source Tap filename path, if any.
+   * <p/>
+   * Use this method inside an Operation to find the current file being processed.
+   *
+   * @param jobConf
+   * @return
+   */
+  public static String getCurrentTapSourcePath( JobConf jobConf )
+    {
+    return jobConf.get( "cascading.source.path" );
+    }
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )
     {
@@ -107,5 +122,13 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
       }
 
     inputSplit.readFields( in );
+
+    if( inputSplit instanceof FileSplit )
+      {
+      Path path = ( (FileSplit) inputSplit ).getPath();
+
+      if( path != null )
+        jobConf.set( "cascading.source.path", path.toString() );
+      }
     }
   }

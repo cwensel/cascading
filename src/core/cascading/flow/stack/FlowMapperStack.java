@@ -24,6 +24,7 @@ package cascading.flow.stack;
 import java.io.IOException;
 import java.util.Set;
 
+import cascading.flow.StepCounters;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
@@ -50,8 +51,6 @@ public class FlowMapperStack
   private final FlowStep step;
   /** Field currentSource */
   private final Tap currentSource;
-  /** Field jobConf */
-  private final JobConf jobConf;
   /** Field flowSession */
   private final HadoopFlowProcess flowProcess;
 
@@ -70,7 +69,8 @@ public class FlowMapperStack
   public FlowMapperStack( HadoopFlowProcess flowProcess ) throws IOException
     {
     this.flowProcess = flowProcess;
-    this.jobConf = flowProcess.getJobConf();
+
+    JobConf jobConf = flowProcess.getJobConf();
     step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
     // is set by the MultiInputSplit
@@ -136,6 +136,8 @@ public class FlowMapperStack
 
   public void map( Object key, Object value, OutputCollector output ) throws IOException
     {
+    flowProcess.increment( StepCounters.Tuples_Read, 1 );
+
     for( int i = 0; i < stacks.length; i++ )
       {
       Tuple tuple = currentSource.source( key, value );

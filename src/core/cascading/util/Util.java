@@ -21,21 +21,6 @@
 
 package cascading.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
@@ -43,13 +28,19 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.MatrixExporter;
-import org.jgrapht.ext.VertexNameProvider;
+import org.jgrapht.ext.*;
 import org.jgrapht.graph.SimpleDirectedGraph;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /** Class Util provides reusable operations. */
 public class Util
@@ -394,7 +385,9 @@ public class Util
       {
       StackTraceElement stackTraceElement = stackTrace[ i ];
 
-      if( stackTraceElement.getClassName().startsWith( type.getPackage().getName() ) )
+      Package aPackage = type.getPackage();
+
+      if( aPackage != null && stackTraceElement.getClassName().startsWith( aPackage.getName() ) )
         continue;
 
       return stackTraceElement.toString();
@@ -432,6 +425,107 @@ public class Util
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
+    }
+
+  public interface RetryOperator<T>
+    {
+    T operate() throws Exception;
+
+    boolean rethrow( Exception exception );
+    }
+
+  public static <T> T retry( Logger logger, int retries, int secondsDelay, String message, RetryOperator<T> operator ) throws Exception
+    {
+    Exception saved = null;
+
+    for( int i = 0; i < retries; i++ )
+      {
+      try
+        {
+        return operator.operate();
+        }
+      catch( Exception exception )
+        {
+        if( operator.rethrow( exception ) )
+          {
+          logger.warn( message + ", but not retrying", exception );
+
+          throw exception;
+          }
+
+        saved = exception;
+
+        logger.warn( message + ", attempt: " + ( i + 1 ), exception );
+
+        try
+          {
+          Thread.sleep( secondsDelay * 1000 );
+          }
+        catch( InterruptedException exception1 )
+          {
+          // do nothing
+          }
+        }
+      }
+
+    logger.warn( message + ", done retrying after attempts: " + retries, saved );
+
+    throw saved;
+    }
+
+  public static Object createProtectedObject( Class type, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Constructor constructor = type.getDeclaredConstructor( parameterTypes );
+
+      constructor.setAccessible( true );
+
+      return constructor.newInstance( parameters );
+      }
+    catch( Exception exception )
+      {
+      exception.printStackTrace();
+
+      throw new FlowException( "unable to instantiate type: " + type.getName(), exception );
+      }
+    }
+
+  public static Thread getHDFSShutdownHook()
+    {
+    try
+      {
+      // we must init the FS so the finalizer is registered
+      FileSystem.getLocal( new JobConf() );
+
+      Field field = FileSystem.class.getDeclaredField( "clientFinalizer" );
+      field.setAccessible( true );
+
+      Thread finalizer = (Thread) field.get( null );
+
+      if( finalizer != null )
+        {
+        Runtime.getRuntime().removeShutdownHook( finalizer );
+        return finalizer;
+        }
+
+      }
+    catch( NoSuchFieldException exception )
+      {
+      LOG.warn( "unable to get finalizer", exception );
+      }
+    catch( IllegalAccessException exception )
+      {
+      LOG.warn( "unable to get finalizer", exception );
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to init FileSystem", exception );
+      }
+
+    LOG.warn( "unable to find and remove client hdfs shutdown hook" );
+
+    return null;
     }
 
   public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )

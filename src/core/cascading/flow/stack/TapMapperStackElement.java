@@ -24,11 +24,11 @@ package cascading.flow.stack;
 import java.io.IOException;
 
 import cascading.CascadingException;
+import cascading.flow.StepCounters;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -71,13 +71,15 @@ class TapMapperStackElement extends MapperStackElement
       {
       if( outputCollector != null )
         {
-        ( (HadoopFlowProcess) getFlowProcess() ).getReporter().progress();
+        getFlowProcess().keepAlive();
         sink.sink( tupleEntry, outputCollector );
         }
       else
         {
         sink.sink( tupleEntry, lastOutput );
         }
+
+      getFlowProcess().increment( StepCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {
@@ -105,9 +107,14 @@ class TapMapperStackElement extends MapperStackElement
   @Override
   public void close() throws IOException
     {
-    if( outputCollector != null )
-      ( (TupleEntryCollector) outputCollector ).close();
-
-    super.close();
+    try
+      {
+      if( outputCollector != null )
+        ( (TupleEntryCollector) outputCollector ).close();
+      }
+    finally
+      {
+      super.close();
+      }
     }
   }

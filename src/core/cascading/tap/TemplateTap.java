@@ -53,6 +53,8 @@ public class TemplateTap extends SinkTap
   private Tap parent;
   /** Field pathTemplate */
   private String pathTemplate;
+  /** Field keepParentOnDelete */
+  private boolean keepParentOnDelete = false;
   /** Field collectors */
   private Map<String, OutputCollector> collectors = new HashMap<String, OutputCollector>();
 
@@ -79,13 +81,12 @@ public class TemplateTap extends SinkTap
 
       try
         {
-        Path fullPath = new Path( parent.getQualifiedPath( conf ), path );
-        Tap tap = new Hfs( parent.getScheme(), fullPath.toString() );
+        Tap tap = new Hfs( parent.getScheme(), parent.getQualifiedPath( conf ).toString() );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "creating collector for path: " + fullPath );
+          LOG.debug( "creating collector for path: " + new Path( parent.getQualifiedPath( conf ), path ) );
 
-        collector = (OutputCollector) new TapCollector( tap, conf );
+        collector = (OutputCollector) new TapCollector( tap, path, conf );
         }
       catch( IOException exception )
         {
@@ -105,10 +106,24 @@ public class TemplateTap extends SinkTap
       {
       super.close();
 
-      for( OutputCollector collector : collectors.values() )
-        ( (TupleEntryCollector) collector ).close();
-
-      collectors.clear();
+      try
+        {
+        for( OutputCollector collector : collectors.values() )
+          {
+          try
+            {
+            ( (TupleEntryCollector) collector ).close();
+            }
+          catch( Exception exception )
+            {
+            // do nothing
+            }
+          }
+        }
+      finally
+        {
+        collectors.clear();
+        }
       }
 
     public void collect( Object key, Object value ) throws IOException
@@ -233,6 +248,26 @@ public class TemplateTap extends SinkTap
   /**
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
+   * <p/>
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
+   *
+   * @param parent             of type Tap
+   * @param pathTemplate       of type String
+   * @param sinkMode           of type SinkMode
+   * @param keepParentOnDelete of type boolean
+   */
+  public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode, boolean keepParentOnDelete )
+    {
+    super( new TemplateScheme( parent.getScheme() ), sinkMode );
+    this.parent = parent;
+    this.pathTemplate = pathTemplate;
+    this.keepParentOnDelete = keepParentOnDelete;
+    }
+
+  /**
+   * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
+   * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
    * The pathFields is a selector that selects and orders the fields to be used in the given pathTemplate.
    * <p/>
    * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
@@ -260,12 +295,38 @@ public class TemplateTap extends SinkTap
    * @param parent       of type Tap
    * @param pathTemplate of type String
    * @param pathFields   of type Fields
+   * @param sinkMode     of type SinkMode
    */
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode )
     {
     super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
+    }
+
+  /**
+   * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
+   * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
+   * The pathFields is a selector that selects and orders the fields to be used in the given pathTemplate.
+   * <p/>
+   * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
+   * data not in the result file to be used in the template path name.
+   * <p/>
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
+   *
+   * @param parent             of type Tap
+   * @param pathTemplate       of type String
+   * @param pathFields         of type Fields
+   * @param sinkMode           of type SinkMode
+   * @param keepParentOnDelete of type boolean
+   */
+  public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode, boolean keepParentOnDelete )
+    {
+    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
+    this.parent = parent;
+    this.pathTemplate = pathTemplate;
+    this.keepParentOnDelete = keepParentOnDelete;
     }
 
   /**
@@ -315,7 +376,7 @@ public class TemplateTap extends SinkTap
   /** @see Tap#deletePath(JobConf) */
   public boolean deletePath( JobConf conf ) throws IOException
     {
-    return parent.deletePath( conf );
+    return keepParentOnDelete || parent.deletePath( conf );
     }
 
   /** @see Tap#pathExists(JobConf) */

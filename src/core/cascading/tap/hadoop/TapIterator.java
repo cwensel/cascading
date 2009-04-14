@@ -96,6 +96,13 @@ public class TapIterator implements TupleIterator
       ( (JobConfigurable) inputFormat ).configure( conf );
 
     splits = inputFormat.getSplits( conf, 1 );
+
+    if( splits.length == 0 )
+      {
+      complete = true;
+      return;
+      }
+
     reader = makeReader( currentSplit );
     key = reader.createKey();
     value = reader.createValue();

@@ -1,8 +1,23 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug where Hadoop FS shutdown hooks prevented cleanup of c.f.Flow intermediate files.
+
+  Fixed bug where c.t.MultiTap was not accounted for when planning a c.c.Cascade.
+
+  Fixed bug where operations in the default package caused NPE when calculating the stacktrace.
+
+  Added c.f.StepCounters enum and now increment the counters Tuples_Read, Tuples_Written, Tuples_Trapped.
+
+  Fixes for instabilities when using traps in some instances.
+
+  Workaround for bug in o.a.h.f.s.NativeS3FileSystem where a null is returned when getting a FileStatus array
+  in some cases.
+
 1.0.7
 
-  Fixed bug where c.o.r.RegexSplitter did not consistently split incoming values if the value had blank 
+  Fixed bug where c.o.r.RegexSplitter did not consistently split incoming values if the value had blank
   fields between the split delimiter. This only occurs if the incoming tuple is declared Fields.UNKNOWN
   and won't affect any tuple with declared field names. Though this is an incompatible change, the bug
   breaks the contract of the splitter.

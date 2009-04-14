@@ -21,24 +21,16 @@
 
 package cascading.tap.hadoop;
 
-import java.io.IOException;
-
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.util.Util;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
-import org.apache.hadoop.mapred.RecordWriter;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.*;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
@@ -54,24 +46,42 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
-  private String filenamePattern = "part-%05d";
+  private String filenamePattern = "%s%spart-%05d";
   /** Field filename */
   private String filename;
   /** Field tap */
   private Tap tap;
+  /** Field prefix */
+  private String prefix;
   /** Field outputEntry */
   private TupleEntry outputEntry;
+  /** Field reporter */
+  private Reporter reporter = Reporter.NULL;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
    *
    * @param tap  of type Tap
    * @param conf of type JobConf
-   * @throws IOException when
+   * @throws IOException when fails to initialize
    */
   public TapCollector( Tap tap, JobConf conf ) throws IOException
     {
+    this( tap, null, conf );
+    }
+
+  /**
+   * Constructor TapCollector creates a new TapCollector instance.
+   *
+   * @param tap    of type Tap
+   * @param prefix of type String
+   * @param conf   of type JobConf
+   * @throws IOException when fails to initialize
+   */
+  public TapCollector( Tap tap, String prefix, JobConf conf ) throws IOException
+    {
     this.tap = tap;
+    this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.conf = new JobConf( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
 
@@ -82,25 +92,23 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    if( !tap.makeDirs( conf ) ) // required
-      throw new TapException( "unable to make dirs for: " + tap.toString() );
+    Hadoop18TapUtil.setupJob( conf );
+
+    if( prefix != null )
+      filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
+    else
+      filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
+
+    Hadoop18TapUtil.setupTask( conf );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
-    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
-
-    filename = String.format( filenamePattern, conf.getInt( "mapred.task.partition", 0 ) );
-
-    conf.set( "mapred.work.output.dir", outputPath.toString() );
-
-    if( outputFormat instanceof FileOutputFormat ) // only file based writing uses temp dirs
-      fileSystem.mkdirs( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ) );
-
-    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
-      conf.set( "mapred.task.id", String.format( "attempt_%12.0e_0000_m_000000_0", Math.rint( System.currentTimeMillis() ) ) );
-
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
+    }
+
+  public void setReporter( Reporter reporter )
+    {
+    this.reporter = reporter;
     }
 
   protected void collect( Tuple tuple )
@@ -117,52 +125,19 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
       }
     }
 
-  private void moveTaskOutputs() throws IOException
-    {
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
-
-    String taskIdPath = conf.get( "mapred.task.id" );
-    Class[] classes = {JobConf.class, String.class};
-    Object[] parameters = {conf, "_temporary/" + taskIdPath};
-    Path taskPath = (Path) Util.invokeStaticMethod( FileOutputFormat.class, "getTaskOutputPath", parameters, classes );
-
-    taskPath = taskPath.getParent();
-
-    FileSystem fileSystem = FileSystem.get( outputPath.toUri(), conf );
-
-    if( !fileSystem.getFileStatus( taskPath ).isDir() )
-      throw new IOException( "path is not a directory: " + taskPath );
-
-    FileStatus[] statuses = fileSystem.listStatus( taskPath );
-
-    for( FileStatus status : statuses )
-      {
-      Path sourcePath = status.getPath();
-
-      if( status.isDir() )
-        throw new IOException( "path is a directory, no support for nested directories: " + sourcePath );
-
-      Path targetPath = new Path( outputPath, sourcePath.getName() );
-
-      fileSystem.rename( sourcePath, targetPath );
-
-      LOG.debug( "moved " + sourcePath + " to " + targetPath );
-      }
-
-    // remove _temporary directory
-    fileSystem.delete( new Path( conf.get( "mapred.work.output.dir" ), "_temporary" ), true );
-    }
-
   @Override
   public void close()
     {
     try
       {
-      writer.close( Reporter.NULL );
+      LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
 
-      if( conf.getOutputFormat() instanceof FileOutputFormat )
-        moveTaskOutputs();
+      writer.close( reporter );
 
+      if( Hadoop18TapUtil.needsTaskCommit( conf ) )
+        Hadoop18TapUtil.commitTask( conf );
+
+      Hadoop18TapUtil.cleanupJob( conf );
       }
     catch( IOException exception )
       {
@@ -180,6 +155,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
    */
   public void collect( Object writableComparable, Object writable ) throws IOException
     {
+    reporter.progress();
     writer.write( writableComparable, writable );
     }
   }
