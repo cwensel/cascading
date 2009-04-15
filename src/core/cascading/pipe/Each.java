@@ -21,26 +21,18 @@
 
 package cascading.pipe;
 
-import java.util.Set;
-
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.operation.Assertion;
-import cascading.operation.AssertionLevel;
-import cascading.operation.ConcreteCall;
-import cascading.operation.Filter;
-import cascading.operation.FilterCall;
-import cascading.operation.Function;
-import cascading.operation.FunctionCall;
-import cascading.operation.ValueAssertion;
-import cascading.operation.AssertionException;
+import cascading.operation.*;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.log4j.Logger;
+
+import java.util.Set;
 
 /**
  * The Each operator applies either a {@link Function} or a {@link Filter} to each entry in the {@link Tuple}
@@ -65,8 +57,8 @@ public class Each extends Operator
   /**
    * Pass all fields to the given function, only return fields declared by the function.
    *
-   * @param name     of type String
-   * @param function of type Function
+   * @param name     name for this branch of Pipes
+   * @param function Function to be applied to each input Tuple
    */
   public Each( String name, Function function )
     {
@@ -76,45 +68,45 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields declared by the function.
    *
-   * @param name                  of type String
-   * @param argumentFieldSelector of type Fields
-   * @param function              of type Function
+   * @param name                  name for this branch of Pipes
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param function              Function to be applied to each input Tuple
    */
-  public Each( String name, Fields argumentFieldSelector, Function function )
+  public Each( String name, Fields argumentSelector, Function function )
     {
-    super( name, argumentFieldSelector, function, FUNCTION_SELECTOR );
+    super( name, argumentSelector, function, FUNCTION_SELECTOR );
     }
 
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param name                  of type String
-   * @param argumentFieldSelector of type Fields
-   * @param function              of type Function
-   * @param outFieldSelector      of type Fields
+   * @param name                  name for this branch of Pipes
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param function              Function to be applied to each input Tuple
+   * @param outputSelector      field selector that selects the output Tuple from the input and Function results Tuples
    */
-  public Each( String name, Fields argumentFieldSelector, Function function, Fields outFieldSelector )
+  public Each( String name, Fields argumentSelector, Function function, Fields outputSelector )
     {
-    super( name, argumentFieldSelector, function, outFieldSelector );
+    super( name, argumentSelector, function, outputSelector );
     }
 
   /**
    * Only return fields selected by the outFieldsSelector.
    *
-   * @param name             of type String
-   * @param function         of type Function
-   * @param outFieldSelector of type Fields
+   * @param name             name for this branch of Pipes
+   * @param function         Function to be applied to each input Tuple
+   * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
-  public Each( String name, Function function, Fields outFieldSelector )
+  public Each( String name, Function function, Fields outputSelector )
     {
-    super( name, function, outFieldSelector );
+    super( name, function, outputSelector );
     }
 
   /**
    * Pass all fields to the given function, only return fields declared by the function.
    *
-   * @param previous of type Pipe
-   * @param function of type Function
+   * @param previous previous Pipe to receive input Tuples from
+   * @param function Function to be applied to each input Tuple
    */
   public Each( Pipe previous, Function function )
     {
@@ -124,38 +116,38 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields declared by the function.
    *
-   * @param pipe                  of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param function              of type Function
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param function              Function to be applied to each input Tuple
    */
-  public Each( Pipe pipe, Fields argumentFieldSelector, Function function )
+  public Each( Pipe previous, Fields argumentSelector, Function function )
     {
-    super( pipe, argumentFieldSelector, function, FUNCTION_SELECTOR );
+    super( previous, argumentSelector, function, FUNCTION_SELECTOR );
     }
 
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param pipe                  of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param function              of type Function
-   * @param outFieldSelector      of type Fields
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param function              Function to be applied to each input Tuple
+   * @param outputSelector      field selector that selects the output Tuple from the input and Function results Tuples
    */
-  public Each( Pipe pipe, Fields argumentFieldSelector, Function function, Fields outFieldSelector )
+  public Each( Pipe previous, Fields argumentSelector, Function function, Fields outputSelector )
     {
-    super( pipe, argumentFieldSelector, function, outFieldSelector );
+    super( previous, argumentSelector, function, outputSelector );
     }
 
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param pipe             of type Pipe
-   * @param function         of type Function
-   * @param outFieldSelector of type Fields
+   * @param previous         previous Pipe to receive input Tuples from
+   * @param function         Function to be applied to each input Tuple
+   * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
-  public Each( Pipe pipe, Function function, Fields outFieldSelector )
+  public Each( Pipe previous, Function function, Fields outputSelector )
     {
-    super( pipe, function, outFieldSelector );
+    super( previous, function, outputSelector );
     }
 
   /////////////////
@@ -165,8 +157,8 @@ public class Each extends Operator
   /**
    * Constructor Each creates a new Each instance.
    *
-   * @param name   of type String
-   * @param filter of type Filter
+   * @param name   name for this branch of Pipes
+   * @param filter Filter to be applied to each input Tuple
    */
   public Each( String name, Filter filter )
     {
@@ -174,18 +166,18 @@ public class Each extends Operator
     }
 
   /**
-   * @param name                  of type String
-   * @param argumentFieldSelector of type Fields
-   * @param filter                of type Filter
+   * @param name                  name for this branch of Pipes
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param filter                Filter to be applied to each input Tuple
    */
-  public Each( String name, Fields argumentFieldSelector, Filter filter )
+  public Each( String name, Fields argumentSelector, Filter filter )
     {
-    super( name, argumentFieldSelector, filter, FILTER_SELECTOR );
+    super( name, argumentSelector, filter, FILTER_SELECTOR );
     }
 
   /**
-   * @param previous of type Pipe
-   * @param filter   of type Filter
+   * @param previous previous Pipe to receive input Tuples from
+   * @param filter   Filter to be applied to each input Tuple
    */
   public Each( Pipe previous, Filter filter )
     {
@@ -193,13 +185,13 @@ public class Each extends Operator
     }
 
   /**
-   * @param pipe                  of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param filter                of type Filter
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param filter                Filter to be applied to each input Tuple
    */
-  public Each( Pipe pipe, Fields argumentFieldSelector, Filter filter )
+  public Each( Pipe previous, Fields argumentSelector, Filter filter )
     {
-    super( pipe, argumentFieldSelector, filter, FILTER_SELECTOR );
+    super( previous, argumentSelector, filter, FILTER_SELECTOR );
     }
 
   ////////////////////
@@ -209,9 +201,9 @@ public class Each extends Operator
   /**
    * Constructor Each creates a new Each instance.
    *
-   * @param name           of type String
-   * @param assertionLevel of type AssertionLevel
-   * @param assertion      of type Filter
+   * @param name           name for this branch of Pipes
+   * @param assertionLevel AssertionLevel to associate with the Assertion
+   * @param assertion      Assertion to be applied to each input Tuple
    */
   public Each( String name, AssertionLevel assertionLevel, Assertion assertion )
     {
@@ -219,20 +211,20 @@ public class Each extends Operator
     }
 
   /**
-   * @param name                  of type String
-   * @param argumentFieldSelector of type Fields
-   * @param assertionLevel        of type AssertionLevel
-   * @param assertion             of type Filter
+   * @param name                  name for this branch of Pipes
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param assertionLevel        AssertionLevel to associate with the Assertion
+   * @param assertion             Assertion to be applied to each input Tuple
    */
-  public Each( String name, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
+  public Each( String name, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( name, argumentFieldSelector, assertionLevel, assertion, FILTER_SELECTOR );
+    super( name, argumentSelector, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   /**
-   * @param previous       of type Pipe
-   * @param assertionLevel of type AssertionLevel
-   * @param assertion      of type Filter
+   * @param previous       previous Pipe to receive input Tuples from
+   * @param assertionLevel AssertionLevel to associate with the Assertion
+   * @param assertion      Assertion to be applied to each input Tuple
    */
   public Each( Pipe previous, AssertionLevel assertionLevel, Assertion assertion )
     {
@@ -240,14 +232,14 @@ public class Each extends Operator
     }
 
   /**
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param assertionLevel        of type AssertionLevel
-   * @param assertion             of type Filter
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param assertionLevel        AssertionLevel to associate with the Assertion
+   * @param assertion             Assertion to be applied to each input Tuple
    */
-  public Each( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, Assertion assertion )
+  public Each( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
-    super( previous, argumentFieldSelector, assertionLevel, assertion, FILTER_SELECTOR );
+    super( previous, argumentSelector, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
   @Override
