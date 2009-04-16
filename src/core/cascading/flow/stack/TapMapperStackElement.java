@@ -21,19 +21,15 @@
 
 package cascading.flow.stack;
 
-import java.io.IOException;
-
 import cascading.CascadingException;
-import cascading.flow.StepCounters;
-import cascading.flow.FlowElement;
-import cascading.flow.FlowException;
-import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
+import cascading.flow.*;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.mapred.OutputCollector;
+
+import java.io.IOException;
 
 /**
  *
@@ -109,12 +105,12 @@ class TapMapperStackElement extends MapperStackElement
     {
     try
       {
-      if( outputCollector != null )
-        ( (TupleEntryCollector) outputCollector ).close();
+      super.close();
       }
     finally
       {
-      super.close();
+      if( outputCollector != null )
+        ( (TupleEntryCollector) outputCollector ).close();
       }
     }
   }

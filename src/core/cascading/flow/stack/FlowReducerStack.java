@@ -21,12 +21,6 @@
 
 package cascading.flow.stack;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
@@ -40,6 +34,12 @@ import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -169,6 +169,6 @@ public class FlowReducerStack
 
   public void close() throws IOException
     {
-    stackTail.close();
+    stackHead.close();
     }
   }
