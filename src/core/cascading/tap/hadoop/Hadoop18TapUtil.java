@@ -129,7 +129,7 @@ public class Hadoop18TapUtil
 
     AtomicInteger integer = pathCounts.get( taskOutputPath.toString() );
 
-    if( integer.decrementAndGet() != 0)
+    if( integer.decrementAndGet() != 0 )
       return;
 
     String taskId = conf.get( "mapred.task.id" );
@@ -192,9 +192,7 @@ public class Hadoop18TapUtil
       FileSystem fileSys = tmpDir.getFileSystem( conf );
 
       if( fileSys.exists( tmpDir ) )
-        {
         fileSys.delete( tmpDir, true );
-        }
       }
     }
 
