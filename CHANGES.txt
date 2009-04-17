@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Changed c.f.s.StackElement#close() behavior to close elements from the top of the stack.
+
 1.0.8
 
   Fixed bug where Hadoop FS shutdown hooks prevented cleanup of c.f.Flow intermediate files.

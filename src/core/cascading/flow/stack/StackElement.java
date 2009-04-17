@@ -21,18 +21,18 @@
 
 package cascading.flow.stack;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.flow.FlowCollector;
-import cascading.flow.StepCounters;
 import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
@@ -141,6 +141,7 @@ abstract class StackElement implements FlowCollector
     {
     prepare();
 
+    // ok if skipped, don't open resources if failing
     if( previous != null )
       previous.open();
     }
@@ -156,13 +157,14 @@ abstract class StackElement implements FlowCollector
       try
         {
         // close if top of stack
-        if( previous == null )
+        if( next == null )
           closeTraps();
         }
       finally
         {
-        if( previous != null )
-          previous.close();
+        // need to try to close all open resources
+        if( next != null )
+          next.close();
         }
       }
     }

@@ -12,6 +12,31 @@ General Information:
   cascading-xml-x.y.z.jar  - all Cascading XML operations class files
   cascadgin-test-x.y.z.jar - all Cascading tests and test utilities
 
+Building:
+
+  To build Cascading,
+
+  > cd <path to cascading>
+  > ant -Dhadoop.home=<path to hadoop> compile
+
+  To make all jars:
+
+  > ant -Dhadoop.home=<path to hadoop> jar
+
+  To run all tests:
+
+  > ant -Dhadoop.home=<path to hadoop> test
+
+  where <path to cascading> is the directory created after cloning or uncompressing the Cascading
+  distribution, and <path to hadoop> is where you installed Hadoop.
+
+  Note that ant will not interpret the ~ path, use ${user.home} instead. For example,
+    -Dhadoop.home=${user.home}/hadoop
+
+  Alternatively, you can put hadoop.home inside the file build.properties in the cascading project directory.
+
+Using:
+
   To use with Hadoop, we suggest stuffing cascading-core and cascading-xml jar files, and all third-party libs
   into the 'lib' folder of your job jar and executing via 'hadoop jar your.jar <your args>'.
 
