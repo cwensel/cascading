@@ -21,13 +21,6 @@
 
 package cascading.flow;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import cascading.CascadingException;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
@@ -37,15 +30,23 @@ import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 
+import java.util.*;
+
 /**
- * Use the FlowConnector to link sink and source {@link Tap} instances with an assembly of {@link Pipe} instances into
+ * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
  * an executable {@link Flow}.
  * <p/>
  * FlowConnector invokes a planner for the target execution environment. Currently only {@link cascading.flow.MultiMapReducePlanner}
- * is supported. If you have just one custom Hadoop job to execute, see {@link cascading.flow.MapReduceFlow}.
+ * is supported. If you have just one pre-existing custom Hadoop job to execute, see {@link cascading.flow.MapReduceFlow}.
  * <p/>
- * The FlowConnector and resulting Flow can be configured via a Map of properties given on the constructor. This properties
- * map can be populated through static methods on FlowConnector and MultiMapReducePlanner.
+ * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"
+ * refers to the last connected Pipe instances in a pipe-assembly. Pipe-assemblies are graphs of object with "heads"
+ * and "tails". From a given "tail", all connected heads can be found, but not the reverse. So "tails" must be
+ * supplied by the user.
+ * <p/>
+ * The FlowConnector and resulting Flow can be configured via a {@link Map} of properties given on the constructor. This properties
+ * map can be populated through static methods on FlowConnector and MultiMapReducePlanner. These properties are used
+ * to influence the current planner, and are passed down to the execution framework (Hadoop).
  * <p/>
  * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or {@link #setApplicationJarPath(java.util.Map, String)}
  * so that the correct application jar file is passed through to all child processes. The Class or path must reference
@@ -55,7 +56,7 @@ import org.apache.hadoop.mapred.JobConf;
  * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
  * runtime from a configuation file.
  * <p/>
- * By default, all {@link Assertion} are planned into the resulting Flow instance. This can be
+ * By default, all {@link Assertion}s are planned into the resulting Flow instance. This can be
  * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
  * <p/>
  * <strong>Properties</strong><br/>
@@ -76,7 +77,7 @@ public class FlowConnector
   /**
    * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties     of type Map<Object, Object>
    * @param assertionLevel of type AssertionLevel
    */
   public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
@@ -101,7 +102,7 @@ public class FlowConnector
   /**
    * Method setIntermediateSchemeClass is used for debugging. The default Scheme for intermediate files is {@link SequenceFile}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties              of type Map<Object, Object>
    * @param intermediateSchemeClass of type Class
    */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class intermediateSchemeClass )
@@ -112,7 +113,7 @@ public class FlowConnector
   /**
    * Method setIntermediateSchemeClass is used for debugging. The default Scheme for intermediate files is {@link SequenceFile}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties              of type Map<Object, Object>
    * @param intermediateSchemeClass of type String
    */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClass )
@@ -180,7 +181,7 @@ public class FlowConnector
    * All cluster executed Cascading applications
    * need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
    * setApplicationJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.
-
+   *
    * @param properties of type Map
    * @param path       of type String
    */
@@ -231,129 +232,129 @@ public class FlowConnector
   /**
    * Method connect links the given source and sink Taps to the given pipe assembly.
    *
-   * @param source of type Tap
-   * @param sink   of type Tap
-   * @param pipe   of type Pipe
+   * @param source source Tap to bind to the head of the given tail Pipe
+   * @param sink   sink Tap to bind to the given tail Pipe
+   * @param tail   tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( Tap source, Tap sink, Pipe pipe )
+  public Flow connect( Tap source, Tap sink, Pipe tail )
     {
-    return connect( null, source, sink, pipe );
+    return connect( null, source, sink, tail );
     }
 
   /**
    * Method connect links the given source and sink Taps to the given pipe assembly.
    *
-   * @param name   of type String
-   * @param source of type Tap
-   * @param sink   of type Tap
-   * @param pipe   of type Pipe
+   * @param name   name to give the resulting Flow
+   * @param source source Tap to bind to the head of the given tail Pipe
+   * @param sink   sink Tap to bind to the given tail Pipe
+   * @param tail   tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Tap source, Tap sink, Pipe pipe )
+  public Flow connect( String name, Tap source, Tap sink, Pipe tail )
     {
     Map<String, Tap> sources = new HashMap<String, Tap>();
 
-    sources.put( pipe.getHeads()[ 0 ].getName(), source );
+    sources.put( tail.getHeads()[ 0 ].getName(), source );
 
-    return connect( name, sources, sink, pipe );
+    return connect( name, sources, sink, tail );
     }
 
   /**
    * Method connect links the given source, sink, and trap Taps to the given pipe assembly. The given trap will
    * be linked to the assembly head along with the source.
    *
-   * @param name   of type String
-   * @param source of type Tap
-   * @param sink   of type Tap
-   * @param trap   of type Tap
-   * @param pipe   of type Pipe
+   * @param name   name to give the resulting Flow
+   * @param source source Tap to bind to the head of the given tail Pipe
+   * @param sink   sink Tap to bind to the given tail Pipe
+   * @param trap   trap Tap to sink all failed Tuples into
+   * @param tail   tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Tap source, Tap sink, Tap trap, Pipe pipe )
+  public Flow connect( String name, Tap source, Tap sink, Tap trap, Pipe tail )
     {
     Map<String, Tap> sources = new HashMap<String, Tap>();
 
-    sources.put( pipe.getHeads()[ 0 ].getName(), source );
+    sources.put( tail.getHeads()[ 0 ].getName(), source );
 
     Map<String, Tap> traps = new HashMap<String, Tap>();
 
-    traps.put( pipe.getHeads()[ 0 ].getName(), trap );
+    traps.put( tail.getHeads()[ 0 ].getName(), trap );
 
-    return connect( name, sources, sink, traps, pipe );
+    return connect( name, sources, sink, traps, tail );
     }
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
    *
-   * @param sources of type Map<String, Tap>
-   * @param sink    of type Tap
-   * @param pipe    of type Pipe
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipe
+   * @param sink    sink Tap to bind to the given tail Pipe
+   * @param tail    tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( Map<String, Tap> sources, Tap sink, Pipe pipe )
+  public Flow connect( Map<String, Tap> sources, Tap sink, Pipe tail )
     {
-    return connect( null, sources, sink, pipe );
+    return connect( null, sources, sink, tail );
     }
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
    *
-   * @param name    of type String
-   * @param sources of type Map<String, Tap>
-   * @param sink    of type Tap
-   * @param pipe    of type Pipe
+   * @param name    name to give the resulting Flow
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipe
+   * @param sink    sink Tap to bind to the given tail Pipe
+   * @param tail    tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Map<String, Tap> sources, Tap sink, Pipe pipe )
+  public Flow connect( String name, Map<String, Tap> sources, Tap sink, Pipe tail )
     {
     Map<String, Tap> sinks = new HashMap<String, Tap>();
 
-    sinks.put( pipe.getName(), sink );
+    sinks.put( tail.getName(), sink );
 
-    return connect( name, sources, sinks, pipe );
+    return connect( name, sources, sinks, tail );
     }
 
   /**
    * Method connect links the named source and trap Taps and sink Tap to the given pipe assembly.
    *
-   * @param name    of type String
-   * @param sources of type Map<String, Tap>
-   * @param sink    of type Tap
-   * @param traps   of type Map<String, Tap>
-   * @param pipe    of type Pipe
+   * @param name    name to give the resulting Flow
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipe
+   * @param sink    sink Tap to bind to the given tail Pipe
+   * @param traps   all pipe names and trap Taps to sink all failed Tuples into
+   * @param tail    tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Map<String, Tap> sources, Tap sink, Map<String, Tap> traps, Pipe pipe )
+  public Flow connect( String name, Map<String, Tap> sources, Tap sink, Map<String, Tap> traps, Pipe tail )
     {
     Map<String, Tap> sinks = new HashMap<String, Tap>();
 
-    sinks.put( pipe.getName(), sink );
+    sinks.put( tail.getName(), sink );
 
-    return connect( name, sources, sinks, traps, pipe );
+    return connect( name, sources, sinks, traps, tail );
     }
 
   /**
    * Method connect links the named trap Taps, source and sink Tap to the given pipe assembly.
    *
-   * @param name    of type String
-   * @param source  of type Tap
-   * @param sink    of type Tap
-   * @param traps   of type Map<String, Tap>
-   * @param pipe    of type Pipe
+   * @param name   name to give the resulting Flow
+   * @param source source Tap to bind to the head of the given tail Pipe
+   * @param sink   sink Tap to bind to the given tail Pipe
+   * @param traps  all pipe names and trap Taps to sink all failed Tuples into
+   * @param tail   tail end of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Tap source, Tap sink, Map<String, Tap> traps, Pipe pipe )
+  public Flow connect( String name, Tap source, Tap sink, Map<String, Tap> traps, Pipe tail )
     {
     Map<String, Tap> sources = new HashMap<String, Tap>();
 
-    sources.put( pipe.getHeads()[ 0 ].getName(), source );
+    sources.put( tail.getHeads()[ 0 ].getName(), source );
 
     Map<String, Tap> sinks = new HashMap<String, Tap>();
 
-    sinks.put( pipe.getName(), sink );
+    sinks.put( tail.getName(), sink );
 
-    return connect( name, sources, sinks, traps, pipe );
+    return connect( name, sources, sinks, traps, tail );
     }
 
   /**
@@ -362,14 +363,14 @@ public class FlowConnector
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
-   * @param source of type Tap
-   * @param sinks  of type Map<String, Tap>
-   * @param pipes  of type Pipe...
+   * @param source source Tap to bind to the head of the given tail Pipes
+   * @param sinks  all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails  all tail ends of a pipe assembly
    * @return Flow
    */
-  public Flow connect( Tap source, Map<String, Tap> sinks, Pipe... pipes )
+  public Flow connect( Tap source, Map<String, Tap> sinks, Pipe... tails )
     {
-    return connect( null, source, sinks, pipes );
+    return connect( null, source, sinks, tails );
     }
 
   /**
@@ -378,17 +379,17 @@ public class FlowConnector
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
-   * @param name   of type String
-   * @param source of type Tap
-   * @param sinks  of type Map<String, Tap>
-   * @param pipes  of type Pipe...
+   * @param name   name to give the resulting Flow
+   * @param source source Tap to bind to the head of the given tail Pipes
+   * @param sinks  all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails  all tail ends of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Tap source, Map<String, Tap> sinks, Pipe... pipes )
+  public Flow connect( String name, Tap source, Map<String, Tap> sinks, Pipe... tails )
     {
     Set<Pipe> heads = new HashSet<Pipe>();
 
-    for( Pipe pipe : pipes )
+    for( Pipe pipe : tails )
       Collections.addAll( heads, pipe.getHeads() );
 
     if( heads.isEmpty() )
@@ -402,53 +403,53 @@ public class FlowConnector
     for( Pipe pipe : heads )
       sources.put( pipe.getName(), source );
 
-    return connect( name, sources, sinks, pipes );
+    return connect( name, sources, sinks, tails );
     }
 
 
   /**
    * Method connect links the named sources and sinks to the given pipe assembly.
    *
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @param pipes   of type Pipe...
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipes
+   * @param sinks   all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails   all tail ends of a pipe assembly
    * @return Flow
    */
-  public Flow connect( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes )
+  public Flow connect( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... tails )
     {
-    return connect( null, sources, sinks, pipes );
+    return connect( null, sources, sinks, tails );
     }
 
   /**
    * Method connect links the named sources and sinks to the given pipe assembly.
    *
-   * @param name    of type String
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @param pipes   of type Pipe...
+   * @param name    name to give the resulting Flow
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipes
+   * @param sinks   all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails   all tail ends of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes )
+  public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... tails )
     {
-    return connect( name, sources, sinks, new HashMap<String, Tap>(), pipes );
+    return connect( name, sources, sinks, new HashMap<String, Tap>(), tails );
     }
 
   /**
    * Method connect links the named sources, sinks and traps to the given pipe assembly.
    *
-   * @param name    of type String
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @param traps   of type Map<String, Tap>
-   * @param pipes   of type Pipe...
+   * @param name    name to give the resulting Flow
+   * @param sources all head names and source Taps to bind to the heads of the given tail Pipes
+   * @param sinks   all tail names and sink Taps to bind to the given tail Pipes
+   * @param traps   all pipe names and trap Taps to sink all failed Tuples into
+   * @param tails   all tail ends of a pipe assembly
    * @return Flow
    */
-  public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Pipe... pipes )
+  public Flow connect( String name, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Pipe... tails )
     {
-    name = name == null ? makeName( pipes ) : name;
+    name = name == null ? makeName( tails ) : name;
 
     // choose appropriate planner (when there is more than one)
-    return new MultiMapReducePlanner( properties ).buildFlow( name, pipes, sources, sinks, traps );
+    return new MultiMapReducePlanner( properties ).buildFlow( name, tails, sources, sinks, traps );
     }
 
   /////////
