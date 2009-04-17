@@ -21,8 +21,6 @@
 
 package cascading.scheme;
 
-import java.io.IOException;
-
 import cascading.tap.Tap;
 import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
@@ -30,12 +28,9 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.*;
+
+import java.io.IOException;
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
@@ -65,7 +60,7 @@ public class TextLine extends Scheme
 
   /**
    * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
-   * "offset" is the byte offset in the input file. By default, numSinkParts is set to 1.
+   * "offset" is the byte offset in the input file.
    */
   public TextLine()
     {
@@ -85,7 +80,7 @@ public class TextLine extends Scheme
 
   /**
    * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
-   * "offset" is the byte offset in the input file. By default, numSinkParts is set to 1.
+   * "offset" is the byte offset in the input file.
    *
    * @param sinkCompression of type Compress
    */
