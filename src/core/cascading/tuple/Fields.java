@@ -501,6 +501,9 @@ public final class Fields implements Comparable, Iterable, Serializable
 
   private Comparable[] validate( Comparable[] fields )
     {
+    if( fields.length == 0 )
+      throw new IllegalArgumentException( "fields parameter may not be empty" );
+
     isOrdered = true;
 
     Set<Comparable> names = new HashSet<Comparable>();
@@ -510,10 +513,10 @@ public final class Fields implements Comparable, Iterable, Serializable
       Comparable field = fields[ i ];
 
       if( field instanceof Fields )
-        throw new IllegalArgumentException( "may not next Field instances within a Field instance" );
+        throw new IllegalArgumentException( "may not nest Fields instances within a Fields instance" );
 
       if( names.contains( field ) )
-        throw new TupleException( "duplicate field name found: " + field );
+        throw new IllegalArgumentException( "duplicate field name found: " + field );
 
       names.add( field );
 
