@@ -21,21 +21,12 @@
 
 package cascading.tuple;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
@@ -670,15 +661,15 @@ public final class Fields implements Comparable, Iterable, Serializable
    * Method getPos returns the index of the give field value in this Fields instance. The index corresponds to the
    * Tuple value index in an associated Tuple instance.
    *
-   * @param field of type Comparable
+   * @param fieldName of type Comparable
    * @return int
    */
-  public int getPos( Comparable field )
+  public int getPos( Comparable fieldName )
     {
-    if( field instanceof Number )
-      return translatePos( (Integer) field );
+    if( fieldName instanceof Number )
+      return translatePos( (Integer) fieldName );
     else
-      return indexOf( field );
+      return indexOf( fieldName );
     }
 
   private final Map<Comparable, Integer> getIndex()
@@ -694,19 +685,19 @@ public final class Fields implements Comparable, Iterable, Serializable
     return index;
     }
 
-  private int indexOf( Comparable field )
+  private int indexOf( Comparable fieldName )
     {
-    Integer result = getIndex().get( field );
+    Integer result = getIndex().get( fieldName );
 
     if( result == null )
-      throw new TupleException( "field not found: '" + field + "', available fields: " + this.print() );
+      throw new TupleException( "field not found: '" + fieldName + "', available fields: " + this.print() );
 
     return result;
     }
 
-  int indexOfSafe( Comparable field )
+  int indexOfSafe( Comparable fieldName )
     {
-    Integer result = getIndex().get( field );
+    Integer result = getIndex().get( fieldName );
 
     if( result == null )
       return -1;
