@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed issue where reverse ordering a c.p.GroupBy was not possible when sortFields were not given.
+
   Changed c.f.s.StackElement#close() behavior to close elements from the top of the stack.
 
 1.0.8
