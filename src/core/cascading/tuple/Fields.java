@@ -501,9 +501,6 @@ public final class Fields implements Comparable, Iterable, Serializable
 
   private Comparable[] validate( Comparable[] fields )
     {
-    if( fields.length == 0 )
-      throw new IllegalArgumentException( "fields parameter may not be empty" );
-
     isOrdered = true;
 
     Set<Comparable> names = new HashSet<Comparable>();
