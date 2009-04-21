@@ -48,7 +48,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/ArrivalUseCaseTest.java#2 $ */
 public class SortedValuesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";

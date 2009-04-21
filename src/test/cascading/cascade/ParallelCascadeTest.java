@@ -21,8 +21,6 @@
 
 package cascading.cascade;
 
-import java.io.IOException;
-
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -38,7 +36,8 @@ import cascading.tap.Dfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/CascadeTest.java#2 $ */
+import java.io.IOException;
+
 public class ParallelCascadeTest extends ClusterTestCase
   {
   String inputFile = "build/test/data/ips.20.txt";

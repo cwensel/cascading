@@ -21,13 +21,6 @@
 
 package cascading.flow;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import cascading.CascadingTestCase;
 import cascading.TestBuffer;
 import cascading.operation.AssertionLevel;
@@ -40,11 +33,7 @@ import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
+import cascading.pipe.*;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
@@ -56,7 +45,9 @@ import cascading.tuple.Fields;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/flow/BuildJobsTest.java#2 $ */
+import java.io.IOException;
+import java.util.*;
+
 public class BuildJobsTest extends CascadingTestCase
   {
   public BuildJobsTest()
