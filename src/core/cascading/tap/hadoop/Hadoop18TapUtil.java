@@ -39,6 +39,7 @@
 
 package cascading.tap.hadoop;
 
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -163,7 +164,9 @@ public class Hadoop18TapUtil
    */
   public static void cleanupTap( JobConf conf, Tap tap ) throws IOException
     {
-    cleanTempPath( conf, tap.getPath() );
+    // don't clean if not hfs
+    if( tap instanceof Hfs )
+      cleanTempPath( conf, tap.getPath() );
     }
 
   /**
