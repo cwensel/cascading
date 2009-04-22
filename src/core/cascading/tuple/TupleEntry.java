@@ -24,7 +24,7 @@ package cascading.tuple;
 /**
  * Class TupleEntry allows a {@link Tuple} instance and its declarating {@link Fields} instance to be used as a single object.
  * <p/>
- * Once a TupleEntry is created, its Fields cannot be changed, but the Tuple instance it holds can be replaced, or
+ * Once a TupleEntry is created, its Fields cannot be changed, but the Tuple instance it holds can be replaced or
  * modified. The managed Tuple should not have elements added or removed, as this will break the relationship with
  * the associated Fields instance.
  *
@@ -66,12 +66,14 @@ public class TupleEntry
 
       return result;
       }
+
     int size = 0;
 
     for( TupleEntry entry : entries )
       size += entry.size();
 
     result = Tuple.size( selector.size() );
+
     int offset = 0;
 
     for( TupleEntry entry : entries )
@@ -81,6 +83,7 @@ public class TupleEntry
         Comparable field = selector.get( i );
 
         int pos = 0;
+
         if( field instanceof String )
           {
           pos = entry.fields.indexOfSafe( field );
@@ -111,6 +114,11 @@ public class TupleEntry
     this.fields = new Fields();
     }
 
+  /**
+   * Constructor TupleEntry creates a new TupleEntry instance.
+   *
+   * @param isUnmodifiable of type boolean
+   */
   public TupleEntry( boolean isUnmodifiable )
     {
     this.fields = new Fields();
@@ -127,6 +135,12 @@ public class TupleEntry
     this.fields = fields;
     }
 
+  /**
+   * Constructor TupleEntry creates a new TupleEntry instance.
+   *
+   * @param fields         of type Fields
+   * @param isUnmodifiable of type boolean
+   */
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -221,120 +235,120 @@ public class TupleEntry
     }
 
   /**
-   * Method get returns the value in the given position i.
+   * Method get returns the value in the given position pos.
    *
-   * @param i of type int
+   * @param pos position of the element to return.
    * @return Comparable
    */
-  public Comparable get( int i )
+  public Comparable get( int pos )
     {
-    return tuple.get( i );
+    return tuple.get( pos );
     }
 
   /**
-   * Method get returns the value in the given field.
+   * Method get returns the value in the given field or position.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return Comparable
    */
-  public Comparable get( Comparable field )
+  public Comparable get( Comparable fieldName )
     {
-    return tuple.get( fields.getPos( field ) );
+    return tuple.get( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method set sets the value in the given field.
+   * Method set sets the value in the given field or position.
    *
-   * @param field of type Comparable
-   * @param value of type Comparable
+   * @param fieldName field name or position to set
+   * @param value     of type Comparable
    */
-  public void set( Comparable field, Comparable value )
+  public void set( Comparable fieldName, Comparable value )
     {
-    tuple.set( fields.getPos( field ), value );
+    tuple.set( fields.getPos( fieldName ), value );
     }
 
   /**
-   * Method getString returns the element for the given fieldname field as a String.
+   * Method getString returns the element for the given field name or position as a String.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return String
    */
-  public String getString( Comparable field )
+  public String getString( Comparable fieldName )
     {
-    return tuple.getString( fields.getPos( field ) );
+    return tuple.getString( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getFloat returns the element for the given fieldname field as a float. Zero if null.
+   * Method getFloat returns the element for the given field name or position as a float. Zero if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return float
    */
-  public float getFloat( Comparable field )
+  public float getFloat( Comparable fieldName )
     {
-    return tuple.getFloat( fields.getPos( field ) );
+    return tuple.getFloat( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getDouble returns the element for the given fieldname field as a double. Zero if null.
+   * Method getDouble returns the element for the given field name or position as a double. Zero if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return double
    */
-  public double getDouble( Comparable field )
+  public double getDouble( Comparable fieldName )
     {
-    return tuple.getDouble( fields.getPos( field ) );
+    return tuple.getDouble( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getInteger  returns the element for the given fieldname field as an int. Zero if null.
+   * Method getInteger  returns the element for the given field name or position as an int. Zero if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return int
    */
-  public int getInteger( Comparable field )
+  public int getInteger( Comparable fieldName )
     {
-    return tuple.getInteger( fields.getPos( field ) );
+    return tuple.getInteger( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getLong returns the element for the given fieldname field as a long. Zero if null.
+   * Method getLong returns the element for the given field name or position as a long. Zero if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return long
    */
-  public long getLong( Comparable field )
+  public long getLong( Comparable fieldName )
     {
-    return tuple.getLong( fields.getPos( field ) );
+    return tuple.getLong( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getShort returns the element for the given fieldname field as a short. Zero if null.
+   * Method getShort returns the element for the given field name or position as a short. Zero if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return short
    */
-  public short getShort( Comparable field )
+  public short getShort( Comparable fieldName )
     {
-    return tuple.getShort( fields.getPos( field ) );
+    return tuple.getShort( fields.getPos( fieldName ) );
     }
 
   /**
-   * Method getBoolean returns the element for the given fieldname field as a boolean.
+   * Method getBoolean returns the element for the given field name or position as a boolean.
    * If the value is (case ignored) the string 'true', a {@code true} value will be returned. {@code false} if null.
    *
-   * @param field of type Comparable
+   * @param fieldName field name or position to return
    * @return boolean
    */
-  public boolean getBoolean( Comparable field )
+  public boolean getBoolean( Comparable fieldName )
     {
-    return tuple.getBoolean( fields.getPos( field ) );
+    return tuple.getBoolean( fields.getPos( fieldName ) );
     }
 
   /**
    * Method selectEntry selects the fields specified in selector from this instance.
    *
-   * @param selector of type Fields
+   * @param selector Fields selector that selects the values to return
    * @return TupleEntry
    */
   public TupleEntry selectEntry( Fields selector )
@@ -355,7 +369,7 @@ public class TupleEntry
   /**
    * Method selectTuple selects the fields specified in selector from this instance.
    *
-   * @param selector of type Fields
+   * @param selector Fields selector that selects the values to return
    * @return Tuple
    */
   public Tuple selectTuple( Fields selector )

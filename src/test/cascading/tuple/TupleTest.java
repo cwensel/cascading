@@ -21,13 +21,12 @@
 
 package cascading.tuple;
 
+import cascading.CascadingTestCase;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import cascading.CascadingTestCase;
-
-/** @version $Id: //depot/calku/cascading/src/test/cascading/tuple/TupleTest.java#2 $ */
 public class TupleTest extends CascadingTestCase
   {
   private Tuple tuple;

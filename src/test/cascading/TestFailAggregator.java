@@ -27,7 +27,6 @@ import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/TestAggregator.java#2 $ */
 public class TestFailAggregator extends BaseOperation implements Aggregator
   {
   private static final long serialVersionUID = 1L;

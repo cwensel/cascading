@@ -77,6 +77,18 @@ public class GroupBy extends Group
   /**
    * Creates a new GroupBy instance that will group on the given groupFields field names.
    *
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public GroupBy( Pipe pipe, Fields groupFields, boolean reverseOrder )
+    {
+    super( pipe, groupFields, null, reverseOrder );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will group on the given groupFields field names.
+   *
    * @param groupName   of type String
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
@@ -84,6 +96,19 @@ public class GroupBy extends Group
   public GroupBy( String groupName, Pipe pipe, Fields groupFields )
     {
     super( groupName, pipe, groupFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will group on the given groupFields field names.
+   *
+   * @param groupName    of type String
+   * @param pipe         of type Pipe
+   * @param groupFields  of type Fields
+   * @param reverseOrder of type boolean
+   */
+  public GroupBy( String groupName, Pipe pipe, Fields groupFields, boolean reverseOrder )
+    {
+    super( groupName, pipe, groupFields, null, reverseOrder );
     }
 
   /**

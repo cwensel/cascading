@@ -21,13 +21,10 @@
 
 package cascading.flow.stack;
 
-import java.io.IOException;
-import java.util.Set;
-
-import cascading.flow.StepCounters;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
+import cascading.flow.StepCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
@@ -38,6 +35,9 @@ import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.Set;
 
 /**
  *
@@ -180,8 +180,8 @@ public class FlowMapperStack
     {
     for( int i = 0; i < stacks.length; i++ )
       {
-      stacks[ i ].tail.cleanup();
-      stacks[ i ].tail.close();
+//      stacks[ i ].head.cleanup();
+      stacks[ i ].head.close();
       }
     }
   }

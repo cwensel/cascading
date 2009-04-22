@@ -21,21 +21,18 @@
 
 package cascading.flow;
 
-import java.io.File;
-
-import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
+import cascading.ClusterTestCase;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
-import cascading.tap.Tap;
 import cascading.tap.SinkMode;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.ClusterTestCase;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
+import java.io.File;
+
 public class FlowSkipTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";

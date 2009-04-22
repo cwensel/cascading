@@ -21,31 +21,25 @@
 
 package cascading.pipe;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.operation.Aggregator;
-import cascading.operation.AssertionLevel;
-import cascading.operation.Buffer;
-import cascading.operation.ConcreteCall;
-import cascading.operation.GroupAssertion;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.Tuples;
+import cascading.operation.*;
+import cascading.tuple.*;
+
+import java.util.Iterator;
+import java.util.Set;
 
 /**
- * The Every operator applies an {@link Aggregator} to every grouping. Any number of Every instances may follow other
- * Every or {@link Group} instance.
+ * The Every operator applies an {@link Aggregator} or {@link Buffer} to every grouping.
+ * <p/>
+ * Any number of Every instances may follow other Every, {@link GroupBy}, {@link CoGroup} instance if they apply an Aggregator, not a Buffer.
+ * If a Buffer, only one Every may follow a GroupBy or CoGroup.
  * <p/>
  * Every operators create aggregate values for every grouping they encounter. This aggregate value is added to the current
  * grouping Tuple. Subsequent Every instances can continue to append values to the grouping Tuple. When an Each follows
- * and Every, the Each applies its operation to the grouping Tuple (thus all values in the grouping are discarded).
+ * and Every, the Each applies its operation to the grouping Tuple (thus all child values in the grouping are discarded
+ * and only aggregate values are propagated).
  */
 public class Every extends Operator
   {
@@ -59,8 +53,8 @@ public class Every extends Operator
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous   of type Pipe
-   * @param aggregator of type Aggregator
+   * @param previous   previous Pipe to receive input Tuples from
+   * @param aggregator Aggregator to be applied to every input Tuple grouping
    */
   public Every( Pipe previous, Aggregator aggregator )
     {
@@ -70,94 +64,94 @@ public class Every extends Operator
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param aggregator            of type Aggregator
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param aggregator            Aggregator to be applied to every input Tuple grouping
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Aggregator aggregator )
+  public Every( Pipe previous, Fields argumentSelector, Aggregator aggregator )
     {
-    super( previous, argumentFieldSelector, aggregator, AGGREGATOR_SELECTOR );
+    super( previous, argumentSelector, aggregator, AGGREGATOR_SELECTOR );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param aggregator            of type Aggregator
-   * @param outFieldSelector      of type Fields
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param aggregator            Aggregator to be applied to every input Tuple grouping
+   * @param outputSelector      field selector that selects the output Tuple from the grouping and Aggregator results Tuples
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Aggregator aggregator, Fields outFieldSelector )
+  public Every( Pipe previous, Fields argumentSelector, Aggregator aggregator, Fields outputSelector )
     {
-    super( previous, argumentFieldSelector, aggregator, outFieldSelector );
+    super( previous, argumentSelector, aggregator, outputSelector );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous         of type Pipe
-   * @param aggregator       of type Aggregator
-   * @param outFieldSelector of type Fields
+   * @param previous         previous Pipe to receive input Tuples from
+   * @param aggregator       Aggregator to be applied to every input Tuple grouping
+   * @param outputSelector field selector that selects the output Tuple from the grouping and Aggregator results Tuples
    */
-  public Every( Pipe previous, Aggregator aggregator, Fields outFieldSelector )
+  public Every( Pipe previous, Aggregator aggregator, Fields outputSelector )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, aggregator, outFieldSelector );
+    super( previous, AGGREGATOR_ARGUMENTS, aggregator, outputSelector );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous of type Pipe
-   * @param reducer  of type Reducer
+   * @param previous previous Pipe to receive input Tuples from
+   * @param buffer   Buffer to be applied to every input Tuple grouping
    */
-  public Every( Pipe previous, Buffer reducer )
+  public Every( Pipe previous, Buffer buffer )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, reducer, AGGREGATOR_SELECTOR );
+    super( previous, AGGREGATOR_ARGUMENTS, buffer, AGGREGATOR_SELECTOR );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param reducer               of type Reducer
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param buffer                Buffer to be applied to every input Tuple grouping
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Buffer reducer )
+  public Every( Pipe previous, Fields argumentSelector, Buffer buffer )
     {
-    super( previous, argumentFieldSelector, reducer, AGGREGATOR_SELECTOR );
+    super( previous, argumentSelector, buffer, AGGREGATOR_SELECTOR );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param reducer               of type Reducer
-   * @param outFieldSelector      of type Fields
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param buffer                Buffer to be applied to every input Tuple grouping
+   * @param outputSelector      field selector that selects the output Tuple from the grouping and Buffer results Tuples
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, Buffer reducer, Fields outFieldSelector )
+  public Every( Pipe previous, Fields argumentSelector, Buffer buffer, Fields outputSelector )
     {
-    super( previous, argumentFieldSelector, reducer, outFieldSelector );
+    super( previous, argumentSelector, buffer, outputSelector );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous         of type Pipe
-   * @param reducer          of type Reducer
-   * @param outFieldSelector of type Fields
+   * @param previous         previous Pipe to receive input Tuples from
+   * @param buffer           Buffer to be applied to every input Tuple grouping
+   * @param outputSelector field selector that selects the output Tuple from the grouping and Buffer results Tuples
    */
-  public Every( Pipe previous, Buffer reducer, Fields outFieldSelector )
+  public Every( Pipe previous, Buffer buffer, Fields outputSelector )
     {
-    super( previous, AGGREGATOR_ARGUMENTS, reducer, outFieldSelector );
+    super( previous, AGGREGATOR_ARGUMENTS, buffer, outputSelector );
     }
 
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous       of type Pipe
+   * @param previous       previous Pipe to receive input Tuples from
    * @param assertionLevel of type AssertionLevel
-   * @param assertion      of type ValueAssertion
+   * @param assertion      GroupAssertion to be applied to every input Tuple grouping
    */
   public Every( Pipe previous, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
@@ -167,14 +161,14 @@ public class Every extends Operator
   /**
    * Constructor Every creates a new Every instance.
    *
-   * @param previous              of type Pipe
-   * @param argumentFieldSelector of type Fields
-   * @param assertionLevel        of type AssertionLevel
-   * @param assertion             of type ValueAssertion
+   * @param previous              previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param assertionLevel        AssertionLevel to associate with the Assertion
+   * @param assertion             GroupAssertion to be applied to every input Tuple grouping
    */
-  public Every( Pipe previous, Fields argumentFieldSelector, AssertionLevel assertionLevel, GroupAssertion assertion )
+  public Every( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
-    super( previous, argumentFieldSelector, assertionLevel, assertion, ASSERTION_SELECTOR );
+    super( previous, argumentSelector, assertionLevel, assertion, ASSERTION_SELECTOR );
     }
 
   /**

@@ -39,6 +39,7 @@
 
 package cascading.tap.hadoop;
 
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -129,7 +130,7 @@ public class Hadoop18TapUtil
 
     AtomicInteger integer = pathCounts.get( taskOutputPath.toString() );
 
-    if( integer.decrementAndGet() != 0)
+    if( integer.decrementAndGet() != 0 )
       return;
 
     String taskId = conf.get( "mapred.task.id" );
@@ -163,7 +164,9 @@ public class Hadoop18TapUtil
    */
   public static void cleanupTap( JobConf conf, Tap tap ) throws IOException
     {
-    cleanTempPath( conf, tap.getPath() );
+    // don't clean if not hfs
+    if( tap instanceof Hfs )
+      cleanTempPath( conf, tap.getPath() );
     }
 
   /**
@@ -192,9 +195,7 @@ public class Hadoop18TapUtil
       FileSystem fileSys = tmpDir.getFileSystem( conf );
 
       if( fileSys.exists( tmpDir ) )
-        {
         fileSys.delete( tmpDir, true );
-        }
       }
     }
 

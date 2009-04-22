@@ -21,10 +21,6 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -35,11 +31,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
+import cascading.pipe.*;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -49,7 +41,10 @@ import cascading.tuple.Tuple;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/FieldedPipesTest.java#4 $ */
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SerializedPipesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";

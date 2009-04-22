@@ -21,13 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
@@ -35,7 +28,6 @@ import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
-import cascading.TestConstants;
 import cascading.operation.text.DateParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -49,7 +41,13 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/ArrivalUseCaseTest.java#2 $ */
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class SortedValuesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";
@@ -109,15 +107,20 @@ public class SortedValuesTest extends ClusterTestCase
 
   public void testSortedValues2() throws Exception
     {
-    runSortTest2( "forward2", false );
+    runSortTest2( "forward2", false, true );
     }
 
   public void testSortedValuesReversed2() throws Exception
     {
-    runSortTest2( "reversed2", true );
+    runSortTest2( "reversed2", true, true );
     }
 
-  private void runSortTest2( String path, boolean sorted ) throws IOException, ParseException
+  public void testSortedValuesReversed3() throws Exception
+    {
+    runSortTest2( "reversed2nosortfields", true, false );
+    }
+
+  private void runSortTest2( String path, boolean sorted, boolean useSortFields ) throws IOException, ParseException
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -136,7 +139,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     // since status will be unique, sorting on count really won't happen.
     // perfect opportunity for planner optimization
-    pipe = new GroupBy( pipe, new Fields( "status" ), new Fields( "count" ), sorted );
+    Fields sortFields = useSortFields ? new Fields( "count" ) : null;
+    pipe = new GroupBy( pipe, new Fields( "status" ), sortFields, sorted );
 
     Map<Object, Object> properties = getProperties();
 

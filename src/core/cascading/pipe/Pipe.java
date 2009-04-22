@@ -21,15 +21,15 @@
 
 package cascading.pipe;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.tuple.Fields;
 import cascading.util.Util;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
@@ -87,7 +87,7 @@ public class Pipe implements FlowElement, Serializable
    * Constructor Pipe creates a new Pipe instance with the given name. This is useful as the 'start' or head
    * of a pipe assembly.
    *
-   * @param name of type String
+   * @param name name for this branch of Pipes
    */
   public Pipe( String name )
     {
@@ -96,10 +96,10 @@ public class Pipe implements FlowElement, Serializable
 
   /**
    * Constructor Pipe creates a new Pipe instance with the given name and previous Pipe instance. This is useful for
-   * naming a branch in a pipe assembly.
+   * naming a branch in a pipe assembly. Or renaming the branch mid-way down.
    *
-   * @param name     of type String
-   * @param previous of type Pipe
+   * @param name     name for this branch of Pipes
+   * @param previous previous Pipe to receive input Tuples from
    */
   public Pipe( String name, Pipe previous )
     {

@@ -165,6 +165,10 @@ public class FlowStep implements Serializable
       conf.setMapOutputKeyClass( Tuple.class );
       conf.setMapOutputValueClass( Tuple.class );
 
+      // handles the case the groupby sort should be reversed
+      if( group.isSortReversed() )
+        conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
+
       if( !group.isGroupBy() )
         conf.setMapOutputValueClass( IndexTuple.class );
 

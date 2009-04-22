@@ -23,7 +23,6 @@ package cascading.tuple;
 
 import cascading.CascadingTestCase;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/tuple/TupleFieldsTest.java#2 $ */
 public class TupleFieldsTest extends CascadingTestCase
   {
   private Fields fields;

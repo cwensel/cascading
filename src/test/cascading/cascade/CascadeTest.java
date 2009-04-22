@@ -21,17 +21,8 @@
 
 package cascading.cascade;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import cascading.ClusterTestCase;
-import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.flow.FlowSkipStrategy;
-import cascading.flow.FlowStep;
-import cascading.flow.LockingFlowListener;
+import cascading.flow.*;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -44,7 +35,11 @@ import cascading.tap.MultiTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/CascadeTest.java#2 $ */
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 public class CascadeTest extends ClusterTestCase
   {
   String inputFile = "build/test/data/ips.20.txt";

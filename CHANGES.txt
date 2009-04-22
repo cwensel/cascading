@@ -2,6 +2,12 @@ Cascading Change Log
 
 1.0.8
 
+  Fixed issue where reverse ordering a c.p.GroupBy was not possible when sortFields were not given.
+
+  Changed c.f.s.StackElement#close() behavior to close elements from the top of the stack.
+
+1.0.8
+
   Fixed bug where Hadoop FS shutdown hooks prevented cleanup of c.f.Flow intermediate files.
 
   Fixed bug where c.t.MultiTap was not accounted for when planning a c.c.Cascade.
