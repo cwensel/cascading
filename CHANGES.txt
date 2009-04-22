@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.0.8
+1.0.9
 
   Fixed issue where reverse ordering a c.p.GroupBy was not possible when sortFields were not given.
 
