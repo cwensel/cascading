@@ -30,7 +30,7 @@ import cascading.flow.FlowProcess;
  * arguments returned by this Iterator.
  * <p/>
  * Buffer is very useful when header or footer values need to be inserted into a grouping, or if values need to be
- * insterted into the middle of the group values. For example, consider a stream of timestamps. A Buffer could
+ * inserted into the middle of the group values. For example, consider a stream of timestamps. A Buffer could
  * be used to add missing entries, or to calculate running or moving averages over a smaller "window" within the grouping.
  * <p/>
  * There may be only one Buffer after a {@link cascading.pipe.GroupBy} or {@link cascading.pipe.CoGroup}. And there

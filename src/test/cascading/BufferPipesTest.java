@@ -21,8 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Insert;
@@ -35,7 +33,10 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+
+import java.io.File;
 
 public class BufferPipesTest extends ClusterTestCase
   {
@@ -108,7 +109,7 @@ public class BufferPipesTest extends ClusterTestCase
     copyFromLocal( inputFileLhs );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simple2", true );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -136,6 +137,44 @@ public class BufferPipesTest extends ClusterTestCase
     assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
     line = iterator.next().get( 1 );
     assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
+
+    iterator.close();
+    }
+
+  public void testSimpleBuffer3() throws Exception
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/simple3", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ), "\\s" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "num" ) );
+
+    pipe = new Every( pipe, new TestBuffer( new Fields( "new" ), new Tuple( "new" ) ), new Fields( "new", "lower", "upper" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+//    flow.writeDOT( "unknownselect.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    Comparable line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "new\ta\tA", line );
+    line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "new\tb\tB", line );
+    line = iterator.next().get( 1 );
+    assertEquals( "not equal: tuple.get(1)", "new\tc\tC", line );
 
     iterator.close();
     }
