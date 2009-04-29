@@ -21,8 +21,6 @@
 
 package cascading;
 
-import java.util.Iterator;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -30,6 +28,8 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+
+import java.util.Iterator;
 
 /**
  *
@@ -39,7 +39,7 @@ public class TestBuffer extends BaseOperation implements Buffer
   private int exepectedSize = -1;
   private boolean insertHeader;
   private boolean insertFooter;
-  private String value;
+  private Comparable value;
 
   public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, boolean insertFooter, String value )
     {
@@ -65,7 +65,7 @@ public class TestBuffer extends BaseOperation implements Buffer
     this.value = value;
     }
 
-  public TestBuffer( Fields fieldDeclaration, String value )
+  public TestBuffer( Fields fieldDeclaration, Comparable value )
     {
     super( fieldDeclaration );
     this.value = value;
