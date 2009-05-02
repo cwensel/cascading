@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.10
 
   Updated planner error messages when field name collisions detected.
 
