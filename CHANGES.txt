@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Updated planner error messages when field name collisions detected.
+
   Fixed issue where temporary paths were not getting deleted consistently.
 
 1.0.9

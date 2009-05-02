@@ -207,7 +207,7 @@ public class Hadoop18TapUtil
       }
     catch( IOException e )
       {
-      LOG.warn( "unable to get filesystem for: " + tmpDir.getName() );
+      // ignore
       }
 
     return null;
