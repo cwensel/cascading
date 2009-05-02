@@ -21,8 +21,6 @@
 
 package cascading.pipe;
 
-import java.util.Set;
-
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
@@ -31,6 +29,9 @@ import cascading.operation.Operation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleException;
+
+import java.util.Set;
 
 /**
  * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
@@ -289,7 +290,16 @@ public abstract class Operator extends Pipe
     if( outputSelector.isValues() )
       return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
-    return Fields.resolve( outputSelector, resolveFields( incomingScope ), declared );
+    Fields incomingFields = resolveFields( incomingScope );
+
+    try
+      {
+      return Fields.resolve( outputSelector, incomingFields, declared );
+      }
+    catch( TupleException exception )
+      {
+      throw new OperatorException( "unable to resolve selector using incoming: " + incomingFields.printVerbose() + " declared: " + declared.printVerbose(), exception );
+      }
     }
 
   Fields resolveArgumentSelector( Set<Scope> incomingScopes )

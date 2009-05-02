@@ -1,5 +1,11 @@
 Cascading Change Log
 
+1.0.10
+
+  Updated planner error messages when field name collisions detected.
+
+  Fixed issue where temporary paths were not getting deleted consistently.
+
 1.0.9
 
   Fixed issue where reverse ordering a c.p.GroupBy was not possible when sortFields were not given.

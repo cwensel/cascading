@@ -68,9 +68,9 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields declared by the function.
    *
-   * @param name                  name for this branch of Pipes
+   * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param function              Function to be applied to each input Tuple
+   * @param function         Function to be applied to each input Tuple
    */
   public Each( String name, Fields argumentSelector, Function function )
     {
@@ -80,10 +80,10 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param name                  name for this branch of Pipes
+   * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param function              Function to be applied to each input Tuple
-   * @param outputSelector      field selector that selects the output Tuple from the input and Function results Tuples
+   * @param function         Function to be applied to each input Tuple
+   * @param outputSelector   field selector that selects the output Tuple from the input and Function results Tuples
    */
   public Each( String name, Fields argumentSelector, Function function, Fields outputSelector )
     {
@@ -93,8 +93,8 @@ public class Each extends Operator
   /**
    * Only return fields selected by the outFieldsSelector.
    *
-   * @param name             name for this branch of Pipes
-   * @param function         Function to be applied to each input Tuple
+   * @param name           name for this branch of Pipes
+   * @param function       Function to be applied to each input Tuple
    * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
   public Each( String name, Function function, Fields outputSelector )
@@ -116,9 +116,9 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields declared by the function.
    *
-   * @param previous              previous Pipe to receive input Tuples from
+   * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param function              Function to be applied to each input Tuple
+   * @param function         Function to be applied to each input Tuple
    */
   public Each( Pipe previous, Fields argumentSelector, Function function )
     {
@@ -128,10 +128,10 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param previous              previous Pipe to receive input Tuples from
+   * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param function              Function to be applied to each input Tuple
-   * @param outputSelector      field selector that selects the output Tuple from the input and Function results Tuples
+   * @param function         Function to be applied to each input Tuple
+   * @param outputSelector   field selector that selects the output Tuple from the input and Function results Tuples
    */
   public Each( Pipe previous, Fields argumentSelector, Function function, Fields outputSelector )
     {
@@ -141,8 +141,8 @@ public class Each extends Operator
   /**
    * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
    *
-   * @param previous         previous Pipe to receive input Tuples from
-   * @param function         Function to be applied to each input Tuple
+   * @param previous       previous Pipe to receive input Tuples from
+   * @param function       Function to be applied to each input Tuple
    * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
   public Each( Pipe previous, Function function, Fields outputSelector )
@@ -166,9 +166,9 @@ public class Each extends Operator
     }
 
   /**
-   * @param name                  name for this branch of Pipes
+   * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param filter                Filter to be applied to each input Tuple
+   * @param filter           Filter to be applied to each input Tuple
    */
   public Each( String name, Fields argumentSelector, Filter filter )
     {
@@ -185,9 +185,9 @@ public class Each extends Operator
     }
 
   /**
-   * @param previous              previous Pipe to receive input Tuples from
+   * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param filter                Filter to be applied to each input Tuple
+   * @param filter           Filter to be applied to each input Tuple
    */
   public Each( Pipe previous, Fields argumentSelector, Filter filter )
     {
@@ -211,10 +211,10 @@ public class Each extends Operator
     }
 
   /**
-   * @param name                  name for this branch of Pipes
+   * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param assertionLevel        AssertionLevel to associate with the Assertion
-   * @param assertion             Assertion to be applied to each input Tuple
+   * @param assertionLevel   AssertionLevel to associate with the Assertion
+   * @param assertion        Assertion to be applied to each input Tuple
    */
   public Each( String name, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
@@ -232,10 +232,10 @@ public class Each extends Operator
     }
 
   /**
-   * @param previous              previous Pipe to receive input Tuples from
+   * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
-   * @param assertionLevel        AssertionLevel to associate with the Assertion
-   * @param assertion             Assertion to be applied to each input Tuple
+   * @param assertionLevel   AssertionLevel to associate with the Assertion
+   * @param assertion        Assertion to be applied to each input Tuple
    */
   public Each( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
@@ -354,6 +354,9 @@ public class Each extends Operator
       }
     catch( Exception exception )
       {
+      if( exception instanceof OperatorException )
+        throw (OperatorException) exception;
+
       throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
       }
     }

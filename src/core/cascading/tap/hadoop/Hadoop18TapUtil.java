@@ -39,7 +39,6 @@
 
 package cascading.tap.hadoop;
 
-import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -164,9 +163,7 @@ public class Hadoop18TapUtil
    */
   public static void cleanupTap( JobConf conf, Tap tap ) throws IOException
     {
-    // don't clean if not hfs
-    if( tap instanceof Hfs )
-      cleanTempPath( conf, tap.getPath() );
+    cleanTempPath( conf, tap.getPath() );
     }
 
   /**
@@ -192,11 +189,28 @@ public class Hadoop18TapUtil
       {
       Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
 
-      FileSystem fileSys = tmpDir.getFileSystem( conf );
+      FileSystem fileSys = getFSSafe( conf, tmpDir );
+
+      if( fileSys == null )
+        return;
 
       if( fileSys.exists( tmpDir ) )
         fileSys.delete( tmpDir, true );
       }
+    }
+
+  private static FileSystem getFSSafe( JobConf conf, Path tmpDir )
+    {
+    try
+      {
+      return tmpDir.getFileSystem( conf );
+      }
+    catch( IOException e )
+      {
+      // ignore
+      }
+
+    return null;
     }
 
   static boolean isInflow( JobConf conf )
