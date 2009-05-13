@@ -21,18 +21,18 @@
 
 package cascading.tuple;
 
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.log4j.Logger;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Flushable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
@@ -45,6 +45,8 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /** Field threshold */
   private long threshold = 10000;
+  /** Field codec */
+  private CompressionCodec codec = null;
   /** Field files */
   private List<File> files = new LinkedList<File>();
   /** Field current */
@@ -67,6 +69,19 @@ public class SpillableTupleList implements Iterable<Tuple>
   public SpillableTupleList( long threshold )
     {
     this.threshold = threshold;
+    }
+
+  /**
+   * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value, and
+   * the first available compression codec, if any.
+   *
+   * @param threshold of type long
+   * @param codec     of type String
+   */
+  public SpillableTupleList( long threshold, CompressionCodec codec )
+    {
+    this.threshold = threshold;
+    this.codec = codec;
     }
 
   /**
@@ -184,9 +199,12 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      return new TupleOutputStream( new FileOutputStream( file ) );
+      if( codec == null )
+        return new TupleOutputStream( new FileOutputStream( file ) );
+      else
+        return new TupleOutputStream( codec.createOutputStream( new FileOutputStream( file ) ) );
       }
-    catch( FileNotFoundException exception )
+    catch( IOException exception )
       {
       throw new TupleException( "unable to create temporary file input stream", exception );
       }
@@ -214,9 +232,12 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      return new TupleInputStream( new FileInputStream( file ) );
+      if( codec == null )
+        return new TupleInputStream( new FileInputStream( file ) );
+      else
+        return new TupleInputStream( codec.createInputStream( new FileInputStream( file ) ) );
       }
-    catch( FileNotFoundException exception )
+    catch( IOException exception )
       {
       throw new TupleException( "unable to create temporary file output stream", exception );
       }
@@ -240,6 +261,7 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /**
    * Method iterator returns a Tuple Iterator of all the values in this collection.
+   *
    * @return Iterator<Tuple>
    */
   public Iterator<Tuple> iterator()
@@ -252,6 +274,7 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /**
    * Method entryIterator returns a TupleEntry Iterator of all the alues in this collection.
+   *
    * @return Iterator<TupleEntry>
    */
   public Iterator<TupleEntry> entryIterator()
