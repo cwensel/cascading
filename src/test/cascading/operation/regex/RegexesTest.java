@@ -21,22 +21,18 @@
 
 package cascading.operation.regex;
 
-import java.util.Iterator;
-
 import cascading.CascadingTestCase;
-import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
+
+import java.util.Iterator;
 
 /**
  *
  */
 public class RegexesTest extends CascadingTestCase
   {
-  private ConcreteCall operationCall;
-
   public RegexesTest()
     {
     super( "regex test" );
@@ -46,20 +42,15 @@ public class RegexesTest extends CascadingTestCase
   protected void setUp() throws Exception
     {
     super.setUp();
-    operationCall = new ConcreteCall();
     }
 
   public void testSplitter()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
-
     RegexSplitter splitter = new RegexSplitter( "\t" );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.UNKNOWN;
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -73,15 +64,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testSplitterGenerator()
     {
-    TupleListCollector collector = new TupleListCollector( new Fields( "field" ) );
-
     RegexSplitGenerator splitter = new RegexSplitGenerator( new Fields( "word" ), "\\s+" );
+    Tuple arguments = new Tuple( "foo\t  bar" );
+    Fields resultFields = new Fields( "field" );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\t  bar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 2, collector.size() );
 
@@ -94,15 +81,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testReplace()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
-
     RegexReplace splitter = new RegexReplace( new Fields( "words" ), "\\s+", "-", true );
+    Tuple arguments = new Tuple( "foo\t bar" );
+    Fields resultFields = Fields.UNKNOWN;
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\t bar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -115,15 +98,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserDeclared()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 2 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.size( 2 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -137,15 +116,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserDeclared2()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 2 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)" );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.size( 2 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -159,15 +134,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserDeclared3()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+" );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.size( 1 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -181,15 +152,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserDeclared4()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "\\S+\\s+\\S+" );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.size( 1 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -204,15 +171,11 @@ public class RegexesTest extends CascadingTestCase
   /** Contributed by gicode */
   public void testParserDeclared5()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "bar" ), "^GET /foo\\?bar=([^\\&]+)&" );
+    Tuple arguments = new Tuple( "GET /foo?bar=z123&baz=2" );
+    Fields resultFields = Fields.size( 1 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "GET /foo?bar=z123&baz=2" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -226,15 +189,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserDeclared6()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.size( 1 ) );
-
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+", new int[]{1} );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.size( 1 );
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -249,15 +208,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserUnknown()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
-
     RegexParser splitter = new RegexParser( Fields.UNKNOWN, "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.UNKNOWN;
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -271,15 +226,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserUnknown2()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
-
     RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.UNKNOWN;
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -293,15 +244,11 @@ public class RegexesTest extends CascadingTestCase
 
   public void testParserUnknown3()
     {
-    TupleListCollector collector = new TupleListCollector( Fields.UNKNOWN );
-
     RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)" );
+    Tuple arguments = new Tuple( "foo\tbar" );
+    Fields resultFields = Fields.UNKNOWN;
 
-    operationCall.setArguments( new TupleEntry( new Tuple( "foo\tbar" ) ) );
-    operationCall.setOutputCollector( collector );
-    splitter.prepare( null, operationCall );
-    splitter.operate( null, operationCall );
-    splitter.cleanup( null, operationCall );
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 
     assertEquals( "wrong size", 1, collector.size() );
 
@@ -313,4 +260,13 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
+  public void testFilter()
+    {
+    Tuple arguments = new Tuple( "foo", "bar" );
+    RegexFilter filter = new RegexFilter( "foo\tbar" );
+
+    boolean isRemove = invokeFilter( filter, arguments );
+
+    assertTrue( "was not remove", !isRemove );
+    }
   }
