@@ -130,6 +130,41 @@ public class MultiMapReducePlanner extends FlowPlanner
     }
 
   /**
+   * Method setJobStatusPollInterval sets the job status polling interval, in milliseconcs.
+   * <p/>
+   * The default is 5,000ms (5 seconds).
+   *
+   * @param properties of type Map<Object, Object>
+   * @param interval   of type int
+   */
+  public static void setJobStatusPollInterval( Map<Object, Object> properties, int interval )
+    {
+    properties.put( "cascading.multimapreduceplanner.job.status.pollinterval", Long.toString( interval ) );
+    }
+
+  /**
+   * Method getJobStatusPollInterval returns the current job status polling interval, defaults to 5000ms.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return int
+   */
+  public static int getJobStatusPollInterval( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.multimapreduceplanner.job.status.pollinterval", 5000 );
+    }
+
+  /**
+   * Method getJobStatusPollInterval returns the current job status polling interval, defaults to 5000ms.
+   *
+   * @param jobConf of type JobConf
+   * @return int
+   */
+  public static int getJobStatusPollInterval( JobConf jobConf )
+    {
+    return jobConf.getInt( "cascading.multimapreduceplanner.job.status.pollinterval", 5000 );
+    }
+
+  /**
    * Constructor MultiMapReducePlanner creates a new MultiMapReducePlanner instance.
    *
    * @param properties of type Map<Object, Object>

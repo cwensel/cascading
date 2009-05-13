@@ -38,8 +38,19 @@ import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
@@ -889,14 +900,14 @@ public class Flow implements Runnable
     while( topoIterator.hasNext() )
       {
       FlowStep step = (FlowStep) topoIterator.next();
-      FlowStep.FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
+      FlowStepJob flowStepJob = step.getFlowStepJob( getJobConf() );
 
       jobsMap.put( step.getName(), flowStepJob );
 
-      List<FlowStep.FlowStepJob> predecessors = new ArrayList<FlowStep.FlowStepJob>();
+      List<FlowStepJob> predecessors = new ArrayList<FlowStepJob>();
 
       for( FlowStep flowStep : Graphs.predecessorListOf( stepGraph, step ) )
-        predecessors.add( (FlowStep.FlowStepJob) jobsMap.get( flowStep.getName() ) );
+        predecessors.add( (FlowStepJob) jobsMap.get( flowStep.getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
       }
@@ -918,7 +929,7 @@ public class Flow implements Runnable
       Collections.reverse( jobs );
 
       for( Callable<Throwable> callable : jobs )
-        ( (FlowStep.FlowStepJob) callable ).stop();
+        ( (FlowStepJob) callable ).stop();
       }
     finally
       {

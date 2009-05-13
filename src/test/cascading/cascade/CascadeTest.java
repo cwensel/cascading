@@ -22,7 +22,11 @@
 package cascading.cascade;
 
 import cascading.ClusterTestCase;
-import cascading.flow.*;
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowSkipStrategy;
+import cascading.flow.FlowStepJob;
+import cascading.flow.LockingFlowListener;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -222,7 +226,7 @@ public class CascadeTest extends ClusterTestCase
       if( map == null || map.values().size() == 0 )
         continue;
 
-      if( ( (FlowStep.FlowStepJob) map.values().iterator().next() ).wasStarted() )
+      if( ( (FlowStepJob) map.values().iterator().next() ).wasStarted() )
         break;
       }
 

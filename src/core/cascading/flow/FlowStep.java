@@ -33,20 +33,25 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TuplePair;
-import cascading.tuple.hadoop.*;
+import cascading.tuple.hadoop.GroupingComparator;
+import cascading.tuple.hadoop.GroupingPartitioner;
+import cascading.tuple.hadoop.ReverseTupleComparator;
+import cascading.tuple.hadoop.ReverseTuplePairComparator;
+import cascading.tuple.hadoop.TupleComparator;
+import cascading.tuple.hadoop.TuplePairComparator;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -206,9 +211,7 @@ public class FlowStep implements Serializable
       JobConf trapConf = new JobConf( conf );
 
       for( Tap tap : traps.values() )
-        {
         tap.sinkInit( trapConf );
-        }
       }
     }
 
@@ -403,165 +406,40 @@ public class FlowStep implements Serializable
 
   public FlowStepJob getFlowStepJob( JobConf parentConf ) throws IOException
     {
-    return new FlowStepJob( this.getName(), getJobConf( parentConf ) );
+    return new FlowStepJob( this, this.getName(), getJobConf( parentConf ) );
     }
 
-  public class FlowStepJob implements Callable<Throwable>
+  protected final boolean isInfoEnabled()
     {
-    private final String stepName;
-    private JobConf currentConf;
-    private JobClient currentJobClient;
-    private RunningJob runningJob;
-
-    private List<FlowStepJob> predecessors;
-    private final CountDownLatch latch = new CountDownLatch( 1 );
-    private boolean stop = false;
-
-    public FlowStepJob( String stepName, JobConf currentConf )
-      {
-      this.stepName = stepName;
-      this.currentConf = currentConf;
-      }
-
-    public void stop()
-      {
-      if( LOG.isInfoEnabled() )
-        logInfo( "stopping: " + stepName );
-
-      stop = true;
-
-      try
-        {
-        if( runningJob != null )
-          runningJob.killJob();
-        }
-      catch( IOException exception )
-        {
-        logWarn( "unable to kill job: " + stepName, exception );
-        }
-      }
-
-    public void setPredecessors( List<FlowStepJob> predecessors ) throws IOException
-      {
-      this.predecessors = predecessors;
-      }
-
-    public Throwable call()
-      {
-      try
-        {
-        for( FlowStepJob predecessor : predecessors )
-          {
-          if( !predecessor.isSuccessful() )
-            {
-            logWarn( "abandoning step: " + stepName + ", predecessor failed: " + predecessor.stepName );
-
-            return null;
-            }
-          }
-
-        if( stop )
-          return null;
-
-        if( LOG.isInfoEnabled() )
-          logInfo( "starting step: " + stepName );
-
-        currentJobClient = new JobClient( currentConf );
-        runningJob = currentJobClient.submitJob( currentConf );
-
-        runningJob.waitForCompletion();
-
-        if( !stop && !runningJob.isSuccessful() )
-          {
-          dumpCompletionEvents();
-
-          return new FlowException( "step failed: " + stepName );
-          }
-        }
-      catch( Throwable throwable )
-        {
-        dumpCompletionEvents();
-        return throwable;
-        }
-      finally
-        {
-        latch.countDown();
-        }
-
-      return null;
-      }
-
-    private void dumpCompletionEvents()
-      {
-      try
-        {
-        if( runningJob == null )
-          return;
-
-        TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-        logWarn( "completion events count: " + events.length );
-
-        for( TaskCompletionEvent event : events )
-          logWarn( "event = " + event );
-        }
-      catch( IOException exception )
-        {
-        logError( "failed reading completion events", exception );
-        }
-      }
-
-    /**
-     * Method isSuccessful returns true if this step completed successfully.
-     *
-     * @return the successful (type boolean) of this FlowStepJob object.
-     */
-    public boolean isSuccessful()
-      {
-      try
-        {
-        latch.await();
-
-        return runningJob != null && runningJob.isSuccessful();
-        }
-      catch( InterruptedException exception )
-        {
-        logWarn( "latch interrupted", exception );
-        }
-      catch( IOException exception )
-        {
-        logWarn( "error querying job", exception );
-        }
-
-      return false;
-      }
-
-    /**
-     * Method wasStarted returns true if this job was started
-     *
-     * @return boolean
-     */
-    public boolean wasStarted()
-      {
-      return runningJob != null;
-      }
+    return LOG.isInfoEnabled();
     }
 
-  private void logInfo( String message )
+  protected final boolean isDebugEnabled()
+    {
+    return LOG.isDebugEnabled();
+    }
+
+  protected void logDebug( String message )
+    {
+    LOG.debug( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    }
+
+  protected void logInfo( String message )
     {
     LOG.info( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
     }
 
-  private void logWarn( String message )
+  protected void logWarn( String message )
     {
     LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
     }
 
-  private void logWarn( String message, Throwable throwable )
+  protected void logWarn( String message, Throwable throwable )
     {
     LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
     }
 
-  private void logError( String message, Throwable throwable )
+  protected void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
     }

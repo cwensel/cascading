@@ -21,13 +21,6 @@
 
 package cascading.flow;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import cascading.ClusterTestCase;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
@@ -44,6 +37,13 @@ import cascading.tap.Hfs;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -183,7 +183,7 @@ public class FlowTest extends ClusterTestCase
       if( map == null || map.values().size() == 0 )
         continue;
 
-      if( ( (FlowStep.FlowStepJob) map.values().iterator().next() ).wasStarted() )
+      if( ( (FlowStepJob) map.values().iterator().next() ).wasStarted() )
         break;
       }
 
@@ -338,7 +338,7 @@ public class FlowTest extends ClusterTestCase
         if( map == null || map.values().size() == 0 )
           continue;
 
-        if( ( (FlowStep.FlowStepJob) map.values().iterator().next() ).wasStarted() )
+        if( ( (FlowStepJob) map.values().iterator().next() ).wasStarted() )
           break;
         }
 
