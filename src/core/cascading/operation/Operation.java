@@ -85,4 +85,17 @@ public interface Operation<C>
    * @return an int
    */
   int getNumArgs();
+
+  /**
+   * Returns {@code true} if this Operation instance can safely execute on the same 'record' multiple
+   * times, {@code false} otherwise.
+   * <p/>
+   * That is, this Operation is safe if it has no side-effects, or if it does, they are idempotent.
+   * <p/>
+   * If seeing the same 'record' more than once can cause errors (internally or externally),
+   * this method must return {@code false}.
+   *
+   * @return a boolean
+   */
+  boolean isSafe();
   }

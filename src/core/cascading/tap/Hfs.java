@@ -21,11 +21,6 @@
 
 package cascading.tap;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
-
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.TapCollector;
@@ -43,6 +38,11 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * Class Hfs is the base class for all Hadoop file system access. Use {@link Dfs}, {@link Lfs}, or {@link S3fs}
@@ -194,7 +194,7 @@ public class Hfs extends Tap
     this.uriScheme = uriScheme;
     }
 
-  protected URI getURIScheme( JobConf jobConf ) throws IOException
+  public URI getURIScheme( JobConf jobConf ) throws IOException
     {
     if( uriScheme != null )
       return uriScheme;
@@ -228,7 +228,7 @@ public class Hfs extends Tap
       else if( schemeString != null )
         uriScheme = new URI( schemeString + ":///" );
       else
-        uriScheme = getDefaultFileSystem( jobConf ).getUri();
+        uriScheme = getDefaultFileSystemURIScheme( jobConf );
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "using uri scheme: " + uriScheme );
@@ -239,6 +239,18 @@ public class Hfs extends Tap
       {
       throw new TapException( "could not determine scheme from path: " + getPath(), exception );
       }
+    }
+
+  /**
+   * Method getDefaultFileSystemURIScheme returns the URI scheme for the default Hadoop FileSystem.
+   *
+   * @param jobConf of type JobConf
+   * @return URI
+   * @throws IOException when
+   */
+  public URI getDefaultFileSystemURIScheme( JobConf jobConf ) throws IOException
+    {
+    return getDefaultFileSystem( jobConf ).getUri();
     }
 
   @Override

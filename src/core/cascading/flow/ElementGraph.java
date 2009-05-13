@@ -21,17 +21,8 @@
 
 package cascading.flow;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.operation.AssertionLevel;
+import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
@@ -50,6 +41,17 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /** Class ElementGraph represents the executable FlowElement graph. */
 public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   {
@@ -57,11 +59,15 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   private static final Logger LOG = Logger.getLogger( ElementGraph.class );
 
   /** Field head */
-  static final Extent head = new Extent( "head" );
+  public static final Extent head = new Extent( "head" );
   /** Field tail */
-  static final Extent tail = new Extent( "tail" );
+  public static final Extent tail = new Extent( "tail" );
   /** Field resolved */
   private boolean resolved;
+  /** Field sources */
+  private Map<String, Tap> sources;
+  /** Field sinks */
+  private Map<String, Tap> sinks;
   /** Field traps */
   private Map<String, Tap> traps;
   /** Field assertionLevel */
@@ -84,12 +90,29 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, AssertionLevel assertionLevel )
     {
     super( Scope.class );
+    this.sources = sources;
+    this.sinks = sinks;
     this.traps = traps;
     this.assertionLevel = assertionLevel;
 
     assembleGraph( pipes, sources, sinks );
 
     verifyGraph();
+    }
+
+  public Collection<Tap> getSources()
+    {
+    return sources.values();
+    }
+
+  public Collection<Tap> getSinks()
+    {
+    return sinks.values();
+    }
+
+  public Collection<Tap> getTraps()
+    {
+    return traps.values();
     }
 
   private void assembleGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -421,32 +444,39 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
       if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testAssertion( flowElement, assertionLevel ) )
         {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "remove testing pipe: " + flowElement );
-
-        Set<Scope> incomingScopes = incomingEdgesOf( flowElement ); // Pipe class is guaranteed to have one input
-        Scope incoming = incomingScopes.iterator().next();
-        Set<Scope> outgoingScopes = outgoingEdgesOf( flowElement );
-
-        // source -> incoming -> flowElement -> outgoing -> target
-        FlowElement source = getEdgeSource( incoming );
-        for( Scope outgoing : outgoingScopes )
-          {
-          FlowElement target = getEdgeTarget( outgoing );
-
-          addEdge( source, target, new Scope( outgoing ) );
-          }
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "removing: " + flowElement );
-
-        removeVertex( flowElement );
+        // Pipe class is guaranteed to have one input
+        removeElement( flowElement );
 
         return false;
         }
       }
 
     return true;
+    }
+
+  private void removeElement( FlowElement flowElement )
+    {
+    LOG.debug( "removing: " + flowElement );
+
+    Set<Scope> incomingScopes = incomingEdgesOf( flowElement );
+
+    if( incomingScopes.size() != 1 )
+      throw new IllegalStateException( "flow element:" + flowElement + ", has multiple input paths: " + incomingScopes.size() );
+
+    Scope incoming = incomingScopes.iterator().next();
+    Set<Scope> outgoingScopes = outgoingEdgesOf( flowElement );
+
+    // source -> incoming -> flowElement -> outgoing -> target
+    FlowElement source = getEdgeSource( incoming );
+
+    for( Scope outgoing : outgoingScopes )
+      {
+      FlowElement target = getEdgeTarget( outgoing );
+
+      addEdge( source, target, new Scope( outgoing ) );
+      }
+
+    removeVertex( flowElement );
     }
 
   private boolean testAssertion( FlowElement flowElement, AssertionLevel assertionLevel )
@@ -481,10 +511,14 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     Set<Scope> incomingScopes = incomingEdgesOf( source );
     Set<Scope> outgoingScopes = outgoingEdgesOf( source );
 
+    // don't bother with sink taps
     List<FlowElement> flowElements = Graphs.successorListOf( this, source );
 
     if( flowElements.size() == 0 )
       throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
+
+    if( flowElements.get( 0 ) instanceof Extent )
+      return;
 
     Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
 
@@ -512,7 +546,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<Group> findAllMergeJoinGroups()
     {
-    return findAllOfType( 2, Group.class, new LinkedList<Group>() );
+    return findAllOfType( 2, 1, Group.class, new LinkedList<Group>() );
     }
 
   /**
@@ -522,7 +556,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<Group> findAllGroups()
     {
-    return findAllOfType( 1, Group.class, new LinkedList<Group>() );
+    return findAllOfType( 1, 1, Group.class, new LinkedList<Group>() );
     }
 
   /**
@@ -532,18 +566,38 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<Every> findAllEveries()
     {
-    return findAllOfType( 1, Every.class, new LinkedList<Every>() );
+    return findAllOfType( 1, 1, Every.class, new LinkedList<Every>() );
+    }
+
+  /**
+   * Method findAllTaps ...
+   *
+   * @return List<Tap>
+   */
+  public List<Tap> findAllTaps()
+    {
+    return findAllOfType( 1, 1, Tap.class, new LinkedList<Tap>() );
+    }
+
+  /**
+   * Method findAllSplits ...
+   *
+   * @return List<FlowElement>
+   */
+  public List<Each> findAllEachSplits()
+    {
+    return findAllOfType( 1, 2, Each.class, new LinkedList<Each>() );
     }
 
   /**
    * Method findAllOfType ...
    *
-   * @param minInDegree of type int
-   * @param type        of type Class<P>
-   * @param results     of type List<P>
-   * @return List<P>
+   * @param minInDegree  of type int
+   * @param minOutDegree
+   * @param type         of type Class<P>
+   * @param results      of type List<P>   @return List<P>
    */
-  public <P> List<P> findAllOfType( int minInDegree, Class<P> type, List<P> results )
+  public <P> List<P> findAllOfType( int minInDegree, int minOutDegree, Class<P> type, List<P> results )
     {
     TopologicalOrderIterator<FlowElement, Scope> topoIterator = getTopologicalIterator();
 
@@ -551,7 +605,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       FlowElement flowElement = topoIterator.next();
 
-      if( type.isInstance( flowElement ) && inDegreeOf( flowElement ) >= minInDegree )
+      if( type.isInstance( flowElement ) && inDegreeOf( flowElement ) >= minInDegree && outDegreeOf( flowElement ) >= minOutDegree )
         results.add( (P) flowElement );
       }
 
@@ -648,6 +702,64 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       }
 
     return maxPaths;
+    }
+
+  public List<FlowElement> getAllSuccessors( FlowElement element )
+    {
+    return (List<FlowElement>) Graphs.successorListOf( this, element );
+    }
+
+  public void replaceElementWith( FlowElement element, FlowElement replacement )
+    {
+    Set<Scope> incoming = new HashSet<Scope>( incomingEdgesOf( element ) );
+    Set<Scope> outgoing = new HashSet<Scope>( outgoingEdgesOf( element ) );
+
+    if( !containsVertex( replacement ) )
+      addVertex( replacement );
+
+    for( Scope scope : incoming )
+      {
+      FlowElement source = getEdgeSource( scope );
+      removeEdge( source, element ); // remove scope
+
+      // drop edge between, if any
+      if( source != replacement )
+        addEdge( source, replacement, scope ); // add scope back
+      }
+
+    for( Scope scope : outgoing )
+      {
+      FlowElement target = getEdgeTarget( scope );
+      removeEdge( element, target ); // remove scope
+
+      // drop edge between, if any
+      if( target != replacement )
+        addEdge( replacement, target, scope ); // add scope back
+      }
+
+    removeVertex( element );
+    }
+
+  public <A extends FlowElement> Set<A> getAllChildrenOfType( FlowElement flowElement, Class<A> type )
+    {
+    Set<A> allChildren = new HashSet<A>();
+
+    getAllChildrenOfType( allChildren, flowElement, type );
+
+    return allChildren;
+    }
+
+  private <A extends FlowElement> void getAllChildrenOfType( Set<A> allSuccessors, FlowElement flowElement, Class<A> type )
+    {
+    List<FlowElement> sucessors = getAllSuccessors( flowElement );
+
+    for( FlowElement sucessor : sucessors )
+      {
+      if( type.isInstance( sucessor ) )
+        allSuccessors.add( (A) sucessor );
+      else
+        getAllChildrenOfType( allSuccessors, sucessor, type );
+      }
     }
 
   public static class Extent extends Pipe

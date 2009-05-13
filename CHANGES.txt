@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (1.1)
 
+  Added support for 'safe' c.o.Operations. By default Operations are safe, that is, they have no side-effects, or
+  if they do, they are idempotent. Non-safe operations are treated differently by the c.f.h.MultiMapReducePlanner.
+
   Added new c.t.Field field set type called Fields.REPLACE. When used as a result selector, the operation results
   will replace values in fields with the same names. That is, inline values can be replaced in a single c.p.Each
   or c.p.Every. It is especially useful with used with Fields.ARGS as the operation field declaration.

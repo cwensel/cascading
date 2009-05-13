@@ -23,6 +23,7 @@ package cascading.flow;
 
 import cascading.CascadingTestCase;
 import cascading.TestBuffer;
+import cascading.TestFunction;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -33,7 +34,11 @@ import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.*;
+import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
@@ -42,11 +47,16 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class BuildJobsTest extends CascadingTestCase
   {
@@ -316,6 +326,42 @@ public class BuildJobsTest extends CascadingTestCase
     List<FlowStep> steps = new FlowConnector().connect( sources, sinks, left, right ).getSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
+    }
+
+  public void testSplitOnNonSafeOperations()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    // this operation is not safe
+    pipe = new Each( pipe, new Fields( "line" ), new TestFunction( new Fields( "ignore" ), new Tuple( 1 ), false ), new Fields( "line" ) );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "splitonnonsafe.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+
+    FlowStep step = steps.get( 0 );
+
+    assertEquals( "wrong number of operations", 2, step.getAllOperations().size() );
     }
 
   /**

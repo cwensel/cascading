@@ -33,6 +33,14 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
   {
   int failon = -1;
   private Tuple value;
+  private boolean isSafe = true;
+
+  public TestFunction( Fields fieldDeclaration, Tuple value, boolean isSafe )
+    {
+    super( fieldDeclaration );
+    this.value = value;
+    this.isSafe = isSafe;
+    }
 
   public TestFunction( Fields fieldDeclaration, Tuple value )
     {
@@ -69,5 +77,12 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
       }
 
     functionCall.getOutputCollector().add( value );
+    }
+
+
+  @Override
+  public boolean isSafe()
+    {
+    return isSafe;
     }
   }

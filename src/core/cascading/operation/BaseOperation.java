@@ -21,8 +21,6 @@
 
 package cascading.operation;
 
-import java.io.Serializable;
-
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -31,6 +29,8 @@ import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
+
+import java.io.Serializable;
 
 /**
  * Class BaseOperation is the base class of predicate types that are applied to {@link Tuple} streams via
@@ -139,6 +139,12 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   public int getNumArgs()
     {
     return numArgs;
+    }
+
+  /** @see Operation#isSafe() */
+  public boolean isSafe()
+    {
+    return true;
     }
 
   /**

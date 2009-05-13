@@ -21,15 +21,15 @@
 
 package cascading.scheme;
 
-import java.io.IOException;
-import java.io.Serializable;
-
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -176,6 +176,17 @@ public abstract class Scheme implements Serializable
   public boolean isWriteDirect()
     {
     return false;
+    }
+
+  /**
+   * Method isSymetrical returns {@code true} if the sink fields equal the source fields. That is, this
+   * scheme sources the same fields as it sinks.
+   *
+   * @return the symetrical (type boolean) of this Scheme object.
+   */
+  public boolean isSymetrical()
+    {
+    return getSinkFields().equals( getSourceFields() );
     }
 
   /**

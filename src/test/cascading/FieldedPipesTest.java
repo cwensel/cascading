@@ -575,6 +575,51 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 2, "right" );
     }
 
+  /**
+   * verifies non-safe rules apply in the proper place
+   *
+   * @throws Exception
+   */
+  public void testSplitNonSafe() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    // 46 192
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink1 = new Hfs( new TextLine(), outputPath + "/nonsafesplit1", true );
+    Tap sink2 = new Hfs( new TextLine(), outputPath + "/nonsafesplit2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    // run job on non-safe operation, forces 3 mr jobs.
+    pipe = new Each( pipe, new TestFunction( new Fields( "ignore" ), new Tuple( 1 ), false ), new Fields( "line" ) );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "split.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 1, "left" );
+    validateLength( flow, 2, "right" );
+    }
+
   public void testSplitSameSourceMerged() throws Exception
     {
     if( !new File( inputFileApache ).exists() )

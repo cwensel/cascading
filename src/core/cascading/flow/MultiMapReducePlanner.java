@@ -21,20 +21,13 @@
 
 package cascading.flow;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.flow.hadoop.HadoopUtil;
+import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
@@ -43,6 +36,17 @@ import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -177,7 +181,8 @@ public class MultiMapReducePlanner extends FlowPlanner
 
       // m/r specific
       handleSplit( elementGraph );
-      handleGroups( elementGraph );
+      handleGroupPartitioning( elementGraph );
+      handleNonSafeOperations( elementGraph );
 
       if( getNormalizeHeterogeneousSources( properties ) )
         handleHeterogeneousSources( elementGraph );
@@ -306,6 +311,130 @@ public class MultiMapReducePlanner extends FlowPlanner
     return true;
     }
 
+  private void handleNonSafeOperations( ElementGraph elementGraph )
+    {
+    // if there was a graph change, iterate paths again.
+    while( !internalNonSafeOperations( elementGraph ) )
+      ;
+    }
+
+  private boolean internalNonSafeOperations( ElementGraph elementGraph )
+    {
+    Set<Pipe> tapInsertions = new HashSet<Pipe>();
+
+    List<Each> splits = elementGraph.findAllEachSplits();
+
+    // if any predecessor is safe, insert temp
+    for( Each split : splits )
+      {
+      List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsTo( split );
+
+      for( GraphPath<FlowElement, Scope> path : paths )
+        {
+        List<FlowElement> elements = Graphs.getPathVertexList( path );
+        Collections.reverse( elements );
+
+        for( FlowElement element : elements )
+          {
+          if( !( element instanceof Each ) )
+            break;
+
+          if( !( (Each) element ).getOperation().isSafe() )
+            {
+            tapInsertions.add( split );
+            break;
+            }
+          }
+        }
+      }
+
+    for( Pipe pipe : tapInsertions )
+      insertTempTapAfter( elementGraph, pipe );
+
+    return tapInsertions.isEmpty();
+    }
+
+  /**
+   * will collapse adjacent and equivalent taps.
+   * equivalence is based on the tap adjacent taps using the same filesystem
+   * and the sink being symetrical, and having the same fields as the temp tap.
+   * <p/>
+   * <p/>
+   * must be run after fields are resolved so temp taps have fully defined scheme instances.
+   *
+   * @param elementGraph
+   */
+  private void handleAdjacentTaps( ElementGraph elementGraph )
+    {
+    // if there was a graph change, iterate paths again.
+    while( !internalAdjacentTaps( elementGraph ) )
+      ;
+    }
+
+  private boolean internalAdjacentTaps( ElementGraph elementGraph )
+    {
+    List<Tap> taps = elementGraph.findAllTaps();
+
+    for( Tap tap : taps )
+      {
+      if( !( tap instanceof TempHfs ) )
+        continue;
+
+      for( FlowElement successor : elementGraph.getAllSuccessors( tap ) )
+        {
+        if( !( successor instanceof Hfs ) )
+          continue;
+
+        Hfs successorTap = (Hfs) successor;
+
+        // does this scheme source what it sinks
+        if( !successorTap.getScheme().isSymetrical() )
+          continue;
+
+        URI tempURIScheme = getDefaultURIScheme( tap ); // temp uses default fs
+        URI successorURIScheme = getURIScheme( successorTap );
+
+        if( !tempURIScheme.equals( successorURIScheme ) )
+          continue;
+
+        // safe, both are symetrical
+        if( !tap.getScheme().getSourceFields().equals( successorTap.getScheme().getSourceFields() ) )
+          continue;
+
+        elementGraph.replaceElementWith( tap, successor );
+
+        return false;
+        }
+      }
+
+    return true;
+    }
+
+  private URI getDefaultURIScheme( Tap tap )
+    {
+    try
+      {
+      return ( (Hfs) tap ).getDefaultFileSystemURIScheme( jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new PlannerException( "unable to get default URI scheme from tap: " + tap );
+      }
+    }
+
+  private URI getURIScheme( Tap tap )
+    {
+    try
+      {
+      return ( (Hfs) tap ).getURIScheme( jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new PlannerException( "unable to get URI scheme from tap: " + tap );
+      }
+    }
+
+
   private void handleHeterogeneousSources( ElementGraph elementGraph )
     {
     while( !internalHeterogeneousSources( elementGraph ) )
@@ -405,14 +534,14 @@ public class MultiMapReducePlanner extends FlowPlanner
    *
    * @param elementGraph of type PipeGraph
    */
-  private void handleGroups( ElementGraph elementGraph )
+  private void handleGroupPartitioning( ElementGraph elementGraph )
     {
     // if there was a graph change, iterate paths again. prevents many temp taps from being inserted infront of a group
-    while( !handleGroupPartitioning( elementGraph ) )
+    while( !internalGroupPartitioning( elementGraph ) )
       ;
     }
 
-  private boolean handleGroupPartitioning( ElementGraph elementGraph )
+  private boolean internalGroupPartitioning( ElementGraph elementGraph )
     {
     KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, elementGraph.head, Integer.MAX_VALUE );
     List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( elementGraph.tail );
