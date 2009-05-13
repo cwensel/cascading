@@ -21,18 +21,18 @@
 
 package cascading.tap;
 
-import java.io.IOException;
-
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
+import java.io.IOException;
+
 /**
- * Class SourceTap is the base class for {@link MultiTap}. Some {@link Tap} instances may only be sources (as opposed
+ * Class SourceTap is the base class for {@link MultiSourceTap}. Some {@link Tap} instances may only be sources (as opposed
  * to being a sink). These types should subclass SourceTap for convenience.
  */
 public abstract class SourceTap extends Tap

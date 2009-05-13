@@ -19,32 +19,12 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow;
+package cascading.tap;
 
-import cascading.tap.Tap;
-import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
-
-/** Class MapReduceFlowStep wraps a {@link JobConf} and allows it to be executed as a {@link Flow}. */
-public class MapReduceFlowStep extends FlowStep
+/**
+ *
+ */
+public interface CompositeTap
   {
-  /** Field jobConf */
-  private final JobConf jobConf;
-
-  MapReduceFlowStep( String name, JobConf jobConf, Tap sink )
-    {
-    super( name );
-    this.jobConf = jobConf;
-    this.sink = sink;
-    }
-
-  @Override
-  protected JobConf getJobConf( JobConf parentConf ) throws IOException
-    {
-    // allow to delete
-    sink.sinkInit( new JobConf() );
-
-    return jobConf;
-    }
+  Tap[] getChildTaps();
   }

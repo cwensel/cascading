@@ -44,7 +44,7 @@ import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
-import cascading.tap.MultiTap;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -742,7 +742,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
-    Tap source = new MultiTap( sourceLower, sourceUpper );
+    Tap source = new MultiSourceTap( sourceLower, sourceUpper );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 

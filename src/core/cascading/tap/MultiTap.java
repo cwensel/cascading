@@ -21,16 +21,11 @@
 
 package cascading.tap;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import cascading.scheme.Scheme;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
+ * This class has been deprecated in favor of {@link MultiSourceTap}.
+ * <p/>
  * Class MultiTap is used to tie multiple {@link Tap} instances into a single resource. Effectively this will allow
  * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
  * <p/>
@@ -40,11 +35,12 @@ import org.apache.hadoop.mapred.JobConf;
  * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.TextLine}), they may not contain
  * the same semi-structure internally. For example, one file might be an Apache log file, and anoter might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
+ *
+ * @deprecated
  */
-public class MultiTap extends SourceTap
+@Deprecated
+public class MultiTap extends MultiSourceTap
   {
-  protected Tap[] taps;
-
   protected MultiTap( Scheme scheme )
     {
     super( scheme );
@@ -52,113 +48,6 @@ public class MultiTap extends SourceTap
 
   public MultiTap( Tap... taps )
     {
-    this.taps = Arrays.copyOf( taps, taps.length );
-
-    verifyTaps();
-    }
-
-  private void verifyTaps()
-    {
-    Tap tap = taps[ 0 ];
-
-    for( int i = 1; i < taps.length; i++ )
-      {
-      if( tap.getClass() != taps[ i ].getClass() )
-        throw new TapException( "all taps must be of the same type" );
-
-      if( !tap.getScheme().equals( taps[ i ].getScheme() ) )
-        throw new TapException( "all tap schemes must be equivalent" );
-      }
-    }
-
-  /**
-   * Method getTaps returns the taps of this MultiTap object.
-   *
-   * @return the taps (type Tap[]) of this MultiTap object.
-   */
-  public Tap[] getTaps()
-    {
-    return Arrays.copyOf( taps, taps.length );
-    }
-
-  /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
-  public Path getPath()
-    {
-    return null;
-    }
-
-  @Override
-  public Scheme getScheme()
-    {
-    Scheme scheme = super.getScheme();
-
-    if( scheme != null )
-      return scheme;
-
-    return taps[ 0 ].getScheme(); // they should all be equivalent per verifyTaps
-    }
-
-  @Override
-  public boolean isReplace()
-    {
-    return false; // cannot be used as sink
-    }
-
-  @Override
-  public void sourceInit( JobConf conf ) throws IOException
-    {
-    for( Tap tap : getTaps() )
-      tap.sourceInit( conf );
-    }
-
-  public boolean pathExists( JobConf conf ) throws IOException
-    {
-    for( Tap tap : getTaps() )
-      {
-      if( tap.pathExists( conf ) )
-        return true;
-      }
-
-    return false;
-    }
-
-  /** Returns the most current modified time. */
-  public long getPathModified( JobConf conf ) throws IOException
-    {
-    long modified = getTaps()[ 0 ].getPathModified( conf );
-
-    for( int i = 1; i < getTaps().length; i++ )
-      modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
-
-    return modified;
-    }
-
-  public boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-    if( !super.equals( object ) )
-      return false;
-
-    MultiTap multiTap = (MultiTap) object;
-
-    if( !Arrays.equals( taps, multiTap.taps ) )
-      return false;
-
-    return true;
-    }
-
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result + ( taps != null ? Arrays.hashCode( taps ) : 0 );
-    return result;
-    }
-
-  public String toString()
-    {
-    return "MultiTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
+    super( taps );
     }
   }

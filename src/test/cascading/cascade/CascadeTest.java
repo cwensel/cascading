@@ -35,7 +35,7 @@ import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
-import cascading.tap.MultiTap;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
@@ -120,7 +120,7 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap source = new MultiTap( sources );
+    Tap source = new MultiSourceTap( sources );
     Tap sink = new Hfs( new TextLine(), outputPath + path + "/multitap", true );
 
     return new FlowConnector( getProperties() ).connect( source, sink, pipe );

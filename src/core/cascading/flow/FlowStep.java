@@ -24,6 +24,7 @@ package cascading.flow;
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
 import cascading.tap.hadoop.Hadoop18TapUtil;
@@ -51,19 +52,29 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
  * planning, pipe assemblies are broken down into "steps" and encapsulated in this class.
+ * <p/>
+ * FlowSteps are submited in order of dependency. If two or more steps do not share the same dependencies and all
+ * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
+ * all steps will be submitted for execution.
  */
 public class FlowStep implements Serializable
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( FlowStep.class );
 
+  /** Field properties */
+  private Map<Object, Object> properties = null;
   /** Field parentFlowName */
   private String parentFlowName;
+
+  /** Field submitPriority */
+  private int submitPriority = 5;
 
   /** Field name */
   final String name;
@@ -73,7 +84,7 @@ public class FlowStep implements Serializable
   /** Field sources */
   final Map<Tap, String> sources = new HashMap<Tap, String>();   // all sources and all sinks must have same scheme
   /** Field sink */
-  Tap sink;
+  protected Tap sink;
   /** Field mapperTraps */
   public final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
   /** Field reducerTraps */
@@ -83,7 +94,7 @@ public class FlowStep implements Serializable
   /** Field group */
   public Group group;
 
-  FlowStep( String name )
+  protected FlowStep( String name )
     {
     this.name = name;
     }
@@ -108,7 +119,12 @@ public class FlowStep implements Serializable
     return parentFlowName;
     }
 
-  void setParentFlowName( String parentFlowName )
+  /**
+   * Method setParentFlowName sets the parentFlowName of this FlowStep object.
+   *
+   * @param parentFlowName the parentFlowName of this FlowStep object.
+   */
+  public void setParentFlowName( String parentFlowName )
     {
     this.parentFlowName = parentFlowName;
     }
@@ -123,14 +139,78 @@ public class FlowStep implements Serializable
     return String.format( "%s[%s]", getParentFlowName(), getName() );
     }
 
-  JobConf getJobConf() throws IOException
+  /**
+   * Method getSubmitPriority returns the submitPriority of this FlowStep object.
+   * <p/>
+   * 10 is lowest, 1 is the highest, 5 is the default.
+   *
+   * @return the submitPriority (type int) of this FlowStep object.
+   */
+  public int getSubmitPriority()
+    {
+    return submitPriority;
+    }
+
+  /**
+   * Method setSubmitPriority sets the submitPriority of this FlowStep object.
+   * <p/>
+   * 10 is lowest, 1 is the highest, 5 is the default.
+   *
+   * @param submitPriority the submitPriority of this FlowStep object.
+   */
+  public void setSubmitPriority( int submitPriority )
+    {
+    this.submitPriority = submitPriority;
+    }
+
+  /**
+   * Method getProperties returns the properties of this FlowStep object.
+   *
+   * @return the properties (type Map<Object, Object>) of this FlowStep object.
+   */
+  public Map<Object, Object> getProperties()
+    {
+    if( properties == null )
+      properties = new Properties();
+
+    return properties;
+    }
+
+  /**
+   * Method setProperties sets the properties of this FlowStep object.
+   *
+   * @param properties the properties of this FlowStep object.
+   */
+  public void setProperties( Map<Object, Object> properties )
+    {
+    this.properties = properties;
+    }
+
+  /**
+   * Method hasProperties returns {@code true} if there are properties associated with this FlowStep.
+   *
+   * @return boolean
+   */
+  public boolean hasProperties()
+    {
+    return properties != null && !properties.isEmpty();
+    }
+
+  protected JobConf getJobConf() throws IOException
     {
     return getJobConf( null );
     }
 
-  JobConf getJobConf( JobConf parentConf ) throws IOException
+  protected JobConf getJobConf( JobConf parentConf ) throws IOException
     {
     JobConf conf = parentConf == null ? new JobConf() : new JobConf( parentConf );
+
+    // set values first so they can't break things downstream
+    if( hasProperties() )
+      {
+      for( Map.Entry entry : getProperties().entrySet() )
+        conf.set( entry.getKey().toString(), entry.getValue().toString() );
+      }
 
     conf.setJobName( getStepName() );
 
@@ -316,6 +396,19 @@ public class FlowStep implements Serializable
     return operations;
     }
 
+  public boolean containsPipeNamed( String pipeName )
+    {
+    Set<FlowElement> vertices = graph.vertexSet();
+
+    for( FlowElement vertice : vertices )
+      {
+      if( vertice instanceof Pipe && ( (Pipe) vertice ).getName().equals( pipeName ) )
+        return true;
+      }
+
+    return false;
+    }
+
   /**
    * Method clean removes any temporary files used by this FlowStep instance. It will log any IOExceptions thrown.
    *
@@ -404,9 +497,9 @@ public class FlowStep implements Serializable
     return buffer.toString();
     }
 
-  public FlowStepJob getFlowStepJob( JobConf parentConf ) throws IOException
+  protected FlowStepJob createFlowStepJob( JobConf parentConf ) throws IOException
     {
-    return new FlowStepJob( this, this.getName(), getJobConf( parentConf ) );
+    return new FlowStepJob( this, getName(), getJobConf( parentConf ) );
     }
 
   protected final boolean isInfoEnabled()

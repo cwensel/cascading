@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Added support for compression of c.t.SpillableTupleList by default in order to speed up c.p.CoGrouping operations 
+  Added c.t.MultiSinkTap to allow for simultaneous writes to multiple unique locations.
+
+  Added support for compression of c.t.SpillableTupleList by default in order to speed up c.p.CoGrouping operations
   where there are very large numbers of values per grouping key.
 
   Added c.o.f.SetValue function for setting values based on the result of a c.o.Filter instance.

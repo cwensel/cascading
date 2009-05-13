@@ -21,12 +21,6 @@
 
 package cascading.tap;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -40,6 +34,12 @@ import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  *
@@ -274,4 +274,29 @@ public class TapTest extends ClusterTestCase implements Serializable
     iterator.close();
     }
 
+  public void testMultiSinkTap() throws IOException
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap lhsSink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "number", "lower" ) ), outputPath + "/multisink/lhs", SinkMode.REPLACE );
+    Tap rhsSink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "number", "upper" ) ), outputPath + "/multisink/rhs", SinkMode.REPLACE );
+
+    Tap sink = new MultiSinkTap( lhsSink, rhsSink );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow.openTapForRead( lhsSink ), 5 );
+    validateLength( flow.openTapForRead( rhsSink ), 5 );
+    }
   }
