@@ -40,6 +40,7 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
+import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/** @version $Id: //depot/calku/cascading/src/test/cascading/flow/BuildJobsTest.java#2 $ */
 public class BuildJobsTest extends CascadingTestCase
   {
   public BuildJobsTest()
@@ -1336,25 +1338,32 @@ public class BuildJobsTest extends CascadingTestCase
    * This test verifies splits on Pipe instances are recognized
    * <p/>
    * This flow intentionally splits to a Each and a Tap from a Each
-   * - T1
-   * .... E1
-   * - E2 - T2
+   * <pre>
    * <p/>
-   * in theory the E2 should be fed T1
+   *  .... E1 - T1 - E2 - T2
+   * <p/>
+   * </pre>
+   * <p/>
+   * this test also verifed T1 feeds E2, instead of a new copy job being created
    *
    * @throws Exception
    */
+  public void testSplitInMiddleBeforePipeOptimized() throws Exception
+    {
+    splitMiddle( true, true );
+    }
+
   public void testSplitInMiddleBeforePipe() throws Exception
     {
-    splitMiddle( true );
+    splitMiddle( true, false );
     }
 
   public void testSplitInMiddleAfterPipe() throws Exception
     {
-    splitMiddle( false );
+    splitMiddle( false, false );
     }
 
-  private void splitMiddle( boolean before )
+  private void splitMiddle( boolean before, boolean testTempReplaced )
     {
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "lower" );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "upper" );
@@ -1364,9 +1373,11 @@ public class BuildJobsTest extends CascadingTestCase
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
+    Scheme leftScheme = testTempReplaced ? new SequenceFile( new Fields( "num", "lower", "num2", "upper" ) ) : new TextLine( new Fields( "offset", "line" ), new Fields( "lower" ) );
+    Tap sinkLeft = new Hfs( leftScheme, "/splitmiddle/left", SinkMode.REPLACE );
 
-    Tap sinkLeft = new Hfs( new SequenceFile( new Fields( "lower" ) ), "/splitmiddle/left", SinkMode.REPLACE );
-    Tap sinkRight = new Hfs( new SequenceFile( new Fields( "lower" ) ), "/splitmiddle/right", SinkMode.REPLACE );
+    Scheme rightScheme = testTempReplaced ? new SequenceFile( new Fields( "lower" ) ) : new TextLine( new Fields( "offset", "line" ), new Fields( "lower" ) );
+    Tap sinkRight = new Hfs( rightScheme, "/splitmiddle/right", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1409,7 +1420,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     List<FlowStep> steps = flow.getSteps();
 
-    assertEquals( "not equal: steps.size()", 3, steps.size() );
+    assertEquals( "not equal: steps.size()", testTempReplaced ? 2 : 3, steps.size() );
 
     FlowStep step = steps.get( 0 );
 
@@ -1426,7 +1437,14 @@ public class BuildJobsTest extends CascadingTestCase
     nextScope = step.getNextScope( operator );
     operator = step.getNextFlowElement( nextScope );
 
-    assertTrue( "not a TempHfs", operator instanceof TempHfs );
+    if( testTempReplaced )
+      {
+      assertEquals( "not proper sink", sinkLeft, operator );
+      }
+    else
+      {
+      assertTrue( "not a TempHfs", operator instanceof TempHfs );
+      }
     }
 
 

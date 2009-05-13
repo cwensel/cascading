@@ -67,6 +67,7 @@ import java.util.Set;
  * <strong>Properties</strong><br/>
  * <ul>
  * <li>cascading.hadoop.jobconf</li>
+ * <li>cascading.multimapreduceplanner.job.status.pollinterval</li>
  * </ul>
  */
 public class MultiMapReducePlanner extends FlowPlanner
@@ -192,6 +193,8 @@ public class MultiMapReducePlanner extends FlowPlanner
       elementGraph.resolveFields();
 
       // m/r specific
+      handleAdjacentTaps( elementGraph );
+
       StepGraph stepGraph = new StepGraph( flowName, elementGraph, traps );
 
       // clone data

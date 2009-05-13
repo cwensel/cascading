@@ -1,6 +1,10 @@
 Cascading Change Log
 
-unreleased (1.1)
+unreleased (wip 1.1)
+
+  Added c.f.h.MultiMapReducePlanner optimization to detect 'equivalent' adjacent c.t.Tap instances in a c.f.Flow.
+  This can drastically reduce the number of jobs when there are intermediate sinks between pipe assemblies.
+  If the taps are not compatible, a job will be inserted to convert the temp tap data to the sink format.
 
   Added support for 'safe' c.o.Operations. By default Operations are safe, that is, they have no side-effects, or
   if they do, they are idempotent. Non-safe operations are treated differently by the c.f.h.MultiMapReducePlanner.
