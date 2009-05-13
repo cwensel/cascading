@@ -21,13 +21,12 @@
 
 package cascading.function;
 
-import java.io.File;
-import java.io.IOException;
-
 import cascading.CascadingTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Insert;
+import cascading.operation.function.SetValue;
+import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
@@ -38,6 +37,9 @@ import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -103,5 +105,34 @@ public class FunctionTest extends CascadingTestCase
 
     assertEquals( "not equal: tuple.get(1)", "1 and A", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "2 and B", iterator.next().get( 1 ) );
+    }
+
+  public void testSetValue() throws IOException
+    {
+    if( !new File( inputFileUpper ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileUpper );
+    Tap sink = new Lfs( new TextLine(), outputPath + "setvalue", true );
+
+    Pipe pipe = new Pipe( "setvalue" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "char" ), "\\s" ) );
+
+    pipe = new Each( pipe, new SetValue( new Fields( "result" ), new RegexFilter( "[A-C]" ) ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
     }
   }

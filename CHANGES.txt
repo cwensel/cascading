@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added c.o.f.SetValue function for setting values based on the result of a c.o.Filter instance.
+
   Added support for configuring polling interval of job status via c.f.h.MultiMapReducePlanner.
 
   Added c.f.h.MultiMapReducePlanner optimization to detect 'equivalent' adjacent c.t.Tap instances in a c.f.Flow.
