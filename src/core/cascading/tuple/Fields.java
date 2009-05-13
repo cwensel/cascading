@@ -74,6 +74,8 @@ public final class Fields implements Comparable, Iterable, Serializable
   public static final Fields ARGS = new Fields( Kind.ARGS );
   /** Field RESULTS represents all fields returned by the current operation */
   public static final Fields RESULTS = new Fields( Kind.RESULTS );
+  /** Field REPLACE represents all incoming fields, and allows them to be replaced by the current operation. */
+  public static final Fields REPLACE = new Fields( Kind.REPLACE );
   /** Field FIRST represents the first field position, 0 */
   public static final Fields FIRST = new Fields( 0 );
   /** Field LAST represents the last field postition, -1 */
@@ -86,7 +88,7 @@ public final class Fields implements Comparable, Iterable, Serializable
    */
   static enum Kind
     {
-      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN;
+      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE;
     }
 
   /** Field fields */
@@ -221,7 +223,7 @@ public final class Fields implements Comparable, Iterable, Serializable
         hasUnknowns = true;
 
       if( !field.isDefined() && field.isUnOrdered() )
-        throw new TupleException( "unable to select from field set: " + field.print() );
+        throw new TupleException( "unable to select from field set: " + field.printVerbose() );
 
       size += field.size();
       }
@@ -234,6 +236,17 @@ public final class Fields implements Comparable, Iterable, Serializable
         result = result.append( fields[ i ] );
 
       return result;
+      }
+
+    if( selector.isReplace() )
+      {
+      if( fields[ 1 ].isUnknown() )
+        throw new TupleException( "cannot replace fields with unknown field declaration" );
+
+      if( !fields[ 0 ].contains( fields[ 1 ] ) )
+        throw new TupleException( "could not find all fields to be replaced, available: " + fields[ 0 ].printVerbose() + ",  declared: " + fields[ 1 ].printVerbose() );
+
+      return fields[ 0 ];
       }
 
     // we can't deal with anything but ALL
@@ -403,7 +416,7 @@ public final class Fields implements Comparable, Iterable, Serializable
    */
   public boolean isOutSelector()
     {
-    return isAll() || isResults() || isDefined();
+    return isAll() || isResults() || isReplace() || isDefined();
     }
 
   /**
@@ -476,6 +489,16 @@ public final class Fields implements Comparable, Iterable, Serializable
   public boolean isResults()
     {
     return kind == Kind.RESULTS;
+    }
+
+  /**
+   * Method isReplace returns true if this instance is the {@link #REPLACE} field set.
+   *
+   * @return the replace (type boolean) of this Fields object.
+   */
+  public boolean isReplace()
+    {
+    return kind == Kind.REPLACE;
     }
 
   /**

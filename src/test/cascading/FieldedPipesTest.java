@@ -21,10 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -53,6 +49,11 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class FieldedPipesTest extends ClusterTestCase
   {
@@ -449,8 +450,10 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe pipe = new Pipe( "test" );
 
     String regex = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{
-      1, 2, 3, 4, 5, 6} ) );
+    Fields fieldDeclaration = new Fields( "ip", "time", "method", "event", "status", "size" );
+    int[] groups = {1, 2, 3, 4, 5, 6};
+    RegexParser function = new RegexParser( fieldDeclaration, regex, groups );
+    pipe = new Each( pipe, new Fields( "line" ), function );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
 
@@ -741,6 +744,69 @@ public class FieldedPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 8 * 2 * 3, null );
+    }
+
+  /**
+   * If the sinks have the same scheme as a temp tap, replace the temp tap
+   *
+   * @throws Exception
+   */
+/*  public void testChainedTaps() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Each( new Pipe( "first" ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Each( new Pipe( "second", pipe ), new Fields( "ip" ), new RegexFilter( "7" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Each( new Pipe( "third", pipe ), new Fields( "ip" ), new RegexFilter( "6" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    String path = outputPath + "/chainedtaps/";
+    Tap sinkFirst = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "first", true );
+    Tap sinkSecond = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "second", true );
+    Tap sinkThird = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "third", true );
+
+    Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second",
+      "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sinks, pipe );
+
+    assertEquals( "wrong number of steps", 3, flow.getSteps().size() );
+
+//    flow.writeDOT( "chainedtaps.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 3, null );
+    }*/
+  public void testReplace() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/replace", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( "line" ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( "line" ), parser, Fields.REPLACE );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, 2, Pattern.compile( "\\d*\\s\\d*\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}" ) );
     }
 
   }

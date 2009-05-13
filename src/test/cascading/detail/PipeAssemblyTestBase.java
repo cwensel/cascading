@@ -21,13 +21,6 @@
 
 package cascading.detail;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import cascading.CascadingTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -37,12 +30,18 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
 public abstract class PipeAssemblyTestBase extends CascadingTestCase
@@ -55,7 +54,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   static Fields[] OP_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] OP_DECL_FIELDS = new Fields[]{new Fields( "field" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
-  static Fields[] OP_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field" ), Fields.RESULTS, Fields.ALL};
+  static Fields[] OP_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field" ), Fields.RESULTS, Fields.ALL, Fields.REPLACE};
   static final String OP_VALUE = "value";
 
   static Fields[] LHS_ARGS_FIELDS = new Fields[]{new Fields( -1 ), Fields.ALL};

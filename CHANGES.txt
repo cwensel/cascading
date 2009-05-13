@@ -1,5 +1,11 @@
 Cascading Change Log
 
+unreleased (1.1)
+
+  Added new c.t.Field field set type called Fields.REPLACE. When used as a result selector, the operation results
+  will replace values in fields with the same names. That is, inline values can be replaced in a single c.p.Each
+  or c.p.Every. It is especially useful with used with Fields.ARGS as the operation field declaration.
+
 1.0.10
 
   Updated planner error messages when field name collisions detected.

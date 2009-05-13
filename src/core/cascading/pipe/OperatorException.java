@@ -35,7 +35,7 @@ public class OperatorException extends CascadingException
   /**
    * Constructor OperatorException creates a new OperatorException instance.
    *
-   * @param pipe of type Pipe
+   * @param pipe   of type Pipe
    * @param string of type String
    */
   public OperatorException( Pipe pipe, String string )
@@ -46,8 +46,8 @@ public class OperatorException extends CascadingException
   /**
    * Constructor OperatorException creates a new OperatorException instance.
    *
-   * @param pipe of type Pipe
-   * @param string of type String
+   * @param pipe      of type Pipe
+   * @param string    of type String
    * @param throwable of type Throwable
    */
   public OperatorException( Pipe pipe, String string, Throwable throwable )

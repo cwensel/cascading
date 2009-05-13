@@ -21,11 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
@@ -50,6 +45,12 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleListCollector;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * These tests execute basic function using field positions, not names. so there will be duplicates with
@@ -324,4 +325,27 @@ public class BasicPipesTest extends CascadingTestCase
 
     validateLength( flow, 8 );
     }
+
+  public void testReplace() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/replace", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( Fields.ARGS, "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( 1 ), parser, Fields.REPLACE );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, 2, Pattern.compile( "\\d*\\s\\d*\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}" ) );
+    }
+
   }

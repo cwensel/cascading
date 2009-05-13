@@ -21,10 +21,10 @@
 
 package cascading.pipe.cogroup;
 
-import java.util.Iterator;
-import java.util.Arrays;
-
 import cascading.tuple.Tuple;
+
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Class MixedJoin will return an {@link java.util.Iterator} that will iterate over a given
@@ -34,9 +34,9 @@ import cascading.tuple.Tuple;
  */
 public class MixedJoin implements Joiner
   {
-  /** Field INNER  */
+  /** Field INNER */
   public static boolean INNER = true;
-  /** Field OUTER  */
+  /** Field OUTER */
   public static boolean OUTER = false;
 
   boolean asInner[];
@@ -75,5 +75,4 @@ public class MixedJoin implements Joiner
       return !asInner[ i ] && super.isOuter( i );
       }
     }
-
   }
