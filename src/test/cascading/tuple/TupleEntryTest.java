@@ -170,5 +170,4 @@ public class TupleEntryTest extends CascadingTestCase
       // do nothing
       }
     }
-
   }

@@ -239,27 +239,29 @@ public class Every extends Operator
   /** @see Operator#outgoingScopeFor(Set<Scope>) */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
-    Fields argumentSelector = resolveArgumentSelector( incomingScopes );
+    Fields argumentFields = resolveArgumentSelector( incomingScopes );
 
-    verifyArguments( argumentSelector );
+    verifyArguments( argumentFields );
 
     // we currently don't support using result from a previous Every in the current Every
     Scope scope = getFirst( incomingScopes );
 
-    if( scope.isEvery() && argumentSelector.contains( scope.getDeclaredFields() ) )
+    if( scope.isEvery() && argumentFields.contains( scope.getDeclaredFields() ) )
       throw new OperatorException( this, "arguments may not select a declared field from a previous Every" );
 
-    Fields declared = resolveDeclared( incomingScopes, argumentSelector );
+    Fields declaredFields = resolveDeclared( incomingScopes, argumentFields );
 
-    verifyDeclared( declared );
+    verifyDeclaredFields( declaredFields );
 
-    Fields outgoingGroupingSelector = resolveOutgoingGroupingSelector( incomingScopes, argumentSelector, declared );
+    Fields outgoingGroupingFields = resolveOutgoingGroupingSelector( incomingScopes, argumentFields, declaredFields );
 
-    verifyOutputSelector( outgoingGroupingSelector );
+    verifyOutputSelector( outgoingGroupingFields );
 
-    Fields outgoingValues = resolveOutgoingValues( incomingScopes );
+    Fields outgoingValuesFields = resolveOutgoingValues( incomingScopes );
 
-    return new Scope( getName(), Scope.Kind.EVERY, argumentSelector, declared, outgoingGroupingSelector, outgoingValues );
+    Fields remainderFields = resolveRemainderFields( incomingScopes, argumentFields );
+
+    return new Scope( getName(), Scope.Kind.EVERY, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
     }
 
   Fields resolveOutgoingGroupingSelector( Set<Scope> incomingScopes, Fields argumentSelector, Fields declared )
@@ -376,7 +378,7 @@ public class Every extends Operator
       {
       protected void collect( Tuple tuple )
         {
-        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getDeclaredEntry(), tuple ) );
+        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getRemainderFields(), outgoingScope.getDeclaredEntry(), tuple ) );
         }
       };
       }
@@ -453,7 +455,7 @@ public class Every extends Operator
       {
       protected void collect( Tuple tuple )
         {
-        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getDeclaredEntry(), tuple ) );
+        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getRemainderFields(), outgoingScope.getDeclaredEntry(), tuple ) );
         }
       };
       }

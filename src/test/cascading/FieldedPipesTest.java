@@ -53,6 +53,7 @@ import cascading.tuple.TupleEntryIterator;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class FieldedPipesTest extends ClusterTestCase
   {
@@ -831,5 +832,25 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 3, null );
     }
 
+  public void testSwap() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
 
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "ip" ) ), outputPath + "/swap", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( "ip" ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( "line" ), parser, Fields.SWAP );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
+    }
   }

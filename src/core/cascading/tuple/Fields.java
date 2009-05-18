@@ -74,8 +74,10 @@ public final class Fields implements Comparable, Iterable, Serializable
   public static final Fields ARGS = new Fields( Kind.ARGS );
   /** Field RESULTS represents all fields returned by the current operation */
   public static final Fields RESULTS = new Fields( Kind.RESULTS );
-  /** Field REPLACE represents all incoming fields, and allows them to be replaced by the current operation. */
+  /** Field REPLACE represents all incoming fields, and allows their values to be replaced by the current operation results. */
   public static final Fields REPLACE = new Fields( Kind.REPLACE );
+  /** Field SWAP represents all fields not used as arguments for the current operation and the operations results. */
+  public static final Fields SWAP = new Fields( Kind.SWAP );
   /** Field FIRST represents the first field position, 0 */
   public static final Fields FIRST = new Fields( 0 );
   /** Field LAST represents the last field postition, -1 */
@@ -88,7 +90,7 @@ public final class Fields implements Comparable, Iterable, Serializable
    */
   static enum Kind
     {
-      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE;
+      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP;
     }
 
   /** Field fields */
@@ -217,6 +219,7 @@ public final class Fields implements Comparable, Iterable, Serializable
     {
     boolean hasUnknowns = false;
     int size = 0;
+
     for( Fields field : fields )
       {
       if( field.isUnknown() )
@@ -239,6 +242,17 @@ public final class Fields implements Comparable, Iterable, Serializable
       }
 
     if( selector.isReplace() )
+      {
+      if( fields[ 1 ].isUnknown() )
+        throw new TupleException( "cannot replace fields with unknown field declaration" );
+
+      if( !fields[ 0 ].contains( fields[ 1 ] ) )
+        throw new TupleException( "could not find all fields to be replaced, available: " + fields[ 0 ].printVerbose() + ",  declared: " + fields[ 1 ].printVerbose() );
+
+      return fields[ 0 ];
+      }
+
+    if( selector.isSwap() )
       {
       if( fields[ 1 ].isUnknown() )
         throw new TupleException( "cannot replace fields with unknown field declaration" );
@@ -416,7 +430,7 @@ public final class Fields implements Comparable, Iterable, Serializable
    */
   public boolean isOutSelector()
     {
-    return isAll() || isResults() || isReplace() || isDefined();
+    return isAll() || isResults() || isReplace() || isSwap() || isDefined();
     }
 
   /**
@@ -499,6 +513,16 @@ public final class Fields implements Comparable, Iterable, Serializable
   public boolean isReplace()
     {
     return kind == Kind.REPLACE;
+    }
+
+  /**
+   * Method isSwap returns true if this instance is the {@link #SWAP} field set.
+   *
+   * @return the swap (type boolean) of this Fields object.
+   */
+  public boolean isSwap()
+    {
+    return kind == Kind.SWAP;
     }
 
   /**

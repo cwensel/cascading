@@ -50,11 +50,11 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   static String inputFile = "build/test/data/nums.20.txt";
 
-  static String outputPath = "build/test/output/assembly/";
+  static String outputPath = "build/test/output/detail/";
 
   static Fields[] OP_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] OP_DECL_FIELDS = new Fields[]{new Fields( "field" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
-  static Fields[] OP_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field" ), Fields.RESULTS, Fields.ALL, Fields.REPLACE};
+  static Fields[] OP_SELECT_FIELDS = new Fields[]{new Fields( -1 ), new Fields( "field" ), Fields.RESULTS, Fields.ALL, Fields.REPLACE, Fields.SWAP};
   static final String OP_VALUE = "value";
 
   static Fields[] LHS_ARGS_FIELDS = new Fields[]{new Fields( -1 ), Fields.ALL};
