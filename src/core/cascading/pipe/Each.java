@@ -25,7 +25,15 @@ import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.operation.*;
+import cascading.operation.Assertion;
+import cascading.operation.AssertionException;
+import cascading.operation.AssertionLevel;
+import cascading.operation.ConcreteCall;
+import cascading.operation.Filter;
+import cascading.operation.FilterCall;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -329,28 +337,30 @@ public class Each extends Operator
   /** @see Operator#outgoingScopeFor(Set<Scope>) */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
-    Fields argumentSelector = resolveArgumentSelector( incomingScopes );
+    Fields argumentFields = resolveArgumentSelector( incomingScopes );
 
-    verifyArguments( argumentSelector );
+    verifyArguments( argumentFields );
 
-    Fields declared = resolveDeclared( incomingScopes, argumentSelector );
+    Fields declaredFields = resolveDeclared( incomingScopes, argumentFields );
 
-    verifyDeclared( declared );
+    verifyDeclaredFields( declaredFields );
 
-    Fields outgoingValuesSelector = resolveOutgoingValuesSelector( incomingScopes, argumentSelector, declared );
+    Fields outgoingValuesFields = resolveOutgoingValuesSelector( incomingScopes, argumentFields, declaredFields );
 
-    verifyOutputSelector( outgoingValuesSelector );
+    verifyOutputSelector( outgoingValuesFields );
 
-    Fields outgoingGrouping = Fields.asDeclaration( outgoingValuesSelector );
+    Fields outgoingGroupingFields = Fields.asDeclaration( outgoingValuesFields );
 
-    return new Scope( getName(), Scope.Kind.EACH, argumentSelector, declared, outgoingGrouping, outgoingValuesSelector );
+    Fields remainderFields = resolveRemainderFields( incomingScopes, argumentFields );
+
+    return new Scope( getName(), Scope.Kind.EACH, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
     }
 
-  Fields resolveOutgoingValuesSelector( Set<Scope> incomingScopes, Fields argumentSelector, Fields declared )
+  Fields resolveOutgoingValuesSelector( Set<Scope> incomingScopes, Fields argumentFields, Fields declaredFields )
     {
     try
       {
-      return resolveOutgoingSelector( incomingScopes, argumentSelector, declared );
+      return resolveOutgoingSelector( incomingScopes, argumentFields, declaredFields );
       }
     catch( Exception exception )
       {
@@ -451,7 +461,7 @@ public class Each extends Operator
       {
       protected void collect( Tuple tuple )
         {
-        flowCollector.collect( makeResult( scope.getOutValuesSelector(), input, scope.getDeclaredEntry(), tuple ) );
+        flowCollector.collect( makeResult( scope.getOutValuesSelector(), input, scope.getRemainderFields(), scope.getDeclaredEntry(), tuple ) );
         }
       };
 

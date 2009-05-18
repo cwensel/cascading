@@ -345,7 +345,28 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 10, 2, Pattern.compile( "\\d*\\s\\d*\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}" ) );
+    validateLength( flow, 10, 2, Pattern.compile( "\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}" ) );
     }
 
+  public void testSwap() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/swap", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( 0 ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( 1 ), parser, Fields.SWAP );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
+    }
   }

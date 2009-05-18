@@ -21,11 +21,11 @@
 
 package cascading.flow;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /** Class Scope is an internal representation of the linkages between operations. */
 public class Scope implements Serializable
@@ -39,10 +39,13 @@ public class Scope implements Serializable
   private String name;
   /** Field kind */
   private Kind kind;
+  /** Field remainderFields */
+  private Fields remainderFields;
   /** Field argumentSelector */
-  private Fields argumentSelector;
+  private Fields argumentFields;
   /** Field declaredFields */
   private Fields declaredFields; // fields declared by the operation
+  /** Field isGroupBy */
   private boolean isGroupBy;
   /** Field groupingSelectors */
   private Map<String, Fields> groupingSelectors;
@@ -101,16 +104,17 @@ public class Scope implements Serializable
    *
    * @param name              of type String
    * @param kind              of type Kind
-   * @param argumentSelector  of type Fields
+   * @param argumentFields    of type Fields
    * @param declaredFields    of type Fields
    * @param outGroupingFields of type Fields
    * @param outValuesFields   of type Fields
    */
-  public Scope( String name, Kind kind, Fields argumentSelector, Fields declaredFields, Fields outGroupingFields, Fields outValuesFields )
+  public Scope( String name, Kind kind, Fields remainderFields, Fields argumentFields, Fields declaredFields, Fields outGroupingFields, Fields outValuesFields )
     {
     this.name = name;
     this.kind = kind;
-    this.argumentSelector = argumentSelector;
+    this.remainderFields = remainderFields;
+    this.argumentFields = argumentFields;
     this.declaredFields = declaredFields;
 
     if( outGroupingFields == null )
@@ -234,13 +238,23 @@ public class Scope implements Serializable
     }
 
   /**
+   * Method getRemainderFields returns the remainderFields of this Scope object.
+   *
+   * @return the remainderFields (type Fields) of this Scope object.
+   */
+  public Fields getRemainderFields()
+    {
+    return remainderFields;
+    }
+
+  /**
    * Method getArgumentSelector returns the argumentSelector of this Scope object.
    *
    * @return the argumentSelector (type Fields) of this Scope object.
    */
-  public Fields getArgumentSelector()
+  public Fields getArgumentFields()
     {
-    return argumentSelector;
+    return argumentFields;
     }
 
   /**
@@ -250,7 +264,7 @@ public class Scope implements Serializable
    */
   public Fields getArguments()
     {
-    return Fields.asDeclaration( argumentSelector );
+    return Fields.asDeclaration( argumentFields );
     }
 
   /**
@@ -278,7 +292,7 @@ public class Scope implements Serializable
     {
     TupleEntry entry = getArgumentsEntry();
 
-    entry.setTuple( input.selectTuple( getArgumentSelector() ) );
+    entry.setTuple( input.selectTuple( getArgumentFields() ) );
 
     return entry;
     }
@@ -385,7 +399,8 @@ public class Scope implements Serializable
     {
     this.kind = scope.kind;
     this.isGroupBy = scope.isGroupBy;
-    this.argumentSelector = scope.argumentSelector;
+    this.remainderFields = scope.remainderFields;
+    this.argumentFields = scope.argumentFields;
     this.declaredFields = scope.declaredFields;
     this.groupingSelectors = scope.groupingSelectors;
     this.sortingSelectors = scope.sortingSelectors;

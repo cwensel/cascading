@@ -235,24 +235,37 @@ public abstract class Operator extends Pipe
     return assertionLevel != null;
     }
 
-  protected Tuple makeResult( Fields outgoingSelector, TupleEntry input, TupleEntry declaredEntry, Tuple output )
+  protected Tuple makeResult( Fields outgoingSelector, TupleEntry inputEntry, Fields remainderFields, TupleEntry declaredEntry, Tuple output )
     {
     if( getOutputSelector().isResults() )
       return output;
 
     if( getOutputSelector().isAll() )
-      return input.getTuple().append( output );
+      return inputEntry.getTuple().append( output );
+
+    if( getOutputSelector().isSwap() )
+      {
+      if( remainderFields.size() == 0 )
+        return output;
+      else
+        return inputEntry.selectTuple( remainderFields ).append( output );
+      }
 
     declaredEntry.setTuple( output );
 
-    return TupleEntry.select( outgoingSelector, input, declaredEntry );
+    return TupleEntry.select( outgoingSelector, inputEntry, declaredEntry );
     }
 
   // FIELDS
 
+  protected Fields resolveRemainderFields( Set<Scope> incomingScopes, Fields argumentFields )
+    {
+    return resolveIncomingOperationFields( getFirst( incomingScopes ) ).subtract( argumentFields );
+    }
+
   public abstract Scope outgoingScopeFor( Set<Scope> incomingScopes );
 
-  void verifyDeclared( Fields declared )
+  void verifyDeclaredFields( Fields declared )
     {
     if( declared.isDefined() && declared.size() == 0 )
       throw new OperatorException( this, "field declaration: " + getFieldDeclaration().printVerbose() + ", resolves to an empty field set, current grouping is on all fields" );
@@ -273,16 +286,16 @@ public abstract class Operator extends Pipe
       throw new OperatorException( this, "resolved wrong number of arguments: " + argumentSelector.printVerbose() + ", expected: " + operation.getNumArgs() );
     }
 
-  Fields resolveOutgoingSelector( Set<Scope> incomingScopes, Fields argumentSelector, Fields declared )
+  Fields resolveOutgoingSelector( Set<Scope> incomingScopes, Fields argumentFields, Fields declaredFields )
     {
     Scope incomingScope = getFirst( incomingScopes );
     Fields outputSelector = getOutputSelector();
 
     if( outputSelector.isResults() )
-      return declared;
+      return declaredFields;
 
     if( outputSelector.isArguments() )
-      return argumentSelector;
+      return argumentFields;
 
     if( outputSelector.isGroup() )
       return incomingScope.getOutGroupingFields();
@@ -290,15 +303,18 @@ public abstract class Operator extends Pipe
     if( outputSelector.isValues() )
       return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
+    if( outputSelector.isSwap() )
+      return incomingScope.getOutValuesFields().subtract( argumentFields ).append( declaredFields );
+
     Fields incomingFields = resolveFields( incomingScope );
 
     try
       {
-      return Fields.resolve( outputSelector, incomingFields, declared );
+      return Fields.resolve( outputSelector, incomingFields, declaredFields );
       }
     catch( TupleException exception )
       {
-      throw new OperatorException( "unable to resolve selector using incoming: " + incomingFields.printVerbose() + " declared: " + declared.printVerbose(), exception );
+      throw new OperatorException( "unable to resolve selector using incoming: " + incomingFields.printVerbose() + " declared: " + declaredFields.printVerbose(), exception );
       }
     }
 
