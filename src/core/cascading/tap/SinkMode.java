@@ -29,11 +29,12 @@ package cascading.tap;
  * <p/>
  * Mode REPLACE will delete/remove the resource before any attempts to write.
  * <p/>
- * Mode APPEND will attempt to append to the resource, if supported.
+ * Mode UPDATE will attempt to re-use to the resource, if supported.
  */
 public enum SinkMode
   {
     KEEP,
     REPLACE,
-    APPEND
+    UPDATE,
+    @Deprecated APPEND
   }

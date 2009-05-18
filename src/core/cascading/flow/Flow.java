@@ -511,7 +511,7 @@ public class Flow implements Runnable
 
     for( Tap sink : sinks.values() )
       {
-      if( sink.isReplace() || sink.isAppend() )
+      if( sink.isReplace() || sink.isUpdate() )
         sinkModified = -1L;
       else
         {
@@ -709,7 +709,7 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method deleteSinks deletes all sinks, whether or not they are configured for {@link cascading.tap.SinkMode#APPEND}.
+   * Method deleteSinks deletes all sinks, whether or not they are configured for {@link cascading.tap.SinkMode#UPDATE}.
    * <p/>
    * Use with caution.
    *
@@ -735,11 +735,28 @@ public class Flow implements Runnable
     {
     for( Tap tap : sinks.values() )
       {
-      if( !tap.isAppend() )
+      if( !tap.isUpdate() )
         tap.deletePath( getJobConf() );
       }
     }
 
+  /**
+   * Method deleteSinksIfNotUpdate deletes all sinks if they are not configured with the {@link cascading.tap.SinkMode#UPDATE} flag.
+   * <p/>
+   * Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
+   * <p/>
+   * Use with caution.
+   *
+   * @throws IOException when
+   */
+  public void deleteSinksIfNotUpdate() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      {
+      if( !tap.isUpdate() )
+        tap.deletePath( getJobConf() );
+      }
+    }
 
   /**
    * Method tapExists returns true if the resource represented by the given Tap instance exists.

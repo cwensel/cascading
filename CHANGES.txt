@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Deprecated c.t.SinkMode#APPEND and replaced with c.t.SinkMode#UPDATE.
+
   Added c.t.MultiSinkTap to allow for simultaneous writes to multiple unique locations.
 
   Added support for compression of c.t.SpillableTupleList by default in order to speed up c.p.CoGrouping operations
