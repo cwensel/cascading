@@ -269,7 +269,12 @@ public abstract class Operator extends Pipe
 
   protected Fields resolveRemainderFields( Set<Scope> incomingScopes, Fields argumentFields )
     {
-    return resolveIncomingOperationFields( getFirst( incomingScopes ) ).subtract( argumentFields );
+    Fields fields = resolveIncomingOperationFields( getFirst( incomingScopes ) );
+
+    if( fields.isUnknown() )
+      return fields;
+
+    return fields.subtract( argumentFields );
     }
 
   public abstract Scope outgoingScopeFor( Set<Scope> incomingScopes );
