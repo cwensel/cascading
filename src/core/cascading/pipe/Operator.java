@@ -243,9 +243,18 @@ public abstract class Operator extends Pipe
     if( getOutputSelector().isAll() )
       return inputEntry.getTuple().append( output );
 
+    if( getOutputSelector().isReplace() )
+      {
+      Tuple result = new Tuple( inputEntry.getTuple() );
+
+      result.set( inputEntry.getFields(), declaredEntry.getFields(), declaredEntry.getTuple() );
+
+      return result;
+      }
+
     if( getOutputSelector().isSwap() )
       {
-      if( remainderFields.size() == 0 )
+      if( remainderFields.size() == 0 ) // the same as Fields.RESULTS
         return output;
       else
         return inputEntry.selectTuple( remainderFields ).append( output );

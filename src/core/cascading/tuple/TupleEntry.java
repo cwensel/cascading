@@ -67,15 +67,6 @@ public class TupleEntry
       return result;
       }
 
-    if( selector.isReplace() )
-      {
-      result = new Tuple( entries[ 0 ].getTuple() );
-
-      result.set( entries[ 0 ].getFields(), entries[ 1 ].getFields(), entries[ 1 ].getTuple() );
-
-      return result;
-      }
-
     int size = 0;
 
     for( TupleEntry entry : entries )
