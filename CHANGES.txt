@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Demoted all DEBUG related c.t.Tuple#print() calls to TRACE. 
+
   Fixed NPE when planner finds inconsistencies with c.t.Tap and c.p.Pipe names.
 
 1.0.10

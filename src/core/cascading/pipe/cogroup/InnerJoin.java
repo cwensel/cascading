@@ -21,10 +21,10 @@
 
 package cascading.pipe.cogroup;
 
-import java.util.Iterator;
-
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
+
+import java.util.Iterator;
 
 /**
  * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
  */
 public class InnerJoin implements Joiner
   {
-  /** Field LOG  */
+  /** Field LOG */
   private static final Logger LOG = Logger.getLogger( InnerJoin.class );
 
   public Iterator<Tuple> getIterator( GroupClosure closure )
@@ -138,8 +138,8 @@ public class InnerJoin implements Joiner
       for( Comparable lastValue : lastValues )
         result.addAll( lastValue );
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "tuple: " + result.print() );
+      if( LOG.isTraceEnabled() )
+        LOG.trace( "tuple: " + result.print() );
 
       return result;
       }
