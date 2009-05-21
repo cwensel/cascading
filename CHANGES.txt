@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed NPE when planner finds inconsistencies with c.t.Tap and c.p.Pipe names.
+
 1.0.10
 
   Updated planner error messages when field name collisions detected.
