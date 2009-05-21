@@ -21,14 +21,6 @@
 
 package cascading.flow;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -39,6 +31,14 @@ import cascading.tap.Tap;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public class FlowPlanner
@@ -90,9 +90,9 @@ public class FlowPlanner
     for( String tapName : taps.keySet() )
       {
       if( areSources && !taps.get( tapName ).isSource() )
-        throw new PlannerException( "tap named: " + tapName + " is not a source: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a source: " + taps.get( tapName ) );
       else if( !areSources && !taps.get( tapName ).isSink() )
-        throw new PlannerException( "tap named: " + tapName + " is not a sink: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a sink: " + taps.get( tapName ) );
       }
     }
 
