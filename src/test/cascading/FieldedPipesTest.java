@@ -880,4 +880,5 @@ public class FieldedPipesTest extends ClusterTestCase
 
     validateLength( flow, 10, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
     }
+
   }

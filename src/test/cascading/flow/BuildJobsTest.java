@@ -1464,7 +1464,7 @@ public class BuildJobsTest extends CascadingTestCase
       Flow flow = new FlowConnector().connect( source, sink, pipe );
       fail( "did not fail" );
       }
-    catch( Exception e )
+    catch( Exception exception )
       {
       }
     }

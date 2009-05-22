@@ -35,6 +35,7 @@ import cascading.tuple.Fields;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -59,7 +60,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sink = new Hfs( new TextLine( new Fields( "num", "char" ) ), outputPath + "/coerce", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "num", "char" ) ), outputPath + "/coerce", true );
 
     Pipe pipe = new Pipe( "coerce" );
 
@@ -72,7 +73,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
     }
 
   public void testShapeNarrow() throws IOException
@@ -83,7 +84,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sink = new Hfs( new TextLine( new Fields( "num" ) ), outputPath + "/shapenarrow", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "num" ), new Fields( "num" ) ), outputPath + "/shapenarrow", true );
 
     Pipe pipe = new Pipe( "shape" );
 
@@ -96,10 +97,10 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+$" ) );
     }
 
-  public void testRenameAll() throws IOException
+  public void testRenameNamed() throws IOException
     {
     if( !new File( inputFileLower ).exists() )
       fail( "data file not found" );
@@ -107,7 +108,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sink = new Hfs( new TextLine( new Fields( "item", "element" ) ), outputPath + "/renameall", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "item", "element" ) ), outputPath + "/renameall", true );
 
     Pipe pipe = new Pipe( "shape" );
 
@@ -120,7 +121,31 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
+    }
+
+  public void testRenameAll() throws IOException
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "item", "element" ) ), outputPath + "/renameall", true );
+
+    Pipe pipe = new Pipe( "shape" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    pipe = new Rename( pipe, Fields.ALL, new Fields( "item", "element" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
     }
 
   public void testRenameNarrow() throws IOException
@@ -131,7 +156,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
     copyFromLocal( inputFileLower );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sink = new Hfs( new TextLine( new Fields( "item" ) ), outputPath + "/renamenarrow", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "item" ), new Fields( "char", "item" ) ), outputPath + "/renamenarrow", true );
 
     Pipe pipe = new Pipe( "shape" );
 
@@ -144,6 +169,6 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5, 1, Pattern.compile( "^\\w+\\s\\d+$" ) );
     }
   }
