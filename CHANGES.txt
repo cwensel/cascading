@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.11
 
   Added clearer error message when c.t.Tap is used as both source and sink in a given Flow.
 
