@@ -60,7 +60,7 @@ import java.util.*;
  * The VALUES Fields set represent all the fields not used as grouping fields in a previous Group.
  * <p/>
  */
-public final class Fields implements Comparable, Iterable, Serializable
+public final class Fields implements Comparable, Iterable<Comparable>, Serializable
   {
   /** Field UNKNOWN */
   public static final Fields UNKNOWN = new Fields( Kind.UNKNOWN );
@@ -242,17 +242,6 @@ public final class Fields implements Comparable, Iterable, Serializable
       }
 
     if( selector.isReplace() )
-      {
-      if( fields[ 1 ].isUnknown() )
-        throw new TupleException( "cannot replace fields with unknown field declaration" );
-
-      if( !fields[ 0 ].contains( fields[ 1 ] ) )
-        throw new TupleException( "could not find all fields to be replaced, available: " + fields[ 0 ].printVerbose() + ",  declared: " + fields[ 1 ].printVerbose() );
-
-      return fields[ 0 ];
-      }
-
-    if( selector.isSwap() )
       {
       if( fields[ 1 ].isUnknown() )
         throw new TupleException( "cannot replace fields with unknown field declaration" );
@@ -860,6 +849,33 @@ public final class Fields implements Comparable, Iterable, Serializable
       result.kind = Kind.UNKNOWN;
 
     return result;
+    }
+
+  /**
+   * Method project will return a new Fields instance similar to the given fields instance
+   * except any absolute positional elements will be replaced by the current field names, if any.
+   *
+   * @param fields of type Fields
+   * @return Fields
+   */
+  public Fields project( Fields fields )
+    {
+    if( fields == null )
+      return this;
+
+    Fields results = size( fields.size() );
+
+    for( int i = 0; i < fields.fields.length; i++ )
+      {
+      if( fields.fields[ i ] instanceof String )
+        results.fields[ i ] = fields.fields[ i ];
+      else if( this.fields[ i ] instanceof String )
+        results.fields[ i ] = this.fields[ i ];
+      else
+        results.fields[ i ] = i;
+      }
+
+    return results;
     }
 
   private static void copy( Set<String> names, Fields result, Fields fields, int offset )

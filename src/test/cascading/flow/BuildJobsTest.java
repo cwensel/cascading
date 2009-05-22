@@ -1447,6 +1447,27 @@ public class BuildJobsTest extends CascadingTestCase
       }
     }
 
+  public void testReplaceFail() throws Exception
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "line2" ) ), "bar", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( 0 ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( "line" ), parser, Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( Fields.ARGS ), Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "line2" ) ), Fields.REPLACE );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( source, sink, pipe );
+      fail( "did not fail" );
+      }
+    catch( Exception e )
+      {
+      }
+    }
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
     {

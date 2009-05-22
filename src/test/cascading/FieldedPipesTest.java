@@ -24,6 +24,7 @@ package cascading;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.operation.Debug;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -830,6 +831,32 @@ public class FieldedPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 3, null );
+    }
+
+  public void testReplace() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "line" ) ), outputPath + "/replace", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( 0 ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( "line" ), parser, Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( Fields.ARGS ), Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "line" ) ), Fields.REPLACE );
+
+    pipe = new Each( pipe, new Debug( true ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 10, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
     }
 
   public void testSwap() throws Exception

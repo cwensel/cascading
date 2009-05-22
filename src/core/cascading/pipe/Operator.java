@@ -247,7 +247,7 @@ public abstract class Operator extends Pipe
       {
       Tuple result = new Tuple( inputEntry.getTuple() );
 
-      result.set( inputEntry.getFields(), declaredEntry.getFields(), declaredEntry.getTuple() );
+      result.set( inputEntry.getFields(), declaredEntry.getFields(), output );
 
       return result;
       }
@@ -358,10 +358,11 @@ public abstract class Operator extends Pipe
 
   Fields resolveDeclared( Set<Scope> incomingScopes, Fields arguments )
     {
+    Fields fieldDeclaration = getFieldDeclaration();
+
     try
       {
       Scope incomingScope = getFirst( incomingScopes );
-      Fields fieldDeclaration = getFieldDeclaration();
 
       if( fieldDeclaration.isUnknown() )
         return fieldDeclaration;
@@ -379,12 +380,21 @@ public abstract class Operator extends Pipe
       if( fieldDeclaration.isValues() )
         return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
-      return fieldDeclaration;
       }
     catch( Exception exception )
       {
       throw new OperatorException( this, "could not resolve declared fields in:  " + this, exception );
       }
+
+    if( getOutputSelector().isReplace() )
+      {
+      if( arguments.isDefined() && fieldDeclaration.isDefined() && arguments.size() != fieldDeclaration.size() )
+        throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
+
+      return arguments.project( fieldDeclaration );
+      }
+
+    return fieldDeclaration;
     }
 
   // OBJECT OVERRIDES
