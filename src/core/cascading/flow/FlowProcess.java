@@ -21,11 +21,11 @@
 
 package cascading.flow;
 
-import java.io.IOException;
-
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+
+import java.io.IOException;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
@@ -56,6 +56,10 @@ public abstract class FlowProcess
     }
 
   public void increment( Enum counter, int amount )
+    {
+    }
+
+  public void setStatus( String status )
     {
     }
 
@@ -129,6 +133,13 @@ public abstract class FlowProcess
    * @param amount  of type int
    */
   public abstract void increment( Enum counter, int amount );
+
+  /**
+   * Method setStatus is used to set the status of the current operation.
+   *
+   * @param status of type String
+   */
+  public abstract void setStatus( String status );
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleIterator} for the given Tap instance.

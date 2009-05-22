@@ -21,8 +21,6 @@
 
 package cascading.flow.hadoop;
 
-import java.io.IOException;
-
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
@@ -30,6 +28,8 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
+
+import java.io.IOException;
 
 /**
  * Class HadoopFlowProcess is an implemenation of {@link FlowProcess} for Hadoop. Use this interfact to get direct
@@ -46,6 +46,7 @@ public class HadoopFlowProcess extends FlowProcess
   {
   /** Field jobConf */
   JobConf jobConf;
+  /** Field isMapper */
   private boolean isMapper;
   /** Field reporter */
   Reporter reporter;
@@ -139,6 +140,12 @@ public class HadoopFlowProcess extends FlowProcess
   public void increment( Enum counter, int amount )
     {
     reporter.incrCounter( counter, amount );
+    }
+
+  /** @see cascading.flow.FlowProcess#setStatus(String) */
+  public void setStatus( String status )
+    {
+    reporter.setStatus( status );
     }
 
   /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
