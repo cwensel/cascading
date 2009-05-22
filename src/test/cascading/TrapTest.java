@@ -24,7 +24,9 @@ package cascading;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
+import cascading.operation.assertion.AssertNotEquals;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -244,12 +246,12 @@ public class TrapTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
     // always fail
-    pipe = new Each( pipe, new TestFunction( new Fields( "test" ), new Tuple( 1 ), 1 ), Fields.ALL );
-    pipe = new GroupBy( pipe, new Fields( "test" ) );
-    pipe = new Each( pipe, new TestFunction( new Fields( "test2" ), new Tuple( 2 ), 2 ), Fields.ALL );
-    pipe = new GroupBy( pipe, new Fields( "test2" ) );
-    pipe = new Each( pipe, new TestFunction( new Fields( "test3" ), new Tuple( 3 ), 3 ), Fields.ALL );
-    pipe = new Each( pipe, new TestFunction( new Fields( "test4" ), new Tuple( 4 ), 4 ), Fields.ALL );
+    pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "75.185.76.245" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "68.46.103.112" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "76.197.151.0" ) );
+    pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "12.215.138.88" ) );
 
     Tap sink = new Hfs( new TextLine(), outputPath + "eacheverychain/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "eacheverychain/trap", true );
