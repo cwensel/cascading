@@ -33,7 +33,11 @@ import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.*;
+import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
@@ -46,7 +50,11 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class BuildJobsTest extends CascadingTestCase
   {
@@ -1383,6 +1391,23 @@ public class BuildJobsTest extends CascadingTestCase
     assertTrue( "not a TempHfs", operator instanceof TempHfs );
     }
 
+  public void testSourceIsSink()
+    {
+    Tap tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+
+    Pipe pipe = new Pipe( "left" );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( tap, tap, pipe );
+//    flow.writeDOT( "dupesource.dot" );
+      fail( "did not throw planner exception" );
+      }
+    catch( Exception exception )
+      {
+//      exception.printStackTrace();
+      }
+    }
 
   private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
     {

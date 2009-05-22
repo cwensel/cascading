@@ -21,14 +21,6 @@
 
 package cascading.flow;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -39,6 +31,14 @@ import cascading.tap.Tap;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public class FlowPlanner
@@ -61,6 +61,8 @@ public class FlowPlanner
   /** Must be called to determine if all elements of the base pipe assembly are available */
   protected void verifyAssembly( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
+    verifySourceNotSinks( sources, sinks );
+
     verifyTaps( sources, true, true );
     verifyTaps( sinks, false, true );
     verifyTaps( traps, false, false );
@@ -73,6 +75,17 @@ public class FlowPlanner
   protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     return new ElementGraph( pipes, sources, sinks, traps, assertionLevel );
+    }
+
+  protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
+    {
+    Collection<Tap> sourcesSet = sources.values();
+
+    for( Tap tap : sinks.values() )
+      {
+      if( sourcesSet.contains( tap ) )
+        throw new PlannerException( "tap may not be used as both source and sink in the same Flow: " + tap );
+      }
     }
 
   /**
@@ -90,9 +103,9 @@ public class FlowPlanner
     for( String tapName : taps.keySet() )
       {
       if( areSources && !taps.get( tapName ).isSource() )
-        throw new PlannerException( "tap named: " + tapName + " is not a source: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a source: " + taps.get( tapName ) );
       else if( !areSources && !taps.get( tapName ).isSink() )
-        throw new PlannerException( "tap named: " + tapName + " is not a sink: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a sink: " + taps.get( tapName ) );
       }
     }
 

@@ -146,10 +146,10 @@ public class FlowReducerStack
 
   public void reduce( Object key, Iterator values, OutputCollector output ) throws IOException
     {
-    if( LOG.isDebugEnabled() )
+    if( LOG.isTraceEnabled() )
       {
-      LOG.debug( "reduce fields: " + stackHead.getOutGroupingFields() );
-      LOG.debug( "reduce key: " + ( (Tuple) key ).print() );
+      LOG.trace( "reduce fields: " + stackHead.getOutGroupingFields() );
+      LOG.trace( "reduce key: " + ( (Tuple) key ).print() );
       }
 
     stackTail.setLastOutput( output );
