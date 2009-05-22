@@ -1447,6 +1447,24 @@ public class BuildJobsTest extends CascadingTestCase
       }
     }
 
+  public void testSourceIsSink()
+    {
+    Tap tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+
+    Pipe pipe = new Pipe( "left" );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( tap, tap, pipe );
+//    flow.writeDOT( "dupesource.dot" );
+      fail( "did not throw planner exception" );
+      }
+    catch( Exception exception )
+      {
+//      exception.printStackTrace();
+      }
+    }
+
   public void testReplaceFail() throws Exception
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );

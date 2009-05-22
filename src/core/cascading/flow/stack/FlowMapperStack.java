@@ -147,13 +147,16 @@ public class FlowMapperStack
         if( tuple == null )
           LOG.debug( "map skipping key and value" );
 
-        if( key instanceof Tuple )
-          LOG.debug( "map key: " + ( (Tuple) key ).print() );
-        else
-          LOG.debug( "map key: [" + key + "]" );
+        if( LOG.isTraceEnabled() )
+          {
+          if( key instanceof Tuple )
+            LOG.trace( "map key: " + ( (Tuple) key ).print() );
+          else
+            LOG.trace( "map key: [" + key + "]" );
 
-        if( tuple != null )
-          LOG.debug( "map value: " + tuple.print() );
+          if( tuple != null )
+            LOG.trace( "map value: " + tuple.print() );
+          }
         }
 
       // skip the key/value pair if null is returned from the source

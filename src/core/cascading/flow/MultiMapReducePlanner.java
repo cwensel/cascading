@@ -249,6 +249,9 @@ public class MultiMapReducePlanner extends FlowPlanner
       {
       Throwable cause = exception.getCause();
 
+      if( cause == null )
+        cause = exception;
+
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );

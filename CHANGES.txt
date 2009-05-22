@@ -34,6 +34,14 @@ unreleased (wip 1.1)
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
 
+1.0.11
+
+  Added clearer error message when c.t.Tap is used as both source and sink in a given Flow.
+
+  Demoted all DEBUG related c.t.Tuple#print() calls to TRACE.
+
+  Fixed NPE when planner finds inconsistencies with c.t.Tap and c.p.Pipe names.
+
 1.0.10
 
   Updated planner error messages when field name collisions detected.
