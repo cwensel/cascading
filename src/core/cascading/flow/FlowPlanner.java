@@ -61,6 +61,8 @@ public class FlowPlanner
   /** Must be called to determine if all elements of the base pipe assembly are available */
   protected void verifyAssembly( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
+    verifySourceNotSinks( sources, sinks );
+
     verifyTaps( sources, true, true );
     verifyTaps( sinks, false, true );
     verifyTaps( traps, false, false );
@@ -73,6 +75,17 @@ public class FlowPlanner
   protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     return new ElementGraph( pipes, sources, sinks, traps, assertionLevel );
+    }
+
+  protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
+    {
+    Collection<Tap> sourcesSet = sources.values();
+
+    for( Tap tap : sinks.values() )
+      {
+      if( sourcesSet.contains( tap ) )
+        throw new PlannerException( "tap may not be used as both source and sink in the same Flow: " + tap );
+      }
     }
 
   /**

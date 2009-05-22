@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased
 
-  Demoted all DEBUG related c.t.Tuple#print() calls to TRACE. 
+  Added clearer error message when c.t.Tap is used as both source and sink in a given Flow.
+
+  Demoted all DEBUG related c.t.Tuple#print() calls to TRACE.
 
   Fixed NPE when planner finds inconsistencies with c.t.Tap and c.p.Pipe names.
 
