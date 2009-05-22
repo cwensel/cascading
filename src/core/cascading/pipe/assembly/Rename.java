@@ -28,14 +28,18 @@ import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 
 /**
- * Class Rename is a {@link SubAssembly} that will rename the fromFields to the toFields.
+ * Class Rename is a {@link SubAssembly} that will rename the fromFields to the names in toFields.
  * <p/>
- * Note that if any input field names are not given, they will not be present in the output Tuple.
+ * Note that if any input field names are not given, they will retain their names.
  */
 public class Rename extends SubAssembly
   {
   /**
-   * Constructor Rename creates a new Rename instance.
+   * Rename the fromFields in the current Tuple to the given toFields.
+   * <p/>
+   * <pre>
+   * incoming: {"first", "middle", "last"} -> from:{"middle"} to:{"initial"} -> outgoing:{"first", "last", "initial"}
+   * </pre>
    *
    * @param previous   of type Pipe
    * @param fromFields of type Fields
@@ -43,6 +47,12 @@ public class Rename extends SubAssembly
    */
   public Rename( Pipe previous, Fields fromFields, Fields toFields )
     {
-    setTails( new Each( previous, fromFields, new Identity( toFields ) ) );
+    if( fromFields.isDefined() && fromFields.size() != toFields.size() )
+      throw new IllegalArgumentException( "fields arguments must be same size, from: " + fromFields.printVerbose() + " to: " + toFields.printVerbose() );
+
+    if( !toFields.isDefined() )
+      throw new IllegalArgumentException( "toFields must define field names: " + toFields.printVerbose() );
+
+    setTails( new Each( previous, fromFields, new Identity( toFields ), Fields.SWAP ) );
     }
   }
