@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added c.o.s.State and c.o.s.Counter helper operations that respectively set 'state' and increment counters.
+
   Added c.f.FlowProcess#setStatus method to allow for text status messages to be posted.
 
   Added c.o.a.AssertNotEquals assertion type.
