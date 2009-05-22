@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added c.o.a.AssertNotEquals assertion type.
+
   Removed planner restriction that traps must not cross map/reduce boundaries. This allows for a single c.t.Tap
   trap to be used across a whole branch, regardless of underlying topology.
 

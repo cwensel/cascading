@@ -117,6 +117,28 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  public void testNotEquals()
+    {
+    ValueAssertion assertion = new AssertNotEquals( 4 );
+
+    assertFail( assertion, getEntry( new Tuple( 4 ) ) );
+    assertPass( assertion, getEntry( new Tuple( 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( 1, 1, 1, 1, 1, 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( (Comparable) null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
+
+    assertion = new AssertNotEquals( "one1", "two1" );
+
+    assertFail( assertion, getEntry( new Tuple( "one1", "two1" ) ) );
+    assertPass( assertion, getEntry( new Tuple( "one", "two" ) ) );
+    assertPass( assertion, getEntry( new Tuple( null, null ) ) );
+
+    assertPass( assertion, getEntry( new Tuple( "0", 1 ) ) );
+    assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
+    }
+
   public void testEqualsAll()
     {
     ValueAssertion assertion = new AssertEqualsAll( 1 );
