@@ -78,6 +78,8 @@ public class FlowStep implements Serializable
 
   /** Field name */
   final String name;
+  /** Field id */
+  private int id;
   /** Field graph */
   final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
 
@@ -94,9 +96,10 @@ public class FlowStep implements Serializable
   /** Field group */
   public Group group;
 
-  protected FlowStep( String name )
+  protected FlowStep( String name, int id )
     {
     this.name = name;
+    this.id = id;
     }
 
   /**
@@ -273,6 +276,7 @@ public class FlowStep implements Serializable
       }
 
     // perform last so init above will pass to tasks
+    conf.setInt( "cascading.flow.step.id", id );
     conf.set( "cascading.flow.step", Util.serializeBase64( this ) );
 
     return conf;

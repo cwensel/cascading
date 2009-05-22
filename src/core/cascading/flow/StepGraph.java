@@ -37,7 +37,11 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
 public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
@@ -63,24 +67,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
     makeStepGraph( flowName, elementGraph, traps );
 
-    validateGraph( traps );
-    }
-
-  private void validateGraph( Map<String, Tap> traps )
-    {
     verifyTrapsAreUnique( traps );
-
-    traps = new HashMap<String, Tap>( traps ); // make copy
-
-    TopologicalOrderIterator<FlowStep, Integer> iterator = getTopologicalIterator();
-
-    while( iterator.hasNext() )
-      {
-      FlowStep step = iterator.next();
-
-      verifyTraps( traps, step.mapperTraps );
-      verifyTraps( traps, step.reducerTraps );
-      }
     }
 
   private void verifyTrapsAreUnique( Map<String, Tap> traps )
@@ -89,17 +76,6 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
       {
       if( Collections.frequency( traps.values(), tap ) != 1 )
         throw new PlannerException( "traps must be unique, cannot be reused on different branches: " + tap );
-      }
-    }
-
-  private void verifyTraps( Map<String, Tap> traps, Map<String, Tap> map )
-    {
-    for( String name : map.keySet() )
-      {
-      if( !traps.containsKey( name ) )
-        throw new PlannerException( "traps may not cross Map and Reduce boundaries: " + name );
-      else
-        traps.remove( name );
       }
     }
 
@@ -120,7 +96,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     if( LOG.isDebugEnabled() )
       LOG.debug( "creating step: " + sinkName );
 
-    FlowStep step = new FlowStep( makeStepName( steps, numJobs, sinkName ) );
+    FlowStep step = new FlowStep( makeStepName( steps, numJobs, sinkName ), steps.size() + 1 );
 
     step.setParentFlowName( flowName );
 
@@ -217,6 +193,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
               {
               String name = ( (Pipe) rhs ).getName();
 
+              // this is legacy, can probably now collapse into one collection safely
               if( traps.containsKey( name ) )
                 {
                 if( onMapSide )

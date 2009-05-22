@@ -34,7 +34,7 @@ public class MapReduceFlowStep extends FlowStep
 
   MapReduceFlowStep( String name, JobConf jobConf, Tap sink )
     {
-    super( name );
+    super( name, 1 );
     this.jobConf = jobConf;
     this.sink = sink;
     }

@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Added new c.t.Field field set type named Fields.SWAP. Can only be used as a result selector. Specifies operation 
+  Removed planner restriction that traps must not cross map/reduce boundaries. This allows for a single c.t.Tap
+  trap to be used across a whole branch, regardless of underlying topology.
+
+  Added new c.t.Field field set type named Fields.SWAP. Can only be used as a result selector. Specifies operation
   results will replace the argument fields. The remaining input fields will remain intact.
 
   Deprecated c.t.SinkMode#APPEND and replaced with c.t.SinkMode#UPDATE.

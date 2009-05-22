@@ -21,10 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -40,6 +36,10 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  *
@@ -213,6 +213,46 @@ public class TrapTest extends ClusterTestCase
 
     Tap sink = new Hfs( new TextLine(), outputPath + "allchain/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "allchain/trap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+//    flow.writeDOT( "traps.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 6, null );
+    validateLength( flow.openTrap(), 4 );
+    }
+
+
+  /**
+   * This test verifies traps can cross m/r and step boundaries.
+   *
+   * @throws Exception
+   */
+  public void testTrapEachEveryAllChained() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new TestFunction( new Fields( "test" ), new Tuple( 1 ), 1 ), Fields.ALL );
+    pipe = new GroupBy( pipe, new Fields( "test" ) );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test2" ), new Tuple( 2 ), 2 ), Fields.ALL );
+    pipe = new GroupBy( pipe, new Fields( "test2" ) );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test3" ), new Tuple( 3 ), 3 ), Fields.ALL );
+    pipe = new Each( pipe, new TestFunction( new Fields( "test4" ), new Tuple( 4 ), 4 ), Fields.ALL );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "eacheverychain/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "eacheverychain/trap", true );
 
     Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
 

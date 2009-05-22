@@ -27,7 +27,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
+import org.apache.hadoop.mapred.RecordWriter;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -84,6 +88,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.conf = new JobConf( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
+    this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 
     initalize();
     }

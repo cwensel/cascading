@@ -53,6 +53,18 @@ abstract class StackElement implements FlowCollector
       {
       try
         {
+        jobConf = new JobConf( jobConf );
+
+        int id = jobConf.getInt( "cascading.flow.step.id", 0 );
+        String partname;
+
+        if( jobConf.getBoolean( "mapred.task.is.map", true ) )
+          partname = String.format( "-m-%05d-", id );
+        else
+          partname = String.format( "-r-%05d-", id );
+
+        jobConf.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
+
         trapCollector = (TapCollector) trap.openForWrite( jobConf );
         trapCollectors.put( trap, trapCollector );
         }
