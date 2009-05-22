@@ -34,9 +34,8 @@ import java.util.*;
  * A Fields instance may also represent a set of field names.
  * <p/>
  * Fields are used as both declarators and selectors. A declarator declares that a given {@link Tap} or
- * {@link cascading.operation.BaseOperation}
- * returns the given field names, for a set of values the size of the given Fields instance. A selector is used to select
- * given referenced fields from a Tuple.
+ * {@link cascading.operation.Operation} returns the given field names, for a set of values the size of
+ * the given Fields instance. A selector is used to select given referenced fields from a Tuple.
  * For example; <br/>
  * <code>Fields fields = new Fields( "a", "b", "c" );</code><br/>
  * This creates a new Fields instance with the field names "a", "b", and "c". This Fields instance can be used as both
@@ -50,7 +49,8 @@ import java.util.*;
  * and last positions would be the same, and would throw an error on there being duplicate field names in the selected
  * Tuple instance.
  * <p/>
- * Additionally, there are six predefined Fields sets used for different purposes; {@link #ALL}, {@link #GROUP}, {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, and {@link #UNKNOWN}.
+ * Additionally, there are eight predefined Fields sets used for different purposes; {@link #ALL}, {@link #GROUP},
+ * {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, {@link #UNKNOWN}, {@link #REPLACE}, and {@link #SWAP}.
  * <p/>
  * The ALL Fields set is a "wildcard" that represents all the current available fields.
  * <p/>
@@ -59,6 +59,24 @@ import java.util.*;
  * <p/>
  * The VALUES Fields set represent all the fields not used as grouping fields in a previous Group.
  * <p/>
+ * The ARGS Fields set is used to let a given Operation inherit the field names of its argument Tuple. This Fields set
+ * is a convenience and is typically used when the Pipe output selector is RESULTS.
+ * <p/>
+ * The RESULTS Fields set is used to represent the field names of the current Operations return values. This Fields
+ * set may only be used as an output selector on a Pipe. It effectively replaces in the input Tuple with the Operation result
+ * Tuple.
+ * <p/>
+ * The UNKNOWN Fields set is used when Fields must be declared, but how many and their names is unknown. This allows
+ * for arbitrarily lengthed Tuples from an input source or some Operation.
+ * <p/>
+ * The REPLACE Fields set is used as an output selector to inline replace the values of the Operation arguments with
+ * the results of an Operation. This is a convenience Fields set that allows subsequent Operations to 'step' on the
+ * value with a given field name. The current Operation must always use the exact same field names, or the ARGS Fields
+ * set.
+ * <p/>
+ * The SWAP Fields set is used as an output selector to swap out Operation arguments with its results. Neither the argument and
+ * result field names or size need to be the same. This is useful for when the Operation arguments are no longer necessary
+ * and the result Fields and values should be appended to the remainder of the input field names and Tuple.
  */
 public final class Fields implements Comparable, Iterable<Comparable>, Serializable
   {
