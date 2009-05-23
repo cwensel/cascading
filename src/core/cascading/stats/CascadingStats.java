@@ -39,7 +39,7 @@ package cascading.stats;
  * @see FlowStats
  * @see CascadeStats
  */
-public class CascadingStats
+public abstract class CascadingStats
   {
   enum Status
     {
@@ -188,6 +188,14 @@ public class CascadingStats
     else
       return 0;
     }
+
+  /**
+   * Method getCounter returns the current value for the given counter Enum.
+   *
+   * @param counter of type Enum
+   * @return the current counter value
+   */
+  public abstract long getCounter( Enum counter );
 
   protected String getStatsString()
     {

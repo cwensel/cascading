@@ -927,9 +927,9 @@ public class Flow implements Runnable
         predecessors.add( (FlowStepJob) jobsMap.get( flowStep.getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
-      }
 
-    flowStats.setStepsCount( jobsMap.size() );
+      flowStats.addStepStats( flowStepJob.getStepStats() );
+      }
     }
 
   private void internalStopAllJobs()

@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
@@ -53,6 +54,8 @@ public class FlowStepJob implements Callable<Throwable>
   private boolean stop = false;
   /** Field flowStep */
   private FlowStep flowStep;
+  /** Field stepStats */
+  private StepStats stepStats;
 
   /** Field throwable */
   protected Throwable throwable;
@@ -66,6 +69,22 @@ public class FlowStepJob implements Callable<Throwable>
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
+
+    stepStats = new StepStats()
+    {
+    @Override
+    public long getCounter( Enum counter )
+      {
+      try
+        {
+        return runningJob.getCounters().getCounter( counter );
+        }
+      catch( IOException e )
+        {
+        throw new FlowException( "unable to get counter values" );
+        }
+      }
+    };
     }
 
   public void stop()
@@ -74,6 +93,9 @@ public class FlowStepJob implements Callable<Throwable>
       flowStep.logInfo( "stopping: " + stepName );
 
     stop = true;
+
+    if( !stepStats.isFinished() )
+      stepStats.markStopped();
 
     try
       {
@@ -125,15 +147,25 @@ public class FlowStepJob implements Callable<Throwable>
     if( flowStep.isInfoEnabled() )
       flowStep.logInfo( "starting step: " + stepName );
 
+    stepStats.markRunning();
+
     runningJob = new JobClient( currentConf ).submitJob( currentConf );
 
     blockTillCompleteOrStopped();
 
     if( !stop && !runningJob.isSuccessful() )
       {
+      if( !stepStats.isFinished() )
+        stepStats.markFailed( null );
+
       dumpCompletionEvents();
 
       throwable = new FlowException( "step failed: " + stepName );
+      }
+    else
+      {
+      if( runningJob.isSuccessful() && !stepStats.isFinished() )
+        stepStats.markSuccessful();
       }
     }
 
@@ -225,5 +257,15 @@ public class FlowStepJob implements Callable<Throwable>
   public boolean wasStarted()
     {
     return runningJob != null;
+    }
+
+  /**
+   * Method getStepStats returns the stepStats of this FlowStepJob object.
+   *
+   * @return the stepStats (type StepStats) of this FlowStepJob object.
+   */
+  public StepStats getStepStats()
+    {
+    return stepStats;
     }
   }

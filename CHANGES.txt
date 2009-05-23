@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added accessor for increment counters on c.s.CascadingStats. This allows applications to pull aggregate counter
+  values from c.c.Cascade, c.f.Flow, or c.f.FlowSteps.
+
   Added c.t.GlobHfs c.t.Tap type that accepts Hadoop style globbing syntax. This allows multiple files that match
   a given pattern to be used as the sources to a Flow.
 
