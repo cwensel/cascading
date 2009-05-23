@@ -94,7 +94,7 @@ public class FlowStepJob implements Callable<Throwable>
 
     stop = true;
 
-    if( !stepStats.isFinished() )
+    if( !stepStats.isPending() && !stepStats.isFinished() )
       stepStats.markStopped();
 
     try
