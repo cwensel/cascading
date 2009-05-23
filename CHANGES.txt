@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added c.t.GlobHfs c.t.Tap type that accepts Hadoop style globbing syntax. This allows multiple files that match
+  a given pattern to be used as the sources to a Flow.
+
   Added c.o.s.State and c.o.s.Counter helper operations that respectively set 'state' and increment counters.
 
   Added c.f.FlowProcess#setStatus method to allow for text status messages to be posted.
