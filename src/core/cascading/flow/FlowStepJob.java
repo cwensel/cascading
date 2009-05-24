@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import cascading.flow.hadoop.HadoopStepStats;
 import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -55,7 +56,7 @@ public class FlowStepJob implements Callable<Throwable>
   /** Field flowStep */
   private FlowStep flowStep;
   /** Field stepStats */
-  private StepStats stepStats;
+  private HadoopStepStats stepStats;
 
   /** Field throwable */
   protected Throwable throwable;
@@ -70,19 +71,12 @@ public class FlowStepJob implements Callable<Throwable>
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
 
-    stepStats = new StepStats()
+    stepStats = new HadoopStepStats()
     {
     @Override
-    public long getCounter( Enum counter )
+    protected RunningJob getRunningJob()
       {
-      try
-        {
-        return runningJob.getCounters().getCounter( counter );
-        }
-      catch( IOException e )
-        {
-        throw new FlowException( "unable to get counter values" );
-        }
+      return runningJob;
       }
     };
     }
@@ -167,6 +161,16 @@ public class FlowStepJob implements Callable<Throwable>
       if( runningJob.isSuccessful() && !stepStats.isFinished() )
         stepStats.markSuccessful();
       }
+
+    captureJobStats();
+    }
+
+  private void captureJobStats()
+    {
+    JobConf ranJob = new JobConf( runningJob.getJobFile() );
+
+    stepStats.setNumMapTasks( ranJob.getNumMapTasks() );
+    stepStats.setNumReducerTasks( ranJob.getNumReduceTasks() );
     }
 
   protected void blockTillCompleteOrStopped() throws IOException

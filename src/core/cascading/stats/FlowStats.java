@@ -38,6 +38,16 @@ public class FlowStats extends CascadingStats
     }
 
   /**
+   * Method getStepStats returns the stepStats owned by this FlowStats.
+   *
+   * @return the stepStats (type List<StepStats>) of this FlowStats object.
+   */
+  public List<StepStats> getStepStats()
+    {
+    return stepStatsList;
+    }
+
+  /**
    * Method getStepsCount returns the number of steps this Flow executed.
    *
    * @return the stepsCount (type int) of this FlowStats object.
@@ -56,6 +66,13 @@ public class FlowStats extends CascadingStats
       value += step.getCounter( counter );
 
     return value;
+    }
+
+  @Override
+  public void captureDetail()
+    {
+    for( StepStats stepStats : stepStatsList )
+      stepStats.captureDetail();
     }
 
   @Override

@@ -36,8 +36,9 @@ package cascading.stats;
  * <code>failed</code>, or <code>stopped</code> is true.</li>
  * </ul>
  *
- * @see FlowStats
  * @see CascadeStats
+ * @see FlowStats
+ * @see StepStats
  */
 public abstract class CascadingStats
   {
@@ -196,6 +197,14 @@ public abstract class CascadingStats
    * @return the current counter value
    */
   public abstract long getCounter( Enum counter );
+
+  /**
+   * Method captureDetail will recursively capture details about nested systems. Use this method to persist
+   * statistics about a given Cascade, Flow, or FlowStep.
+   * <p/>
+   * Each CascadingStats object must be individually inspected for any system specific details.
+   */
+  public abstract void captureDetail();
 
   protected String getStatsString()
     {

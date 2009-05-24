@@ -26,9 +26,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MiniMRCluster;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,6 +82,11 @@ public class ClusterTestCase extends CascadingTestCase
     {
     }
 
+  public boolean isEnableCluster()
+    {
+    return enableCluster;
+    }
+
   public void setUp() throws IOException
     {
     if( jobConf != null )
@@ -105,8 +110,8 @@ public class ClusterTestCase extends CascadingTestCase
       jobConf = mr.createJobConf();
 
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
-      jobConf.set( "mapred.map.tasks.speculative.execution", "false" );
-      jobConf.set( "mapred.reduce.tasks.speculative.execution", "false" );
+      jobConf.setMapSpeculativeExecution( false );
+      jobConf.setReduceSpeculativeExecution( false );
       }
 
     jobConf.setNumMapTasks( numMapTasks );

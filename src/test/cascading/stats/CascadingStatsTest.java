@@ -26,6 +26,7 @@ import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.HadoopStepStats;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
@@ -41,7 +42,7 @@ import java.io.File;
 /**
  *
  */
-public class FlowStatsTest extends ClusterTestCase
+public class CascadingStatsTest extends ClusterTestCase
   {
 
   String inputFileApache = "build/test/data/apache.10.txt";
@@ -52,7 +53,7 @@ public class FlowStatsTest extends ClusterTestCase
       FIRST, SECOND
     }
 
-  public FlowStatsTest()
+  public CascadingStatsTest()
     {
     super( "flow stats tests", true );
     }
@@ -95,9 +96,34 @@ public class FlowStatsTest extends ClusterTestCase
     assertEquals( 20, flowStats1.getCounter( TestEnum.FIRST ) );
     assertEquals( 10, flowStats1.getCounter( TestEnum.SECOND ) );
 
-    FlowStats fowStats2 = flow2.getFlowStats();
+    FlowStats flowStats2 = flow2.getFlowStats();
 
-    assertEquals( 20, fowStats2.getCounter( TestEnum.FIRST ) );
-    assertEquals( 10, fowStats2.getCounter( TestEnum.SECOND ) );
+    assertEquals( 20, flowStats2.getCounter( TestEnum.FIRST ) );
+    assertEquals( 10, flowStats2.getCounter( TestEnum.SECOND ) );
+
+    cascadeStats.captureDetail();
+
+    assertEquals( 2, flowStats1.getStepsCount() );
+    assertEquals( 2, flowStats2.getStepsCount() );
+
+    HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getStepStats().get( 0 );
+    assertEquals( 2, stats1.getNumMapTasks() );
+    assertEquals( 1, stats1.getNumReducerTasks() );
+
+    if( isEnableCluster() )
+      {
+      assertEquals( 7, stats1.getTaskStats().size() );
+      assertNotNull( stats1.getTaskStats().get( 0 ) );
+      }
+
+    HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getStepStats().get( 0 );
+    assertEquals( 2, stats2.getNumMapTasks() );
+    assertEquals( 1, stats2.getNumReducerTasks() );
+
+    if( isEnableCluster() )
+      {
+      assertEquals( 7, stats2.getTaskStats().size() );
+      assertNotNull( stats2.getTaskStats().get( 0 ) );
+      }
     }
   }

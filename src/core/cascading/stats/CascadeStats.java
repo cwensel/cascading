@@ -64,6 +64,13 @@ public class CascadeStats extends CascadingStats
     }
 
   @Override
+  public void captureDetail()
+    {
+    for( FlowStats flowStats : flowStatsList )
+      flowStats.captureDetail();
+    }
+
+  @Override
   public String toString()
     {
     return "Cascade{" + "flowStatsList=" + flowStatsList + '}';
