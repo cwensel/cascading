@@ -42,6 +42,8 @@ public class FlowStepJob implements Callable<Throwable>
   private final String stepName;
   /** Field currentConf */
   private JobConf currentConf;
+  /** Field jobClient */
+  private JobClient jobClient;
   /** Field runningJob */
   private RunningJob runningJob;
   /** Field pollingInterval */
@@ -73,6 +75,12 @@ public class FlowStepJob implements Callable<Throwable>
 
     stepStats = new HadoopStepStats()
     {
+    @Override
+    protected JobClient getJobClient()
+      {
+      return jobClient;
+      }
+
     @Override
     protected RunningJob getRunningJob()
       {
@@ -143,7 +151,8 @@ public class FlowStepJob implements Callable<Throwable>
 
     stepStats.markRunning();
 
-    runningJob = new JobClient( currentConf ).submitJob( currentConf );
+    jobClient = new JobClient( currentConf );
+    runningJob = jobClient.submitJob( currentConf );
 
     blockTillCompleteOrStopped();
 
@@ -162,15 +171,7 @@ public class FlowStepJob implements Callable<Throwable>
         stepStats.markSuccessful();
       }
 
-    captureJobStats();
-    }
-
-  private void captureJobStats()
-    {
-    JobConf ranJob = new JobConf( runningJob.getJobFile() );
-
-    stepStats.setNumMapTasks( ranJob.getNumMapTasks() );
-    stepStats.setNumReducerTasks( ranJob.getNumReduceTasks() );
+    stepStats.captureJobStats();
     }
 
   protected void blockTillCompleteOrStopped() throws IOException
