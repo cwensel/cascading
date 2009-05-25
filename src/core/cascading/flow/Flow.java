@@ -810,6 +810,8 @@ public class Flow implements Runnable
     if( thread == null )
       throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
 
+    Cascade.printBanner();
+
     try
       {
       flowStats.markRunning();

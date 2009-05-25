@@ -163,6 +163,8 @@
       <classpath refid="project.class.path"/>
     </javac>
 
+    <copy todir="${build.core}/cascading" file="${cascading.basedir}/version.properties"/>
+
     <copy todir="${build.core}">
       <fileset dir="${src.core}">
         <exclude name="**/*.java"/>
