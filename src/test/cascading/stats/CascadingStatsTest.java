@@ -113,7 +113,8 @@ public class CascadingStatsTest extends ClusterTestCase
     if( isEnableCluster() )
       {
       assertEquals( 7, stats1.getTaskStats().size() );
-      assertNotNull( stats1.getTaskStats().get( 0 ) );
+      assertNotNull( stats1.getTaskStats().get( 5 ) );
+      assertTrue( stats1.getTaskStats().get( 5 ).getCounter( TestEnum.FIRST ) > 0 ); // in reducer
       }
 
     HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getStepStats().get( 0 );

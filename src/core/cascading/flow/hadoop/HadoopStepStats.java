@@ -23,6 +23,7 @@ package cascading.flow.hadoop;
 
 import cascading.flow.FlowException;
 import cascading.stats.StepStats;
+import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
@@ -32,6 +33,8 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Class HadoopStepStats ... */
 public abstract class HadoopStepStats extends StepStats
@@ -55,17 +58,19 @@ public abstract class HadoopStepStats extends StepStats
       }
 
     /** Field taskType */
-    TaskType taskType;
+    public TaskType taskType;
     /** Field id */
-    String id;
+    public String id;
     /** Field startTime */
-    long startTime;
+    public long startTime;
     /** Field finishTime */
-    long finishTime;
+    public long finishTime;
     /** Field status */
-    String status;
+    public String status;
     /** Field state */
-    String state;
+    public String state;
+    /** Field counters */
+    public Map<String, Long> counters;
 
     public HadoopTaskStats( TaskType taskType, TaskReport taskReport )
       {
@@ -96,6 +101,34 @@ public abstract class HadoopStepStats extends StepStats
       this.finishTime = taskReport.getFinishTime();
       this.state = taskReport.getState();
       this.status = TaskCompletionEvent.Status.SUCCEEDED.toString();
+
+      setCounters( taskReport );
+      }
+
+    private void setCounters( TaskReport taskReport )
+      {
+      this.counters = new HashMap<String, Long>();
+
+      Counters hadoopCounters = taskReport.getCounters();
+
+      for( Counters.Group group : hadoopCounters )
+        {
+        for( Counters.Counter counter : group )
+          this.counters.put( group.getName() + "." + counter.getName(), counter.getCounter() );
+        }
+      }
+
+    public long getCounter( Enum counter )
+      {
+      if( counters == null )
+        return 0;
+
+      Long value = counters.get( counter.getDeclaringClass().getName() + "." + counter.name() );
+
+      if( value == null )
+        return 0;
+
+      return value;
       }
     }
 
@@ -162,7 +195,6 @@ public abstract class HadoopStepStats extends StepStats
   public void captureJobStats()
     {
     RunningJob runningJob = getRunningJob();
-
     JobConf ranJob = new JobConf( runningJob.getJobFile() );
 
     setNumMapTasks( ranJob.getNumMapTasks() );

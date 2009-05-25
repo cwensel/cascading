@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added ability to capture Hadoop specific job details like task start and stop times, and all available counter values.
+
   Added accessor for increment counters on c.s.CascadingStats. This allows applications to pull aggregate counter
   values from c.c.Cascade, c.f.Flow, or c.f.FlowSteps.
 
