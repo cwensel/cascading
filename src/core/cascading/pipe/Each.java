@@ -21,11 +21,19 @@
 
 package cascading.pipe;
 
+import cascading.CascadingException;
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.operation.*;
+import cascading.operation.Assertion;
+import cascading.operation.AssertionLevel;
+import cascading.operation.ConcreteCall;
+import cascading.operation.Filter;
+import cascading.operation.FilterCall;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
+import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -399,11 +407,11 @@ public class Each extends Operator
 
         handle( flowProcess, input, arguments );
         }
-      catch( AssertionException exception )
+      catch( CascadingException exception )
         {
         throw exception;
         }
-      catch( Exception exception )
+      catch( Throwable exception )
         {
         throw new OperatorException( Each.this, "operator Each failed executing operation", exception );
         }

@@ -23,9 +23,7 @@ package cascading.flow.stack;
 
 import cascading.CascadingException;
 
-/**
- *
- */
+/** Class StackException is an Exception holder that wraps a fatal exception within the pipeline stack. */
 public class StackException extends CascadingException
   {
   public StackException()

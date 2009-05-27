@@ -22,8 +22,13 @@
 package cascading.flow.stack;
 
 import cascading.CascadingException;
-import cascading.flow.*;
+import cascading.flow.FlowElement;
+import cascading.flow.FlowException;
+import cascading.flow.FlowProcess;
+import cascading.flow.Scope;
+import cascading.flow.StepCounters;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -70,6 +75,11 @@ class TapReducerStackElement extends ReducerStackElement
       operateSink( (TupleEntry) values.next() );
     }
 
+  /**
+   * Throws a StackException to flag a hard failure
+   *
+   * @param tupleEntry
+   */
   private void operateSink( TupleEntry tupleEntry )
     {
     try
@@ -88,7 +98,15 @@ class TapReducerStackElement extends ReducerStackElement
       }
     catch( OutOfMemoryError error )
       {
-      throw new FlowException( "out of memory, try increasing task memory allocation", error );
+      throw new StackException( "out of memory, try increasing task memory allocation", error );
+      }
+    catch( IOException exception )
+      {
+      throw new StackException( "io exception writing to tap: " + sink.toString(), exception );
+      }
+    catch( TapException exception )
+      {
+      throw new StackException( "exception writing to tap: " + sink.toString(), exception );
       }
     catch( Throwable throwable )
       {
