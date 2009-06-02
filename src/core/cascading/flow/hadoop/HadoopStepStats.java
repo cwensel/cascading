@@ -21,6 +21,12 @@
 
 package cascading.flow.hadoop;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import cascading.flow.FlowException;
 import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.Counters;
@@ -30,11 +36,6 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskReport;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Class HadoopStepStats ... */
 public abstract class HadoopStepStats extends StepStats
@@ -118,12 +119,17 @@ public abstract class HadoopStepStats extends StepStats
         }
       }
 
-    public long getCounter( Enum counter )
+    public long getCounterValue( Enum counter )
+      {
+      return getCounterValue( counter.getDeclaringClass().getName(), counter.name() );
+      }
+
+    public long getCounterValue( String group, String name )
       {
       if( counters == null )
         return 0;
 
-      Long value = counters.get( counter.getDeclaringClass().getName() + "." + counter.name() );
+      Long value = counters.get( group + "." + name );
 
       if( value == null )
         return 0;
@@ -180,7 +186,7 @@ public abstract class HadoopStepStats extends StepStats
   protected abstract RunningJob getRunningJob();
 
   @Override
-  public long getCounter( Enum counter )
+  public long getCounterValue( Enum counter )
     {
     try
       {
@@ -199,6 +205,11 @@ public abstract class HadoopStepStats extends StepStats
 
     setNumMapTasks( ranJob.getNumMapTasks() );
     setNumReducerTasks( ranJob.getNumReduceTasks() );
+    }
+
+  public Collection getChildren()
+    {
+    return getTaskStats();
     }
 
   @Override

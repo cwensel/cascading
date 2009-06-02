@@ -21,6 +21,8 @@
 
 package cascading.stats;
 
+import java.io.File;
+
 import cascading.ClusterTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
@@ -36,8 +38,6 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.File;
 
 /**
  *
@@ -88,18 +88,18 @@ public class CascadingStatsTest extends ClusterTestCase
 
     CascadeStats cascadeStats = cascade.getCascadeStats();
 
-    assertEquals( 40, cascadeStats.getCounter( TestEnum.FIRST ) );
-    assertEquals( 20, cascadeStats.getCounter( TestEnum.SECOND ) );
+    assertEquals( 40, cascadeStats.getCounterValue( TestEnum.FIRST ) );
+    assertEquals( 20, cascadeStats.getCounterValue( TestEnum.SECOND ) );
 
     FlowStats flowStats1 = flow1.getFlowStats();
 
-    assertEquals( 20, flowStats1.getCounter( TestEnum.FIRST ) );
-    assertEquals( 10, flowStats1.getCounter( TestEnum.SECOND ) );
+    assertEquals( 20, flowStats1.getCounterValue( TestEnum.FIRST ) );
+    assertEquals( 10, flowStats1.getCounterValue( TestEnum.SECOND ) );
 
     FlowStats flowStats2 = flow2.getFlowStats();
 
-    assertEquals( 20, flowStats2.getCounter( TestEnum.FIRST ) );
-    assertEquals( 10, flowStats2.getCounter( TestEnum.SECOND ) );
+    assertEquals( 20, flowStats2.getCounterValue( TestEnum.FIRST ) );
+    assertEquals( 10, flowStats2.getCounterValue( TestEnum.SECOND ) );
 
     cascadeStats.captureDetail();
 
@@ -114,7 +114,7 @@ public class CascadingStatsTest extends ClusterTestCase
       {
       assertEquals( 7, stats1.getTaskStats().size() );
       assertNotNull( stats1.getTaskStats().get( 5 ) );
-      assertTrue( stats1.getTaskStats().get( 5 ).getCounter( TestEnum.FIRST ) > 0 ); // in reducer
+      assertTrue( stats1.getTaskStats().get( 5 ).getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
       }
 
     HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getStepStats().get( 0 );
