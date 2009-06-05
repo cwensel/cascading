@@ -33,7 +33,13 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TuplePair;
-import cascading.tuple.hadoop.*;
+import cascading.tuple.hadoop.GroupingComparator;
+import cascading.tuple.hadoop.GroupingPartitioner;
+import cascading.tuple.hadoop.ReverseTupleComparator;
+import cascading.tuple.hadoop.ReverseTuplePairComparator;
+import cascading.tuple.hadoop.TupleComparator;
+import cascading.tuple.hadoop.TuplePairComparator;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -44,7 +50,12 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
@@ -364,7 +375,7 @@ public class FlowStep implements Serializable
       }
     catch( IOException exception )
       {
-      logWarn( "unable to remove temporary path: " + this.sink, exception );
+      // ignore exception
       }
     }
 
