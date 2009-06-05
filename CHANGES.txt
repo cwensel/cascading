@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed j.u.ConcurrentModificationException when using a c.c.CascadeConnector on c.f.Flows using a c.t.MultiSink
+  c.t.Tap.
+
   Fixed bug where c.f.s.StackException was being wrapped preventing failures within sink c.t.Tap instances from
   causing the c.f.Flow to fail. This mainly affected Flows using traps.
 

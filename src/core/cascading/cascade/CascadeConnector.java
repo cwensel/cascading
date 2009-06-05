@@ -21,13 +21,6 @@
 
 package cascading.cascade;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import cascading.flow.Flow;
 import cascading.tap.MultiTap;
 import cascading.tap.Tap;
@@ -40,6 +33,14 @@ import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
@@ -112,16 +113,21 @@ public class CascadeConnector
     {
     for( Flow flow : flows )
       {
-      Collection<Tap> sources = new HashSet<Tap>( flow.getSources().values() );
+      LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSources().values() );
       Collection<Tap> sinks = flow.getSinks().values();
 
       // account for MultiTap sources
-      for( Tap source : sources )
+      ListIterator<Tap> iterator = sources.listIterator();
+      while( iterator.hasNext() )
         {
+        Tap source = iterator.next();
+
         if( source instanceof MultiTap )
           {
-          sources.remove( source );
-          Collections.addAll( sources, ( (MultiTap) source ).getTaps() );
+          iterator.remove();
+
+          for( Tap tap : ( (MultiTap) source ).getTaps() )
+            iterator.add( tap );
           }
         }
 
