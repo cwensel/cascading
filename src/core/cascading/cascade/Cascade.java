@@ -21,18 +21,6 @@
 
 package cascading.cascade;
 
-import cascading.CascadingException;
-import cascading.flow.Flow;
-import cascading.flow.FlowException;
-import cascading.flow.FlowSkipStrategy;
-import cascading.stats.CascadeStats;
-import cascading.tap.Tap;
-import cascading.util.Util;
-import org.apache.log4j.Logger;
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -47,6 +35,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import cascading.CascadingException;
+import cascading.flow.Flow;
+import cascading.flow.FlowException;
+import cascading.flow.FlowSkipStrategy;
+import cascading.stats.CascadeStats;
+import cascading.tap.Tap;
+import cascading.util.Util;
+import org.apache.log4j.Logger;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
  * A Cascade is an assembly of {@link Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
@@ -79,6 +79,8 @@ public class Cascade implements Runnable
   /** Field versionProperties */
   private static Properties versionProperties;
 
+  /** Field id */
+  private String id;
   /** Field name */
   private String name;
   /** Field jobGraph */
@@ -102,6 +104,8 @@ public class Cascade implements Runnable
     {
     this.name = name;
     this.jobGraph = jobGraph;
+
+    setIDOnFlow();
     }
 
   /**
@@ -115,6 +119,22 @@ public class Cascade implements Runnable
     }
 
   /**
+   * Method getID returns the ID of this Cascade object.
+   * <p/>
+   * The ID value is a long HEX String used to identify this instance globally. Subsequent Cascade
+   * instances created with identical paramers will not return the same ID.
+   *
+   * @return the ID (type String) of this Cascade object.
+   */
+  public String getID()
+    {
+    if( id == null )
+      id = Util.createUniqueID( getName() );
+
+    return id;
+    }
+
+  /**
    * Method getCascadeStats returns the cascadeStats of this Cascade object.
    *
    * @return the cascadeStats (type CascadeStats) of this Cascade object.
@@ -122,6 +142,12 @@ public class Cascade implements Runnable
   public CascadeStats getCascadeStats()
     {
     return cascadeStats;
+    }
+
+  private void setIDOnFlow()
+    {
+    for( Flow flow : getFlows() )
+      flow.setProperty( "cascading.cascade.id", getID() );
     }
 
   /**

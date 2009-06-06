@@ -21,6 +21,13 @@
 
 package cascading.flow;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import cascading.ClusterTestCase;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
@@ -37,13 +44,6 @@ import cascading.tap.Hfs;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -359,6 +359,26 @@ public class FlowTest extends ClusterTestCase
       {
       // ignore
       }
+    }
+
+  public void testFlowID() throws Exception
+    {
+    Tap source = new Lfs( new TextLine(), "input/path" );
+    Tap sink = new Hfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Map<Object, Object> props = getProperties();
+    Flow flow1 = new FlowConnector( props ).connect( source, sink, pipe );
+
+//    System.out.println( "flow.getID() = " + flow1.getID() );
+
+    assertNotNull( "missing id", flow1.getID() );
+    assertNotNull( "missing id in conf", flow1.getJobConf().get( "cascading.flow.id" ) );
+
+    Flow flow2 = new FlowConnector( props ).connect( source, sink, pipe );
+
+    assertTrue( "same id", !flow1.getID().equalsIgnoreCase( flow2.getID() ) );
     }
 
   }

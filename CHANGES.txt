@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added guid like ID values to c.f.Flow and c.c.Cascade instances.
+
   Refactored reduce side grouping and co-grouping operations to remove redundant code calls.
 
   Added ability to capture Hadoop specific job details like task start and stop times, and all available counter values.

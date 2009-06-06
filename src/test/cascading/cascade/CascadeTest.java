@@ -21,6 +21,11 @@
 
 package cascading.cascade;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -38,11 +43,6 @@ import cascading.tap.Hfs;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 public class CascadeTest extends ClusterTestCase
   {
@@ -236,5 +236,25 @@ public class CascadeTest extends ClusterTestCase
 
     assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
     assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+    }
+
+  public void testCascadeID() throws IOException
+    {
+    String path = "simple";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    String id = cascade.getID();
+
+    assertNotNull( "id is null", id );
+    assertEquals( first.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( second.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( third.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( fourth.getProperty( "cascading.cascade.id" ), id );
     }
   }

@@ -21,6 +21,21 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
@@ -36,21 +51,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
@@ -83,6 +83,8 @@ public class Flow implements Runnable
   /** Field shutdownCount */
   private static int shutdownCount = 0;
 
+  /** Field id */
+  private String id;
   /** Field name */
   private String name;
   /** Field listeners */
@@ -178,10 +180,10 @@ public class Flow implements Runnable
 
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
-    setJobConf( jobConf );
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
+    setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
@@ -191,9 +193,9 @@ public class Flow implements Runnable
 
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
-    setJobConf( jobConf );
     this.name = name;
     this.stepGraph = stepGraph;
+    setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
@@ -235,6 +237,22 @@ public class Flow implements Runnable
     this.name = name;
     }
 
+  /**
+   * Method getID returns the ID of this Flow object.
+   * <p/>
+   * The ID value is a long HEX String used to identify this instance globally. Subsequent Flow
+   * instances created with identical paramers will not return the same ID.
+   *
+   * @return the ID (type String) of this Flow object.
+   */
+  public String getID()
+    {
+    if( id == null )
+      id = Util.createUniqueID( getName() );
+
+    return id;
+    }
+
   protected void setSources( Map<String, Tap> sources )
     {
     addListeners( sources.values() );
@@ -267,6 +285,9 @@ public class Flow implements Runnable
     this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
     this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
     this.jobConf.set( "fs.s3tp.impl", S3HttpFileSystem.class.getName() );
+
+    // set the ID for future reference
+    this.jobConf.set( "cascading.flow.id", getID() );
     }
 
   /**
@@ -280,6 +301,28 @@ public class Flow implements Runnable
       setJobConf( new JobConf() );
 
     return jobConf;
+    }
+
+  /**
+   * Method setProperty sets the given key and value on the underlying properites system.
+   *
+   * @param key   of type String
+   * @param value of type String
+   */
+  public void setProperty( String key, String value )
+    {
+    getJobConf().set( key, value );
+    }
+
+  /**
+   * Method getProperty returns the value associated with the given key from the underlying properties system.
+   *
+   * @param key of type String
+   * @return String
+   */
+  public String getProperty( String key )
+    {
+    return getJobConf().get( key );
     }
 
   /**
