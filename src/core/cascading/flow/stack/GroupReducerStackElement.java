@@ -39,15 +39,13 @@ import cascading.tuple.TupleEntryIterator;
 class GroupReducerStackElement extends ReducerStackElement
   {
   private final Group group;
-  private final Set<Scope> incomingScopes;
-  private final Scope thisScope;
 
   public GroupReducerStackElement( FlowProcess flowProcess, Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, Tap trap )
     {
     super( trap, outGroupingFields, flowProcess );
     this.group = group;
-    this.incomingScopes = incomingScopes;
-    this.thisScope = thisScope;
+
+    group.initializeReduce( flowProcess, incomingScopes, thisScope );
     }
 
   public FlowElement getFlowElement()
@@ -69,7 +67,7 @@ class GroupReducerStackElement extends ReducerStackElement
     // this can be one big tuple. the values iterator will have one Tuple of the format:
     // [ [key] [group1] [group2] ] where [groupX] == [ [...] [...] ...], a cogroup for each source
     // this can be nasty
-    values = group.iterateReduceValues( getFlowProcess(), incomingScopes, thisScope, key, values );
+    values = group.iterateReduceValues( key, values );
 
     values = new TupleEntryIterator( ( (ReducerStackElement) next ).resolveIncomingOperationFields(), values );
 

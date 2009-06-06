@@ -21,6 +21,8 @@
 
 package cascading.pipe.cogroup;
 
+import java.util.Iterator;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.Fields;
@@ -30,8 +32,6 @@ import cascading.tuple.Tuple;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /**
  * Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams.
@@ -54,11 +54,16 @@ public class CoGroupClosure extends GroupClosure
 
   /** Field groups */
   SpillableTupleList[] groups;
+  private int numSelfJoins;
+  private CompressionCodec codec;
+  private long threshold;
 
-  public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
+  public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
-    super( groupingFields, valueFields, key, values );
-    build( flowProcess, numSelfJoins );
+    super( groupingFields, valueFields );
+    this.numSelfJoins = numSelfJoins;
+    this.codec = getCompressionCodec( flowProcess );
+    threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
     }
 
   @Override
@@ -81,18 +86,21 @@ public class CoGroupClosure extends GroupClosure
     return groups[ pos ];
     }
 
-  public void build( FlowProcess flowProcess, int numSelfJoins )
+  @Override
+  public void reset( Tuple grouping, Iterator values )
+    {
+    super.reset( grouping, values );
+
+    build();
+    }
+
+  public void build()
     {
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      {
-      long threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
-      CompressionCodec codec = getCompressionCodec( flowProcess );
-
       groups[ i ] = new SpillableTupleList( threshold, codec );
-      }
 
     while( values.hasNext() )
       {

@@ -21,26 +21,24 @@
 
 package cascading.pipe.cogroup;
 
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-
 import java.util.Arrays;
 import java.util.Iterator;
+
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 /** Class GroupClosure is used internally to represent groups of tuples during grouping. */
 public class GroupClosure
   {
   final Fields[] groupingFields;
   final Fields[] valueFields;
-  final Tuple grouping;
-  final Iterator values;
+  Tuple grouping;
+  Iterator values;
 
-  public GroupClosure( Fields[] groupingFields, Fields[] valueFields, Tuple key, Iterator values )
+  public GroupClosure( Fields[] groupingFields, Fields[] valueFields )
     {
     this.groupingFields = Arrays.copyOf( groupingFields, groupingFields.length );
     this.valueFields = Arrays.copyOf( valueFields, valueFields.length );
-    this.grouping = key;
-    this.values = values;
     }
 
   public int size()
@@ -86,5 +84,11 @@ public class GroupClosure
       throw new UnsupportedOperationException( "remove not supported" );
       }
     };
+    }
+
+  public void reset( Tuple grouping, Iterator values )
+    {
+    this.grouping = grouping;
+    this.values = values;
     }
   }
