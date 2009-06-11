@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Improved error message when sink c.t.Tap instances are equivalent.
+
   Fixed j.u.ConcurrentModificationException when using a c.c.CascadeConnector on c.f.Flows using a c.t.MultiSink
   c.t.Tap.
 
