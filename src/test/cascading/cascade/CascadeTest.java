@@ -22,7 +22,11 @@
 package cascading.cascade;
 
 import cascading.ClusterTestCase;
-import cascading.flow.*;
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowSkipStrategy;
+import cascading.flow.FlowStep;
+import cascading.flow.LockingFlowListener;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -152,7 +156,7 @@ public class CascadeTest extends ClusterTestCase
     Flow second = previousMultiTapFlow( path, "second" );
     Flow multitap = multiTapFlow( Tap.taps( first.getSink(), second.getSink() ), path );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, multitap );
+    Cascade cascade = new CascadeConnector().connect( multitap, first, second );
 
     cascade.start();
 
