@@ -21,15 +21,20 @@
 
 package cascading.flow.stack;
 
+import java.io.IOException;
+
 import cascading.CascadingException;
-import cascading.flow.*;
+import cascading.flow.FlowElement;
+import cascading.flow.FlowException;
+import cascading.flow.FlowProcess;
+import cascading.flow.Scope;
+import cascading.flow.StepCounters;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.mapred.OutputCollector;
-
-import java.io.IOException;
 
 /**
  *
@@ -79,7 +84,15 @@ class TapMapperStackElement extends MapperStackElement
       }
     catch( OutOfMemoryError error )
       {
-      throw new FlowException( "out of memory, try increasing task memory allocation", error );
+      throw new StackException( "out of memory, try increasing task memory allocation", error );
+      }
+    catch( IOException exception )
+      {
+      throw new StackException( "io exception writing to tap: " + sink.toString(), exception );
+      }
+    catch( TapException exception )
+      {
+      throw new StackException( "exception writing to tap: " + sink.toString(), exception );
       }
     catch( Throwable throwable )
       {

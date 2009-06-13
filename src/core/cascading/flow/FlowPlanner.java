@@ -21,17 +21,6 @@
 
 package cascading.flow;
 
-import cascading.operation.AssertionLevel;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.Group;
-import cascading.pipe.Pipe;
-import cascading.pipe.SubAssembly;
-import cascading.tap.Tap;
-import org.apache.log4j.Logger;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +28,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import cascading.operation.AssertionLevel;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.Group;
+import cascading.pipe.Pipe;
+import cascading.pipe.SubAssembly;
+import cascading.tap.Tap;
+import cascading.util.Util;
+import org.apache.log4j.Logger;
+import org.jgrapht.GraphPath;
+import org.jgrapht.Graphs;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public class FlowPlanner
@@ -158,13 +159,20 @@ public class FlowPlanner
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          LOG.warn( "duplicate tail name found: " + tailName );
+          LOG.warn( "duplicate tail name found, not an error but tails should have unique names: " + tailName );
 //          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
         tails.add( pipe );
         }
       }
+
+    tailNames.removeAll( sinks.keySet() );
+    Set<String> remainingSinks = new HashSet<String>( sinks.keySet() );
+    remainingSinks.removeAll( tailNames );
+
+    if( tailNames.size() != 0 )
+      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( tailNames, ", " ) + "], remaining sinks: [" + Util.join( remainingSinks, ", " ) + "]" );
 
     // handle heads
     Set<Pipe> heads = new HashSet<Pipe>();
@@ -180,13 +188,21 @@ public class FlowPlanner
           throw new PlannerException( head, "pipe name not found in either sink or source map: " + headName );
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
-          LOG.warn( "duplicate head name found: " + headName );
+          LOG.warn( "duplicate tail name found, not an error but heads should have unique names: " + headName );
 //          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
         heads.add( head );
         }
       }
+
+    headNames.removeAll( sources.keySet() );
+    Set<String> remainingSources = new HashSet<String>( sources.keySet() );
+    remainingSources.removeAll( headNames );
+
+    if( headNames.size() != 0 )
+      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( headNames, ", " ) + "], remaining sources: [" + Util.join( remainingSources, ", " ) + "]" );
+
     }
 
   protected void verifyTraps( Map<String, Tap> traps, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )

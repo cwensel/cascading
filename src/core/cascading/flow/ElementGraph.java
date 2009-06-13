@@ -21,6 +21,17 @@
 
 package cascading.flow;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -40,17 +51,6 @@ import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Class ElementGraph represents the executable FlowElement graph. */
 public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
@@ -192,7 +192,16 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     for( String sink : sinks.keySet() )
       {
-      Scope scope = addEdge( sinks.get( sink ), tail );
+      Scope scope = null;
+
+      try
+        {
+        scope = addEdge( sinks.get( sink ), tail );
+        }
+      catch( IllegalArgumentException exception )
+        {
+        throw new ElementGraphException( "missing pipe for sink tap: [" + sink + "]" );
+        }
 
       if( scope == null )
         throw new ElementGraphException( "cannot sink to the same path from multiple branches: [" + Util.join( sinks.values() ) + "]" );

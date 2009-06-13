@@ -156,7 +156,7 @@ public class CascadeTest extends ClusterTestCase
     Flow second = previousMultiTapFlow( path, "second" );
     Flow multitap = multiTapFlow( Tap.taps( first.getSink(), second.getSink() ), path );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, multitap );
+    Cascade cascade = new CascadeConnector().connect( multitap, first, second );
 
     cascade.start();
 

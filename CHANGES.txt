@@ -48,6 +48,17 @@ unreleased (wip 1.1)
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
 
+1.0.12
+
+  Fixed bug where the c.f.FlowPlanner did not detect that tails were not bound to sinks, or that some tail references
+  were missing.
+
+  Fixed j.u.ConcurrentModificationException when using a c.c.CascadeConnector on c.f.Flows using a c.t.MultiSink
+  c.t.Tap.
+
+  Fixed bug where c.f.s.StackException was being wrapped preventing failures within sink c.t.Tap instances from
+  causing the c.f.Flow to fail. This mainly affected Flows using traps.
+
 1.0.11
 
   Added clearer error message when c.t.Tap is used as both source and sink in a given Flow.

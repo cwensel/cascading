@@ -21,6 +21,10 @@
 
 package cascading.pipe;
 
+import java.util.Iterator;
+import java.util.Set;
+
+import cascading.CascadingException;
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
@@ -35,9 +39,6 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.Tuples;
-
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * The Every operator applies an {@link Aggregator} or {@link Buffer} to every grouping.
@@ -393,6 +394,10 @@ public class Every extends Operator
         {
         getAggregator().start( flowProcess, operationCall );
         }
+      catch( CascadingException exception )
+        {
+        throw exception;
+        }
       catch( Exception exception )
         {
         throw new OperatorException( Every.this, "operator Every failed starting aggregator", exception );
@@ -408,6 +413,10 @@ public class Every extends Operator
         operationCall.setArguments( arguments );
 
         getAggregator().aggregate( flowProcess, operationCall );
+        }
+      catch( CascadingException exception )
+        {
+        throw exception;
         }
       catch( Throwable throwable )
         {
@@ -425,6 +434,10 @@ public class Every extends Operator
       try
         {
         getAggregator().complete( flowProcess, operationCall );
+        }
+      catch( CascadingException exception )
+        {
+        throw exception;
         }
       catch( Exception exception )
         {
@@ -508,6 +521,10 @@ public class Every extends Operator
       try
         {
         getReducer().operate( flowProcess, operationCall );
+        }
+      catch( CascadingException exception )
+        {
+        throw exception;
         }
       catch( Throwable throwable )
         {

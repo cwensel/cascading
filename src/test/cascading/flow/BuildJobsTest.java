@@ -21,6 +21,13 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import cascading.CascadingTestCase;
 import cascading.TestBuffer;
 import cascading.TestFunction;
@@ -51,13 +58,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /** @version $Id: //depot/calku/cascading/src/test/cascading/flow/BuildJobsTest.java#2 $ */
 public class BuildJobsTest extends CascadingTestCase
@@ -328,6 +328,39 @@ public class BuildJobsTest extends CascadingTestCase
     List<FlowStep> steps = new FlowConnector().connect( sources, sinks, left, right ).getSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
+    }
+
+  /** this test verifies that the planner recognizes there are fewer tails than sinks. */
+  public void testSplitHangingTails()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    try
+      {
+      new FlowConnector().connect( sources, sinks, pipe );
+      fail( "did not catch missing tails" );
+      }
+    catch( Exception exception )
+      {
+      System.out.println( "exception.getMessage() = " + exception.getMessage() );
+      assertTrue( exception.getMessage().contains( "left, right" ) );
+      }
     }
 
   public void testSplitOnNonSafeOperations()

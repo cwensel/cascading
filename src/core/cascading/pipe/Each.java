@@ -21,12 +21,14 @@
 
 package cascading.pipe;
 
+import java.util.Set;
+
+import cascading.CascadingException;
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
-import cascading.operation.AssertionException;
 import cascading.operation.AssertionLevel;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
@@ -39,8 +41,6 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.log4j.Logger;
-
-import java.util.Set;
 
 /**
  * The Each operator applies either a {@link Function} or a {@link Filter} to each entry in the {@link Tuple}
@@ -409,11 +409,11 @@ public class Each extends Operator
 
         handle( flowProcess, input, arguments );
         }
-      catch( AssertionException exception )
+      catch( CascadingException exception )
         {
         throw exception;
         }
-      catch( Exception exception )
+      catch( Throwable exception )
         {
         throw new OperatorException( Each.this, "operator Each failed executing operation", exception );
         }
