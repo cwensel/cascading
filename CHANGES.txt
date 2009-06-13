@@ -2,7 +2,8 @@ Cascading Change Log
 
 unreleased
 
-  Improved error message when sink c.t.Tap instances are equivalent.
+  Fixed bug where the c.f.FlowPlanner did not detect that tails were not bound to sinks, or that some tail references
+  were missing.
 
   Fixed j.u.ConcurrentModificationException when using a c.c.CascadeConnector on c.f.Flows using a c.t.MultiSink
   c.t.Tap.

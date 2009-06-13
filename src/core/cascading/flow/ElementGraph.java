@@ -177,7 +177,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         }
       catch( IllegalArgumentException exception )
         {
-        throw new ElementGraphException( "cannot sink to the same path from multiple branches: [" + Util.join( sinks.values() ) + "]" );
+        throw new ElementGraphException( "missing pipe for sink tap: [" + sink + "]" );
         }
 
       if( scope == null )
