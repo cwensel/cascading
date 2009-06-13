@@ -25,6 +25,7 @@
 
   <dirname property="cascading.basedir" file="${ant.file.cascading}"/>
 
+  <property name="system.build.number" value="dev"/>
   <property file="${user.home}/build.properties"/>
   <property file="${cascading.basedir}/version.properties"/>
   <property file="${cascading.basedir}/build.properties"/>
