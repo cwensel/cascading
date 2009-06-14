@@ -25,7 +25,7 @@
 
   <dirname property="cascading.basedir" file="${ant.file.cascading}"/>
 
-  <property name="system.build.number" value="dev"/>
+  <property name="build.number" value="dev"/>
   <property file="${user.home}/build.properties"/>
   <property file="${cascading.basedir}/version.properties"/>
   <property file="${cascading.basedir}/build.properties"/>
@@ -383,6 +383,7 @@
   </target>
 
   <target name="dist" depends="jar,javadoc">
+    <echo message="creating version: ${cascading.release.version}"/>
     <mkdir dir="${dist}"/>
 
     <copy todir="${dist}">
