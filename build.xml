@@ -424,4 +424,10 @@
     </tar>
   </target>
 
+  <target name="push-package" unless="${package.remote.path}">
+    <property name="package.remote.port" value="22"/>
+    <scp file="${tar.cascading}" todir="${package.remote.path}" keyfile="${package.remote.keyfile}"
+         passphrase="" port="${package.remote.port}"/>
+  </target>
+
 </project>
