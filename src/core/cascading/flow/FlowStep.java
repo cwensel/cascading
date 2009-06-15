@@ -317,12 +317,13 @@ public class FlowStep implements Serializable
 
   private void initFromSink( JobConf conf ) throws IOException
     {
+    // init sink first so tempSink can take precedence
+    if( sink != null )
+      sink.sinkInit( conf );
+
     // tempSink exists cause sink is writeDirect
     if( tempSink != null )
       tempSink.sinkInit( conf );
-
-    if( sink != null )
-      sink.sinkInit( conf );
     }
 
   public TapIterator openSourceForRead( JobConf conf ) throws IOException
