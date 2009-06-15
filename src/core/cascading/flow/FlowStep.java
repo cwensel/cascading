@@ -317,9 +317,11 @@ public class FlowStep implements Serializable
 
   private void initFromSink( JobConf conf ) throws IOException
     {
+    // tempSink exists cause sink is writeDirect
     if( tempSink != null )
       tempSink.sinkInit( conf );
-    else
+
+    if( sink != null )
       sink.sinkInit( conf );
     }
 

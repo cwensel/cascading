@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Fixed bug where c.t.Tap instances that returned true for #isWriteDirect() were not properly being initialized
+  when used as a sink.
+
   Added guid like ID values to c.f.Flow and c.c.Cascade instances.
 
   Refactored reduce side grouping and co-grouping operations to remove redundant code calls.
