@@ -21,6 +21,11 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
@@ -32,11 +37,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /**
  *
  */
@@ -46,6 +46,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
   private static final Logger LOG = Logger.getLogger( MultiSinkTap.class );
 
   private Tap[] taps;
+  private String tempPath = "__temporary_multisink" + Integer.toString( (int) ( 10000000 * Math.random() ) );
 
   private class MultiSinkCollector extends TupleEntryCollector implements OutputCollector
     {
@@ -68,7 +69,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
 
     protected void collect( Tuple tuple )
       {
-      throw new UnsupportedOperationException( "collect should never be called on TemplateCollector" );
+      throw new UnsupportedOperationException( "collect should never be called on MultiSinkCollector" );
       }
 
     public void collect( Object key, Object value ) throws IOException
@@ -128,7 +129,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
   @Override
   public Path getPath()
     {
-    return new Path( "__temporary_multisink" + Integer.toString( (int) ( 10000000 * Math.random() ) ) );
+    return new Path( tempPath );
     }
 
   @Override

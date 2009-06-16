@@ -321,7 +321,7 @@ public class FlowStep implements Serializable
     if( sink != null )
       sink.sinkInit( conf );
 
-    // tempSink exists cause sink is writeDirect
+    // tempSink exists because sink is writeDirect
     if( tempSink != null )
       tempSink.sinkInit( conf );
     }
