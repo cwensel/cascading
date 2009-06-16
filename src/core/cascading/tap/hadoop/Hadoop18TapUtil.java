@@ -19,25 +19,13 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cascading.tap.hadoop;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import cascading.tap.Tap;
 import org.apache.hadoop.fs.FileStatus;
@@ -47,13 +35,6 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-/** This class embodies the dependencies between Hadoop versions. It is copyright and licensed under Apache */
 public class Hadoop18TapUtil
   {
   private static final Logger LOG = Logger.getLogger( Hadoop18TapUtil.class );
@@ -92,6 +73,15 @@ public class Hadoop18TapUtil
     if( workpath == null )
       return;
 
+    FileSystem fs = getFSSafe( conf, new Path( workpath ) );
+
+    if( fs == null )
+      return;
+
+    String taskId = conf.get( "mapred.task.id" );
+
+    LOG.info( "setting up task: '" + taskId + "' - " + workpath );
+
     AtomicInteger integer = pathCounts.get( workpath );
 
     if( integer == null )
@@ -109,7 +99,10 @@ public class Hadoop18TapUtil
 
     if( taskOutputPath != null )
       {
-      FileSystem fs = taskOutputPath.getFileSystem( conf );
+      FileSystem fs = getFSSafe( conf, taskOutputPath );
+
+      if( fs == null )
+        return false;
 
       if( fs.exists( taskOutputPath ) )
         return true;
@@ -127,6 +120,11 @@ public class Hadoop18TapUtil
     {
     Path taskOutputPath = getTaskOutputPath( conf );
 
+    FileSystem fs = getFSSafe( conf, taskOutputPath );
+
+    if( fs == null )
+      return;
+
     AtomicInteger integer = pathCounts.get( taskOutputPath.toString() );
 
     if( integer.decrementAndGet() != 0 )
@@ -134,10 +132,10 @@ public class Hadoop18TapUtil
 
     String taskId = conf.get( "mapred.task.id" );
 
+    LOG.info( "committing task: '" + taskId + "' - " + taskOutputPath );
+
     if( taskOutputPath != null )
       {
-      FileSystem fs = taskOutputPath.getFileSystem( conf );
-
       if( fs.exists( taskOutputPath ) )
         {
         Path jobOutputPath = taskOutputPath.getParent().getParent();
@@ -146,11 +144,9 @@ public class Hadoop18TapUtil
 
         // Delete the temporary task-specific output directory
         if( !fs.delete( taskOutputPath, true ) )
-          {
-          LOG.info( "Failed to delete the temporary output" + " directory of task: " + taskId + " - " + taskOutputPath );
-          }
+          LOG.info( "failed to delete the temporary output directory of task: '" + taskId + "' - " + taskOutputPath );
 
-        LOG.info( "Saved output of task '" + taskId + "' to " + jobOutputPath );
+        LOG.info( "saved output of task '" + taskId + "' to " + jobOutputPath );
         }
       }
     }
@@ -181,13 +177,15 @@ public class Hadoop18TapUtil
     cleanTempPath( conf, outputPath );
     }
 
-  private static void cleanTempPath( JobConf conf, Path outputPath ) throws IOException
+  private static synchronized void cleanTempPath( JobConf conf, Path outputPath ) throws IOException
     {
     // do the clean up of temporary directory
 
     if( outputPath != null )
       {
       Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
+
+      LOG.info( "deleting temp path " + tmpDir );
 
       FileSystem fileSys = getFSSafe( conf, tmpDir );
 
@@ -253,7 +251,7 @@ public class Hadoop18TapUtil
 
       if( !fileSys.exists( tmpDir ) && !fileSys.mkdirs( tmpDir ) )
         {
-        LOG.error( "Mkdirs failed to create " + tmpDir.toString() );
+        LOG.error( "mkdirs failed to create " + tmpDir.toString() );
         }
       }
     }

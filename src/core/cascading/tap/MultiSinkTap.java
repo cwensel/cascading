@@ -22,12 +22,16 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
+import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -38,32 +42,40 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * Class MultiSinkTap is both a {@link CompositeTap} and {@link SinkTap} that can write to multiple child {@link Tap} instances simultaneously.
+ * <p/>
+ * It is the counterpart to {@link MultiSourceTap}.
  */
 public class MultiSinkTap extends SinkTap implements CompositeTap
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MultiSinkTap.class );
 
+  /** Field taps */
   private Tap[] taps;
-  private String tempPath = "__temporary_multisink" + Integer.toString( (int) ( 10000000 * Math.random() ) );
+  /** Field tempPath */
+  private String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
+  /** Field childConfigs */
+  private List<Map<String, String>> childConfigs;
 
   private class MultiSinkCollector extends TupleEntryCollector implements OutputCollector
     {
-    JobConf conf;
     OutputCollector[] collectors;
 
     public MultiSinkCollector( JobConf conf, Tap... taps ) throws IOException
       {
-      this.conf = conf;
-
       collectors = new OutputCollector[taps.length];
+
+      conf = new JobConf( conf );
+
+      JobConf[] jobConfs = MultiInputFormat.getJobConfs( conf, childConfigs );
 
       for( int i = 0; i < taps.length; i++ )
         {
         Tap tap = taps[ i ];
         LOG.info( "opening for write: " + tap.toString() );
-        collectors[ i ] = (OutputCollector) tap.openForWrite( conf );
+
+        collectors[ i ] = (OutputCollector) tap.openForWrite( jobConfs[ i ] );
         }
       }
 
@@ -141,8 +153,17 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
   @Override
   public void sinkInit( JobConf conf ) throws IOException
     {
-    for( Tap tap : getTaps() )
-      tap.sinkInit( new JobConf( conf ) );
+    childConfigs = new ArrayList<Map<String, String>>();
+
+    for( int i = 0; i < getTaps().length; i++ )
+      {
+      Tap tap = getTaps()[ i ];
+      JobConf jobConf = new JobConf( conf );
+
+      tap.sinkInit( jobConf );
+
+      childConfigs.add( MultiInputFormat.getConfig( conf, jobConf ) );
+      }
     }
 
   @Override

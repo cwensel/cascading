@@ -21,6 +21,8 @@
 
 package cascading.tap.hadoop;
 
+import java.io.IOException;
+
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
@@ -33,8 +35,6 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
@@ -97,14 +97,17 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    Hadoop18TapUtil.setupJob( conf );
+    if( !tap.isWriteDirect() )
+      {
+      Hadoop18TapUtil.setupJob( conf );
 
-    if( prefix != null )
-      filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
-    else
-      filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
+      if( prefix != null )
+        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
+      else
+        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
 
-    Hadoop18TapUtil.setupTask( conf );
+      Hadoop18TapUtil.setupTask( conf );
+      }
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
@@ -139,10 +142,13 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       writer.close( reporter );
 
-      if( Hadoop18TapUtil.needsTaskCommit( conf ) )
-        Hadoop18TapUtil.commitTask( conf );
+      if( !tap.isWriteDirect() )
+        {
+        if( Hadoop18TapUtil.needsTaskCommit( conf ) )
+          Hadoop18TapUtil.commitTask( conf );
 
-      Hadoop18TapUtil.cleanupJob( conf );
+        Hadoop18TapUtil.cleanupJob( conf );
+        }
       }
     catch( IOException exception )
       {
