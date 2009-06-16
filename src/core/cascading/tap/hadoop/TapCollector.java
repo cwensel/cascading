@@ -29,6 +29,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
@@ -61,6 +62,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private TupleEntry outputEntry;
   /** Field reporter */
   private Reporter reporter = Reporter.NULL;
+  private boolean isFileOutputFormat;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -97,7 +99,11 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     tap.sinkInit( conf ); // tap should not delete if called within a task
 
-    if( !tap.isWriteDirect() )
+    OutputFormat outputFormat = conf.getOutputFormat();
+
+    isFileOutputFormat = outputFormat instanceof FileOutputFormat;
+
+    if( isFileOutputFormat )
       {
       Hadoop18TapUtil.setupJob( conf );
 
@@ -108,8 +114,6 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       Hadoop18TapUtil.setupTask( conf );
       }
-
-    OutputFormat outputFormat = conf.getOutputFormat();
 
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
@@ -142,7 +146,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       writer.close( reporter );
 
-      if( !tap.isWriteDirect() )
+      if( isFileOutputFormat )
         {
         if( Hadoop18TapUtil.needsTaskCommit( conf ) )
           Hadoop18TapUtil.commitTask( conf );
