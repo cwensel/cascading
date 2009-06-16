@@ -60,9 +60,10 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private String prefix;
   /** Field outputEntry */
   private TupleEntry outputEntry;
+  /** Field isFileOutputFormat */
+  private boolean isFileOutputFormat;
   /** Field reporter */
   private Reporter reporter = Reporter.NULL;
-  private boolean isFileOutputFormat;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -142,16 +143,24 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
     {
     try
       {
-      LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
-
-      writer.close( reporter );
-
       if( isFileOutputFormat )
-        {
-        if( Hadoop18TapUtil.needsTaskCommit( conf ) )
-          Hadoop18TapUtil.commitTask( conf );
+        LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
+      else
+        LOG.info( "closing tap collector for: " + tap.toString() );
 
-        Hadoop18TapUtil.cleanupJob( conf );
+      try
+        {
+        writer.close( reporter );
+        }
+      finally
+        {
+        if( isFileOutputFormat )
+          {
+          if( Hadoop18TapUtil.needsTaskCommit( conf ) )
+            Hadoop18TapUtil.commitTask( conf );
+
+          Hadoop18TapUtil.cleanupJob( conf );
+          }
         }
       }
     catch( IOException exception )

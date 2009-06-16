@@ -105,7 +105,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
             }
           catch( Exception exception )
             {
-            // do nothing
+            LOG.warn( "exception closing TupleEntryCollector", exception );
             }
           }
         }
