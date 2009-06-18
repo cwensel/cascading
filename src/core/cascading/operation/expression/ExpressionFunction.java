@@ -58,7 +58,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression );
 
-    if( fieldDeclaration.size() != 1 )
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
@@ -75,7 +75,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression, parameterType );
 
-    if( fieldDeclaration.size() != 1 )
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
@@ -94,7 +94,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression, parameterNames, parameterTypes );
 
-    if( fieldDeclaration.size() != 1 )
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
