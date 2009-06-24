@@ -73,6 +73,10 @@ public class HadoopUtil
       if( value == null ) // don't stuff null values
         continue;
 
+      // don't let these objects pass, even though toString is called below.
+      if( value instanceof Class || value instanceof JobConf )
+        continue;
+
       jobConf.set( key.toString(), value.toString() );
       }
 
