@@ -21,15 +21,15 @@
 
 package cascading.flow.hadoop;
 
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -60,10 +60,11 @@ public class HadoopUtil
     if( properties == null )
       return jobConf;
 
-    Set<Object> keys = properties.keySet();
+    Set<Object> keys = new HashSet<Object>( properties.keySet() );
 
+    // keys will only be grabbed if both key/value are String, so keep orig keys
     if( properties instanceof Properties )
-      keys = new HashSet<Object>( ( (Properties) properties ).stringPropertyNames() );
+      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
 
     for( Object key : keys )
       {
