@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed bug where custom serializations where not recognized during co-grouping spills inside c.t.SpillableTupleList.
+
 1.0.12
 
   Fixed bug where the c.f.FlowPlanner did not detect that tails were not bound to sinks, or that some tail references

@@ -21,8 +21,6 @@
 
 package cascading.pipe.cogroup;
 
-import java.util.Iterator;
-
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
@@ -30,9 +28,9 @@ import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
-/**
- * Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams.
- */
+import java.util.Iterator;
+
+/** Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams. */
 public class CoGroupClosure extends GroupClosure
   {
   public static final String SPILL_THRESHOLD = "cascading.cogroup.spill.threshold";
@@ -75,8 +73,11 @@ public class CoGroupClosure extends GroupClosure
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
+    String serializations = (String) flowProcess.getProperty( "io.serializations" );
+    long threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
+
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold ) );
+      groups[ i ] = new SpillableTupleList( threshold, serializations );
 
     while( values.hasNext() )
       {

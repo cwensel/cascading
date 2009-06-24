@@ -21,29 +21,25 @@
 
 package cascading.tuple.hadoop;
 
-import org.apache.hadoop.io.Text;
-
 /**
  *
  */
-public class TestText extends Text
+public class TestText implements Comparable<TestText>
   {
+  String value;
+
   public TestText()
     {
     }
 
   public TestText( String string )
     {
-    super( string );
+    this.value = string;
     }
 
-  public TestText( Text utf8 )
+  @Override
+  public int compareTo( TestText o )
     {
-    super( utf8 );
-    }
-
-  public TestText( byte[] utf8 )
-    {
-    super( utf8 );
+    return value.compareTo( o.value );
     }
   }
