@@ -21,15 +21,97 @@
 
 package cascading.tuple.hadoop;
 
-import org.apache.hadoop.io.serializer.WritableSerialization;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.io.WritableUtils;
+import org.apache.hadoop.io.serializer.Deserializer;
+import org.apache.hadoop.io.serializer.Serialization;
+import org.apache.hadoop.io.serializer.Serializer;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  *
  */
-@SerializationToken(tokens={222}, classNames = {"cascading.tuple.hadoop.TestText"})
-public class TestSerialization extends WritableSerialization
+@SerializationToken(tokens = {222}, classNames = {"cascading.tuple.hadoop.TestText"})
+public class TestSerialization extends Configured implements Serialization<TestText>
   {
+
+  public static class TestTextDeserializer implements Deserializer<TestText>
+    {
+    private DataInputStream in;
+
+    @Override
+    public void open( InputStream in ) throws IOException
+      {
+      if( in instanceof DataInputStream )
+        this.in = (DataInputStream) in;
+      else
+        this.in = new DataInputStream( in );
+      }
+
+    @Override
+    public TestText deserialize( TestText testText ) throws IOException
+      {
+      return new TestText( WritableUtils.readString( in ) );
+      }
+
+    @Override
+    public void close() throws IOException
+      {
+      in.close();
+      }
+    }
+
+  public static class TestTextSerializer implements Serializer<TestText>
+    {
+    private DataOutputStream out;
+
+    @Override
+    public void open( OutputStream out ) throws IOException
+      {
+      if( out instanceof DataOutputStream )
+        this.out = (DataOutputStream) out;
+      else
+        this.out = new DataOutputStream( out );
+      }
+
+    @Override
+    public void serialize( TestText testText ) throws IOException
+      {
+      WritableUtils.writeString( out, testText.value );
+      }
+
+    @Override
+    public void close() throws IOException
+      {
+      out.close();
+      }
+    }
+
+
   public TestSerialization()
     {
+    }
+
+  @Override
+  public boolean accept( Class<?> c )
+    {
+    return TestText.class.isAssignableFrom( c );
+    }
+
+  @Override
+  public Serializer<TestText> getSerializer( Class<TestText> c )
+    {
+    return new TestTextSerializer();
+    }
+
+  @Override
+  public Deserializer<TestText> getDeserializer( Class<TestText> c )
+    {
+    return new TestTextDeserializer();
     }
   }

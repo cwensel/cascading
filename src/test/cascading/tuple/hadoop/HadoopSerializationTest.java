@@ -21,11 +21,6 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import cascading.CascadingTestCase;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleInputStream;
@@ -33,7 +28,13 @@ import cascading.tuple.TupleOutputStream;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.serializer.WritableSerialization;
 import org.apache.hadoop.mapred.JobConf;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -53,7 +54,7 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     JobConf jobConf = new JobConf();
 
-    jobConf.set( "io.serializations", TestSerialization.class.getName() ); // disable/replace WritableSerialization class
+    jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
     jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing
 
     TupleSerialization tupleSerialization = new TupleSerialization( jobConf );
@@ -75,7 +76,7 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     output.close();
 
-    assertEquals( "wrong size", 92582L, file.length() ); // just makes sure the file size doesnt change from expected
+    assertEquals( "wrong size", 94085L, file.length() ); // just makes sure the file size doesnt change from expected
 
     TupleInputStream input = new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
 

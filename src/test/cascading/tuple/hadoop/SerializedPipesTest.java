@@ -25,13 +25,19 @@ import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.*;
+import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
+import cascading.pipe.cogroup.CoGroupClosure;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
@@ -42,6 +48,7 @@ import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,6 +90,38 @@ public class SerializedPipesTest extends ClusterTestCase
     public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
       functionCall.getOutputCollector().add( new Tuple( new BooleanWritable( asBoolean ) ) );
+      }
+    }
+
+  public static class Container implements Serializable, Comparable<String>
+    {
+    String value;
+
+    public Container( String value )
+      {
+      this.value = value;
+      }
+
+    @Override
+    public int compareTo( String o )
+      {
+      return value.compareTo( o );
+      }
+    }
+
+  public static class InsertTestText extends BaseOperation implements Function
+    {
+    private String testText;
+
+    public InsertTestText( Fields fieldDeclaration, String testText )
+      {
+      super( fieldDeclaration );
+      this.testText = testText;
+      }
+
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+      {
+      functionCall.getOutputCollector().add( new Tuple( new TestText( testText ) ) );
       }
     }
 
@@ -160,6 +199,58 @@ public class SerializedPipesTest extends ClusterTestCase
     Pipe splice = new CoGroup( pipeLower, new Fields( "group" ), pipeUpper, new Fields( "group" ), Fields.size( 8 ) );
 
     Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 25, null );
+    }
+
+  public void testCoGroupSpillCustomWritable() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/hadoop/customerwritable", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes" ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "value" ), "inserted text as bytes" ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "text" ), "inserted text as custom text" ), Fields.ALL );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "group" ), "inserted text as bytes" ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "value" ), "inserted text as bytes" ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "text" ), "inserted text as custom text" ), Fields.ALL );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "group" ), pipeUpper, new Fields( "group" ), Fields.size( 10 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    properties.put( CoGroupClosure.SPILL_THRESHOLD, 1 );
+//    String serializations = MultiMapReducePlanner.getJobConf( properties ).get( "io.serializations" );
+//    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
+//    System.out.println( "serializations = " + serializations );
+//    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations",serializations );
+    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations", TestSerialization.class.getName() );
+
+    Flow countFlow = new FlowConnector( properties ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );

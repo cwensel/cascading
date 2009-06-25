@@ -21,6 +21,10 @@
 
 package cascading.tuple;
 
+import cascading.tuple.hadoop.TupleSerialization;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +35,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
@@ -45,6 +47,8 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /** Field threshold */
   private long threshold = 10000;
+  /** Field serializations */
+  private String serializations;
   /** Field files */
   private List<File> files = new LinkedList<File>();
   /** Field current */
@@ -53,6 +57,8 @@ public class SpillableTupleList implements Iterable<Tuple>
   private long size = 0;
   /** Field fields */
   private Fields fields;
+  /** Field serializationElementWriter */
+  private TupleSerialization tupleSerialization;
 
   /** Constructor SpillableTupleList creates a new SpillableTupleList instance. */
   public SpillableTupleList()
@@ -67,6 +73,16 @@ public class SpillableTupleList implements Iterable<Tuple>
   public SpillableTupleList( long threshold )
     {
     this.threshold = threshold;
+    }
+
+  public SpillableTupleList( long threshold, String serializations )
+    {
+    this.threshold = threshold;
+    this.serializations = serializations;
+
+    JobConf conf = new JobConf();
+    conf.set( "io.serializations", serializations );
+    tupleSerialization = new TupleSerialization( conf );
     }
 
   /**
@@ -184,7 +200,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      return new TupleOutputStream( new FileOutputStream( file ) );
+      if( tupleSerialization == null )
+        return new TupleOutputStream( new FileOutputStream( file ) );
+      else
+        return new TupleOutputStream( new FileOutputStream( file ), tupleSerialization.getElementWriter() );
       }
     catch( FileNotFoundException exception )
       {
@@ -214,7 +233,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      return new TupleInputStream( new FileInputStream( file ) );
+      if( tupleSerialization == null )
+        return new TupleInputStream( new FileInputStream( file ) );
+      else
+        return new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
       }
     catch( FileNotFoundException exception )
       {
@@ -240,6 +262,7 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /**
    * Method iterator returns a Tuple Iterator of all the values in this collection.
+   *
    * @return Iterator<Tuple>
    */
   public Iterator<Tuple> iterator()
@@ -252,6 +275,7 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /**
    * Method entryIterator returns a TupleEntry Iterator of all the alues in this collection.
+   *
    * @return Iterator<TupleEntry>
    */
   public Iterator<TupleEntry> entryIterator()

@@ -1,5 +1,11 @@
 Cascading Change Log
 
+1.0.13
+
+  Fixed bug where non-String j.u.Property values where not being copied to the internal o.a.h.m.JobConf instance.
+
+  Fixed bug where custom serializations where not recognized during co-grouping spills inside c.t.SpillableTupleList.
+
 1.0.12
 
   Fixed bug where the c.f.FlowPlanner did not detect that tails were not bound to sinks, or that some tail references
