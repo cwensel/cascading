@@ -21,11 +21,12 @@
 
 package cascading.tuple;
 
-import cascading.CascadingTestCase;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
+
+import cascading.CascadingTestCase;
 
 public class TupleTest extends CascadingTestCase
   {
@@ -304,5 +305,18 @@ public class TupleTest extends CascadingTestCase
     bTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "2.0" );
 
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) > 0 );
+    }
+
+  public void testCoerce()
+    {
+    Date date = new Date();
+    Tuple tuple = new Tuple( "1", null, date, date );
+
+    Tuple results = Tuples.coerce( tuple, new Class[]{int.class, boolean.class, Date.class, String.class} );
+
+    assertEquals( results.get( 0 ), 1 );
+    assertEquals( results.get( 1 ), false );
+    assertEquals( results.get( 2 ), date );
+    assertEquals( results.get( 3 ), date.toString() );
     }
   }
