@@ -21,14 +21,14 @@
 
 package cascading.tuple;
 
+import java.util.Iterator;
+
 import cascading.CascadingTestCase;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
-
-import java.util.Iterator;
 
 /**
  *
@@ -74,7 +74,7 @@ public class SpillableTupleTest extends CascadingTestCase
 
   private void performSpillTest( int size, int threshold, CompressionCodec codec )
     {
-    SpillableTupleList list = new SpillableTupleList( threshold, codec );
+    SpillableTupleList list = new SpillableTupleList( threshold, null, codec );
 
     for( int i = 0; i < size; i++ )
       {

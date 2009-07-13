@@ -57,13 +57,15 @@ public class CoGroupClosure extends GroupClosure
   private int numSelfJoins;
   private CompressionCodec codec;
   private long threshold;
+  private String serializations;
 
   public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
     super( groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
     this.codec = getCompressionCodec( flowProcess );
-    threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
+    this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
+    this.serializations = (String) flowProcess.getProperty( "io.serializations" );
     }
 
   @Override
@@ -100,7 +102,7 @@ public class CoGroupClosure extends GroupClosure
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, codec );
+      groups[ i ] = new SpillableTupleList( threshold, serializations, codec );
 
     while( values.hasNext() )
       {
