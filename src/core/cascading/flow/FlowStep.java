@@ -206,11 +206,11 @@ public class FlowStep implements Serializable
 
   private void initFromTraps( JobConf conf ) throws IOException
     {
-    initFromTraps( conf, mapperTraps, true );
-    initFromTraps( conf, reducerTraps, false );
+    initFromTraps( conf, mapperTraps );
+    initFromTraps( conf, reducerTraps );
     }
 
-  private void initFromTraps( JobConf conf, Map<String, Tap> traps, boolean isMapper ) throws IOException
+  private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
     {
     if( !traps.isEmpty() )
       {
