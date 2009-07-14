@@ -427,11 +427,13 @@ public class FlowStep implements Serializable
     private List<FlowStepJob> predecessors;
     private final CountDownLatch latch = new CountDownLatch( 1 );
     private boolean stop = false;
+    private long pollingInterval;
 
     public FlowStepJob( String stepName, JobConf currentConf )
       {
       this.stepName = stepName;
       this.currentConf = currentConf;
+      this.pollingInterval = Flow.getJobPollingInterval( currentConf );
       }
 
     public void stop()
@@ -480,7 +482,17 @@ public class FlowStep implements Serializable
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
 
-        runningJob.waitForCompletion();
+        while( !runningJob.isComplete() )
+          {
+          try
+            {
+            Thread.sleep( pollingInterval );
+            }
+          catch( InterruptedException exception )
+            {
+            // ignore exception
+            }
+          }
 
         if( !stop && !runningJob.isSuccessful() )
           {
