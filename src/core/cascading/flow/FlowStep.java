@@ -482,17 +482,7 @@ public class FlowStep implements Serializable
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
 
-        while( !runningJob.isComplete() )
-          {
-          try
-            {
-            Thread.sleep( pollingInterval );
-            }
-          catch( InterruptedException exception )
-            {
-            // ignore exception
-            }
-          }
+        blockTillCompleteOrStopped();
 
         if( !stop && !runningJob.isSuccessful() )
           {
@@ -512,6 +502,29 @@ public class FlowStep implements Serializable
         }
 
       return null;
+      }
+
+    protected void blockTillCompleteOrStopped() throws IOException
+      {
+      while( true )
+        {
+        if( stop || runningJob.isComplete() )
+          break;
+
+        sleep();
+        }
+      }
+
+    protected void sleep()
+      {
+      try
+        {
+        Thread.sleep( pollingInterval );
+        }
+      catch( InterruptedException exception )
+        {
+        // do nothing
+        }
       }
 
     private void dumpCompletionEvents()
