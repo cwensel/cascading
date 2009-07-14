@@ -145,7 +145,7 @@ public class Flow implements Runnable
    */
   public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", Boolean.toString( false ) ) );
+    return Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", false );
     }
 
   /**
@@ -168,7 +168,7 @@ public class Flow implements Runnable
    */
   public static boolean getStopJobsOnExit( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", Boolean.toString( true ) ) );
+    return Util.getProperty( properties, "cascading.flow.stopjobsonexit", true );
     }
 
   /**
@@ -191,7 +191,7 @@ public class Flow implements Runnable
    */
   public static long getJobPollingInterval( Map<Object, Object> properties )
     {
-    return Long.parseLong( Util.getProperty( properties, "cascading.flow.job.pollinginterval", Long.toString( 5000 ) ) );
+    return Util.getProperty( properties, "cascading.flow.job.pollinginterval", 500 );
     }
 
   static long getJobPollingInterval( JobConf jobConf )
