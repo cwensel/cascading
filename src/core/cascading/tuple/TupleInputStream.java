@@ -30,9 +30,7 @@ import cascading.tuple.hadoop.TupleSerialization;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.log4j.Logger;
 
-/**
- * Class TupleInputStream is used internally to read Tuples from storage.
- */
+/** Class TupleInputStream is used internally to read Tuples from storage. */
 public class TupleInputStream extends DataInputStream
   {
   /** Field LOG */
@@ -40,7 +38,7 @@ public class TupleInputStream extends DataInputStream
 
   ElementReader elementReader;
 
-  public static interface ElementReader
+  public interface ElementReader
     {
     Comparable read( int token, DataInputStream inputStream ) throws IOException;
 

@@ -30,21 +30,19 @@ import cascading.tuple.hadoop.TupleSerialization;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.log4j.Logger;
 
-/**
- * Class TupleOutputStream is used internally to write Tuples to storage.
- */
+/** Class TupleOutputStream is used internally to write Tuples to storage. */
 public class TupleOutputStream extends DataOutputStream
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
 
-  /** Field WRITABLE_TOKEN  */
+  /** Field WRITABLE_TOKEN */
   public static final int WRITABLE_TOKEN = 32;
 
-  /** Field elementWriter  */
+  /** Field elementWriter */
   ElementWriter elementWriter;
 
-  public static interface ElementWriter
+  public interface ElementWriter
     {
     void write( DataOutputStream outputStream, Comparable comparable ) throws IOException;
 
@@ -114,53 +112,53 @@ public class TupleOutputStream extends DataOutputStream
         writeFloat( (Float) element );
         }
       else if( Double.class == type )
-        {
-        WritableUtils.writeVInt( this, 3 );
-        writeDouble( (Double) element );
-        }
-      else if( Integer.class == type )
-        {
-        WritableUtils.writeVInt( this, 4 );
-        WritableUtils.writeVInt( this, (Integer) element );
-        }
-      else if( Long.class == type )
-        {
-        WritableUtils.writeVInt( this, 5 );
-        WritableUtils.writeVLong( this, (Long) element );
-        }
-      else if( Boolean.class == type )
-        {
-        WritableUtils.writeVInt( this, 6 );
-        writeBoolean( (Boolean) element );
-        }
-      else if( Short.class == type )
-        {
-        WritableUtils.writeVInt( this, 7 );
-        writeShort( (Short) element );
-        }
-      else if( Tuple.class == type )
-        {
-        WritableUtils.writeVInt( this, 8 );
-        writeTuple( (Tuple) element );
-        }
-      else if( TuplePair.class == type )
-        {
-        WritableUtils.writeVInt( this, 9 );
-        writeTuplePair( (TuplePair) element );
-        }
-      else if( IndexTuple.class == type )
-        {
-        WritableUtils.writeVInt( this, 10 );
-        writeIndexTuple( (IndexTuple) element );
-        }
-      else if( element instanceof Comparable )
-        {
-        elementWriter.write( this, (Comparable) element );
-        }
-      else
-        {
-        throw new IOException( "could not write unknown element type: " + element.getClass().getName() );
-        }
+          {
+          WritableUtils.writeVInt( this, 3 );
+          writeDouble( (Double) element );
+          }
+        else if( Integer.class == type )
+            {
+            WritableUtils.writeVInt( this, 4 );
+            WritableUtils.writeVInt( this, (Integer) element );
+            }
+          else if( Long.class == type )
+              {
+              WritableUtils.writeVInt( this, 5 );
+              WritableUtils.writeVLong( this, (Long) element );
+              }
+            else if( Boolean.class == type )
+                {
+                WritableUtils.writeVInt( this, 6 );
+                writeBoolean( (Boolean) element );
+                }
+              else if( Short.class == type )
+                  {
+                  WritableUtils.writeVInt( this, 7 );
+                  writeShort( (Short) element );
+                  }
+                else if( Tuple.class == type )
+                    {
+                    WritableUtils.writeVInt( this, 8 );
+                    writeTuple( (Tuple) element );
+                    }
+                  else if( TuplePair.class == type )
+                      {
+                      WritableUtils.writeVInt( this, 9 );
+                      writeTuplePair( (TuplePair) element );
+                      }
+                    else if( IndexTuple.class == type )
+                        {
+                        WritableUtils.writeVInt( this, 10 );
+                        writeIndexTuple( (IndexTuple) element );
+                        }
+                      else if( element instanceof Comparable )
+                          {
+                          elementWriter.write( this, (Comparable) element );
+                          }
+                        else
+                          {
+                          throw new IOException( "could not write unknown element type: " + element.getClass().getName() );
+                          }
       }
     }
 
