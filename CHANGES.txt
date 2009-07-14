@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Updated ant build to not hard-code hadoop/lib sub-dir names.
+
 1.0.13
 
   Fixed bug where non-String j.u.Property values where not being copied to the internal o.a.h.m.JobConf instance.
