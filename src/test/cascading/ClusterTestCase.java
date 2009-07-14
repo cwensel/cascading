@@ -21,6 +21,12 @@
 
 package cascading;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import cascading.flow.Flow;
 import cascading.flow.MultiMapReducePlanner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,11 +35,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MiniMRCluster;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -120,6 +121,7 @@ public class ClusterTestCase extends CascadingTestCase
     if( logger != null )
       properties.put( "log4j.logger", logger );
 
+    Flow.setJobPollingInterval( properties, 500 ); // should speed up tests
     MultiMapReducePlanner.setJobConf( properties, jobConf );
     }
 

@@ -21,6 +21,17 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -36,17 +47,6 @@ import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -127,41 +127,6 @@ public class MultiMapReducePlanner extends FlowPlanner
   public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
     {
     return Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", false );
-    }
-
-  /**
-   * Method setJobStatusPollInterval sets the job status polling interval, in milliseconcs.
-   * <p/>
-   * The default is 5,000ms (5 seconds).
-   *
-   * @param properties of type Map<Object, Object>
-   * @param interval   of type int
-   */
-  public static void setJobStatusPollInterval( Map<Object, Object> properties, int interval )
-    {
-    properties.put( "cascading.multimapreduceplanner.job.status.pollinterval", Long.toString( interval ) );
-    }
-
-  /**
-   * Method getJobStatusPollInterval returns the current job status polling interval, defaults to 5000ms.
-   *
-   * @param properties of type Map<Object, Object>
-   * @return int
-   */
-  public static int getJobStatusPollInterval( Map<Object, Object> properties )
-    {
-    return Util.getProperty( properties, "cascading.multimapreduceplanner.job.status.pollinterval", 5000 );
-    }
-
-  /**
-   * Method getJobStatusPollInterval returns the current job status polling interval, defaults to 5000ms.
-   *
-   * @param jobConf of type JobConf
-   * @return int
-   */
-  public static int getJobStatusPollInterval( JobConf jobConf )
-    {
-    return jobConf.getInt( "cascading.multimapreduceplanner.job.status.pollinterval", 5000 );
     }
 
   /**

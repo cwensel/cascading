@@ -173,6 +173,34 @@ public class Flow implements Runnable
     return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", Boolean.toString( true ) ) );
     }
 
+  /**
+   * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
+   * The default value is 5000 msec (5 seconds).   *
+   *
+   * @param properties of type Map
+   * @param interval   of type long
+   */
+  public static void setJobPollingInterval( Map<Object, Object> properties, long interval )
+    {
+    properties.put( "cascading.flow.job.pollinginterval", Long.toString( interval ) );
+    }
+
+  /**
+   * Returns property jobPollingInterval. The default is 5000 (5 sec).
+   *
+   * @param properties of type Map
+   * @return a long
+   */
+  public static long getJobPollingInterval( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.flow.job.pollinginterval", 500 );
+    }
+
+  public static long getJobPollingInterval( JobConf jobConf )
+    {
+    return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
+    }
+
   /** Used for testing. */
   protected Flow()
     {

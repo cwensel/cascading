@@ -21,17 +21,17 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
 import cascading.flow.hadoop.HadoopStepStats;
 import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 
 /**
  *
@@ -47,7 +47,7 @@ public class FlowStepJob implements Callable<Throwable>
   /** Field runningJob */
   private RunningJob runningJob;
   /** Field pollingInterval */
-  private int pollingInterval = 5000;
+  private long pollingInterval = 5000;
 
   /** Field predecessors */
   protected List<FlowStepJob> predecessors;
@@ -68,7 +68,7 @@ public class FlowStepJob implements Callable<Throwable>
     this.flowStep = flowStep;
     this.stepName = stepName;
     this.currentConf = currentConf;
-    this.pollingInterval = MultiMapReducePlanner.getJobStatusPollInterval( currentConf );
+    this.pollingInterval = Flow.getJobPollingInterval( currentConf );
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
