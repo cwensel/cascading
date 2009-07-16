@@ -50,7 +50,12 @@ public class Hadoop18TapUtil
    */
   public static void setupJob( JobConf conf ) throws IOException
     {
-    if( FileOutputFormat.getOutputPath( conf ) == null )
+    Path outputPath = FileOutputFormat.getOutputPath( conf );
+
+    if( outputPath == null )
+      return;
+
+    if( getFSSafe( conf, outputPath ) == null )
       return;
 
     if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
@@ -183,14 +188,17 @@ public class Hadoop18TapUtil
 
     if( outputPath != null )
       {
-      Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
-
-      LOG.info( "deleting temp path " + tmpDir );
-
-      FileSystem fileSys = getFSSafe( conf, tmpDir );
+      FileSystem fileSys = getFSSafe( conf, outputPath );
 
       if( fileSys == null )
         return;
+
+      if( !fileSys.exists( outputPath ) )
+        return;
+
+      Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
+
+      LOG.info( "deleting temp path " + tmpDir );
 
       if( fileSys.exists( tmpDir ) )
         fileSys.delete( tmpDir, true );

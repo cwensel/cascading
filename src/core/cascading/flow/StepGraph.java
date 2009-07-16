@@ -21,6 +21,15 @@
 
 package cascading.flow;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -33,15 +42,6 @@ import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
 public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
@@ -169,7 +169,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
           step.sink = sink;
 
           if( step.sink.isWriteDirect() )
-            step.tempSink = new TempHfs( sink.getPath().toUri().getPath() );
+            step.tempSink = new TempHfs( "tmp:/" + sink.getPath().toUri().getPath(), true );
 
           FlowElement lhs = source;
 

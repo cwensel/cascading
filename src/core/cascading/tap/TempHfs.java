@@ -29,8 +29,12 @@ import cascading.flow.Scope;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.lib.NullOutputFormat;
 
 /** Class TempHfs creates a temporary {@link Tap} instance for use internally. */
 public class TempHfs extends Hfs
@@ -42,9 +46,58 @@ public class TempHfs extends Hfs
   /** Field temporaryPath */
   private String temporaryPath;
 
+  /** Class NullScheme is a noop scheme used as a placeholder */
+  private static class NullScheme extends Scheme
+    {
+
+    @Override
+    public void sourceInit( Tap tap, JobConf conf ) throws IOException
+      {
+      // do nothing
+      }
+
+    @Override
+    public void sinkInit( Tap tap, JobConf conf ) throws IOException
+      {
+      conf.setOutputKeyClass( Tuple.class );
+      conf.setOutputValueClass( Tuple.class );
+      conf.setOutputFormat( NullOutputFormat.class );
+      }
+
+    @Override
+    public Tuple source( Object key, Object value )
+      {
+      return null;
+      }
+
+    @Override
+    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+      {
+      }
+    }
+
+  /**
+   * Constructor TempHfs creates a new TempHfs instance.
+   *
+   * @param name of type String
+   */
   public TempHfs( String name )
     {
     super( new SequenceFile()
+    {
+    } );
+    this.name = name;
+    }
+
+  /**
+   * Constructor TempHfs creates a new TempHfs instance.
+   *
+   * @param name   of type String
+   * @param isNull of type boolean
+   */
+  public TempHfs( String name, boolean isNull )
+    {
+    super( isNull ? new NullScheme() : new SequenceFile()
     {
     } );
     this.name = name;
