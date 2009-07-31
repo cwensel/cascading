@@ -270,7 +270,7 @@ public abstract class Tap implements FlowElement, Serializable
           }
         catch( FieldsResolverException exception )
           {
-          throw new TapException( this, exception.getIncomingFields(), exception.getSelectorFields(), exception );
+          throw new TapException( this, exception.getSourceFields(), exception.getSelectorFields(), exception );
           }
 
         count++;

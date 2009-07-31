@@ -354,7 +354,7 @@ public abstract class Operator extends Pipe
       }
     catch( FieldsResolverException exception )
       {
-      throw new OperatorException( this, OperatorException.Kind.argument, exception.getIncomingFields(), argumentSelector, exception );
+      throw new OperatorException( this, OperatorException.Kind.argument, exception.getSourceFields(), argumentSelector, exception );
       }
     catch( Exception exception )
       {

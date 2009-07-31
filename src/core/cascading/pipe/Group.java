@@ -875,7 +875,7 @@ public class Group extends Pipe
       }
     catch( FieldsResolverException exception )
       {
-      throw new OperatorException( this, OperatorException.Kind.grouping, exception.getIncomingFields(), exception.getSelectorFields(), exception );
+      throw new OperatorException( this, OperatorException.Kind.grouping, exception.getSourceFields(), exception.getSelectorFields(), exception );
       }
     catch( RuntimeException exception )
       {
@@ -922,7 +922,7 @@ public class Group extends Pipe
       }
     catch( FieldsResolverException exception )
       {
-      throw new OperatorException( this, OperatorException.Kind.sorting, exception.getIncomingFields(), exception.getSelectorFields(), exception );
+      throw new OperatorException( this, OperatorException.Kind.sorting, exception.getSourceFields(), exception.getSelectorFields(), exception );
       }
     catch( RuntimeException exception )
       {

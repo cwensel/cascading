@@ -22,33 +22,52 @@
 package cascading.tuple;
 
 /**
- *
+ * Class FieldsResolverException is thrown when selectorFields cannot
+ * select from the sourceFields.
  */
 public class FieldsResolverException extends TupleException
   {
-  private Fields incomingFields;
+  /** Field sourceFields */
+  private Fields sourceFields;
+  /** Field selectorFields */
   private Fields selectorFields;
 
-  public FieldsResolverException( Fields incomingFields, Fields selectorFields )
+  /**
+   * Constructor FieldsResolverException creates a new FieldsResolverException instance.
+   *
+   * @param sourceFields   of type Fields
+   * @param selectorFields of type Fields
+   */
+  public FieldsResolverException( Fields sourceFields, Fields selectorFields )
     {
-    super( createMessage( incomingFields, selectorFields ) );
+    super( createMessage( sourceFields, selectorFields ) );
 
-    this.incomingFields = incomingFields;
+    this.sourceFields = sourceFields;
     this.selectorFields = selectorFields;
     }
 
-  public Fields getIncomingFields()
+  /**
+   * Method getSourceFields returns the sourceFields of this FieldsResolverException object.
+   *
+   * @return the sourceFields (type Fields) of this FieldsResolverException object.
+   */
+  public Fields getSourceFields()
     {
-    return incomingFields;
+    return sourceFields;
     }
 
+  /**
+   * Method getSelectorFields returns the selectorFields of this FieldsResolverException object.
+   *
+   * @return the selectorFields (type Fields) of this FieldsResolverException object.
+   */
   public Fields getSelectorFields()
     {
     return selectorFields;
     }
 
-  private static String createMessage( Fields incomingFields, Fields selectorFields )
+  private static String createMessage( Fields sourceFields, Fields selectorFields )
     {
-    return "could not select fields: " + selectorFields.printVerbose() + ", from: " + incomingFields.printVerbose();
+    return "could not select fields: " + selectorFields.printVerbose() + ", from: " + sourceFields.printVerbose();
     }
   }
