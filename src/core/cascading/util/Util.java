@@ -44,6 +44,7 @@ import cascading.flow.Scope;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
+import cascading.scheme.Scheme;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -377,6 +378,20 @@ public class Util
     while( list.remove( null ) )
       ;
     }
+
+  public static String formatTrace( Scheme scheme, String message )
+    {
+    if( scheme == null )
+      return message;
+
+    String trace = scheme.getTrace();
+
+    if( trace == null )
+      return message;
+
+    return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
+    }
+
 
   public static String formatTrace( Pipe pipe, String message )
     {

@@ -21,6 +21,10 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Set;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -28,6 +32,7 @@ import cascading.flow.Scope;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
+import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -35,10 +40,6 @@ import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Set;
 
 /**
  * A Tap represents the physical data source or sink in a connected {@link Flow}.
@@ -263,7 +264,15 @@ public abstract class Tap implements FlowElement, Serializable
 
       if( incomingFields != null )
         {
-        incomingFields.verifyContains( getSinkFields() );
+        try
+          {
+          incomingFields.select( getSinkFields() );
+          }
+        catch( FieldsResolverException exception )
+          {
+          throw new TapException( this, exception.getIncomingFields(), exception.getSelectorFields(), exception );
+          }
+
         count++;
         }
       }

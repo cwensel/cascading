@@ -40,6 +40,7 @@ import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
@@ -222,6 +223,9 @@ public class MultiMapReducePlanner extends FlowPlanner
       String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
 
       if( cause instanceof OperatorException )
+        throw new PlannerException( message, cause, elementGraph );
+
+      if( cause instanceof TapException )
         throw new PlannerException( message, cause, elementGraph );
 
       throw new PlannerException( exception.getPipe(), message, cause, elementGraph );

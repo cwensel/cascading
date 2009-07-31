@@ -21,12 +21,21 @@
 
 package cascading.tuple;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
-
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
@@ -291,7 +300,7 @@ public final class Fields implements Comparable, Iterable<Comparable>, Serializa
     notFound.removeAll( found );
 
     if( !notFound.isEmpty() )
-      throw new TupleException( "selector did not find fields: [" + Util.join( notFound, ", " ) + "] in [" + Util.join( join( size, fields ), ", " ) + "]" );
+      throw new FieldsResolverException( new Fields( join( size, fields ) ), new Fields( notFound.toArray( new Comparable[0] ) ) );
 
     if( hasUnknowns )
       return selector;
@@ -744,7 +753,7 @@ public final class Fields implements Comparable, Iterable<Comparable>, Serializa
     Integer result = getIndex().get( fieldName );
 
     if( result == null )
-      throw new TupleException( "field not found: '" + fieldName + "', available fields: " + this.print() );
+      throw new FieldsResolverException( this, new Fields( fieldName ) );
 
     return result;
     }

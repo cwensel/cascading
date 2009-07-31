@@ -21,17 +21,18 @@
 
 package cascading.pipe;
 
+import java.util.Set;
+
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.tuple.Fields;
+import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleException;
-
-import java.util.Set;
 
 /**
  * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
@@ -328,16 +329,17 @@ public abstract class Operator extends Pipe
       }
     catch( TupleException exception )
       {
-      throw new OperatorException( "unable to resolve selector using incoming: " + incomingFields.printVerbose() + " declared: " + declaredFields.printVerbose(), exception );
+      throw new OperatorException( this, incomingFields, declaredFields, outputSelector, exception );
       }
     }
 
   Fields resolveArgumentSelector( Set<Scope> incomingScopes )
     {
+    Fields argumentSelector = getArgumentSelector();
+
     try
       {
       Scope incomingScope = getFirst( incomingScopes );
-      Fields argumentSelector = getArgumentSelector();
 
       if( argumentSelector.isAll() )
         return resolveIncomingOperationFields( incomingScope );
@@ -350,9 +352,13 @@ public abstract class Operator extends Pipe
 
       return resolveIncomingOperationFields( incomingScope ).select( argumentSelector );
       }
+    catch( FieldsResolverException exception )
+      {
+      throw new OperatorException( this, OperatorException.Kind.argument, exception.getIncomingFields(), argumentSelector, exception );
+      }
     catch( Exception exception )
       {
-      throw new OperatorException( this, "could not resolve argument selector in: " + this, exception );
+      throw new OperatorException( this, "unable to resolve argument selector: " + argumentSelector.printVerbose(), exception );
       }
     }
 

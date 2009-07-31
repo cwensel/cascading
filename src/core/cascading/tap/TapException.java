@@ -22,10 +22,15 @@
 package cascading.tap;
 
 import cascading.CascadingException;
+import cascading.tuple.Fields;
+import cascading.util.Util;
 
 /** Class TapException is thrown from {@link Tap} subclasses. */
 public class TapException extends CascadingException
   {
+  private Fields incomingFields;
+  private Fields selectorFields;
+
   /** Constructor TapException creates a new TapException instance. */
   public TapException()
     {
@@ -60,5 +65,30 @@ public class TapException extends CascadingException
   public TapException( Throwable throwable )
     {
     super( throwable );
+    }
+
+  /**
+   * Constructor TapException creates a new TapException instance.
+   *
+   * @param tap            of type Tap
+   * @param incomingFields of type Fields
+   * @param selectorFields of type Fields
+   * @param throwable      of type Throwable
+   */
+  public TapException( Tap tap, Fields incomingFields, Fields selectorFields, Throwable throwable )
+    {
+    super( createMessage( tap, incomingFields, selectorFields ), throwable );
+
+    this.incomingFields = incomingFields;
+    this.selectorFields = selectorFields;
+    }
+
+  private static String createMessage( Tap tap, Fields incomingFields, Fields selectorFields )
+    {
+    String message = "unable to resolve scheme sink selector: " + selectorFields.printVerbose() +
+      ", with incoming: " + incomingFields.printVerbose();
+
+    return Util.formatTrace( tap.getScheme(), message );
+
     }
   }

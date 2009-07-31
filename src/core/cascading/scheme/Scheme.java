@@ -21,15 +21,16 @@
 
 package cascading.scheme;
 
+import java.io.IOException;
+import java.io.Serializable;
+
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-
-import java.io.IOException;
-import java.io.Serializable;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -54,6 +55,8 @@ public abstract class Scheme implements Serializable
   Fields sourceFields = Fields.UNKNOWN;
   /** Field numSinkParts */
   int numSinkParts;
+  /** Field trace */
+  private String trace = Util.captureDebugTrace( getClass() );
 
   /** Constructor Scheme creates a new Scheme instance. */
   protected Scheme()
@@ -166,6 +169,16 @@ public abstract class Scheme implements Serializable
   public void setNumSinkParts( int numSinkParts )
     {
     this.numSinkParts = numSinkParts;
+    }
+
+  /**
+   * Method getTrace returns a String that pinpoint where this instance was created for debugging.
+   *
+   * @return String
+   */
+  public String getTrace()
+    {
+    return trace;
     }
 
   /**

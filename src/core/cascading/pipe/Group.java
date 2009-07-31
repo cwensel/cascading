@@ -37,6 +37,7 @@ import cascading.pipe.cogroup.GroupClosure;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.Joiner;
 import cascading.tuple.Fields;
+import cascading.tuple.FieldsResolverException;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -872,6 +873,10 @@ public class Group extends Pipe
 
       return groupingFields;
       }
+    catch( FieldsResolverException exception )
+      {
+      throw new OperatorException( this, OperatorException.Kind.grouping, exception.getIncomingFields(), exception.getSelectorFields(), exception );
+      }
     catch( RuntimeException exception )
       {
       throw new OperatorException( this, "could not resolve grouping selector in: " + this, exception );
@@ -914,6 +919,10 @@ public class Group extends Pipe
         return null;
 
       return resolveSelectorsAgainstIncoming( incomingScopes, getSortingSelectors(), "sorting" );
+      }
+    catch( FieldsResolverException exception )
+      {
+      throw new OperatorException( this, OperatorException.Kind.sorting, exception.getIncomingFields(), exception.getSelectorFields(), exception );
       }
     catch( RuntimeException exception )
       {

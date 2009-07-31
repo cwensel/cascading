@@ -21,15 +21,15 @@
 
 package cascading.pipe;
 
-import cascading.flow.FlowElement;
-import cascading.flow.Scope;
-import cascading.tuple.Fields;
-import cascading.util.Util;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import cascading.flow.FlowElement;
+import cascading.flow.Scope;
+import cascading.tuple.Fields;
+import cascading.util.Util;
 
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
@@ -58,7 +58,7 @@ public class Pipe implements FlowElement, Serializable
   private String name;
   /** Field previous */
   protected Pipe previous;
-  /** Field debugTrace */
+  /** Field trace */
   private String trace = Util.captureDebugTrace( getClass() );
 
   /**
