@@ -21,6 +21,17 @@
 
 package cascading.flow;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -39,16 +50,6 @@ import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Class ElementGraph represents the executable FlowElement graph. */
 public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
@@ -297,7 +298,12 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetweenExtents()
     {
-    return new KShortestPaths<FlowElement, Scope>( this, head, Integer.MAX_VALUE ).getPaths( tail );
+    List<GraphPath<FlowElement, Scope>> paths = new KShortestPaths<FlowElement, Scope>( this, head, Integer.MAX_VALUE ).getPaths( tail );
+
+    if( paths == null )
+      return new ArrayList<GraphPath<FlowElement, Scope>>();
+
+    return paths;
     }
 
   /**
@@ -309,7 +315,12 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetween( FlowElement from, FlowElement to )
     {
-    return new KShortestPaths<FlowElement, Scope>( this, from, Integer.MAX_VALUE ).getPaths( to );
+    List<GraphPath<FlowElement, Scope>> paths = new KShortestPaths<FlowElement, Scope>( this, from, Integer.MAX_VALUE ).getPaths( to );
+
+    if( paths == null )
+      return new ArrayList<GraphPath<FlowElement, Scope>>();
+
+    return paths;
     }
 
   /**

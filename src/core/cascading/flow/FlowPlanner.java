@@ -265,12 +265,7 @@ public class FlowPlanner
     // walk Every instances after Group
     for( Group group : groups )
       {
-      List<GraphPath<FlowElement, Scope>> list = elementGraph.getAllShortestPathsFrom( group );
-
-      if( list == null )
-        return;
-
-      for( GraphPath<FlowElement, Scope> path : list )
+      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsFrom( group ) )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is tail
 
