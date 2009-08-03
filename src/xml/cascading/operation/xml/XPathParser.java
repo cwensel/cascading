@@ -21,7 +21,7 @@
 
 package cascading.operation.xml;
 
-import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -32,8 +32,8 @@ import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 /**
  * XPathParser will extract a value from the passed Tuple argument into a new Tuple field. One field
@@ -44,7 +44,7 @@ import org.xml.sax.InputSource;
  * XML document and converted to a String. If only the text values are required, search on the text() nodes, or consider
  * using {@link XPathGenerator} to handle multiple NodeList values.
  */
-public class XPathParser extends XPathOperation implements Function
+public class XPathParser extends XPathOperation implements Function<DocumentBuilder>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathParser.class );
@@ -59,6 +59,9 @@ public class XPathParser extends XPathOperation implements Function
   public XPathParser( Fields fieldDeclaration, String[][] namespaces, String... paths )
     {
     super( 1, fieldDeclaration, namespaces, paths );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != paths.length )
+      throw new IllegalArgumentException( "declared fields and given xpath expressions are not the same size: " + fieldDeclaration.print() + " paths: " + paths.length );
     }
 
   /**
@@ -70,20 +73,23 @@ public class XPathParser extends XPathOperation implements Function
   public XPathParser( Fields fieldDeclaration, String... paths )
     {
     super( 1, fieldDeclaration, null, paths );
+
+    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != paths.length )
+      throw new IllegalArgumentException( "declared fields and given xpath expressions are not the same size: " + fieldDeclaration.print() + " paths: " + paths.length );
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<DocumentBuilder> functionCall )
     {
     Tuple tuple = new Tuple();
     String argument = functionCall.getArguments().getString( 0 );
+    Document document = parseDocument( functionCall.getContext(), argument );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {
       try
         {
-        InputSource source = new InputSource( new StringReader( argument ) );
-        NodeList value = (NodeList) getExpressions().get( i ).evaluate( source, XPathConstants.NODESET );
+        NodeList value = (NodeList) getExpressions().get( i ).evaluate( document, XPathConstants.NODESET );
 
         if( LOG.isDebugEnabled() )
           LOG.debug( "xpath: " + paths[ i ] + " was: " + ( value != null && value.getLength() != 0 ) );
@@ -92,7 +98,6 @@ public class XPathParser extends XPathOperation implements Function
           tuple.add( writeAsXML( value.item( 0 ) ) );
         else
           tuple.add( "" );
-
         }
       catch( XPathExpressionException exception )
         {

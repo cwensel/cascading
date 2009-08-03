@@ -21,7 +21,7 @@
 
 package cascading.operation.xml;
 
-import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -31,13 +31,13 @@ import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationException;
 import org.apache.log4j.Logger;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
 
 /**
  * XPathFilter will filter out a Tuple if the given XPath expression returns false. Set removeMatch to true
  * if the filter should be reversed.
  */
-public class XPathFilter extends XPathOperation implements Filter
+public class XPathFilter extends XPathOperation implements Filter<DocumentBuilder>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathFilter.class );
@@ -70,14 +70,15 @@ public class XPathFilter extends XPathOperation implements Filter
     }
 
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
-  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
+  public boolean isRemove( FlowProcess flowProcess, FilterCall<DocumentBuilder> filterCall )
     {
-    InputSource source = new InputSource( new StringReader( (String) filterCall.getArguments().get( 0 ) ) );
+    String argument = (String) filterCall.getArguments().getString( 0 );
+    Document document = parseDocument( filterCall.getContext(), argument );
     XPathExpression expression = getExpressions().get( 0 );
 
     try
       {
-      boolean value = (Boolean) expression.evaluate( source, XPathConstants.BOOLEAN );
+      boolean value = (Boolean) expression.evaluate( document, XPathConstants.BOOLEAN );
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "xpath: " + paths[ 0 ] + " matches: " + value );

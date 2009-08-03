@@ -21,6 +21,8 @@
 
 package cascading.operation.xml;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -42,17 +47,23 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /** Class XPathOperation is the base class for all XPath operations. */
-public class XPathOperation extends BaseOperation
+public class XPathOperation extends BaseOperation<DocumentBuilder>
   {
   /** Field NAMESPACE_XHTML */
-  public static final String[][] NAMESPACE_XHTML = new String[][]{new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};
+  public static final String[][] NAMESPACE_XHTML = new String[][]{
+    new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};
 
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathOperation.class );
@@ -77,9 +88,6 @@ public class XPathOperation extends BaseOperation
 
     if( paths == null || paths.length == 0 )
       throw new IllegalArgumentException( "a xpath expression must be given" );
-
-    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != paths.length )
-      throw new IllegalArgumentException( "declared fields and given xpath expressions are not the same size: " + fieldDeclaration.print() + " paths: " + paths.length );
     }
 
   protected XPathOperation( int numArgs, String[][] namespaces, String... paths )
@@ -90,6 +98,23 @@ public class XPathOperation extends BaseOperation
 
     if( paths == null || paths.length == 0 )
       throw new IllegalArgumentException( "a xpath expression must be given" );
+    }
+
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<DocumentBuilder> operationCall )
+    {
+    try
+      {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+      factory.setNamespaceAware( true );
+
+      operationCall.setContext( factory.newDocumentBuilder() );
+      }
+    catch( ParserConfigurationException exception )
+      {
+      throw new OperationException( "could not create document builder", exception );
+      }
     }
 
   /**
@@ -226,5 +251,23 @@ public class XPathOperation extends BaseOperation
 
       return prefixes.iterator();
       }
+    }
+
+  protected Document parseDocument( DocumentBuilder documentBuilder, String argument )
+    {
+    Document document;
+    try
+      {
+      document = documentBuilder.parse( new InputSource( new StringReader( argument ) ) );
+      }
+    catch( SAXException exception )
+      {
+      throw new OperationException( "could not parse xml document", exception );
+      }
+    catch( IOException exception )
+      {
+      throw new OperationException( "could not parse xml document", exception );
+      }
+    return document;
     }
   }

@@ -21,7 +21,7 @@
 
 package cascading.operation.xml;
 
-import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -33,14 +33,14 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 /**
  * XPathGenerator is a Generator function that will emit a new Tuple for every Node returned by
  * the given XPath expression.
  */
-public class XPathGenerator extends XPathOperation implements Function
+public class XPathGenerator extends XPathOperation implements Function<DocumentBuilder>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( XPathGenerator.class );
@@ -62,25 +62,25 @@ public class XPathGenerator extends XPathOperation implements Function
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<DocumentBuilder> functionCall )
     {
     TupleEntry input = functionCall.getArguments();
 
     if( input.get( 0 ) == null || !( input.get( 0 ) instanceof String ) )
       return;
 
-    String value = (String) input.get( 0 );
+    String value = (String) input.getString( 0 );
 
     if( value.length() == 0 ) // intentionally not trim()ing this value
       return;
 
-    InputSource source = new InputSource( new StringReader( value ) );
+    Document document = parseDocument( functionCall.getContext(), value );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {
       try
         {
-        NodeList nodeList = (NodeList) getExpressions().get( i ).evaluate( source, XPathConstants.NODESET );
+        NodeList nodeList = (NodeList) getExpressions().get( i ).evaluate( document, XPathConstants.NODESET );
 
         if( LOG.isDebugEnabled() )
           LOG.debug( "xpath: " + paths[ i ] + " was: " + ( nodeList != null && nodeList.getLength() != 0 ) );
