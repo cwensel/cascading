@@ -114,12 +114,8 @@
     </fileset>
 
     <fileset dir="${hadoop.home}/lib">
-      <include name="*.jar"/>
+      <include name="**/*.jar"/>
       <exclude name="**/junit*"/>
-    </fileset>
-
-    <fileset dir="${hadoop.home}/lib/jetty-ext">
-      <include name="*.jar"/>
     </fileset>
   </path>
 

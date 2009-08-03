@@ -147,11 +147,11 @@ public class Flow implements Runnable
    */
   public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", Boolean.toString( false ) ) );
+    return Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", false );
     }
 
   /**
-   * Propety stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
+   * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
    * underlying computing system supports it. Defaults to {@code true}.
    *
    * @param properties     of type Map
@@ -170,7 +170,7 @@ public class Flow implements Runnable
    */
   public static boolean getStopJobsOnExit( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", Boolean.toString( true ) ) );
+    return Util.getProperty( properties, "cascading.flow.stopjobsonexit", true );
     }
 
   /**
