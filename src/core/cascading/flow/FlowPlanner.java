@@ -21,6 +21,14 @@
 
 package cascading.flow;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.operation.AssertionLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -32,14 +40,6 @@ import cascading.util.Util;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public class FlowPlanner
@@ -265,7 +265,12 @@ public class FlowPlanner
     // walk Every instances after Group
     for( Group group : groups )
       {
-      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsFrom( group ) )
+      List<GraphPath<FlowElement, Scope>> list = elementGraph.getAllShortestPathsFrom( group );
+
+      if( list == null )
+        return;
+
+      for( GraphPath<FlowElement, Scope> path : list )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is tail
 

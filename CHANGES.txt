@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug in planner where JGraphT sometimes returns null instead of an empty List. 
+
   Fixed bug in c.o.x.XPathParser that prevented use of multiple xpath expressions.
 
   Added configuration propety allowing job polling interval to be configured per c.f.Flow via
