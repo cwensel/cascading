@@ -21,7 +21,35 @@
 
 package cascading.operation;
 
-/** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link BaseOperation}. */
-public interface Assertion<PC> extends PlannedOperation<PC>
+/**
+ * Enum DebugLevel designates the level of a given {@link cascading.operation.Debug} instance. This is used in conjuction with the
+ * {@link cascading.flow.FlowConnector} to plan dubug operations out of a particular {@link cascading.flow.Flow} instance.
+ * </p>
+ * Currently Debug can be denote either DEFAULT or VERBOSE. It is up to the developer to determine if a Debug operation
+ * should be at any given level.
+ */
+public enum DebugLevel implements PlannerLevel
   {
+    NONE( 0 ),
+    DEFAULT( 1 ),
+    VERBOSE( 2 );
+
+  private int rank;
+
+  DebugLevel( int rank )
+    {
+    this.rank = rank;
+    }
+
+  @Override
+  public boolean isNoneLevel()
+    {
+    return this == NONE;
+    }
+
+  @Override
+  public boolean isStricterThan( PlannerLevel plannerLevel )
+    {
+    return rank > ( (DebugLevel) plannerLevel ).rank;
+    }
   }

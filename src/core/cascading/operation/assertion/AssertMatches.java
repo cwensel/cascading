@@ -24,6 +24,8 @@ package cascading.operation.assertion;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.AssertionLevel;
+import cascading.operation.PlannerLevel;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.operation.regex.RegexMatcher;
@@ -63,6 +65,12 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion<Matche
   public AssertMatches( String patternString, boolean negateMatch )
     {
     super( patternString, negateMatch );
+    }
+
+  @Override
+  public boolean supportsPlannerLevel( PlannerLevel plannerLevel )
+    {
+    return plannerLevel instanceof AssertionLevel;
     }
 
   /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */

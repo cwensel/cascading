@@ -31,6 +31,8 @@ import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.ConcreteCall;
+import cascading.operation.Debug;
+import cascading.operation.DebugLevel;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.Function;
@@ -202,9 +204,9 @@ public class Each extends Operator
     super( previous, argumentSelector, filter, FILTER_SELECTOR );
     }
 
-  ////////////////////
-  // TAKE ASSERTIONS
-  ///////////////////
+  ///////////////
+  // ASSERTIONS
+  ///////////////
 
   /**
    * Constructor Each creates a new Each instance.
@@ -250,9 +252,49 @@ public class Each extends Operator
     super( previous, argumentSelector, assertionLevel, assertion, FILTER_SELECTOR );
     }
 
+  //////////
+  //DEBUG
+  //////////
+
+  /**
+   * @param name             name for this branch of Pipes
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param debugLevel       DebugLevel to associate with the Debug
+   * @param debug            Debug to be applied to each input Tuple
+   */
+  public Each( String name, Fields argumentSelector, DebugLevel debugLevel, Debug debug )
+    {
+    super( name, argumentSelector, debugLevel, debug, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param previous   previous Pipe to receive input Tuples from
+   * @param debugLevel DebugLevel to associate with the Debug
+   * @param debug      Debug to be applied to each input Tuple
+   */
+  public Each( Pipe previous, DebugLevel debugLevel, Debug debug )
+    {
+    super( previous, debugLevel, debug, FILTER_SELECTOR );
+    }
+
+  /**
+   * @param previous         previous Pipe to receive input Tuples from
+   * @param argumentSelector field selector that selects Function arguments from the input Tuple
+   * @param debugLevel       DebugLevel to associate with the Debug
+   * @param debug            Debug to be applied to each input Tuple
+   */
+  public Each( Pipe previous, Fields argumentSelector, DebugLevel debugLevel, Debug debug )
+    {
+    super( previous, argumentSelector, debugLevel, debug, FILTER_SELECTOR );
+    }
+
   @Override
   protected void verifyOperation()
     {
+    // backwards compatibility with 1.0
+    if( plannerLevel == null && operation instanceof Debug )
+      plannerLevel = DebugLevel.DEFAULT;
+
     super.verifyOperation();
 
     if( !argumentSelector.isArgSelector() )

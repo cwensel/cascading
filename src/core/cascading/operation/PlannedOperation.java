@@ -21,7 +21,12 @@
 
 package cascading.operation;
 
-/** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link BaseOperation}. */
-public interface Assertion<PC> extends PlannedOperation<PC>
+/**
+ * Interface PlannedOperation is implemened by all {@link Operation} implementations
+ * that use a {@link PlannerLevel} value to inform the {@link cascading.flow.FlowPlanner} how to treat the operation
+ * during job planning.
+ */
+public interface PlannedOperation<C> extends Operation<C>
   {
+  boolean supportsPlannerLevel( PlannerLevel plannerLevel );
   }

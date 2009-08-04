@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added support for planner managed debugging levels via the c.o.DebugLevel enum. Now c.o.Debug operations
+  can be planned out at runtime in the same manner as c.o.Assertion operations.
+
   Refactored xpath operations to re-use j.x.p.DocumentBuilder instances.
 
   Refactored fields resolver framework to emit consistent error messages across all field resolution types.

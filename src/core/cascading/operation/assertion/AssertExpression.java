@@ -22,6 +22,8 @@
 package cascading.operation.assertion;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.AssertionLevel;
+import cascading.operation.PlannerLevel;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.operation.expression.ExpressionOperation;
@@ -49,7 +51,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
-   * @param expression     of type String
+   * @param expression    of type String
    * @param parameterType of type Class
    */
   public AssertExpression( String expression, Class parameterType )
@@ -61,13 +63,19 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
    * Constructor AssertExpression creates a new AssertExpression instance.
    *
    * @param fieldDeclaration of type Fields
-   * @param expression of type String
-   * @param parameterNames of type String[]
-   * @param parameterTypes of type Class[]
+   * @param expression       of type String
+   * @param parameterNames   of type String[]
+   * @param parameterTypes   of type Class[]
    */
   public AssertExpression( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( fieldDeclaration, expression, parameterNames, parameterTypes );
+    }
+
+  @Override
+  public boolean supportsPlannerLevel( PlannerLevel plannerLevel )
+    {
+    return plannerLevel instanceof AssertionLevel;
     }
 
   /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */

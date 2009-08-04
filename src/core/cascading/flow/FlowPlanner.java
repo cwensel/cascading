@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.operation.AssertionLevel;
+import cascading.operation.DebugLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -52,11 +53,14 @@ public class FlowPlanner
 
   /** Field assertionLevel */
   protected AssertionLevel assertionLevel;
+  /** Field debugLevel */
+  protected DebugLevel debugLevel;
 
   FlowPlanner( Map<Object, Object> properties )
     {
     this.properties = properties;
     this.assertionLevel = FlowConnector.getAssertionLevel( properties );
+    this.debugLevel = FlowConnector.getDebugLevel( properties );
     }
 
   /** Must be called to determine if all elements of the base pipe assembly are available */
@@ -75,7 +79,7 @@ public class FlowPlanner
   /** Creates a new ElementGraph instance. */
   protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
-    return new ElementGraph( pipes, sources, sinks, traps, assertionLevel );
+    return new ElementGraph( pipes, sources, sinks, traps, assertionLevel, debugLevel );
     }
 
   protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -284,7 +288,7 @@ public class FlowPlanner
 
           Every every = (Every) flowElement;
 
-          if( every.getAssertionLevel() != null )
+          if( every.getPlannerLevel() != null )
             assertions++;
           }
 

@@ -28,6 +28,8 @@ import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
+import cascading.operation.PlannedOperation;
+import cascading.operation.PlannerLevel;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
@@ -50,7 +52,7 @@ public abstract class Operator extends Pipe
   /** Field outputSelector */
   protected Fields outputSelector = Fields.RESULTS;  // this is overridden by the subclasses via the ctor
   /** Field assertionLevel */
-  protected AssertionLevel assertionLevel; // do not initialize a default
+  protected PlannerLevel plannerLevel; // do not initialize a default
 
   protected Operator( Operation operation )
     {
@@ -122,38 +124,38 @@ public abstract class Operator extends Pipe
     verifyOperation();
     }
 
-  protected Operator( String name, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+  protected Operator( String name, PlannerLevel plannerLevel, PlannedOperation operation, Fields outputSelector )
     {
     super( name );
-    this.assertionLevel = assertionLevel;
+    this.plannerLevel = plannerLevel;
     this.operation = operation;
     this.outputSelector = outputSelector;
     verifyOperation();
     }
 
-  protected Operator( String name, Fields argumentSelector, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+  protected Operator( String name, Fields argumentSelector, PlannerLevel plannerLevel, PlannedOperation operation, Fields outputSelector )
     {
     super( name );
-    this.assertionLevel = assertionLevel;
+    this.plannerLevel = plannerLevel;
     this.operation = operation;
     this.argumentSelector = argumentSelector;
     this.outputSelector = outputSelector;
     verifyOperation();
     }
 
-  protected Operator( Pipe previous, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+  protected Operator( Pipe previous, PlannerLevel plannerLevel, PlannedOperation operation, Fields outputSelector )
     {
     super( previous );
-    this.assertionLevel = assertionLevel;
+    this.plannerLevel = plannerLevel;
     this.operation = operation;
     this.outputSelector = outputSelector;
     verifyOperation();
     }
 
-  protected Operator( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, Operation operation, Fields outputSelector )
+  protected Operator( Pipe previous, Fields argumentSelector, PlannerLevel plannerLevel, PlannedOperation operation, Fields outputSelector )
     {
     super( previous );
-    this.assertionLevel = assertionLevel;
+    this.plannerLevel = plannerLevel;
     this.operation = operation;
     this.argumentSelector = argumentSelector;
     this.outputSelector = outputSelector;
@@ -171,8 +173,13 @@ public abstract class Operator extends Pipe
     if( outputSelector == null )
       throw new IllegalArgumentException( "outputSelector may not be null" );
 
-    if( operation instanceof Assertion && ( assertionLevel == null || assertionLevel == AssertionLevel.NONE ) )
-      throw new IllegalArgumentException( "assertionLevel may not be null or NONE" );
+    if( operation instanceof PlannedOperation )
+      {
+      if( plannerLevel == null )
+        throw new IllegalArgumentException( "planner level may not be null" );
+      else if( plannerLevel.isNoneLevel() )
+        throw new IllegalArgumentException( "given planner level: " + plannerLevel.getClass().getName() + ", may not be NONE" );
+      }
     }
 
   /**
@@ -221,19 +228,42 @@ public abstract class Operator extends Pipe
    *
    * @return the assertionLevel (type Assertion.Level) of this Operator object.
    */
+  @Deprecated
   public AssertionLevel getAssertionLevel()
     {
-    return assertionLevel;
+    return (AssertionLevel) plannerLevel;
     }
 
   /**
-   * Method isAssertion returns true if this Operation represents an {@link Assertion}.
+   * Method getPlannerLevel returns the plannerLevel of this Operator object.
+   *
+   * @return the plannerLevel (type PlannerLevel) of this Operator object.
+   */
+  public PlannerLevel getPlannerLevel()
+    {
+    return plannerLevel;
+    }
+
+  /**
+   * Method isAssertion returns true if this Operation represents an {@link Assertion} operation.
    *
    * @return the assertion (type boolean) of this Operator object.
    */
+  @Deprecated
   public boolean isAssertion()
     {
-    return assertionLevel != null;
+    return plannerLevel instanceof AssertionLevel;
+    }
+
+  /**
+   * Method hasPlannerLevel returns true if this Operator object holds a {@link PlannedOperation} object with an associated
+   * {@link PlannerLevel} level.
+   *
+   * @return boolean
+   */
+  public boolean hasPlannerLevel()
+    {
+    return plannerLevel != null;
     }
 
   protected Tuple makeResult( Fields outgoingSelector, TupleEntry inputEntry, Fields remainderFields, TupleEntry declaredEntry, Tuple output )

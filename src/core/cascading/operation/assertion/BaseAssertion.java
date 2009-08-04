@@ -22,7 +22,10 @@
 package cascading.operation.assertion;
 
 import cascading.operation.AssertionException;
+import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
+import cascading.operation.PlannedOperation;
+import cascading.operation.PlannerLevel;
 import cascading.util.Util;
 
 /**
@@ -33,7 +36,7 @@ import cascading.util.Util;
  * @see cascading.operation.GroupAssertion
  * @see cascading.operation.ValueAssertion
  */
-public abstract class BaseAssertion<C> extends BaseOperation<C>
+public abstract class BaseAssertion<C> extends BaseOperation<C> implements PlannedOperation<C>
   {
   /** Field message */
   private String message;
@@ -61,6 +64,12 @@ public abstract class BaseAssertion<C> extends BaseOperation<C>
   public String getMessage()
     {
     return message;
+    }
+
+  @Override
+  public boolean supportsPlannerLevel( PlannerLevel plannerLevel )
+    {
+    return plannerLevel instanceof AssertionLevel;
     }
 
   protected void fail()

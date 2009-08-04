@@ -31,7 +31,7 @@ package cascading.operation;
  * </p>
  * STRICT assertions should be used as unit test would be against regression data and during development.
  */
-public enum AssertionLevel
+public enum AssertionLevel implements PlannerLevel
   {
     NONE( 0 ),
     VALID( 1 ),
@@ -44,14 +44,15 @@ public enum AssertionLevel
     this.rank = rank;
     }
 
-  /**
-   * Method isStricterThan returns true if the current AssertionLevel is stricter than the argument level.
-   *
-   * @param assertionLevel of type AssertionLevel
-   * @return boolean
-   */
-  public boolean isStricterThan( AssertionLevel assertionLevel )
+  @Override
+  public boolean isNoneLevel()
     {
-    return rank > assertionLevel.rank;
+    return this == NONE;
+    }
+
+  @Override
+  public boolean isStricterThan( PlannerLevel plannerLevel )
+    {
+    return rank > ( (AssertionLevel) plannerLevel ).rank;
     }
   }

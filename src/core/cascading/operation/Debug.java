@@ -34,7 +34,7 @@ import cascading.flow.FlowProcess;
  * The frequency that fields and tuples are printed can be set via {@link #setPrintFieldsEvery(int)} and
  * {@link #setPrintTupleEvery(int)} methods, respectively.
  */
-public class Debug extends BaseOperation<Long> implements Filter<Long>
+public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedOperation<Long>
   {
   static public enum Output
     {
@@ -162,7 +162,6 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>
    * Method setPrintFieldsEvery sets the printFieldsEvery interval value of this Debug object.
    *
    * @param printFieldsEvery the printFieldsEvery of this Debug object.
-   *
    */
   public void setPrintFieldsEvery( int printFieldsEvery )
     {
@@ -183,11 +182,16 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>
    * Method setPrintTupleEvery sets the printTupleEvery interval value of this Debug object.
    *
    * @param printTupleEvery the printTupleEvery of this Debug object.
-   *
    */
   public void setPrintTupleEvery( int printTupleEvery )
     {
     this.printTupleEvery = printTupleEvery;
+    }
+
+  @Override
+  public boolean supportsPlannerLevel( PlannerLevel plannerLevel )
+    {
+    return plannerLevel instanceof DebugLevel;
     }
 
   @Override
@@ -224,5 +228,4 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>
 
     stream.println( message );
     }
-
   }

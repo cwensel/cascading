@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.operation.AssertionLevel;
+import cascading.operation.PlannedOperation;
+import cascading.operation.PlannerLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -72,7 +73,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   /** Field traps */
   private Map<String, Tap> traps;
   /** Field assertionLevel */
-  private AssertionLevel assertionLevel;
+  private PlannerLevel[] plannerLevels;
 
 
   ElementGraph()
@@ -83,18 +84,17 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   /**
    * Constructor ElementGraph creates a new ElementGraph instance.
    *
-   * @param pipes          of type Pipe[]
-   * @param sources        of type Map<String, Tap>
-   * @param sinks          of type Map<String, Tap>
-   * @param assertionLevel of type AssertionLevel
+   * @param pipes   of type Pipe[]
+   * @param sources of type Map<String, Tap>
+   * @param sinks   of type Map<String, Tap>
    */
-  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, AssertionLevel assertionLevel )
+  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, PlannerLevel... plannerLevels )
     {
     super( Scope.class );
     this.sources = sources;
     this.sinks = sinks;
     this.traps = traps;
-    this.assertionLevel = assertionLevel;
+    this.plannerLevels = plannerLevels;
 
     assembleGraph( pipes, sources, sinks );
 
@@ -462,7 +462,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testAssertion( flowElement, assertionLevel ) )
+      if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testPlannerLevel( flowElement ) )
         {
         // Pipe class is guaranteed to have one input
         removeElement( flowElement );
@@ -499,14 +499,23 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     removeVertex( flowElement );
     }
 
-  private boolean testAssertion( FlowElement flowElement, AssertionLevel assertionLevel )
+  private boolean testPlannerLevel( FlowElement flowElement )
     {
     if( !( flowElement instanceof Operator ) )
       return false;
 
     Operator operator = (Operator) flowElement;
 
-    return operator.isAssertion() && operator.getAssertionLevel().isStricterThan( assertionLevel );
+    if( !operator.hasPlannerLevel() )
+      return false;
+
+    for( PlannerLevel plannerLevel : plannerLevels )
+      {
+      if( ( (PlannedOperation) operator.getOperation() ).supportsPlannerLevel( plannerLevel ) )
+        return operator.getPlannerLevel().isStricterThan( plannerLevel );
+      }
+
+    throw new IllegalStateException( "encountered unsupported planner level: " + operator.getPlannerLevel().getClass().getName() );
     }
 
   /** Method resolveFields performs a breadth first traversal and resolves the tuple fields between each Pipe instance. */
