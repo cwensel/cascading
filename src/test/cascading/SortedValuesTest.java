@@ -23,9 +23,7 @@ package cascading;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.ParseException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,46 +60,6 @@ public class SortedValuesTest extends ClusterTestCase
   private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
   private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{
     1, 2, 3, 4, 5, 6} );
-
-  private static class TestLongComparator implements Comparator<Long>, Serializable
-    {
-    boolean reverse = true;
-
-    public TestLongComparator()
-      {
-      }
-
-    public TestLongComparator( boolean reverse )
-      {
-      this.reverse = reverse;
-      }
-
-    @Override
-    public int compare( Long o1, Long o2 )
-      {
-      return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
-      }
-    }
-
-  private static class TestStringComparator implements Comparator<String>, Serializable
-    {
-    boolean reverse = true;
-
-    public TestStringComparator()
-      {
-      }
-
-    public TestStringComparator( boolean reverse )
-      {
-      this.reverse = reverse;
-      }
-
-    @Override
-    public int compare( String o1, String o2 )
-      {
-      return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
-      }
-    }
 
   public SortedValuesTest()
     {

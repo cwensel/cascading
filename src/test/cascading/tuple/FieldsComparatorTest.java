@@ -24,21 +24,14 @@ package cascading.tuple;
 import java.util.Comparator;
 
 import cascading.CascadingTestCase;
+import cascading.TestStringComparator;
 
 /**
  *
  */
 public class FieldsComparatorTest extends CascadingTestCase
   {
-  Comparator comparator = new Comparator<String>()
-  {
-
-  @Override
-  public int compare( String o1, String o2 )
-    {
-    return o1.compareTo( o2 );
-    }
-  };
+  Comparator comparator = new TestStringComparator( false );
 
   public FieldsComparatorTest()
     {
