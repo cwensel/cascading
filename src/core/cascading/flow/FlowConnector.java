@@ -65,11 +65,15 @@ import org.apache.hadoop.mapred.JobConf;
  * By default, all {@link Assertion}s are planned into the resulting Flow instance. This can be
  * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
  * <p/>
+ * Also by default, all {@link cascading.operation.Debug}s are planned into the resulting Flow instance. This can be
+ * changed by calling {@link #setDebugLevel(java.util.Map, cascading.operation.DebugLevel)}.
+ * <p/>
  * <strong>Properties</strong><br/>
  * <ul>
  * <li>cascading.flowconnector.appjar.class</li>
  * <li>cascading.flowconnector.appjar.path</li>
  * <li>cascading.flowconnector.assertionlevel</li>
+ * <li>cascading.flowconnector.debuglevel</li>
  * <li>cascading.flowconnector.intermediateschemeclass</li>
  * </ul>
  *
