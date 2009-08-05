@@ -22,12 +22,81 @@
 package cascading.tuple.hadoop;
 
 import java.io.IOException;
+import java.util.Comparator;
 
+import cascading.CascadingException;
 import cascading.tuple.TuplePair;
+import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 
 /** Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
 public class TuplePairComparator extends DeserializerComparator<TuplePair>
   {
+  private Comparator comparator = new Comparator<TuplePair>()
+  {
+  @Override
+  public int compare( TuplePair lhs, TuplePair rhs )
+    {
+    return lhs.compareTo( rhs );
+    }
+  };
+
+  @Override
+  public void setConf( Configuration conf )
+    {
+    super.setConf( conf );
+
+    if( conf == null )
+      return;
+
+    String group = conf.get( "cascading.group.comparator" );
+    String sort = conf.get( "cascading.sort.comparator" );
+
+    if( sort == null && group == null )
+      return;
+
+    Comparator groupComparator = comparator;
+    Comparator sortComparator = comparator;
+
+    try
+      {
+      if( group != null )
+        groupComparator = (Comparator) Util.deserializeBase64( group );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to deserialize grouping comparator" );
+      }
+
+    try
+      {
+      if( sort != null )
+        sortComparator = (Comparator) Util.deserializeBase64( sort );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to deserialize sorting comparator" );
+      }
+
+    final Comparator finalGroupComparator = groupComparator;
+    final Comparator finalSortComparator = sortComparator;
+
+    comparator = new Comparator<TuplePair>()
+    {
+    @Override
+    public int compare( TuplePair lhs, TuplePair rhs )
+      {
+      int c = finalGroupComparator.compare( lhs.getLhs(), rhs.getLhs() );
+
+      if( c != 0 )
+        return c;
+
+      return finalSortComparator.compare( lhs.getRhs(), rhs.getRhs() );
+      }
+    };
+    }
+
+
   void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
     setDeserializer( tupleSerialization.getTuplePairDeserializer() );
@@ -35,6 +104,6 @@ public class TuplePairComparator extends DeserializerComparator<TuplePair>
 
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return lhs.compareTo( rhs );
+    return comparator.compare( lhs, rhs );
     }
   }

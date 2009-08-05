@@ -19,33 +19,49 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cascading.tuple.hadoop;
 
 import java.io.IOException;
+import java.util.Comparator;
 
+import cascading.CascadingException;
 import cascading.tuple.Tuple;
+import cascading.util.Util;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 
 public class TupleComparator extends DeserializerComparator<Tuple> implements Configurable
   {
+  private Comparator comparator = new Comparator<Tuple>()
+  {
+  @Override
+  public int compare( Tuple lhs, Tuple rhs )
+    {
+    return lhs.compareTo( rhs );
+    }
+  };
+
+  @Override
+  public void setConf( Configuration conf )
+    {
+    super.setConf( conf );
+
+    if( conf == null )
+      return;
+
+    try
+      {
+      String value = conf.get( "cascading.group.comparator" );
+
+      if( value != null )
+        comparator = (Comparator) Util.deserializeBase64( value );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to deserialize grouping comparator" );
+      }
+    }
+
   void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
     setDeserializer( tupleSerialization.getTupleDeserializer() );
@@ -53,6 +69,6 @@ public class TupleComparator extends DeserializerComparator<Tuple> implements Co
 
   public int compare( Tuple lhs, Tuple rhs )
     {
-    return lhs.compareTo( rhs );
+    return comparator.compare( lhs, rhs );
     }
   }

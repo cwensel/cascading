@@ -35,14 +35,19 @@ import cascading.tuple.Fields;
  * <p/>
  * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
  * <p/>
- * Self joins an be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
+ * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once.
+ * <p/>
+ * The outgoing grouping Tuple stream is sorted by the natural order of the grouping fields. To control this order,
+ * at least the first groupingFields value given should be an instance of {@link cascading.tuple.FieldsComparator}.
+ * This allows fine grained control of the sort grouping order.
  *
  * @see cascading.pipe.cogroup.InnerJoin
  * @see cascading.pipe.cogroup.OuterJoin
  * @see cascading.pipe.cogroup.LeftJoin
  * @see cascading.pipe.cogroup.RightJoin
  * @see cascading.pipe.cogroup.MixedJoin
+ * @see cascading.tuple.FieldsComparator
  */
 public class CoGroup extends Group
   {

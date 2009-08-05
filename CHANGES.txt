@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added support for custom j.u.Comparator instances to control the grouping and sort orders in c.p.CoGroup and
+  c.p.GroupBy. This is achieved through the use of the new c.t.FieldsComparator class.
+
   Added support for planner managed debugging levels via the c.o.DebugLevel enum. Now c.o.Debug operations
   can be planned out at runtime in the same manner as c.o.Assertion operations.
 

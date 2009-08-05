@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -39,6 +40,8 @@ import cascading.tap.TempHfs;
 import cascading.tap.hadoop.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tap.hadoop.TapIterator;
+import cascading.tuple.Fields;
+import cascading.tuple.FieldsComparator;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
@@ -253,6 +256,11 @@ public class FlowStep implements Serializable
       conf.setMapOutputKeyClass( Tuple.class );
       conf.setMapOutputValueClass( Tuple.class );
 
+      addComparators( conf, "cascading.group.comparator", group.getGroupingSelectors() );
+
+      if( group.isGroupBy() )
+        addComparators( conf, "cascading.sort.comparator", group.getSortingSelectors() );
+
       // handles the case the groupby sort should be reversed
       if( group.isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
@@ -280,6 +288,21 @@ public class FlowStep implements Serializable
     conf.set( "cascading.flow.step", Util.serializeBase64( this ) );
 
     return conf;
+    }
+
+  private void addComparators( JobConf conf, String property, Map<String, Fields> map ) throws IOException
+    {
+    Iterator<Fields> fieldsIterator = map.values().iterator();
+
+    if( !fieldsIterator.hasNext() )
+      return;
+
+    Fields fields = fieldsIterator.next();
+
+    if( fields instanceof FieldsComparator )
+      conf.set( property, Util.serializeBase64( fields ) );
+
+    return;
     }
 
   private void initFromTraps( JobConf conf ) throws IOException

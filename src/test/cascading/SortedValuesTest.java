@@ -21,6 +21,16 @@
 
 package cascading;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
@@ -29,6 +39,7 @@ import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.text.DateParser;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
@@ -37,24 +48,60 @@ import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.FieldsComparator;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 public class SortedValuesTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.200.txt";
+  String inputFileIps = "build/test/data/ips.20.txt";
 
   String outputPath = "build/test/output/sorting/";
   private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
-  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{1, 2, 3, 4, 5, 6} );
+  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{
+    1, 2, 3, 4, 5, 6} );
+
+  private static class TestLongComparator implements Comparator<Long>, Serializable
+    {
+    boolean reverse = true;
+
+    public TestLongComparator()
+      {
+      }
+
+    public TestLongComparator( boolean reverse )
+      {
+      this.reverse = reverse;
+      }
+
+    @Override
+    public int compare( Long o1, Long o2 )
+      {
+      return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
+      }
+    }
+
+  private static class TestStringComparator implements Comparator<String>, Serializable
+    {
+    boolean reverse = true;
+
+    public TestStringComparator()
+      {
+      }
+
+    public TestStringComparator( boolean reverse )
+      {
+      this.reverse = reverse;
+      }
+
+    @Override
+    public int compare( String o1, String o2 )
+      {
+      return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
+      }
+    }
 
   public SortedValuesTest()
     {
@@ -153,6 +200,166 @@ public class SortedValuesTest extends ClusterTestCase
     validateFile( sink, 6, 6, sorted, 0 );
     }
 
+  public void testComparatorValues() throws Exception
+    {
+    runComparatorTest( "compareforward", false );
+    }
+
+  public void testComparatorValuesReversed() throws Exception
+    {
+    runComparatorTest( "comparereversed", true );
+    }
+
+  private void runComparatorTest( String path, boolean reverseSort ) throws IOException, ParseException
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileApache );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+
+    Pipe pipe = new Pipe( "apache" );
+
+    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
+
+    pipe = new Each( pipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
+
+    // DateParser.APACHE declares: "ts"
+    pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+
+    FieldsComparator groupFields = new FieldsComparator( "ts" );
+
+    groupFields.setComparator( "ts", new TestLongComparator() );
+
+    pipe = new GroupBy( pipe, groupFields, null, reverseSort );
+
+    pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
+
+    Map<Object, Object> properties = getProperties();
+
+    if( MultiMapReducePlanner.getJobConf( properties ) != null )
+      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateFile( sink, 200, 161, !reverseSort, 2 );
+    }
+
+  public void testComparatorSortedValues() throws Exception
+    {
+    runComparatorSortTest( "comparesortforward", false );
+    }
+
+  public void testComparatorSortedValuesReversed() throws Exception
+    {
+    runComparatorSortTest( "comparesortreversed", true );
+    }
+
+  private void runComparatorSortTest( String path, boolean reverseSort ) throws IOException, ParseException
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Lfs( new TextLine(), inputFileApache );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+
+    Pipe pipe = new Pipe( "apache" );
+
+    // RegexParser.APACHE declares: "time", "method", "event", "status", "size"
+    pipe = new Each( pipe, new Fields( "line" ), apacheCommonParser );
+
+    pipe = new Each( pipe, new Insert( new Fields( "col" ), 1l ), Fields.ALL );
+
+    // DateParser.APACHE declares: "ts"
+    pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
+
+    FieldsComparator groupFields = new FieldsComparator( "col" );
+
+    groupFields.setComparator( "col", new TestLongComparator() );
+
+    FieldsComparator sortFields = new FieldsComparator( "status" );
+
+    sortFields.setComparator( "status", new TestStringComparator() );
+
+    pipe = new GroupBy( pipe, groupFields, sortFields, reverseSort );
+
+    pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
+
+    Map<Object, Object> properties = getProperties();
+
+    if( MultiMapReducePlanner.getJobConf( properties ) != null )
+      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+
+    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateFile( sink, 200, 6, !reverseSort, 1 );
+    }
+
+
+  public void testCoGroupComparatorValues() throws Exception
+    {
+    runCoGroupComparatorTest( "cogroupcompareforward", false );
+    }
+
+  public void testCoGroupComparatorValuesReversed() throws Exception
+    {
+    runCoGroupComparatorTest( "cogroupcomparereversed", true );
+    }
+
+  private void runCoGroupComparatorTest( String path, boolean reverseSort ) throws IOException, ParseException
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    Tap sourceApache = new Lfs( new TextLine(), inputFileApache );
+    Tap sourceIP = new Lfs( new TextLine(), inputFileIps );
+    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+
+    Pipe apachePipe = new Pipe( "apache" );
+
+    apachePipe = new Each( apachePipe, new Fields( "line" ), apacheCommonParser );
+    apachePipe = new Each( apachePipe, new Insert( new Fields( "col" ), 1 ), Fields.ALL );
+    apachePipe = new Each( apachePipe, new Fields( "ip" ), new RegexParser( new Fields( "octet" ), "^[^.]*" ), new Fields( "col", "status", "event", "octet", "size" ) );
+    apachePipe = new Each( apachePipe, new Fields( "octet" ), new Identity( long.class ), Fields.REPLACE );
+
+    FieldsComparator groupApache = new FieldsComparator( "octet" );
+    groupApache.setComparator( "octet", new TestLongComparator( reverseSort ) );
+
+    Pipe ipPipe = new Pipe( "ip" );
+
+    ipPipe = new Each( ipPipe, new Fields( "line" ), new Identity( new Fields( "rawip" ) ) );
+    ipPipe = new Each( ipPipe, new Fields( "rawip" ), new RegexParser( new Fields( "rawoctet" ), "^[^.]*" ), new Fields( "rawoctet" ) );
+    ipPipe = new Each( ipPipe, new Fields( "rawoctet" ), new Identity( long.class ), Fields.REPLACE );
+
+    FieldsComparator groupIP = new FieldsComparator( "rawoctet" );
+    groupIP.setComparator( "rawoctet", new TestLongComparator( reverseSort ) );
+
+    Pipe pipe = new CoGroup( apachePipe, groupApache, ipPipe, groupIP );
+
+    pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
+
+    Map<Object, Object> properties = getProperties();
+
+    if( MultiMapReducePlanner.getJobConf( properties ) != null )
+      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+
+    Map sources = new HashMap();
+
+    sources.put( "apache", sourceApache );
+    sources.put( "ip", sourceIP );
+
+    Flow flow = new FlowConnector( properties ).connect( sources, sink, pipe );
+
+    flow.complete();
+
+    validateFile( sink, 199, 16, reverseSort, 5 );
+    }
+
   public void testSortFails() throws Exception
     {
     String path = "fails";
@@ -196,9 +403,9 @@ public class SortedValuesTest extends ClusterTestCase
     {
     TupleEntryIterator iterator = tap.openForRead( new JobConf() );
 
-    Set<Integer> values = new HashSet<Integer>();
+    Set<Long> values = new HashSet<Long>();
 
-    int lastValue = isReversed ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+    long lastValue = isReversed ? Long.MAX_VALUE : Long.MIN_VALUE;
     int count = 0;
 
     while( iterator.hasNext() )
@@ -208,7 +415,7 @@ public class SortedValuesTest extends ClusterTestCase
 
       tuple = new Tuple( tuple.getString( 1 ).split( "\t" ) );
 
-      int value = tuple.getInteger( comparePosition );
+      long value = tuple.getLong( comparePosition );
 
       values.add( value );
 
@@ -224,6 +431,6 @@ public class SortedValuesTest extends ClusterTestCase
       assertEquals( "length of " + tap, length, count );
 
     if( uniqueValues != -1 )
-      assertEquals( "unique values of" + tap, uniqueValues, values.size() );
+      assertEquals( "unique values of " + tap, uniqueValues, values.size() );
     }
   }

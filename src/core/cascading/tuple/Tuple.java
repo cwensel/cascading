@@ -21,13 +21,19 @@
 
 package cascading.tuple;
 
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
+
 import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
-
-import java.io.Serializable;
-import java.io.StringReader;
-import java.util.*;
 
 /**
  * A Tuple represents a set of values. Consider a Tuple the same as a data base record where every value is a column in that table.
@@ -660,6 +666,45 @@ public class Tuple implements Comparable, Iterable, Serializable
         return 1;
 
       int c = lhs.compareTo( rhs ); // guaranteed to not be null
+      if( c != 0 )
+        return c;
+      }
+
+    return 0;
+    }
+
+  public int compareTo( Comparator[] comparators, Tuple other )
+    {
+    if( comparators == null )
+      return compareTo( other );
+
+    if( other == null || other.elements == null )
+      return 1;
+
+    if( other.elements.size() != this.elements.size() )
+      return this.elements.size() - other.elements.size();
+
+    if( comparators.length != this.elements.size() )
+      throw new IllegalArgumentException( "comparator array not same size as tuple elements" );
+
+    for( int i = 0; i < this.elements.size(); i++ )
+      {
+      Comparable lhs = this.elements.get( i );
+      Comparable rhs = other.elements.get( i );
+
+      int c = 0;
+
+      if( comparators[ i ] != null )
+        c = comparators[ i ].compare( lhs, rhs );
+      else if( lhs == null && rhs == null )
+        c = 0;
+      else if( lhs == null && rhs != null )
+          return -1;
+        else if( lhs != null && rhs == null )
+            return 1;
+          else
+            c = lhs.compareTo( rhs ); // guaranteed to not be null
+
       if( c != 0 )
         return c;
       }

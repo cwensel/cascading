@@ -29,6 +29,6 @@ public class ReverseTuplePairComparator extends TuplePairComparator
   @Override
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return rhs.compareTo( lhs ); // swap arguments
+    return super.compare( rhs, lhs );
     }
   }

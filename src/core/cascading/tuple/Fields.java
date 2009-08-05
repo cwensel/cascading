@@ -87,7 +87,7 @@ import cascading.util.Util;
  * result field names or size need to be the same. This is useful for when the Operation arguments are no longer necessary
  * and the result Fields and values should be appended to the remainder of the input field names and Tuple.
  */
-public final class Fields implements Comparable, Iterable<Comparable>, Serializable
+public class Fields implements Comparable, Iterable<Comparable>, Serializable
   {
   /** Field UNKNOWN */
   public static final Fields UNKNOWN = new Fields( Kind.UNKNOWN );

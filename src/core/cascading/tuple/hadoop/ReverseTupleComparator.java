@@ -22,19 +22,12 @@
 package cascading.tuple.hadoop;
 
 import cascading.tuple.Tuple;
-import org.apache.hadoop.conf.Configurable;
 
-import java.io.IOException;
-
-public class ReverseTupleComparator extends DeserializerComparator<Tuple> implements Configurable
+public class ReverseTupleComparator extends TupleComparator
   {
-  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
-    {
-    setDeserializer( tupleSerialization.getTupleDeserializer() );
-    }
-
+  @Override
   public int compare( Tuple lhs, Tuple rhs )
     {
-    return rhs.compareTo( lhs );
+    return super.compare( rhs, lhs );
     }
   }
