@@ -113,7 +113,7 @@ public class FlowConnector
    * Method setDebugLevel sets the target planner {@link cascading.operation.DebugLevel}.
    *
    * @param properties of type Map<Object, Object>
-   * @param debugLevel of type AssertionLevel
+   * @param debugLevel of type DebugLevel
    */
   public static void setDebugLevel( Map<Object, Object> properties, DebugLevel debugLevel )
     {
@@ -125,7 +125,7 @@ public class FlowConnector
    * Method getDebugLevel returns the configured target planner {@link cascading.operation.DebugLevel}.
    *
    * @param properties of type Map<Object, Object>
-   * @return AssertionLevel the configured AssertionLevel
+   * @return DebugLevel the configured DebugLevel
    */
   public static DebugLevel getDebugLevel( Map<Object, Object> properties )
     {
