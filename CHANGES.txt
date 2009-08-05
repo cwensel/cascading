@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Changed serialization framework to cache deserialized instances to reduce the number of reflected new
+  instance calls. Now all custom types will be reused and should not be cached.
+
   Added support for custom j.u.Comparator instances to control the grouping and sort orders in c.p.CoGroup and
   c.p.GroupBy. This is achieved through the use of the new c.t.FieldsComparator class.
 
