@@ -206,11 +206,11 @@ public class FlowStep implements Serializable
 
   private void initFromTraps( JobConf conf ) throws IOException
     {
-    initFromTraps( conf, mapperTraps, true );
-    initFromTraps( conf, reducerTraps, false );
+    initFromTraps( conf, mapperTraps );
+    initFromTraps( conf, reducerTraps );
     }
 
-  private void initFromTraps( JobConf conf, Map<String, Tap> traps, boolean isMapper ) throws IOException
+  private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
     {
     if( !traps.isEmpty() )
       {
@@ -427,11 +427,13 @@ public class FlowStep implements Serializable
     private List<FlowStepJob> predecessors;
     private final CountDownLatch latch = new CountDownLatch( 1 );
     private boolean stop = false;
+    private long pollingInterval;
 
     public FlowStepJob( String stepName, JobConf currentConf )
       {
       this.stepName = stepName;
       this.currentConf = currentConf;
+      this.pollingInterval = Flow.getJobPollingInterval( currentConf );
       }
 
     public void stop()
@@ -480,7 +482,7 @@ public class FlowStep implements Serializable
         currentJobClient = new JobClient( currentConf );
         runningJob = currentJobClient.submitJob( currentConf );
 
-        runningJob.waitForCompletion();
+        blockTillCompleteOrStopped();
 
         if( !stop && !runningJob.isSuccessful() )
           {
@@ -500,6 +502,29 @@ public class FlowStep implements Serializable
         }
 
       return null;
+      }
+
+    protected void blockTillCompleteOrStopped() throws IOException
+      {
+      while( true )
+        {
+        if( stop || runningJob.isComplete() )
+          break;
+
+        sleep();
+        }
+      }
+
+    protected void sleep()
+      {
+      try
+        {
+        Thread.sleep( pollingInterval );
+        }
+      catch( InterruptedException exception )
+        {
+        // do nothing
+        }
       }
 
     private void dumpCompletionEvents()

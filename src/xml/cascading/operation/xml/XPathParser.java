@@ -76,12 +76,13 @@ public class XPathParser extends XPathOperation implements Function
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     Tuple tuple = new Tuple();
-    InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().get( 0 ) ) );
+    String argument = functionCall.getArguments().getString( 0 );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {
       try
         {
+        InputSource source = new InputSource( new StringReader( argument ) );
         NodeList value = (NodeList) getExpressions().get( i ).evaluate( source, XPathConstants.NODESET );
 
         if( LOG.isDebugEnabled() )

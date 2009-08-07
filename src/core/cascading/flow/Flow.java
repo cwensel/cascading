@@ -38,8 +38,19 @@ import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
@@ -134,11 +145,11 @@ public class Flow implements Runnable
    */
   public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", Boolean.toString( false ) ) );
+    return Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", false );
     }
 
   /**
-   * Propety stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
+   * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
    * underlying computing system supports it. Defaults to {@code true}.
    *
    * @param properties     of type Map
@@ -157,7 +168,35 @@ public class Flow implements Runnable
    */
   public static boolean getStopJobsOnExit( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", Boolean.toString( true ) ) );
+    return Util.getProperty( properties, "cascading.flow.stopjobsonexit", true );
+    }
+
+  /**
+   * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
+   * The default value is 5000 msec (5 seconds).   *
+   *
+   * @param properties of type Map
+   * @param interval   of type long
+   */
+  public static void setJobPollingInterval( Map<Object, Object> properties, long interval )
+    {
+    properties.put( "cascading.flow.job.pollinginterval", Long.toString( interval ) );
+    }
+
+  /**
+   * Returns property jobPollingInterval. The default is 5000 (5 sec).
+   *
+   * @param properties of type Map
+   * @return a long
+   */
+  public static long getJobPollingInterval( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.flow.job.pollinginterval", 500 );
+    }
+
+  static long getJobPollingInterval( JobConf jobConf )
+    {
+    return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
     }
 
   /** Used for testing. */

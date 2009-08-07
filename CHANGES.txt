@@ -1,5 +1,16 @@
 Cascading Change Log
 
+1.0.14
+
+  Fixed bug in planner where JGraphT sometimes returns null instead of an empty List. 
+
+  Fixed bug in c.o.x.XPathParser that prevented use of multiple xpath expressions.
+
+  Added configuration propety allowing job polling interval to be configured per c.f.Flow via
+  Flow#setJobPollingInterval().
+
+  Updated ant build to not hard-code hadoop/lib sub-dir names.
+
 1.0.13
 
   Fixed bug where non-String j.u.Property values where not being copied to the internal o.a.h.m.JobConf instance.

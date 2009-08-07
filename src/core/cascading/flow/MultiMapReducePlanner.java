@@ -325,13 +325,11 @@ public class MultiMapReducePlanner extends FlowPlanner
 
     for( Group group : groups )
       {
-      KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, elementGraph.head, Integer.MAX_VALUE );
-      List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
 
       Set<Tap> taps = new HashSet<Tap>();
 
       // iterate each shortest path to current group finding each tap sourcing the merge/join
-      for( GraphPath<FlowElement, Scope> path : paths )
+      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( group ) )
         {
         List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is group
         Collections.reverse( flowElements ); // first element is group
@@ -377,11 +375,8 @@ public class MultiMapReducePlanner extends FlowPlanner
         if( tap instanceof TempHfs || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
           continue;
 
-        KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, tap, Integer.MAX_VALUE );
-        List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( group );
-
         // handle case where there is a split on a pipe between the tap and group
-        for( GraphPath<FlowElement, Scope> path : paths )
+        for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetween( tap, group ) )
           {
           List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // shortest path tap -> group
           Collections.reverse( flowElements ); // group -> tap
@@ -417,10 +412,7 @@ public class MultiMapReducePlanner extends FlowPlanner
 
   private boolean handleGroupPartitioning( ElementGraph elementGraph )
     {
-    KShortestPaths<FlowElement, Scope> shortestPaths = new KShortestPaths<FlowElement, Scope>( elementGraph, elementGraph.head, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> paths = shortestPaths.getPaths( elementGraph.tail );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
+    for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetweenExtents() )
       {
       List<FlowElement> flowElements = Graphs.getPathVertexList( path );
       List<Pipe> tapInsertions = new ArrayList<Pipe>();
