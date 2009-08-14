@@ -1,8 +1,12 @@
 Cascading Change Log
 
+unreleased
+
+  Fixed issue in c.t.h.FSDigestOutputStream where seek() now must be implemented with modern versions of Hadoop. 
+
 1.0.14
 
-  Fixed bug in planner where JGraphT sometimes returns null instead of an empty List. 
+  Fixed bug in planner where JGraphT sometimes returns null instead of an empty List.
 
   Fixed bug in c.o.x.XPathParser that prevented use of multiple xpath expressions.
 

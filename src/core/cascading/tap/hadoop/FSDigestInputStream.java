@@ -122,7 +122,15 @@ public class FSDigestInputStream extends FSInputStream
   @Override
   public void seek( long pos ) throws IOException
     {
-    throw new IOException( "not supported" );
+    if( getPos() == pos )
+      return;
+
+    if( getPos() > pos )
+      throw new IOException( "cannot seek to " + pos + ", currently at" + getPos() );
+
+    int len = (int) ( pos - getPos() );
+
+    read( new byte[len], 0, len );
     }
 
   @Override
