@@ -21,10 +21,10 @@
 
 package cascading.tuple;
 
-import java.util.Comparator;
-
 import cascading.CascadingTestCase;
 import cascading.TestStringComparator;
+
+import java.util.Comparator;
 
 /**
  *
@@ -40,7 +40,7 @@ public class FieldsComparatorTest extends CascadingTestCase
 
   public void testCompare()
     {
-    FieldsComparator fields = new FieldsComparator( "a" );
+    Fields fields = new Fields( "a" );
 
     fields.setComparator( "a", comparator );
 
@@ -61,7 +61,7 @@ public class FieldsComparatorTest extends CascadingTestCase
 
   public void testCompare2()
     {
-    FieldsComparator fields = new FieldsComparator( "a" );
+    Fields fields = new Fields( "a" );
 
     fields.setComparators( new Comparator[]{comparator} );
 

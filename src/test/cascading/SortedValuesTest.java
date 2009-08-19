@@ -21,14 +21,6 @@
 
 package cascading;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
@@ -37,19 +29,22 @@ import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.text.DateParser;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
+import cascading.pipe.*;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.FieldsComparator;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SortedValuesTest extends ClusterTestCase
   {
@@ -186,7 +181,7 @@ public class SortedValuesTest extends ClusterTestCase
     // DateParser.APACHE declares: "ts"
     pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
-    FieldsComparator groupFields = new FieldsComparator( "ts" );
+    Fields groupFields = new Fields( "ts" );
 
     groupFields.setComparator( "ts", new TestLongComparator() );
 
@@ -234,11 +229,11 @@ public class SortedValuesTest extends ClusterTestCase
     // DateParser.APACHE declares: "ts"
     pipe = new Each( pipe, new Fields( "time" ), new DateParser( "dd/MMM/yyyy:HH:mm:ss Z" ), new Fields( "col", "status", "ts", "event", "ip", "size" ) );
 
-    FieldsComparator groupFields = new FieldsComparator( "col" );
+    Fields groupFields = new Fields( "col" );
 
     groupFields.setComparator( "col", new TestLongComparator() );
 
-    FieldsComparator sortFields = new FieldsComparator( "status" );
+    Fields sortFields = new Fields( "status" );
 
     sortFields.setComparator( "status", new TestStringComparator() );
 
@@ -285,7 +280,7 @@ public class SortedValuesTest extends ClusterTestCase
     apachePipe = new Each( apachePipe, new Fields( "ip" ), new RegexParser( new Fields( "octet" ), "^[^.]*" ), new Fields( "col", "status", "event", "octet", "size" ) );
     apachePipe = new Each( apachePipe, new Fields( "octet" ), new Identity( long.class ), Fields.REPLACE );
 
-    FieldsComparator groupApache = new FieldsComparator( "octet" );
+    Fields groupApache = new Fields( "octet" );
     groupApache.setComparator( "octet", new TestLongComparator( reverseSort ) );
 
     Pipe ipPipe = new Pipe( "ip" );
@@ -294,7 +289,7 @@ public class SortedValuesTest extends ClusterTestCase
     ipPipe = new Each( ipPipe, new Fields( "rawip" ), new RegexParser( new Fields( "rawoctet" ), "^[^.]*" ), new Fields( "rawoctet" ) );
     ipPipe = new Each( ipPipe, new Fields( "rawoctet" ), new Identity( long.class ), Fields.REPLACE );
 
-    FieldsComparator groupIP = new FieldsComparator( "rawoctet" );
+    Fields groupIP = new Fields( "rawoctet" );
     groupIP.setComparator( "rawoctet", new TestLongComparator( reverseSort ) );
 
     Pipe pipe = new CoGroup( apachePipe, groupApache, ipPipe, groupIP );

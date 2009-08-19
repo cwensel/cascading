@@ -21,14 +21,14 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.IOException;
-
 import cascading.CascadingException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.InputBuffer;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.serializer.Deserializer;
+
+import java.io.IOException;
 
 /** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
@@ -88,7 +88,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     catch( ClassCastException exception )
       {
       throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
-        "different types or custom comparators are incorrectly set on FieldsComparator", exception );
+        "different types or custom comparators are incorrectly set on Fields", exception );
       }
     }
   }

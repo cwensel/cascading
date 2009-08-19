@@ -39,7 +39,8 @@ import cascading.tuple.Fields;
  * 1 for numSelfJoins will join the Pipe with itself once.
  * <p/>
  * The outgoing grouping Tuple stream is sorted by the natural order of the grouping fields. To control this order,
- * at least the first groupingFields value given should be an instance of {@link cascading.tuple.FieldsComparator}.
+ * at least the first groupingFields value given should be an instance of {@link cascading.tuple.Fields} containing
+ * {@link java.util.Comparator} instances for the appropriate fields.
  * This allows fine grained control of the sort grouping order.
  *
  * @see cascading.pipe.cogroup.InnerJoin
@@ -47,7 +48,7 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.cogroup.LeftJoin
  * @see cascading.pipe.cogroup.RightJoin
  * @see cascading.pipe.cogroup.MixedJoin
- * @see cascading.tuple.FieldsComparator
+ * @see cascading.tuple.Fields
  */
 public class CoGroup extends Group
   {

@@ -21,21 +21,12 @@
 
 package cascading.tuple;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
@@ -87,7 +78,7 @@ import cascading.util.Util;
  * result field names or size need to be the same. This is useful for when the Operation arguments are no longer necessary
  * and the result Fields and values should be appended to the remainder of the input field names and Tuple.
  */
-public class Fields implements Comparable, Iterable<Comparable>, Serializable
+public class Fields implements Comparable, Iterable<Comparable>, Serializable, Comparator<Tuple>
   {
   /** Field UNKNOWN */
   public static final Fields UNKNOWN = new Fields( Kind.UNKNOWN );
@@ -126,6 +117,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable
   boolean isOrdered = true;
   /** Field kind */
   Kind kind;
+  /** Field comparators */
+  Comparator[] comparators;
 
   /** Field thisPos */
   transient int[] thisPos;
@@ -1121,6 +1114,80 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable
   public final int size()
     {
     return fields.length;
+    }
+
+  /**
+   * Method setComparator should be used to associate a {@link java.util.Comparator} with a given field name or position.
+   *
+   * @param fieldName  of type Comparable
+   * @param comparator of type Comparator
+   */
+  public void setComparator( Comparable fieldName, Comparator comparator )
+    {
+    if( !( comparator instanceof Serializable ) )
+      throw new IllegalArgumentException( "given comparator must be serializable" );
+
+    if( comparators == null )
+      comparators = new Comparator[size()];
+
+    try
+      {
+      comparators[ getPos( fieldName ) ] = comparator;
+      }
+    catch( FieldsResolverException exception )
+      {
+      throw new IllegalArgumentException( "given field name was not found: " + fieldName, exception );
+      }
+    }
+
+  /**
+   * Method setComparators sets all the comparators of this FieldsComparator object. The Comparator array
+   * must be the same length as the number for fields in this instance.
+   *
+   * @param comparators the comparators of this FieldsComparator object.
+   */
+  public void setComparators( Comparator... comparators )
+    {
+    if( comparators.length != size() )
+      throw new IllegalArgumentException( "given number of comparator instances must match fields size" );
+
+    for( Comparator comparator : comparators )
+      {
+      if( !( comparator instanceof Serializable ) )
+        throw new IllegalArgumentException( "comparators must be serializable" );
+      }
+
+    this.comparators = comparators;
+    }
+
+  /**
+   * Method getComparators returns the comparators of this Fields object.
+   *
+   * @return the comparators (type Comparator[]) of this Fields object.
+   */
+  public Comparator[] getComparators()
+    {
+    Comparator[] copy = new Comparator[size()];
+
+    System.arraycopy( comparators, 0, copy, 0, size() );
+
+    return copy;
+    }
+
+  /**
+   * Method hasComparators test if this Fields instance has Comparators.
+   *
+   * @return boolean
+   */
+  public boolean hasComparators()
+    {
+    return comparators != null;
+    }
+
+  @Override
+  public int compare( Tuple lhs, Tuple rhs )
+    {
+    return lhs.compareTo( comparators, rhs );
     }
 
   @Override

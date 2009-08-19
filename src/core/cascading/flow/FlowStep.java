@@ -21,16 +21,6 @@
 
 package cascading.flow;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
@@ -40,23 +30,16 @@ import cascading.tap.TempHfs;
 import cascading.tap.hadoop.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tap.hadoop.TapIterator;
-import cascading.tuple.Fields;
-import cascading.tuple.FieldsComparator;
-import cascading.tuple.IndexTuple;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TuplePair;
-import cascading.tuple.hadoop.GroupingComparator;
-import cascading.tuple.hadoop.GroupingPartitioner;
-import cascading.tuple.hadoop.ReverseTupleComparator;
-import cascading.tuple.hadoop.ReverseTuplePairComparator;
-import cascading.tuple.hadoop.TupleComparator;
-import cascading.tuple.hadoop.TuplePairComparator;
-import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.*;
+import cascading.tuple.hadoop.*;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -299,7 +282,7 @@ public class FlowStep implements Serializable
 
     Fields fields = fieldsIterator.next();
 
-    if( fields instanceof FieldsComparator )
+    if( fields.hasComparators() )
       conf.set( property, Util.serializeBase64( fields ) );
 
     return;

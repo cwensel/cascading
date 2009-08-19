@@ -48,10 +48,10 @@ import cascading.tuple.Tuple;
  * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see their arguments
  * in order.
  * <p/>
- * For more control over sorting at the group or secondary sort level, use {@link cascading.tuple.FieldsComparator}
- * instead of {@link Fields} instances when setting the groupFields or sortFields values. FieldsComparator allows you to
- * set a custom {@link java.util.Comparator} instance for each field name or position. It is required that each Comparator
- * class also be {@link java.io.Serializable}.
+ * For more control over sorting at the group or secondary sort level, use {@link cascading.tuple.Fields}
+ * containing {@link java.util.Comparator} instances for the appropriate fields when setting the groupFields or
+ * sortFields values. Fields allows you to set a custom {@link java.util.Comparator} instance for each field name or
+ * position. It is required that each Comparator class also be {@link java.io.Serializable}.
  * <p/>
  * It should be noted for MapReduce systems, distributed group sorting is not 'total'. That is groups are sorted
  * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
