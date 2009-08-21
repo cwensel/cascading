@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased
 
-  Fixed issue in c.t.h.FSDigestOutputStream where seek() now must be implemented with modern versions of Hadoop. 
+  Fixed bug in c.u.Util#join() methods where if the first value was empty, the delimiter was not properly applied.
+
+  Fixed issue in c.t.h.FSDigestOutputStream where seek() now must be implemented with modern versions of Hadoop.
 
 1.0.14
 

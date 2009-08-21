@@ -21,6 +21,23 @@
 
 package cascading.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
@@ -31,16 +48,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
-import org.jgrapht.ext.*;
+import org.jgrapht.ext.DOTExporter;
+import org.jgrapht.ext.EdgeNameProvider;
+import org.jgrapht.ext.IntegerNameProvider;
+import org.jgrapht.ext.MatrixExporter;
+import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /** Class Util provides reusable operations. */
 public class Util
@@ -98,16 +111,19 @@ public class Util
   public static String join( int[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
+    int count = 0;
 
     for( Object s : list )
       {
       if( s == null )
         continue;
 
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
 
     return buffer.toString();
@@ -128,16 +144,19 @@ public class Util
   public static String join( Object[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
+    int count = 0;
 
     for( Object s : list )
       {
       if( s == null )
         continue;
 
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
 
     return buffer.toString();
@@ -180,12 +199,16 @@ public class Util
    */
   public static void join( StringBuffer buffer, Collection collection, String delim )
     {
+    int count = 0;
+
     for( Object s : collection )
       {
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
     }
 
@@ -200,14 +223,18 @@ public class Util
 
   public static void print( StringBuffer buffer, Collection collection, String delim )
     {
+    int count = 0;
+
     for( Object s : collection )
       {
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( "[" );
       buffer.append( s );
       buffer.append( "]" );
+
+      count++;
       }
     }
 
