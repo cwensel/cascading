@@ -126,16 +126,19 @@ public class Util
   public static String join( int[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
+    int count = 0;
 
     for( Object s : list )
       {
       if( s == null )
         continue;
 
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
 
     return buffer.toString();
@@ -156,16 +159,19 @@ public class Util
   public static String join( Object[] list, String delim )
     {
     StringBuffer buffer = new StringBuffer();
+    int count = 0;
 
     for( Object s : list )
       {
       if( s == null )
         continue;
 
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
 
     return buffer.toString();
@@ -208,12 +214,16 @@ public class Util
    */
   public static void join( StringBuffer buffer, Collection collection, String delim )
     {
+    int count = 0;
+
     for( Object s : collection )
       {
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( s );
+
+      count++;
       }
     }
 
@@ -228,14 +238,18 @@ public class Util
 
   public static void print( StringBuffer buffer, Collection collection, String delim )
     {
+    int count = 0;
+
     for( Object s : collection )
       {
-      if( buffer.length() != 0 )
+      if( count != 0 )
         buffer.append( delim );
 
       buffer.append( "[" );
       buffer.append( s );
       buffer.append( "]" );
+
+      count++;
       }
     }
 
