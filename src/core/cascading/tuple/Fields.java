@@ -21,12 +21,21 @@
 
 package cascading.tuple;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
-
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
@@ -508,6 +517,9 @@ public final class Fields implements Comparable, Iterable, Serializable
     for( int i = 0; i < fields.length; i++ )
       {
       Comparable field = fields[ i ];
+
+      if( field == null )
+        throw new IllegalArgumentException( "field name or position may not be null" );
 
       if( field instanceof Fields )
         throw new IllegalArgumentException( "may not nest Fields instances within a Fields instance" );

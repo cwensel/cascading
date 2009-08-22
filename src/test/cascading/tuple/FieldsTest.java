@@ -662,5 +662,16 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
-
+  public void testNullFieldsFail()
+    {
+    try
+      {
+      new Fields( "foo", 1, null );
+      fail( "did not throw exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      // ignore
+      }
+    }
   }
