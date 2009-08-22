@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.t.Fields did not check for a null field name or position on the ctor.
+
   Fixed bug in c.u.Util#join() methods where if the first value was empty, the delimiter was not properly applied.
 
   Fixed issue in c.t.h.FSDigestOutputStream where seek() now must be implemented with modern versions of Hadoop.
