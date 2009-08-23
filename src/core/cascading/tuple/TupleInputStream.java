@@ -40,7 +40,7 @@ public class TupleInputStream extends DataInputStream
 
   public interface ElementReader
     {
-    Comparable read( int token, DataInputStream inputStream ) throws IOException;
+    Object read( int token, DataInputStream inputStream ) throws IOException;
 
     void close();
     }
@@ -64,7 +64,7 @@ public class TupleInputStream extends DataInputStream
 
   public Tuple readTuple( Tuple tuple ) throws IOException
     {
-    List<Comparable> elements = Tuple.elements( tuple );
+    List<Object> elements = Tuple.elements( tuple );
 
     elements.clear();
     int len = WritableUtils.readVInt( this );
@@ -103,7 +103,7 @@ public class TupleInputStream extends DataInputStream
     return indexTuple;
     }
 
-  private final Comparable readType( int type ) throws IOException
+  private final Object readType( int type ) throws IOException
     {
     switch( type )
       {

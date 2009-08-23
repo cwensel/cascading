@@ -2,6 +2,12 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added c.t.h.BytesSerialization and c.t.h.BytesComparator to allow for c.t.Tuple instances
+  to hold raw byte arrays (byte[]), and allow joining, grouping, and secondary sorting.
+
+  Changed c.t.Tuple and underlying framework to support j.l.Object instead of j.l.Comparable. Note that
+  Tuple#get() returns Comparable to maintain backwards compatibility.
+
   Changed serialization framework to cache deserialized instances to reduce the number of reflected new
   instance calls. Now all custom types will be reused and should not be cached.
 

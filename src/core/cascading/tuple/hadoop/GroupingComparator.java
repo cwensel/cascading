@@ -22,12 +22,50 @@
 package cascading.tuple.hadoop;
 
 import java.io.IOException;
+import java.util.Comparator;
 
+import cascading.CascadingException;
+import cascading.tuple.Tuple;
 import cascading.tuple.TuplePair;
+import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 
 /** Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
 public class GroupingComparator extends DeserializerComparator<TuplePair>
   {
+  private Comparator comparator = new Comparator<Tuple>()
+  {
+  @Override
+  public int compare( Tuple lhs, Tuple rhs )
+    {
+    return lhs.compareTo( rhs );
+    }
+  };
+
+  @Override
+  public void setConf( Configuration conf )
+    {
+    super.setConf( conf );
+
+    if( conf == null )
+      return;
+
+    String group = conf.get( "cascading.group.comparator" );
+
+    if( group == null )
+      return;
+
+    try
+      {
+      if( group != null )
+        comparator = (Comparator) Util.deserializeBase64( group );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to deserialize grouping comparator" );
+      }
+    }
+
   void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
     setDeserializer( tupleSerialization.getTuplePairDeserializer() );
@@ -35,6 +73,6 @@ public class GroupingComparator extends DeserializerComparator<TuplePair>
 
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return ( (TuplePair) lhs ).getLhs().compareTo( ( (TuplePair) rhs ).getLhs() );
+    return comparator.compare( lhs.getLhs(), rhs.getLhs() );
     }
   }

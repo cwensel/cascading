@@ -51,9 +51,9 @@ public class SerializationElementWriter implements TupleOutputStream.ElementWrit
     tupleSerialization.initTokenMaps();
     }
 
-  public void write( DataOutputStream outputStream, Comparable comparable ) throws IOException
+  public void write( DataOutputStream outputStream, Object object ) throws IOException
     {
-    Class<? extends Comparable> type = comparable.getClass();
+    Class<?> type = object.getClass();
     String className = type.getName();
     Integer token = tupleSerialization.getTokenFor( className );
 
@@ -79,7 +79,7 @@ public class SerializationElementWriter implements TupleOutputStream.ElementWrit
 
     try
       {
-      serializer.serialize( comparable );
+      serializer.serialize( object );
       }
     catch( IOException exception )
       {

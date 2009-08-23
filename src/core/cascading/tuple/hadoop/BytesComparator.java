@@ -19,26 +19,22 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading;
+package cascading.tuple.hadoop;
 
-import cascading.scheme.TextLine;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
+import java.io.Serializable;
+import java.util.Comparator;
 
-/**
- *
- */
-public class TestTextLine extends TextLine
+import org.apache.hadoop.io.WritableComparator;
+
+/** Class BytesComparator is used to compare arrays of bytes. */
+public class BytesComparator implements Comparator<byte[]>, Serializable
   {
-
-  public TestTextLine( Fields sourceFields )
-    {
-    super( sourceFields );
-    }
-
   @Override
-  public Tuple source( Object key, Object value )
+  public int compare( byte[] lhs, byte[] rhs )
     {
-    return new Tuple( (Object[]) value.toString().split( "\t" ) );
+    if( lhs == rhs )
+      return 0;
+
+    return WritableComparator.compareBytes( lhs, 0, lhs.length, rhs, 0, rhs.length );
     }
   }

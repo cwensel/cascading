@@ -35,9 +35,9 @@ public class Insert extends BaseOperation implements Function
    * Constructor Insert creates a new Insert instance with the given fields and values.
    *
    * @param fieldDeclaration of type Fields
-   * @param values           of type Comparable...
+   * @param values           of type Object...
    */
-  public Insert( Fields fieldDeclaration, Comparable... values )
+  public Insert( Fields fieldDeclaration, Object... values )
     {
     super( 0, fieldDeclaration );
     this.values = new Tuple( values );

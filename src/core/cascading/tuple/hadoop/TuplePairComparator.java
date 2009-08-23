@@ -96,7 +96,6 @@ public class TuplePairComparator extends DeserializerComparator<TuplePair>
     };
     }
 
-
   void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
     {
     setDeserializer( tupleSerialization.getTuplePairDeserializer() );

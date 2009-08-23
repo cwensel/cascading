@@ -21,6 +21,14 @@
 
 package cascading;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
@@ -29,7 +37,11 @@ import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.text.DateParser;
-import cascading.pipe.*;
+import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
@@ -37,14 +49,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class SortedValuesTest extends ClusterTestCase
   {
@@ -366,7 +370,7 @@ public class SortedValuesTest extends ClusterTestCase
       Tuple tuple = iterator.next().getTuple();
       count++;
 
-      tuple = new Tuple( tuple.getString( 1 ).split( "\t" ) );
+      tuple = new Tuple( (Object[]) tuple.getString( 1 ).split( "\t" ) );
 
       long value = tuple.getLong( comparePosition );
 

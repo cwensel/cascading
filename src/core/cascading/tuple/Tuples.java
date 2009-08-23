@@ -122,7 +122,7 @@ public class Tuples
    */
   public static Tuple coerce( Tuple tuple, Class[] types )
     {
-    return new Tuple( (Comparable[]) asArray( tuple, types, new Comparable[types.length] ) );
+    return new Tuple( (Object[]) asArray( tuple, types, new Object[types.length] ) );
     }
 
   /**

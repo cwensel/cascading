@@ -38,9 +38,9 @@ public class AssertEquals extends BaseAssertion implements ValueAssertion
   /**
    * Constructor AssertEquals creates a new AssertEquals instance.
    *
-   * @param values of type Comparable...
+   * @param values of type Object...
    */
-  public AssertEquals( Comparable... values )
+  public AssertEquals( Object... values )
     {
     // set to 1 if null, will fail immediately afterwards
     super( values == null ? 1 : values.length, "argument tuple: %s was not equal to values: %s" );

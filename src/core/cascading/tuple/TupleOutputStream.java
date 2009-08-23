@@ -44,7 +44,7 @@ public class TupleOutputStream extends DataOutputStream
 
   public interface ElementWriter
     {
-    void write( DataOutputStream outputStream, Comparable comparable ) throws IOException;
+    void write( DataOutputStream outputStream, Object object ) throws IOException;
 
     void close();
     }
@@ -87,7 +87,7 @@ public class TupleOutputStream extends DataOutputStream
    */
   private void write( Tuple tuple ) throws IOException
     {
-    List<Comparable> elements = Tuple.elements( tuple );
+    List<Object> elements = Tuple.elements( tuple );
 
     WritableUtils.writeVInt( this, elements.size() );
 
@@ -151,14 +151,10 @@ public class TupleOutputStream extends DataOutputStream
                         WritableUtils.writeVInt( this, 10 );
                         writeIndexTuple( (IndexTuple) element );
                         }
-                      else if( element instanceof Comparable )
-                          {
-                          elementWriter.write( this, (Comparable) element );
-                          }
-                        else
-                          {
-                          throw new IOException( "could not write unknown element type: " + element.getClass().getName() );
-                          }
+                      else
+                        {
+                        elementWriter.write( this, element );
+                        }
       }
     }
 

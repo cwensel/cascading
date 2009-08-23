@@ -44,7 +44,7 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
   /** Field deserializers */
   Map<String, Deserializer> deserializers = new HashMap<String, Deserializer>();
   /** Field instances */
-  Map<String, Comparable> instances = new HashMap<String, Comparable>();
+  Map<String, Object> instances = new HashMap<String, Object>();
 
   /**
    * Constructor SerializationElementReader creates a new SerializationElementReader instance.
@@ -58,7 +58,7 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
     tupleSerialization.initTokenMaps();
     }
 
-  public Comparable read( int token, DataInputStream inputStream ) throws IOException
+  public Object read( int token, DataInputStream inputStream ) throws IOException
     {
     String className = tupleSerialization.getClassNameFor( token );
 
@@ -74,12 +74,12 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       deserializers.put( className, deserializer );
       }
 
-    Comparable foundComparable = instances.get( className );
-    Comparable comparable = null;
+    Object foundObject = instances.get( className );
+    Object object = null;
 
     try
       {
-      comparable = (Comparable) deserializer.deserialize( foundComparable );
+      object = deserializer.deserialize( foundObject );
       }
     catch( IOException exception )
       {
@@ -88,10 +88,10 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       throw exception;
       }
 
-    if( foundComparable == null )
-      instances.put( className, comparable );
+    if( foundObject == null )
+      instances.put( className, object );
 
-    return comparable;
+    return object;
     }
 
   public void close()
