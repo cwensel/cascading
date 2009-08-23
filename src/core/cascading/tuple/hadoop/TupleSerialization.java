@@ -225,7 +225,7 @@ public class TupleSerialization extends Configured implements Serialization
 
   private void addToken( Class type, int token, String className )
     {
-    if( !type.getName().startsWith( "cascading." ) && token < 128 )
+    if( type != null && !type.getName().startsWith( "cascading." ) && token < 128 )
       throw new CascadingException( "serialization annotation tokens may not be less than 128, was: " + token );
 
     if( tokenClassesMap.containsKey( token ) )
