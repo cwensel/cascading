@@ -166,6 +166,6 @@ public class CoGroupClosure extends GroupClosure
       return null;
       }
 
-    return ReflectionUtils.newInstance( codecClass, ( (HadoopFlowProcess) flowProcess ).getJobConf() );
+    return ReflectionUtils.newInstance( codecClass, ( (HadoopFlowProcess) flowProcess ).getConfiguration() );
     }
   }

@@ -34,6 +34,8 @@ import cascading.tuple.*;
 import cascading.tuple.hadoop.*;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -185,95 +187,95 @@ public class FlowStep implements Serializable
     return properties != null && !properties.isEmpty();
     }
 
-  protected JobConf getJobConf() throws IOException
+  protected Job getJob() throws IOException
     {
-    return getJobConf( null );
+    return getJob( null );
     }
 
-  protected JobConf getJobConf( JobConf parentConf ) throws IOException
+  protected Job getJob( Configuration parentConf ) throws IOException
     {
-    JobConf conf = parentConf == null ? new JobConf() : new JobConf( parentConf );
+    Job job = parentConf == null ? new Job() : new Job( parentConf );
 
     // set values first so they can't break things downstream
     if( hasProperties() )
       {
       for( Map.Entry entry : getProperties().entrySet() )
-        conf.set( entry.getKey().toString(), entry.getValue().toString() );
+        job.getConfiguration().set( entry.getKey().toString(), entry.getValue().toString() );
       }
 
-    conf.setJobName( getStepName() );
+    job.setJobName( getStepName() );
 
-    conf.setOutputKeyClass( Tuple.class );
-    conf.setOutputValueClass( Tuple.class );
+    job.setOutputKeyClass( Tuple.class );
+    job.setOutputValueClass( Tuple.class );
 
-    conf.setMapperClass( FlowMapper.class );
-    conf.setReducerClass( FlowReducer.class );
+    job.setMapperClass( FlowMapper.class );
+    job.setReducerClass( FlowReducer.class );
 
     // set for use by the shuffling phase
-    TupleSerialization.setSerializations( conf );
+    TupleSerialization.setSerializations( job.getConfiguration() );
 
-    initFromSources( conf );
+    initFromSources( job );
 
-    initFromSink( conf );
+    initFromSink( job );
 
-    initFromTraps( conf );
+    initFromTraps( job );
 
     if( sink.getScheme().getNumSinkParts() != 0 )
       {
       // if no reducer, set num map tasks to control parts
       if( group != null )
-        conf.setNumReduceTasks( sink.getScheme().getNumSinkParts() );
+        job.setNumReduceTasks( sink.getScheme().getNumSinkParts() );
       else
-        conf.setNumMapTasks( sink.getScheme().getNumSinkParts() );
+        job.getConfiguration().setInt( "mapred.map.tasks", sink.getScheme().getNumSinkParts() );
       }
 
-    conf.setOutputKeyComparatorClass( TupleComparator.class );
+    job.setSortComparatorClass( TupleComparator.class );
 
     if( group == null )
       {
-      conf.setNumReduceTasks( 0 ); // disable reducers
+      job.setNumReduceTasks( 0 ); // disable reducers
       }
     else
       {
       // must set map output defaults when performing a reduce
-      conf.setMapOutputKeyClass( Tuple.class );
-      conf.setMapOutputValueClass( Tuple.class );
+      job.setMapOutputKeyClass( Tuple.class );
+      job.setMapOutputValueClass( Tuple.class );
 
-      addComparators( conf, "cascading.group.comparator", group.getGroupingSelectors() );
+      addComparators( job, "cascading.group.comparator", group.getGroupingSelectors() );
 
       if( group.isGroupBy() )
-        addComparators( conf, "cascading.sort.comparator", group.getSortingSelectors() );
+        addComparators( job, "cascading.sort.comparator", group.getSortingSelectors() );
 
       // handles the case the groupby sort should be reversed
       if( group.isSortReversed() )
-        conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
+        job.setSortComparatorClass( ReverseTupleComparator.class );
 
       if( !group.isGroupBy() )
-        conf.setMapOutputValueClass( IndexTuple.class );
+        job.setMapOutputValueClass( IndexTuple.class );
 
       if( group.isSorted() )
         {
-        conf.setPartitionerClass( GroupingPartitioner.class );
-        conf.setMapOutputKeyClass( TuplePair.class );
+        job.setPartitionerClass( GroupingPartitioner.class );
+        job.setMapOutputKeyClass( TuplePair.class );
 
         if( group.isSortReversed() )
-          conf.setOutputKeyComparatorClass( ReverseTuplePairComparator.class );
+          job.setSortComparatorClass( ReverseTuplePairComparator.class );
         else
-          conf.setOutputKeyComparatorClass( TuplePairComparator.class );
+          job.setSortComparatorClass( TuplePairComparator.class );
 
         // no need to supply a reverse comparator, only equality is checked
-        conf.setOutputValueGroupingComparator( GroupingComparator.class );
+        job.setGroupingComparatorClass( GroupingComparator.class );
         }
       }
 
     // perform last so init above will pass to tasks
-    conf.setInt( "cascading.flow.step.id", id );
-    conf.set( "cascading.flow.step", Util.serializeBase64( this ) );
+    job.getConfiguration().setInt( "cascading.flow.step.id", id );
+    job.getConfiguration().set( "cascading.flow.step", Util.serializeBase64( this ) );
 
-    return conf;
+    return job;
     }
 
-  private void addComparators( JobConf conf, String property, Map<String, Fields> map ) throws IOException
+  private void addComparators( Job job, String property, Map<String, Fields> map ) throws IOException
     {
     Iterator<Fields> fieldsIterator = map.values().iterator();
 
@@ -283,45 +285,46 @@ public class FlowStep implements Serializable
     Fields fields = fieldsIterator.next();
 
     if( fields.hasComparators() )
-      conf.set( property, Util.serializeBase64( fields ) );
+      job.getConfiguration().set( property, Util.serializeBase64( fields ) );
 
     return;
     }
 
-  private void initFromTraps( JobConf conf ) throws IOException
+  private void initFromTraps( Job job ) throws IOException
     {
-    initFromTraps( conf, mapperTraps );
-    initFromTraps( conf, reducerTraps );
+    initFromTraps( job, mapperTraps );
+    initFromTraps( job, reducerTraps );
     }
 
-  private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
+  private void initFromTraps( Job job, Map<String, Tap> traps ) throws IOException
     {
     if( !traps.isEmpty() )
       {
-      JobConf trapConf = new JobConf( conf );
+      Job trapJob = new Job( job.getConfiguration() );
 
       for( Tap tap : traps.values() )
-        tap.sinkInit( trapConf );
+        tap.sinkInit( trapJob );
       }
     }
 
-  private void initFromSources( JobConf conf ) throws IOException
+  private void initFromSources( Job job ) throws IOException
     {
-    JobConf[] fromJobs = new JobConf[sources.size()];
+    Configuration[] fromJobs = new Configuration[sources.size()];
     int i = 0;
 
     for( Tap tap : sources.keySet() )
       {
-      fromJobs[ i ] = new JobConf( conf );
-      tap.sourceInit( fromJobs[ i ] );
+      Job fromJob = new Job( job.getConfiguration() );
+      fromJobs[ i ] = fromJob.getConfiguration();
+      tap.sourceInit( fromJob );
       fromJobs[ i ].set( "cascading.step.source", Util.serializeBase64( tap ) );
       i++;
       }
 
-    MultiInputFormat.addInputFormat( conf, fromJobs );
+    MultiInputFormat.addInputFormat( job, fromJobs );
     }
 
-  private void initFromSink( JobConf conf ) throws IOException
+  private void initFromSink( Job conf ) throws IOException
     {
     // init sink first so tempSink can take precedence
     if( sink != null )
@@ -512,7 +515,7 @@ public class FlowStep implements Serializable
 
   protected FlowStepJob createFlowStepJob( JobConf parentConf ) throws IOException
     {
-    return new FlowStepJob( this, getName(), getJobConf( parentConf ) );
+    return new FlowStepJob( this, getName(), getJob( parentConf ) );
     }
 
   protected final boolean isInfoEnabled()

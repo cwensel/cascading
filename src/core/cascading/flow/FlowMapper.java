@@ -27,14 +27,10 @@ import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowMapperStack;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
-public class FlowMapper extends MapReduceBase implements Mapper
+public class FlowMapper extends Mapper
   {
   /** Field flowMapperStack */
   private FlowMapperStack flowMapperStack;
@@ -47,15 +43,17 @@ public class FlowMapper extends MapReduceBase implements Mapper
     }
 
   @Override
-  public void configure( JobConf jobConf )
+  protected void setup( Context context ) throws IOException, InterruptedException
     {
     try
       {
-      super.configure( jobConf );
-      HadoopUtil.initLog4j( jobConf );
+      super.setup( context );
+      HadoopUtil.initLog4j( context.getConfiguration() );
 
-      currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, true );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), true );
       flowMapperStack = new FlowMapperStack( currentProcess );
+
+      currentProcess.setContext( context );
       }
     catch( Throwable throwable )
       {
@@ -66,13 +64,12 @@ public class FlowMapper extends MapReduceBase implements Mapper
       }
     }
 
-  public void map( Object key, Object value, OutputCollector output, Reporter reporter ) throws IOException
+  @Override
+  protected void map( Object key, Object value, Context context ) throws IOException, InterruptedException
     {
-    currentProcess.setReporter( reporter );
-
     try
       {
-      flowMapperStack.map( key, value, output );
+      flowMapperStack.map( key, value );
       }
     catch( IOException exception )
       {
@@ -88,11 +85,11 @@ public class FlowMapper extends MapReduceBase implements Mapper
     }
 
   @Override
-  public void close() throws IOException
+  protected void cleanup( Context context ) throws IOException, InterruptedException
     {
     try
       {
-      super.close();
+      super.cleanup( context );
       }
     finally
       {

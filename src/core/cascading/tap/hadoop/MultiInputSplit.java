@@ -29,17 +29,18 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.WritableUtils;
-import org.apache.hadoop.mapred.FileSplit;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configurable;
 
 /** Class MultiInputSplit is used by MultiInputFormat */
-public class MultiInputSplit implements InputSplit, JobConfigurable
+public class MultiInputSplit extends InputSplit implements Configurable, Writable
   {
   /** Field jobConf */
-  private transient JobConf jobConf;
+  private transient Configuration conf;
   /** Field inputSplit */
   InputSplit inputSplit;
   /** Field config */
@@ -53,7 +54,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
    * @param jobConf
    * @return
    */
-  public static String getCurrentTapSourcePath( JobConf jobConf )
+  public static String getCurrentTapSourcePath( Configuration jobConf )
     {
     return jobConf.get( "cascading.source.path" );
     }
@@ -68,17 +69,24 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     {
     }
 
-  public void configure( JobConf jobConf )
+  @Override
+  public void setConf( Configuration conf )
     {
-    this.jobConf = jobConf;
+    this.conf = conf;
     }
 
-  public long getLength() throws IOException
+  @Override
+  public Configuration getConf()
+    {
+    return conf;
+    }
+
+  public long getLength() throws IOException, InterruptedException
     {
     return inputSplit.getLength();
     }
 
-  public String[] getLocations() throws IOException
+  public String[] getLocations() throws IOException, InterruptedException
     {
     return inputSplit.getLocations();
     }
@@ -96,7 +104,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     WritableUtils.writeStringArray( out, keys );
     WritableUtils.writeStringArray( out, values );
 
-    inputSplit.write( out );
+    ( (Writable) inputSplit ).write( out );
     }
 
   public void readFields( DataInput in ) throws IOException
@@ -110,7 +118,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     for( int i = 0; i < keys.length; i++ )
       config.put( keys[ i ], values[ i ] );
 
-    JobConf currentConf = MultiInputFormat.mergeConf( jobConf, config, false );
+    Configuration currentConf = MultiInputFormat.mergeConf( conf, config, false );
 
     try
       {
@@ -121,14 +129,15 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
       throw new IOException( "Split class " + splitType + " not found" );
       }
 
-    inputSplit.readFields( in );
+    ( (Writable) inputSplit ).readFields( in );
 
     if( inputSplit instanceof FileSplit )
       {
       Path path = ( (FileSplit) inputSplit ).getPath();
 
       if( path != null )
-        jobConf.set( "cascading.source.path", path.toString() );
+        conf.set( "cascading.source.path", path.toString() );
       }
     }
+
   }

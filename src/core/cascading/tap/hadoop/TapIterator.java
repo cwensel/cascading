@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
 /**
@@ -49,7 +50,7 @@ public class TapIterator implements TupleIterator
   /** Field inputFormat */
   private InputFormat inputFormat;
   /** Field conf */
-  private final JobConf conf;
+  private final Configuration conf;
   /** Field splits */
   private InputSplit[] splits;
   /** Field reader */
@@ -72,10 +73,10 @@ public class TapIterator implements TupleIterator
    * @param conf of type JobConf
    * @throws IOException when
    */
-  public TapIterator( Tap tap, JobConf conf ) throws IOException
+  public TapIterator( Tap tap, Configuration conf ) throws IOException
     {
     this.tap = tap;
-    this.conf = new JobConf( conf );
+    this.conf = new Configuration( conf );
 
     initalize();
     }

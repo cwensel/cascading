@@ -31,13 +31,12 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +51,7 @@ public class FlowReducerStack
   /** Field step */
   private final FlowStep step;
   /** Field jobConf */
-  private final JobConf jobConf;
+  private final Configuration conf;
   /** Field flowSession */
   private final HadoopFlowProcess flowProcess;
 
@@ -64,15 +63,17 @@ public class FlowReducerStack
   public FlowReducerStack( HadoopFlowProcess flowProcess ) throws IOException
     {
     this.flowProcess = flowProcess;
-    this.jobConf = flowProcess.getJobConf();
-    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
+    this.conf = flowProcess.getConfiguration();
+    step = (FlowStep) Util.deserializeBase64( conf.getRaw( "cascading.flow.step" ) );
 
     // early versions of hadoop 0.19 instantiated this class with no intention of calling reduce()
-    if( jobConf.getNumReduceTasks() == 0 )
+    int numReduceTasks = conf.getInt( "mapred.reduce.tasks", 0 );
+
+    if( numReduceTasks == 0 )
       return;
 
     if( step.group == null )
-      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + ", in step: " + step.getStepName() );
+      throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + numReduceTasks + ", in step: " + step.getStepName() );
 
     buildStack();
 
@@ -144,7 +145,7 @@ public class FlowReducerStack
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
-  public void reduce( Object key, Iterator values, OutputCollector output ) throws IOException
+  public void reduce( Object key, Iterable values, TaskInputOutputContext output ) throws IOException
     {
     if( LOG.isTraceEnabled() )
       {
@@ -156,7 +157,7 @@ public class FlowReducerStack
 
     try
       {
-      stackHead.collect( (Tuple) key, values );
+      stackHead.collect( (Tuple) key, values.iterator() );
       }
     catch( StackException exception )
       {

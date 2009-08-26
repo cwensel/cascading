@@ -36,14 +36,13 @@ import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /**
  * Class TupleSerialization is an implementation of Hadoop's {@link Serialization} interface.
  * <p/>
  * Typically developers will not use this implementation directly as it is automatically added
- * to any relevant MapReduce jobs via the {@link JobConf}.
+ * to any relevant MapReduce jobs via the {@link Configuration}.
  * <p/>
  * By default, all primitive types are natively handled, and {@link org.apache.hadoop.io.BytesWritable}
  * has a pre-configured serialization token since byte arrays are not handled natively by {@link Tuple}.
@@ -94,9 +93,9 @@ public class TupleSerialization extends Configured implements Serialization
     return (String) properties.get( "cascading.serialization.tokens" );
     }
 
-  static String getSerializationTokens( JobConf jobConf )
+  static String getSerializationTokens( Configuration conf )
     {
-    return jobConf.get( "cascading.serialization.tokens" );
+    return conf.get( "cascading.serialization.tokens" );
     }
 
   /**
@@ -115,21 +114,21 @@ public class TupleSerialization extends Configured implements Serialization
   /**
    * Adds this class as a Hadoop Serialization class. This method is safe to call redundantly.
    *
-   * @param jobConf of type JobConf
+   * @param conf
    */
-  public static void setSerializations( JobConf jobConf )
+  public static void setSerializations( Configuration conf )
     {
-    String serializations = getSerializations( jobConf );
+    String serializations = getSerializations( conf );
 
     if( serializations.contains( TupleSerialization.class.getName() ) )
       return;
 
-    jobConf.set( "io.serializations", Util.join( ",", serializations, TupleSerialization.class.getName() ) );
+    conf.set( "io.serializations", Util.join( ",", serializations, TupleSerialization.class.getName() ) );
     }
 
-  static String getSerializations( JobConf jobConf )
+  static String getSerializations( Configuration conf )
     {
-    return jobConf.get( "io.serializations" );
+    return conf.get( "io.serializations" );
     }
 
   /** Constructor TupleSerialization creates a new TupleSerialization instance. */
@@ -151,7 +150,7 @@ public class TupleSerialization extends Configured implements Serialization
   public Configuration getConf()
     {
     if( super.getConf() == null )
-      setConf( new JobConf() );
+      setConf( new Configuration() );
 
     return super.getConf();
     }
@@ -173,7 +172,7 @@ public class TupleSerialization extends Configured implements Serialization
     tokenClassesMap = new HashMap<Integer, String>();
     classesTokensMap = new HashMap<String, Integer>();
 
-    String tokenProperty = getSerializationTokens( (JobConf) getConf() );
+    String tokenProperty = getSerializationTokens( getConf() );
 
     if( tokenProperty != null )
       {
@@ -186,7 +185,7 @@ public class TupleSerialization extends Configured implements Serialization
         }
       }
 
-    String serializationsString = getSerializations( (JobConf) getConf() );
+    String serializationsString = getSerializations( getConf() );
 
     if( serializationsString == null )
       return;

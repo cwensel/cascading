@@ -25,11 +25,9 @@ import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.scheme.Scheme;
-import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Class Lfs is a {@link Tap} class that provides access to the Local File System via Hadoop.
@@ -113,7 +111,7 @@ public class Lfs extends Hfs
     super.setStringPath( stringPath );
     }
 
-  protected FileSystem getFileSystem( JobConf conf ) throws IOException
+  protected FileSystem getFileSystem( Configuration conf ) throws IOException
     {
     return FileSystem.getLocal( conf );
     }

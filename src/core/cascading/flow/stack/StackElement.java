@@ -29,6 +29,7 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ abstract class StackElement implements FlowCollector
   StackElement previous;
   StackElement next;
 
-  private static TapCollector getTrapCollector( Tap trap, JobConf jobConf )
+  private static TapCollector getTrapCollector( Tap trap, Configuration configuration )
     {
     TapCollector trapCollector = trapCollectors.get( trap );
 
@@ -53,19 +54,19 @@ abstract class StackElement implements FlowCollector
       {
       try
         {
-        jobConf = new JobConf( jobConf );
+        configuration = new Configuration( configuration );
 
-        int id = jobConf.getInt( "cascading.flow.step.id", 0 );
+        int id = configuration.getInt( "cascading.flow.step.id", 0 );
         String partname;
 
-        if( jobConf.getBoolean( "mapred.task.is.map", true ) )
+        if( configuration.getBoolean( "mapred.task.is.map", true ) )
           partname = String.format( "-m-%05d-", id );
         else
           partname = String.format( "-r-%05d-", id );
 
-        jobConf.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
+        configuration.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 
-        trapCollector = (TapCollector) trap.openForWrite( jobConf );
+        trapCollector = (TapCollector) trap.openForWrite( configuration );
         trapCollectors.put( trap, trapCollector );
         }
       catch( IOException exception )
@@ -127,9 +128,9 @@ abstract class StackElement implements FlowCollector
     return flowProcess;
     }
 
-  public JobConf getJobConf()
+  public Configuration getConfiguration()
     {
-    return ( (HadoopFlowProcess) flowProcess ).getJobConf();
+    return ( (HadoopFlowProcess) flowProcess ).getConfiguration();
     }
 
   protected void handleException( Exception exception, TupleEntry tupleEntry )
@@ -145,7 +146,7 @@ abstract class StackElement implements FlowCollector
     if( trap == null )
       throw new StackException( exception );
 
-    getTrapCollector( trap, getJobConf() ).add( tupleEntry );
+    getTrapCollector( trap, getConfiguration() ).add( tupleEntry );
     getFlowProcess().increment( StepCounters.Tuples_Trapped, 1 );
     }
 

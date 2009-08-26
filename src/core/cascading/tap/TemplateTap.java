@@ -31,9 +31,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.flow.FlowProcess;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
 /**
@@ -189,14 +191,14 @@ public class TemplateTap extends SinkTap
       return scheme.isWriteDirect();
       }
 
-    public void sourceInit( Tap tap, JobConf conf ) throws IOException
+    public void sourceInit( Tap tap, Job job ) throws IOException
       {
-      scheme.sourceInit( tap, conf );
+      scheme.sourceInit( tap, job );
       }
 
-    public void sinkInit( Tap tap, JobConf conf ) throws IOException
+    public void sinkInit( Tap tap, Job job ) throws IOException
       {
-      scheme.sinkInit( tap, conf );
+      scheme.sinkInit( tap, job );
       }
 
     public Tuple source( Object key, Object value )
@@ -204,15 +206,15 @@ public class TemplateTap extends SinkTap
       return scheme.source( key, value );
       }
 
-    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
       {
       if( pathFields != null )
         {
         Tuple values = tupleEntry.selectTuple( pathFields );
-        outputCollector = ( (TemplateCollector) outputCollector ).getCollector( values.format( pathTemplate ) );
+        context = ( (TemplateCollector) context ).getCollector( values.format( pathTemplate ) );
         }
 
-      scheme.sink( tupleEntry, outputCollector );
+      scheme.sink( tupleEntry, context );
       }
     }
 
@@ -362,30 +364,30 @@ public class TemplateTap extends SinkTap
     }
 
   @Override
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
     {
-    return new TemplateCollector( conf );
+    return new TemplateCollector( flowProcess );
     }
 
-  /** @see Tap#makeDirs(JobConf) */
+  /** @see Tap#makeDirs(org.apache.hadoop.mapreduce.Job) */
   public boolean makeDirs( JobConf conf ) throws IOException
     {
     return parent.makeDirs( conf );
     }
 
-  /** @see Tap#deletePath(JobConf) */
+  /** @see Tap#deletePath(org.apache.hadoop.mapreduce.Job) */
   public boolean deletePath( JobConf conf ) throws IOException
     {
     return keepParentOnDelete || parent.deletePath( conf );
     }
 
-  /** @see Tap#pathExists(JobConf) */
+  /** @see Tap#pathExists(org.apache.hadoop.mapreduce.Job) */
   public boolean pathExists( JobConf conf ) throws IOException
     {
     return parent.pathExists( conf );
     }
 
-  /** @see Tap#getPathModified(JobConf) */
+  /** @see Tap#getPathModified(org.apache.hadoop.mapreduce.Job) */
   public long getPathModified( JobConf conf ) throws IOException
     {
     return parent.getPathModified( conf );

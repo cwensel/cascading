@@ -64,7 +64,7 @@ public class LimitFilterTest extends CascadingTestCase
 
     public TestFlowProcess( boolean isMapper, int numMappers, int numReducers, int taskNum )
       {
-      super( new FlowSession(), null, isMapper );
+      super( new FlowSession(), isMapper );
       this.numMappers = numMappers;
       this.numReducers = numReducers;
       this.taskNum = taskNum;

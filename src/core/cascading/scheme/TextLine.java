@@ -29,6 +29,7 @@ import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapreduce.Job;
 
 import java.io.IOException;
 
@@ -209,12 +210,12 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sourceInit( Tap tap, JobConf conf )
+  public void sourceInit( Tap tap, Job job )
     {
-    if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
-      conf.setInputFormat( ZipInputFormat.class );
+    if( hasZippedFiles( FileInputFormat.getInputPaths( job ) ) )
+      job.setInputFormat( ZipInputFormat.class );
     else
-      conf.setInputFormat( TextInputFormat.class );
+      job.setInputFormat( TextInputFormat.class );
     }
 
   private boolean hasZippedFiles( Path[] paths )
@@ -231,19 +232,19 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sinkInit( Tap tap, JobConf conf ) throws IOException
+  public void sinkInit( Tap tap, Job job ) throws IOException
     {
-    if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
-      throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
+    if( tap.getQualifiedPath( job ).toString().endsWith( ".zip" ) )
+      throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( job ) );
 
     if( getSinkCompression() == Compress.DISABLE )
-      conf.setBoolean( "mapred.output.compress", false );
+      job.setBoolean( "mapred.output.compress", false );
     else if( getSinkCompression() == Compress.ENABLE )
-      conf.setBoolean( "mapred.output.compress", true );
+      job.setBoolean( "mapred.output.compress", true );
 
-    conf.setOutputKeyClass( Text.class ); // be explicit
-    conf.setOutputValueClass( Text.class ); // be explicit
-    conf.setOutputFormat( TextOutputFormat.class );
+    job.setOutputKeyClass( Text.class ); // be explicit
+    job.setOutputValueClass( Text.class ); // be explicit
+    job.setOutputFormat( TextOutputFormat.class );
     }
 
   @Override
@@ -260,10 +261,10 @@ public class TextLine extends Scheme
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
     {
     // it's ok to use NULL here so the collector does not write anything
-    outputCollector.collect( null, tupleEntry.selectTuple( sinkFields ) );
+    context.write( null, tupleEntry.selectTuple( sinkFields ) );
     }
 
   }

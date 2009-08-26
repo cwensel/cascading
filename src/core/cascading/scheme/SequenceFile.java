@@ -28,10 +28,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  * A SequenceFile is a type of {@link Scheme}, which is a flat files consisting of
@@ -59,17 +58,17 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public void sourceInit( Tap tap, JobConf conf )
+  public void sourceInit( Tap tap, Job job )
     {
-    conf.setInputFormat( SequenceFileInputFormat.class );
+    job.setInputFormat( SequenceFileInputFormat.class );
     }
 
   @Override
-  public void sinkInit( Tap tap, JobConf conf )
+  public void sinkInit( Tap tap, Job job )
     {
-    conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
-    conf.setOutputValueClass( Tuple.class ); // supports TapCollector
-    conf.setOutputFormat( SequenceFileOutputFormat.class );
+    job.setOutputKeyClass( Tuple.class ); // supports TapCollector
+    job.setOutputValueClass( Tuple.class ); // supports TapCollector
+    job.setOutputFormat( SequenceFileOutputFormat.class );
     }
 
   @Override
@@ -85,11 +84,11 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
     {
     Tuple result = getSinkFields() != null ? tupleEntry.selectTuple( getSinkFields() ) : tupleEntry.getTuple();
 
-    outputCollector.collect( Tuples.NULL, result );
+    context.collect( Tuples.NULL, result );
     }
 
   }

@@ -42,15 +42,14 @@ import org.apache.hadoop.mapred.OutputCollector;
 class TapMapperStackElement extends MapperStackElement
   {
   private final Tap sink;
-  private OutputCollector outputCollector;
+  private TupleEntryCollector outputCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
+  public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink ) throws IOException
     {
     super( previous, flowProcess, incomingScope, null );
     this.sink = sink;
 
-    if( useTapCollector )
-      this.outputCollector = (OutputCollector) sink.openForWrite( getJobConf() );
+    this.outputCollector =  sink.openForWrite( flowProcess );
     }
 
   protected FlowElement getFlowElement()
@@ -123,7 +122,7 @@ class TapMapperStackElement extends MapperStackElement
     finally
       {
       if( outputCollector != null )
-        ( (TupleEntryCollector) outputCollector ).close();
+        outputCollector.close();
       }
     }
   }

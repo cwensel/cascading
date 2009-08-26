@@ -34,7 +34,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
 /**
@@ -163,11 +163,11 @@ public class MapReduceFlow extends Flow
 
   class NullScheme extends Scheme
     {
-    public void sourceInit( Tap tap, JobConf conf ) throws IOException
+    public void sourceInit( Tap tap, Job job ) throws IOException
       {
       }
 
-    public void sinkInit( Tap tap, JobConf conf ) throws IOException
+    public void sinkInit( Tap tap, Job job ) throws IOException
       {
       }
 
@@ -185,7 +185,7 @@ public class MapReduceFlow extends Flow
       return getClass().getSimpleName();
       }
 
-    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
       {
       throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
       }

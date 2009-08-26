@@ -33,8 +33,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
 
 /** Class TempHfs creates a temporary {@link Tap} instance for use internally. */
 public class TempHfs extends Hfs
@@ -51,17 +51,17 @@ public class TempHfs extends Hfs
     {
 
     @Override
-    public void sourceInit( Tap tap, JobConf conf ) throws IOException
+    public void sourceInit( Tap tap, Job job ) throws IOException
       {
       // do nothing
       }
 
     @Override
-    public void sinkInit( Tap tap, JobConf conf ) throws IOException
+    public void sinkInit( Tap tap, Job job ) throws IOException
       {
-      conf.setOutputKeyClass( Tuple.class );
-      conf.setOutputValueClass( Tuple.class );
-      conf.setOutputFormat( NullOutputFormat.class );
+      job.setOutputKeyClass( Tuple.class );
+      job.setOutputValueClass( Tuple.class );
+      job.setOutputFormat( NullOutputFormat.class );
       }
 
     @Override
@@ -71,7 +71,7 @@ public class TempHfs extends Hfs
       }
 
     @Override
-    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
       {
       }
     }
@@ -160,17 +160,17 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
-    makeTemporaryFile( conf );
-    super.sourceInit( conf );
+    makeTemporaryFile( job );
+    super.sourceInit( job );
     }
 
   @Override
-  public void sinkInit( JobConf conf ) throws IOException
+  public void sinkInit( Job job ) throws IOException
     {
-    makeTemporaryFile( conf );
-    super.sinkInit( conf );
+    makeTemporaryFile( job );
+    super.sinkInit( job );
     }
 
   @Override

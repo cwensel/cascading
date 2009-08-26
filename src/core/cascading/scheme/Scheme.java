@@ -29,8 +29,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -206,19 +206,19 @@ public abstract class Scheme implements Serializable
    * Method sourceInit initializes this instance as a source.
    *
    * @param tap  of type Tap
-   * @param conf of type JobConf
+   * @param job
    * @throws IOException on initializatin failure
    */
-  public abstract void sourceInit( Tap tap, JobConf conf ) throws IOException;
+  public abstract void sourceInit( Tap tap, Job job ) throws IOException;
 
   /**
    * Method sinkInit initializes this instance as a sink.
    *
    * @param tap  of type Tap
-   * @param conf of type JobConf
+   * @param job
    * @throws IOException on initialization failure
    */
-  public abstract void sinkInit( Tap tap, JobConf conf ) throws IOException;
+  public abstract void sinkInit( Tap tap, Job job ) throws IOException;
 
   /**
    * Method source takes the given Hadoop key and value and returns a new {@link Tuple} instance.
@@ -233,9 +233,9 @@ public abstract class Scheme implements Serializable
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.
    *
    * @param tupleEntry
-   * @param outputCollector of type OutputCollector @throws IOException when
+   * @param context
    */
-  public abstract void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException;
+  public abstract void sink( TupleEntry tupleEntry, Object context ) throws IOException;
 
 
   @Override

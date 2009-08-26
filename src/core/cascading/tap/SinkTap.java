@@ -28,7 +28,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
+import cascading.flow.FlowProcess;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  * Class SinkTap is the base class for {@link cascading.tap.TemplateTap}. Some {@link cascading.tap.Tap} instances may only be sinks (as opposed
@@ -68,17 +70,17 @@ public abstract class SinkTap extends Tap
     return false;
     }
 
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SinkTap instance" );
     }
 
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }

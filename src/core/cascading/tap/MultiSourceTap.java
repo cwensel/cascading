@@ -23,7 +23,7 @@ package cascading.tap;
 
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -110,30 +110,31 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
     for( Tap tap : getTaps() )
-      tap.sourceInit( conf );
+      tap.sourceInit( job );
     }
 
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean pathExists( Job job ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
-      if( tap.pathExists( conf ) )
+      if( tap.pathExists( job ) )
         return true;
       }
 
     return false;
     }
 
-  /** Returns the most current modified time. */
-  public long getPathModified( JobConf conf ) throws IOException
+  /** Returns the most current modified time.
+   * @param job*/
+  public long getPathModified( Job job ) throws IOException
     {
-    long modified = getTaps()[ 0 ].getPathModified( conf );
+    long modified = getTaps()[ 0 ].getPathModified( job );
 
     for( int i = 1; i < getTaps().length; i++ )
-      modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
+      modified = Math.max( getTaps()[ i ].getPathModified( job ), modified );
 
     return modified;
     }

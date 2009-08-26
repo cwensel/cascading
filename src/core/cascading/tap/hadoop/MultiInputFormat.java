@@ -32,12 +32,15 @@ import java.util.Map;
 import cascading.CascadingException;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.jets3t.service.S3ServiceException;
 
@@ -45,7 +48,7 @@ import org.jets3t.service.S3ServiceException;
  * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
  * to read data from incompatible file types.
  */
-public class MultiInputFormat implements InputFormat
+public class MultiInputFormat extends InputFormat
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MultiInputFormat.class );
@@ -56,28 +59,35 @@ public class MultiInputFormat implements InputFormat
    * @param toJob
    * @param fromJobs
    */
-  public static void addInputFormat( JobConf toJob, JobConf... fromJobs )
+  public static void addInputFormat( Job toJob, Configuration... fromJobs )
     {
-    toJob.setInputFormat( MultiInputFormat.class );
+    toJob.setInputFormatClass( MultiInputFormat.class );
     List<Map<String, String>> configs = new ArrayList<Map<String, String>>();
     List<Path> allPaths = new ArrayList<Path>();
 
     boolean isLocal = false;
 
-    for( JobConf fromJob : fromJobs )
+    try
       {
-      configs.add( getConfig( toJob, fromJob ) );
-      Collections.addAll( allPaths, FileInputFormat.getInputPaths( fromJob ) );
+      for( Configuration fromJob : fromJobs )
+        {
+        configs.add( getConfig( toJob, fromJob ) );
+        Collections.addAll( allPaths, FileInputFormat.getInputPaths( new Job( fromJob ) ) );
 
-      if( !isLocal )
-        isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+        if( !isLocal )
+          isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+        }
+
+      FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[allPaths.size()] ) );
       }
-
-    FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[allPaths.size()] ) );
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to handle input formats", exception );
+      }
 
     try
       {
-      toJob.set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
+      toJob.getConfiguration().set( "cascading.multiinputformats", Util.serializeBase64( configs ) );
       }
     catch( IOException exception )
       {
@@ -85,17 +95,17 @@ public class MultiInputFormat implements InputFormat
       }
 
     if( isLocal )
-      toJob.set( "mapred.job.tracker", "local" );
+      toJob.getConfiguration().set( "mapred.job.tracker", "local" );
     }
 
-  public static Map<String, String> getConfig( JobConf toJob, JobConf fromJob )
+  public static Map<String, String> getConfig( Job toJob, Configuration fromJob )
     {
     Map<String, String> configs = new HashMap<String, String>();
 
     for( Map.Entry<String, String> entry : fromJob )
       configs.put( entry.getKey(), entry.getValue() );
 
-    for( Map.Entry<String, String> entry : toJob )
+    for( Map.Entry<String, String> entry : toJob.getConfiguration() )
       {
       String value = configs.get( entry.getKey() );
 
@@ -114,19 +124,19 @@ public class MultiInputFormat implements InputFormat
     return configs;
     }
 
-  public static JobConf[] getJobConfs( JobConf job, List<Map<String, String>> configs )
+  public static Configuration[] getJobConfs( JobContext job, List<Map<String, String>> configs )
     {
-    JobConf[] jobConfs = new JobConf[configs.size()];
+    Configuration[] jobConfs = new Configuration[configs.size()];
 
     for( int i = 0; i < jobConfs.length; i++ )
-      jobConfs[ i ] = mergeConf( job, configs.get( i ), false );
+      jobConfs[ i ] = mergeConf( job.getConfiguration(), configs.get( i ), false );
 
     return jobConfs;
     }
 
-  static JobConf mergeConf( JobConf job, Map<String, String> config, boolean directly )
+  static Configuration mergeConf( Configuration job, Map<String, String> config, boolean directly )
     {
-    JobConf currentConf = directly ? job : new JobConf( job );
+    Configuration currentConf = directly ? job : new Configuration( job );
 
     for( String key : config.keySet() )
       {
@@ -139,22 +149,36 @@ public class MultiInputFormat implements InputFormat
     return currentConf;
     }
 
-  static InputFormat[] getInputFormats( JobConf[] jobConfs )
+  static InputFormat[] getInputFormats( Configuration[] jobConfs )
     {
     InputFormat[] inputFormats = new InputFormat[jobConfs.length];
 
-    for( int i = 0; i < jobConfs.length; i++ )
-      inputFormats[ i ] = jobConfs[ i ].getInputFormat();
+    try
+      {
+      for( int i = 0; i < jobConfs.length; i++ )
+        {
+        Class<? extends InputFormat<?, ?>> type = new Job( jobConfs[ i ] ).getInputFormatClass();
+        inputFormats[ i ] = ReflectionUtils.newInstance( type, jobConfs[ i ] );
+        }
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to construct a job", exception );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class", exception );
+      }
 
     return inputFormats;
     }
 
-  private List<Map<String, String>> getConfigs( JobConf job ) throws IOException
+  private List<Map<String, String>> getConfigs( Configuration job ) throws IOException
     {
     return (List<Map<String, String>>) Util.deserializeBase64( job.get( "cascading.multiinputformats" ) );
     }
 
-  public void validateInput( JobConf job ) throws IOException
+  public void validateInput( Configuration job ) throws IOException
     {
     // do nothing, is deprecated
     }
@@ -163,111 +187,61 @@ public class MultiInputFormat implements InputFormat
    * Method getSplits delegates to the appropriate InputFormat.
    *
    * @param job       of type JobConf
-   * @param numSplits of type int
    * @return InputSplit[]
    * @throws IOException when
    */
-  public InputSplit[] getSplits( JobConf job, int numSplits ) throws IOException
+  @Override
+  public List getSplits( JobContext job ) throws IOException, InterruptedException
     {
-    numSplits = numSplits == 0 ? 1 : numSplits;
-
-    List<Map<String, String>> configs = getConfigs( job );
-    JobConf[] jobConfs = getJobConfs( job, configs );
+    List<Map<String, String>> configs = getConfigs( job.getConfiguration() );
+    Configuration[] jobConfs = getJobConfs( job, configs );
     InputFormat[] inputFormats = getInputFormats( jobConfs );
 
     // if only one InputFormat, just return what ever it suggests
     if( inputFormats.length == 1 )
-      return collapse( getSplits( inputFormats, jobConfs, new int[]{numSplits} ), configs );
+      return collapse( getSplits( inputFormats, jobConfs ), configs );
 
-    int[] indexedSplits = new int[inputFormats.length];
-
-    // if we need only a few, the return one for each
-    if( numSplits <= inputFormats.length )
-      {
-      Arrays.fill( indexedSplits, 1 );
-      return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
-      }
-
-    // attempt to get splits proportionally sized per input format
-    long[] inputSizes = getInputSizes( inputFormats, jobConfs );
-    long totalSize = sum( inputSizes );
-
-    if( totalSize == 0 )
-      {
-      Arrays.fill( indexedSplits, 1 );
-      return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
-      }
-
-    for( int i = 0; i < inputSizes.length; i++ )
-      indexedSplits[ i ] = (int) Math.ceil( (double) numSplits * inputSizes[ i ] / (double) totalSize );
-
-    return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
+    return collapse( getSplits( inputFormats, jobConfs ), configs );
     }
 
-  private long sum( long[] inputSizes )
-    {
-    long size = 0;
-
-    for( long inputSize : inputSizes )
-      size += inputSize;
-
-    return size;
-    }
-
-  private InputSplit[] collapse( InputSplit[][] splits, List<Map<String, String>> configs )
+  private List collapse( List<InputSplit>[] splits, List<Map<String, String>> configs )
     {
     List<InputSplit> splitsList = new ArrayList<InputSplit>();
 
     for( int i = 0; i < splits.length; i++ )
       {
-      InputSplit[] split = splits[ i ];
+      List<InputSplit> splitList = splits[ i ];
 
-      for( int j = 0; j < split.length; j++ )
-        splitsList.add( new MultiInputSplit( split[ j ], configs.get( i ) ) );
+      for( int j = 0; j < splitList.size(); j++ )
+        splitsList.add( new MultiInputSplit( splitList.get( j ), configs.get( i ) ) );
       }
 
-    return splitsList.toArray( new InputSplit[splitsList.size()] );
+    return splitsList;
     }
 
-  private InputSplit[][] getSplits( InputFormat[] inputFormats, JobConf[] jobConfs, int[] numSplits ) throws IOException
+  private List<InputSplit>[] getSplits( InputFormat[] inputFormats, Configuration[] jobConfs ) throws IOException, InterruptedException
     {
-    InputSplit[][] inputSplits = new InputSplit[inputFormats.length][];
+    List<InputSplit>[] inputSplits = new List[inputFormats.length];
 
     for( int i = 0; i < inputFormats.length; i++ )
-      inputSplits[ i ] = inputFormats[ i ].getSplits( jobConfs[ i ], numSplits[ i ] );
+      inputSplits[ i ] = inputFormats[ i ].getSplits( new Job( jobConfs[ i ] ) );
 
     return inputSplits;
-    }
-
-  private long[] getInputSizes( InputFormat[] inputFormats, JobConf[] jobConfs ) throws IOException
-    {
-    long[] inputSizes = new long[inputFormats.length];
-
-    for( int i = 0; i < inputFormats.length; i++ )
-      {
-      InputFormat inputFormat = inputFormats[ i ];
-      InputSplit[] splits = inputFormat.getSplits( jobConfs[ i ], 1 );
-
-      for( InputSplit split : splits )
-        inputSizes[ i ] = inputSizes[ i ] + split.getLength();
-      }
-
-    return inputSizes;
     }
 
   /**
    * Method getRecordReader delegates to the appropriate InputFormat.
    *
-   * @param split    of type InputSplit
-   * @param job      of type JobConf
-   * @param reporter of type Reporter
+   * @param split of type InputSplit
+   * @param job   of type JobConf
    * @return RecordReader
    * @throws IOException when
    */
-  public RecordReader getRecordReader( InputSplit split, JobConf job, final Reporter reporter ) throws IOException
+  @Override
+  public RecordReader createRecordReader( InputSplit split, final TaskAttemptContext job ) throws IOException, InterruptedException
     {
     final MultiInputSplit multiSplit = (MultiInputSplit) split;
-    final JobConf currentConf = mergeConf( job, multiSplit.config, true );
+    final Configuration currentConf = mergeConf( job.getConfiguration(), multiSplit.config, true );
 
     try
       {
@@ -277,7 +251,9 @@ public class MultiInputFormat implements InputFormat
       @Override
       public RecordReader operate() throws Exception
         {
-        return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
+        TaskAttemptContext context = new TaskAttemptContext( currentConf, job.getTaskAttemptID() );
+        Class<? extends InputFormat<?, ?>> type = new Job( currentConf ).getInputFormatClass();
+        return ReflectionUtils.newInstance( type, currentConf ).createRecordReader( multiSplit.inputSplit, context );
         }
 
       @Override

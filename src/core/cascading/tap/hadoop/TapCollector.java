@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
 /**
@@ -47,7 +48,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private static final Logger LOG = Logger.getLogger( TapCollector.class );
 
   /** Field conf */
-  private JobConf conf;
+  private Configuration conf;
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
@@ -72,7 +73,7 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
    * @param conf of type JobConf
    * @throws IOException when fails to initialize
    */
-  public TapCollector( Tap tap, JobConf conf ) throws IOException
+  public TapCollector( Tap tap, Configuration conf ) throws IOException
     {
     this( tap, null, conf );
     }
@@ -85,11 +86,11 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
    * @param conf   of type JobConf
    * @throws IOException when fails to initialize
    */
-  public TapCollector( Tap tap, String prefix, JobConf conf ) throws IOException
+  public TapCollector( Tap tap, String prefix, Configuration conf ) throws IOException
     {
     this.tap = tap;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
-    this.conf = new JobConf( conf );
+    this.conf = new Configuration( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
     this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 

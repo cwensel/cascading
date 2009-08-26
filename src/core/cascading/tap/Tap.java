@@ -29,6 +29,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
+import cascading.flow.FlowProcess;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
@@ -38,8 +39,8 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  * A Tap represents the physical data source or sink in a connected {@link Flow}.
@@ -134,8 +135,8 @@ public abstract class Tap implements FlowElement, Serializable
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
    * <p/>
-   * This method will be called once per Flow, and before {@link #sourceInit(org.apache.hadoop.mapred.JobConf)} and
-   * {@link #sinkInit(org.apache.hadoop.mapred.JobConf)} methods.
+   * This method will be called once per Flow, and before {@link #sourceInit(org.apache.hadoop.mapreduce.Job)} and
+   * {@link #sinkInit(org.apache.hadoop.mapreduce.Job)} methods.
    *
    * @param flow of type Flow
    */
@@ -154,12 +155,12 @@ public abstract class Tap implements FlowElement, Serializable
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param conf of type JobConf
+   * @param job
    * @throws IOException on resource initialization failure.
    */
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
-    getScheme().sourceInit( this, conf );
+    getScheme().sourceInit( this, job );
     }
 
   /**
@@ -174,12 +175,12 @@ public abstract class Tap implements FlowElement, Serializable
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param conf of type JobConf
+   * @param job
    * @throws IOException on resource initialization failure.
    */
-  public void sinkInit( JobConf conf ) throws IOException
+  public void sinkInit( Job job ) throws IOException
     {
-    getScheme().sinkInit( this, conf );
+    getScheme().sinkInit( this, job );
     }
 
   /**
@@ -216,16 +217,16 @@ public abstract class Tap implements FlowElement, Serializable
    * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( JobConf conf ) throws IOException;
+  public abstract TupleEntryIterator openForRead( Configuration conf ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
-   * @param conf of type JobConf
+   * @param flowProcess
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleEntryCollector openForWrite( JobConf conf ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException;
 
   /**
    * Method source returns the source value as an instance of {@link Tuple}
@@ -243,12 +244,12 @@ public abstract class Tap implements FlowElement, Serializable
    * Method sink emits the sink value(s) to the OutputCollector
    *
    * @param tupleEntry      of type TupleEntry
-   * @param outputCollector of type OutputCollector
+   * @param context
    * @throws java.io.IOException when the resource cannot be written to
    */
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
     {
-    getScheme().sink( tupleEntry, outputCollector );
+    getScheme().sink( tupleEntry, context );
     }
 
   /** @see FlowElement#outgoingScopeFor(Set<Scope>) */
@@ -309,11 +310,11 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method getQualifiedPath returns a FileSystem fully qualified Hadoop Path.
    *
-   * @param conf of type JobConf
+   * @param job
    * @return Path
    * @throws IOException when
    */
-  public Path getQualifiedPath( JobConf conf ) throws IOException
+  public Path getQualifiedPath( Job job ) throws IOException
     {
     return getPath();
     }
@@ -321,38 +322,38 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method makeDirs makes all the directories this Tap instance represents.
    *
-   * @param conf of type JobConf
+   * @param job
    * @return boolean
    * @throws IOException when there is an error making directories
    */
-  public abstract boolean makeDirs( JobConf conf ) throws IOException;
+  public abstract boolean makeDirs( Job job ) throws IOException;
 
   /**
    * Method deletePath deletes the resource represented by this instance.
    *
-   * @param conf of type JobConf
+   * @param job
    * @return boolean
    * @throws IOException when the resource cannot be deleted
    */
-  public abstract boolean deletePath( JobConf conf ) throws IOException;
+  public abstract boolean deletePath( Job job ) throws IOException;
 
   /**
    * Method pathExists return true if the path represented by this instance exists.
    *
-   * @param conf of type JobConf
+   * @param job
    * @return boolean
    * @throws IOException when the status cannot be determined
    */
-  public abstract boolean pathExists( JobConf conf ) throws IOException;
+  public abstract boolean pathExists( Job job ) throws IOException;
 
   /**
    * Method getPathModified returns the date this resource was last modified.
    *
-   * @param conf of type JobConf
+   * @param job
    * @return long
    * @throws IOException when the modified date cannot be determined
    */
-  public abstract long getPathModified( JobConf conf ) throws IOException;
+  public abstract long getPathModified( Job job ) throws IOException;
 
   /**
    * Method isKeep indicates whether the resource represented by this instance should be kept if it

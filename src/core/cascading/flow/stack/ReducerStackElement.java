@@ -32,6 +32,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
 /**
  *
@@ -49,7 +50,7 @@ abstract class ReducerStackElement extends StackElement
   /** Field tupleEntry */
   private TupleEntry tupleEntry;
   /** Field lastOutput */
-  OutputCollector lastOutput;
+  TaskInputOutputContext lastOutput;
 
   ReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap )
     {
@@ -74,7 +75,7 @@ abstract class ReducerStackElement extends StackElement
     return incomingFields;
     }
 
-  public void setLastOutput( OutputCollector lastOutput )
+  public void setLastOutput( TaskInputOutputContext lastOutput )
     {
     this.lastOutput = lastOutput;
     }

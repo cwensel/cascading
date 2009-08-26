@@ -32,8 +32,7 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -70,11 +69,11 @@ public class FlowMapperStack
     {
     this.flowProcess = flowProcess;
 
-    JobConf jobConf = flowProcess.getJobConf();
-    step = (FlowStep) Util.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
+    Configuration conf = flowProcess.getConfiguration();
+    step = (FlowStep) Util.deserializeBase64( conf.getRaw( "cascading.flow.step" ) );
 
     // is set by the MultiInputSplit
-    currentSource = (Tap) Util.deserializeBase64( jobConf.getRaw( "cascading.step.source" ) );
+    currentSource = (Tap) Util.deserializeBase64( conf.getRaw( "cascading.step.source" ) );
 
     if( LOG.isDebugEnabled() )
       LOG.debug( "map current source: " + currentSource );
@@ -110,8 +109,6 @@ public class FlowMapperStack
         operator = step.getNextFlowElement( incomingScope );
         }
 
-      boolean useTapCollector = false;
-
       if( operator instanceof Group )
         {
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
@@ -121,20 +118,19 @@ public class FlowMapperStack
         }
       else if( operator instanceof Tap )
         {
-        useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
-
-        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator, useTapCollector );
+        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator );
         }
       else
         throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
 
       stacks[ i ].head = (MapperStackElement) stacks[ i ].tail.resolveStack();
+      stacks[ i ].tail.setLastOutput( flowProcess.getContext() );
 
       i++;
       }
     }
 
-  public void map( Object key, Object value, OutputCollector output ) throws IOException
+  public void map( Object key, Object value ) throws IOException
     {
     flowProcess.increment( StepCounters.Tuples_Read, 1 );
 
@@ -163,8 +159,6 @@ public class FlowMapperStack
       if( tuple == null )
         return;
 
-      stacks[ i ].tail.setLastOutput( output );
-
       try
         {
         stacks[ i ].head.collect( tuple );
@@ -182,9 +176,6 @@ public class FlowMapperStack
   public void close() throws IOException
     {
     for( int i = 0; i < stacks.length; i++ )
-      {
-//      stacks[ i ].head.cleanup();
       stacks[ i ].head.close();
-      }
     }
   }

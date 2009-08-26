@@ -22,20 +22,15 @@
 package cascading.flow;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowReducerStack;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 /** Class FlowReducer is the Hadoop Reducer implementation. */
-public class FlowReducer extends MapReduceBase implements Reducer
+public class FlowReducer extends Reducer
   {
   /** Field flowReducerStack */
   private FlowReducerStack flowReducerStack;
@@ -48,13 +43,13 @@ public class FlowReducer extends MapReduceBase implements Reducer
     }
 
   @Override
-  public void configure( JobConf jobConf )
+  protected void setup( Context context ) throws IOException, InterruptedException
     {
     try
       {
-      super.configure( jobConf );
-      HadoopUtil.initLog4j( jobConf );
-      currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, false );
+      super.setup( context );
+      HadoopUtil.initLog4j( context.getConfiguration() );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), false );
       flowReducerStack = new FlowReducerStack( currentProcess );
       }
     catch( Throwable throwable )
@@ -66,13 +61,14 @@ public class FlowReducer extends MapReduceBase implements Reducer
       }
     }
 
-  public void reduce( Object key, Iterator values, OutputCollector output, Reporter reporter ) throws IOException
+  @Override
+  protected void reduce( Object key, Iterable values, Context context ) throws IOException, InterruptedException
     {
-    currentProcess.setReporter( reporter );
+    currentProcess.setContext( context );
 
     try
       {
-      flowReducerStack.reduce( key, values, output );
+      flowReducerStack.reduce( key, values, context );
       }
     catch( Throwable throwable )
       {
@@ -84,11 +80,11 @@ public class FlowReducer extends MapReduceBase implements Reducer
     }
 
   @Override
-  public void close() throws IOException
+  protected void cleanup( Context context ) throws IOException, InterruptedException
     {
     try
       {
-      super.close();
+      super.cleanup( context );    //To change body of overridden methods use File | Settings | File Templates.
       }
     finally
       {

@@ -40,7 +40,7 @@ public class MapReduceFlowStep extends FlowStep
     }
 
   @Override
-  protected JobConf getJobConf( JobConf parentConf ) throws IOException
+  protected JobConf getJob( JobConf parentConf ) throws IOException
     {
     // allow to delete
     sink.sinkInit( new JobConf() );

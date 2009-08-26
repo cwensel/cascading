@@ -22,6 +22,7 @@
 package cascading.flow.hadoop;
 
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -36,7 +37,7 @@ import java.util.Set;
  */
 public class HadoopUtil
   {
-  public static void initLog4j( JobConf jobConf )
+  public static void initLog4j( Configuration jobConf )
     {
     String values = jobConf.get( "log4j.logger", null );
 

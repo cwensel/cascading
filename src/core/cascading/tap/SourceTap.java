@@ -26,8 +26,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import cascading.flow.FlowProcess;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 
 import java.io.IOException;
 
@@ -53,7 +54,7 @@ public abstract class SourceTap extends Tap
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
     }
@@ -64,24 +65,24 @@ public abstract class SourceTap extends Tap
     return false;
     }
 
-  /** @see Tap#deletePath(JobConf) */
-  public boolean deletePath( JobConf conf ) throws IOException
+  /** @see Tap#deletePath(org.apache.hadoop.mapreduce.Job) */
+  public boolean deletePath( Job job ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
     }
 
-  /** @see Tap#makeDirs(JobConf) */
-  public boolean makeDirs( JobConf conf ) throws IOException
+  /** @see Tap#makeDirs(org.apache.hadoop.mapreduce.Job) */
+  public boolean makeDirs( Job job ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
 
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

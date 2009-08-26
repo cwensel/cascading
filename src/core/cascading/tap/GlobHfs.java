@@ -26,7 +26,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 
 import java.io.IOException;
 
@@ -74,13 +74,13 @@ public class GlobHfs extends MultiSourceTap
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
     FileStatus[] statusList = null;
 
     Path path = new Path( pathPattern );
 
-    FileSystem fileSystem = path.getFileSystem( conf );
+    FileSystem fileSystem = path.getFileSystem( job.getConfiguration() );
 
     if( pathFilter == null )
       statusList = fileSystem.globStatus( path );
@@ -95,6 +95,6 @@ public class GlobHfs extends MultiSourceTap
     for( int i = 0; i < statusList.length; i++ )
       taps[ i ] = new Hfs( getScheme(), statusList[ i ].getPath().toString() );
 
-    super.sourceInit( conf );
+    super.sourceInit( job );
     }
   }

@@ -30,13 +30,15 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
+import cascading.flow.FlowProcess;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -194,17 +196,17 @@ public class Hfs extends Tap
     this.uriScheme = uriScheme;
     }
 
-  public URI getURIScheme( JobConf jobConf ) throws IOException
+  public URI getURIScheme( Configuration conf ) throws IOException
     {
     if( uriScheme != null )
       return uriScheme;
 
-    uriScheme = makeURIScheme( jobConf );
+    uriScheme = makeURIScheme( conf );
 
     return uriScheme;
     }
 
-  protected URI makeURIScheme( JobConf jobConf ) throws IOException
+  protected URI makeURIScheme( Configuration conf ) throws IOException
     {
     try
       {
@@ -228,7 +230,7 @@ public class Hfs extends Tap
       else if( schemeString != null )
         uriScheme = new URI( schemeString + ":///" );
       else
-        uriScheme = getDefaultFileSystemURIScheme( jobConf );
+        uriScheme = getDefaultFileSystemURIScheme( conf );
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "using uri scheme: " + uriScheme );
@@ -244,13 +246,13 @@ public class Hfs extends Tap
   /**
    * Method getDefaultFileSystemURIScheme returns the URI scheme for the default Hadoop FileSystem.
    *
-   * @param jobConf of type JobConf
+   * @param conf
    * @return URI
    * @throws IOException when
    */
-  public URI getDefaultFileSystemURIScheme( JobConf jobConf ) throws IOException
+  public URI getDefaultFileSystemURIScheme( Configuration conf ) throws IOException
     {
-    return getDefaultFileSystem( jobConf ).getUri();
+    return getDefaultFileSystem( conf ).getUri();
     }
 
   @Override
@@ -259,14 +261,14 @@ public class Hfs extends Tap
     return super.isWriteDirect() || stringPath != null && stringPath.matches( "(^https?://.*$)|(^s3tp://.*$)" );
     }
 
-  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getDefaultFileSystem( Configuration conf ) throws IOException
     {
-    return FileSystem.get( jobConf );
+    return FileSystem.get( conf );
     }
 
-  protected FileSystem getFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getFileSystem( Configuration conf ) throws IOException
     {
-    return FileSystem.get( getURIScheme( jobConf ), jobConf );
+    return FileSystem.get( getURIScheme( conf ), conf );
     }
 
   /** @see Tap#getPath() */
@@ -285,49 +287,49 @@ public class Hfs extends Tap
     }
 
   @Override
-  public Path getQualifiedPath( JobConf conf ) throws IOException
+  public Path getQualifiedPath( Job job ) throws IOException
     {
-    return getPath().makeQualified( getFileSystem( conf ) );
+    return getPath().makeQualified( getFileSystem( job.getConfiguration() ) );
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceInit( Job job ) throws IOException
     {
-    Path qualifiedPath = getQualifiedPath( conf );
+    Path qualifiedPath = getQualifiedPath( job );
 
-    for( Path exitingPath : FileInputFormat.getInputPaths( conf ) )
+    for( Path exitingPath : FileInputFormat.getInputPaths( job ) )
       {
       if( exitingPath.equals( qualifiedPath ) )
         throw new TapException( "may not add duplicate paths, found: " + exitingPath );
       }
 
-    FileInputFormat.addInputPath( conf, qualifiedPath );
+    FileInputFormat.addInputPath( job, qualifiedPath );
 
-    super.sourceInit( conf );
+    super.sourceInit( job );
 
-    makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
+    makeLocal( job.getConfiguration(), qualifiedPath, "forcing job to local mode, via source: " );
 
-    TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
+    TupleSerialization.setSerializations( job.getConfiguration() ); // allows Hfs to be used independent of Flow
     }
 
   @Override
-  public void sinkInit( JobConf conf ) throws IOException
+  public void sinkInit( Job job ) throws IOException
     {
     // do not delete if initialized from within a task
-    if( isReplace() && conf.get( "mapred.task.partition" ) == null )
-      deletePath( conf );
+    if( isReplace() && job.getConfiguration().get( "mapred.task.partition" ) == null )
+      deletePath( job );
 
-    Path qualifiedPath = getQualifiedPath( conf );
+    Path qualifiedPath = getQualifiedPath( job );
 
-    FileOutputFormat.setOutputPath( conf, qualifiedPath );
-    super.sinkInit( conf );
+    FileOutputFormat.setOutputPath( job, qualifiedPath );
+    super.sinkInit( job );
 
-    makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
+    makeLocal( job.getConfiguration(), qualifiedPath, "forcing job to local mode, via sink: " );
 
-    TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
+    TupleSerialization.setSerializations( job.getConfiguration() ); // allows Hfs to be used independent of Flow
     }
 
-  private void makeLocal( JobConf conf, Path qualifiedPath, String infoMessage )
+  private void makeLocal( Configuration conf, Path qualifiedPath, String infoMessage )
     {
     if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( "file" ) )
       {
@@ -339,25 +341,25 @@ public class Hfs extends Tap
     }
 
   @Override
-  public boolean makeDirs( JobConf conf ) throws IOException
+  public boolean makeDirs( Job job ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "making dirs: " + getQualifiedPath( conf ) );
+      LOG.debug( "making dirs: " + getQualifiedPath( job ) );
 
-    return getFileSystem( conf ).mkdirs( getPath() );
+    return getFileSystem( job.getConfiguration() ).mkdirs( getPath() );
     }
 
   @Override
-  public boolean deletePath( JobConf conf ) throws IOException
+  public boolean deletePath( Job job ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "deleting: " + getQualifiedPath( conf ) );
+      LOG.debug( "deleting: " + getQualifiedPath( job ) );
 
     // do not delete the root directory
-    if( getQualifiedPath( conf ).depth() == 0 )
+    if( getQualifiedPath( job ).depth() == 0 )
       return true;
 
-    FileSystem fileSystem = getFileSystem( conf );
+    FileSystem fileSystem = getFileSystem( job.getConfiguration() );
 
     try
       {
@@ -374,20 +376,20 @@ public class Hfs extends Tap
     }
 
   @Override
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean pathExists( Job job ) throws IOException
     {
-    return getFileSystem( conf ).exists( getPath() );
+    return getFileSystem( job.getConfiguration() ).exists( getPath() );
     }
 
   @Override
-  public long getPathModified( JobConf conf ) throws IOException
+  public long getPathModified( Job job ) throws IOException
     {
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
+    FileStatus fileStatus = getFileSystem( job.getConfiguration() ).getFileStatus( getPath() );
 
     if( !fileStatus.isDir() )
       return fileStatus.getModificationTime();
 
-    makeStatuses( conf );
+    makeStatuses( job.getConfiguration() );
 
     // statuses is empty, return 0
     if( statuses == null || statuses.length == 0 )
@@ -405,7 +407,7 @@ public class Hfs extends Tap
     return date;
     }
 
-  protected Path getTempPath( JobConf conf )
+  protected Path getTempPath( Configuration conf )
     {
     String tempDir = conf.get( TEMPORARY_DIRECTORY );
 
@@ -426,7 +428,7 @@ public class Hfs extends Tap
    * @param conf of type JobConf
    * @throws IOException on failure
    */
-  private void makeStatuses( JobConf conf ) throws IOException
+  private void makeStatuses( Configuration conf ) throws IOException
     {
     if( statuses != null )
       return;
@@ -472,13 +474,13 @@ public class Hfs extends Tap
     return result;
     }
 
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
     {
     return new TupleEntryIterator( getSourceFields(), new TapIterator( this, conf ) );
     }
 
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
     {
-    return new TapCollector( this, conf );
+    return new TapCollector( this, flowProcess );
     }
   }

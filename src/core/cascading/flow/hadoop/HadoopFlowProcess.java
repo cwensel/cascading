@@ -28,6 +28,8 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
 import java.io.IOException;
 
@@ -44,23 +46,19 @@ import java.io.IOException;
  */
 public class HadoopFlowProcess extends FlowProcess
   {
-  /** Field jobConf */
-  JobConf jobConf;
   /** Field isMapper */
   private boolean isMapper;
   /** Field reporter */
-  Reporter reporter;
+  TaskInputOutputContext context;
 
   /**
    * Constructor HadoopFlowProcess creates a new HadoopFlowProcess instance.
    *
    * @param flowSession of type FlowSession
-   * @param jobConf     of type JobConf
    */
-  public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf, boolean isMapper )
+  public HadoopFlowProcess( FlowSession flowSession, boolean isMapper )
     {
     super( flowSession );
-    this.jobConf = jobConf;
     this.isMapper = isMapper;
     }
 
@@ -69,9 +67,9 @@ public class HadoopFlowProcess extends FlowProcess
    *
    * @return the jobConf (type JobConf) of this HadoopFlowProcess object.
    */
-  public JobConf getJobConf()
+  public Configuration getConfiguration()
     {
-    return jobConf;
+    return context.getConfiguration();
     }
 
   /**
@@ -86,12 +84,12 @@ public class HadoopFlowProcess extends FlowProcess
 
   public int getCurrentNumMappers()
     {
-    return getJobConf().getNumMapTasks();
+    return getConfiguration().getInt( "mapred.map.tasks", 1 );
     }
 
   public int getCurrentNumReducers()
     {
-    return getJobConf().getNumReduceTasks();
+    return getConfiguration().getInt( "mapred.reduce.tasks", 1 );
     }
 
   /**
@@ -101,17 +99,17 @@ public class HadoopFlowProcess extends FlowProcess
    */
   public int getCurrentTaskNum()
     {
-    return getJobConf().getInt( "mapred.task.partition", 0 );
+    return getConfiguration().getInt( "mapred.task.partition", 0 );
     }
 
   /**
    * Method setReporter sets the reporter of this HadoopFlowProcess object.
    *
-   * @param reporter the reporter of this HadoopFlowProcess object.
+   * @param context the reporter of this HadoopFlowProcess object.
    */
-  public void setReporter( Reporter reporter )
+  public void setContext( TaskInputOutputContext context )
     {
-    this.reporter = reporter;
+    this.context = context;
     }
 
   /**
@@ -119,44 +117,44 @@ public class HadoopFlowProcess extends FlowProcess
    *
    * @return the reporter (type Reporter) of this HadoopFlowProcess object.
    */
-  public Reporter getReporter()
+  public TaskInputOutputContext getContext()
     {
-    return reporter;
+    return context;
     }
 
   /** @see cascading.flow.FlowProcess#getProperty(String) */
   public Object getProperty( String key )
     {
-    return jobConf.get( key );
+    return getConfiguration().get( key );
     }
 
   /** @see cascading.flow.FlowProcess#keepAlive() */
   public void keepAlive()
     {
-    reporter.progress();
+    context.progress();
     }
 
   /** @see cascading.flow.FlowProcess#increment(Enum, int) */
   public void increment( Enum counter, int amount )
     {
-    reporter.incrCounter( counter, amount );
+    context.getCounter( counter ).increment( amount );
     }
 
   /** @see cascading.flow.FlowProcess#setStatus(String) */
   public void setStatus( String status )
     {
-    reporter.setStatus( status );
+    context.setStatus( status );
     }
 
   /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
-    return tap.openForRead( getJobConf() );
+    return tap.openForRead( getConfiguration() );
     }
 
   /** @see cascading.flow.FlowProcess#openTapForWrite(Tap) */
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( getJobConf() );
+    return tap.openForWrite( getConfiguration() );
     }
   }

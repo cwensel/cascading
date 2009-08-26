@@ -87,7 +87,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
     assertNull( "not null: step.groupBy", step.group );
@@ -125,7 +125,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
@@ -158,7 +158,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
@@ -192,7 +192,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
@@ -231,7 +231,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
@@ -267,7 +267,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
@@ -1268,7 +1268,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    step.getJobConf(); // called init the step
+    step.getJob(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
     assertNotNull( "null: step.groupBy", step.group );
