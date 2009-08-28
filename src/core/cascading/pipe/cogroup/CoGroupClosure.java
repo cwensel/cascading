@@ -30,6 +30,7 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
@@ -57,7 +58,7 @@ public class CoGroupClosure extends GroupClosure
   private int numSelfJoins;
   private CompressionCodec codec;
   private long threshold;
-  private String serializations;
+  private JobConf conf;
 
   public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -65,7 +66,7 @@ public class CoGroupClosure extends GroupClosure
     this.numSelfJoins = numSelfJoins;
     this.codec = getCompressionCodec( flowProcess );
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
-    this.serializations = (String) flowProcess.getProperty( "io.serializations" );
+    this.conf = ( (HadoopFlowProcess) flowProcess ).getJobConf();
     }
 
   @Override
@@ -102,7 +103,7 @@ public class CoGroupClosure extends GroupClosure
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, serializations, codec );
+      groups[ i ] = new SpillableTupleList( threshold, conf, codec );
 
     while( values.hasNext() )
       {

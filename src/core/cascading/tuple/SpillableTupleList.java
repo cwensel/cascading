@@ -81,21 +81,17 @@ public class SpillableTupleList implements Iterable<Tuple>
    * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value, and
    * the first available compression codec, if any.
    *
-   * @param threshold      of type long
-   * @param serializations of type String
-   * @param codec          of type CompressionCodec
+   * @param threshold of type long
+   * @param conf
+   * @param codec     of type CompressionCodec
    */
-  public SpillableTupleList( long threshold, String serializations, CompressionCodec codec )
+  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
     {
     this.threshold = threshold;
     this.codec = codec;
 
-    if( serializations != null )
-      {
-      JobConf conf = new JobConf();
-      conf.set( "io.serializations", serializations );
+    if( conf != null )
       tupleSerialization = new TupleSerialization( conf );
-      }
     }
 
   /**
