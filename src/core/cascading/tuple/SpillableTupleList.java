@@ -47,8 +47,6 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /** Field threshold */
   private long threshold = 10000;
-  /** Field serializations */
-  private String serializations;
   /** Field files */
   private List<File> files = new LinkedList<File>();
   /** Field current */
@@ -75,14 +73,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     this.threshold = threshold;
     }
 
-  public SpillableTupleList( long threshold, String serializations )
+  public SpillableTupleList( long threshold, JobConf conf )
     {
     this.threshold = threshold;
-    this.serializations = serializations;
-
-    JobConf conf = new JobConf();
-    conf.set( "io.serializations", serializations );
-    tupleSerialization = new TupleSerialization( conf );
+    this.tupleSerialization = new TupleSerialization( conf );
     }
 
   /**

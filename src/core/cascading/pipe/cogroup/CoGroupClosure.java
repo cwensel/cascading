@@ -22,6 +22,7 @@
 package cascading.pipe.cogroup;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
@@ -77,7 +78,7 @@ public class CoGroupClosure extends GroupClosure
     long threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, serializations );
+      groups[ i ] = new SpillableTupleList( threshold, ( (HadoopFlowProcess) flowProcess ).getJobConf() );
 
     while( values.hasNext() )
       {
