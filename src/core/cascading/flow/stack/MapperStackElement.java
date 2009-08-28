@@ -31,8 +31,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import cascading.tuple.TupleIterator;
 
 /**
  *
@@ -45,19 +44,12 @@ abstract class MapperStackElement extends StackElement
   private Fields incomingFields;
   /** Field tupleEntry */
   private TupleEntry tupleEntry;
-  /** Field lastOutput */
-  TaskInputOutputContext lastOutput;
 
   MapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap )
     {
     super( flowProcess, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
-    }
-
-  public void setLastOutput( TaskInputOutputContext lastOutput )
-    {
-    this.lastOutput = lastOutput;
     }
 
   protected abstract FlowElement getFlowElement();
@@ -83,6 +75,11 @@ abstract class MapperStackElement extends StackElement
     tupleEntry.setTuple( tuple );
 
     return tupleEntry;
+    }
+
+  public void start( TupleIterator tupleIterator )
+    {
+
     }
 
   public void collect( Tuple tuple )

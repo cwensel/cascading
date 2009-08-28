@@ -23,6 +23,7 @@ package cascading.tuple;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * TupleEntryCollector is a convenience class for managing a list of tuples. More specifically it can simultaneously
@@ -96,5 +97,15 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
   public Iterator<Tuple> iterator()
     {
     return tuples.iterator();
+    }
+
+  /**
+   * Method listIterator returns a {@link ListIterator} for this collections.
+   *
+   * @return ListIterator<Tuple>
+   */
+  public ListIterator<Tuple> listIterator()
+    {
+    return tuples.listIterator();
     }
   }

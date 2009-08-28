@@ -264,7 +264,7 @@ public class SerializedPipesTest extends ClusterTestCase
 //    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
 //    System.out.println( "serializations = " + serializations );
 //    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations",serializations );
-    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations", TestSerialization.class.getName() );
+    MultiMapReducePlanner.getConfiguration( properties ).set( "io.serializations", TestSerialization.class.getName() );
 
     Flow countFlow = new FlowConnector( properties ).connect( sources, sink, splice );
 

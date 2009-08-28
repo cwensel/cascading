@@ -122,7 +122,7 @@ public class ClusterTestCase extends CascadingTestCase
       properties.put( "log4j.logger", logger );
 
     Flow.setJobPollingInterval( properties, 500 ); // should speed up tests
-    MultiMapReducePlanner.setJobConf( properties, jobConf );
+    MultiMapReducePlanner.setConfiguration( properties, jobConf );
     }
 
   public Map<Object, Object> getProperties()

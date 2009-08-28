@@ -21,6 +21,12 @@
 
 package cascading.tap;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -34,13 +40,8 @@ import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  *
@@ -64,7 +65,7 @@ public class TapTest extends ClusterTestCase implements Serializable
     {
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getJobConf( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getConfiguration( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
     new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
     new Dfs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
@@ -88,37 +89,11 @@ public class TapTest extends ClusterTestCase implements Serializable
       }
     }
 
-  public void testS3fs() throws URISyntaxException, IOException
-    {
-    // don't test qualified path, it tries to connect to s3 service
-
-    new S3fs( new Fields( "foo" ), "s3://localhost:5001/some/path" );
-    new S3fs( new Fields( "foo" ), new URI( "s3://localhost:5001/some/path" ) );
-
-    try
-      {
-      new S3fs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
-      fail( "not valid url" );
-      }
-    catch( Exception exception )
-      {
-      }
-
-    try
-      {
-      new S3fs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
-      fail( "not valid url" );
-      }
-    catch( Exception exception )
-      {
-      }
-    }
-
   public void testLfs() throws URISyntaxException, IOException
     {
     Tap tap = new Lfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getJobConf( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "file" ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getConfiguration( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Lfs( new Fields( "foo" ), "file:///some/path" );
 
@@ -144,12 +119,12 @@ public class TapTest extends ClusterTestCase implements Serializable
       }
 
     @Override
-    public Tuple source( Object key, Object value )
+    public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      if( value.toString().matches( "^\\s*#.*$" ) )
+      if( tupleEntryCollector.toString().matches( "^\\s*#.*$" ) )
         return null;
 
-      return super.source( key, value );
+      return super.source( tuple, tupleEntryCollector );
       }
     }
 

@@ -21,34 +21,34 @@
 
 package cascading.flow.stack;
 
-import cascading.flow.FlowCollector;
-import cascading.flow.FlowProcess;
-import cascading.flow.StepCounters;
-import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.tap.Tap;
-import cascading.tap.hadoop.TapCollector;
-import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.conf.Configuration;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import cascading.flow.FlowCollector;
+import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
+import cascading.flow.hadoop.ConfigurationFlowContext;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.tap.Tap;
+import cascading.tap.hadoop.HfsCollector;
+import cascading.tuple.TupleEntry;
+import org.apache.hadoop.conf.Configuration;
 
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
   {
 
-  private static Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
+  private static Map<Tap, HfsCollector> trapCollectors = new HashMap<Tap, HfsCollector>();
 
   final FlowProcess flowProcess;
   private final Tap trap;
   StackElement previous;
   StackElement next;
 
-  private static TapCollector getTrapCollector( Tap trap, Configuration configuration )
+  private static HfsCollector getTrapCollector( Tap trap, Configuration configuration )
     {
-    TapCollector trapCollector = trapCollectors.get( trap );
+    HfsCollector trapCollector = trapCollectors.get( trap );
 
     if( trapCollector == null )
       {
@@ -66,7 +66,7 @@ abstract class StackElement implements FlowCollector
 
         configuration.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 
-        trapCollector = (TapCollector) trap.openForWrite( configuration );
+        trapCollector = (HfsCollector) trap.openForWrite( new ConfigurationFlowContext( configuration ) );
         trapCollectors.put( trap, trapCollector );
         }
       catch( IOException exception )
@@ -80,7 +80,7 @@ abstract class StackElement implements FlowCollector
 
   private static void closeTraps()
     {
-    for( TapCollector trapCollector : trapCollectors.values() )
+    for( HfsCollector trapCollector : trapCollectors.values() )
       {
       try
         {

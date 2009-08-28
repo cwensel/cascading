@@ -21,16 +21,16 @@
 
 package cascading.flow.hadoop;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -54,12 +54,12 @@ public class HadoopUtil
       }
     }
 
-  public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )
+  public static Configuration createConfiguration( Map<Object, Object> properties, Configuration defaultConf )
     {
-    JobConf jobConf = defaultJobconf == null ? new JobConf() : new JobConf( defaultJobconf );
+    Configuration conf = defaultConf == null ? new Configuration() : new Configuration( defaultConf );
 
     if( properties == null )
-      return jobConf;
+      return conf;
 
     Set<Object> keys = new HashSet<Object>( properties.keySet() );
 
@@ -78,10 +78,10 @@ public class HadoopUtil
       if( value instanceof Class || value instanceof JobConf )
         continue;
 
-      jobConf.set( key.toString(), value.toString() );
+      conf.set( key.toString(), value.toString() );
       }
 
-    return jobConf;
+    return conf;
     }
 
   public static Map<Object, Object> createProperties( JobConf jobConf )

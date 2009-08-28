@@ -38,16 +38,17 @@ import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.HttpFileSystem;
-import cascading.tap.hadoop.S3HttpFileSystem;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleIterator;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -73,7 +74,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  *
  * @see cascading.flow.FlowConnector
  */
-public class Flow implements Runnable
+public class Flow implements HadoopFlowContext, Runnable
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( Flow.class );
@@ -107,7 +108,7 @@ public class Flow implements Runnable
   /** Field stepGraph */
   private StepGraph stepGraph;
   /** Field jobConf */
-  private JobConf jobConf;
+  private Configuration conf;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -196,9 +197,9 @@ public class Flow implements Runnable
     return Util.getProperty( properties, "cascading.flow.job.pollinginterval", 500 );
     }
 
-  public static long getJobPollingInterval( JobConf jobConf )
+  public static long getJobPollingInterval( Configuration conf )
     {
-    return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
+    return conf.getLong( "cascading.flow.job.pollinginterval", 5000 );
     }
 
   /** Used for testing. */
@@ -206,12 +207,12 @@ public class Flow implements Runnable
     {
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Configuration conf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
-    setJobConf( jobConf );
+    setConf( conf );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
@@ -219,11 +220,11 @@ public class Flow implements Runnable
     initFromTaps();
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Configuration conf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
     this.stepGraph = stepGraph;
-    setJobConf( jobConf );
+    setConf( conf );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
@@ -304,18 +305,17 @@ public class Flow implements Runnable
     this.stepGraph = stepGraph;
     }
 
-  private void setJobConf( JobConf jobConf )
+  private void setConf( Configuration conf )
     {
-    if( jobConf == null ) // this is ok, getJobConf will pass a default parent in
+    if( conf == null ) // this is ok, getJobConf will pass a default parent in
       return;
 
-    this.jobConf = new JobConf( jobConf ); // prevent local values from being shared
-    this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
-    this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
-    this.jobConf.set( "fs.s3tp.impl", S3HttpFileSystem.class.getName() );
+    this.conf = new Configuration( conf ); // prevent local values from being shared
+    this.conf.set( "fs.http.impl", HttpFileSystem.class.getName() );
+    this.conf.set( "fs.https.impl", HttpFileSystem.class.getName() );
 
     // set the ID for future reference
-    this.jobConf.set( "cascading.flow.id", getID() );
+    this.conf.set( "cascading.flow.id", getID() );
     }
 
   /**
@@ -323,12 +323,12 @@ public class Flow implements Runnable
    *
    * @return the jobConf (type JobConf) of this Flow object.
    */
-  public JobConf getJobConf()
+  public Configuration getConfiguration()
     {
-    if( jobConf == null )
-      setJobConf( new JobConf() );
+    if( conf == null )
+      setConf( new Configuration() );
 
-    return jobConf;
+    return conf;
     }
 
   /**
@@ -339,7 +339,7 @@ public class Flow implements Runnable
    */
   public void setProperty( String key, String value )
     {
-    getJobConf().set( key, value );
+    getConfiguration().set( key, value );
     }
 
   /**
@@ -350,7 +350,7 @@ public class Flow implements Runnable
    */
   public String getProperty( String key )
     {
-    return getJobConf().get( key );
+    return getConfiguration().get( key );
     }
 
   /**
@@ -541,17 +541,17 @@ public class Flow implements Runnable
    */
   public boolean areSourcesNewer( long sinkModified ) throws IOException
     {
-    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
+    Job job = new Job( getConfiguration() ); // let's not add unused values by accident
     long sourceMod = 0;
 
     try
       {
       for( Tap source : sources.values() )
         {
-        if( !source.pathExists( confCopy ) )
+        if( !source.pathExists( job ) )
           throw new FlowException( "source does not exist: " + source );
 
-        sourceMod = source.getPathModified( confCopy );
+        sourceMod = source.getPathModified( job );
 
         if( sinkModified < sourceMod )
           return true;
@@ -577,7 +577,7 @@ public class Flow implements Runnable
    */
   public long getSinkModified() throws IOException
     {
-    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
+    Job job = new Job( getConfiguration() ); // let's not add unused values by accident
     long sinkModified = Long.MAX_VALUE;
 
     for( Tap sink : sinks.values() )
@@ -586,10 +586,10 @@ public class Flow implements Runnable
         sinkModified = -1L;
       else
         {
-        if( !sink.pathExists( confCopy ) )
+        if( !sink.pathExists( job ) )
           sinkModified = 0L;
         else
-          sinkModified = Math.min( sinkModified, sink.getPathModified( confCopy ) ); // return youngest mod date
+          sinkModified = Math.min( sinkModified, sink.getPathModified( job ) ); // return youngest mod date
         }
       }
 
@@ -718,7 +718,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSource() throws IOException
     {
-    return sources.values().iterator().next().openForRead( getJobConf() );
+    return sources.values().iterator().next().openForRead( this );
     }
 
   /**
@@ -730,7 +730,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSource( String name ) throws IOException
     {
-    return sources.get( name ).openForRead( getJobConf() );
+    return sources.get( name ).openForRead( this );
     }
 
   /**
@@ -741,7 +741,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSink() throws IOException
     {
-    return sinks.values().iterator().next().openForRead( getJobConf() );
+    return sinks.values().iterator().next().openForRead( this );
     }
 
   /**
@@ -753,7 +753,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSink( String name ) throws IOException
     {
-    return sinks.get( name ).openForRead( getJobConf() );
+    return sinks.get( name ).openForRead( this );
     }
 
   /**
@@ -764,7 +764,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTrap() throws IOException
     {
-    return traps.values().iterator().next().openForRead( getJobConf() );
+    return traps.values().iterator().next().openForRead( this );
     }
 
   /**
@@ -776,7 +776,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTrap( String name ) throws IOException
     {
-    return traps.get( name ).openForRead( getJobConf() );
+    return traps.get( name ).openForRead( this );
     }
 
   /**
@@ -790,7 +790,7 @@ public class Flow implements Runnable
   public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
-      tap.deletePath( getJobConf() );
+      tap.deletePath( new Job( getConfiguration() ) );
     }
 
   /**
@@ -807,7 +807,7 @@ public class Flow implements Runnable
     for( Tap tap : sinks.values() )
       {
       if( !tap.isUpdate() )
-        tap.deletePath( getJobConf() );
+        tap.deletePath( new Job( getConfiguration() ) );
       }
     }
 
@@ -825,7 +825,7 @@ public class Flow implements Runnable
     for( Tap tap : sinks.values() )
       {
       if( !tap.isUpdate() )
-        tap.deletePath( getJobConf() );
+        tap.deletePath( new Job( getConfiguration() ) );
       }
     }
 
@@ -838,7 +838,7 @@ public class Flow implements Runnable
    */
   public boolean tapPathExists( Tap tap ) throws IOException
     {
-    return tap.pathExists( getJobConf() );
+    return tap.pathExists( new Job( getConfiguration() ) );
     }
 
   /**
@@ -850,7 +850,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
-    return tap.openForRead( getJobConf() );
+    return tap.openForRead( this );
     }
 
   /**
@@ -862,7 +862,7 @@ public class Flow implements Runnable
    */
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( getJobConf() );
+    return tap.openForWrite( this );
     }
 
   /**
@@ -872,7 +872,7 @@ public class Flow implements Runnable
    */
   public boolean jobsAreLocal()
     {
-    return getJobConf().get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+    return getConfiguration().get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
     }
 
   /** Method run implements the Runnable run method and should not be called by users. */
@@ -990,7 +990,7 @@ public class Flow implements Runnable
     while( topoIterator.hasNext() )
       {
       FlowStep step = (FlowStep) topoIterator.next();
-      FlowStepJob flowStepJob = step.createFlowStepJob( getJobConf() );
+      FlowStepJob flowStepJob = step.createFlowStepJob( getConfiguration() );
 
       jobsMap.put( step.getName(), flowStepJob );
 
@@ -1105,7 +1105,7 @@ public class Flow implements Runnable
       return;
 
     for( FlowStep step : getSteps() )
-      step.clean( getJobConf() );
+      step.clean( getConfiguration() );
     }
 
   private void registerShutdownHook()

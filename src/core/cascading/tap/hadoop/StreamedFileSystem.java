@@ -22,8 +22,10 @@
 package cascading.tap.hadoop;
 
 import java.io.IOException;
+import java.util.EnumSet;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.CreateFlag;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,6 +37,13 @@ import org.apache.hadoop.util.Progressable;
 public abstract class StreamedFileSystem extends FileSystem
   {
   @Override
+  public FSDataOutputStream create( Path f, FsPermission permission, EnumSet<CreateFlag> flag, int bufferSize, short replication, long blockSize, Progressable progress ) throws IOException
+    {
+    throw new UnsupportedOperationException( "not supported" );
+    }
+
+  @Override
+  @Deprecated
   public FSDataOutputStream create( Path path, FsPermission permission, boolean overwrite, int bufferSize, short replication, long blockSize, Progressable progress ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
@@ -42,13 +51,6 @@ public abstract class StreamedFileSystem extends FileSystem
 
   @Override
   public boolean rename( Path path, Path path1 ) throws IOException
-    {
-    throw new UnsupportedOperationException( "not supported" );
-    }
-
-  @Deprecated
-  @Override
-  public boolean delete( Path path ) throws IOException
     {
     throw new UnsupportedOperationException( "not supported" );
     }

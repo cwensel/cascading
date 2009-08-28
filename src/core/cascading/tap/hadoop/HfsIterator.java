@@ -22,28 +22,33 @@
 package cascading.tap.hadoop;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.ListIterator;
 
+import cascading.flow.Flow;
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
+import cascading.tuple.TupleListCollector;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
 /**
  * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link cascading.tap.Tap} instances when
  * opening the taps resource for reading.
  */
-public class TapIterator implements TupleIterator
+public class HfsIterator implements TupleIterator
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TapIterator.class );
+  private static final Logger LOG = Logger.getLogger( HfsIterator.class );
 
   /** Field tap */
   private final Tap tap;
@@ -52,16 +57,16 @@ public class TapIterator implements TupleIterator
   /** Field conf */
   private final Configuration conf;
   /** Field splits */
-  private InputSplit[] splits;
+  private List<InputSplit> splits;
   /** Field reader */
   private RecordReader reader;
-  /** Field key */
-  private Object key;
-  /** Field value */
-  private Object value;
 
   /** Field currentSplit */
   private int currentSplit = 0;
+  /** Field tupleListCollector */
+  private TupleListCollector tupleListCollector;
+  /** Field tupleListIterator */
+  private ListIterator<Tuple> tupleListIterator;
   /** Field currentTuple */
   private Tuple currentTuple;
   /** Field complete */
@@ -70,50 +75,62 @@ public class TapIterator implements TupleIterator
   /**
    * Constructor TapIterator creates a new TapIterator instance.
    *
-   * @param conf of type JobConf
+   * @param flowContext
    * @throws IOException when
    */
-  public TapIterator( Tap tap, Configuration conf ) throws IOException
+  public HfsIterator( Tap tap, HadoopFlowContext flowContext ) throws IOException
     {
     this.tap = tap;
-    this.conf = new Configuration( conf );
+    this.conf = new Configuration( ( (Flow) flowContext ).getConfiguration() );
 
     initalize();
     }
 
   private void initalize() throws IOException
     {
-    tap.sourceInit( conf );
+    Job job = new Job( conf );
 
-    if( !tap.pathExists( conf ) )
+    tap.sourceInit( job );
+    tupleListCollector = new TupleListCollector( tap.getSourceFields() );
+    tupleListIterator = tupleListCollector.listIterator(); // is empty
+
+    if( !tap.pathExists( job ) )
       {
       complete = true;
       return;
       }
 
-    inputFormat = conf.getInputFormat();
+    try
+      {
+      inputFormat = ReflectionUtils.newInstance( job.getInputFormatClass(), conf );
+      }
+    catch( ClassNotFoundException exception )
+      {
 
-    if( inputFormat instanceof JobConfigurable )
-      ( (JobConfigurable) inputFormat ).configure( conf );
+      }
 
-    splits = inputFormat.getSplits( conf, 1 );
+    if( inputFormat instanceof Configurable )
+      ( (Configurable) inputFormat ).setConf( conf );
 
-    if( splits.length == 0 )
+    try
+      {
+      splits = inputFormat.getSplits( job );
+      }
+    catch( InterruptedException exception )
+      {
+
+      }
+
+    if( splits.size() == 0 )
       {
       complete = true;
       return;
       }
 
     reader = makeReader( currentSplit );
-    key = reader.createKey();
-    value = reader.createValue();
 
     if( LOG.isDebugEnabled() )
-      {
-      LOG.debug( "found splits: " + splits.length );
-      LOG.debug( "using key: " + key.getClass().getName() );
-      LOG.debug( "using value: " + value.getClass().getName() );
-      }
+      LOG.debug( "found splits: " + splits.size() );
     }
 
   private RecordReader makeReader( int currentSplit ) throws IOException
@@ -121,7 +138,14 @@ public class TapIterator implements TupleIterator
     if( LOG.isDebugEnabled() )
       LOG.debug( "reading split: " + currentSplit );
 
-    return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
+    try
+      {
+      return inputFormat.createRecordReader( splits.get( currentSplit ), Hadoop19TapUtil.getAttemptContext( conf ) );
+      }
+    catch( InterruptedException exception )
+      {
+      throw new RuntimeException( exception );
+      }
     }
 
   /**
@@ -162,25 +186,35 @@ public class TapIterator implements TupleIterator
 
     try
       {
-      if( reader.next( key, value ) )
+      if( tupleListIterator.hasNext() )
         {
-        currentTuple = tap.source( key, value );
+        currentTuple = tupleListIterator.next();
         getNextTuple(); // handles case where currentTuple is returned null from the source
         }
-      else if( currentSplit < splits.length - 1 )
+      else if( reader.nextKeyValue() )
         {
-        reader.close();
-        reader = makeReader( ++currentSplit );
+        tap.source( new Tuple( reader.getCurrentKey(), reader.getCurrentValue() ), tupleListCollector );
+        tupleListIterator = tupleListCollector.listIterator();
         getNextTuple();
         }
-      else
-        {
-        complete = true;
-        }
+      else if( currentSplit < splits.size() - 1 )
+          {
+          reader.close();
+          reader = makeReader( ++currentSplit );
+          getNextTuple();
+          }
+        else
+          {
+          complete = true;
+          }
       }
     catch( IOException exception )
       {
       throw new TapException( "could not get next tuple", exception );
+      }
+    catch( InterruptedException exception )
+      {
+      throw new RuntimeException( exception );
       }
     }
 

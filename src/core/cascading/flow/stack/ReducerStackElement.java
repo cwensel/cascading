@@ -31,7 +31,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
 /**

@@ -21,11 +21,11 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-
-import java.io.IOException;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
@@ -151,7 +151,7 @@ public abstract class FlowProcess
   public abstract TupleEntryIterator openTapForRead( Tap tap ) throws IOException;
 
   /**
-   * Method openTapForWrite returns a (@link TupleCollector} for the given Tap instance.
+   * Method openTapForWrite returns a {@link TupleEntryCollector} for the given Tap instance.
    *
    * @param tap of type Tap
    * @return TupleCollector

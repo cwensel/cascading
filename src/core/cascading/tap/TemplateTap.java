@@ -25,16 +25,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.Flow;
+import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.scheme.Scheme;
-import cascading.tap.hadoop.TapCollector;
+import cascading.tap.hadoop.HfsCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.flow.FlowProcess;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
@@ -58,37 +59,32 @@ public class TemplateTap extends SinkTap
   /** Field keepParentOnDelete */
   private boolean keepParentOnDelete = false;
   /** Field collectors */
-  private Map<String, OutputCollector> collectors = new HashMap<String, OutputCollector>();
+  private Map<String, TupleEntryCollector> collectors = new HashMap<String, TupleEntryCollector>();
 
-  private class TemplateCollector extends TupleEntryCollector implements OutputCollector
+  private class TemplateCollector extends TupleEntryCollector
     {
-    JobConf conf;
+    Configuration conf;
 
-    public TemplateCollector( JobConf conf )
+    public TemplateCollector( Configuration conf )
       {
       this.conf = conf;
       }
 
-    protected void collect( Tuple tuple )
+    private TupleEntryCollector getCollector( String path )
       {
-      throw new UnsupportedOperationException( "collect should never be called on TemplateCollector" );
-      }
-
-    private OutputCollector getCollector( String path )
-      {
-      OutputCollector collector = collectors.get( path );
+      TupleEntryCollector collector = collectors.get( path );
 
       if( collector != null )
         return collector;
 
       try
         {
-        Tap tap = new Hfs( parent.getScheme(), parent.getQualifiedPath( conf ).toString() );
+        Tap tap = new Hfs( parent.getScheme(), parent.getQualifiedPath( new Job( conf ) ).toString() );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "creating collector for path: " + new Path( parent.getQualifiedPath( conf ), path ) );
+          LOG.debug( "creating collector for path: " + new Path( parent.getQualifiedPath( new Job( conf ) ), path ) );
 
-        collector = (OutputCollector) new TapCollector( tap, path, conf );
+        collector = new HfsCollector( tap, path, conf );
         }
       catch( IOException exception )
         {
@@ -110,11 +106,11 @@ public class TemplateTap extends SinkTap
 
       try
         {
-        for( OutputCollector collector : collectors.values() )
+        for( TupleEntryCollector collector : collectors.values() )
           {
           try
             {
-            ( (TupleEntryCollector) collector ).close();
+            collector.close();
             }
           catch( Exception exception )
             {
@@ -128,12 +124,13 @@ public class TemplateTap extends SinkTap
         }
       }
 
-    public void collect( Object key, Object value ) throws IOException
+    protected void collect( Tuple tuple )
       {
-      String path = ( (Tuple) value ).format( pathTemplate );
+      String path = ( (Tuple) tuple ).format( pathTemplate );
 
-      getCollector( path ).collect( key, value );
+      getCollector( path ).add( tuple );
       }
+
     }
 
   public static class TemplateScheme extends Scheme
@@ -201,20 +198,20 @@ public class TemplateTap extends SinkTap
       scheme.sinkInit( tap, job );
       }
 
-    public Tuple source( Object key, Object value )
+    public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      return scheme.source( key, value );
+      scheme.source( tuple, tupleEntryCollector );
       }
 
-    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+    public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
       {
       if( pathFields != null )
         {
         Tuple values = tupleEntry.selectTuple( pathFields );
-        context = ( (TemplateCollector) context ).getCollector( values.format( pathTemplate ) );
+        tupleEntryCollector = ( (TemplateCollector) tupleEntryCollector ).getCollector( values.format( pathTemplate ) );
         }
 
-      scheme.sink( tupleEntry, context );
+      scheme.sink( tupleEntry, tupleEntryCollector );
       }
     }
 
@@ -251,7 +248,7 @@ public class TemplateTap extends SinkTap
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(Job)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
    * @param parent             of type Tap
@@ -314,7 +311,7 @@ public class TemplateTap extends SinkTap
    * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
    * data not in the result file to be used in the template path name.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(Job)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
    * @param parent             of type Tap
@@ -364,31 +361,38 @@ public class TemplateTap extends SinkTap
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
     {
-    return new TemplateCollector( flowProcess );
+    Configuration conf = null;
+
+    if( flowContext instanceof Flow )
+      conf = ( (Flow) flowContext ).getConfiguration();
+    else
+      conf = ( (HadoopFlowProcess) flowContext ).getConfiguration();
+
+    return new TemplateCollector( conf );
     }
 
   /** @see Tap#makeDirs(org.apache.hadoop.mapreduce.Job) */
-  public boolean makeDirs( JobConf conf ) throws IOException
+  public boolean makeDirs( Job conf ) throws IOException
     {
     return parent.makeDirs( conf );
     }
 
   /** @see Tap#deletePath(org.apache.hadoop.mapreduce.Job) */
-  public boolean deletePath( JobConf conf ) throws IOException
+  public boolean deletePath( Job conf ) throws IOException
     {
     return keepParentOnDelete || parent.deletePath( conf );
     }
 
   /** @see Tap#pathExists(org.apache.hadoop.mapreduce.Job) */
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean pathExists( Job conf ) throws IOException
     {
     return parent.pathExists( conf );
     }
 
   /** @see Tap#getPathModified(org.apache.hadoop.mapreduce.Job) */
-  public long getPathModified( JobConf conf ) throws IOException
+  public long getPathModified( Job conf ) throws IOException
     {
     return parent.getPathModified( conf );
     }

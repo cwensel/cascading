@@ -19,27 +19,44 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading;
+package cascading.tap.hadoop;
 
-import cascading.scheme.TextLine;
-import cascading.tuple.Fields;
+import java.io.IOException;
+
+import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.tap.Hfs;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class TestTextLine extends TextLine
+public class HadoopOutputCollector extends HadoopEntryCollector
   {
+  private Hfs sink;
+  private TupleEntry outputEntry;
 
-  public TestTextLine( Fields sourceFields )
+  public HadoopOutputCollector( Hfs sink, HadoopFlowContext hadoopFlowProcess )
     {
-    super( sourceFields );
+    super( (HadoopFlowProcess) hadoopFlowProcess );
+    this.sink = sink;
+    this.outputEntry = new TupleEntry( sink.getSinkFields() );
     }
 
   @Override
-  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
+  protected void collect( Tuple tuple )
     {
-    return new Tuple( (Object[]) tupleEntryCollector.toString().split( "\t" ) );
+    try
+      {
+      outputEntry.setTuple( tuple );
+
+      sink.sink( outputEntry, this );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to write to: " + sink.getPath(), exception );
+      }
     }
   }

@@ -21,16 +21,15 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.flow.FlowProcess;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
-
-import java.io.IOException;
 
 /**
  * Class SourceTap is the base class for {@link MultiSourceTap}. Some {@link Tap} instances may only be sources (as opposed
@@ -54,7 +53,7 @@ public abstract class SourceTap extends Tap
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+  public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
     }
@@ -77,12 +76,12 @@ public abstract class SourceTap extends Tap
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
 
-  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
+  public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

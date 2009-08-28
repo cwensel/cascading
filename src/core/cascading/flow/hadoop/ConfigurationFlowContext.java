@@ -19,27 +19,25 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading;
+package cascading.flow.hadoop;
 
-import cascading.scheme.TextLine;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  *
  */
-public class TestTextLine extends TextLine
+public class ConfigurationFlowContext implements HadoopFlowContext
   {
+  Configuration conf;
 
-  public TestTextLine( Fields sourceFields )
+  public ConfigurationFlowContext( Configuration conf )
     {
-    super( sourceFields );
+    this.conf = conf;
     }
 
   @Override
-  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
+  public Configuration getConfiguration()
     {
-    return new Tuple( (Object[]) tupleEntryCollector.toString().split( "\t" ) );
+    return conf;
     }
   }

@@ -77,7 +77,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -100,7 +100,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -123,7 +123,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is local", !isLocal );
@@ -374,7 +374,7 @@ public class FlowTest extends ClusterTestCase
 //    System.out.println( "flow.getID() = " + flow1.getID() );
 
     assertNotNull( "missing id", flow1.getID() );
-    assertNotNull( "missing id in conf", flow1.getJobConf().get( "cascading.flow.id" ) );
+    assertNotNull( "missing id in conf", flow1.getConfiguration().get( "cascading.flow.id" ) );
 
     Flow flow2 = new FlowConnector( props ).connect( source, sink, pipe );
 

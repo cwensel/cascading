@@ -27,71 +27,92 @@ import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
-import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.pipe.Group;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleIterator;
 
 /**
  *
  */
-class GroupMapperStackElement extends MapperStackElement
+class SourceMapperStackElement extends MapperStackElement
   {
-  private final Group group;
-  private final Scope outgoingScope;
+  private final Tap source;
+  private TupleEntryCollector outputCollector;
 
-  public GroupMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Group group, Scope outgoingScope )
+  private class SourcedCollector extends TupleEntryCollector
     {
-    super( previous, flowProcess, incomingScope, trap );
-    this.group = group;
-    this.outgoingScope = outgoingScope;
+    @Override
+    protected void collect( Tuple tuple )
+      {
+      next.collect( tuple );
+      }
+    }
+
+  public SourceMapperStackElement( FlowProcess flowProcess, Tap source ) throws IOException
+    {
+    super( null, flowProcess, null, null );
+    this.source = source;
+    this.outputCollector = new SourcedCollector();
     }
 
   protected FlowElement getFlowElement()
     {
-    return group;
+    return source;
     }
 
   @Override
-  public void collect( Tuple tuple )
+  public void start( TupleIterator tupleIterator )
     {
-    super.collect( tuple );
-
-    operateGroup( getTupleEntry( tuple ) );
+    operateSource( tupleIterator );
     }
 
-  private void operateGroup( TupleEntry tupleEntry )
+  private void operateSource( TupleIterator tupleIterator )
     {
     try
       {
-      group.collectReduceGrouping( incomingScope, outgoingScope, tupleEntry, (HadoopFlowProcess) flowProcess );
-      }
-    catch( IOException exception )
-      {
-      throw new StackException( "failed writing output", exception );
+      while( tupleIterator.hasNext() )
+        source.source( tupleIterator.next(), outputCollector );
       }
     catch( OutOfMemoryError error )
       {
       throw new StackException( "out of memory, try increasing task memory allocation", error );
+      }
+    catch( TapException exception )
+      {
+      throw new StackException( "exception writing to tap: " + source.toString(), exception );
       }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
-      throw new FlowException( "internal error", throwable );
+      throw new FlowException( "internal error: " + source, throwable );
       }
     }
 
   public void prepare()
     {
-    // do nothing, groups don't count
+    // do nothing
     }
 
   public void cleanup()
     {
-    // do nothing, groups don't count
+    // do nothing
+    }
+
+  @Override
+  public void close() throws IOException
+    {
+    try
+      {
+      super.close();
+      }
+    finally
+      {
+      if( outputCollector != null )
+        outputCollector.close();
+      }
     }
   }

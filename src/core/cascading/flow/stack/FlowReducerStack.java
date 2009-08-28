@@ -21,6 +21,11 @@
 
 package cascading.flow.stack;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
@@ -31,14 +36,9 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -64,6 +64,7 @@ public class FlowReducerStack
     {
     this.flowProcess = flowProcess;
     this.conf = flowProcess.getConfiguration();
+
     step = (FlowStep) Util.deserializeBase64( conf.getRaw( "cascading.flow.step" ) );
 
     // early versions of hadoop 0.19 instantiated this class with no intention of calling reduce()
@@ -137,11 +138,7 @@ public class FlowReducerStack
       operator = step.getNextFlowElement( nextScope );
       }
 
-    boolean useTapCollector = false;
-
-    useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
-
-    stackTail = new TapReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator, useTapCollector );
+    stackTail = new SinkReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator );
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 

@@ -30,7 +30,6 @@ import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -65,7 +64,7 @@ public class TapCollectorTest extends CascadingTestCase
     {
     JobConf conf = new JobConf();
 
-    TapCollector collector = (TapCollector) tap.openForWrite( conf ); // casting for test
+    HfsCollector collector = (HfsCollector) tap.openForWrite( conf ); // casting for test
 
     for( int i = 0; i < 100; i++ )
       collector.collect( new Tuple( "string", "" + i, i ) );

@@ -23,13 +23,12 @@ package cascading.tap;
 
 import java.io.IOException;
 
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.flow.FlowProcess;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 
 /**
@@ -49,7 +48,7 @@ public abstract class SinkTap extends Tap
 
   protected SinkTap( Scheme scheme, SinkMode sinkMode )
     {
-    super(scheme, sinkMode );
+    super( scheme, sinkMode );
     }
 
   @Override
@@ -59,7 +58,7 @@ public abstract class SinkTap extends Tap
     }
 
   @Override
-  public Tuple source( Object key, Object value )
+  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }
@@ -70,12 +69,12 @@ public abstract class SinkTap extends Tap
     return false;
     }
 
-  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
+  public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SinkTap instance" );
     }

@@ -23,7 +23,6 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,15 +30,15 @@ import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.jets3t.service.S3ServiceException;
@@ -124,7 +123,7 @@ public class MultiInputFormat extends InputFormat
     return configs;
     }
 
-  public static Configuration[] getJobConfs( JobContext job, List<Map<String, String>> configs )
+  public static Configuration[] getConfigurations( JobContext job, List<Map<String, String>> configs )
     {
     Configuration[] jobConfs = new Configuration[configs.size()];
 
@@ -186,7 +185,7 @@ public class MultiInputFormat extends InputFormat
   /**
    * Method getSplits delegates to the appropriate InputFormat.
    *
-   * @param job       of type JobConf
+   * @param job of type JobConf
    * @return InputSplit[]
    * @throws IOException when
    */
@@ -194,7 +193,7 @@ public class MultiInputFormat extends InputFormat
   public List getSplits( JobContext job ) throws IOException, InterruptedException
     {
     List<Map<String, String>> configs = getConfigs( job.getConfiguration() );
-    Configuration[] jobConfs = getJobConfs( job, configs );
+    Configuration[] jobConfs = getConfigurations( job, configs );
     InputFormat[] inputFormats = getInputFormats( jobConfs );
 
     // if only one InputFormat, just return what ever it suggests

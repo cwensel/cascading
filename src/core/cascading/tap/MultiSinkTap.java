@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.hadoop.ConfigurationFlowContext;
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.MultiInputFormat;
@@ -36,10 +38,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.flow.FlowProcess;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
@@ -60,36 +60,29 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
   /** Field childConfigs */
   private List<Map<String, String>> childConfigs;
 
-  private class MultiSinkCollector extends TupleEntryCollector implements OutputCollector
+  private class MultiSinkCollector extends TupleEntryCollector
     {
-    OutputCollector[] collectors;
+    TupleEntryCollector[] collectors;
 
-    public MultiSinkCollector( Configuration conf, Tap... taps ) throws IOException
+    public MultiSinkCollector( HadoopFlowContext flowContext, Tap... taps ) throws IOException
       {
-      collectors = new OutputCollector[taps.length];
+      collectors = new TupleEntryCollector[taps.length];
 
-      conf = new Configuration( conf );
-
-      Configuration[] jobConfs = MultiInputFormat.getJobConfs( new Job(conf), childConfigs );
+      Configuration[] confs = MultiInputFormat.getConfigurations( new Job( flowContext.getConfiguration() ), childConfigs );
 
       for( int i = 0; i < taps.length; i++ )
         {
         Tap tap = taps[ i ];
         LOG.info( "opening for write: " + tap.toString() );
 
-        collectors[ i ] = (OutputCollector) tap.openForWrite( jobConfs[ i ] );
+        collectors[ i ] = tap.openForWrite( new ConfigurationFlowContext( confs[ i ] ) );
         }
       }
 
     protected void collect( Tuple tuple )
       {
-      throw new UnsupportedOperationException( "collect should never be called on MultiSinkCollector" );
-      }
-
-    public void collect( Object key, Object value ) throws IOException
-      {
-      for( OutputCollector collector : collectors )
-        collector.collect( key, value );
+      for( TupleEntryCollector collector : collectors )
+        collector.add( tuple );
       }
 
     @Override
@@ -99,11 +92,11 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
 
       try
         {
-        for( OutputCollector collector : collectors )
+        for( TupleEntryCollector collector : collectors )
           {
           try
             {
-            ( (TupleEntryCollector) collector ).close();
+            collector.close();
             }
           catch( Exception exception )
             {
@@ -147,9 +140,9 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
     {
-    return new MultiSinkCollector( flowProcess, getTaps() );
+    return new MultiSinkCollector( flowContext, getTaps() );
     }
 
   @Override
@@ -216,10 +209,10 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
     {
     for( int i = 0; i < taps.length; i++ )
-      taps[ i ].sink( tupleEntry, ( (MultiSinkCollector) outputCollector ).collectors[ i ] );
+      taps[ i ].sink( tupleEntry, ( (MultiSinkCollector) tupleEntryCollector ).collectors[ i ] );
     }
 
   @Override

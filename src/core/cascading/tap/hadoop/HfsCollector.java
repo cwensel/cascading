@@ -23,32 +23,37 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowSession;
+import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
-import org.apache.hadoop.mapred.RecordWriter;
-import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class TapCollector extends TupleEntryCollector implements OutputCollector
+public class HfsCollector extends HadoopEntryCollector
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TapCollector.class );
+  private static final Logger LOG = Logger.getLogger( HfsCollector.class );
 
   /** Field conf */
-  private Configuration conf;
+  private Job job;
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
@@ -63,19 +68,19 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
   private TupleEntry outputEntry;
   /** Field isFileOutputFormat */
   private boolean isFileOutputFormat;
-  /** Field reporter */
-  private Reporter reporter = Reporter.NULL;
+  /** Field taskAttemptContext */
+  private TaskAttemptContext taskAttemptContext;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
    *
-   * @param tap  of type Tap
-   * @param conf of type JobConf
+   * @param tap         of type Tap
+   * @param flowContext of type JobConf
    * @throws IOException when fails to initialize
    */
-  public TapCollector( Tap tap, Configuration conf ) throws IOException
+  public HfsCollector( Tap tap, HadoopFlowContext flowContext ) throws IOException
     {
-    this( tap, null, conf );
+    this( tap, null, ( (Flow) flowContext ).getConfiguration() );
     }
 
   /**
@@ -86,11 +91,11 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
    * @param conf   of type JobConf
    * @throws IOException when fails to initialize
    */
-  public TapCollector( Tap tap, String prefix, Configuration conf ) throws IOException
+  public HfsCollector( Tap tap, String prefix, Configuration conf ) throws IOException
     {
     this.tap = tap;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
-    this.conf = new Configuration( conf );
+    this.job = new Job( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
     this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 
@@ -99,30 +104,46 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
   private void initalize() throws IOException
     {
-    tap.sinkInit( conf ); // tap should not delete if called within a task
+    tap.sinkInit( job ); // tap should not delete if called within a task
 
-    OutputFormat outputFormat = conf.getOutputFormat();
+    OutputFormat outputFormat = null;
+
+    try
+      {
+      outputFormat = ReflectionUtils.newInstance( job.getOutputFormatClass(), job.getConfiguration() );
+      }
+    catch( ClassNotFoundException exception )
+      {
+
+      }
 
     isFileOutputFormat = outputFormat instanceof FileOutputFormat;
 
     if( isFileOutputFormat )
       {
-      Hadoop18TapUtil.setupJob( conf );
+//      Hadoop18TapUtil.setupJob( job );
 
       if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
+        filename = String.format( filenamePattern, prefix, "/", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
       else
-        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
+        filename = String.format( filenamePattern, "", "", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
 
-      Hadoop18TapUtil.setupTask( conf );
+//      Hadoop18TapUtil.setupTask( job );
       }
 
-    writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
-    }
+    try
+      {
+      taskAttemptContext = Hadoop19TapUtil.getAttemptContext( job.getConfiguration() );
+      writer = outputFormat.getRecordWriter( taskAttemptContext );
 
-  public void setReporter( Reporter reporter )
-    {
-    this.reporter = reporter;
+      TaskAttemptID taskId = Hadoop19TapUtil.getTaskAttemptId( job.getConfiguration() );
+      TaskInputOutputContext taskContext = new HfsContext( job.getConfiguration(), taskId, writer, null, null );
+      hadoopFlowProcess = new HadoopFlowProcess( new FlowSession(), taskContext, true );
+      }
+    catch( InterruptedException exception )
+      {
+
+      }
     }
 
   protected void collect( Tuple tuple )
@@ -151,17 +172,21 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
 
       try
         {
-        writer.close( reporter );
+        writer.close( taskAttemptContext );
+        }
+      catch( InterruptedException exception )
+        {
+
         }
       finally
         {
-        if( isFileOutputFormat )
-          {
-          if( Hadoop18TapUtil.needsTaskCommit( conf ) )
-            Hadoop18TapUtil.commitTask( conf );
-
-          Hadoop18TapUtil.cleanupJob( conf );
-          }
+//        if( isFileOutputFormat )
+//          {
+//          if( Hadoop18TapUtil.needsTaskCommit( job ) )
+//            Hadoop18TapUtil.commitTask( job );
+//
+//          Hadoop18TapUtil.cleanupJob( job );
+//          }
         }
       }
     catch( IOException exception )
@@ -171,16 +196,4 @@ public class TapCollector extends TupleEntryCollector implements OutputCollector
       }
     }
 
-  /**
-   * Method collect writes the given values to the {@link Tap} this instance encapsulates.
-   *
-   * @param writableComparable of type WritableComparable
-   * @param writable           of type Writable
-   * @throws IOException when
-   */
-  public void collect( Object writableComparable, Object writable ) throws IOException
-    {
-    reporter.progress();
-    writer.write( writableComparable, writable );
-    }
   }

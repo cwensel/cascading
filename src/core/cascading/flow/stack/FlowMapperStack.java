@@ -21,22 +21,21 @@
 
 package cascading.flow.stack;
 
+import java.io.IOException;
+import java.util.Set;
+
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
-import cascading.flow.StepCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.Set;
 
 /**
  *
@@ -94,11 +93,11 @@ public class FlowMapperStack
 
     for( Scope incomingScope : incomingScopes )
       {
-      FlowElement operator = step.getNextFlowElement( incomingScope );
-
       stacks[ i ] = new Stack();
 
-      stacks[ i ].tail = null;
+      stacks[ i ].tail = new SourceMapperStackElement( flowProcess, currentSource );
+
+      FlowElement operator = step.getNextFlowElement( incomingScope );
 
       while( operator instanceof Each )
         {
@@ -118,50 +117,24 @@ public class FlowMapperStack
         }
       else if( operator instanceof Tap )
         {
-        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator );
+        stacks[ i ].tail = new SinkMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator );
         }
       else
         throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
 
       stacks[ i ].head = (MapperStackElement) stacks[ i ].tail.resolveStack();
-      stacks[ i ].tail.setLastOutput( flowProcess.getContext() );
 
       i++;
       }
     }
 
-  public void map( Object key, Object value ) throws IOException
+  public void map( TupleIterator iterator ) throws IOException
     {
-    flowProcess.increment( StepCounters.Tuples_Read, 1 );
-
     for( int i = 0; i < stacks.length; i++ )
       {
-      Tuple tuple = currentSource.source( key, value );
-
-      if( LOG.isDebugEnabled() )
-        {
-        if( tuple == null )
-          LOG.debug( "map skipping key and value" );
-
-        if( LOG.isTraceEnabled() )
-          {
-          if( key instanceof Tuple )
-            LOG.trace( "map key: " + ( (Tuple) key ).print() );
-          else
-            LOG.trace( "map key: [" + key + "]" );
-
-          if( tuple != null )
-            LOG.trace( "map value: " + tuple.print() );
-          }
-        }
-
-      // skip the key/value pair if null is returned from the source
-      if( tuple == null )
-        return;
-
       try
         {
-        stacks[ i ].head.collect( tuple );
+        stacks[ i ].head.start( iterator );
         }
       catch( StackException exception )
         {

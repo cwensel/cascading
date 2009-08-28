@@ -21,17 +21,17 @@
 
 package cascading.flow.hadoop;
 
+import java.io.IOException;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-
-import java.io.IOException;
 
 /**
  * Class HadoopFlowProcess is an implemenation of {@link FlowProcess} for Hadoop. Use this interfact to get direct
@@ -44,7 +44,7 @@ import java.io.IOException;
  * @see JobConf
  * @see Reporter
  */
-public class HadoopFlowProcess extends FlowProcess
+public class HadoopFlowProcess extends FlowProcess implements HadoopFlowContext
   {
   /** Field isMapper */
   private boolean isMapper;
@@ -55,10 +55,12 @@ public class HadoopFlowProcess extends FlowProcess
    * Constructor HadoopFlowProcess creates a new HadoopFlowProcess instance.
    *
    * @param flowSession of type FlowSession
+   * @param context
    */
-  public HadoopFlowProcess( FlowSession flowSession, boolean isMapper )
+  public HadoopFlowProcess( FlowSession flowSession, TaskInputOutputContext context, boolean isMapper )
     {
     super( flowSession );
+    this.context = context;
     this.isMapper = isMapper;
     }
 
@@ -149,12 +151,12 @@ public class HadoopFlowProcess extends FlowProcess
   /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
-    return tap.openForRead( getConfiguration() );
+    return tap.openForRead( this );
     }
 
   /** @see cascading.flow.FlowProcess#openTapForWrite(Tap) */
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( getConfiguration() );
+    return tap.openForWrite( this );
     }
   }

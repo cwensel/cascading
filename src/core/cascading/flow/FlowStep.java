@@ -21,27 +21,42 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
-import cascading.tap.hadoop.Hadoop18TapUtil;
+import cascading.tap.hadoop.HfsIterator;
 import cascading.tap.hadoop.MultiInputFormat;
-import cascading.tap.hadoop.TapIterator;
-import cascading.tuple.*;
-import cascading.tuple.hadoop.*;
+import cascading.tuple.Fields;
+import cascading.tuple.IndexTuple;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TuplePair;
+import cascading.tuple.hadoop.GroupingComparator;
+import cascading.tuple.hadoop.GroupingPartitioner;
+import cascading.tuple.hadoop.ReverseTupleComparator;
+import cascading.tuple.hadoop.ReverseTuplePairComparator;
+import cascading.tuple.hadoop.TupleComparator;
+import cascading.tuple.hadoop.TuplePairComparator;
+import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -335,9 +350,9 @@ public class FlowStep implements Serializable
       tempSink.sinkInit( conf );
     }
 
-  public TapIterator openSourceForRead( JobConf conf ) throws IOException
+  public HfsIterator openSourceForRead( JobConf conf ) throws IOException
     {
-    return new TapIterator( sources.keySet().iterator().next(), conf );
+    return new HfsIterator( sources.keySet().iterator().next(), conf );
     }
 
   public TupleEntryIterator openSinkForRead( JobConf conf ) throws IOException
@@ -430,13 +445,24 @@ public class FlowStep implements Serializable
    *
    * @param jobConf of type JobConf
    */
-  public void clean( JobConf jobConf )
+  public void clean( Configuration jobConf )
     {
+    Job job;
+
+    try
+      {
+      job = new Job( jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to create tmp job" );
+      }
+
     if( tempSink != null )
       {
       try
         {
-        tempSink.deletePath( jobConf );
+        tempSink.deletePath( job );
         }
       catch( IOException exception )
         {
@@ -448,7 +474,7 @@ public class FlowStep implements Serializable
       {
       try
         {
-        sink.deletePath( jobConf );
+        sink.deletePath( job );
         }
       catch( IOException exception )
         {
@@ -468,16 +494,16 @@ public class FlowStep implements Serializable
 
     }
 
-  private void cleanTap( JobConf jobConf, Tap tap )
+  private void cleanTap( Configuration conf, Tap tap )
     {
-    try
-      {
-      Hadoop18TapUtil.cleanupTap( jobConf, tap );
-      }
-    catch( IOException exception )
-      {
-      // ignore exception
-      }
+//    try
+//      {
+//      Hadoop18TapUtil.cleanupTap( conf, tap );
+//      }
+//    catch( IOException exception )
+//      {
+    // ignore exception
+//      }
     }
 
   @Override
@@ -513,7 +539,7 @@ public class FlowStep implements Serializable
     return buffer.toString();
     }
 
-  protected FlowStepJob createFlowStepJob( JobConf parentConf ) throws IOException
+  protected FlowStepJob createFlowStepJob( Configuration parentConf ) throws IOException
     {
     return new FlowStepJob( this, getName(), getJob( parentConf ) );
     }

@@ -19,27 +19,36 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading;
+package cascading.tap.hadoop;
 
-import cascading.scheme.TextLine;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 
 /**
  *
  */
-public class TestTextLine extends TextLine
+public abstract class HadoopEntryCollector extends TupleEntryCollector
   {
+  HadoopFlowProcess hadoopFlowProcess;
 
-  public TestTextLine( Fields sourceFields )
+  protected HadoopEntryCollector()
     {
-    super( sourceFields );
     }
 
-  @Override
-  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
+  protected HadoopEntryCollector( HadoopFlowProcess hadoopFlowProcess )
     {
-    return new Tuple( (Object[]) tupleEntryCollector.toString().split( "\t" ) );
+    this.hadoopFlowProcess = hadoopFlowProcess;
+    }
+
+  protected HadoopEntryCollector( Fields declared, HadoopFlowProcess hadoopFlowProcess )
+    {
+    super( declared );
+    this.hadoopFlowProcess = hadoopFlowProcess;
+    }
+
+  public HadoopFlowProcess getHadoopFlowProcess()
+    {
+    return hadoopFlowProcess;
     }
   }

@@ -35,23 +35,21 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  *
  */
-class TapReducerStackElement extends ReducerStackElement
+class SinkReducerStackElement extends ReducerStackElement
   {
   private final Tap sink;
-  private OutputCollector outputCollector;
+  private TupleEntryCollector outputCollector;
 
-  public TapReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
+  public SinkReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink ) throws IOException
     {
     super( previous, flowProcess, incomingScope, null );
     this.sink = sink;
 
-    if( useTapCollector )
-      this.outputCollector = (OutputCollector) sink.openForWrite( getConfiguration() );
+    this.outputCollector = flowProcess.openTapForWrite( sink );
     }
 
   public FlowElement getFlowElement()
@@ -84,15 +82,7 @@ class TapReducerStackElement extends ReducerStackElement
     {
     try
       {
-      if( outputCollector != null )
-        {
-        getFlowProcess().keepAlive();
-        ( (Tap) getFlowElement() ).sink( tupleEntry, outputCollector );
-        }
-      else
-        {
-        ( (Tap) getFlowElement() ).sink( tupleEntry, lastOutput );
-        }
+      sink.sink( tupleEntry, outputCollector );
 
       getFlowProcess().increment( StepCounters.Tuples_Written, 1 );
       }
@@ -137,7 +127,7 @@ class TapReducerStackElement extends ReducerStackElement
     finally
       {
       if( outputCollector != null )
-        ( (TupleEntryCollector) outputCollector ).close();
+        outputCollector.close();
       }
     }
   }

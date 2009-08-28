@@ -31,10 +31,11 @@ import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.lib.NullOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 /** Class TempHfs creates a temporary {@link Tap} instance for use internally. */
 public class TempHfs extends Hfs
@@ -61,17 +62,16 @@ public class TempHfs extends Hfs
       {
       job.setOutputKeyClass( Tuple.class );
       job.setOutputValueClass( Tuple.class );
-      job.setOutputFormat( NullOutputFormat.class );
+      job.setOutputFormatClass( NullOutputFormat.class );
       }
 
     @Override
-    public Tuple source( Object key, Object value )
+    public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      return null;
       }
 
     @Override
-    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+    public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
       {
       }
     }
@@ -123,7 +123,7 @@ public class TempHfs extends Hfs
     return schemeClass;
     }
 
-  private void makeTemporaryFile( JobConf conf )
+  private void makeTemporaryFile( Configuration conf )
     {
     // init stringPath as path is transient
     if( stringPath != null )
@@ -162,14 +162,14 @@ public class TempHfs extends Hfs
   @Override
   public void sourceInit( Job job ) throws IOException
     {
-    makeTemporaryFile( job );
+    makeTemporaryFile( job.getConfiguration() );
     super.sourceInit( job );
     }
 
   @Override
   public void sinkInit( Job job ) throws IOException
     {
-    makeTemporaryFile( job );
+    makeTemporaryFile( job.getConfiguration() );
     super.sinkInit( job );
     }
 
@@ -180,9 +180,10 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public boolean deletePath( JobConf conf ) throws IOException
+  public boolean deletePath( Job job ) throws IOException
     {
-    return super.deletePath( conf ) && getFileSystem( conf ).delete( new Path( getTempPath( conf ), temporaryPath ), true );
+    Configuration conf = job.getConfiguration();
+    return super.deletePath( job ) && getFileSystem( conf ).delete( new Path( getTempPath( conf ), temporaryPath ), true );
     }
 
   @Override

@@ -23,14 +23,19 @@ package cascading.scheme;
 
 import java.io.IOException;
 
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
+import cascading.tap.hadoop.HadoopEntryCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuples;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 /**
  * A SequenceFile is a type of {@link Scheme}, which is a flat files consisting of
@@ -38,9 +43,6 @@ import org.apache.hadoop.mapreduce.Job;
  */
 public class SequenceFile extends Scheme
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
-
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
     {
@@ -60,7 +62,7 @@ public class SequenceFile extends Scheme
   @Override
   public void sourceInit( Tap tap, Job job )
     {
-    job.setInputFormat( SequenceFileInputFormat.class );
+    job.setInputFormatClass( SequenceFileInputFormat.class );
     }
 
   @Override
@@ -68,13 +70,13 @@ public class SequenceFile extends Scheme
     {
     job.setOutputKeyClass( Tuple.class ); // supports TapCollector
     job.setOutputValueClass( Tuple.class ); // supports TapCollector
-    job.setOutputFormat( SequenceFileOutputFormat.class );
+    job.setOutputFormatClass( SequenceFileOutputFormat.class );
     }
 
   @Override
-  public Tuple source( Object key, Object value )
+  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
-    return (Tuple) value;
+    tupleEntryCollector.add( (Tuple) tuple.get( 1 ) );
     }
 
   @Override
@@ -84,11 +86,21 @@ public class SequenceFile extends Scheme
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+  public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
     {
     Tuple result = getSinkFields() != null ? tupleEntry.selectTuple( getSinkFields() ) : tupleEntry.getTuple();
 
-    context.collect( Tuples.NULL, result );
+    HadoopFlowProcess hadoopFlowProcess = ( (HadoopEntryCollector) tupleEntryCollector ).getHadoopFlowProcess();
+    TaskInputOutputContext taskInputOutputContext = hadoopFlowProcess.getContext();
+
+    try
+      {
+      taskInputOutputContext.write( Tuples.NULL, result );
+      }
+    catch( InterruptedException exception )
+      {
+      throw new TapException( "thread interrupted", exception );
+      }
     }
 
   }

@@ -30,15 +30,15 @@ import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 
 /**
- * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs preconfigured via the {@link JobConf}
+ * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs preconfigured via the {@link Job}
  * object.
  * <p/>
  * Use this class to allow custom MapReduce jobs to participage in the {@link cascading.cascade.Cascade} scheduler. If
@@ -58,73 +58,73 @@ public class MapReduceFlow extends Flow
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
-   * @param jobConf of type JobConf
+   * @param job
    */
-  public MapReduceFlow( JobConf jobConf )
+  public MapReduceFlow( Job job )
     {
-    this( jobConf.getJobName(), jobConf, false );
+    this( job.getJobName(), job, false );
     }
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
-   * @param jobConf          of type JobConf
+   * @param job
    * @param deleteSinkOnInit of type boolean
    */
-  public MapReduceFlow( JobConf jobConf, boolean deleteSinkOnInit )
+  public MapReduceFlow( Job job, boolean deleteSinkOnInit )
     {
-    this( jobConf.getJobName(), jobConf, deleteSinkOnInit );
+    this( job.getJobName(), job, deleteSinkOnInit );
     }
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
-   * @param name    of type String
-   * @param jobConf of type JobConf
+   * @param name of type String
+   * @param job
    */
-  public MapReduceFlow( String name, JobConf jobConf )
+  public MapReduceFlow( String name, Job job )
     {
-    this( name, jobConf, false );
+    this( name, job, false );
     }
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
    * @param name             of type String
-   * @param jobConf          of type JobConf
+   * @param job
    * @param deleteSinkOnInit of type boolean
    */
-  public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
+  public MapReduceFlow( String name, Job job, boolean deleteSinkOnInit )
     {
-    this( name, jobConf, deleteSinkOnInit, true );
+    this( name, job, deleteSinkOnInit, true );
     }
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
    * @param name             of type String
-   * @param jobConf          of type JobConf
+   * @param job
    * @param deleteSinkOnInit of type boolean
    * @param stopJobsOnExit   of type boolean
    */
-  public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
+  public MapReduceFlow( String name, Job job, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 
     setName( name );
-    setSources( createSources( jobConf ) );
-    setSinks( createSinks( jobConf ) );
-    setTraps( createTraps( jobConf ) );
-    setStepGraph( makeStepGraph( jobConf ) );
+    setSources( createSources( job ) );
+    setSinks( createSinks( job ) );
+    setTraps( createTraps( job ) );
+    setStepGraph( makeStepGraph( job ) );
     }
 
-  private StepGraph makeStepGraph( JobConf jobConf )
+  private StepGraph makeStepGraph( Job job )
     {
     StepGraph stepGraph = new StepGraph();
 
     Tap sink = getSinks().values().iterator().next();
-    FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );
+    FlowStep step = new MapReduceFlowStep( sink.toString(), job, sink );
 
     step.setParentFlowName( getName() );
 
@@ -133,9 +133,9 @@ public class MapReduceFlow extends Flow
     return stepGraph;
     }
 
-  private Map<String, Tap> createSources( JobConf jobConf )
+  private Map<String, Tap> createSources( Job job )
     {
-    Path[] paths = FileInputFormat.getInputPaths( jobConf );
+    Path[] paths = FileInputFormat.getInputPaths( job );
 
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
@@ -145,18 +145,18 @@ public class MapReduceFlow extends Flow
     return taps;
     }
 
-  private Map<String, Tap> createSinks( JobConf jobConf )
+  private Map<String, Tap> createSinks( Job job )
     {
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
-    String path = FileOutputFormat.getOutputPath( jobConf ).toString();
+    String path = FileOutputFormat.getOutputPath( job ).toString();
 
     taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ) );
 
     return taps;
     }
 
-  private Map<String, Tap> createTraps( JobConf jobConf )
+  private Map<String, Tap> createTraps( Job job )
     {
     return new HashMap<String, Tap>();
     }
@@ -171,12 +171,9 @@ public class MapReduceFlow extends Flow
       {
       }
 
-    public Tuple source( Object key, Object value )
+    public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      if( value instanceof Comparable )
-        return new Tuple( (Comparable) key, (Comparable) value );
-      else
-        return new Tuple( (Comparable) key );
+      tupleEntryCollector.add( tuple );
       }
 
     @Override
@@ -185,7 +182,7 @@ public class MapReduceFlow extends Flow
       return getClass().getSimpleName();
       }
 
-    public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+    public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
       {
       throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
       }

@@ -27,6 +27,8 @@ import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowMapperStack;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapreduce.Mapper;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
@@ -36,6 +38,72 @@ public class FlowMapper extends Mapper
   private FlowMapperStack flowMapperStack;
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
+
+  private class ContextIterator implements TupleIterator
+    {
+    Context context = null;
+    Tuple pair = new Tuple();
+
+    private ContextIterator( Context context )
+      {
+      this.context = context;
+      }
+
+    @Override
+    public boolean hasNext()
+      {
+      try
+        {
+        return context.nextKeyValue();
+        }
+      catch( IOException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      catch( InterruptedException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      }
+
+    @Override
+    public Tuple next()
+      {
+      currentProcess.increment( StepCounters.Tuples_Read, 1 );
+
+      try
+        {
+        pair = Tuple.asModifiable( pair );
+
+        pair.set( 0, context.getCurrentKey() );
+        pair.set( 1, context.getCurrentValue() );
+
+        pair = Tuple.asUnmodifiable( pair );
+
+        return pair;
+        }
+      catch( IOException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      catch( InterruptedException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      }
+
+    @Override
+    public void remove()
+      {
+      throw new UnsupportedOperationException( "remove is not supported" );
+      }
+
+    @Override
+    public void close()
+      {
+      // do nothing
+      }
+    }
 
   /** Constructor FlowMapper creates a new FlowMapper instance. */
   public FlowMapper()
@@ -50,10 +118,8 @@ public class FlowMapper extends Mapper
       super.setup( context );
       HadoopUtil.initLog4j( context.getConfiguration() );
 
-      currentProcess = new HadoopFlowProcess( new FlowSession(), true );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), context, true );
       flowMapperStack = new FlowMapperStack( currentProcess );
-
-      currentProcess.setContext( context );
       }
     catch( Throwable throwable )
       {
@@ -65,11 +131,13 @@ public class FlowMapper extends Mapper
     }
 
   @Override
-  protected void map( Object key, Object value, Context context ) throws IOException, InterruptedException
+  public void run( Context context ) throws IOException, InterruptedException
     {
+    setup( context );
+
     try
       {
-      flowMapperStack.map( key, value );
+      flowMapperStack.map( new ContextIterator( context ) );
       }
     catch( IOException exception )
       {
@@ -82,6 +150,8 @@ public class FlowMapper extends Mapper
 
       throw new FlowException( "internal error during mapper execution", throwable );
       }
+
+    cleanup( context );
     }
 
   @Override

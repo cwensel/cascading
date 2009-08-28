@@ -21,17 +21,21 @@
 
 package cascading.scheme;
 
+import java.io.IOException;
+
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.ZipInputFormat;
+import cascading.tap.TapException;
+import cascading.tap.hadoop.HadoopEntryCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.fs.Path;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.mapreduce.Job;
-
-import java.io.IOException;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
@@ -40,9 +44,6 @@ import java.io.IOException;
  * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line". But if
  * a {@link Fields} is passed on the constructor with one field, the return tuples will simply
  * be the "line" value using the given field name.
- * <p/>
- * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
- * bi-directional, so zip files cannot be written.
  */
 public class TextLine extends Scheme
   {
@@ -212,59 +213,47 @@ public class TextLine extends Scheme
   @Override
   public void sourceInit( Tap tap, Job job )
     {
-    if( hasZippedFiles( FileInputFormat.getInputPaths( job ) ) )
-      job.setInputFormat( ZipInputFormat.class );
-    else
-      job.setInputFormat( TextInputFormat.class );
-    }
-
-  private boolean hasZippedFiles( Path[] paths )
-    {
-    boolean isZipped = paths[ 0 ].getName().endsWith( ".zip" );
-
-    for( int i = 1; i < paths.length; i++ )
-      {
-      if( isZipped != paths[ i ].getName().endsWith( ".zip" ) )
-        throw new IllegalStateException( "cannot mix zipped and upzippled files" );
-      }
-
-    return isZipped;
+    job.setInputFormatClass( TextInputFormat.class );
     }
 
   @Override
   public void sinkInit( Tap tap, Job job ) throws IOException
     {
-    if( tap.getQualifiedPath( job ).toString().endsWith( ".zip" ) )
-      throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( job ) );
-
     if( getSinkCompression() == Compress.DISABLE )
-      job.setBoolean( "mapred.output.compress", false );
+      job.getConfiguration().setBoolean( "mapred.output.compress", false );
     else if( getSinkCompression() == Compress.ENABLE )
-      job.setBoolean( "mapred.output.compress", true );
+      job.getConfiguration().setBoolean( "mapred.output.compress", true );
 
     job.setOutputKeyClass( Text.class ); // be explicit
     job.setOutputValueClass( Text.class ); // be explicit
-    job.setOutputFormat( TextOutputFormat.class );
+    job.setOutputFormatClass( TextOutputFormat.class );
     }
 
   @Override
-  public Tuple source( Object key, Object value )
+  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
-    Tuple tuple = new Tuple();
+    // just fetch line
+    if( sourceFields.size() == 1 )
+      tuple = new Tuple( tuple.get( 1 ) );
 
-    if( sourceFields.size() == 2 )
-      tuple.add( key.toString() );
-
-    tuple.add( value.toString() );
-
-    return tuple;
+    tupleEntryCollector.add( tuple );
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+  public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
     {
-    // it's ok to use NULL here so the collector does not write anything
-    context.write( null, tupleEntry.selectTuple( sinkFields ) );
+    HadoopFlowProcess hadoopFlowProcess = ( (HadoopEntryCollector) tupleEntryCollector ).getHadoopFlowProcess();
+    TaskInputOutputContext taskInputOutputContext = hadoopFlowProcess.getContext();
+
+    try
+      {
+      // it's ok to use NULL here so the collector does not write anything
+      taskInputOutputContext.write( null, tupleEntry.selectTuple( sinkFields ) );
+      }
+    catch( InterruptedException exception )
+      {
+      throw new TapException( "thread interrupted", exception );
+      }
     }
 
   }

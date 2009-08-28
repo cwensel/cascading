@@ -32,6 +32,7 @@ import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.pipe.cogroup.CoGroupClosure;
 import cascading.pipe.cogroup.GroupClosure;
 import cascading.pipe.cogroup.InnerJoin;
@@ -45,7 +46,6 @@ import cascading.tuple.TupleException;
 import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
 /**
@@ -747,10 +747,10 @@ public class Group extends Pipe
    * @param incomingScope of type Scope
    * @param outgoingScope of type Scope
    * @param entry         of type TupleEntry
-   * @param output        of type OutputCollector
+   * @param flowProcess   of type OutputCollector
    * @throws IOException thrown by OutputCollector on collect
    */
-  public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
+  public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, HadoopFlowProcess flowProcess ) throws IOException, InterruptedException
     {
     Fields groupFields = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
     Fields sortFields = outgoingScope.getSortingSelectors() == null ? null : outgoingScope.getSortingSelectors().get( incomingScope.getName() );
@@ -766,9 +766,9 @@ public class Group extends Pipe
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 
     if( isGroupBy() )
-      output.collect( groupKey, valuesTuple );
+      flowProcess.getContext().write( groupKey, valuesTuple );
     else
-      output.collect( groupKey, new IndexTuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
+      flowProcess.getContext().write( groupKey, new IndexTuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
     }
 
   /**

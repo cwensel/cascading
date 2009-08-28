@@ -99,8 +99,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( MultiMapReducePlanner.getConfiguration( properties ) != null )
+      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -148,7 +148,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -195,8 +195,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( MultiMapReducePlanner.getConfiguration( properties ) != null )
+      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -247,8 +247,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( MultiMapReducePlanner.getConfiguration( properties ) != null )
+      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -302,8 +302,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( MultiMapReducePlanner.getConfiguration( properties ) != null )
+      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     Map sources = new HashMap();
 
@@ -343,7 +343,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
 
     try
       {

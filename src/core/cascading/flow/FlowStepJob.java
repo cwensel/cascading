@@ -28,10 +28,11 @@ import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.hadoop.HadoopStepStats;
 import cascading.stats.StepStats;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  *
@@ -41,7 +42,7 @@ public class FlowStepJob implements Callable<Throwable>
   /** Field stepName */
   private final String stepName;
   /** Field currentConf */
-  private JobConf currentConf;
+  private Job currentJob;
   /** Field jobClient */
   private JobClient jobClient;
   /** Field runningJob */
@@ -63,12 +64,12 @@ public class FlowStepJob implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( FlowStep flowStep, String stepName, JobConf currentConf )
+  public FlowStepJob( FlowStep flowStep, String stepName, final Job currentJob )
     {
     this.flowStep = flowStep;
     this.stepName = stepName;
-    this.currentConf = currentConf;
-    this.pollingInterval = Flow.getJobPollingInterval( currentConf );
+    this.currentJob = currentJob;
+    this.pollingInterval = Flow.getJobPollingInterval( currentJob.getConfiguration() );
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
@@ -151,12 +152,26 @@ public class FlowStepJob implements Callable<Throwable>
 
     stepStats.markRunning();
 
-    jobClient = new JobClient( currentConf );
-    runningJob = jobClient.submitJob( currentConf );
+    try
+      {
+      currentJob.submit();
+
+      runningJob = (RunningJob) Util.getInstanceField( Job.class, "info", currentJob );
+      jobClient = (JobClient) Util.getInstanceField( Job.class, "jobClient", currentJob );
+
+      }
+    catch( InterruptedException exception )
+      {
+
+      }
+    catch( ClassNotFoundException exception )
+      {
+
+      }
 
     blockTillCompleteOrStopped();
 
-    if( !stop && !runningJob.isSuccessful() )
+    if( !stop && !currentJob.isSuccessful() )
       {
       if( !stepStats.isFinished() )
         stepStats.markFailed( null );

@@ -31,15 +31,14 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -211,35 +210,35 @@ public class CascadeConnector
       }
 
     /** @see Tap#makeDirs(org.apache.hadoop.mapreduce.Job) */
-    public boolean makeDirs( JobConf conf ) throws IOException
+    public boolean makeDirs( Job conf ) throws IOException
       {
       return false;
       }
 
     /** @see Tap#deletePath(org.apache.hadoop.mapreduce.Job) */
-    public boolean deletePath( JobConf conf ) throws IOException
+    public boolean deletePath( Job conf ) throws IOException
       {
       return false;
       }
 
     /** @see Tap#pathExists(org.apache.hadoop.mapreduce.Job) */
-    public boolean pathExists( JobConf conf ) throws IOException
+    public boolean pathExists( Job conf ) throws IOException
       {
       return false;
       }
 
     /** @see Tap#getPathModified(org.apache.hadoop.mapreduce.Job) */
-    public long getPathModified( JobConf conf ) throws IOException
+    public long getPathModified( Job conf ) throws IOException
       {
       return 0;
       }
 
-    public TupleEntryIterator openForRead( Configuration conf ) throws IOException
+    public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
       {
       return null;
       }
 
-    public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+    public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
       {
       return null;
       }

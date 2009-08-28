@@ -21,33 +21,35 @@
 
 package cascading.tap;
 
-import cascading.scheme.Scheme;
-import cascading.scheme.SequenceFile;
-import cascading.tap.hadoop.TapCollector;
-import cascading.tap.hadoop.TapIterator;
-import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.hadoop.TupleSerialization;
-import cascading.util.Util;
-import cascading.flow.FlowProcess;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.scheme.Scheme;
+import cascading.scheme.SequenceFile;
+import cascading.tap.hadoop.HadoopOutputCollector;
+import cascading.tap.hadoop.HfsCollector;
+import cascading.tap.hadoop.HfsIterator;
+import cascading.tuple.Fields;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.hadoop.TupleSerialization;
+import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.log4j.Logger;
+
 /**
- * Class Hfs is the base class for all Hadoop file system access. Use {@link Dfs}, {@link Lfs}, or {@link S3fs}
+ * Class Hfs is the base class for all Hadoop file system access. Use {@link Dfs}, or {@link Lfs}
  * for resources specific to Hadoop Distributed file system, the Local file system, or Amazon S3, respectively.
  * <p/>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
@@ -474,13 +476,16 @@ public class Hfs extends Tap
     return result;
     }
 
-  public TupleEntryIterator openForRead( Configuration conf ) throws IOException
+  public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
     {
-    return new TupleEntryIterator( getSourceFields(), new TapIterator( this, conf ) );
+    return new TupleEntryIterator( getSourceFields(), new HfsIterator( this, flowContext ) );
     }
 
-  public TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
     {
-    return new TapCollector( this, flowProcess );
+    if( flowContext instanceof HadoopFlowProcess )
+      return new HadoopOutputCollector( this, flowContext );
+    else
+      return new HfsCollector( this, flowContext );
     }
   }

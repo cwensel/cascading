@@ -34,22 +34,20 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  *
  */
-class TapMapperStackElement extends MapperStackElement
+class SinkMapperStackElement extends MapperStackElement
   {
   private final Tap sink;
   private TupleEntryCollector outputCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink ) throws IOException
+  public SinkMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink ) throws IOException
     {
     super( previous, flowProcess, incomingScope, null );
     this.sink = sink;
-
-    this.outputCollector =  sink.openForWrite( flowProcess );
+    this.outputCollector = flowProcess.openTapForWrite( sink );
     }
 
   protected FlowElement getFlowElement()
@@ -69,15 +67,7 @@ class TapMapperStackElement extends MapperStackElement
     {
     try
       {
-      if( outputCollector != null )
-        {
-        getFlowProcess().keepAlive();
-        sink.sink( tupleEntry, outputCollector );
-        }
-      else
-        {
-        sink.sink( tupleEntry, lastOutput );
-        }
+      sink.sink( tupleEntry, outputCollector );
 
       getFlowProcess().increment( StepCounters.Tuples_Written, 1 );
       }

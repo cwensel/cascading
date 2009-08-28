@@ -29,7 +29,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
-import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
@@ -39,7 +39,6 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 
 /**
@@ -213,43 +212,42 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method openForRead opens the resource represented by this Tap instance.
    *
-   * @param conf of type JobConf
+   * @param flowContext
    * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( Configuration conf ) throws IOException;
+  public abstract TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
-   * @param flowProcess
+   * @param flowContext
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleEntryCollector openForWrite( FlowProcess flowProcess ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException;
 
   /**
    * Method source returns the source value as an instance of {@link Tuple}
    *
-   * @param key   of type WritableComparable
-   * @param value of type Writable
-   * @return Tuple
+   * @param tuple
+   * @param tupleEntryCollector @return Tuple
    */
-  public Tuple source( Object key, Object value )
+  public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
-    return getScheme().source( key, value );
+    getScheme().source( tuple, tupleEntryCollector );
     }
 
   /**
    * Method sink emits the sink value(s) to the OutputCollector
    *
-   * @param tupleEntry      of type TupleEntry
-   * @param context
+   * @param tupleEntry          of type TupleEntry
+   * @param tupleEntryCollector
    * @throws java.io.IOException when the resource cannot be written to
    */
-  public void sink( TupleEntry tupleEntry, Object context ) throws IOException
+  public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
     {
-    getScheme().sink( tupleEntry, context );
+    getScheme().sink( tupleEntry, tupleEntryCollector );
     }
 
   /** @see FlowElement#outgoingScopeFor(Set<Scope>) */

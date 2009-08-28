@@ -90,7 +90,8 @@ public abstract class HadoopStepStats extends StepStats
 
     public void fill( TaskCompletionEvent taskCompletionEvent )
       {
-      taskType = taskCompletionEvent.getTaskAttemptId().getTaskID().isMap() ? TaskType.MAPPER : TaskType.REDUCER;
+      org.apache.hadoop.mapreduce.TaskType type = taskCompletionEvent.getTaskAttemptId().getTaskID().getTaskType();
+      taskType = type == org.apache.hadoop.mapreduce.TaskType.MAP ? TaskType.MAPPER : TaskType.REDUCER;
       status = taskCompletionEvent.getTaskStatus().toString();
       }
 

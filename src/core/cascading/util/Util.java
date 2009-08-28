@@ -599,4 +599,36 @@ public class Util
       throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
       }
     }
+
+  public static Object invokeInstanceMethod( Class type, String methodName, Object object, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Method method = type.getDeclaredMethod( methodName, parameterTypes );
+
+      method.setAccessible( true );
+
+      return method.invoke( object, parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new FlowException( "unable to invoke instance method: " + type.getName() + "." + methodName, exception );
+      }
+    }
+
+  public static Object getInstanceField( Class type, String fieldName, Object object )
+    {
+    try
+      {
+      Field field = type.getField( fieldName );
+
+      field.setAccessible( true );
+
+      return field.get( object );
+      }
+    catch( Exception exception )
+      {
+      throw new FlowException( "unable to get instance field: " + type.getName() + "." + fieldName, exception );
+      }
+    }
   }

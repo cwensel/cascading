@@ -21,6 +21,8 @@
 
 package cascading.flow;
 
+import java.io.File;
+
 import cascading.ClusterTestCase;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
@@ -30,8 +32,6 @@ import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.File;
 
 public class FlowSkipTest extends ClusterTestCase
   {
@@ -62,7 +62,7 @@ public class FlowSkipTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-    sink.deletePath( flow.getJobConf() );
+    sink.deletePath( flow.getConfiguration() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );
@@ -100,7 +100,7 @@ public class FlowSkipTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-    sink.deletePath( flow.getJobConf() );
+    sink.deletePath( flow.getConfiguration() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );

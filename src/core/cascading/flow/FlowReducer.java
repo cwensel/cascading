@@ -49,7 +49,7 @@ public class FlowReducer extends Reducer
       {
       super.setup( context );
       HadoopUtil.initLog4j( context.getConfiguration() );
-      currentProcess = new HadoopFlowProcess( new FlowSession(), false );
+      currentProcess = new HadoopFlowProcess( new FlowSession(), context, false );
       flowReducerStack = new FlowReducerStack( currentProcess );
       }
     catch( Throwable throwable )
@@ -64,8 +64,6 @@ public class FlowReducer extends Reducer
   @Override
   protected void reduce( Object key, Iterable values, Context context ) throws IOException, InterruptedException
     {
-    currentProcess.setContext( context );
-
     try
       {
       flowReducerStack.reduce( key, values, context );

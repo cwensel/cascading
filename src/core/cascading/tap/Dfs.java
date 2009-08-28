@@ -26,8 +26,8 @@ import java.net.URI;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  * Class Dfs is a {@link Tap} class that provides access to the Hadoop Distributed File System.
@@ -41,7 +41,7 @@ public class Dfs extends Hfs
    * Constructor Dfs creates a new Dfs instance.
    *
    * @param fields of type Fields
-   * @param uri          of type URI
+   * @param uri    of type URI
    */
   public Dfs( Fields fields, URI uri )
     {
@@ -56,9 +56,9 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param uri          of type URI
-   * @param replace      of type boolean
+   * @param fields  of type Fields
+   * @param uri     of type URI
+   * @param replace of type boolean
    */
   public Dfs( Fields fields, URI uri, boolean replace )
     {
@@ -73,8 +73,8 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param uri of type URI
+   * @param fields   of type Fields
+   * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
   public Dfs( Fields fields, URI uri, SinkMode sinkMode )
@@ -90,8 +90,8 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
+   * @param fields     of type Fields
+   * @param stringPath of type String
    */
   public Dfs( Fields fields, String stringPath )
     {
@@ -101,9 +101,9 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param replace      of type boolean
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
   public Dfs( Fields fields, String stringPath, boolean replace )
     {
@@ -113,9 +113,9 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param sinkMode     of type SinkMode
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
    */
   public Dfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
@@ -163,8 +163,8 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param scheme of type Scheme
-   * @param uri of type URI
+   * @param scheme   of type Scheme
+   * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
   public Dfs( Scheme scheme, URI uri, SinkMode sinkMode )
@@ -221,7 +221,7 @@ public class Dfs extends Hfs
     }
 
   @Override
-  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getDefaultFileSystem( Configuration jobConf ) throws IOException
     {
     String name = jobConf.get( "fs.default.name", "hdfs://localhost:5001/" );
 

@@ -66,9 +66,32 @@ public class Tuple implements Comparable, Iterable, Serializable
   /** Field printDelim */
   private final String printDelim = "\t";
 
-  public static Tuple asUnmodifiable( Tuple tuple )
+  /**
+   * Forces the given Tuple instance to dissallow modification.
+   * <p/>
+   * This methods just changes the state of the given Tuple, no new objects are created.
+   *
+   * @param tuple of type Tuple
+   * @return an unmodifiable instance
+   */
+  public static final Tuple asUnmodifiable( Tuple tuple )
     {
     tuple.isUnmodifiable = true;
+
+    return tuple;
+    }
+
+  /**
+   * Forces the given Tuple instance to allow modification.
+   * <p/>
+   * This methods just changes the state of the given Tuple, no new objects are created.
+   *
+   * @param tuple of type Tuple
+   * @return an modifiable instance
+   */
+  public static final Tuple asModifiable( Tuple tuple )
+    {
+    tuple.isUnmodifiable = false;
 
     return tuple;
     }

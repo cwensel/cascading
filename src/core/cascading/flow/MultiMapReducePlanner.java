@@ -43,11 +43,11 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.TempHfs;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -55,7 +55,7 @@ import org.jgrapht.alg.KShortestPaths;
  * Notes:
  * <p/>
  * <strong>Custom JobConf properties</strong><br/>
- * A custom JobConf instance can be passed to this planner by calling {@link #setJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
+ * A custom JobConf instance can be passed to this planner by calling {@link #getConfiguration(java.util.Map)}
  * on a map properties object before constructing a new {@link FlowConnector}.
  * <p/>
  * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
@@ -77,7 +77,7 @@ public class MultiMapReducePlanner extends FlowPlanner
   private static final Logger LOG = Logger.getLogger( MultiMapReducePlanner.class );
 
   /** Field jobConf */
-  private JobConf jobConf;
+  private Configuration conf;
   /** Field intermediateSchemeClass */
   private final Class intermediateSchemeClass;
 
@@ -86,11 +86,11 @@ public class MultiMapReducePlanner extends FlowPlanner
    * custom default Hadoop JobConf properties to Hadoop.
    *
    * @param properties of type Map
-   * @param jobConf    of type JobConf
+   * @param conf
    */
-  public static void setJobConf( Map<Object, Object> properties, JobConf jobConf )
+  public static void setConfiguration( Map<Object, Object> properties, Configuration conf )
     {
-    properties.put( "cascading.hadoop.jobconf", jobConf );
+    properties.put( "cascading.hadoop.configuration", conf );
     }
 
   /**
@@ -99,9 +99,9 @@ public class MultiMapReducePlanner extends FlowPlanner
    * @param properties of type Map
    * @return a JobConf instance
    */
-  public static JobConf getJobConf( Map<Object, Object> properties )
+  public static Configuration getConfiguration( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.hadoop.jobconf", (JobConf) null );
+    return Util.getProperty( properties, "cascading.hadoop.configuration", (Configuration) null );
     }
 
   /**
@@ -138,21 +138,31 @@ public class MultiMapReducePlanner extends FlowPlanner
   protected MultiMapReducePlanner( Map<Object, Object> properties )
     {
     super( properties );
-    jobConf = HadoopUtil.createJobConf( properties, getJobConf( properties ) );
+    conf = HadoopUtil.createConfiguration( properties, getConfiguration( properties ) );
     intermediateSchemeClass = FlowConnector.getIntermediateSchemeClass( properties );
 
+    Job job = null;
+
+    try
+      {
+      job = new Job( conf );
+      }
+    catch( IOException exception )
+      {
+      }
+
     Class type = FlowConnector.getApplicationJarClass( properties );
-    if( jobConf.getJar() == null && type != null )
-      jobConf.setJarByClass( type );
+    if( job.getJar() == null && type != null )
+      job.setJarByClass( type );
 
     String path = FlowConnector.getApplicationJarPath( properties );
-    if( jobConf.getJar() == null && path != null )
-      jobConf.setJar( path );
+    if( job.getJar() == null && path != null )
+      job.getConfiguration().set( "mapred.jar", path );
 
-    if( jobConf.getJar() == null )
-      jobConf.setJarByClass( Util.findMainClass( MultiMapReducePlanner.class ) );
+    if( job.getJar() == null )
+      job.setJarByClass( Util.findMainClass( MultiMapReducePlanner.class ) );
 
-    LOG.info( "using application jar: " + jobConf.getJar() );
+    LOG.info( "using application jar: " + job.getJar() );
     }
 
   /**
@@ -203,7 +213,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       sinks = new HashMap<String, Tap>( sinks );
       traps = new HashMap<String, Tap>( traps );
 
-      return new Flow( properties, jobConf, flowName, elementGraph, stepGraph, sources, sinks, traps );
+      return new Flow( properties, conf, flowName, elementGraph, stepGraph, sources, sinks, traps );
       }
     catch( PlannerException exception )
       {
@@ -424,7 +434,7 @@ public class MultiMapReducePlanner extends FlowPlanner
     {
     try
       {
-      return ( (Hfs) tap ).getDefaultFileSystemURIScheme( jobConf );
+      return ( (Hfs) tap ).getDefaultFileSystemURIScheme( conf );
       }
     catch( IOException exception )
       {
@@ -436,7 +446,7 @@ public class MultiMapReducePlanner extends FlowPlanner
     {
     try
       {
-      return ( (Hfs) tap ).getURIScheme( jobConf );
+      return ( (Hfs) tap ).getURIScheme( conf );
       }
     catch( IOException exception )
       {

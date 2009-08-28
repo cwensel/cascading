@@ -191,7 +191,7 @@ public class CascadeTest extends ClusterTestCase
 
     cascade.complete();
 
-    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getJobConf() ) );
+    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getConfiguration() ) );
     }
 
   public void testSimpleCascadeStop() throws IOException, InterruptedException

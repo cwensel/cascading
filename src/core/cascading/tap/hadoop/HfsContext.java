@@ -19,34 +19,42 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow;
+package cascading.tap.hadoop;
 
 import java.io.IOException;
 
-import cascading.tap.Tap;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.StatusReporter;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
-/** Class MapReduceFlowStep wraps a {@link JobConf} and allows it to be executed as a {@link Flow}. */
-public class MapReduceFlowStep extends FlowStep
+/**
+ *
+ */
+public class HfsContext extends TaskInputOutputContext
   {
-  /** Field jobConf */
-  private final Job job;
-
-  MapReduceFlowStep( String name, Job job, Tap sink )
+  public HfsContext( Configuration conf, TaskAttemptID taskid, RecordWriter output, OutputCommitter committer, StatusReporter reporter )
     {
-    super( name, 1 );
-    this.job = job;
-    this.sink = sink;
+    super( conf, taskid, output, committer, reporter );
     }
 
   @Override
-  protected Job getJob( Configuration parentConf ) throws IOException
+  public boolean nextKeyValue() throws IOException, InterruptedException
     {
-    // allow to delete
-    sink.sinkInit( new Job() );
+    return false;
+    }
 
-    return job;
+  @Override
+  public Object getCurrentKey() throws IOException, InterruptedException
+    {
+    return null;
+    }
+
+  @Override
+  public Object getCurrentValue() throws IOException, InterruptedException
+    {
+    return null;
     }
   }
