@@ -174,7 +174,14 @@ public class CascadingTestCase extends TestCase
 
   protected TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
     {
+    return invokeAggregator( aggregator, null, argumentsArray, resultFields );
+    }
+
+  protected TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
+    {
     ConcreteCall operationCall = new ConcreteCall();
+
+    operationCall.setGroup( group );
 
     aggregator.prepare( FlowProcess.NULL, operationCall );
 
@@ -208,16 +215,22 @@ public class CascadingTestCase extends TestCase
 
   protected TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
     {
+    return invokeBuffer( buffer, null, argumentsArray, resultFields );
+    }
+
+  protected TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
+    {
     ConcreteCall operationCall = new ConcreteCall();
 
+    operationCall.setGroup( group );
+
     buffer.prepare( FlowProcess.NULL, operationCall );
+    TupleListCollector collector = new TupleListCollector( resultFields );
+    operationCall.setOutputCollector( collector );
 
     operationCall.setArgumentsIterator( Arrays.asList( argumentsArray ).iterator() );
 
     buffer.operate( FlowProcess.NULL, operationCall );
-
-    TupleListCollector collector = new TupleListCollector( resultFields );
-    operationCall.setOutputCollector( collector );
 
     buffer.cleanup( null, operationCall );
 

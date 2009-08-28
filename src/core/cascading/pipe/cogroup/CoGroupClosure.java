@@ -21,14 +21,15 @@
 
 package cascading.pipe.cogroup;
 
+import java.util.Iterator;
+
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /** Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams. */
 public class CoGroupClosure extends GroupClosure
@@ -77,7 +78,7 @@ public class CoGroupClosure extends GroupClosure
     long threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, serializations );
+      groups[ i ] = new SpillableTupleList( threshold, ( (HadoopFlowProcess) flowProcess ).getJobConf() );
 
     while( values.hasNext() )
       {

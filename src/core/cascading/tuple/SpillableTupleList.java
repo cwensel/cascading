@@ -21,10 +21,6 @@
 
 package cascading.tuple;
 
-import cascading.tuple.hadoop.TupleSerialization;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +31,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import cascading.tuple.hadoop.TupleSerialization;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
@@ -47,8 +47,6 @@ public class SpillableTupleList implements Iterable<Tuple>
 
   /** Field threshold */
   private long threshold = 10000;
-  /** Field serializations */
-  private String serializations;
   /** Field files */
   private List<File> files = new LinkedList<File>();
   /** Field current */
@@ -75,14 +73,10 @@ public class SpillableTupleList implements Iterable<Tuple>
     this.threshold = threshold;
     }
 
-  public SpillableTupleList( long threshold, String serializations )
+  public SpillableTupleList( long threshold, JobConf conf )
     {
     this.threshold = threshold;
-    this.serializations = serializations;
-
-    JobConf conf = new JobConf();
-    conf.set( "io.serializations", serializations );
-    tupleSerialization = new TupleSerialization( conf );
+    this.tupleSerialization = new TupleSerialization( conf );
     }
 
   /**
