@@ -252,7 +252,9 @@ public class MultiInputFormat extends InputFormat
         {
         TaskAttemptContext context = new TaskAttemptContext( currentConf, job.getTaskAttemptID() );
         Class<? extends InputFormat<?, ?>> type = new Job( currentConf ).getInputFormatClass();
-        return ReflectionUtils.newInstance( type, currentConf ).createRecordReader( multiSplit.inputSplit, context );
+        RecordReader recordReader = ReflectionUtils.newInstance( type, currentConf ).createRecordReader( multiSplit.inputSplit, context );
+
+        return new MultiInputRecordReader( recordReader );
         }
 
       @Override

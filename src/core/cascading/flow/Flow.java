@@ -634,7 +634,7 @@ public class Flow implements FlowContext<Configuration>, Runnable
     if( thread != null )
       return;
 
-    registerShutdownHook();
+//    registerShutdownHook();
 
     thread = new Thread( this, ( "flow " + Util.toNull( getName() ) ).trim() );
 
@@ -949,7 +949,7 @@ public class Flow implements FlowContext<Configuration>, Runnable
         }
       finally
         {
-        deregisterShutdownHook();
+//        deregisterShutdownHook();
         }
       }
     }

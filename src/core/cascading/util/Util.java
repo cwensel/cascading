@@ -620,7 +620,7 @@ public class Util
     {
     try
       {
-      Field field = type.getField( fieldName );
+      Field field = type.getDeclaredField( fieldName );
 
       field.setAccessible( true );
 
