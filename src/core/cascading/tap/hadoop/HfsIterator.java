@@ -200,6 +200,7 @@ public class HfsIterator implements TupleIterator
         }
       else if( reader.nextKeyValue() )
         {
+        tupleListCollector.clear();
         tap.source( new Tuple( reader.getCurrentKey(), reader.getCurrentValue() ), tupleListCollector );
         tupleListIterator = tupleListCollector.listIterator();
         getNextTuple();
