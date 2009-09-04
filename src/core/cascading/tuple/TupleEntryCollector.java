@@ -41,7 +41,7 @@ public abstract class TupleEntryCollector
     if( declared == null )
       throw new IllegalArgumentException( "declared fields must not be null" );
 
-    this.declared = declared.isAll() ? null : declared;
+    this.declared = declared != null && ( declared.isAll() || declared.isUnknown() ) ? null : declared;
     }
 
   /**
@@ -65,7 +65,7 @@ public abstract class TupleEntryCollector
     if( tuple.isEmpty() )
       return;
 
-    if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
+    if( declared != null && declared.size() != tuple.size() )
       throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
 
     collect( tuple );
