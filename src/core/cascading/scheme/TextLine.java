@@ -31,6 +31,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
@@ -232,11 +233,14 @@ public class TextLine extends Scheme
   @Override
   public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
-    // just fetch line
-    if( sourceFields.size() == 1 )
-      tuple = new Tuple( tuple.get( 1 ) );
+    Tuple result = new Tuple();
 
-    tupleEntryCollector.add( tuple );
+    if( sourceFields.size() == 2 )
+      result.add( ( (LongWritable) tuple.get( 0 ) ).get() );
+
+    result.add( tuple.get( 1 ).toString() );
+
+    tupleEntryCollector.add( result );
     }
 
   @Override

@@ -54,7 +54,7 @@ public class MultiInputRecordReader extends RecordReader
   @Override
   public Object getCurrentKey() throws IOException, InterruptedException
     {
-    return recordReader.getCurrentValue();
+    return recordReader.getCurrentKey();
     }
 
   @Override
