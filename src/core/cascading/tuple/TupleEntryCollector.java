@@ -41,7 +41,7 @@ public abstract class TupleEntryCollector
     if( declared == null )
       throw new IllegalArgumentException( "declared fields must not be null" );
 
-    this.declared = declared;
+    this.declared = declared.isAll() ? null : declared;
     }
 
   /**

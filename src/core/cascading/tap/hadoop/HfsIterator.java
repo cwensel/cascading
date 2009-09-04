@@ -56,7 +56,7 @@ public class HfsIterator implements TupleIterator
   /** Field inputFormat */
   private InputFormat inputFormat;
   /** Field conf */
-  private final Configuration conf;
+  private final Job job;
   /** Field splits */
   private List<InputSplit> splits;
   /** Field reader */
@@ -82,15 +82,13 @@ public class HfsIterator implements TupleIterator
   public HfsIterator( Tap tap, FlowContext<Configuration> flowContext ) throws IOException
     {
     this.tap = tap;
-    this.conf = new Configuration( ( (Flow) flowContext ).getConfiguration() );
+    this.job = new Job( ( (Flow) flowContext ).getConfiguration() );
 
     initalize();
     }
 
   private void initalize() throws IOException
     {
-    Job job = new Job( conf );
-
     tap.sourceInit( job );
     tupleListCollector = new TupleListCollector( tap.getSourceFields() );
     tupleListIterator = tupleListCollector.listIterator(); // is empty
@@ -103,7 +101,7 @@ public class HfsIterator implements TupleIterator
 
     try
       {
-      inputFormat = ReflectionUtils.newInstance( job.getInputFormatClass(), conf );
+      inputFormat = ReflectionUtils.newInstance( job.getInputFormatClass(), job.getConfiguration() );
       }
     catch( ClassNotFoundException exception )
       {
@@ -111,7 +109,7 @@ public class HfsIterator implements TupleIterator
       }
 
     if( inputFormat instanceof Configurable )
-      ( (Configurable) inputFormat ).setConf( conf );
+      ( (Configurable) inputFormat ).setConf( job.getConfiguration() );
 
     try
       {
@@ -141,7 +139,7 @@ public class HfsIterator implements TupleIterator
 
     try
       {
-      TaskAttemptContext taskAttemptContext = Hadoop21TapUtil.getMapContext( conf );
+      TaskAttemptContext taskAttemptContext = Hadoop21TapUtil.getMapContext( job.getConfiguration() );
       InputSplit inputSplit = splits.get( currentSplit );
       RecordReader reader = inputFormat.createRecordReader( inputSplit, taskAttemptContext );
 
