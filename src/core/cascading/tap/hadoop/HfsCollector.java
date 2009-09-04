@@ -136,10 +136,10 @@ public class HfsCollector extends TupleEntryCollector
 
     try
       {
-      taskAttemptContext = Hadoop19TapUtil.getAttemptContext( job.getConfiguration() );
+      taskAttemptContext = Hadoop21TapUtil.getAttemptContext( job.getConfiguration() );
       writer = outputFormat.getRecordWriter( taskAttemptContext );
 
-      TaskAttemptID taskId = Hadoop19TapUtil.getTaskAttemptId( job.getConfiguration() );
+      TaskAttemptID taskId = Hadoop21TapUtil.getTaskAttemptId( job.getConfiguration() );
       TaskInputOutputContext taskContext = new HfsContext( job.getConfiguration(), taskId, writer, null, null );
       hadoopFlowProcess = new HadoopFlowProcess( new FlowSession(), taskContext, true );
       }

@@ -38,6 +38,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
@@ -140,7 +141,13 @@ public class HfsIterator implements TupleIterator
 
     try
       {
-      return inputFormat.createRecordReader( splits.get( currentSplit ), Hadoop19TapUtil.getAttemptContext( conf ) );
+      TaskAttemptContext taskAttemptContext = Hadoop21TapUtil.getMapContext( conf );
+      InputSplit inputSplit = splits.get( currentSplit );
+      RecordReader reader = inputFormat.createRecordReader( inputSplit, taskAttemptContext );
+
+      reader.initialize( inputSplit, taskAttemptContext );
+
+      return reader;
       }
     catch( InterruptedException exception )
       {

@@ -42,7 +42,7 @@ public class FlowMapper extends Mapper
   private class ContextIterator implements TupleIterator
     {
     Context context = null;
-    Tuple pair = new Tuple();
+    Tuple pair = new Tuple( null, null );
 
     private ContextIterator( Context context )
       {

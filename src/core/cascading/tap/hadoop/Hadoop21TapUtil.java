@@ -25,15 +25,45 @@ import java.io.IOException;
 
 import cascading.tap.Tap;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MapContext;
+import org.apache.hadoop.mapreduce.StatusReporter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 
 /**
  *
  */
-public class Hadoop19TapUtil
+public class Hadoop21TapUtil
   {
+  private static class NullStatusReporter extends StatusReporter
+    {
+    public void setStatus( String s )
+      {
+      }
+
+    public void progress()
+      {
+      }
+
+    public Counter getCounter( Enum<?> name )
+      {
+      return new Counters().findCounter( name );
+      }
+
+    public Counter getCounter( String group, String name )
+      {
+      return new Counters().findCounter( group, name );
+      }
+    }
+
+  static MapContext getMapContext( Configuration conf )
+    {
+    TaskAttemptID attemptID = getTaskAttemptId( conf );
+    return new MapContext( conf, attemptID, null, null, null, new NullStatusReporter(), null );
+    }
 
   static TaskAttemptContext getAttemptContext( Configuration conf )
     {
