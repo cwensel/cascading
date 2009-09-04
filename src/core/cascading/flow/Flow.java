@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
-import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
@@ -74,7 +73,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  *
  * @see cascading.flow.FlowConnector
  */
-public class Flow implements HadoopFlowContext, Runnable
+public class Flow implements FlowContext<Configuration>, Runnable
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( Flow.class );

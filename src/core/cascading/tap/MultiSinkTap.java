@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.hadoop.ConfigurationFlowContext;
-import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.FlowContext;
+import cascading.flow.hadoop.ConfFlowContext;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.MultiInputFormat;
@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * <p/>
  * It is the counterpart to {@link MultiSourceTap}.
  */
-public class MultiSinkTap extends SinkTap implements CompositeTap
+public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MultiSinkTap.class );
@@ -64,7 +64,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     {
     TupleEntryCollector[] collectors;
 
-    public MultiSinkCollector( HadoopFlowContext flowContext, Tap... taps ) throws IOException
+    public MultiSinkCollector( FlowContext<Configuration> flowContext, Tap... taps ) throws IOException
       {
       collectors = new TupleEntryCollector[taps.length];
 
@@ -75,7 +75,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
         Tap tap = taps[ i ];
         LOG.info( "opening for write: " + tap.toString() );
 
-        collectors[ i ] = tap.openForWrite( new ConfigurationFlowContext( confs[ i ] ) );
+        collectors[ i ] = tap.openForWrite( new ConfFlowContext( confs[ i ] ) );
         }
       }
 
@@ -140,7 +140,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
+  public TupleEntryCollector openForWrite( FlowContext<Configuration> flowContext ) throws IOException
     {
     return new MultiSinkCollector( flowContext, getTaps() );
     }

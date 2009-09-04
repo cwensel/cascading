@@ -24,6 +24,7 @@ package cascading.tap.hadoop;
 import java.io.IOException;
 
 import cascading.CascadingTestCase;
+import cascading.flow.hadoop.ConfFlowContext;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
@@ -31,7 +32,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -62,7 +62,7 @@ public class TapCollectorTest extends CascadingTestCase
 
   private void runTest( Tap tap ) throws IOException
     {
-    JobConf conf = new JobConf();
+    ConfFlowContext conf = new ConfFlowContext();
 
     HfsCollector collector = (HfsCollector) tap.openForWrite( conf ); // casting for test
 

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.FlowContext;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
@@ -78,7 +78,7 @@ public class HfsIterator implements TupleIterator
    * @param flowContext
    * @throws IOException when
    */
-  public HfsIterator( Tap tap, HadoopFlowContext flowContext ) throws IOException
+  public HfsIterator( Tap tap, FlowContext<Configuration> flowContext ) throws IOException
     {
     this.tap = tap;
     this.conf = new Configuration( ( (Flow) flowContext ).getConfiguration() );

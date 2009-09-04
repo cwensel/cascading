@@ -24,13 +24,14 @@ package cascading.tap.hadoop;
 import java.io.IOException;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowContext;
 import cascading.flow.FlowSession;
-import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -47,7 +48,7 @@ import org.apache.log4j.Logger;
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class HfsCollector extends HadoopEntryCollector
+public class HfsCollector extends TupleEntryCollector
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( HfsCollector.class );
@@ -70,6 +71,8 @@ public class HfsCollector extends HadoopEntryCollector
   private boolean isFileOutputFormat;
   /** Field taskAttemptContext */
   private TaskAttemptContext taskAttemptContext;
+  /** Field hadoopFlowProcess */
+  private HadoopFlowProcess hadoopFlowProcess;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -78,7 +81,7 @@ public class HfsCollector extends HadoopEntryCollector
    * @param flowContext of type JobConf
    * @throws IOException when fails to initialize
    */
-  public HfsCollector( Tap tap, HadoopFlowContext flowContext ) throws IOException
+  public HfsCollector( Tap tap, FlowContext<Configuration> flowContext ) throws IOException
     {
     this( tap, null, ( (Flow) flowContext ).getConfiguration() );
     }

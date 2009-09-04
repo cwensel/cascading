@@ -19,25 +19,12 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow.hadoop;
-
-import org.apache.hadoop.conf.Configuration;
+package cascading.flow;
 
 /**
  *
  */
-public class ConfigurationFlowContext implements HadoopFlowContext
+public interface FlowContext<C>
   {
-  Configuration conf;
-
-  public ConfigurationFlowContext( Configuration conf )
-    {
-    this.conf = conf;
-    }
-
-  @Override
-  public Configuration getConfiguration()
-    {
-    return conf;
-    }
+  C getConfiguration();
   }

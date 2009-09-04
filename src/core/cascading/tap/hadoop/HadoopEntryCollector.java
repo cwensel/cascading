@@ -32,10 +32,6 @@ public abstract class HadoopEntryCollector extends TupleEntryCollector
   {
   HadoopFlowProcess hadoopFlowProcess;
 
-  protected HadoopEntryCollector()
-    {
-    }
-
   protected HadoopEntryCollector( HadoopFlowProcess hadoopFlowProcess )
     {
     this.hadoopFlowProcess = hadoopFlowProcess;

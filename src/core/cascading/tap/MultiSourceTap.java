@@ -21,12 +21,15 @@
 
 package cascading.tap;
 
-import cascading.scheme.Scheme;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-
 import java.io.IOException;
 import java.util.Arrays;
+
+import cascading.flow.FlowContext;
+import cascading.scheme.Scheme;
+import cascading.tuple.TupleEntryCollector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  * Class MultiSourceTap is used to tie multiple {@link Tap} instances into a single resource. Effectively this will allow
@@ -39,7 +42,7 @@ import java.util.Arrays;
  * the same semi-structure internally. For example, one file might be an Apache log file, and anoter might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
-public class MultiSourceTap extends SourceTap implements CompositeTap
+public class MultiSourceTap extends SourceTap<Configuration> implements CompositeTap
   {
   protected Tap[] taps;
 
@@ -127,8 +130,17 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     return false;
     }
 
-  /** Returns the most current modified time.
-   * @param job*/
+  @Override
+  public TupleEntryCollector openForWrite( FlowContext<Configuration> configurationFlowContext ) throws IOException
+    {
+    throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
+    }
+
+  /**
+   * Returns the most current modified time.
+   *
+   * @param job
+   */
   public long getPathModified( Job job ) throws IOException
     {
     long modified = getTaps()[ 0 ].getPathModified( job );
@@ -165,6 +177,6 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
 
   public String toString()
     {
-    return "MultiTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
+    return "MultiSourceTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
     }
   }

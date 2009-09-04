@@ -23,6 +23,7 @@ package cascading.flow.hadoop;
 
 import java.io.IOException;
 
+import cascading.flow.FlowContext;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
@@ -44,7 +45,7 @@ import org.apache.hadoop.mapreduce.TaskInputOutputContext;
  * @see JobConf
  * @see Reporter
  */
-public class HadoopFlowProcess extends FlowProcess implements HadoopFlowContext
+public class HadoopFlowProcess extends FlowProcess implements FlowContext<Configuration>
   {
   /** Field isMapper */
   private boolean isMapper;

@@ -32,6 +32,7 @@ import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import org.apache.hadoop.mapreduce.Job;
 
 public class FlowSkipTest extends ClusterTestCase
   {
@@ -62,7 +63,7 @@ public class FlowSkipTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-    sink.deletePath( flow.getConfiguration() );
+    sink.deletePath( new Job( flow.getConfiguration() ) );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );
@@ -100,7 +101,7 @@ public class FlowSkipTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
-    sink.deletePath( flow.getConfiguration() );
+    sink.deletePath( new Job( flow.getConfiguration() ) );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );

@@ -42,6 +42,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  *
@@ -65,7 +66,8 @@ public class TapTest extends ClusterTestCase implements Serializable
     {
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getConfiguration( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
+    Job job = new Job( MultiMapReducePlanner.getConfiguration( getProperties() ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( job ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
     new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
     new Dfs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
@@ -93,7 +95,8 @@ public class TapTest extends ClusterTestCase implements Serializable
     {
     Tap tap = new Lfs( new Fields( "foo" ), "some/path" );
 
-    assertTrue( "wrong scheme", tap.getQualifiedPath( MultiMapReducePlanner.getConfiguration( getProperties() ) ).toUri().getScheme().equalsIgnoreCase( "file" ) );
+    Job configuration = new Job( MultiMapReducePlanner.getConfiguration( getProperties() ) );
+    assertTrue( "wrong scheme", tap.getQualifiedPath( configuration ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Lfs( new Fields( "foo" ), "file:///some/path" );
 
@@ -121,10 +124,10 @@ public class TapTest extends ClusterTestCase implements Serializable
     @Override
     public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      if( tupleEntryCollector.toString().matches( "^\\s*#.*$" ) )
-        return null;
+      if( tuple.toString().matches( "^\\s*#.*$" ) )
+        return;
 
-      return super.source( tuple, tupleEntryCollector );
+      super.source( tuple, tupleEntryCollector );
       }
     }
 

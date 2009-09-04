@@ -26,10 +26,10 @@ import java.io.Serializable;
 import java.util.Set;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowContext;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.Scope;
-import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
@@ -58,7 +58,7 @@ import org.apache.hadoop.mapreduce.Job;
  * used for the tap identity? If the name, then two Tap instances with different names but the same path could
  * interfere with one another.
  */
-public abstract class Tap implements FlowElement, Serializable
+public abstract class Tap<C> implements FlowElement, Serializable
   {
   /** Field scheme */
   private Scheme scheme;
@@ -216,7 +216,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException;
+  public abstract TupleEntryIterator openForRead( FlowContext<C> flowContext ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
@@ -225,7 +225,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( FlowContext<C> flowContext ) throws IOException;
 
   /**
    * Method source returns the source value as an instance of {@link Tuple}

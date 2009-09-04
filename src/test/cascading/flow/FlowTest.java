@@ -77,7 +77,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).getConfiguration().get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -100,7 +100,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).getConfiguration().get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -123,7 +123,7 @@ public class FlowTest extends ClusterTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).get( "mapred.job.tracker" );
+    String tracker = step.getJob( MultiMapReducePlanner.getConfiguration( props ) ).getConfiguration().get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is local", !isLocal );

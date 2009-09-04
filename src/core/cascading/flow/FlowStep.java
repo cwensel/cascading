@@ -37,12 +37,10 @@ import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.TempHfs;
-import cascading.tap.hadoop.HfsIterator;
 import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TuplePair;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
@@ -53,7 +51,6 @@ import cascading.tuple.hadoop.TuplePairComparator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -348,16 +345,6 @@ public class FlowStep implements Serializable
     // tempSink exists because sink is writeDirect
     if( tempSink != null )
       tempSink.sinkInit( conf );
-    }
-
-  public HfsIterator openSourceForRead( JobConf conf ) throws IOException
-    {
-    return new HfsIterator( sources.keySet().iterator().next(), conf );
-    }
-
-  public TupleEntryIterator openSinkForRead( JobConf conf ) throws IOException
-    {
-    return sink.openForRead( conf );
     }
 
   public Tap getMapperTrap( String name )

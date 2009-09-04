@@ -32,6 +32,7 @@ import java.util.Set;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
+import cascading.flow.hadoop.ConfFlowContext;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -48,7 +49,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
 
 public class SortedValuesTest extends ClusterTestCase
   {
@@ -100,7 +100,7 @@ public class SortedValuesTest extends ClusterTestCase
     Map<Object, Object> properties = getProperties();
 
     if( MultiMapReducePlanner.getConfiguration( properties ) != null )
-      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+      MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -148,7 +148,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+    MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -196,7 +196,7 @@ public class SortedValuesTest extends ClusterTestCase
     Map<Object, Object> properties = getProperties();
 
     if( MultiMapReducePlanner.getConfiguration( properties ) != null )
-      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+      MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -248,7 +248,7 @@ public class SortedValuesTest extends ClusterTestCase
     Map<Object, Object> properties = getProperties();
 
     if( MultiMapReducePlanner.getConfiguration( properties ) != null )
-      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+      MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
 
@@ -303,7 +303,7 @@ public class SortedValuesTest extends ClusterTestCase
     Map<Object, Object> properties = getProperties();
 
     if( MultiMapReducePlanner.getConfiguration( properties ) != null )
-      MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+      MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     Map sources = new HashMap();
 
@@ -343,7 +343,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    MultiMapReducePlanner.getConfiguration( properties ).setNumMapTasks( 13 );
+    MultiMapReducePlanner.getConfiguration( properties ).setInt( "mapred.map.tasks", 13 );
 
     try
       {
@@ -358,7 +358,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed, int comparePosition ) throws IOException, ParseException
     {
-    TupleEntryIterator iterator = tap.openForRead( new JobConf() );
+    TupleEntryIterator iterator = tap.openForRead( new ConfFlowContext() );
 
     Set<Long> values = new HashSet<Long>();
 

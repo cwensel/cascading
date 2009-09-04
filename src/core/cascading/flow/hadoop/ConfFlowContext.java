@@ -21,12 +21,29 @@
 
 package cascading.flow.hadoop;
 
+import cascading.flow.FlowContext;
 import org.apache.hadoop.conf.Configuration;
 
 /**
  *
  */
-public interface HadoopFlowContext
+public class ConfFlowContext implements FlowContext<Configuration>
   {
-  Configuration getConfiguration();
+  Configuration conf;
+
+  public ConfFlowContext()
+    {
+    this.conf = new Configuration();
+    }
+
+  public ConfFlowContext( Configuration conf )
+    {
+    this.conf = conf;
+    }
+
+  @Override
+  public Configuration getConfiguration()
+    {
+    return conf;
+    }
   }

@@ -43,6 +43,7 @@ import cascading.tap.Hfs;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import org.apache.hadoop.mapreduce.Job;
 
 public class CascadeTest extends ClusterTestCase
   {
@@ -191,7 +192,7 @@ public class CascadeTest extends ClusterTestCase
 
     cascade.complete();
 
-    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getConfiguration() ) );
+    assertFalse( "file exists", fourth.getSink().pathExists( new Job( fourth.getConfiguration() ) ) );
     }
 
   public void testSimpleCascadeStop() throws IOException, InterruptedException

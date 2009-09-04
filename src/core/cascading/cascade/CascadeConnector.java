@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.FlowContext;
 import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
@@ -233,12 +233,12 @@ public class CascadeConnector
       return 0;
       }
 
-    public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
+    public TupleEntryIterator openForRead( FlowContext flowContext ) throws IOException
       {
       return null;
       }
 
-    public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
+    public TupleEntryCollector openForWrite( FlowContext flowContext ) throws IOException
       {
       return null;
       }

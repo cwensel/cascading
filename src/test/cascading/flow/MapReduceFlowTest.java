@@ -29,13 +29,11 @@ import cascading.cascade.CascadeConnector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 /**
  *
@@ -55,17 +53,17 @@ public class MapReduceFlowTest extends CascadingTestCase
 
   public void testFlow() throws IOException
     {
-    JobConf conf = new JobConf();
+    Job conf = new Job();
     conf.setJobName( "mrflow" );
 
     conf.setOutputKeyClass( LongWritable.class );
     conf.setOutputValueClass( Text.class );
 
-    conf.setMapperClass( IdentityMapper.class );
-    conf.setReducerClass( IdentityReducer.class );
+//    conf.setMapperClass( IdentityMapper.class );
+//    conf.setReducerClass( IdentityReducer.class );
 
-    conf.setInputFormat( TextInputFormat.class );
-    conf.setOutputFormat( TextOutputFormat.class );
+    conf.setInputFormatClass( TextInputFormat.class );
+    conf.setOutputFormatClass( TextOutputFormat.class );
 
     FileInputFormat.setInputPaths( conf, new Path( inputFileApache ) );
     FileOutputFormat.setOutputPath( conf, new Path( outputPath ) );
@@ -81,51 +79,51 @@ public class MapReduceFlowTest extends CascadingTestCase
 
   public void testCascade() throws IOException
     {
-    JobConf firstConf = new JobConf();
+    Job firstConf = new Job();
     firstConf.setJobName( "first" );
 
     firstConf.setOutputKeyClass( LongWritable.class );
     firstConf.setOutputValueClass( Text.class );
 
-    firstConf.setMapperClass( IdentityMapper.class );
-    firstConf.setReducerClass( IdentityReducer.class );
+//    firstConf.setMapperClass( IdentityMapper.class );
+//    firstConf.setReducerClass( IdentityReducer.class );
 
-    firstConf.setInputFormat( TextInputFormat.class );
-    firstConf.setOutputFormat( TextOutputFormat.class );
+    firstConf.setInputFormatClass( TextInputFormat.class );
+    firstConf.setOutputFormatClass( TextOutputFormat.class );
 
     FileInputFormat.setInputPaths( firstConf, new Path( inputFileApache ) );
     FileOutputFormat.setOutputPath( firstConf, new Path( outputPath1 ) );
 
     Flow firstFlow = new MapReduceFlow( firstConf, true );
 
-    JobConf secondConf = new JobConf();
+    Job secondConf = new Job();
     secondConf.setJobName( "second" );
 
     secondConf.setOutputKeyClass( LongWritable.class );
     secondConf.setOutputValueClass( Text.class );
 
-    secondConf.setMapperClass( IdentityMapper.class );
-    secondConf.setReducerClass( IdentityReducer.class );
+//    secondConf.setMapperClass( IdentityMapper.class );
+//    secondConf.setReducerClass( IdentityReducer.class );
 
-    secondConf.setInputFormat( TextInputFormat.class );
-    secondConf.setOutputFormat( TextOutputFormat.class );
+    secondConf.setInputFormatClass( TextInputFormat.class );
+    secondConf.setOutputFormatClass( TextOutputFormat.class );
 
     FileInputFormat.setInputPaths( secondConf, new Path( outputPath1 ) );
     FileOutputFormat.setOutputPath( secondConf, new Path( outputPath2 ) );
 
     Flow secondFlow = new MapReduceFlow( secondConf, true );
 
-    JobConf thirdConf = new JobConf();
+    Job thirdConf = new Job();
     thirdConf.setJobName( "third" );
 
     thirdConf.setOutputKeyClass( LongWritable.class );
     thirdConf.setOutputValueClass( Text.class );
 
-    thirdConf.setMapperClass( IdentityMapper.class );
-    thirdConf.setReducerClass( IdentityReducer.class );
+//    thirdConf.setMapperClass( IdentityMapper.class );
+//    thirdConf.setReducerClass( IdentityReducer.class );
 
-    thirdConf.setInputFormat( TextInputFormat.class );
-    thirdConf.setOutputFormat( TextOutputFormat.class );
+    thirdConf.setInputFormatClass( TextInputFormat.class );
+    thirdConf.setOutputFormatClass( TextOutputFormat.class );
 
     FileInputFormat.setInputPaths( thirdConf, new Path( outputPath2 ) );
     FileOutputFormat.setOutputPath( thirdConf, new Path( outputPath3 ) );

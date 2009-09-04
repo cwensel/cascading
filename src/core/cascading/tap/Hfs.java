@@ -26,7 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.FlowContext;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
@@ -59,12 +59,10 @@ import org.apache.log4j.Logger;
  * Call {@link #setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
  */
-public class Hfs extends Tap
+public class Hfs extends Tap<Configuration>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( Hfs.class );
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
 
   /** Field TEMPORARY_DIRECTORY */
   private static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
@@ -476,15 +474,15 @@ public class Hfs extends Tap
     return result;
     }
 
-  public TupleEntryIterator openForRead( HadoopFlowContext flowContext ) throws IOException
+  public TupleEntryIterator openForRead( FlowContext<Configuration> flowContext ) throws IOException
     {
     return new TupleEntryIterator( getSourceFields(), new HfsIterator( this, flowContext ) );
     }
 
-  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
+  public TupleEntryCollector openForWrite( FlowContext<Configuration> flowContext ) throws IOException
     {
     if( flowContext instanceof HadoopFlowProcess )
-      return new HadoopOutputCollector( this, flowContext );
+      return new HadoopOutputCollector( this, (HadoopFlowProcess) flowContext );
     else
       return new HfsCollector( this, flowContext );
     }

@@ -28,7 +28,7 @@ import java.util.Map;
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
-import cascading.flow.hadoop.ConfigurationFlowContext;
+import cascading.flow.hadoop.ConfFlowContext;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.HfsCollector;
@@ -66,7 +66,7 @@ abstract class StackElement implements FlowCollector
 
         configuration.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 
-        trapCollector = (HfsCollector) trap.openForWrite( new ConfigurationFlowContext( configuration ) );
+        trapCollector = (HfsCollector) trap.openForWrite( new ConfFlowContext( configuration ) );
         trapCollectors.put( trap, trapCollector );
         }
       catch( IOException exception )

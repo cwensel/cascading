@@ -40,6 +40,7 @@ public class TestTextLine extends TextLine
   @Override
   public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
     {
-    return new Tuple( (Object[]) tupleEntryCollector.toString().split( "\t" ) );
+    tuple = new Tuple( (Object[]) tuple.toString().split( "\t" ) );
+    tupleEntryCollector.add( tuple );
     }
   }

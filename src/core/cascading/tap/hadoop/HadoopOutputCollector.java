@@ -23,7 +23,6 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 
-import cascading.flow.hadoop.HadoopFlowContext;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Hfs;
 import cascading.tap.TapException;
@@ -38,9 +37,9 @@ public class HadoopOutputCollector extends HadoopEntryCollector
   private Hfs sink;
   private TupleEntry outputEntry;
 
-  public HadoopOutputCollector( Hfs sink, HadoopFlowContext hadoopFlowProcess )
+  public HadoopOutputCollector( Hfs sink, HadoopFlowProcess flowContext )
     {
-    super( (HadoopFlowProcess) hadoopFlowProcess );
+    super( flowContext );
     this.sink = sink;
     this.outputEntry = new TupleEntry( sink.getSinkFields() );
     }

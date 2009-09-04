@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowContext;
+import cascading.flow.FlowContext;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.hadoop.HfsCollector;
@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
  * Tuple values at given positions to be used as directory names. Note that Hadoop can only sink to directories, and
  * all files in those directories are "part-xxxxx" files.
  */
-public class TemplateTap extends SinkTap
+public class TemplateTap extends SinkTap<Configuration>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TemplateTap.class );
@@ -361,7 +361,7 @@ public class TemplateTap extends SinkTap
     }
 
   @Override
-  public TupleEntryCollector openForWrite( HadoopFlowContext flowContext ) throws IOException
+  public TupleEntryCollector openForWrite( FlowContext<Configuration> flowContext ) throws IOException
     {
     Configuration conf = null;
 
