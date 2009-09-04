@@ -24,7 +24,7 @@
 
 <!-- Values used when running unit tests.  This is mostly empty, to -->
 <!-- use of the default values, overriding the potentially -->
-<!-- user-editted hadoop-site.xml in the conf/ directory.  -->
+<!-- user-editted core-site.xml in the conf/ directory.  -->
 
 <configuration>
 
@@ -35,16 +35,16 @@
     <description>A base for other temporary directories.</description>
   </property>
 
-  <property>
-    <name>test.fs.s3.name</name>
-    <value>s3:///</value>
-    <description>The name of the s3 file system for testing.</description>
-  </property>
+  <!--<property>-->
+  <!--<name>test.fs.s3.name</name>-->
+  <!--<value>s3:///</value>-->
+  <!--<description>The name of the s3 file system for testing.</description>-->
+  <!--</property>-->
 
-  <property>
-    <name>fs.s3.block.size</name>
-    <value>128</value>
-    <description>Size of a block in bytes.</description>
-  </property>
+  <!--<property>-->
+  <!--<name>fs.s3.block.size</name>-->
+  <!--<value>128</value>-->
+  <!--<description>Size of a block in bytes.</description>-->
+  <!--</property>-->
 
 </configuration>
