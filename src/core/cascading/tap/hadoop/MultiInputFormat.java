@@ -240,7 +240,7 @@ public class MultiInputFormat extends InputFormat
   public RecordReader createRecordReader( InputSplit split, final TaskAttemptContext job ) throws IOException, InterruptedException
     {
     final MultiInputSplit multiSplit = (MultiInputSplit) split;
-    final Configuration currentConf = mergeConf( job.getConfiguration(), multiSplit.config, true );
+    mergeConf( job.getConfiguration(), multiSplit.config, true );
 
     try
       {
@@ -250,9 +250,8 @@ public class MultiInputFormat extends InputFormat
       @Override
       public RecordReader operate() throws Exception
         {
-        TaskAttemptContext context = new TaskAttemptContext( currentConf, job.getTaskAttemptID() );
-        Class<? extends InputFormat<?, ?>> type = new Job( currentConf ).getInputFormatClass();
-        RecordReader recordReader = ReflectionUtils.newInstance( type, currentConf ).createRecordReader( multiSplit.inputSplit, context );
+        Class<? extends InputFormat<?, ?>> type = job.getInputFormatClass();
+        RecordReader recordReader = ReflectionUtils.newInstance( type, job.getConfiguration() ).createRecordReader( multiSplit.inputSplit, job );
 
         return new MultiInputRecordReader( recordReader );
         }

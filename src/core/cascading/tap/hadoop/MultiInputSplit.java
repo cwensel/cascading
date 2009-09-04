@@ -27,14 +27,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit extends InputSplit implements Configurable, Writable
@@ -118,11 +118,11 @@ public class MultiInputSplit extends InputSplit implements Configurable, Writabl
     for( int i = 0; i < keys.length; i++ )
       config.put( keys[ i ], values[ i ] );
 
-    Configuration currentConf = MultiInputFormat.mergeConf( conf, config, false );
+    MultiInputFormat.mergeConf( conf, config, true );
 
     try
       {
-      inputSplit = (InputSplit) ReflectionUtils.newInstance( currentConf.getClassByName( splitType ), currentConf );
+      inputSplit = (InputSplit) ReflectionUtils.newInstance( conf.getClassByName( splitType ), conf );
       }
     catch( ClassNotFoundException exp )
       {
