@@ -31,7 +31,6 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleIterator;
 
 /**
  *
@@ -63,17 +62,11 @@ class SourceMapperStackElement extends MapperStackElement
     }
 
   @Override
-  public void start( TupleIterator tupleIterator )
-    {
-    operateSource( tupleIterator );
-    }
-
-  private void operateSource( TupleIterator tupleIterator )
+  public void start( Tuple tuple )
     {
     try
       {
-      while( tupleIterator.hasNext() )
-        source.source( tupleIterator.next(), outputCollector );
+      source.source( tuple, outputCollector );
       }
     catch( OutOfMemoryError error )
       {

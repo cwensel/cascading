@@ -32,6 +32,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleIterator;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
@@ -130,19 +131,22 @@ public class FlowMapperStack
 
   public void map( TupleIterator iterator ) throws IOException
     {
-    for( int i = 0; i < stacks.length; i++ )
+    try
       {
-      try
+      while( iterator.hasNext() )
         {
-        stacks[ i ].head.start( iterator );
-        }
-      catch( StackException exception )
-        {
-        if( exception.getCause() instanceof IOException )
-          throw (IOException) exception.getCause();
+        Tuple tuple = iterator.next();
 
-        throw (RuntimeException) exception.getCause();
+        for( int i = 0; i < stacks.length; i++ )
+          stacks[ i ].head.start( tuple );
         }
+      }
+    catch( StackException exception )
+      {
+      if( exception.getCause() instanceof IOException )
+        throw (IOException) exception.getCause();
+
+      throw (RuntimeException) exception.getCause();
       }
     }
 

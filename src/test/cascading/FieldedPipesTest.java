@@ -21,6 +21,11 @@
 
 package cascading;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -50,11 +55,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public class FieldedPipesTest extends ClusterTestCase
   {
@@ -644,7 +644,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, merged );
 
-//    flow.writeDOT( "splitmerged.dot" );
+//    flow.writeDOT( "splitsamesourcemerged.dot" );
 
     flow.complete();
 
@@ -820,7 +820,8 @@ public class FieldedPipesTest extends ClusterTestCase
     Tap sinkSecond = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "second", true );
     Tap sinkThird = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "third", true );
 
-    Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second", "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );
+    Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second",
+                                                            "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sinks, pipe );
 

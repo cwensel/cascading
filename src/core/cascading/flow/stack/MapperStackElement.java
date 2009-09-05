@@ -31,7 +31,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleIterator;
 
 /**
  *
@@ -77,7 +76,7 @@ abstract class MapperStackElement extends StackElement
     return tupleEntry;
     }
 
-  public void start( TupleIterator tupleIterator )
+  public void start( Tuple tuple )
     {
 
     }
