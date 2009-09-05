@@ -39,6 +39,7 @@ import cascading.tuple.TupleEntryIterator;
 class GroupReducerStackElement extends ReducerStackElement
   {
   private final Group group;
+  private Fields fields;
 
   public GroupReducerStackElement( FlowProcess flowProcess, Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, Tap trap )
     {
@@ -69,9 +70,22 @@ class GroupReducerStackElement extends ReducerStackElement
     // this can be nasty
     values = group.iterateReduceValues( key, values );
 
-    values = new TupleEntryIterator( ( (ReducerStackElement) next ).resolveIncomingOperationFields(), values );
+    values = new TupleEntryIterator( fields, values );
 
     next.collect( key, values );
+    }
+
+  @Override
+  StackElement setNext( StackElement next )
+    {
+    try
+      {
+      return super.setNext( next );
+      }
+    finally
+      {
+      fields = ( (ReducerStackElement) this.next ).resolveIncomingOperationFields();
+      }
     }
 
   public void prepare()

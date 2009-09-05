@@ -150,8 +150,10 @@ public class FlowMapper extends Mapper
 
       throw new FlowException( "internal error during mapper execution", throwable );
       }
-
-    cleanup( context );
+    finally
+      {
+      cleanup( context );
+      }
     }
 
   @Override

@@ -22,11 +22,14 @@
 package cascading.flow;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stack.FlowReducerStack;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /** Class FlowReducer is the Hadoop Reducer implementation. */
@@ -36,6 +39,74 @@ public class FlowReducer extends Reducer
   private FlowReducerStack flowReducerStack;
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
+
+  public class ContextGroupIterator implements TupleIterator
+    {
+    Context context;
+    private Tuple groupingTuple = new Tuple(); // a hack to prevent a null check below
+
+    private ContextGroupIterator( Context context )
+      {
+      this.context = context;
+      }
+
+    @Override
+    public boolean hasNext()
+      {
+      try
+        {
+        return context.nextKeyValue();
+        }
+      catch( IOException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      catch( InterruptedException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      }
+
+    @Override
+    public Tuple next()
+      {
+//      currentProcess.increment( StepCounters.Tuples_Read, 1 );
+
+      groupingTuple = Tuple.asUnmodifiable( groupingTuple );
+      groupingTuple = (Tuple) context.getCurrentKey();
+      groupingTuple = Tuple.asUnmodifiable( groupingTuple );
+
+      return groupingTuple;
+      }
+
+    public Iterator<Tuple> nextValues()
+      {
+      try
+        {
+        return (Iterator<Tuple>) context.getValues().iterator();
+        }
+      catch( IOException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      catch( InterruptedException exception )
+        {
+        throw new RuntimeException( exception );
+        }
+      }
+
+    @Override
+    public void remove()
+      {
+      throw new UnsupportedOperationException( "remove is not supported" );
+      }
+
+    @Override
+    public void close()
+      {
+      // do nothing
+      }
+    }
 
   /** Constructor FlowReducer creates a new FlowReducer instance. */
   public FlowReducer()
@@ -62,11 +133,13 @@ public class FlowReducer extends Reducer
     }
 
   @Override
-  protected void reduce( Object key, Iterable values, Context context ) throws IOException, InterruptedException
+  public void run( Context context ) throws IOException, InterruptedException
     {
+    setup( context );
+
     try
       {
-      flowReducerStack.reduce( key, values, context );
+      flowReducerStack.reduce( new ContextGroupIterator( context ) );
       }
     catch( Throwable throwable )
       {
@@ -74,6 +147,10 @@ public class FlowReducer extends Reducer
         throw (CascadingException) throwable;
 
       throw new FlowException( "internal error during reducer execution", throwable );
+      }
+    finally
+      {
+      cleanup( context );
       }
     }
 

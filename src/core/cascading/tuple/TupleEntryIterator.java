@@ -32,7 +32,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
   /** Field entry */
   final TupleEntry entry = new TupleEntry( true );
   /** Field iterator */
-  final Iterator iterator;
+  final Iterator<Tuple> iterator;
 
   /**
    * Constructor TupleEntryIterator creates a new TupleEntryIterator instance.
@@ -40,7 +40,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
    * @param fields   of type Fields
    * @param iterator of type Iterator
    */
-  public TupleEntryIterator( Fields fields, Iterator iterator )
+  public TupleEntryIterator( Fields fields, Iterator<Tuple> iterator )
     {
     this.entry.fields = fields;
     this.iterator = iterator;
@@ -97,9 +97,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
     iterator.remove();
     }
 
-  /**
-   * Method close closes all underlying resources.
-   */
+  /** Method close closes all underlying resources. */
   public void close()
     {
     if( iterator instanceof TupleIterator )

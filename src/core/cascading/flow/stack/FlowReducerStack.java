@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowReducer;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -34,10 +35,8 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-import cascading.tuple.Tuple;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.log4j.Logger;
 
 /**
@@ -142,19 +141,14 @@ public class FlowReducerStack
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 
-  public void reduce( Object key, Iterable values, TaskInputOutputContext output ) throws IOException
+  public void reduce( FlowReducer.ContextGroupIterator iterator ) throws IOException
     {
-    if( LOG.isTraceEnabled() )
-      {
-      LOG.trace( "reduce fields: " + stackHead.getOutGroupingFields() );
-      LOG.trace( "reduce key: " + ( (Tuple) key ).print() );
-      }
-
-    stackTail.setLastOutput( output );
-
     try
       {
-      stackHead.collect( (Tuple) key, values.iterator() );
+      while( iterator.hasNext() )
+        {
+        stackHead.collect( iterator.next(), iterator.nextValues() );
+        }
       }
     catch( StackException exception )
       {

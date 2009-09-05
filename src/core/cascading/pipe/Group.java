@@ -789,7 +789,7 @@ public class Group extends Pipe
    * @param values of type Iterator @return Iterator<Tuple>
    * @return a Tuple Iterator
    */
-  public Iterator<Tuple> iterateReduceValues( Tuple key, Iterator values )
+  public Iterator<Tuple> iterateReduceValues( Tuple key, Iterator<Tuple> values )
     {
     closure.reset( key, values );
 
