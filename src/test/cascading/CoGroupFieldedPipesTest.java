@@ -938,7 +938,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     assertEquals( "wrong number of steps", 2, flow.getSteps().size() );
 
-//    flow.writeDOT( "cogroupcogroupwout.dot" );
+//    flow.writeDOT( "cogrouparoundcogroup.dot" );
 
     flow.complete();
 
