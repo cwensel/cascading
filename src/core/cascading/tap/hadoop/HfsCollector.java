@@ -31,10 +31,10 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class HfsCollector extends TupleEntryCollector
+public class HfsCollector extends HadoopEntryCollector
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( HfsCollector.class );
@@ -71,8 +71,8 @@ public class HfsCollector extends TupleEntryCollector
   private boolean isFileOutputFormat;
   /** Field taskAttemptContext */
   private TaskAttemptContext taskAttemptContext;
-  /** Field hadoopFlowProcess */
-  private HadoopFlowProcess hadoopFlowProcess;
+  /** Field outputCommitter */
+  private OutputCommitter outputCommitter;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -83,7 +83,7 @@ public class HfsCollector extends TupleEntryCollector
    */
   public HfsCollector( Tap tap, FlowContext<Configuration> flowContext ) throws IOException
     {
-    this( tap, null, ( (Flow) flowContext ).getConfiguration() );
+    this( tap, null, flowContext.getConfiguration() );
     }
 
   /**
@@ -137,6 +137,11 @@ public class HfsCollector extends TupleEntryCollector
     try
       {
       taskAttemptContext = Hadoop21TapUtil.getAttemptContext( job.getConfiguration() );
+
+      outputCommitter = outputFormat.getOutputCommitter( taskAttemptContext );
+      outputCommitter.setupJob( taskAttemptContext );
+      outputCommitter.setupTask( taskAttemptContext );
+
       writer = outputFormat.getRecordWriter( taskAttemptContext );
 
       TaskAttemptID taskId = Hadoop21TapUtil.getTaskAttemptId( job.getConfiguration() );
@@ -145,7 +150,7 @@ public class HfsCollector extends TupleEntryCollector
       }
     catch( InterruptedException exception )
       {
-
+      throw new RuntimeException( exception );
       }
     }
 
@@ -179,17 +184,15 @@ public class HfsCollector extends TupleEntryCollector
         }
       catch( InterruptedException exception )
         {
-
+        throw new RuntimeException( exception );
         }
       finally
         {
-//        if( isFileOutputFormat )
-//          {
-//          if( Hadoop18TapUtil.needsTaskCommit( job ) )
-//            Hadoop18TapUtil.commitTask( job );
-//
-//          Hadoop18TapUtil.cleanupJob( job );
-//          }
+        if( outputCommitter.needsTaskCommit( taskAttemptContext ) )
+          outputCommitter.commitTask( taskAttemptContext );
+
+        if( !Flow.isInflow( taskAttemptContext.getConfiguration() ) )
+          outputCommitter.cleanupJob( taskAttemptContext );
         }
       }
     catch( IOException exception )

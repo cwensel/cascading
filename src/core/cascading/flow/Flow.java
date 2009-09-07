@@ -201,6 +201,17 @@ public class Flow implements FlowContext<Configuration>, Runnable
     return conf.getLong( "cascading.flow.job.pollinginterval", 5000 );
     }
 
+  /**
+   * Returns true if the given Configuration was created inside a running Flow.
+   *
+   * @param conf
+   * @return
+   */
+  public static boolean isInflow( Configuration conf )
+    {
+    return conf.get( "cascading.flow.step" ) != null;
+    }
+
   /** Used for testing. */
   protected Flow()
     {

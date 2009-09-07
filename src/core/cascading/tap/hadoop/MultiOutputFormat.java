@@ -21,34 +21,27 @@
 
 package cascading.tap.hadoop;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
+import java.io.IOException;
+
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
  *
  */
-public abstract class HadoopEntryCollector extends TupleEntryCollector
+public class MultiOutputFormat extends FileOutputFormat
   {
-  HadoopFlowProcess hadoopFlowProcess;
-
-  protected HadoopEntryCollector()
+  @Override
+  public RecordWriter getRecordWriter( TaskAttemptContext job ) throws IOException, InterruptedException
     {
+    return null;
     }
 
-  protected HadoopEntryCollector( HadoopFlowProcess hadoopFlowProcess )
+  @Override
+  public OutputCommitter getOutputCommitter( TaskAttemptContext context ) throws IOException
     {
-    this.hadoopFlowProcess = hadoopFlowProcess;
-    }
-
-  protected HadoopEntryCollector( Fields declared, HadoopFlowProcess hadoopFlowProcess )
-    {
-    super( declared );
-    this.hadoopFlowProcess = hadoopFlowProcess;
-    }
-
-  public HadoopFlowProcess getHadoopFlowProcess()
-    {
-    return hadoopFlowProcess;
+    return super.getOutputCommitter( context );
     }
   }

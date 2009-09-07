@@ -124,7 +124,7 @@ public class TapTest extends ClusterTestCase implements Serializable
     @Override
     public void source( Tuple tuple, TupleEntryCollector tupleEntryCollector )
       {
-      if( tuple.toString().matches( "^\\s*#.*$" ) )
+      if( tuple.get( 1 ).toString().matches( "^\\s*#.*$" ) )
         return;
 
       super.source( tuple, tupleEntryCollector );

@@ -118,7 +118,7 @@ public class MultiInputSplit extends InputSplit implements Configurable, Writabl
     for( int i = 0; i < keys.length; i++ )
       config.put( keys[ i ], values[ i ] );
 
-    MultiInputFormat.mergeConf( conf, config, true );
+    Hadoop21TapUtil.mergeConf( conf, config, true );
 
     try
       {

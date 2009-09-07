@@ -33,7 +33,8 @@ import cascading.flow.FlowContext;
 import cascading.flow.hadoop.ConfFlowContext;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
-import cascading.tap.hadoop.MultiInputFormat;
+import cascading.tap.hadoop.Hadoop21TapUtil;
+import cascading.tap.hadoop.MultiOutputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -68,7 +69,7 @@ public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
       {
       collectors = new TupleEntryCollector[taps.length];
 
-      Configuration[] confs = MultiInputFormat.getConfigurations( new Job( flowContext.getConfiguration() ), childConfigs );
+      Configuration[] confs = Hadoop21TapUtil.getConfigurations( new Job( flowContext.getConfiguration() ), childConfigs );
 
       for( int i = 0; i < taps.length; i++ )
         {
@@ -153,12 +154,14 @@ public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
     for( int i = 0; i < getTaps().length; i++ )
       {
       Tap tap = getTaps()[ i ];
-      Job jobConf = new Job( job.getConfiguration() );
+      Job jobCopy = new Job( job.getConfiguration() );
 
-      tap.sinkInit( jobConf );
+      tap.sinkInit( jobCopy );
 
-      childConfigs.add( MultiInputFormat.getConfig( job, jobConf.getConfiguration() ) );
+      childConfigs.add( Hadoop21TapUtil.getConfig( job, jobCopy.getConfiguration() ) );
       }
+
+    job.setOutputFormatClass( MultiOutputFormat.class );
     }
 
   @Override

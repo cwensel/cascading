@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import cascading.flow.Flow;
 import cascading.tap.Tap;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -174,7 +175,7 @@ public class Hadoop18TapUtil
    */
   static void cleanupJob( JobConf conf ) throws IOException
     {
-    if( isInflow( conf ) )
+    if( Flow.isInflow( conf ) )
       return;
 
     Path outputPath = FileOutputFormat.getOutputPath( conf );
@@ -217,11 +218,6 @@ public class Hadoop18TapUtil
       }
 
     return null;
-    }
-
-  static boolean isInflow( JobConf conf )
-    {
-    return conf.get( "cascading.flow.step" ) != null;
     }
 
   private static Path getTaskOutputPath( JobConf conf )

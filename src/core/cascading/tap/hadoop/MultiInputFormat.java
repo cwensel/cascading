@@ -24,7 +24,6 @@ package cascading.tap.hadoop;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +69,7 @@ public class MultiInputFormat extends InputFormat
       {
       for( Configuration fromJob : fromJobs )
         {
-        configs.add( getConfig( toJob, fromJob ) );
+        configs.add( Hadoop21TapUtil.getConfig( toJob, fromJob ) );
         Collections.addAll( allPaths, FileInputFormat.getInputPaths( new Job( fromJob ) ) );
 
         if( !isLocal )
@@ -95,57 +94,6 @@ public class MultiInputFormat extends InputFormat
 
     if( isLocal )
       toJob.getConfiguration().set( "mapred.job.tracker", "local" );
-    }
-
-  public static Map<String, String> getConfig( Job toJob, Configuration fromJob )
-    {
-    Map<String, String> configs = new HashMap<String, String>();
-
-    for( Map.Entry<String, String> entry : fromJob )
-      configs.put( entry.getKey(), entry.getValue() );
-
-    for( Map.Entry<String, String> entry : toJob.getConfiguration() )
-      {
-      String value = configs.get( entry.getKey() );
-
-      if( entry.getValue() == null )
-        continue;
-
-      if( value == null && entry.getValue() == null )
-        configs.remove( entry.getKey() );
-
-      if( value != null && value.equals( entry.getValue() ) )
-        configs.remove( entry.getKey() );
-
-      configs.remove( "mapred.working.dir" );
-      }
-
-    return configs;
-    }
-
-  public static Configuration[] getConfigurations( JobContext job, List<Map<String, String>> configs )
-    {
-    Configuration[] jobConfs = new Configuration[configs.size()];
-
-    for( int i = 0; i < jobConfs.length; i++ )
-      jobConfs[ i ] = mergeConf( job.getConfiguration(), configs.get( i ), false );
-
-    return jobConfs;
-    }
-
-  static Configuration mergeConf( Configuration job, Map<String, String> config, boolean directly )
-    {
-    Configuration currentConf = directly ? job : new Configuration( job );
-
-    for( String key : config.keySet() )
-      {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "merging key: " + key + " value: " + config.get( key ) );
-
-      currentConf.set( key, config.get( key ) );
-      }
-
-    return currentConf;
     }
 
   static InputFormat[] getInputFormats( Configuration[] jobConfs )
@@ -193,7 +141,7 @@ public class MultiInputFormat extends InputFormat
   public List getSplits( JobContext job ) throws IOException, InterruptedException
     {
     List<Map<String, String>> configs = getConfigs( job.getConfiguration() );
-    Configuration[] jobConfs = getConfigurations( job, configs );
+    Configuration[] jobConfs = Hadoop21TapUtil.getConfigurations( job, configs );
     InputFormat[] inputFormats = getInputFormats( jobConfs );
 
     // if only one InputFormat, just return what ever it suggests
@@ -240,7 +188,7 @@ public class MultiInputFormat extends InputFormat
   public RecordReader createRecordReader( InputSplit split, final TaskAttemptContext job ) throws IOException, InterruptedException
     {
     final MultiInputSplit multiSplit = (MultiInputSplit) split;
-    mergeConf( job.getConfiguration(), multiSplit.config, true );
+    Hadoop21TapUtil.mergeConf( job.getConfiguration(), multiSplit.config, true );
 
     try
       {
