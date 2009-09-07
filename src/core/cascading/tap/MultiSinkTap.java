@@ -34,7 +34,6 @@ import cascading.flow.hadoop.ConfFlowContext;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.Hadoop21TapUtil;
-import cascading.tap.hadoop.MultiOutputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -160,8 +159,6 @@ public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
 
       childConfigs.add( Hadoop21TapUtil.getConfig( job, jobCopy.getConfiguration() ) );
       }
-
-    job.setOutputFormatClass( MultiOutputFormat.class );
     }
 
   @Override
