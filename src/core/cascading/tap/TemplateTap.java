@@ -25,10 +25,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.Flow;
 import cascading.flow.FlowContext;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.scheme.Scheme;
+import cascading.tap.hadoop.HadoopEntryCollector;
 import cascading.tap.hadoop.HfsCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -61,7 +60,7 @@ public class TemplateTap extends SinkTap<Configuration>
   /** Field collectors */
   private Map<String, TupleEntryCollector> collectors = new HashMap<String, TupleEntryCollector>();
 
-  private class TemplateCollector extends TupleEntryCollector
+  private class TemplateCollector extends HadoopEntryCollector
     {
     Configuration conf;
 
@@ -79,10 +78,11 @@ public class TemplateTap extends SinkTap<Configuration>
 
       try
         {
-        Tap tap = new Hfs( parent.getScheme(), parent.getQualifiedPath( new Job( conf ) ).toString() );
+        Path targetPath = new Path( parent.getQualifiedPath( new Job( conf ) ), path );
+        Hfs tap = new Hfs( parent.getScheme(), targetPath.toString() );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "creating collector for path: " + new Path( parent.getQualifiedPath( new Job( conf ) ), path ) );
+          LOG.debug( "creating collector for path: " + targetPath );
 
         collector = new HfsCollector( tap, path, conf );
         }
@@ -133,24 +133,25 @@ public class TemplateTap extends SinkTap<Configuration>
 
     }
 
+  // static so we can use in the super() of the Tap ctor
   public static class TemplateScheme extends Scheme
     {
     private final Scheme scheme;
-    private final Fields pathFields;
     private final String pathTemplate;
+    private final Fields pathFields;
 
-    public TemplateScheme( Scheme scheme )
+    public TemplateScheme( Scheme scheme, String pathTemplate )
       {
       this.scheme = scheme;
+      this.pathTemplate = pathTemplate;
       this.pathFields = null;
-      this.pathTemplate = null;
       }
 
     public TemplateScheme( Scheme scheme, String pathTemplate, Fields pathFields )
       {
       this.scheme = scheme;
-      this.pathFields = pathFields;
       this.pathTemplate = pathTemplate;
+      this.pathFields = pathFields;
       }
 
     public Fields getSinkFields()
@@ -205,11 +206,12 @@ public class TemplateTap extends SinkTap<Configuration>
 
     public void sink( TupleEntry tupleEntry, TupleEntryCollector tupleEntryCollector ) throws IOException
       {
+      Tuple values = tupleEntry.getTuple();
+
       if( pathFields != null )
-        {
-        Tuple values = tupleEntry.selectTuple( pathFields );
-        tupleEntryCollector = ( (TemplateCollector) tupleEntryCollector ).getCollector( values.format( pathTemplate ) );
-        }
+        values = tupleEntry.selectTuple( pathFields );
+
+      tupleEntryCollector = ( (TemplateCollector) tupleEntryCollector ).getCollector( values.format( pathTemplate ) );
 
       scheme.sink( tupleEntry, tupleEntryCollector );
       }
@@ -224,7 +226,7 @@ public class TemplateTap extends SinkTap<Configuration>
    */
   public TemplateTap( Hfs parent, String pathTemplate )
     {
-    super( new TemplateScheme( parent.getScheme() ) );
+    super( new TemplateScheme( parent.getScheme(), pathTemplate ) );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     }
@@ -239,7 +241,7 @@ public class TemplateTap extends SinkTap<Configuration>
    */
   public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode )
     {
-    super( new TemplateScheme( parent.getScheme() ), sinkMode );
+    super( new TemplateScheme( parent.getScheme(), pathTemplate ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     }
@@ -258,7 +260,7 @@ public class TemplateTap extends SinkTap<Configuration>
    */
   public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode, boolean keepParentOnDelete )
     {
-    super( new TemplateScheme( parent.getScheme() ), sinkMode );
+    super( new TemplateScheme( parent.getScheme(), pathTemplate ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     this.keepParentOnDelete = keepParentOnDelete;
@@ -363,14 +365,7 @@ public class TemplateTap extends SinkTap<Configuration>
   @Override
   public TupleEntryCollector openForWrite( FlowContext<Configuration> flowContext ) throws IOException
     {
-    Configuration conf = null;
-
-    if( flowContext instanceof Flow )
-      conf = ( (Flow) flowContext ).getConfiguration();
-    else
-      conf = ( (HadoopFlowProcess) flowContext ).getConfiguration();
-
-    return new TemplateCollector( conf );
+    return new TemplateCollector( flowContext.getConfiguration() );
     }
 
   /** @see Tap#makeDirs(org.apache.hadoop.mapreduce.Job) */

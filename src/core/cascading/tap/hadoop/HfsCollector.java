@@ -27,12 +27,12 @@ import cascading.flow.Flow;
 import cascading.flow.FlowContext;
 import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -58,9 +58,9 @@ public class HfsCollector extends HadoopEntryCollector
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
-  private String filenamePattern = "%s%spart-%05d";
+//  private String filenamePattern = "%s%spart-%05d";
   /** Field filename */
-  private String filename;
+  //  private String filename;
   /** Field tap */
   private Tap tap;
   /** Field prefix */
@@ -81,7 +81,7 @@ public class HfsCollector extends HadoopEntryCollector
    * @param flowContext of type JobConf
    * @throws IOException when fails to initialize
    */
-  public HfsCollector( Tap tap, FlowContext<Configuration> flowContext ) throws IOException
+  public HfsCollector( Hfs tap, FlowContext<Configuration> flowContext ) throws IOException
     {
     this( tap, null, flowContext.getConfiguration() );
     }
@@ -94,13 +94,13 @@ public class HfsCollector extends HadoopEntryCollector
    * @param conf   of type JobConf
    * @throws IOException when fails to initialize
    */
-  public HfsCollector( Tap tap, String prefix, Configuration conf ) throws IOException
+  public HfsCollector( Hfs tap, String prefix, Configuration conf ) throws IOException
     {
     this.tap = tap;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.job = new Job( conf );
     this.outputEntry = new TupleEntry( tap.getSinkFields() );
-    this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
+//    this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 
     initalize();
     }
@@ -117,22 +117,18 @@ public class HfsCollector extends HadoopEntryCollector
       }
     catch( ClassNotFoundException exception )
       {
-
+      throw new RuntimeException( exception );
       }
 
     isFileOutputFormat = outputFormat instanceof FileOutputFormat;
 
-    if( isFileOutputFormat )
-      {
-//      Hadoop18TapUtil.setupJob( job );
-
-      if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
-      else
-        filename = String.format( filenamePattern, "", "", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
-
-//      Hadoop18TapUtil.setupTask( job );
-      }
+//    if( isFileOutputFormat )
+//      {
+//      if( prefix != null )
+//        filename = String.format( filenamePattern, prefix, "/", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
+//      else
+//        filename = String.format( filenamePattern, "", "", job.getConfiguration().getInt( "mapred.task.partition", 0 ) );
+//      }
 
     try
       {
@@ -164,7 +160,7 @@ public class HfsCollector extends HadoopEntryCollector
       }
     catch( IOException exception )
       {
-      throw new TapException( "unable to write to: " + filename, exception );
+      throw new TapException( "unable to write to: " + tap.toString(), exception );
       }
     }
 
@@ -173,10 +169,10 @@ public class HfsCollector extends HadoopEntryCollector
     {
     try
       {
-      if( isFileOutputFormat )
-        LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
-      else
-        LOG.info( "closing tap collector for: " + tap.toString() );
+//      if( isFileOutputFormat )
+//        LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
+//      else
+      LOG.info( "closing tap collector for: " + tap.toString() );
 
       try
         {
@@ -197,8 +193,8 @@ public class HfsCollector extends HadoopEntryCollector
       }
     catch( IOException exception )
       {
-      LOG.warn( "exception closing: " + filename, exception );
-      throw new TapException( "exception closing: " + filename, exception );
+      LOG.warn( "exception closing: " + tap, exception );
+      throw new TapException( "exception closing: " + tap, exception );
       }
     }
 
