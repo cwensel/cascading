@@ -113,10 +113,17 @@ public class MapReduceFlow extends Flow
     this.stopJobsOnExit = stopJobsOnExit;
 
     setName( name );
-    setSources( createSources( job ) );
-    setSinks( createSinks( job ) );
-    setTraps( createTraps( job ) );
-    setStepGraph( makeStepGraph( job ) );
+    try
+      {
+      setSources( createSources( job ) );
+      setSinks( createSinks( job ) );
+      setTraps( createTraps( job ) );
+      setStepGraph( makeStepGraph( job ) );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to create flow from job", exception );
+      }
     }
 
   private StepGraph makeStepGraph( Job job )
@@ -133,25 +140,31 @@ public class MapReduceFlow extends Flow
     return stepGraph;
     }
 
-  private Map<String, Tap> createSources( Job job )
+  private Map<String, Tap> createSources( Job job ) throws IOException
     {
     Path[] paths = FileInputFormat.getInputPaths( job );
 
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
     for( Path path : paths )
+      {
+      path = path.getFileSystem( job.getConfiguration() ).makeQualified( path );
+
       taps.put( path.toString(), new Hfs( new NullScheme(), path.toString() ) );
+      }
 
     return taps;
     }
 
-  private Map<String, Tap> createSinks( Job job )
+  private Map<String, Tap> createSinks( Job job ) throws IOException
     {
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
-    String path = FileOutputFormat.getOutputPath( job ).toString();
+    Path path = FileOutputFormat.getOutputPath( job );
 
-    taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ) );
+    path = path.getFileSystem( job.getConfiguration() ).makeQualified( path );
+
+    taps.put( path.toString(), new Hfs( new NullScheme(), path.toString(), deleteSinkOnInit ) );
 
     return taps;
     }
