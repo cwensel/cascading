@@ -21,14 +21,12 @@
 
 package cascading.flow.hadoop;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -75,7 +73,7 @@ public class HadoopUtil
         continue;
 
       // don't let these objects pass, even though toString is called below.
-      if( value instanceof Class || value instanceof JobConf )
+      if( value instanceof Class || value instanceof Configuration )
         continue;
 
       conf.set( key.toString(), value.toString() );
@@ -84,13 +82,13 @@ public class HadoopUtil
     return conf;
     }
 
-  public static Map<Object, Object> createProperties( JobConf jobConf )
-    {
-    Map<Object, Object> properties = new HashMap<Object, Object>();
-
-    for( Map.Entry<String, String> entry : jobConf )
-      properties.put( entry.getKey(), entry.getValue() );
-
-    return properties;
-    }
+//  public static Map<Object, Object> createProperties( JobConf jobConf )
+//    {
+//    Map<Object, Object> properties = new HashMap<Object, Object>();
+//
+//    for( Map.Entry<String, String> entry : jobConf )
+//      properties.put( entry.getKey(), entry.getValue() );
+//
+//    return properties;
+//    }
   }

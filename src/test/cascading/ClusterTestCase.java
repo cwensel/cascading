@@ -46,7 +46,7 @@ public class ClusterTestCase extends CascadingTestCase
   transient private static MiniDFSCluster dfs;
   transient private static FileSystem fileSys;
   transient private static MiniMRCluster mr;
-  transient private static JobConf jobConf;
+  transient private static Configuration conf;
   transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
   transient private boolean enableCluster;
 
@@ -90,39 +90,43 @@ public class ClusterTestCase extends CascadingTestCase
 
   public void setUp() throws IOException
     {
-    if( jobConf != null )
+    if( conf != null )
       return;
 
     if( !enableCluster )
       {
-      jobConf = new JobConf();
+      conf = new Configuration();
       }
     else
       {
       System.setProperty( "test.build.data", "build" );
       new File( "build/test/log" ).mkdirs();
       System.setProperty( "hadoop.log.dir", "build/test/log" );
-      Configuration conf = new Configuration();
+      Configuration hdfsConf = new Configuration();
 
-      dfs = new MiniDFSCluster( conf, 4, true, null );
+      hdfsConf.setBoolean( "dfs.permissions", false );
+
+      dfs = new MiniDFSCluster( hdfsConf, 4, true, null );
       fileSys = dfs.getFileSystem();
       mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
 
-      jobConf = mr.createJobConf();
+      JobConf jobConf = mr.createJobConf();
 
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
       jobConf.setMapSpeculativeExecution( false );
       jobConf.setReduceSpeculativeExecution( false );
+
+      conf = new Configuration( jobConf );
       }
 
-    jobConf.setNumMapTasks( numMapTasks );
-    jobConf.setNumReduceTasks( numReduceTasks );
+    conf.setInt( "mapred.map.tasks", numMapTasks );
+    conf.setInt( "mapred.reduce.tasks", numReduceTasks );
 
     if( logger != null )
       properties.put( "log4j.logger", logger );
 
     Flow.setJobPollingInterval( properties, 500 ); // should speed up tests
-    MultiMapReducePlanner.setConfiguration( properties, jobConf );
+    MultiMapReducePlanner.setConfiguration( properties, conf );
     }
 
   public Map<Object, Object> getProperties()
@@ -138,7 +142,7 @@ public class ClusterTestCase extends CascadingTestCase
     Path path = new Path( inputFile );
 
     if( !fileSys.exists( path ) )
-      FileUtil.copy( new File( inputFile ), fileSys, path, false, jobConf );
+      FileUtil.copy( new File( inputFile ), fileSys, path, false, conf );
     }
 
   public void tearDown() throws IOException

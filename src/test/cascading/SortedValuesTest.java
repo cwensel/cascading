@@ -62,7 +62,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   public SortedValuesTest()
     {
-    super( "sorted values", true );
+    super( "sorted values", false ); // leave cluster off
     }
 
   public void testSortedValues() throws Exception

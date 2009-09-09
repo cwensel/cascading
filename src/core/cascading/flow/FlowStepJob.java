@@ -162,11 +162,11 @@ public class FlowStepJob implements Callable<Throwable>
       }
     catch( InterruptedException exception )
       {
-
+      throw new RuntimeException( exception );
       }
     catch( ClassNotFoundException exception )
       {
-
+      throw new RuntimeException( exception );
       }
 
     blockTillCompleteOrStopped();

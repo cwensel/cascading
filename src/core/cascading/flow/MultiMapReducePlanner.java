@@ -149,6 +149,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       }
     catch( IOException exception )
       {
+      throw new RuntimeException( exception );
       }
 
     Class type = FlowConnector.getApplicationJarClass( properties );
@@ -163,6 +164,8 @@ public class MultiMapReducePlanner extends FlowPlanner
       job.setJarByClass( Util.findMainClass( MultiMapReducePlanner.class ) );
 
     LOG.info( "using application jar: " + job.getJar() );
+
+    conf = job.getConfiguration();
     }
 
   /**
