@@ -255,12 +255,6 @@ public class Hfs extends Tap<Configuration>
     return getDefaultFileSystem( conf ).getUri();
     }
 
-  @Override
-  public boolean isWriteDirect()
-    {
-    return super.isWriteDirect() || stringPath != null && stringPath.matches( "(^https?://.*$)|(^s3tp://.*$)" );
-    }
-
   protected FileSystem getDefaultFileSystem( Configuration conf ) throws IOException
     {
     return FileSystem.get( conf );

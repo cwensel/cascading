@@ -350,16 +350,16 @@ public class TemplateTap extends SinkTap<Configuration>
     return pathTemplate;
     }
 
-  @Override
-  public boolean isWriteDirect()
-    {
-    return true;
-    }
-
   /** @see Tap#getPath() */
   public Path getPath()
     {
     return parent.getPath();
+    }
+
+  @Override
+  public void sinkInit( Job job ) throws IOException
+    {
+    parent.sinkInit( job );
     }
 
   @Override

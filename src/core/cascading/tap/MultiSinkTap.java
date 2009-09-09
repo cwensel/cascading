@@ -41,6 +41,7 @@ import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 
 /**
@@ -128,12 +129,6 @@ public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
     }
 
   @Override
-  public boolean isWriteDirect()
-    {
-    return true;
-    }
-
-  @Override
   public Path getPath()
     {
     return new Path( tempPath );
@@ -148,6 +143,8 @@ public class MultiSinkTap extends SinkTap<Configuration> implements CompositeTap
   @Override
   public void sinkInit( Job job ) throws IOException
     {
+    FileOutputFormat.setOutputPath( job, getPath() ); // set a fake path to satisfy Job
+
     childConfigs = new ArrayList<Map<String, String>>();
 
     for( int i = 0; i < getTaps().length; i++ )

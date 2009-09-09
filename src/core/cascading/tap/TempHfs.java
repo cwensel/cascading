@@ -174,12 +174,6 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public boolean isWriteDirect()
-    {
-    return false;
-    }
-
-  @Override
   public boolean deletePath( Job job ) throws IOException
     {
     Configuration conf = job.getConfiguration();

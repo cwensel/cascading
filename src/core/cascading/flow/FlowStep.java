@@ -92,7 +92,7 @@ public class FlowStep implements Serializable
   /** Field reducerTraps */
   public final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
   /** Field tempSink */
-  TempHfs tempSink; // used if we need to bypass
+  //  TempHfs tempSink; // used if we need to bypass
   /** Field group */
   public Group group;
 
@@ -341,10 +341,6 @@ public class FlowStep implements Serializable
     // init sink first so tempSink can take precedence
     if( sink != null )
       sink.sinkInit( conf );
-
-    // tempSink exists because sink is writeDirect
-    if( tempSink != null )
-      tempSink.sinkInit( conf );
     }
 
   public Tap getMapperTrap( String name )
@@ -443,18 +439,6 @@ public class FlowStep implements Serializable
     catch( IOException exception )
       {
       throw new FlowException( "unable to create tmp job" );
-      }
-
-    if( tempSink != null )
-      {
-      try
-        {
-        tempSink.deletePath( job );
-        }
-      catch( IOException exception )
-        {
-        logWarn( "unable to remove temporary file: " + sink, exception );
-        }
       }
 
     if( sink instanceof TempHfs )

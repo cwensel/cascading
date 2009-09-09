@@ -168,9 +168,6 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
           step.sources.put( (Tap) source, sourceName );
           step.sink = sink;
 
-          if( step.sink.isWriteDirect() )
-            step.tempSink = new TempHfs( "tmp:/" + sink.getPath().toUri().getPath(), true );
-
           FlowElement lhs = source;
 
           step.graph.addVertex( lhs );

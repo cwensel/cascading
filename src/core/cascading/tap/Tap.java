@@ -63,8 +63,6 @@ public abstract class Tap<C> implements FlowElement, Serializable
   /** Field scheme */
   private Scheme scheme;
 
-  /** Field writeDirect */
-  boolean writeDirect = false;
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
 
@@ -107,26 +105,6 @@ public abstract class Tap<C> implements FlowElement, Serializable
   public Scheme getScheme()
     {
     return scheme;
-    }
-
-  /**
-   * Method isWriteDirect returns true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
-   *
-   * @return the writeDirect (type boolean) of this Tap object.
-   */
-  public boolean isWriteDirect()
-    {
-    return writeDirect || getScheme().isWriteDirect();
-    }
-
-  /**
-   * Method setWriteDirect should be set to true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
-   *
-   * @param writeDirect the writeDirect of this Tap object.
-   */
-  public void setWriteDirect( boolean writeDirect )
-    {
-    this.writeDirect = writeDirect;
     }
 
   /**
