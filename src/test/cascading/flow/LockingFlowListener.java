@@ -25,11 +25,16 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 
+import org.apache.log4j.Logger;
+
 /**
  *
  */
 public class LockingFlowListener implements FlowListener
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( LockingFlowListener.class );
+
   public Semaphore started = new Semaphore( 0 );
   public Semaphore stopped = new Semaphore( 0 );
   public Semaphore completed = new Semaphore( 0 );
@@ -46,21 +51,25 @@ public class LockingFlowListener implements FlowListener
 
   public void onStarting( Flow flow )
     {
+    LOG.info( "received started event" );
     started.release();
     }
 
   public void onStopping( Flow flow )
     {
+    LOG.info( "received stopped event" );
     stopped.release();
     }
 
   public void onCompleted( Flow flow )
     {
+    LOG.info( "received completed event" );
     completed.release();
     }
 
   public boolean onThrowable( Flow flow, Throwable throwable )
     {
+    LOG.info( "received onThrowable event" );
     thrown.release();
     return false;
     }

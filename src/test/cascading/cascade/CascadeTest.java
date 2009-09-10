@@ -220,7 +220,7 @@ public class CascadeTest extends ClusterTestCase
     while( true )
       {
       System.out.println( "testing if running" );
-      Thread.sleep( 1000 );
+      Thread.sleep( 200 );
 
       Map<String, Callable<Throwable>> map = LockingFlowListener.getJobsMap( first );
 
