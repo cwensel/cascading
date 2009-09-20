@@ -21,6 +21,11 @@
 
 package cascading.tuple.hadoop;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import cascading.CascadingTestCase;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleInputStream;
@@ -30,11 +35,6 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.serializer.WritableSerialization;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  *
@@ -71,12 +71,12 @@ public class HadoopSerializationTest extends CascadingTestCase
       String aString = "string number " + i;
       double random = Math.random();
 
-      output.writeTuple( new Tuple( i, aString, random, new TestText( aString ), new Tuple( "inner tuple", new BytesWritable( "some string".getBytes() ) ), new BytesWritable( "some string".getBytes() ), new BooleanWritable( false ) ) );
+      output.writeTuple( new Tuple( i, aString, random, new TestText( aString ), new Tuple( "inner tuple", new BytesWritable( "some string".getBytes() ) ), new BytesWritable( Integer.toString( i ).getBytes( "UTF-8" ) ), new BooleanWritable( false ) ) );
       }
 
     output.close();
 
-    assertEquals( "wrong size", 94085L, file.length() ); // just makes sure the file size doesnt change from expected
+    assertEquals( "wrong size", 89967L, file.length() ); // just makes sure the file size doesnt change from expected
 
     TupleInputStream input = new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
 
@@ -89,6 +89,10 @@ public class HadoopSerializationTest extends CascadingTestCase
       assertTrue( "wrong type", tuple.get( 3 ) instanceof TestText );
       assertTrue( "wrong type", tuple.get( 4 ) instanceof Tuple );
       assertTrue( "wrong type", tuple.get( 5 ) instanceof BytesWritable );
+
+      byte[] bytes = ( (BytesWritable) tuple.get( 5 ) ).getBytes();
+      String string = new String( bytes, 0, bytes.length > 1 ? bytes.length - 1 : bytes.length, "UTF-8" );
+      assertEquals( "wrong value", Integer.parseInt( string ), i );
       assertTrue( "wrong type", tuple.get( 6 ) instanceof BooleanWritable );
       k = value;
       }

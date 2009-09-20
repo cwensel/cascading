@@ -74,7 +74,7 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       deserializers.put( className, deserializer );
       }
 
-    Object foundObject = instances.get( className );
+    Object foundObject = null;// instances.get( className );
     Object object = null;
 
     try
