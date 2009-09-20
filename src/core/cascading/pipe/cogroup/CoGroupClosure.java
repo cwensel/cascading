@@ -67,6 +67,8 @@ public class CoGroupClosure extends GroupClosure
     this.codec = getCompressionCodec( flowProcess );
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
     this.conf = ( (HadoopFlowProcess) flowProcess ).getJobConf();
+
+    initLists();
     }
 
   @Override
@@ -99,11 +101,8 @@ public class CoGroupClosure extends GroupClosure
 
   public void build()
     {
-    int numPipes = groupingFields.length;
-    groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
-
-    for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, conf, codec );
+    for( SpillableTupleList group : groups )
+      group.clear();
 
     while( values.hasNext() )
       {
@@ -123,6 +122,15 @@ public class CoGroupClosure extends GroupClosure
 
     for( int i = 1; i < numSelfJoins + 1; i++ )
       groups[ i ] = groups[ 0 ];
+    }
+
+  private void initLists()
+    {
+    int numPipes = groupingFields.length;
+    groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
+
+    for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
+      groups[ i ] = new SpillableTupleList( threshold, conf, codec );
     }
 
   private long getLong( FlowProcess flowProcess, String key, long defaultValue )

@@ -282,6 +282,13 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
+  /** Method clear empties this container so it may be re-used. */
+  public void clear()
+    {
+    files.clear();
+    current.clear();
+    size = 0;
+    }
 
   /**
    * Method iterator returns a Tuple Iterator of all the values in this collection.
