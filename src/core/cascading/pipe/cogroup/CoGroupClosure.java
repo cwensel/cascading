@@ -119,9 +119,6 @@ public class CoGroupClosure extends GroupClosure
 
       groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
       }
-
-    for( int i = 1; i < numSelfJoins + 1; i++ )
-      groups[ i ] = groups[ 0 ];
     }
 
   private void initLists()
@@ -129,8 +126,11 @@ public class CoGroupClosure extends GroupClosure
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
-    for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
+    for( int i = 0; i < numPipes; i++ ) // use numPipes not numSelfJoins, see below
       groups[ i ] = new SpillableTupleList( threshold, conf, codec );
+
+    for( int i = 1; i < numSelfJoins + 1; i++ )
+      groups[ i ] = groups[ 0 ];
     }
 
   private long getLong( FlowProcess flowProcess, String key, long defaultValue )
