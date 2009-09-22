@@ -78,7 +78,7 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     assertEquals( "wrong size", 89967L, file.length() ); // just makes sure the file size doesnt change from expected
 
-    TupleInputStream input = new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
+    TupleInputStream input = new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader( false ) );
 
     int k = -1;
     for( int i = 0; i < 501; i++ )

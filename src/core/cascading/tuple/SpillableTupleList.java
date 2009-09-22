@@ -257,9 +257,9 @@ public class SpillableTupleList implements Iterable<Tuple>
         inputStream = codec.createInputStream( new FileInputStream( file ) );
 
       if( tupleSerialization == null )
-        return new TupleInputStream( inputStream );
+        return new TupleInputStream( inputStream, false );
       else
-        return new TupleInputStream( inputStream, tupleSerialization.getElementReader() );
+        return new TupleInputStream( inputStream, tupleSerialization.getElementReader( false ) );
       }
     catch( IOException exception )
       {

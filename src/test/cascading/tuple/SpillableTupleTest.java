@@ -93,6 +93,7 @@ public class SpillableTupleTest extends CascadingTestCase
       {
       int value = tuple.getInteger( 0 );
       assertTrue( "wrong diff", value - i == 1 );
+      assertEquals( "wrong value", "string number " + count, tuple.get( 3 ).toString() );
       i = value;
       count++;
       }

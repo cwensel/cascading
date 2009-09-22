@@ -8,9 +8,8 @@ unreleased (wip 1.1)
   Changed c.t.Tuple and underlying framework to support j.l.Object instead of j.l.Comparable. Note that
   Tuple#get() returns Comparable to maintain backwards compatibility.
 
-  # disabled temporarily
-  Changed serialization framework to cache deserialized instances to reduce the number of reflected new
-  instance calls. Now all custom types will be reused and should not be cached.
+  Changed serialization framework to cache deserialized instances when possible to reduce the number of reflected new
+  instance calls. Now all custom types might be reused and should not be cached.
 
   Added support for custom j.u.Comparator instances to control the grouping and sort orders in c.p.CoGroup and
   c.p.GroupBy via the c.t.Fields class.
