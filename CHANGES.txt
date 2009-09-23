@@ -8,8 +8,8 @@ unreleased (wip 1.1)
   Changed c.t.Tuple and underlying framework to support j.l.Object instead of j.l.Comparable. Note that
   Tuple#get() returns Comparable to maintain backwards compatibility.
 
-  Changed serialization framework to cache deserialized instances to reduce the number of reflected new
-  instance calls. Now all custom types will be reused and should not be cached.
+  Changed serialization framework to cache deserialized instances when possible to reduce the number of reflected new
+  instance calls. Now all custom types might be reused and should not be cached.
 
   Added support for custom j.u.Comparator instances to control the grouping and sort orders in c.p.CoGroup and
   c.p.GroupBy via the c.t.Fields class.
@@ -71,6 +71,13 @@ unreleased (wip 1.1)
   Added new c.t.Field field set type named Fields.REPLACE. Can only be used as a result selector. Specifies the
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
+
+unreleased
+
+  Fixed bug where in some instances o.a.h.m.JobConf hangs when instantiated during co-grouping.
+
+  Fixed bug in c.CascadingTestCase#invokeBuffer where the output collector was not properly being set. Added
+  new methods on #invokeBuffer and #invokeAggregator to take a groping c.t.TupleEntry.
 
 1.0.15
 

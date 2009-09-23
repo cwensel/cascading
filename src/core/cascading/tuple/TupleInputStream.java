@@ -51,10 +51,10 @@ public class TupleInputStream extends DataInputStream
     this.elementReader = elementReader;
     }
 
-  public TupleInputStream( InputStream inputStream )
+  public TupleInputStream( InputStream inputStream, boolean reuseInstances )
     {
     super( inputStream );
-    this.elementReader = new TupleSerialization().getElementReader();
+    this.elementReader = new TupleSerialization().getElementReader( reuseInstances );
     }
 
   public Tuple readTuple() throws IOException

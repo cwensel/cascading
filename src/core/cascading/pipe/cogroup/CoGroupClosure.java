@@ -30,6 +30,7 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
@@ -57,7 +58,7 @@ public class CoGroupClosure extends GroupClosure
   private int numSelfJoins;
   private CompressionCodec codec;
   private long threshold;
-  private String serializations;
+  private JobConf conf;
 
   public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -65,7 +66,9 @@ public class CoGroupClosure extends GroupClosure
     this.numSelfJoins = numSelfJoins;
     this.codec = getCompressionCodec( flowProcess );
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
-    this.serializations = (String) flowProcess.getProperty( "io.serializations" );
+    this.conf = ( (HadoopFlowProcess) flowProcess ).getJobConf();
+
+    initLists();
     }
 
   @Override
@@ -98,11 +101,8 @@ public class CoGroupClosure extends GroupClosure
 
   public void build()
     {
-    int numPipes = groupingFields.length;
-    groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
-
-    for( int i = 0; i < numPipes; i++ ) // use numPipes not repeat, see below
-      groups[ i ] = new SpillableTupleList( threshold, serializations, codec );
+    for( SpillableTupleList group : groups )
+      group.clear();
 
     while( values.hasNext() )
       {
@@ -119,6 +119,15 @@ public class CoGroupClosure extends GroupClosure
 
       groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
       }
+    }
+
+  private void initLists()
+    {
+    int numPipes = groupingFields.length;
+    groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
+
+    for( int i = 0; i < numPipes; i++ ) // use numPipes not numSelfJoins, see below
+      groups[ i ] = new SpillableTupleList( threshold, conf, codec );
 
     for( int i = 1; i < numSelfJoins + 1; i++ )
       groups[ i ] = groups[ 0 ];

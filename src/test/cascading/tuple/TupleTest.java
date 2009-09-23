@@ -285,7 +285,7 @@ public class TupleTest extends CascadingTestCase
     dataOutputStream.flush();
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray() );
-    TupleInputStream dataInputStream = new TupleInputStream( byteArrayInputStream );
+    TupleInputStream dataInputStream = new TupleInputStream( byteArrayInputStream, false );
 
     Tuple newTuple = new Tuple();
 

@@ -81,21 +81,17 @@ public class SpillableTupleList implements Iterable<Tuple>
    * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value, and
    * the first available compression codec, if any.
    *
-   * @param threshold      of type long
-   * @param serializations of type String
-   * @param codec          of type CompressionCodec
+   * @param threshold of type long
+   * @param conf
+   * @param codec     of type CompressionCodec
    */
-  public SpillableTupleList( long threshold, String serializations, CompressionCodec codec )
+  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
     {
     this.threshold = threshold;
     this.codec = codec;
 
-    if( serializations != null )
-      {
-      JobConf conf = new JobConf();
-      conf.set( "io.serializations", serializations );
+    if( conf != null )
       tupleSerialization = new TupleSerialization( conf );
-      }
     }
 
   /**
@@ -261,9 +257,9 @@ public class SpillableTupleList implements Iterable<Tuple>
         inputStream = codec.createInputStream( new FileInputStream( file ) );
 
       if( tupleSerialization == null )
-        return new TupleInputStream( inputStream );
+        return new TupleInputStream( inputStream, false );
       else
-        return new TupleInputStream( inputStream, tupleSerialization.getElementReader() );
+        return new TupleInputStream( inputStream, tupleSerialization.getElementReader( false ) );
       }
     catch( IOException exception )
       {
@@ -286,6 +282,13 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
+  /** Method clear empties this container so it may be re-used. */
+  public void clear()
+    {
+    files.clear();
+    current.clear();
+    size = 0;
+    }
 
   /**
    * Method iterator returns a Tuple Iterator of all the values in this collection.

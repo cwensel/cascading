@@ -200,6 +200,26 @@ public class FieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testCopy() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/copy", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+    }
+
   public void testSimpleMerge() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
