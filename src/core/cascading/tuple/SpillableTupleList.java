@@ -34,8 +34,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cascading.tuple.hadoop.TupleSerialization;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /**
@@ -85,7 +85,7 @@ public class SpillableTupleList implements Iterable<Tuple>
    * @param conf
    * @param codec     of type CompressionCodec
    */
-  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
+  public SpillableTupleList( long threshold, Configuration conf, CompressionCodec codec )
     {
     this.threshold = threshold;
     this.codec = codec;

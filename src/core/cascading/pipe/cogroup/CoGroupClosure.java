@@ -29,8 +29,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 
@@ -58,7 +58,7 @@ public class CoGroupClosure extends GroupClosure
   private int numSelfJoins;
   private CompressionCodec codec;
   private long threshold;
-  private JobConf conf;
+  private Configuration conf;
 
   public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -66,7 +66,7 @@ public class CoGroupClosure extends GroupClosure
     this.numSelfJoins = numSelfJoins;
     this.codec = getCompressionCodec( flowProcess );
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
-    this.conf = ( (HadoopFlowProcess) flowProcess ).getJobConf();
+    this.conf = ( (HadoopFlowProcess) flowProcess ).getConfiguration();
 
     initLists();
     }
