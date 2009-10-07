@@ -21,6 +21,21 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.pipe.Pipe;
@@ -36,21 +51,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
@@ -592,6 +592,9 @@ public class Flow implements Runnable
     if( thread != null )
       return;
 
+    if( stop )
+      return;
+
     registerShutdownHook();
 
     thread = new Thread( this, ( "flow " + Util.toNull( getName() ) ).trim() );
@@ -618,6 +621,9 @@ public class Flow implements Runnable
     internalStopAllJobs();
 
     handleExecutorShutdown();
+
+    if( !isPreserveTemporaryFiles() )
+      cleanTemporaryFiles( false ); // force cleanup
     }
 
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
@@ -875,7 +881,7 @@ public class Flow implements Runnable
     finally
       {
       if( !isPreserveTemporaryFiles() )
-        cleanTemporaryFiles();
+        cleanTemporaryFiles( stop );
 
       handleThrowableAndMarkFailed();
 
@@ -1037,7 +1043,7 @@ public class Flow implements Runnable
       }
     }
 
-  private void cleanTemporaryFiles()
+  private void cleanTemporaryFiles( boolean stop )
     {
     if( stop ) // unstable to call fs operations during shutdown
       return;
