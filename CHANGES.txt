@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fix bug where c.f.FlowProcess#openTapForRead() included current input file values in iterator.
+
   Fix for intermediate temp files not being cleaned up on c.f.Flow#stop().
 
   Fixed bug where NPE is thrown if all hadoop default properties are not available.
