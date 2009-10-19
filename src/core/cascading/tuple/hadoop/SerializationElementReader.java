@@ -40,23 +40,18 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
 
   /** Field tupleSerialization */
   private final TupleSerialization tupleSerialization;
-  /** Field reuseInstances */
-  private boolean reuseInstances;
 
   /** Field deserializers */
   Map<String, Deserializer> deserializers = new HashMap<String, Deserializer>();
-  /** Field instances */
-  Map<String, Object> instances = new HashMap<String, Object>();
 
   /**
    * Constructor SerializationElementReader creates a new SerializationElementReader instance.
    *
    * @param tupleSerialization of type TupleSerialization
    */
-  public SerializationElementReader( TupleSerialization tupleSerialization, boolean reuseInstances )
+  public SerializationElementReader( TupleSerialization tupleSerialization )
     {
     this.tupleSerialization = tupleSerialization;
-    this.reuseInstances = reuseInstances;
 
     tupleSerialization.initTokenMaps();
     }
@@ -77,7 +72,7 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       deserializers.put( className, deserializer );
       }
 
-    Object foundObject = reuseInstances ? instances.get( className ) : null;
+    Object foundObject = null;
     Object object = null;
 
     try
@@ -91,16 +86,11 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       throw exception;
       }
 
-    if( reuseInstances && foundObject == null )
-      instances.put( className, object );
-
     return object;
     }
 
   public void close()
     {
-    instances.clear();
-
     if( deserializers.size() == 0 )
       return;
 

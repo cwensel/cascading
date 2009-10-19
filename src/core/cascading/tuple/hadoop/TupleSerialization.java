@@ -313,7 +313,7 @@ public class TupleSerialization extends Configured implements Serialization
    */
   public SerializationElementReader getElementReader( boolean reuseInstances )
     {
-    return new SerializationElementReader( this, reuseInstances );
+    return new SerializationElementReader( this );
     }
 
   TupleDeserializer getTupleDeserializer()
