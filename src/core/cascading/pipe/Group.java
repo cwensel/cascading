@@ -69,6 +69,8 @@ public class Group extends Pipe
   private boolean reverseOrder = false;
   /** Field declaredFields */
   protected Fields declaredFields;
+  /** Field resultGroupFields */
+  protected Fields resultGroupFields;
   /** Field repeat */
   private int numSelfJoins = 0;
   /** Field coGrouper */
@@ -93,7 +95,12 @@ public class Group extends Pipe
    */
   protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
-    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, null );
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, null, null );
+    }
+
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, null );
     }
 
   /**
@@ -109,6 +116,11 @@ public class Group extends Pipe
   protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ), declaredFields, joiner );
+    }
+
+  protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ), declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -185,6 +197,11 @@ public class Group extends Pipe
     this( groupName, pipes, groupFields, declaredFields, null );
     }
 
+  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    this( groupName, pipes, groupFields, declaredFields, resultGroupFields, null );
+    }
+
   /**
    * Constructor Group creates a new Group instance.
    *
@@ -195,7 +212,12 @@ public class Group extends Pipe
    */
   protected Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
-    this( null, pipes, groupFields, declaredFields, joiner );
+    this( null, pipes, groupFields, declaredFields, null, joiner );
+    }
+
+  protected Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    this( null, pipes, groupFields, declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -207,7 +229,7 @@ public class Group extends Pipe
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
-  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
+  protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this.groupName = groupName;
 
@@ -229,7 +251,11 @@ public class Group extends Pipe
       addGroupFields( pipes[ i ], groupFields[ i ] );
       }
 
+    if( resultGroupFields != null && last != resultGroupFields.size() )
+      throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+
     this.declaredFields = declaredFields;
+    this.resultGroupFields = resultGroupFields;
     this.joiner = joiner;
 
     verifyCoGrouper();
@@ -251,6 +277,12 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
+    this.groupName = groupName;
+    }
+
   /**
    * Constructor Group creates a new Group instance.
    *
@@ -265,6 +297,12 @@ public class Group extends Pipe
   protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
+    this.groupName = groupName;
+    }
+
+  protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
     this.groupName = groupName;
     }
 
@@ -325,6 +363,16 @@ public class Group extends Pipe
     this.declaredFields = declaredFields;
     }
 
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
+    {
+    this( pipe, groupFields, numSelfJoins );
+    this.declaredFields = declaredFields;
+    this.resultGroupFields = resultGroupFields;
+
+    if( resultGroupFields != null && groupFields.size() != resultGroupFields.size() )
+      throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+    }
+
   /**
    * Constructor Group creates a new Group instance.
    *
@@ -337,6 +385,14 @@ public class Group extends Pipe
   protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields );
+    this.joiner = joiner;
+
+    verifyCoGrouper();
+    }
+
+  protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
     this.joiner = joiner;
 
     verifyCoGrouper();
@@ -387,6 +443,12 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
+    {
+    this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
+    this.groupName = groupName;
+    }
+
   /**
    * Constructor Group creates a new Group instance.
    *
@@ -400,6 +462,12 @@ public class Group extends Pipe
   protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields, joiner );
+    this.groupName = groupName;
+    }
+
+  protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
     this.groupName = groupName;
     }
 
@@ -848,7 +916,7 @@ public class Group extends Pipe
     Fields declared = resolveDeclared( incomingScopes );
 
     // for Group, the outgoing fields are the same as those declared
-    return new Scope( getName(), declared, groupingSelectors, sortingSelectors, declared, isGroupBy() );
+    return new Scope( getName(), declared, resultGroupFields, groupingSelectors, sortingSelectors, declared, isGroupBy() );
     }
 
   Map<String, Fields> resolveGroupingSelectors( Set<Scope> incomingScopes )

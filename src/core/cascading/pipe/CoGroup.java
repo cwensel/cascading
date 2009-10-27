@@ -33,6 +33,9 @@ import cascading.tuple.Fields;
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
  * to overcome field name collisions.
  * <p/>
+ * {@code resultGroupFields} value sets the resulting grouping fieldname. By default, if all 'groupFields' values
+ * are equal, that value will be used for resultGroupFields.
+ * <p/>
  * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
  * <p/>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
@@ -69,6 +72,21 @@ public class CoGroup extends Group
   /**
    * Constructor CoGroup creates a new CoGroup instance.
    *
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
+  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
    * @param rhs            of type Pipe
@@ -79,6 +97,22 @@ public class CoGroup extends Group
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
+  public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -145,6 +179,20 @@ public class CoGroup extends Group
   /**
    * Constructor CoGroup creates a new CoGroup instance.
    *
+   * @param pipes             of type Pipe[]
+   * @param groupFields       of type Fields[]
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
+  public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( pipes, groupFields, declaredFields, resultGroupFields, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
    * @param groupName   of type String
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
@@ -170,6 +218,20 @@ public class CoGroup extends Group
   /**
    * Constructor CoGroup creates a new CoGroup instance.
    *
+   * @param groupName         of type String
+   * @param pipes             of type Pipe[]
+   * @param groupFields       of type Fields[]
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    super( groupName, pipes, groupFields, declaredFields, resultGroupFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
    * @param groupName      of type String
    * @param pipes          of type Pipe[]
    * @param groupFields    of type Fields[]
@@ -178,7 +240,22 @@ public class CoGroup extends Group
    */
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
-    super( groupName, pipes, groupFields, declaredFields, joiner );
+    super( groupName, pipes, groupFields, declaredFields, null, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param groupName         of type String
+   * @param pipes             of type Pipe[]
+   * @param groupFields       of type Fields[]
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type CoGrouper
+   */
+  public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( groupName, pipes, groupFields, declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -199,6 +276,22 @@ public class CoGroup extends Group
   /**
    * Constructor CoGroup creates a new CoGroup instance.
    *
+   * @param groupName         of type String
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
    * @param groupName      of type String
    * @param lhs            of type Pipe
    * @param lhsGroupFields of type Fields
@@ -210,6 +303,23 @@ public class CoGroup extends Group
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param groupName         of type String
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
+  public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -267,6 +377,20 @@ public class CoGroup extends Group
     }
 
   /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
+    {
+    super( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
+    }
+
+  /**
    * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
@@ -279,6 +403,21 @@ public class CoGroup extends Group
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( pipe, groupFields, numSelfJoins, declaredFields, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
+  public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
     }
 
   /**
@@ -324,6 +463,21 @@ public class CoGroup extends Group
     }
 
   /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param groupName         of type String
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
+    {
+    super( groupName, pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
+    }
+
+  /**
    * Constructor CoGroup creates a new CoGroup instance that performs numSelfJoins number of self joins on the
    * given {@link Pipe} instance.
    *
@@ -337,6 +491,22 @@ public class CoGroup extends Group
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( groupName, pipe, groupFields, numSelfJoins, declaredFields, joiner );
+    }
+
+  /**
+   * Constructor CoGroup creates a new CoGroup instance.
+   *
+   * @param groupName         of type String
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
+  public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
+    {
+    super( groupName, pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
     }
 
   /**

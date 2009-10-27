@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added support for resultGroupFields in c.p.CoGroup. This allows the outgoig grouping fields to be set. 
+
   Added c.t.h.BytesSerialization and c.t.h.BytesComparator to allow for c.t.Tuple instances
   to hold raw byte arrays (byte[]), and allow joining, grouping, and secondary sorting.
 

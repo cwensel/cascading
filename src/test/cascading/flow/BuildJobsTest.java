@@ -35,6 +35,7 @@ import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
+import cascading.operation.aggregator.First;
 import cascading.operation.assertion.AssertNotNull;
 import cascading.operation.assertion.AssertNull;
 import cascading.operation.expression.ExpressionFilter;
@@ -829,6 +830,56 @@ public class BuildJobsTest extends CascadingTestCase
 //    flow.writeDOT( "cogroupcogroup.dot" );
 
     assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
+    }
+
+  public void testCoGroupWithResultGroupFieldsDefault() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "lhs", "num2", "rhs" ) );
+
+    splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "num", "value" ) );
+
+    Flow countFlow = new FlowConnector().connect( sources, sink, splice );
+    }
+
+  public void testCoGroupWithResultGroupFields() throws Exception
+    {
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "bar" );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "lhs", "num2", "rhs" ), new Fields( "somenum" ) );
+
+    splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "somenum", "value" ) );
+
+    Flow countFlow = new FlowConnector().connect( sources, sink, splice );
     }
 
   public void testDirectCoGroup() throws Exception

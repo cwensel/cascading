@@ -21,11 +21,13 @@
 
 package cascading.flow;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
-
-import java.io.Serializable;
-import java.util.Map;
 
 /** Class Scope is an internal representation of the linkages between operations. */
 public class Scope implements Serializable
@@ -149,7 +151,7 @@ public class Scope implements Serializable
    * @param groupingSelectors of type Map<String, Fields>
    * @param outValuesFields   of type Fields
    */
-  public Scope( String name, Fields declaredFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
+  public Scope( String name, Fields declaredFields, Fields outGroupingFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
     {
     this.name = name;
     this.kind = Kind.GROUP;
@@ -162,6 +164,7 @@ public class Scope implements Serializable
       throw new IllegalArgumentException( "values may not be null" );
 
     this.declaredFields = declaredFields;
+    this.outGroupingFields = outGroupingFields;
     this.groupingSelectors = groupingSelectors;
     this.sortingSelectors = sortingSelectors; // null ok
     this.outValuesFields = outValuesFields;
@@ -365,6 +368,16 @@ public class Scope implements Serializable
     Fields first = groupingSelectors.values().iterator().next();
 
     if( groupingSelectors.size() == 1 || isGroup() && isGroupBy )
+      return first;
+
+    // if given by user
+    if( outGroupingFields != null )
+      return outGroupingFields;
+
+    // if all have the same names, then use for grouping
+    Set<Fields> set = new HashSet<Fields>( groupingSelectors.values() );
+
+    if( set.size() == 1 )
       return first;
 
     return Fields.size( first.size() );
