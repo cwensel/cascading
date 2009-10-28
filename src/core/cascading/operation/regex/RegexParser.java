@@ -38,8 +38,9 @@ import cascading.tuple.Tuple;
  * Sometimes its useful to parse out a value from a key/value pair in a string, if the key exists. If the key does
  * not exist, returning an empty string insted of failing is typically expected.
  * <p/>
- * The following regex can extract a value from {@code key=value} if the key exists:<br/>
- * <pre>(?<=keyname)[^=]*|$</pre>
+ * The following regex can extract a value from {@code key1=value1&key2=value2} if key1 exists, otherwise an
+ * empty string is returned:<br/>
+ * <pre>(?<=key1=)[^&]*|$</pre>
  */
 public class RegexParser extends RegexOperation<Matcher> implements Function<Matcher>
   {
