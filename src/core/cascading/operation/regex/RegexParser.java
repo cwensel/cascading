@@ -21,8 +21,8 @@
 
 package cascading.operation.regex;
 
-import java.util.regex.Matcher;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -32,7 +32,15 @@ import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** Class RegexParser is used to extract a matched regex from an incoming argument value. */
+/**
+ * Class RegexParser is used to extract a matched regex from an incoming argument value.
+ * <p/>
+ * Sometimes its useful to parse out a value from a key/value pair in a string, if the key exists. If the key does
+ * not exist, returning an empty string insted of failing is typically expected.
+ * <p/>
+ * The following regex can extract a value from {@code key=value} if the key exists:<br/>
+ * <pre>(?<=keyname)[^=]*|$</pre>
+ */
 public class RegexParser extends RegexOperation<Matcher> implements Function<Matcher>
   {
   /** Field groups */

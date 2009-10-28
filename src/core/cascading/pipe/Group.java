@@ -82,6 +82,7 @@ public class Group extends Pipe
 
   /** Field pipePos */
   private transient Map<String, Integer> pipePos;
+  /** Field closure */
   private GroupClosure closure;
 
   /**
@@ -98,6 +99,16 @@ public class Group extends Pipe
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, null, null );
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
   protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, null );
@@ -118,6 +129,17 @@ public class Group extends Pipe
     this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ), declaredFields, joiner );
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
   protected Group( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this( Pipe.pipes( lhs, rhs ), Fields.fields( lhsGroupFields, rhsGroupFields ), declaredFields, resultGroupFields, joiner );
@@ -197,6 +219,15 @@ public class Group extends Pipe
     this( groupName, pipes, groupFields, declaredFields, null );
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName         of type String
+   * @param pipes             of type Pipe[]
+   * @param groupFields       of type Fields[]
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
   protected Group( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields )
     {
     this( groupName, pipes, groupFields, declaredFields, resultGroupFields, null );
@@ -215,6 +246,15 @@ public class Group extends Pipe
     this( null, pipes, groupFields, declaredFields, null, joiner );
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipes             of type Pipe[]
+   * @param groupFields       of type Fields[]
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
   protected Group( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this( null, pipes, groupFields, declaredFields, resultGroupFields, joiner );
@@ -277,6 +317,17 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName         of type String
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
   protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
@@ -300,6 +351,18 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName         of type String
+   * @param lhs               of type Pipe
+   * @param lhsGroupFields    of type Fields
+   * @param rhs               of type Pipe
+   * @param rhsGroupFields    of type Fields
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
   protected Group( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
@@ -363,6 +426,15 @@ public class Group extends Pipe
     this.declaredFields = declaredFields;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
   protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
     {
     this( pipe, groupFields, numSelfJoins );
@@ -390,6 +462,16 @@ public class Group extends Pipe
     verifyCoGrouper();
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
   protected Group( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
@@ -443,6 +525,16 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName         of type String
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   */
   protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
@@ -465,6 +557,17 @@ public class Group extends Pipe
     this.groupName = groupName;
     }
 
+  /**
+   * Constructor Group creates a new Group instance.
+   *
+   * @param groupName         of type String
+   * @param pipe              of type Pipe
+   * @param groupFields       of type Fields
+   * @param numSelfJoins      of type int
+   * @param declaredFields    of type Fields
+   * @param resultGroupFields of type Fields
+   * @param joiner            of type Joiner
+   */
   protected Group( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     this( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
