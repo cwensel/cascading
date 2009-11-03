@@ -136,9 +136,26 @@ public class FieldsTest extends CascadingTestCase
 
     Fields renamed = fields.rename( from, to );
 
+    assertTrue( "not isOrdered", renamed.isOrdered() );
     assertEquals( "not equal: ", 4, renamed.size() );
     assertEquals( "not equal: ", 0, renamed.get( 0 ) );
     assertEquals( "not equal: ", 1, renamed.get( 1 ) );
+    assertEquals( "not equal: ", "c", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "d", renamed.get( 3 ) );
+    }
+
+  public void testRename4()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+    Fields from = new Fields( "a", "b" );
+    Fields to = new Fields( 3, 4 );
+
+    Fields renamed = fields.rename( from, to );
+
+    assertTrue( "isOrdered", !renamed.isOrdered() );
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", 3, renamed.get( 0 ) );
+    assertEquals( "not equal: ", 4, renamed.get( 1 ) );
     assertEquals( "not equal: ", "c", renamed.get( 2 ) );
     assertEquals( "not equal: ", "d", renamed.get( 3 ) );
     }

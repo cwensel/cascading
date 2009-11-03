@@ -910,18 +910,14 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Set<String> names = new HashSet<String>();
 
-    // init the Field
-    Fields result = size( this.size() );
-
-    // copy over field names from this side
-    copy( names, result, this, 0 );
+    Comparable[] newFields = Arrays.copyOf( this.fields, this.fields.length );
 
     int[] pos = getPos( from );
 
     for( int i = 0; i < pos.length; i++ )
-      result.fields[ pos[ i ] ] = to.fields[ i ];
+      newFields[ pos[ i ] ] = to.fields[ i ];
 
-    return result;
+    return new Fields( newFields );
     }
 
   /**
