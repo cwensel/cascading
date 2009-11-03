@@ -885,6 +885,46 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
+   * Method rename will rename the from fields to the values in to to fields. Fields may contain field names, or
+   * positions.
+   * <p/>
+   * Using positions is useful to remove a field name put keep its place in the Tuple stream.
+   *
+   * @param from of type Fields
+   * @param to   of type Fields
+   * @return Fields
+   */
+  public Fields rename( Fields from, Fields to )
+    {
+    if( this.isSubstitution() || this.isUnknown() )
+      throw new TupleException( "cannot rename fields in a substitution or unkown Fields instance: " + this.print() );
+
+    if( from.size() != to.size() )
+      throw new TupleException( "from and to fields must be the same size" );
+
+    if( from.isSubstitution() || from.isUnknown() )
+      throw new TupleException( "from fields may not be a substitution or unknown" );
+
+    if( to.isSubstitution() || to.isUnknown() )
+      throw new TupleException( "to fields may not be a substitution or unknown" );
+
+    Set<String> names = new HashSet<String>();
+
+    // init the Field
+    Fields result = size( this.size() );
+
+    // copy over field names from this side
+    copy( names, result, this, 0 );
+
+    int[] pos = getPos( from );
+
+    for( int i = 0; i < pos.length; i++ )
+      result.fields[ pos[ i ] ] = to.fields[ i ];
+
+    return result;
+    }
+
+  /**
    * Method project will return a new Fields instance similar to the given fields instance
    * except any absolute positional elements will be replaced by the current field names, if any.
    *

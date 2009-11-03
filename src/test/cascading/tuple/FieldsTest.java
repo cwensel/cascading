@@ -98,6 +98,51 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  public void testRename()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+    Fields from = new Fields( "a", "b" );
+    Fields to = new Fields( "A", "B" );
+
+    Fields renamed = fields.rename( from, to );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "A", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "B", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "c", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "d", renamed.get( 3 ) );
+    }
+
+  public void testRename2()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+    Fields from = new Fields( 0, 1 );
+    Fields to = new Fields( "A", "B" );
+
+    Fields renamed = fields.rename( from, to );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "A", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "B", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "c", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "d", renamed.get( 3 ) );
+    }
+
+  public void testRename3()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+    Fields from = new Fields( "a", "b" );
+    Fields to = new Fields( 0, 1 );
+
+    Fields renamed = fields.rename( from, to );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", 0, renamed.get( 0 ) );
+    assertEquals( "not equal: ", 1, renamed.get( 1 ) );
+    assertEquals( "not equal: ", "c", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "d", renamed.get( 3 ) );
+    }
+
   public void testDiff()
     {
     Fields fieldA = new Fields( "a", "b" );
