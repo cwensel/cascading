@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.17
 
   Changed behavior when cleaning temp files that allows shutdown to continue even if an exception is thrown
   during temp file delete.
