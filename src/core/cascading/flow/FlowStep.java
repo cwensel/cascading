@@ -21,6 +21,17 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
@@ -47,17 +58,6 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -337,9 +337,10 @@ public class FlowStep implements Serializable
         {
         tempSink.deletePath( jobConf );
         }
-      catch( IOException exception )
+      catch( Exception exception )
         {
-        logWarn( "unable to remove temporary file: " + sink, exception );
+        // sink all exceptions, don't fail app
+        logWarn( "unable to remove temporary file: " + tempSink, exception );
         }
       }
 
@@ -349,8 +350,9 @@ public class FlowStep implements Serializable
         {
         sink.deletePath( jobConf );
         }
-      catch( IOException exception )
+      catch( Exception exception )
         {
+        // sink all exceptions, don't fail app
         logWarn( "unable to remove temporary file: " + sink, exception );
         }
       }

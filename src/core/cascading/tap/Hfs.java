@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.tap.hadoop.TapCollector;
@@ -462,6 +463,12 @@ public class Hfs extends Tap
 
   public TupleEntryIterator openForRead( JobConf conf ) throws IOException
     {
+    Map<Object, Object> properties = HadoopUtil.createProperties( conf );
+
+    properties.remove( "mapred.input.dir" );
+
+    conf = HadoopUtil.createJobConf( properties, null );
+
     return new TupleEntryIterator( getSourceFields(), new TapIterator( this, conf ) );
     }
 

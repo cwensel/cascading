@@ -134,7 +134,7 @@ public class TupleSerialization extends Configured implements Serialization
 
   static String getSerializations( JobConf jobConf )
     {
-    return jobConf.get( "io.serializations" );
+    return jobConf.get( "io.serializations", "" );
     }
 
   /** Constructor TupleSerialization creates a new TupleSerialization instance. */

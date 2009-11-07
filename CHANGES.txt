@@ -1,5 +1,16 @@
 Cascading Change Log
 
+1.0.17
+
+  Changed behavior when cleaning temp files that allows shutdown to continue even if an exception is thrown
+  during temp file delete.
+
+  Fix bug where c.f.FlowProcess#openTapForRead() included current input file values in iterator.
+
+  Fix for intermediate temp files not being cleaned up on c.f.Flow#stop().
+
+  Fixed bug where NPE is thrown if all hadoop default properties are not available.
+
 1.0.16
 
   Fixed bug where in some instances o.a.h.m.JobConf hangs when instantiated during co-grouping.
