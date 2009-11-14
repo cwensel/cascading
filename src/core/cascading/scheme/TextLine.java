@@ -21,6 +21,8 @@
 
 package cascading.scheme;
 
+import java.io.IOException;
+
 import cascading.tap.Tap;
 import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
@@ -28,17 +30,28 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.*;
-
-import java.io.IOException;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.TextOutputFormat;
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
  * lines. Either line-feed or carriage-return are used to signal end of line.
  * <p/>
- * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line". But if
- * a {@link Fields} is passed on the constructor with one field, the return tuples will simply
- * be the "line" value using the given field name.
+ * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line".
+ * <p/>
+ * Many of the constructors take both "sourceFields" and "sinkFields". sourceFields denote the field names
+ * to be used instead of the names "offset" and "line". sinkFields is a selector and is by default {@link Fields#ALL}.
+ * Any available field names can be given if only a subset of the incoming fields should be used.
+ * <p/>
+ * If a {@link Fields} instance is passed on the constructor as sourceFields having only one field, the return tuples
+ * will simply be the "line" value using the given field name.
+ * <p/>
+ * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
+ * writing out the line.
  * <p/>
  * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
  * bi-directional, so zip files cannot be written.

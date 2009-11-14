@@ -21,26 +21,27 @@
 
 package cascading.flow;
 
+import java.io.File;
 import java.io.IOException;
 
-import cascading.CascadingTestCase;
+import cascading.ClusterTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 
 /**
  *
  */
-public class MapReduceFlowTest extends CascadingTestCase
+public class MapReduceFlowTest extends ClusterTestCase
   {
   String inputFileApache = "build/test/data/apache.10.txt";
   String outputPath = "build/test/output/mapreduceflow/";
@@ -50,12 +51,19 @@ public class MapReduceFlowTest extends CascadingTestCase
 
   public MapReduceFlowTest()
     {
-    super( "map-reduce flow test" );
+    super( "map-reduce flow test", true );
     }
 
   public void testFlow() throws IOException
     {
-    JobConf conf = new JobConf();
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    JobConf defaultConf = MultiMapReducePlanner.getJobConf( getProperties() );
+
+    JobConf conf = new JobConf( defaultConf );
     conf.setJobName( "mrflow" );
 
     conf.setOutputKeyClass( LongWritable.class );
@@ -81,7 +89,14 @@ public class MapReduceFlowTest extends CascadingTestCase
 
   public void testCascade() throws IOException
     {
-    JobConf firstConf = new JobConf();
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    JobConf defaultConf = MultiMapReducePlanner.getJobConf( getProperties() );
+
+    JobConf firstConf = new JobConf( defaultConf );
     firstConf.setJobName( "first" );
 
     firstConf.setOutputKeyClass( LongWritable.class );
@@ -98,7 +113,7 @@ public class MapReduceFlowTest extends CascadingTestCase
 
     Flow firstFlow = new MapReduceFlow( firstConf, true );
 
-    JobConf secondConf = new JobConf();
+    JobConf secondConf = new JobConf( defaultConf );
     secondConf.setJobName( "second" );
 
     secondConf.setOutputKeyClass( LongWritable.class );
@@ -115,7 +130,7 @@ public class MapReduceFlowTest extends CascadingTestCase
 
     Flow secondFlow = new MapReduceFlow( secondConf, true );
 
-    JobConf thirdConf = new JobConf();
+    JobConf thirdConf = new JobConf( defaultConf );
     thirdConf.setJobName( "third" );
 
     thirdConf.setOutputKeyClass( LongWritable.class );
@@ -134,7 +149,8 @@ public class MapReduceFlowTest extends CascadingTestCase
 
     CascadeConnector cascadeConnector = new CascadeConnector();
 
-    Cascade cascade = cascadeConnector.connect( firstFlow, secondFlow, thirdFlow );
+    // pass out of order
+    Cascade cascade = cascadeConnector.connect( thirdFlow, firstFlow, secondFlow );
 
     cascade.complete();
 
