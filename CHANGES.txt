@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Fixed bad cast of j.l.Error when caught in map/reduce pipeline stack.  
+
   Added c.t.Fields#rename to simplify Fields instance manipulations.
 
   Added support for resultGroupFields in c.p.CoGroup. This allows the outgoig grouping fields to be set.
