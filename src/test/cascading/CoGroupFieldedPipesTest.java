@@ -33,6 +33,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.PlannerException;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
@@ -380,9 +381,58 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\tb\t5\tE" );
     results.add( "5\te\t5\tE" );
 
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+
+    iterator.close();
+    }
+
+
+  public void testCoGroupInnerSingleField() throws Exception
+    {
+    if( !new File( inputFileLowerOffset ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLowerOffset );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupinnersingle/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char" ), " " ), new Fields( "num1" ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char" ), " " ), new Fields( "num2" ) );
+
+    Pipe join = new CoGroup( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
+
+    join = new Every( join, new Count() );
+
+    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, join );
+
+//    countFlow.writeDOT( "cogroup.dot" );
+//    System.out.println( "countFlow =\n" + countFlow );
+
+    countFlow.complete();
+
+    validateLength( countFlow, 2, null );
+
+    TupleEntryIterator iterator = countFlow.openSink();
+
+    Set<String> results = new HashSet<String>();
+
+    results.add( "1\t1" );
+    results.add( "5\t2" );
+
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -457,13 +507,13 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\te\t5\tE" );
     results.add( "6\tc\tnull\tnull" );
 
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -532,10 +582,10 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\te\t5\tE" );
     results.add( "6\tc\tnull\tnull" );
 
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -608,12 +658,12 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\tb\t5\tE" );
     results.add( "5\te\t5\tE" );
 
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }
@@ -701,12 +751,12 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     results.add( "5\tb\t5\tE\t5\te" );
     results.add( "5\te\t5\tE\t5\te" );
 
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertNotNull( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
 
     iterator.close();
     }

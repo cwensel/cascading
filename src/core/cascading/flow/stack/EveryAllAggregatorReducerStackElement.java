@@ -66,6 +66,9 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
 
   private void operateEveryHandlers( TupleEntry keyEntry, Iterator values )
     {
+    if( !values.hasNext() )
+      return;
+
     for( Every.EveryHandler handler : everyHandlers )
       {
       try

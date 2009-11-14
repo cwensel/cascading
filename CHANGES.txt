@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Fix for case when an c.o.Aggregator#start is called when there are no values to iterate across in current grouping.
+
 1.0.17
 
   Changed behavior when cleaning temp files that allows shutdown to continue even if an exception is thrown
