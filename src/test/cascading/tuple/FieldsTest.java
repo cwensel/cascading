@@ -211,7 +211,10 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 1, got.get( 1 ) );
     }
 
-  /** this one is funky. regardless of the input, positions are always monotonically increasing */
+  /**
+   * this test is reverted from original. we don't want to do the following comment
+   * ~~this one is funky. regardless of the input, positions are always monotonically increasing~~
+   */
   public void testSelectPos2()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -220,8 +223,8 @@ public class FieldsTest extends CascadingTestCase
     Fields got = declarationA.select( selectA );
 
     assertEquals( "not equal: ", 2, got.size() );
-    assertEquals( "not equal: ", 0, got.get( 0 ) );
-    assertEquals( "not equal: ", 1, got.get( 1 ) );
+    assertEquals( "not equal: ", 1, got.get( 0 ) );
+    assertEquals( "not equal: ", 0, got.get( 1 ) );
     }
 
   public void testSelectMixed()
@@ -270,8 +273,8 @@ public class FieldsTest extends CascadingTestCase
     Fields got = declarationA.select( selectA );
 
     assertEquals( "not equal: ", 4, got.size() );
-    assertEquals( "not equal: ", 0, got.get( 0 ) );
-    assertEquals( "not equal: ", 1, got.get( 1 ) );
+    assertEquals( "not equal: ", 2, got.get( 0 ) );
+    assertEquals( "not equal: ", 3, got.get( 1 ) );
     assertEquals( "not equal: ", "a", got.get( 2 ) );
     assertEquals( "not equal: ", "b", got.get( 3 ) );
     }
@@ -322,8 +325,8 @@ public class FieldsTest extends CascadingTestCase
     Fields got = declarationA.select( selectA );
 
     assertEquals( "not equal: ", 4, got.size() );
-    assertEquals( "not equal: ", 0, got.get( 0 ) );
-    assertEquals( "not equal: ", 1, got.get( 1 ) );
+    assertEquals( "not equal: ", 2, got.get( 0 ) );
+    assertEquals( "not equal: ", 3, got.get( 1 ) );
     assertEquals( "not equal: ", "a", got.get( 2 ) );
     assertEquals( "not equal: ", "b", got.get( 3 ) );
     }

@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fix for bug when selecting positional Fields from positional Fields.
+
   Fix for case when an c.o.Aggregator#start is called when there are no values to iterate across in current grouping.
 
 1.0.17
