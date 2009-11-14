@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bad cast of j.l.Error when caught in map/reduce pipeline stack. 
+
   Fix for bug when selecting positional Fields from positional Fields.
 
   Fix for case when an c.o.Aggregator#start is called when there are no values to iterate across in current grouping.
