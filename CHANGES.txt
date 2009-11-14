@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased
 
-  Fixed bad cast of j.l.Error when caught in map/reduce pipeline stack. 
+  Fix for edge case where Cascading jars are stored in Hadoop classpath and deserialization of c.f.Flow fails. 
+
+  Fix for bad cast of j.l.Error when caught in map/reduce pipeline stack.
 
   Fix for bug when selecting positional Fields from positional Fields.
 
