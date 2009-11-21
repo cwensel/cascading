@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Fixed bad cast of j.l.Error when caught in map/reduce pipeline stack.  
+  Added compression of object serialization and deserialization, on by default. This improves reliability
+  of very large jobs with very large numbers of input files.
+
+  Fixed bad cast of j.l.Error when caught in map/reduce pipeline stack.
 
   Added c.t.Fields#rename to simplify Fields instance manipulations.
 

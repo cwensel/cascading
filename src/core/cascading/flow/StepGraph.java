@@ -108,8 +108,8 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   private String makeStepName( Map<String, FlowStep> steps, int numJobs, String sinkPath )
     {
     // todo make the long form optional via a property
-    if( sinkPath.length() > 110 )
-      sinkPath = String.format( "...%110s", sinkPath.substring( sinkPath.length() - 110 ) );
+    if( sinkPath.length() > 75 )
+      sinkPath = String.format( "...%75s", sinkPath.substring( sinkPath.length() - 75 ) );
 
     return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
     }

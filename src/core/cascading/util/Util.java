@@ -37,6 +37,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -71,10 +73,23 @@ public class Util
    */
   public static String serializeBase64( Object object ) throws IOException
     {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream( bytes );
+    return serializeBase64( object, true );
+    }
 
-    out.writeObject( object );
+  public static String serializeBase64( Object object, boolean compress ) throws IOException
+    {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+
+    try
+      {
+      out.writeObject( object );
+      }
+    finally
+      {
+      out.close();
+      }
 
     return new String( Base64.encodeBase64( bytes.toByteArray() ) );
     }
@@ -87,19 +102,32 @@ public class Util
    */
   public static Object deserializeBase64( String string ) throws IOException
     {
+    return deserializeBase64( string, true );
+    }
+
+  public static Object deserializeBase64( String string, boolean decompress ) throws IOException
+    {
     if( string == null || string.length() == 0 )
       return null;
+
+    ObjectInputStream in = null;
 
     try
       {
       ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
-      ObjectInputStream in = new ObjectInputStream( bytes );
+
+      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
 
       return in.readObject();
       }
     catch( ClassNotFoundException exception )
       {
       throw new FlowException( "unable to deserialize data", exception );
+      }
+    finally
+      {
+      if( in != null )
+        in.close();
       }
     }
 
