@@ -21,7 +21,15 @@
 
 package cascading.tap;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import cascading.ClusterTestCase;
+import cascading.cascade.Cascade;
+import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
@@ -35,12 +43,6 @@ import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  *
@@ -313,20 +315,25 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     Tap source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/{upper,lower}.txt" );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
-
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), outputPath + "/glob/", true );
 
-    Pipe pipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
+    Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow concatFlow = new FlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
+
+    Tap nextSink = new Hfs( new TextLine(), outputPath + "/glob2/", true );
+
+    Flow nextFlow = new FlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
+
+    Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
+
+    cascade.complete();
 
 //    countFlow.writeDOT( "cogroup.dot" );
 //    System.out.println( "countFlow =\n" + countFlow );
 
-    countFlow.complete();
-
-    validateLength( countFlow, 10, null );
+    validateLength( concatFlow, 10, null );
     }
   }

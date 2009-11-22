@@ -21,12 +21,12 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Class MultiSourceTap is used to tie multiple {@link Tap} instances into a single resource. Effectively this will allow
@@ -82,7 +82,7 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
   @Override
   public Tap[] getChildTaps()
     {
-    return Arrays.copyOf( taps, taps.length );
+    return Arrays.copyOf( getTaps(), getTaps().length );
     }
 
 

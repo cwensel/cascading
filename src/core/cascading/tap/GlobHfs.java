@@ -21,14 +21,14 @@
 
 package cascading.tap;
 
+import java.io.IOException;
+
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
 
 /**
  * Class GlobHfs is a type of {@link MultiSourceTap} that accepts Hadoop style 'file globbing' expressions so
@@ -74,7 +74,24 @@ public class GlobHfs extends MultiSourceTap
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  protected Tap[] getTaps()
+    {
+    if( taps != null )
+      return taps;
+
+    try
+      {
+      taps = makeTaps( new JobConf() );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to resolve taps for globbing path: " + pathPattern );
+      }
+
+    return taps;
+    }
+
+  private Tap[] makeTaps( JobConf conf ) throws IOException
     {
     FileStatus[] statusList = null;
 
@@ -90,11 +107,46 @@ public class GlobHfs extends MultiSourceTap
     if( statusList == null || statusList.length == 0 )
       throw new TapException( "unable to find paths matching path pattern: " + pathPattern );
 
-    taps = new Tap[statusList.length];
+    Tap[] taps = new Tap[statusList.length];
 
     for( int i = 0; i < statusList.length; i++ )
       taps[ i ] = new Hfs( getScheme(), statusList[ i ].getPath().toString() );
 
+    return taps;
+    }
+
+  @Override
+  public void sourceInit( JobConf conf ) throws IOException
+    {
+    taps = makeTaps( conf );
     super.sourceInit( conf );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    GlobHfs globHfs = (GlobHfs) object;
+
+    if( pathFilter != null ? !pathFilter.equals( globHfs.pathFilter ) : globHfs.pathFilter != null )
+      return false;
+    if( pathPattern != null ? !pathPattern.equals( globHfs.pathPattern ) : globHfs.pathPattern != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = pathPattern != null ? pathPattern.hashCode() : 0;
+    result = 31 * result + ( pathFilter != null ? pathFilter.hashCode() : 0 );
+    return result;
     }
   }
