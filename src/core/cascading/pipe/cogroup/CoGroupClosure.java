@@ -119,8 +119,17 @@ public class CoGroupClosure extends GroupClosure
 
       boolean spilled = groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
 
-      if( spilled && groups[ pos ].getNumFiles() == 1 )
+      if( spilled && ( groups[ pos ].getNumFiles() - 1 ) % 10 == 0 )
+        {
         LOG.info( "spilled group: " + groupingFields[ pos ].printVerbose() + ", on grouping: " + getGrouping().print() );
+
+        Runtime runtime = Runtime.getRuntime();
+        long freeMem = runtime.freeMemory() / 1024 / 1024;
+        long maxMem = runtime.maxMemory() / 1024 / 1024;
+        long totalMem = runtime.totalMemory() / 1024 / 1024;
+
+        LOG.info( "mem on spill (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+        }
       }
     }
 
