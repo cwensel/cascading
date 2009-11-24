@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased
 
-  Fix for edge case where Cascading jars are stored in Hadoop classpath and deserialization of c.f.Flow fails. 
+  Fix for case where one side of a branch multiplexed in a mapper could step on c.t.Tuple values before being
+  handed to the next branch.
+
+  Fix for edge case where Cascading jars are stored in Hadoop classpath and deserialization of c.f.Flow fails.
 
   Fix for bad cast of j.l.Error when caught in map/reduce pipeline stack.
 
