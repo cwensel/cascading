@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import cascading.flow.FlowProcess;
 import cascading.tuple.hadoop.TupleSerialization;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
@@ -47,10 +48,17 @@ public class SpillableTupleList implements Iterable<Tuple>
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( SpillableTupleList.class );
 
+  enum Spill
+    {
+      Num_Spills_Written, Num_Spills_Read
+    }
+
   /** Field threshold */
   private long threshold = 10000;
   /** Field codec */
   private CompressionCodec codec = null;
+  /** Field flowProcess */
+  private FlowProcess flowProcess;
   /** Field files */
   private List<File> files = new LinkedList<File>();
   /** Field current */
@@ -87,8 +95,14 @@ public class SpillableTupleList implements Iterable<Tuple>
    */
   public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
     {
+    this( threshold, conf, codec, null );
+    }
+
+  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec, FlowProcess flowProcess )
+    {
     this.threshold = threshold;
     this.codec = codec;
+    this.flowProcess = flowProcess;
 
     if( conf != null )
       tupleSerialization = new TupleSerialization( conf );
@@ -99,12 +113,12 @@ public class SpillableTupleList implements Iterable<Tuple>
    *
    * @param tuple of type Tuple
    */
-  public void add( Tuple tuple )
+  public boolean add( Tuple tuple )
     {
     current.add( tuple );
     size++;
 
-    doSpill();
+    return doSpill();
     }
 
   /**
@@ -112,14 +126,14 @@ public class SpillableTupleList implements Iterable<Tuple>
    *
    * @param tupleEntry of type TupleEntry
    */
-  public void add( TupleEntry tupleEntry )
+  public boolean add( TupleEntry tupleEntry )
     {
     if( fields == null )
       fields = tupleEntry.fields;
     else if( !fields.equals( tupleEntry.fields ) )
       throw new IllegalArgumentException( "all entries must have same fields, have: " + fields.print() + " got: " + tupleEntry.fields.print() );
 
-    add( tupleEntry.getTuple() );
+    return add( tupleEntry.getTuple() );
     }
 
   /**
@@ -142,12 +156,15 @@ public class SpillableTupleList implements Iterable<Tuple>
     return files.size();
     }
 
-  private final void doSpill()
+  private final boolean doSpill()
     {
     if( current.size() != threshold )
-      return;
+      return false;
 
     LOG.info( "spilling tuple list to file number " + ( getNumFiles() + 1 ) );
+
+    if( flowProcess != null )
+      flowProcess.increment( Spill.Num_Spills_Written, 1 );
 
     File file = createTempFile();
     TupleOutputStream dataOutputStream = createTupleOutputStream( file );
@@ -164,6 +181,8 @@ public class SpillableTupleList implements Iterable<Tuple>
 
     files.add( file );
     current.clear();
+
+    return true;
     }
 
   private void flushSilent( Flushable flushable )
@@ -339,6 +358,9 @@ public class SpillableTupleList implements Iterable<Tuple>
 
     private List<Tuple> getListFor( File file )
       {
+      if( flowProcess != null )
+        flowProcess.increment( Spill.Num_Spills_Read, 1 );
+
       TupleInputStream dataInputStream = createTupleInputStream( file );
 
       try

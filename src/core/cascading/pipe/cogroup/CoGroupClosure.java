@@ -68,7 +68,7 @@ public class CoGroupClosure extends GroupClosure
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );
     this.conf = ( (HadoopFlowProcess) flowProcess ).getJobConf();
 
-    initLists();
+    initLists( flowProcess );
     }
 
   @Override
@@ -117,17 +117,20 @@ public class CoGroupClosure extends GroupClosure
           LOG.debug( "numSelfJoins: " + numSelfJoins );
         }
 
-      groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
+      boolean spilled = groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
+
+      if( spilled && groups[ pos ].getNumFiles() == 1 )
+        LOG.info( "spilled group: " + groupingFields[ pos ].printVerbose() + ", on grouping: " + getGrouping().print() );
       }
     }
 
-  private void initLists()
+  private void initLists( FlowProcess flowProcess )
     {
     int numPipes = groupingFields.length;
     groups = new SpillableTupleList[Math.max( numPipes, numSelfJoins + 1 )];
 
     for( int i = 0; i < numPipes; i++ ) // use numPipes not numSelfJoins, see below
-      groups[ i ] = new SpillableTupleList( threshold, conf, codec );
+      groups[ i ] = new SpillableTupleList( threshold, conf, codec, flowProcess );
 
     for( int i = 1; i < numSelfJoins + 1; i++ )
       groups[ i ] = groups[ 0 ];

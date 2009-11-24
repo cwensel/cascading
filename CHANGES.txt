@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added new counters for tuple spills and reads. Also logs grouping after first spill.
+
   Added compression of object serialization and deserialization, on by default. This improves reliability
   of very large jobs with very large numbers of input files.
 
