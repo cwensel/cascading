@@ -50,6 +50,7 @@ import cascading.tuple.hadoop.CoGroupingPartitioner;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.IndexTupleComparator;
+import cascading.tuple.hadoop.ReverseTupleComparator;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
 import cascading.tuple.hadoop.TupleComparator;
 import cascading.tuple.hadoop.TuplePairComparator;
@@ -257,6 +258,10 @@ public class FlowStep implements Serializable
       conf.setMapOutputKeyClass( Tuple.class );
       conf.setMapOutputValueClass( Tuple.class );
 
+      // handles the case the groupby sort should be reversed
+      if( group.isSortReversed() )
+        conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
+
       addComparators( conf, "cascading.group.comparator", group.getGroupingSelectors() );
 
       if( group.isGroupBy() )
@@ -270,7 +275,8 @@ public class FlowStep implements Serializable
         conf.setOutputKeyComparatorClass( IndexTupleComparator.class );
         conf.setOutputValueGroupingComparator( CoGroupingComparator.class );
         }
-      else if( group.isSorted() )
+
+      if( group.isSorted() )
         {
         conf.setPartitionerClass( GroupingPartitioner.class );
         conf.setMapOutputKeyClass( TuplePair.class );
