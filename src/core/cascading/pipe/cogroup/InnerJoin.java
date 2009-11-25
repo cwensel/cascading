@@ -47,15 +47,14 @@ public class InnerJoin implements Joiner
     }
 
   @Override
-  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
     {
-    for( int i = 0; i <= lastPos; i++ )
-      {
-      if( groups[ i ].size() == 0 )
-        return true;
-      }
+    long size = 1;
 
-    return false;
+    for( int i = 0; i <= lastPos; i++ )
+      size = size * groups[ i ].size();
+
+    return size;
     }
 
   protected static class JoinIterator implements Iterator<Tuple>

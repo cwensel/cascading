@@ -59,15 +59,19 @@ public class MixedJoin implements Joiner
     }
 
   @Override
-  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
     {
+    long size = 1;
+
     for( int i = 0; i <= lastPos; i++ )
       {
-      if( asInner[ i ] && groups[ i ].size() == 0 )
-        return true;
+      if( asInner[ i ] )
+        size = size * groups[ i ].size();
+      else
+        size = size * Math.max( groups[ i ].size(), 1 );
       }
 
-    return false;
+    return size;
     }
 
   public Iterator<Tuple> getIterator( GroupClosure closure )

@@ -86,9 +86,9 @@ public class CoGroupClosure extends GroupClosure
     return makeIterator( pos, groups[ pos ].iterator() );
     }
 
-  public SpillableTupleList getGroup( int pos )
+  public boolean isEmpty( int pos )
     {
-    return groups[ pos ];
+    return groups[ pos ].isEmpty();
     }
 
   @Override
@@ -118,15 +118,24 @@ public class CoGroupClosure extends GroupClosure
           LOG.debug( "numSelfJoins: " + numSelfJoins );
         }
 
-      if( currentGroup != pos )
+      if( currentGroup != pos ) // will skip on the first iteration, currentGroup == 0
         {
-        if( joiner.isEmptyJoin( groups, pos - 1 ) ) // we may skip group, so use pos - 1
+        long numIterations = joiner.numIterationsFor( groups, pos - 1 );
+
+        if( numIterations == 0 ) // we may skip group, so use pos - 1
           {
           while( values.hasNext() )
             values.next();
 
           clearGroups();
           continue;
+          }
+
+        // if this is the last co-group and only 1 iteration multiplier, use values iterator
+        if( pos == groups.length - 1 && numIterations == 1 )
+          {
+          groups[ pos ].setIterator( current, values );
+          break;
           }
 
         currentGroup = pos;

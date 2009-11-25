@@ -49,18 +49,16 @@ public class LeftJoin implements Joiner
     }
 
   @Override
-  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
     {
-    if( lastPos + 1 == groups.length )
-      lastPos = lastPos - 1;
+    long size = 1;
 
-    for( int i = 0; i <= lastPos; i++ )
-      {
-      if( groups[ i ].size() == 0 )
-        return true;
-      }
+    for( int i = 0; i < lastPos; i++ )
+      size = size * groups[ i ].size();
 
-    return false;
+    size = size * Math.max( groups[ lastPos ].size(), 1 );
+
+    return size;
     }
 
   protected static class JoinIterator extends OuterJoin.JoinIterator

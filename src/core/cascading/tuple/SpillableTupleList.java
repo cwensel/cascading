@@ -63,6 +63,8 @@ public class SpillableTupleList implements Iterable<Tuple>
   private List<File> files = new LinkedList<File>();
   /** Field current */
   private List<Tuple> current = new LinkedList<Tuple>();
+  /** Field overrideIterator */
+  private Iterator<Tuple> overrideIterator;
   /** Field size */
   private long size = 0;
   /** Field fields */
@@ -144,6 +146,16 @@ public class SpillableTupleList implements Iterable<Tuple>
   public long size()
     {
     return size;
+    }
+
+  /**
+   * Method isEmpty returns true if this list is empty
+   *
+   * @return the empty (type boolean) of this SpillableTupleList object.
+   */
+  public boolean isEmpty()
+    {
+    return overrideIterator == null && files.isEmpty() && current.size() == 0;
     }
 
   /**
@@ -304,9 +316,46 @@ public class SpillableTupleList implements Iterable<Tuple>
   /** Method clear empties this container so it may be re-used. */
   public void clear()
     {
+    overrideIterator = null;
     files.clear();
     current.clear();
     size = 0;
+    }
+
+  public void setIterator( final IndexTuple current, final Iterator values )
+    {
+    overrideIterator = new Iterator<Tuple>()
+    {
+    IndexTuple value = current;
+
+    @Override
+    public boolean hasNext()
+      {
+      return value != null;
+      }
+
+    @Override
+    public Tuple next()
+      {
+      try
+        {
+        return value.getTuple();
+        }
+      finally
+        {
+        if( values.hasNext() )
+          value = (IndexTuple) values.next();
+        else
+          value = null;
+        }
+      }
+
+    @Override
+    public void remove()
+      {
+      // unsupported
+      }
+    };
     }
 
   /**
@@ -316,6 +365,9 @@ public class SpillableTupleList implements Iterable<Tuple>
    */
   public Iterator<Tuple> iterator()
     {
+    if( overrideIterator != null )
+      return overrideIterator;
+
     if( files.isEmpty() )
       return current.iterator();
 
@@ -329,10 +381,7 @@ public class SpillableTupleList implements Iterable<Tuple>
    */
   public Iterator<TupleEntry> entryIterator()
     {
-    if( files.isEmpty() )
-      return new TupleEntryIterator( fields, current.iterator() );
-
-    return new TupleEntryIterator( fields, new SpilledListIterator() );
+    return new TupleEntryIterator( fields, iterator() );
     }
 
   private class SpilledListIterator implements Iterator<Tuple>

@@ -45,5 +45,5 @@ public interface Joiner extends Serializable
    */
   int numJoins();
 
-  boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos );
+  long numIterationsFor( SpillableTupleList[] groups, int lastPos );
   }

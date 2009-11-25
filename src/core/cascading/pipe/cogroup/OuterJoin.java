@@ -44,10 +44,14 @@ public class OuterJoin implements Joiner
     return -1;
     }
 
-  @Override
-  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
     {
-    return false; // is never empty
+    long size = 1;
+
+    for( int i = 0; i <= lastPos; i++ )
+      size = size * Math.max( groups[ i ].size(), 1 );
+
+    return size;
     }
 
   protected static class JoinIterator extends InnerJoin.JoinIterator
@@ -80,7 +84,7 @@ public class OuterJoin implements Joiner
 
     protected boolean isOuter( int i )
       {
-      return getCoGroupClosure().getGroup( i ).size() == 0;
+      return getCoGroupClosure().isEmpty( i );
       }
 
     @Override
