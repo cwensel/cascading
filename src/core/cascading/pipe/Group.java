@@ -937,9 +937,14 @@ public class Group extends Pipe
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 
     if( isGroupBy() )
+      {
       output.collect( groupKey, valuesTuple );
-    else
-      output.collect( groupKey, new IndexTuple( getPipePos().get( incomingScope.getName() ), valuesTuple ) );
+      return;
+      }
+
+    Integer pos = getPipePos().get( incomingScope.getName() );
+
+    output.collect( new IndexTuple( pos, groupKey ), new IndexTuple( pos, valuesTuple ) );
     }
 
   /**
@@ -950,6 +955,9 @@ public class Group extends Pipe
    */
   public Tuple unwrapGrouping( Tuple tuple )
     {
+    if( !isGroupBy )
+      return ( (IndexTuple) tuple ).getTuple();
+
     return !isSorted() ? (Tuple) tuple : ( (TuplePair) tuple ).getLhs();
     }
 
@@ -962,7 +970,7 @@ public class Group extends Pipe
    */
   public Iterator<Tuple> iterateReduceValues( Tuple key, Iterator values )
     {
-    closure.reset( key, values );
+    closure.reset( joiner, key, values );
 
     return joiner.getIterator( closure );
     }

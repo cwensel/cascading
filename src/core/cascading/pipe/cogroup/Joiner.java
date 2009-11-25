@@ -24,6 +24,7 @@ package cascading.pipe.cogroup;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /** Interface Joiner allows for custom join strategies against a {@link CoGroupClosure}. */
@@ -43,4 +44,6 @@ public interface Joiner extends Serializable
    * @return an int
    */
   int numJoins();
+
+  boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos );
   }

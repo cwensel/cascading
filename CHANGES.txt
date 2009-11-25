@@ -2,6 +2,11 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added feature allowing c.p.CoGroup with c.p.c.Joiner to detect if a join can be satisfied, if not, the join is
+  abandoned by discarding all the remaining values in the current group. This bypasses any unnecessary accumulation and
+  subsequent spills. This feature requires the stream with the fewest values to be handed to the CoGroup
+  pipe on the most left hand side, as those values are accumulated first.
+
   Added new counters for tuple spills and reads. Also logs grouping after first spill.
 
   Added compression of object serialization and deserialization, on by default. This improves reliability

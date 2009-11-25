@@ -21,10 +21,11 @@
 
 package cascading.pipe.cogroup;
 
-import cascading.tuple.Tuple;
-
 import java.util.Arrays;
 import java.util.Iterator;
+
+import cascading.tuple.SpillableTupleList;
+import cascading.tuple.Tuple;
 
 /**
  * Class MixedJoin will return an {@link java.util.Iterator} that will iterate over a given
@@ -51,15 +52,27 @@ public class MixedJoin implements Joiner
     this.asInner = Arrays.copyOf( asInner, asInner.length );
     }
 
-  public Iterator<Tuple> getIterator( GroupClosure closure )
-    {
-    return new JoinIterator( closure );
-    }
-
   /** @see Joiner#numJoins() */
   public int numJoins()
     {
     return asInner.length - 1;
+    }
+
+  @Override
+  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+    {
+    for( int i = 0; i <= lastPos; i++ )
+      {
+      if( asInner[ i ] && groups[ i ].size() == 0 )
+        return true;
+      }
+
+    return false;
+    }
+
+  public Iterator<Tuple> getIterator( GroupClosure closure )
+    {
+    return new JoinIterator( closure );
     }
 
   protected class JoinIterator extends OuterJoin.JoinIterator

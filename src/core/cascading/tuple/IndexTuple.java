@@ -21,8 +21,10 @@
 
 package cascading.tuple;
 
+import java.util.List;
+
 /** Class IndexTuple allows for managing an int index value with a Tuple instance. Used internally for co-grouping values. */
-public class IndexTuple implements Comparable
+public class IndexTuple extends Tuple implements Comparable
   {
   int index;
   Tuple tuple;
@@ -30,6 +32,7 @@ public class IndexTuple implements Comparable
   /** Constructor IndexTuple creates a new IndexTuple instance. */
   public IndexTuple()
     {
+    super( (List<Comparable>) null );
     }
 
   /**
@@ -40,6 +43,7 @@ public class IndexTuple implements Comparable
    */
   public IndexTuple( int index, Tuple tuple )
     {
+    super( (List<Comparable>) null );
     this.index = index;
     this.tuple = tuple;
     }
@@ -106,5 +110,11 @@ public class IndexTuple implements Comparable
     int result = index;
     result = 31 * result + ( tuple != null ? tuple.hashCode() : 0 );
     return result;
+    }
+
+  @Override
+  public String toString()
+    {
+    return "[" + index + "]" + tuple;
     }
   }

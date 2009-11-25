@@ -92,17 +92,18 @@ public class CoGroupClosure extends GroupClosure
     }
 
   @Override
-  public void reset( Tuple grouping, Iterator values )
+  public void reset( Joiner joiner, Tuple grouping, Iterator values )
     {
-    super.reset( grouping, values );
+    super.reset( joiner, grouping, values );
 
-    build();
+    build( joiner );
     }
 
-  public void build()
+  private void build( Joiner joiner )
     {
-    for( SpillableTupleList group : groups )
-      group.clear();
+    clearGroups();
+
+    int currentGroup = 0;
 
     while( values.hasNext() )
       {
@@ -115,6 +116,20 @@ public class CoGroupClosure extends GroupClosure
 
         if( numSelfJoins != 0 )
           LOG.debug( "numSelfJoins: " + numSelfJoins );
+        }
+
+      if( currentGroup != pos )
+        {
+        if( joiner.isEmptyJoin( groups, pos - 1 ) ) // we may skip group, so use pos - 1
+          {
+          while( values.hasNext() )
+            values.next();
+
+          clearGroups();
+          continue;
+          }
+
+        currentGroup = pos;
         }
 
       boolean spilled = groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
@@ -131,6 +146,12 @@ public class CoGroupClosure extends GroupClosure
         LOG.info( "mem on spill (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
         }
       }
+    }
+
+  private void clearGroups()
+    {
+    for( SpillableTupleList group : groups )
+      group.clear();
     }
 
   private void initLists( FlowProcess flowProcess )

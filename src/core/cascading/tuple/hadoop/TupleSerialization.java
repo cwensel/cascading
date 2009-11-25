@@ -326,7 +326,7 @@ public class TupleSerialization extends Configured implements Serialization
     return new TuplePairSerializer( getElementWriter() );
     }
 
-  private IndexTupleDeserializer getIndexTupleDeserializer()
+  IndexTupleDeserializer getIndexTupleDeserializer()
     {
     return new IndexTupleDeserializer( getElementReader( false ) );
     }

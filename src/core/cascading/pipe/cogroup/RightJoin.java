@@ -23,6 +23,7 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /**
@@ -45,6 +46,21 @@ public class RightJoin implements Joiner
   public int numJoins()
     {
     return -1;
+    }
+
+  @Override
+  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+    {
+    if( lastPos == 0 )
+      return false;
+
+    for( int i = 1; i <= lastPos; i++ )
+      {
+      if( groups[ i ].size() == 0 )
+        return true;
+      }
+
+    return false;
     }
 
   protected static class JoinIterator extends OuterJoin.JoinIterator

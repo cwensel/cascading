@@ -21,10 +21,11 @@
 
 package cascading.pipe.cogroup;
 
+import java.util.Iterator;
+
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /**
  * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
@@ -43,6 +44,18 @@ public class InnerJoin implements Joiner
   public int numJoins()
     {
     return -1;
+    }
+
+  @Override
+  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+    {
+    for( int i = 0; i <= lastPos; i++ )
+      {
+      if( groups[ i ].size() == 0 )
+        return true;
+      }
+
+    return false;
     }
 
   protected static class JoinIterator implements Iterator<Tuple>

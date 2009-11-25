@@ -86,7 +86,7 @@ public class GroupClosure
     };
     }
 
-  public void reset( Tuple grouping, Iterator values )
+  public void reset( Joiner joiner, Tuple grouping, Iterator values )
     {
     this.grouping = grouping;
     this.values = values;

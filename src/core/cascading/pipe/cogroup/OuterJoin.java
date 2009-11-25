@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /**
@@ -41,6 +42,12 @@ public class OuterJoin implements Joiner
   public int numJoins()
     {
     return -1;
+    }
+
+  @Override
+  public boolean isEmptyJoin( SpillableTupleList[] groups, int lastPos )
+    {
+    return false; // is never empty
     }
 
   protected static class JoinIterator extends InnerJoin.JoinIterator
