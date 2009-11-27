@@ -45,5 +45,15 @@ public interface Joiner extends Serializable
    */
   int numJoins();
 
-  long numIterationsFor( SpillableTupleList[] groups, int lastPos );
+  /**
+   * Returns the number of iterations that would satisfy this join type.
+   * <p/>
+   * Each group is the list of values for each co-grouping. currentPos specifies the current
+   * grouping we just completed accumulating.
+   *
+   * @param groups
+   * @param currentPos
+   * @return
+   */
+  long numIterationsSoFar( SpillableTupleList[] groups, int currentPos );
   }

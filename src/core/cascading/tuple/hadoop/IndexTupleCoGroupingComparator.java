@@ -31,7 +31,7 @@ import cascading.util.Util;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 
-public class IndexTupleComparator extends DeserializerComparator<IndexTuple> implements Configurable
+public class IndexTupleCoGroupingComparator extends DeserializerComparator<IndexTuple> implements Configurable
   {
   private Comparator comparator = new Comparator<Tuple>()
   {

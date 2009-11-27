@@ -49,7 +49,7 @@ import cascading.tuple.hadoop.CoGroupingComparator;
 import cascading.tuple.hadoop.CoGroupingPartitioner;
 import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
-import cascading.tuple.hadoop.IndexTupleComparator;
+import cascading.tuple.hadoop.IndexTupleCoGroupingComparator;
 import cascading.tuple.hadoop.ReverseTupleComparator;
 import cascading.tuple.hadoop.ReverseTuplePairComparator;
 import cascading.tuple.hadoop.TupleComparator;
@@ -270,9 +270,9 @@ public class FlowStep implements Serializable
       if( !group.isGroupBy() )
         {
         conf.setPartitionerClass( CoGroupingPartitioner.class );
-        conf.setMapOutputKeyClass( IndexTuple.class );
+        conf.setMapOutputKeyClass( IndexTuple.class ); // allows groups to be sorted by index
         conf.setMapOutputValueClass( IndexTuple.class );
-        conf.setOutputKeyComparatorClass( IndexTupleComparator.class );
+        conf.setOutputKeyComparatorClass( IndexTupleCoGroupingComparator.class ); // sorts by group, then by index
         conf.setOutputValueGroupingComparator( CoGroupingComparator.class );
         }
 

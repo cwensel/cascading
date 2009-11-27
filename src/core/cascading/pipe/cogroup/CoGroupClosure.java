@@ -120,9 +120,12 @@ public class CoGroupClosure extends GroupClosure
 
       if( currentGroup != pos ) // will skip on the first iteration, currentGroup == 0
         {
-        long numIterations = joiner.numIterationsFor( groups, pos - 1 );
+        if( pos < currentGroup )
+          throw new IllegalStateException( "group indexes are arriving out of order" );
 
-        if( numIterations == 0 ) // we may skip group, so use pos - 1
+        long numIterations = joiner.numIterationsSoFar( groups, pos - 1 );
+
+        if( numIterations == 0 ) // we may skip group
           {
           while( values.hasNext() )
             values.next();

@@ -68,6 +68,9 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
   String inputFileRhs = "build/test/data/rhs.txt";
   String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
 
+  String inputFileLhsSparse = "build/test/data/lhs-sparse.txt";
+  String inputFileRhsSparse = "build/test/data/rhs-sparse.txt";
+
   String outputPath = "build/test/output/fields/";
 
   public CoGroupFieldedPipesTest()
@@ -319,34 +322,61 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
 
   /**
-   * 1 a
-   * 5 b
-   * 6 c
-   * 5 b
-   * 5 e
+   * 1 a1
+   * 1 a2
+   * 1 a3
+   * 2 b1
+   * 3 c1
+   * 4 d1
+   * 4 d2
+   * 4 d3
+   * 5 e1
+   * 5 e2
+   * 5 e3
+   * 7 g1
+   * 7 g2
+   * 7 g3
+   * 7 g4
+   * 7 g5
    * <p/>
-   * 1 A
-   * 2 B
-   * 3 C
-   * 4 D
-   * 5 E
+   * 1 A1
+   * 1 A2
+   * 1 A3
+   * 2 B1
+   * 2 B2
+   * 2 B3
+   * 4 D1
+   * 6 F1
+   * 6 F2
    * <p/>
-   * 1	a	1	A
-   * 5	b	5	E
-   * 5	e	5	E
+   * 1	a1	1	A1
+   * 1	a1	1	A2
+   * 1	a1	1	A3
+   * 1	a2	1	A1
+   * 1	a2	1	A2
+   * 1	a2	1	A3
+   * 1	a3	1	A1
+   * 1	a3	1	A2
+   * 1	a3	1	A3
+   * 2	b1	2	B1
+   * 2	b1	2	B2
+   * 2	b1	2	B3
+   * 4	d1	4	D1
+   * 4	d2	4	D1
+   * 4	d3	4	D1
    *
    * @throws Exception
    */
   public void testCoGroupInner() throws Exception
     {
-    if( !new File( inputFileLowerOffset ).exists() )
+    if( !new File( inputFileLhsSparse ).exists() )
       fail( "data file not found" );
 
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileUpper );
+    copyFromLocal( inputFileLhsSparse );
+    copyFromLocal( inputFileRhsSparse );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
 
     Map sources = new HashMap();
 
@@ -370,56 +400,104 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     countFlow.complete();
 
-    validateLength( countFlow, 3, null );
+    validateLength( countFlow, 15, null );
 
     TupleEntryIterator iterator = countFlow.openSink();
 
     Set<String> results = new HashSet<String>();
 
-    results.add( "1\ta\t1\tA" );
-    results.add( "5\tb\t5\tE" );
-    results.add( "5\te\t5\tE" );
+    results.add( "1\ta1\t1\tA1" );
+    results.add( "1\ta1\t1\tA2" );
+    results.add( "1\ta1\t1\tA3" );
+    results.add( "1\ta2\t1\tA1" );
+    results.add( "1\ta2\t1\tA2" );
+    results.add( "1\ta2\t1\tA3" );
+    results.add( "1\ta3\t1\tA1" );
+    results.add( "1\ta3\t1\tA2" );
+    results.add( "1\ta3\t1\tA3" );
+    results.add( "2\tb1\t2\tB1" );
+    results.add( "2\tb1\t2\tB2" );
+    results.add( "2\tb1\t2\tB3" );
+    results.add( "4\td1\t4\tD1" );
+    results.add( "4\td2\t4\tD1" );
+    results.add( "4\td3\t4\tD1" );
 
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    int size = results.size();
+    for( int i = 0; i < size; i++ )
+      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+
+    assertEquals( 0, results.size() );
 
     iterator.close();
     }
 
   /**
-   * 1 a
-   * 5 b
-   * 6 c
-   * 5 b
-   * 5 e
+   * 1 a1
+   * 1 a2
+   * 1 a3
+   * 2 b1
+   * 3 c1
+   * 4 d1
+   * 4 d2
+   * 4 d3
+   * 5 e1
+   * 5 e2
+   * 5 e3
+   * 7 g1
+   * 7 g2
+   * 7 g3
+   * 7 g4
+   * 7 g5
    * <p/>
-   * 1 A
-   * 2 B
-   * 3 C
-   * 4 D
-   * 5 E
+   * 1 A1
+   * 1 A2
+   * 1 A3
+   * 2 B1
+   * 2 B2
+   * 2 B3
+   * 4 D1
+   * 6 F1
+   * 6 F2
    * <p/>
-   * 1	a	1	A
-   * -  -   2   B
-   * -  -   3   C
-   * -  -   4   D
-   * 5	b	5	E
-   * 5	e	5	E
-   * 6  c   -   -
+   * 1	a1	1	A1
+   * 1	a1	1	A2
+   * 1	a1	1	A3
+   * 1	a2	1	A1
+   * 1	a2	1	A2
+   * 1	a2	1	A3
+   * 1	a3	1	A1
+   * 1	a3	1	A2
+   * 1	a3	1	A3
+   * 2	b1	2	B1
+   * 2	b1	2	B2
+   * 2	b1	2	B3
+   * 3	c1	null	null
+   * 4	d1	4	D1
+   * 4	d2	4	D1
+   * 4	d3	4	D1
+   * 5	e1	null	null
+   * 5	e2	null	null
+   * 5	e3	null	null
+   * null	null	6	F1
+   * null	null	6	F2
+   * 7	g1	null	null
+   * 7	g2	null	null
+   * 7	g3	null	null
+   * 7	g4	null	null
+   * 7	g5	null	null
    *
    * @throws Exception
    */
   public void testCoGroupOuter() throws Exception
     {
-    if( !new File( inputFileLowerOffset ).exists() )
+    if( !new File( inputFileLhsSparse ).exists() )
       fail( "data file not found" );
 
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileUpper );
+    copyFromLocal( inputFileLhsSparse );
+    copyFromLocal( inputFileRhsSparse );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
 
     Map sources = new HashMap();
 
@@ -443,61 +521,113 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     countFlow.complete();
 
-    validateLength( countFlow, 7, null );
+    validateLength( countFlow, 26, null );
 
     TupleEntryIterator iterator = countFlow.openSink();
 
     Set<String> results = new HashSet<String>();
 
-    results.add( "1\ta\t1\tA" );
-    results.add( "null\tnull\t2\tB" );
-    results.add( "null\tnull\t3\tC" );
-    results.add( "null\tnull\t4\tD" );
-    results.add( "5\tb\t5\tE" );
-    results.add( "5\te\t5\tE" );
-    results.add( "6\tc\tnull\tnull" );
+    results.add( "1\ta1\t1\tA1" );
+    results.add( "1\ta1\t1\tA2" );
+    results.add( "1\ta1\t1\tA3" );
+    results.add( "1\ta2\t1\tA1" );
+    results.add( "1\ta2\t1\tA2" );
+    results.add( "1\ta2\t1\tA3" );
+    results.add( "1\ta3\t1\tA1" );
+    results.add( "1\ta3\t1\tA2" );
+    results.add( "1\ta3\t1\tA3" );
+    results.add( "2\tb1\t2\tB1" );
+    results.add( "2\tb1\t2\tB2" );
+    results.add( "2\tb1\t2\tB3" );
+    results.add( "3\tc1\tnull\tnull" );
+    results.add( "4\td1\t4\tD1" );
+    results.add( "4\td2\t4\tD1" );
+    results.add( "4\td3\t4\tD1" );
+    results.add( "5\te1\tnull\tnull" );
+    results.add( "5\te2\tnull\tnull" );
+    results.add( "5\te3\tnull\tnull" );
+    results.add( "null\tnull\t6\tF1" );
+    results.add( "null\tnull\t6\tF2" );
+    results.add( "7\tg1\tnull\tnull" );
+    results.add( "7\tg2\tnull\tnull" );
+    results.add( "7\tg3\tnull\tnull" );
+    results.add( "7\tg4\tnull\tnull" );
+    results.add( "7\tg5\tnull\tnull" );
 
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    int size = results.size();
+    for( int i = 0; i < size; i++ )
+      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+
+    assertEquals( 0, results.size() );
 
     iterator.close();
     }
 
   /**
-   * 1 a
-   * 5 b
-   * 6 c
-   * 5 b
-   * 5 e
+   * 1 a1
+   * 1 a2
+   * 1 a3
+   * 2 b1
+   * 3 c1
+   * 4 d1
+   * 4 d2
+   * 4 d3
+   * 5 e1
+   * 5 e2
+   * 5 e3
+   * 7 g1
+   * 7 g2
+   * 7 g3
+   * 7 g4
+   * 7 g5
    * <p/>
-   * 1 A
-   * 2 B
-   * 3 C
-   * 4 D
-   * 5 E
+   * 1 A1
+   * 1 A2
+   * 1 A3
+   * 2 B1
+   * 2 B2
+   * 2 B3
+   * 4 D1
+   * 6 F1
+   * 6 F2
    * <p/>
-   * 1	a	1	A
-   * 5	b	5	E
-   * 5	e	5	E
-   * 6  c   -   -
+   * 1	a1	1	A1
+   * 1	a1	1	A2
+   * 1	a1	1	A3
+   * 1	a2	1	A1
+   * 1	a2	1	A2
+   * 1	a2	1	A3
+   * 1	a3	1	A1
+   * 1	a3	1	A2
+   * 1	a3	1	A3
+   * 2	b1	2	B1
+   * 2	b1	2	B2
+   * 2	b1	2	B3
+   * 3	c1	null	null
+   * 4	d1	4	D1
+   * 4	d2	4	D1
+   * 4	d3	4	D1
+   * 5	e1	null	null
+   * 5	e2	null	null
+   * 5	e3	null	null
+   * 7	g1	null	null
+   * 7	g2	null	null
+   * 7	g3	null	null
+   * 7	g4	null	null
+   * 7	g5	null	null
    *
    * @throws Exception
    */
   public void testCoGroupInnerOuter() throws Exception
     {
-    if( !new File( inputFileLowerOffset ).exists() )
+    if( !new File( inputFileLhsSparse ).exists() )
       fail( "data file not found" );
 
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileUpper );
+    copyFromLocal( inputFileLhsSparse );
+    copyFromLocal( inputFileRhsSparse );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
 
     Map sources = new HashMap();
 
@@ -521,57 +651,104 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     countFlow.complete();
 
-    validateLength( countFlow, 4, null );
+    validateLength( countFlow, 24, null );
 
     TupleEntryIterator iterator = countFlow.openSink();
 
     Set<String> results = new HashSet<String>();
 
-    results.add( "1\ta\t1\tA" );
-    results.add( "5\tb\t5\tE" );
-    results.add( "5\te\t5\tE" );
-    results.add( "6\tc\tnull\tnull" );
+    results.add( "1\ta1\t1\tA1" );
+    results.add( "1\ta1\t1\tA2" );
+    results.add( "1\ta1\t1\tA3" );
+    results.add( "1\ta2\t1\tA1" );
+    results.add( "1\ta2\t1\tA2" );
+    results.add( "1\ta2\t1\tA3" );
+    results.add( "1\ta3\t1\tA1" );
+    results.add( "1\ta3\t1\tA2" );
+    results.add( "1\ta3\t1\tA3" );
+    results.add( "2\tb1\t2\tB1" );
+    results.add( "2\tb1\t2\tB2" );
+    results.add( "2\tb1\t2\tB3" );
+    results.add( "3\tc1\tnull\tnull" );
+    results.add( "4\td1\t4\tD1" );
+    results.add( "4\td2\t4\tD1" );
+    results.add( "4\td3\t4\tD1" );
+    results.add( "5\te1\tnull\tnull" );
+    results.add( "5\te2\tnull\tnull" );
+    results.add( "5\te3\tnull\tnull" );
+    results.add( "7\tg1\tnull\tnull" );
+    results.add( "7\tg2\tnull\tnull" );
+    results.add( "7\tg3\tnull\tnull" );
+    results.add( "7\tg4\tnull\tnull" );
+    results.add( "7\tg5\tnull\tnull" );
 
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    int size = results.size();
+    for( int i = 0; i < size; i++ )
+      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+
+    assertEquals( 0, results.size() );
 
     iterator.close();
     }
 
   /**
-   * 1 a
-   * 5 b
-   * 6 c
-   * 5 b
-   * 5 e
+   * 1 a1
+   * 1 a2
+   * 1 a3
+   * 2 b1
+   * 3 c1
+   * 4 d1
+   * 4 d2
+   * 4 d3
+   * 5 e1
+   * 5 e2
+   * 5 e3
+   * 7 g1
+   * 7 g2
+   * 7 g3
+   * 7 g4
+   * 7 g5
    * <p/>
-   * 1 A
-   * 2 B
-   * 3 C
-   * 4 D
-   * 5 E
+   * 1 A1
+   * 1 A2
+   * 1 A3
+   * 2 B1
+   * 2 B2
+   * 2 B3
+   * 4 D1
+   * 6 F1
+   * 6 F2
    * <p/>
-   * 1	a	1	A
-   * -  -   2   B
-   * -  -   3   C
-   * -  -   4   D
-   * 5	b	5	E
-   * 5	e	5	E
+   * 1	a1	1	A1
+   * 1	a1	1	A2
+   * 1	a1	1	A3
+   * 1	a2	1	A1
+   * 1	a2	1	A2
+   * 1	a2	1	A3
+   * 1	a3	1	A1
+   * 1	a3	1	A2
+   * 1	a3	1	A3
+   * 2	b1	2	B1
+   * 2	b1	2	B2
+   * 2	b1	2	B3
+   * 4	d1	4	D1
+   * 4	d2	4	D1
+   * 4	d3	4	D1
+   * null	null	6	F1
+   * null	null	6	F2
    *
    * @throws Exception
    */
   public void testCoGroupOuterInner() throws Exception
     {
-    if( !new File( inputFileLowerOffset ).exists() )
+    if( !new File( inputFileLhsSparse ).exists() )
       fail( "data file not found" );
 
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileUpper );
+    copyFromLocal( inputFileLhsSparse );
+    copyFromLocal( inputFileRhsSparse );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
 
     Map sources = new HashMap();
 
@@ -595,25 +772,35 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     countFlow.complete();
 
-    validateLength( countFlow, 6, null );
+    validateLength( countFlow, 17, null );
 
     TupleEntryIterator iterator = countFlow.openSink();
 
     Set<String> results = new HashSet<String>();
 
-    results.add( "1\ta\t1\tA" );
-    results.add( "null\tnull\t2\tB" );
-    results.add( "null\tnull\t3\tC" );
-    results.add( "null\tnull\t4\tD" );
-    results.add( "5\tb\t5\tE" );
-    results.add( "5\te\t5\tE" );
+    results.add( "1\ta1\t1\tA1" );
+    results.add( "1\ta1\t1\tA2" );
+    results.add( "1\ta1\t1\tA3" );
+    results.add( "1\ta2\t1\tA1" );
+    results.add( "1\ta2\t1\tA2" );
+    results.add( "1\ta2\t1\tA3" );
+    results.add( "1\ta3\t1\tA1" );
+    results.add( "1\ta3\t1\tA2" );
+    results.add( "1\ta3\t1\tA3" );
+    results.add( "2\tb1\t2\tB1" );
+    results.add( "2\tb1\t2\tB2" );
+    results.add( "2\tb1\t2\tB3" );
+    results.add( "4\td1\t4\tD1" );
+    results.add( "4\td2\t4\tD1" );
+    results.add( "4\td3\t4\tD1" );
+    results.add( "null\tnull\t6\tF1" );
+    results.add( "null\tnull\t6\tF2" );
 
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    int size = results.size();
+    for( int i = 0; i < size; i++ )
+      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+
+    assertEquals( 0, results.size() );
 
     iterator.close();
     }

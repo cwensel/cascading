@@ -49,13 +49,13 @@ public class RightJoin implements Joiner
     }
 
   @Override
-  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
     {
     long size = 1;
 
     size = size * Math.max( groups[ 0 ].size(), 1 );
 
-    for( int i = 1; i <= lastPos; i++ )
+    for( int i = 1; i <= currentPos; i++ )
       size = size * groups[ i ].size();
 
     return size;

@@ -32,7 +32,7 @@ public class IndexTuple extends Tuple implements Comparable
   /** Constructor IndexTuple creates a new IndexTuple instance. */
   public IndexTuple()
     {
-    super( (List<Comparable>) null );
+    super( (List<Object>) null );
     }
 
   /**

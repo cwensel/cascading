@@ -337,17 +337,14 @@ public class SpillableTupleList implements Iterable<Tuple>
     @Override
     public Tuple next()
       {
-      try
-        {
-        return value.getTuple();
-        }
-      finally
-        {
-        if( values.hasNext() )
-          value = (IndexTuple) values.next();
-        else
-          value = null;
-        }
+      Tuple result = value.getTuple();
+
+      if( values.hasNext() )
+        value = (IndexTuple) values.next();
+      else
+        value = null;
+
+      return result;
       }
 
     @Override

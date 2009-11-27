@@ -44,11 +44,11 @@ public class OuterJoin implements Joiner
     return -1;
     }
 
-  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
     {
     long size = 1;
 
-    for( int i = 0; i <= lastPos; i++ )
+    for( int i = 0; i <= currentPos; i++ )
       size = size * Math.max( groups[ i ].size(), 1 );
 
     return size;

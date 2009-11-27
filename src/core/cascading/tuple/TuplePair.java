@@ -47,7 +47,7 @@ public class TuplePair extends Tuple
   /** Constructor Tuple creates a new Tuple instance. */
   public TuplePair()
     {
-    super( (List<Comparable>) null ); // bypass unnecessary List creation
+    super( (List<Object>) null ); // bypass unnecessary List creation
     tuples[ 0 ] = new Tuple();
     tuples[ 1 ] = new Tuple();
     }
@@ -60,7 +60,7 @@ public class TuplePair extends Tuple
    */
   public TuplePair( Tuple lhs, Tuple rhs )
     {
-    super( (List<Comparable>) null ); // bypass unnecessary List creation
+    super( (List<Object>) null ); // bypass unnecessary List creation
     tuples[ 0 ] = lhs;
     tuples[ 1 ] = rhs;
 

@@ -49,14 +49,13 @@ public class LeftJoin implements Joiner
     }
 
   @Override
-  public long numIterationsFor( SpillableTupleList[] groups, int lastPos )
+  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
     {
+    // only the furthest right group of the join matters, so treat this like a normal innerjoin.
     long size = 1;
 
-    for( int i = 0; i < lastPos; i++ )
+    for( int i = 0; i <= currentPos; i++ )
       size = size * groups[ i ].size();
-
-    size = size * Math.max( groups[ lastPos ].size(), 1 );
 
     return size;
     }
