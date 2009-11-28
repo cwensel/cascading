@@ -24,7 +24,6 @@ package cascading.pipe.cogroup;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /** Interface Joiner allows for custom join strategies against a {@link CoGroupClosure}. */
@@ -44,16 +43,4 @@ public interface Joiner extends Serializable
    * @return an int
    */
   int numJoins();
-
-  /**
-   * Returns the number of iterations that would satisfy this join type.
-   * <p/>
-   * Each group is the list of values for each co-grouping. currentPos specifies the current
-   * grouping we just completed accumulating.
-   *
-   * @param groups
-   * @param currentPos
-   * @return
-   */
-  long numIterationsSoFar( SpillableTupleList[] groups, int currentPos );
   }

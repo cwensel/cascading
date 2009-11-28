@@ -75,6 +75,7 @@ public class IndexTupleCoGroupingComparator extends DeserializerComparator<Index
     if( c != 0 )
       return c;
 
-    return lhs.getIndex() - rhs.getIndex();
+    // intentionally sort in reverse
+    return rhs.getIndex() - lhs.getIndex();
     }
   }

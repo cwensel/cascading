@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /**
@@ -42,16 +41,6 @@ public class OuterJoin implements Joiner
   public int numJoins()
     {
     return -1;
-    }
-
-  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
-    {
-    long size = 1;
-
-    for( int i = 0; i <= currentPos; i++ )
-      size = size * Math.max( groups[ i ].size(), 1 );
-
-    return size;
     }
 
   protected static class JoinIterator extends InnerJoin.JoinIterator

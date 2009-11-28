@@ -96,52 +96,23 @@ public class CoGroupClosure extends GroupClosure
     {
     super.reset( joiner, grouping, values );
 
-    build( joiner );
+    build();
     }
 
-  private void build( Joiner joiner )
+  private void build()
     {
     clearGroups();
-
-    int currentGroup = 0;
 
     while( values.hasNext() )
       {
       IndexTuple current = (IndexTuple) values.next();
       int pos = current.getIndex();
 
-      if( LOG.isDebugEnabled() )
+      // if this is the first (lhs) co-group, just use values iterator
+      if( numSelfJoins == 0 && pos == 0 )
         {
-        LOG.debug( "group pos: " + pos );
-
-        if( numSelfJoins != 0 )
-          LOG.debug( "numSelfJoins: " + numSelfJoins );
-        }
-
-      if( currentGroup != pos ) // will skip on the first iteration, currentGroup == 0
-        {
-        if( pos < currentGroup )
-          throw new IllegalStateException( "group indexes are arriving out of order" );
-
-        long numIterations = joiner.numIterationsSoFar( groups, pos - 1 );
-
-        if( numIterations == 0 ) // we may skip group
-          {
-          while( values.hasNext() )
-            values.next();
-
-          clearGroups();
-          continue;
-          }
-
-        // if this is the last co-group and only 1 iteration multiplier, use values iterator
-        if( pos == groups.length - 1 && numIterations == 1 )
-          {
-          groups[ pos ].setIterator( current, values );
-          break;
-          }
-
-        currentGroup = pos;
+        groups[ pos ].setIterator( current, values );
+        break;
         }
 
       boolean spilled = groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup

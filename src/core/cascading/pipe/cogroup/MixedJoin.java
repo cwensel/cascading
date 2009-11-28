@@ -24,7 +24,6 @@ package cascading.pipe.cogroup;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /**
@@ -56,22 +55,6 @@ public class MixedJoin implements Joiner
   public int numJoins()
     {
     return asInner.length - 1;
-    }
-
-  @Override
-  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
-    {
-    long size = 1;
-
-    for( int i = 0; i <= currentPos; i++ )
-      {
-      if( asInner[ i ] )
-        size = size * groups[ i ].size();
-      else
-        size = size * Math.max( groups[ i ].size(), 1 );
-      }
-
-    return size;
     }
 
   public Iterator<Tuple> getIterator( GroupClosure closure )

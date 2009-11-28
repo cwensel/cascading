@@ -23,7 +23,6 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import org.apache.log4j.Logger;
 
@@ -44,17 +43,6 @@ public class InnerJoin implements Joiner
   public int numJoins()
     {
     return -1;
-    }
-
-  @Override
-  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
-    {
-    long size = 1;
-
-    for( int i = 0; i <= currentPos; i++ )
-      size = size * groups[ i ].size();
-
-    return size;
     }
 
   protected static class JoinIterator implements Iterator<Tuple>
@@ -143,7 +131,6 @@ public class InnerJoin implements Joiner
 
     private Tuple makeResult( Comparable[] lastValues )
       {
-//      Tuple result = new Tuple( closure.getGrouping() );
       Tuple result = new Tuple();
 
       // flatten the results into one Tuple

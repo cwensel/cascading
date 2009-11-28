@@ -23,7 +23,6 @@ package cascading.pipe.cogroup;
 
 import java.util.Iterator;
 
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 
 /**
@@ -37,7 +36,6 @@ import cascading.tuple.Tuple;
  */
 public class RightJoin implements Joiner
   {
-
   public Iterator<Tuple> getIterator( GroupClosure closure )
     {
     return new JoinIterator( closure );
@@ -46,19 +44,6 @@ public class RightJoin implements Joiner
   public int numJoins()
     {
     return -1;
-    }
-
-  @Override
-  public long numIterationsSoFar( SpillableTupleList[] groups, int currentPos )
-    {
-    long size = 1;
-
-    size = size * Math.max( groups[ 0 ].size(), 1 );
-
-    for( int i = 1; i <= currentPos; i++ )
-      size = size * groups[ i ].size();
-
-    return size;
     }
 
   protected static class JoinIterator extends OuterJoin.JoinIterator
@@ -75,5 +60,4 @@ public class RightJoin implements Joiner
       return i == 0 && super.isOuter( i );
       }
     }
-
   }
