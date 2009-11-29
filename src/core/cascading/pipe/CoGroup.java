@@ -45,6 +45,17 @@ import cascading.tuple.Fields;
  * at least the first groupingFields value given should be an instance of {@link cascading.tuple.Fields} containing
  * {@link java.util.Comparator} instances for the appropriate fields.
  * This allows fine grained control of the sort grouping order.
+ * <p/>
+ * CoGrouping, specifically joins, do not scale well when implemented over MapReduce. In Cascading there are two
+ * ways to optimize CoGrouping.
+ * <p/>
+ * The first is to join streams with more data on the left hand side to streams with more sparse data on the right
+ * hand side. That is, always attempt to effect M x N joins where M is large and N is small, instead of where M is
+ * small and N is large. This typically will allow Cascading to forgo spilling a group via the {@link cascading.tuple.SpillableTupleList }
+ * internally.
+ * <p/>
+ * If spills are happening, consider increasing the spill threshold ({@link cascading.pipe.cogroup.CoGroupClosure#SPILL_THRESHOLD}
+ * via the properties handed to {@link cascading.flow.FlowConnector}.
  *
  * @see cascading.pipe.cogroup.InnerJoin
  * @see cascading.pipe.cogroup.OuterJoin
@@ -52,6 +63,8 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.cogroup.RightJoin
  * @see cascading.pipe.cogroup.MixedJoin
  * @see cascading.tuple.Fields
+ * @see cascading.tuple.SpillableTupleList
+ * @see cascading.pipe.cogroup.CoGroupClosure
  */
 public class CoGroup extends Group
   {
