@@ -47,7 +47,7 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Class ZipInputFormat ia an {@link InputFormat} for zip files. Each file within a zip file is broken
+ * Class ZipInputFormat is an {@link InputFormat} for zip files. Each file within a zip file is broken
  * into lines. Either line-feed or carriage-return are used to signal end of
  * line. Keys are the position in the file, and values are the line of text.
  * <p/>
