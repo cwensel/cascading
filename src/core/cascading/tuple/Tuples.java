@@ -78,39 +78,112 @@ public class Tuples
    */
   public static Object coerce( Tuple tuple, int pos, Class type )
     {
-    Comparable value = tuple.get( pos );
+    Object value = tuple.get( pos );
 
+    return coerce( value, type );
+    }
+
+  public static Object coerce( Object value, Class type )
+    {
     if( value != null && type == value.getClass() )
-      return tuple.get( pos );
+      return value;
 
     if( type == Object.class )
       return value;
 
     if( type == String.class )
-      return tuple.getString( pos );
+      return toString( value );
 
     if( type == Integer.class || type == int.class )
-      return tuple.getInteger( pos );
+      return toInteger( value );
 
     if( type == Long.class || type == long.class )
-      return tuple.getLong( pos );
+      return toLong( value );
 
     if( type == Double.class || type == double.class )
-      return tuple.getDouble( pos );
+      return toDouble( value );
 
     if( type == Float.class || type == float.class )
-      return tuple.getFloat( pos );
+      return toFloat( value );
 
     if( type == Short.class || type == short.class )
-      return tuple.getShort( pos );
+      return toShort( value );
 
     if( type == Boolean.class || type == boolean.class )
-      return tuple.getBoolean( pos );
+      return toBoolean( value );
 
     if( type != null )
-      throw new OperationException( "could not coerce value, " + tuple.get( pos ) + " to type: " + type.getName() );
+      throw new OperationException( "could not coerce value, " + value + " to type: " + type.getName() );
 
     return null;
+    }
+
+  public static final String toString( Object value )
+    {
+    if( value == null )
+      return null;
+
+    return value.toString();
+    }
+
+  public static final int toInteger( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).intValue();
+    else if( value == null )
+      return 0;
+    else
+      return Integer.parseInt( value.toString() );
+    }
+
+  public static final long toLong( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).longValue();
+    else if( value == null )
+      return 0;
+    else
+      return Long.parseLong( value.toString() );
+    }
+
+  public static final double toDouble( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).doubleValue();
+    else if( value == null )
+      return 0;
+    else
+      return Double.parseDouble( value.toString() );
+    }
+
+  public static final float toFloat( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).floatValue();
+    else if( value == null )
+      return 0;
+    else
+      return Float.parseFloat( value.toString() );
+    }
+
+  public static final short toShort( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).shortValue();
+    else if( value == null )
+      return 0;
+    else
+      return Short.parseShort( value.toString() );
+    }
+
+  public static final boolean toBoolean( Object value )
+    {
+    if( value instanceof Boolean )
+      return ( (Boolean) value ).booleanValue();
+    else if( value == null )
+      return false;
+    else
+      return Boolean.parseBoolean( value.toString() );
     }
 
   /**

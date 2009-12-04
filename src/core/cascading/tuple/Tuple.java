@@ -221,12 +221,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public String getString( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value == null )
-      return null;
-
-    return value.toString();
+    return Tuples.toString( get( pos ) );
     }
 
   /**
@@ -237,14 +232,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public float getFloat( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Number )
-      return ( (Number) value ).floatValue();
-    else if( value == null )
-      return 0;
-    else
-      return Float.parseFloat( value.toString() );
+    return Tuples.toFloat( get( pos ) );
     }
 
   /**
@@ -255,14 +243,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public double getDouble( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Number )
-      return ( (Number) value ).doubleValue();
-    else if( value == null )
-      return 0;
-    else
-      return Double.parseDouble( value.toString() );
+    return Tuples.toDouble( get( pos ) );
     }
 
   /**
@@ -273,14 +254,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public int getInteger( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Number )
-      return ( (Number) value ).intValue();
-    else if( value == null )
-      return 0;
-    else
-      return Integer.parseInt( value.toString() );
+    return Tuples.toInteger( get( pos ) );
     }
 
   /**
@@ -291,14 +265,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public long getLong( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Number )
-      return ( (Number) value ).longValue();
-    else if( value == null )
-      return 0;
-    else
-      return Long.parseLong( value.toString() );
+    return Tuples.toLong( get( pos ) );
     }
 
   /**
@@ -309,14 +276,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public short getShort( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Number )
-      return ( (Number) value ).shortValue();
-    else if( value == null )
-      return 0;
-    else
-      return Short.parseShort( value.toString() );
+    return Tuples.toShort( get( pos ) );
     }
 
   /**
@@ -328,14 +288,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public boolean getBoolean( int pos )
     {
-    Comparable value = get( pos );
-
-    if( value instanceof Boolean )
-      return ( (Boolean) value ).booleanValue();
-    else if( value == null )
-      return false;
-    else
-      return Boolean.parseBoolean( value.toString() );
+    return Tuples.toBoolean( get( pos ) );
     }
 
   /**

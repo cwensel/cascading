@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added new c.s.Scheme type c.s.TextDelimited to allow native support for delimited text files.
+
   Added optimization during CoGrouping where the most LHS pipe will not ever be accumulated, instead the values iterator
   will be used directly. This allows for the most dense values to be on the LHS, and the most sparse to be on the
   RHS of the join.
