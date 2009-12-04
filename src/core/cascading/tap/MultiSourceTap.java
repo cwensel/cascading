@@ -130,7 +130,12 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
   /** Returns the most current modified time. */
   public long getPathModified( JobConf conf ) throws IOException
     {
-    long modified = getTaps()[ 0 ].getPathModified( conf );
+    Tap[] taps = getTaps();
+
+    if( taps == null || taps.length == 0 )
+      return 0;
+
+    long modified = taps[ 0 ].getPathModified( conf );
 
     for( int i = 1; i < getTaps().length; i++ )
       modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );

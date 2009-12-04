@@ -22,6 +22,8 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.FileStatus;
@@ -32,7 +34,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 /**
  * Class GlobHfs is a type of {@link MultiSourceTap} that accepts Hadoop style 'file globbing' expressions so
- * multiple files that match the given pattern may be used as the input sources for a given {@link Flow}.
+ * multiple files that match the given pattern may be used as the input sources for a given {@link cascading.flow.Flow}.
  * <p/>
  * See {@link FileSystem#globStatus(org.apache.hadoop.fs.Path)} for details on the globbing syntax. But in short
  * it is similiar to standard regular expressions except alternation is done via {foo,bar} instead of (foo|bar).
@@ -107,12 +109,15 @@ public class GlobHfs extends MultiSourceTap
     if( statusList == null || statusList.length == 0 )
       throw new TapException( "unable to find paths matching path pattern: " + pathPattern );
 
-    Tap[] taps = new Tap[statusList.length];
+    List<Hfs> notEmpty = new ArrayList<Hfs>();
 
     for( int i = 0; i < statusList.length; i++ )
-      taps[ i ] = new Hfs( getScheme(), statusList[ i ].getPath().toString() );
+      {
+      if( statusList[ i ].getLen() != 0 )
+        notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
+      }
 
-    return taps;
+    return notEmpty.toArray( new Tap[notEmpty.size()] );
     }
 
   @Override
