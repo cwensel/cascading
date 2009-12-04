@@ -293,17 +293,19 @@ public class TextDelimited extends TextLine
 
     if( types != null ) // forced null in ctor
       {
+      Object[] result = new Object[split.length];
+
       for( int i = 0; i < split.length; i++ )
         {
         try
           {
-          split[ i ] = Tuples.coerce( split[ i ], types[ i ] );
+          result[ i ] = Tuples.coerce( split[ i ], types[ i ] );
           }
         catch( Exception exception )
           {
-          String message = "field " + getSourceFields().get( i ) + " cannot be coerced from : " + split[ i ] + " to: " + types[ i ].getName();
+          String message = "field " + getSourceFields().get( i ) + " cannot be coerced from : " + result[ i ] + " to: " + types[ i ].getName();
 
-          split[ i ] = null;
+          result[ i ] = null;
 
           LOG.warn( message, exception );
 
@@ -311,6 +313,8 @@ public class TextDelimited extends TextLine
             throw new TapException( message, exception );
           }
         }
+
+      split = result;
       }
 
     return new Tuple( split );
