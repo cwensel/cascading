@@ -3,13 +3,8 @@ Cascading Change Log
 unreleased (wip 1.1)
 
   Added optimization during CoGrouping where the most LHS pipe will not ever be accumulated, instead the values iterator
-  will be used directly. This allows for the most dense values to be on the LHS, and the most sparse to be on the 
+  will be used directly. This allows for the most dense values to be on the LHS, and the most sparse to be on the
   RHS of the join.
-
-  Added feature allowing c.p.CoGroup with c.p.c.Joiner to detect if a join can be satisfied, if not, the join is
-  abandoned by discarding all the remaining values in the current group. This bypasses any unnecessary accumulation and
-  subsequent spills. This feature requires the stream with the fewest values to be handed to the CoGroup
-  pipe on the most left hand side, as those values are accumulated first.
 
   Added new counters for tuple spills and reads. Also logs grouping after first spill.
 
