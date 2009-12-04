@@ -21,7 +21,6 @@
 
 package cascading.flow;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -215,31 +214,12 @@ public class FlowPlanner
 
     Set<String> names = new HashSet<String>();
 
-    collectNames( pipes, names );
+    Collections.addAll( names, Pipe.names( pipes ) );
 
     for( String name : traps.keySet() )
       {
       if( !names.contains( name ) )
         throw new PlannerException( "trap name not found in assembly: " + name );
-      }
-    }
-
-  /**
-   * Method collectNames ...
-   *
-   * @param pipes of type Pipe[]
-   * @param names of type Set<String>
-   */
-  private void collectNames( Pipe[] pipes, Set<String> names )
-    {
-    for( Pipe pipe : pipes )
-      {
-      if( pipe instanceof SubAssembly )
-        names.addAll( Arrays.asList( ( (SubAssembly) pipe ).getTailNames() ) );
-      else
-        names.add( pipe.getName() );
-
-      collectNames( SubAssembly.unwind( pipe.getPrevious() ), names );
       }
     }
 

@@ -22,6 +22,7 @@
 package cascading.pipe;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -70,6 +71,34 @@ public class Pipe implements FlowElement, Serializable
   public static Pipe[] pipes( Pipe... pipes )
     {
     return pipes;
+    }
+
+  /**
+   * Convenience method for finding all Pipe names in an assembly.
+   *
+   * @param tails vararg list of all tails in given assembly
+   * @return array of Pipe names
+   */
+  public static String[] names( Pipe... tails )
+    {
+    Set<String> names = new HashSet<String>();
+
+    collectNames( tails, names );
+
+    return names.toArray( new String[names.size()] );
+    }
+
+  private static void collectNames( Pipe[] pipes, Set<String> names )
+    {
+    for( Pipe pipe : pipes )
+      {
+      if( pipe instanceof SubAssembly )
+        names.addAll( Arrays.asList( ( (SubAssembly) pipe ).getTailNames() ) );
+      else
+        names.add( pipe.getName() );
+
+      collectNames( SubAssembly.unwind( pipe.getPrevious() ), names );
+      }
     }
 
   protected Pipe()

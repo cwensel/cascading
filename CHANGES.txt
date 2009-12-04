@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added new convenience method c.p.Pipe#names to return an array of all the pipe names in an assembly. This supports
+  the dynamic creation of traps from opaque assemblies.
+
   Added new c.s.Scheme type c.s.TextDelimited to allow native support for delimited text files.
 
   Added optimization during CoGrouping where the most LHS pipe will not ever be accumulated, instead the values iterator
