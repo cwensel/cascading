@@ -21,6 +21,8 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -45,6 +47,7 @@ public class Or extends Logic
    *
    * @param filters of type Filter...
    */
+  @ConstructorProperties({"filters"})
   public Or( Filter... filters )
     {
     super( filters );
@@ -58,6 +61,7 @@ public class Or extends Logic
    * @param rhsArgumentSelector of type Fields
    * @param rhsFilter           of type Filter
    */
+  @ConstructorProperties({"lhsArgumentsSelector", "lhsFilter", "rhsArgumentSelector", "rhsFilter"})
   public Or( Fields lhsArgumentSelector, Filter lhsFilter, Fields rhsArgumentSelector, Filter rhsFilter )
     {
     super( lhsArgumentSelector, lhsFilter, rhsArgumentSelector, rhsFilter );
@@ -69,6 +73,7 @@ public class Or extends Logic
    * @param argumentSelectors of type Fields[]
    * @param filters           of type Filter[]
    */
+  @ConstructorProperties({"argumentSelectors", "filters"})
   public Or( Fields[] argumentSelectors, Filter[] filters )
     {
     super( argumentSelectors, filters );

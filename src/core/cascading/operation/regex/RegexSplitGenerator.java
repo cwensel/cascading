@@ -21,6 +21,8 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -39,6 +41,7 @@ public class RegexSplitGenerator extends RegexOperation implements Function
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexSplitGenerator( String patternString )
     {
     super( 1, Fields.size( 1 ), patternString );
@@ -50,6 +53,7 @@ public class RegexSplitGenerator extends RegexOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString"})
   public RegexSplitGenerator( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );

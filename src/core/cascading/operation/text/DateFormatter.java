@@ -21,6 +21,7 @@
 
 package cascading.operation.text;
 
+import java.beans.ConstructorProperties;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -49,6 +50,7 @@ public class DateFormatter extends DateOperation implements Function
    *
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"dateFormatString"})
   public DateFormatter( String dateFormatString )
     {
     super( 1, new Fields( FIELD_NAME ), dateFormatString );
@@ -60,6 +62,7 @@ public class DateFormatter extends DateOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "dateFormatString"})
   public DateFormatter( Fields fieldDeclaration, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString );
@@ -72,6 +75,7 @@ public class DateFormatter extends DateOperation implements Function
    * @param dateFormatString of type String
    * @param zone             of type TimeZone
    */
+  @ConstructorProperties({"fieldDeclaration", "dateFormatString", "zone"})
   public DateFormatter( Fields fieldDeclaration, String dateFormatString, TimeZone zone )
     {
     super( 1, fieldDeclaration, dateFormatString, zone, null );
@@ -85,6 +89,7 @@ public class DateFormatter extends DateOperation implements Function
    * @param zone             of type TimeZone
    * @param locale           of type Locale
    */
+  @ConstructorProperties({"fieldDeclaration", "dateFormatString", "zone", "locale"})
   public DateFormatter( Fields fieldDeclaration, String dateFormatString, TimeZone zone, Locale locale )
     {
     super( 1, fieldDeclaration, dateFormatString, zone, locale );

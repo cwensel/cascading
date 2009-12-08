@@ -21,6 +21,8 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -35,6 +37,7 @@ public class RegexSplitter extends RegexOperation implements Function
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexSplitter( String patternString )
     {
     super( 1, patternString );
@@ -45,6 +48,7 @@ public class RegexSplitter extends RegexOperation implements Function
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public RegexSplitter( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration, "\t" );
@@ -56,6 +60,7 @@ public class RegexSplitter extends RegexOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString"})
   public RegexSplitter( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );

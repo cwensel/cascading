@@ -21,6 +21,8 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
@@ -50,6 +52,7 @@ public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public Sum( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -65,6 +68,7 @@ public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
    * @param fieldDeclaration of type Fields
    * @param type             of type Class
    */
+  @ConstructorProperties({"fieldDeclaration", "type"})
   public Sum( Fields fieldDeclaration, Class type )
     {
     this( fieldDeclaration );

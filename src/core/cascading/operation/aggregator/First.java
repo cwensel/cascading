@@ -21,6 +21,8 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -44,6 +46,7 @@ public class First extends ExtentBase
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public First( Fields fieldDeclaration )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
@@ -56,6 +59,7 @@ public class First extends ExtentBase
    * @param fieldDeclaration of type Fields
    * @param ignoreTuples     of type Tuple...
    */
+  @ConstructorProperties({"fieldDeclaration", "ignoreTuples"})
   public First( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
     super( fieldDeclaration, ignoreTuples );

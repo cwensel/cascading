@@ -21,6 +21,8 @@
 
 package cascading.operation.expression;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -54,6 +56,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
    * @param fieldDeclaration of type Fields
    * @param expression       of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "expression"})
   public ExpressionFunction( Fields fieldDeclaration, String expression )
     {
     super( fieldDeclaration, expression );
@@ -71,6 +74,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
    * @param expression       of type String
    * @param parameterType    of type Class
    */
+  @ConstructorProperties({"fieldDeclaration", "expression", "parameterType"})
   public ExpressionFunction( Fields fieldDeclaration, String expression, Class parameterType )
     {
     super( fieldDeclaration, expression, parameterType );
@@ -90,6 +94,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
    * @param parameterNames   of type String[]
    * @param parameterTypes   of type Class[]
    */
+  @ConstructorProperties({"fieldDeclaration", "expression", "parameterNames", "parameterTypes"})
   public ExpressionFunction( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( fieldDeclaration, expression, parameterNames, parameterTypes );

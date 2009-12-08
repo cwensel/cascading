@@ -21,6 +21,7 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -66,6 +67,7 @@ public class Every extends Operator
    * @param previous   previous Pipe to receive input Tuples from
    * @param aggregator Aggregator to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "aggregator"})
   public Every( Pipe previous, Aggregator aggregator )
     {
     super( previous, AGGREGATOR_ARGUMENTS, aggregator, AGGREGATOR_SELECTOR );
@@ -78,6 +80,7 @@ public class Every extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param aggregator       Aggregator to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "argumentSelector", "aggregator"})
   public Every( Pipe previous, Fields argumentSelector, Aggregator aggregator )
     {
     super( previous, argumentSelector, aggregator, AGGREGATOR_SELECTOR );
@@ -91,6 +94,7 @@ public class Every extends Operator
    * @param aggregator       Aggregator to be applied to every input Tuple grouping
    * @param outputSelector   field selector that selects the output Tuple from the grouping and Aggregator results Tuples
    */
+  @ConstructorProperties({"previous", "argumentSelector", "aggregator", "outputSelector"})
   public Every( Pipe previous, Fields argumentSelector, Aggregator aggregator, Fields outputSelector )
     {
     super( previous, argumentSelector, aggregator, outputSelector );
@@ -103,6 +107,7 @@ public class Every extends Operator
    * @param aggregator     Aggregator to be applied to every input Tuple grouping
    * @param outputSelector field selector that selects the output Tuple from the grouping and Aggregator results Tuples
    */
+  @ConstructorProperties({"previous", "aggregator", "outputSelector"})
   public Every( Pipe previous, Aggregator aggregator, Fields outputSelector )
     {
     super( previous, AGGREGATOR_ARGUMENTS, aggregator, outputSelector );
@@ -114,6 +119,7 @@ public class Every extends Operator
    * @param previous previous Pipe to receive input Tuples from
    * @param buffer   Buffer to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "buffer"})
   public Every( Pipe previous, Buffer buffer )
     {
     super( previous, AGGREGATOR_ARGUMENTS, buffer, AGGREGATOR_SELECTOR );
@@ -126,6 +132,7 @@ public class Every extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param buffer           Buffer to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "argumentSelector", "buffer"})
   public Every( Pipe previous, Fields argumentSelector, Buffer buffer )
     {
     super( previous, argumentSelector, buffer, AGGREGATOR_SELECTOR );
@@ -139,6 +146,7 @@ public class Every extends Operator
    * @param buffer           Buffer to be applied to every input Tuple grouping
    * @param outputSelector   field selector that selects the output Tuple from the grouping and Buffer results Tuples
    */
+  @ConstructorProperties({"previous", "argumentSelector", "buffer", "outputSelector"})
   public Every( Pipe previous, Fields argumentSelector, Buffer buffer, Fields outputSelector )
     {
     super( previous, argumentSelector, buffer, outputSelector );
@@ -151,6 +159,7 @@ public class Every extends Operator
    * @param buffer         Buffer to be applied to every input Tuple grouping
    * @param outputSelector field selector that selects the output Tuple from the grouping and Buffer results Tuples
    */
+  @ConstructorProperties({"previous", "buffer", "outputSelector"})
   public Every( Pipe previous, Buffer buffer, Fields outputSelector )
     {
     super( previous, AGGREGATOR_ARGUMENTS, buffer, outputSelector );
@@ -163,6 +172,7 @@ public class Every extends Operator
    * @param assertionLevel of type AssertionLevel
    * @param assertion      GroupAssertion to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "assertionLevel", "assertion"})
   public Every( Pipe previous, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
     super( previous, AGGREGATOR_ARGUMENTS, assertionLevel, assertion, ASSERTION_SELECTOR );
@@ -176,6 +186,7 @@ public class Every extends Operator
    * @param assertionLevel   AssertionLevel to associate with the Assertion
    * @param assertion        GroupAssertion to be applied to every input Tuple grouping
    */
+  @ConstructorProperties({"previous", "argumentSelector", "assertionLevel", "assertion"})
   public Every( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, GroupAssertion assertion )
     {
     super( previous, argumentSelector, assertionLevel, assertion, ASSERTION_SELECTOR );

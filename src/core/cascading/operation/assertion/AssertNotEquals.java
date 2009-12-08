@@ -21,6 +21,8 @@
 
 package cascading.operation.assertion;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
@@ -40,6 +42,7 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
    *
    * @param values of type Object...
    */
+  @ConstructorProperties({"values"})
   public AssertNotEquals( Object... values )
     {
     // set to 1 if null, will fail immediately afterwards

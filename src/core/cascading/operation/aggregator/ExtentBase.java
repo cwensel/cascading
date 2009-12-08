@@ -21,6 +21,7 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,18 +40,21 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
   /** Field ignoreTuples */
   private final Collection<Tuple> ignoreTuples;
 
+  @ConstructorProperties({"fieldDeclaration"})
   protected ExtentBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
     this.ignoreTuples = null;
     }
 
+  @ConstructorProperties({"numArgs", "fieldDeclaration"})
   protected ExtentBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
     ignoreTuples = null;
     }
 
+  @ConstructorProperties({"fieldDeclaration", "ignoreTuples"})
   protected ExtentBase( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
     super( fieldDeclaration );

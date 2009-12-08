@@ -21,6 +21,7 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,12 +62,14 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
       }
     }
 
+  @ConstructorProperties({"fieldDeclaration"})
   public ExtremaBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
     ignoreValues = null;
     }
 
+  @ConstructorProperties({"numArgs", "fieldDeclaration"})
   public ExtremaBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
@@ -76,6 +79,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
+  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
   protected ExtremaBase( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration );

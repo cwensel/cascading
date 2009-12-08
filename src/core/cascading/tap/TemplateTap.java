@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -223,6 +224,7 @@ public class TemplateTap extends SinkTap
    * @param parent       of type Tap
    * @param pathTemplate of type String
    */
+  @ConstructorProperties({"parent", "pathTemplate"})
   public TemplateTap( Hfs parent, String pathTemplate )
     {
     super( new TemplateScheme( parent.getScheme() ) );
@@ -238,6 +240,7 @@ public class TemplateTap extends SinkTap
    * @param pathTemplate of type String
    * @param sinkMode     of type SinkMode
    */
+  @ConstructorProperties({"parent", "pathTemplate", "sinkMode"})
   public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode )
     {
     super( new TemplateScheme( parent.getScheme() ), sinkMode );
@@ -257,6 +260,7 @@ public class TemplateTap extends SinkTap
    * @param sinkMode           of type SinkMode
    * @param keepParentOnDelete of type boolean
    */
+  @ConstructorProperties({"parent", "pathTemplate", "sinkMode", "keepParentOnDelete"})
   public TemplateTap( Hfs parent, String pathTemplate, SinkMode sinkMode, boolean keepParentOnDelete )
     {
     super( new TemplateScheme( parent.getScheme() ), sinkMode );
@@ -277,6 +281,7 @@ public class TemplateTap extends SinkTap
    * @param pathTemplate of type String
    * @param pathFields   of type Fields
    */
+  @ConstructorProperties({"parent", "pathTemplate", "pathFields"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields )
     {
     super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ) );
@@ -297,6 +302,7 @@ public class TemplateTap extends SinkTap
    * @param pathFields   of type Fields
    * @param sinkMode     of type SinkMode
    */
+  @ConstructorProperties({"parent", "pathTemplate", "pathFields", "sinkMode"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode )
     {
     super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
@@ -321,6 +327,7 @@ public class TemplateTap extends SinkTap
    * @param sinkMode           of type SinkMode
    * @param keepParentOnDelete of type boolean
    */
+  @ConstructorProperties({"parent", "pathTemplate", "pathFields", "sinkMode", "keepParentOnDelete"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode, boolean keepParentOnDelete )
     {
     super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );

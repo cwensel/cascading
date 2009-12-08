@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Pattern;
 
 import cascading.operation.BaseOperation;
@@ -45,6 +46,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    *
    * @param numArgs of type int
    */
+  @ConstructorProperties({"numArgs"})
   public RegexOperation( int numArgs )
     {
     super( numArgs );
@@ -55,6 +57,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public RegexOperation( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
@@ -66,6 +69,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    * @param numArgs       of type int
    * @param patternString of type String
    */
+  @ConstructorProperties({"numArgs", "patternString"})
   public RegexOperation( int numArgs, String patternString )
     {
     super( numArgs );
@@ -77,6 +81,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexOperation( String patternString )
     {
     this.patternString = patternString;
@@ -88,6 +93,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    * @param numArgs          of type int
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"numArgs", "fieldDeclaration"})
   public RegexOperation( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
@@ -100,6 +106,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
+  @ConstructorProperties({"numArgs", "fieldDeclaration", "patternString"})
   public RegexOperation( int numArgs, Fields fieldDeclaration, String patternString )
     {
     super( numArgs, fieldDeclaration );

@@ -21,6 +21,8 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -47,6 +49,7 @@ public class Xor extends Logic
    *
    * @param filters of type Filter...
    */
+  @ConstructorProperties({"filters"})
   public Xor( Filter... filters )
     {
     super( filters );
@@ -60,6 +63,7 @@ public class Xor extends Logic
    * @param rhsArgumentSelector of type Fields
    * @param rhsFilter           of type Filter
    */
+  @ConstructorProperties({"lhsArgumentsSelector", "lhsFilter", "rhsArgumentSelector", "rhsFilter"})
   public Xor( Fields lhsArgumentSelector, Filter lhsFilter, Fields rhsArgumentSelector, Filter rhsFilter )
     {
     super( lhsArgumentSelector, lhsFilter, rhsArgumentSelector, rhsFilter );

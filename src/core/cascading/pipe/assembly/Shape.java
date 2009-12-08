@@ -21,6 +21,8 @@
 
 package cascading.pipe.assembly;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.Identity;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
@@ -30,6 +32,7 @@ import cascading.tuple.Fields;
 /** Class Shape is a {@link SubAssembly} that will modify the input Tuple stream to match the given fields. */
 public class Shape extends SubAssembly
   {
+  @ConstructorProperties({"previous", "fields"})
   public Shape( Pipe previous, Fields fields )
     {
     setTails( new Each( previous, fields, new Identity() ) );

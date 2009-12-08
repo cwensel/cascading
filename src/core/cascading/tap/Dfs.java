@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 
@@ -41,8 +42,9 @@ public class Dfs extends Hfs
    * Constructor Dfs creates a new Dfs instance.
    *
    * @param fields of type Fields
-   * @param uri          of type URI
+   * @param uri    of type URI
    */
+  @ConstructorProperties({"fields", "uri"})
   public Dfs( Fields fields, URI uri )
     {
     super( fields, uri.getPath() );
@@ -56,10 +58,11 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param uri          of type URI
-   * @param replace      of type boolean
+   * @param fields  of type Fields
+   * @param uri     of type URI
+   * @param replace of type boolean
    */
+  @ConstructorProperties({"fields", "uri", "replace"})
   public Dfs( Fields fields, URI uri, boolean replace )
     {
     super( fields, uri.getPath(), replace );
@@ -73,10 +76,11 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param uri of type URI
+   * @param fields   of type Fields
+   * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
+  @ConstructorProperties({"fields", "uri", "sinkMode"})
   public Dfs( Fields fields, URI uri, SinkMode sinkMode )
     {
     super( fields, uri.getPath(), sinkMode );
@@ -90,9 +94,10 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
+   * @param fields     of type Fields
+   * @param stringPath of type String
    */
+  @ConstructorProperties({"fields", "stringPath"})
   public Dfs( Fields fields, String stringPath )
     {
     super( fields, stringPath );
@@ -101,10 +106,11 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param replace      of type boolean
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param replace    of type boolean
    */
+  @ConstructorProperties({"fields", "stringPath", "replace"})
   public Dfs( Fields fields, String stringPath, boolean replace )
     {
     super( fields, stringPath, replace );
@@ -113,15 +119,17 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param sinkMode     of type SinkMode
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
   public Dfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( fields, stringPath, sinkMode );
     }
 
+  @ConstructorProperties({"scheme"})
   Dfs( Scheme scheme )
     {
     super( scheme );
@@ -133,6 +141,7 @@ public class Dfs extends Hfs
    * @param scheme of type Scheme
    * @param uri    of type URI
    */
+  @ConstructorProperties({"scheme", "uri"})
   public Dfs( Scheme scheme, URI uri )
     {
     super( scheme, uri.getPath() );
@@ -150,6 +159,7 @@ public class Dfs extends Hfs
    * @param uri     of type URI
    * @param replace of type boolean
    */
+  @ConstructorProperties({"scheme", "uri", "replace"})
   public Dfs( Scheme scheme, URI uri, boolean replace )
     {
     super( scheme, uri.getPath(), replace );
@@ -163,10 +173,11 @@ public class Dfs extends Hfs
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
-   * @param scheme of type Scheme
-   * @param uri of type URI
+   * @param scheme   of type Scheme
+   * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
+  @ConstructorProperties({"scheme", "uri", "sinkMode"})
   public Dfs( Scheme scheme, URI uri, SinkMode sinkMode )
     {
     super( scheme, uri.getPath(), sinkMode );
@@ -183,6 +194,7 @@ public class Dfs extends Hfs
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
+  @ConstructorProperties({"scheme", "stringPath"})
   public Dfs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
@@ -195,6 +207,7 @@ public class Dfs extends Hfs
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @ConstructorProperties({"scheme", "stringPath", "replace"})
   public Dfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
@@ -207,6 +220,7 @@ public class Dfs extends Hfs
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
   public Dfs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );

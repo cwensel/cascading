@@ -21,6 +21,8 @@
 
 package cascading.tuple;
 
+import java.beans.ConstructorProperties;
+
 /**
  * Class TupleEntry allows a {@link Tuple} instance and its declarating {@link Fields} instance to be used as a single object.
  * <p/>
@@ -119,6 +121,7 @@ public class TupleEntry
    *
    * @param isUnmodifiable of type boolean
    */
+  @ConstructorProperties({"isUnmodifiable"})
   public TupleEntry( boolean isUnmodifiable )
     {
     this.fields = new Fields();
@@ -130,6 +133,7 @@ public class TupleEntry
    *
    * @param fields of type Fields
    */
+  @ConstructorProperties({"fields"})
   public TupleEntry( Fields fields )
     {
     this.fields = fields;
@@ -141,6 +145,7 @@ public class TupleEntry
    * @param fields         of type Fields
    * @param isUnmodifiable of type boolean
    */
+  @ConstructorProperties({"fields", "isUnmodifiable"})
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -153,6 +158,7 @@ public class TupleEntry
    * @param fields of type Fields
    * @param tuple  of type Tuple
    */
+  @ConstructorProperties({"fields", "tuple"})
   public TupleEntry( Fields fields, Tuple tuple )
     {
     this.fields = fields;
@@ -164,6 +170,7 @@ public class TupleEntry
    *
    * @param tupleEntry of type TupleEntry
    */
+  @ConstructorProperties({"tupleEntry"})
   public TupleEntry( TupleEntry tupleEntry )
     {
     this.fields = tupleEntry.fields;
@@ -175,6 +182,7 @@ public class TupleEntry
    *
    * @param tuple of type Tuple
    */
+  @ConstructorProperties({"tuple"})
   public TupleEntry( Tuple tuple )
     {
     this.fields = Fields.size( tuple.size() );

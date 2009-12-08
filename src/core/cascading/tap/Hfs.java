@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -101,6 +102,7 @@ public class Hfs extends Tap
     {
     }
 
+  @ConstructorProperties({"scheme"})
   protected Hfs( Scheme scheme )
     {
     super( scheme );
@@ -112,6 +114,7 @@ public class Hfs extends Tap
    * @param fields     of type Fields
    * @param stringPath of type String
    */
+  @ConstructorProperties({"fields", "stringPath"})
   public Hfs( Fields fields, String stringPath )
     {
     super( new SequenceFile( fields ) );
@@ -125,6 +128,7 @@ public class Hfs extends Tap
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @ConstructorProperties({"fields", "stringPath", "replace"})
   public Hfs( Fields fields, String stringPath, boolean replace )
     {
     super( new SequenceFile( fields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
@@ -138,6 +142,7 @@ public class Hfs extends Tap
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
   public Hfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( new SequenceFile( fields ), sinkMode );
@@ -153,6 +158,7 @@ public class Hfs extends Tap
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
+  @ConstructorProperties({"scheme", "stringPath"})
   public Hfs( Scheme scheme, String stringPath )
     {
     super( scheme );
@@ -166,6 +172,7 @@ public class Hfs extends Tap
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @ConstructorProperties({"scheme", "stringPath", "replace"})
   public Hfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
@@ -179,6 +186,7 @@ public class Hfs extends Tap
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
   public Hfs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );

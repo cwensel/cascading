@@ -21,6 +21,7 @@
 
 package cascading.operation.assertion;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
@@ -51,6 +52,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public AssertMatchesAll( String patternString )
     {
     super( patternString, false );
@@ -62,6 +64,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
    * @param patternString of type String
    * @param negateMatch   of type boolean
    */
+  @ConstructorProperties({"patternString", "negateMatch"})
   public AssertMatchesAll( String patternString, boolean negateMatch )
     {
     super( patternString, negateMatch );

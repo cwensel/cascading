@@ -21,6 +21,7 @@
 
 package cascading.operation.assertion;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,12 +74,14 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
       }
     }
 
+  @ConstructorProperties({"message", "size"})
   public AssertGroupBase( String message, long size )
     {
     super( message );
     this.size = size;
     }
 
+  @ConstructorProperties({"message", "patternString", "size"})
   protected AssertGroupBase( String message, String patternString, long size )
     {
     super( message );

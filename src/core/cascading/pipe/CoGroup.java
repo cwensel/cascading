@@ -21,6 +21,8 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
+
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.Joiner;
 import cascading.tuple.Fields;
@@ -77,6 +79,7 @@ public class CoGroup extends Group
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
@@ -92,6 +95,7 @@ public class CoGroup extends Group
    * @param declaredFields    of type Fields
    * @param resultGroupFields of type Fields
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields", "resultGroupFields"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
@@ -107,6 +111,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields", "joiner"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
@@ -123,6 +128,8 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type Joiner
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields", "resultGroupFields",
+                          "joiner"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
@@ -137,6 +144,7 @@ public class CoGroup extends Group
    * @param rhsGroupFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "joiner"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
@@ -150,6 +158,7 @@ public class CoGroup extends Group
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    */
+  @ConstructorProperties({"lhs", "lhsGroupFields", "rhs", "rhsGroupFields"})
   public CoGroup( Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
     {
     super( lhs, lhsGroupFields, rhs, rhsGroupFields );
@@ -160,6 +169,7 @@ public class CoGroup extends Group
    *
    * @param pipes of type Pipe...
    */
+  @ConstructorProperties({"pipes"})
   public CoGroup( Pipe... pipes )
     {
     super( pipes );
@@ -171,6 +181,7 @@ public class CoGroup extends Group
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
    */
+  @ConstructorProperties({"pipes", "groupFields"})
   public CoGroup( Pipe[] pipes, Fields[] groupFields )
     {
     super( pipes, groupFields );
@@ -184,6 +195,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"pipes", "groupFields", "declaredFields", "joiner"})
   public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
     super( pipes, groupFields, declaredFields, joiner );
@@ -198,6 +210,7 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type Joiner
    */
+  @ConstructorProperties({"pipes", "groupFields", "declaredFields", "resultGroupFields", "joiner"})
   public CoGroup( Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( pipes, groupFields, declaredFields, resultGroupFields, joiner );
@@ -210,6 +223,7 @@ public class CoGroup extends Group
    * @param pipes       of type Pipe[]
    * @param groupFields of type Fields[]
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields"})
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields )
     {
     super( groupName, pipes, groupFields );
@@ -223,6 +237,7 @@ public class CoGroup extends Group
    * @param groupFields    of type Fields[]
    * @param declaredFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "declaredFields"})
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields )
     {
     super( groupName, pipes, groupFields, declaredFields );
@@ -237,6 +252,7 @@ public class CoGroup extends Group
    * @param declaredFields    of type Fields
    * @param resultGroupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "declaredFields", "resultGroupFields"})
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields )
     {
     super( groupName, pipes, groupFields, declaredFields, resultGroupFields );
@@ -251,6 +267,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "declaredFields", "joiner"})
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Joiner joiner )
     {
     super( groupName, pipes, groupFields, declaredFields, null, joiner );
@@ -266,6 +283,7 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "declaredFields", "resultGroupFields", "joiner"})
   public CoGroup( String groupName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( groupName, pipes, groupFields, declaredFields, resultGroupFields, joiner );
@@ -281,6 +299,7 @@ public class CoGroup extends Group
    * @param rhsGroupFields of type Fields
    * @param declaredFields of type Fields
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields );
@@ -297,6 +316,8 @@ public class CoGroup extends Group
    * @param declaredFields    of type Fields
    * @param resultGroupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields",
+                          "resultGroupFields"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields );
@@ -313,6 +334,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields", "joiner"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Joiner joiner )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, joiner );
@@ -330,6 +352,8 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type Joiner
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "declaredFields",
+                          "resultGroupFields", "joiner"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, declaredFields, resultGroupFields, joiner );
@@ -345,6 +369,7 @@ public class CoGroup extends Group
    * @param rhsGroupFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields", "joiner"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields, Joiner joiner )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields, joiner );
@@ -359,6 +384,7 @@ public class CoGroup extends Group
    * @param rhs            of type Pipe
    * @param rhsGroupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "lhs", "lhsGroupFields", "rhs", "rhsGroupFields"})
   public CoGroup( String groupName, Pipe lhs, Fields lhsGroupFields, Pipe rhs, Fields rhsGroupFields )
     {
     super( groupName, lhs, lhsGroupFields, rhs, rhsGroupFields );
@@ -370,6 +396,7 @@ public class CoGroup extends Group
    * @param groupName of type String
    * @param pipes     of type Pipe...
    */
+  @ConstructorProperties({"groupName", "pipes"})
   public CoGroup( String groupName, Pipe... pipes )
     {
     super( groupName, pipes );
@@ -384,6 +411,7 @@ public class CoGroup extends Group
    * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins", "declaredFields"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
     super( pipe, groupFields, numSelfJoins, declaredFields );
@@ -398,6 +426,7 @@ public class CoGroup extends Group
    * @param declaredFields    of type Fields
    * @param resultGroupFields of type Fields
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins", "declaredFields", "resultGroupFields"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
     {
     super( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
@@ -413,6 +442,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins", "declaredFields", "joiner"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( pipe, groupFields, numSelfJoins, declaredFields, joiner );
@@ -428,6 +458,7 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type Joiner
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins", "declaredFields", "resultGroupFields", "joiner"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
@@ -442,6 +473,7 @@ public class CoGroup extends Group
    * @param numSelfJoins of type int
    * @param joiner       of type CoGrouper
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins", "joiner"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
     super( pipe, groupFields, numSelfJoins, joiner );
@@ -455,6 +487,7 @@ public class CoGroup extends Group
    * @param groupFields  of type Fields
    * @param numSelfJoins of type int
    */
+  @ConstructorProperties({"pipe", "groupFields", "numSelfJoins"})
   public CoGroup( Pipe pipe, Fields groupFields, int numSelfJoins )
     {
     super( pipe, groupFields, numSelfJoins );
@@ -470,6 +503,7 @@ public class CoGroup extends Group
    * @param numSelfJoins   of type int
    * @param declaredFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins", "declaredFields"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields )
     {
     super( groupName, pipe, groupFields, numSelfJoins, declaredFields );
@@ -485,6 +519,7 @@ public class CoGroup extends Group
    * @param declaredFields    of type Fields
    * @param resultGroupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins", "declaredFields", "resultGroupFields"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields )
     {
     super( groupName, pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields );
@@ -501,6 +536,7 @@ public class CoGroup extends Group
    * @param declaredFields of type Fields
    * @param joiner         of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins", "declaredFields", "joiner"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( groupName, pipe, groupFields, numSelfJoins, declaredFields, joiner );
@@ -517,6 +553,8 @@ public class CoGroup extends Group
    * @param resultGroupFields of type Fields
    * @param joiner            of type Joiner
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins", "declaredFields", "resultGroupFields",
+                          "joiner"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
     super( groupName, pipe, groupFields, numSelfJoins, declaredFields, resultGroupFields, joiner );
@@ -532,6 +570,7 @@ public class CoGroup extends Group
    * @param numSelfJoins of type int
    * @param joiner       of type CoGrouper
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins", "joiner"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins, Joiner joiner )
     {
     super( groupName, pipe, groupFields, numSelfJoins, joiner );
@@ -546,6 +585,7 @@ public class CoGroup extends Group
    * @param groupFields  of type Fields
    * @param numSelfJoins of type int
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "numSelfJoins"})
   public CoGroup( String groupName, Pipe pipe, Fields groupFields, int numSelfJoins )
     {
     super( groupName, pipe, groupFields, numSelfJoins );

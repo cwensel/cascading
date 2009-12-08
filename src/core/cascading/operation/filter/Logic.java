@@ -21,6 +21,7 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,6 +54,7 @@ public abstract class Logic extends BaseOperation implements Filter
     return filters;
     }
 
+  @ConstructorProperties({"filters"})
   protected Logic( Filter... filters )
     {
     this.filters = filters;
@@ -68,11 +70,13 @@ public abstract class Logic extends BaseOperation implements Filter
     this.numArgs = getFieldsSize();
     }
 
+  @ConstructorProperties({"lhsArgumentsSelector", "lhsFilter", "rhsArgumentSelector", "rhsFilter"})
   protected Logic( Fields lhsArgumentSelector, Filter lhsFilter, Fields rhsArgumentSelector, Filter rhsFilter )
     {
     this( Fields.fields( lhsArgumentSelector, rhsArgumentSelector ), filters( lhsFilter, rhsFilter ) );
     }
 
+  @ConstructorProperties({"argumentSelectors", "filters"})
   protected Logic( Fields[] argumentSelectors, Filter[] filters )
     {
     this.argumentSelectors = argumentSelectors;

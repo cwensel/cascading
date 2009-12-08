@@ -21,6 +21,7 @@
 
 package cascading.operation.text;
 
+import java.beans.ConstructorProperties;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -55,6 +56,7 @@ public class DateParser extends DateOperation implements Function
    *
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"dateFormatString"})
   public DateParser( String dateFormatString )
     {
     super( 1, new Fields( FIELD_NAME ), dateFormatString );
@@ -66,6 +68,7 @@ public class DateParser extends DateOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "dateFormatString"})
   public DateParser( Fields fieldDeclaration, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString );
@@ -79,6 +82,7 @@ public class DateParser extends DateOperation implements Function
    * @param calendarFields   of type int[]
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "calendarFields", "dateFormatString"})
   public DateParser( Fields fieldDeclaration, int[] calendarFields, String dateFormatString )
     {
     this( fieldDeclaration, calendarFields, null, null, dateFormatString );
@@ -93,6 +97,7 @@ public class DateParser extends DateOperation implements Function
    * @param locale           of type Locale
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "zone", "locale", "dateFormatString"})
   public DateParser( Fields fieldDeclaration, TimeZone zone, Locale locale, String dateFormatString )
     {
     this( fieldDeclaration, null, zone, locale, dateFormatString );
@@ -108,6 +113,7 @@ public class DateParser extends DateOperation implements Function
    * @param locale           of type Locale
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "calendarFields", "zone", "locale", "dateFormatString"})
   public DateParser( Fields fieldDeclaration, int[] calendarFields, TimeZone zone, Locale locale, String dateFormatString )
     {
     super( 1, fieldDeclaration, dateFormatString, zone, locale );

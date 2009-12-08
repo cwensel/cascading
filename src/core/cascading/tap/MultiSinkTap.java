@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,6 +117,12 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
       }
     }
 
+  /**
+   * Constructor MultiSinkTap creates a new MultiSinkTap instance.
+   *
+   * @param taps of type Tap...
+   */
+  @ConstructorProperties({"taps"})
   public MultiSinkTap( Tap... taps )
     {
     this.taps = taps;

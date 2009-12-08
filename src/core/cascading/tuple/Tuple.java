@@ -21,6 +21,7 @@
 
 package cascading.tuple;
 
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -162,6 +163,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    *
    * @param tuple of type Tuple
    */
+  @ConstructorProperties({"tuple"})
   public Tuple( Tuple tuple )
     {
     this();
@@ -173,6 +175,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    *
    * @param values of type Object...
    */
+  @ConstructorProperties({"values"})
   public Tuple( Object... values )
     {
     this();

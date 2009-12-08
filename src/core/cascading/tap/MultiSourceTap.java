@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -48,6 +49,12 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     super( scheme );
     }
 
+  /**
+   * Constructor MultiSourceTap creates a new MultiSourceTap instance.
+   *
+   * @param taps of type Tap...
+   */
+  @ConstructorProperties({"taps"})
   public MultiSourceTap( Tap... taps )
     {
     this.taps = Arrays.copyOf( taps, taps.length );

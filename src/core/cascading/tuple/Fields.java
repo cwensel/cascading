@@ -21,6 +21,7 @@
 
 package cascading.tuple;
 
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -405,6 +406,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @param fields of type Comparable...
    */
+  @ConstructorProperties({"fields"})
   public Fields( Comparable... fields )
     {
     this.fields = validate( fields );

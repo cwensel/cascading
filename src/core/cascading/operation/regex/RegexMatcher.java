@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
@@ -44,18 +45,21 @@ public class RegexMatcher extends RegexOperation<Matcher>
   /** Field removeMatch */
   protected final boolean negateMatch;
 
+  @ConstructorProperties({"patternString"})
   protected RegexMatcher( String patternString )
     {
     super( patternString );
     this.negateMatch = false;
     }
 
+  @ConstructorProperties({"patternString", "negateMatch"})
   protected RegexMatcher( String patternString, boolean negateMatch )
     {
     super( patternString );
     this.negateMatch = negateMatch;
     }
 
+  @ConstructorProperties({"fieldDeclaration", "patternString"})
   protected RegexMatcher( Fields fieldDeclaration, String patternString )
     {
     super( ANY, fieldDeclaration, patternString );
@@ -64,6 +68,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
     verify();
     }
 
+  @ConstructorProperties({"fieldDeclaration", "patternString", "negateMatch"})
   protected RegexMatcher( Fields fieldDeclaration, String patternString, boolean negateMatch )
     {
     super( ANY, fieldDeclaration, patternString );

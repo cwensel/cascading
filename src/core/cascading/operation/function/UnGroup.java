@@ -21,6 +21,7 @@
 
 package cascading.operation.function;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
@@ -73,6 +74,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector  of type Fields
    * @param valueSelectors of type Fields[]
    */
+  @ConstructorProperties({"groupSelector", "valueSelectors"})
   public UnGroup( Fields groupSelector, Fields[] valueSelectors )
     {
     int size = 0;
@@ -98,6 +100,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector    of type Fields
    * @param valueSelectors   of type Fields[]
    */
+  @ConstructorProperties({"fieldDeclaration", "groupSelector", "valueSelectors"})
   public UnGroup( Fields fieldDeclaration, Fields groupSelector, Fields[] valueSelectors )
     {
     super( fieldDeclaration );
@@ -131,6 +134,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector    of type Fields
    * @param numValues        of type int
    */
+  @ConstructorProperties({"fieldDeclaration", "groupSelector", "numValues"})
   public UnGroup( Fields fieldDeclaration, Fields groupSelector, int numValues )
     {
     super( fieldDeclaration );

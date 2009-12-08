@@ -21,6 +21,7 @@
 
 package cascading.scheme;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 import cascading.tap.Tap;
@@ -86,6 +87,7 @@ public class TextLine extends Scheme
    *
    * @param numSinkParts of type int
    */
+  @ConstructorProperties({"numSinkParts"})
   public TextLine( int numSinkParts )
     {
     super( DEFAULT_SOURCE_FIELDS, numSinkParts );
@@ -97,6 +99,7 @@ public class TextLine extends Scheme
    *
    * @param sinkCompression of type Compress
    */
+  @ConstructorProperties({"sinkCompression"})
   public TextLine( Compress sinkCompression )
     {
     super( DEFAULT_SOURCE_FIELDS );
@@ -111,6 +114,7 @@ public class TextLine extends Scheme
    * @param sourceFields the source fields for this scheme
    * @param sinkFields   the sink fields for this scheme
    */
+  @ConstructorProperties({"sourceFields", "sinkFields"})
   public TextLine( Fields sourceFields, Fields sinkFields )
     {
     super( sourceFields, sinkFields );
@@ -127,6 +131,7 @@ public class TextLine extends Scheme
    * @param sinkFields   the sink fields for this scheme
    * @param numSinkParts of type int
    */
+  @ConstructorProperties({"sourceFields", "sinkFields", "numSinkParts"})
   public TextLine( Fields sourceFields, Fields sinkFields, int numSinkParts )
     {
     super( sourceFields, sinkFields, numSinkParts );
@@ -143,6 +148,7 @@ public class TextLine extends Scheme
    * @param sinkFields      of type Fields
    * @param sinkCompression of type Compress
    */
+  @ConstructorProperties({"sourceFields", "sinkFields", "sinkCompression"})
   public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression )
     {
     super( sourceFields, sinkFields );
@@ -162,6 +168,7 @@ public class TextLine extends Scheme
    * @param sinkCompression of type Compress
    * @param numSinkParts    of type int
    */
+  @ConstructorProperties({"sourceFields", "sinkFields", "sinkCompression", "numSinkParts"})
   public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression, int numSinkParts )
     {
     super( sourceFields, sinkFields, numSinkParts );
@@ -178,6 +185,7 @@ public class TextLine extends Scheme
    *
    * @param sourceFields the source fields for this scheme
    */
+  @ConstructorProperties({"sourceFields"})
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
@@ -193,6 +201,7 @@ public class TextLine extends Scheme
    * @param sourceFields the source fields for this scheme
    * @param numSinkParts of type int
    */
+  @ConstructorProperties({"sourceFields", "numSinkParts"})
   public TextLine( Fields sourceFields, int numSinkParts )
     {
     super( sourceFields, numSinkParts );

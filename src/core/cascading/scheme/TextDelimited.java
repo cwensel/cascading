@@ -21,6 +21,7 @@
 
 package cascading.scheme;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -83,6 +84,7 @@ public class TextDelimited extends TextLine
    * @param fields    of type Fields
    * @param delimiter of type String
    */
+  @ConstructorProperties({"fields", "delimiter"})
   public TextDelimited( Fields fields, String delimiter )
     {
     this( fields, null, delimiter, null, null );
@@ -95,6 +97,7 @@ public class TextDelimited extends TextLine
    * @param delimiter of type String
    * @param types     of type Class[]
    */
+  @ConstructorProperties({"fields", "delimiter", "types"})
   public TextDelimited( Fields fields, String delimiter, Class[] types )
     {
     this( fields, null, delimiter, null, types );
@@ -108,6 +111,7 @@ public class TextDelimited extends TextLine
    * @param quote     of type String
    * @param types     of type Class[]
    */
+  @ConstructorProperties({"fields", "delimiter", "quote", "types"})
   public TextDelimited( Fields fields, String delimiter, String quote, Class[] types )
     {
     this( fields, null, delimiter, quote, types );
@@ -122,6 +126,7 @@ public class TextDelimited extends TextLine
    * @param types     of type Class[]
    * @param safe      of type boolean
    */
+  @ConstructorProperties({"fields", "delimiter", "quote", "types", "safe"})
   public TextDelimited( Fields fields, String delimiter, String quote, Class[] types, boolean safe )
     {
     this( fields, null, delimiter, quote, types, safe );
@@ -134,6 +139,7 @@ public class TextDelimited extends TextLine
    * @param sinkCompression of type Compress
    * @param delimiter       of type String
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter )
     {
     this( fields, sinkCompression, delimiter, null, null );
@@ -147,6 +153,7 @@ public class TextDelimited extends TextLine
    * @param delimiter       of type String
    * @param types           of type Class[]
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "types"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, Class[] types )
     {
     this( fields, sinkCompression, delimiter, null, types );
@@ -161,6 +168,7 @@ public class TextDelimited extends TextLine
    * @param types           of type Class[]
    * @param safe            of type boolean
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "types", "safe"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, Class[] types, boolean safe )
     {
     this( fields, sinkCompression, delimiter, null, types, safe );
@@ -173,6 +181,7 @@ public class TextDelimited extends TextLine
    * @param delimiter of type String
    * @param quote     of type String
    */
+  @ConstructorProperties({"fields", "delimiter", "quote"})
   public TextDelimited( Fields fields, String delimiter, String quote )
     {
     this( fields, null, delimiter, quote );
@@ -186,6 +195,7 @@ public class TextDelimited extends TextLine
    * @param delimiter       of type String
    * @param quote           of type String
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "quote"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, String quote )
     {
     this( fields, sinkCompression, delimiter, true, quote, null, true );
@@ -200,6 +210,7 @@ public class TextDelimited extends TextLine
    * @param quote           of type String
    * @param types           of type Class[]
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "quote", "types"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, String quote, Class[] types )
     {
     this( fields, sinkCompression, delimiter, true, quote, types, true );
@@ -215,6 +226,7 @@ public class TextDelimited extends TextLine
    * @param types           of type Class[]
    * @param safe            of type boolean
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "quote", "types", "safe"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, String quote, Class[] types, boolean safe )
     {
     this( fields, sinkCompression, delimiter, true, quote, types, safe );
@@ -231,6 +243,7 @@ public class TextDelimited extends TextLine
    * @param types           of type Class[]
    * @param safe            of type boolean
    */
+  @ConstructorProperties({"fields", "sinkCompression", "delimiter", "strict", "quote", "types", "safe"})
   public TextDelimited( Fields fields, Compress sinkCompression, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
     super( sinkCompression );

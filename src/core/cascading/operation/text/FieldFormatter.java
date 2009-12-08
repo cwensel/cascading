@@ -21,6 +21,7 @@
 
 package cascading.operation.text;
 
+import java.beans.ConstructorProperties;
 import java.util.Formatter;
 
 import cascading.flow.FlowProcess;
@@ -48,6 +49,7 @@ public class FieldFormatter extends BaseOperation implements Function
    *
    * @param format of type String
    */
+  @ConstructorProperties({"format"})
   public FieldFormatter( String format )
     {
     super( new Fields( FIELD_NAME ) );
@@ -60,6 +62,7 @@ public class FieldFormatter extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param format           of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "format"})
   public FieldFormatter( Fields fieldDeclaration, String format )
     {
     super( fieldDeclaration );

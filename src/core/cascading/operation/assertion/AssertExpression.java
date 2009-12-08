@@ -21,6 +21,8 @@
 
 package cascading.operation.assertion;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.AssertionLevel;
 import cascading.operation.PlannerLevel;
@@ -54,6 +56,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
    * @param expression    of type String
    * @param parameterType of type Class
    */
+  @ConstructorProperties({"expression", "parameterType"})
   public AssertExpression( String expression, Class parameterType )
     {
     super( Fields.ALL, expression, parameterType );
@@ -67,6 +70,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
    * @param parameterNames   of type String[]
    * @param parameterTypes   of type Class[]
    */
+  @ConstructorProperties({"fieldDeclaration", "expression", "parameterNames", "parameterTypes"})
   public AssertExpression( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( fieldDeclaration, expression, parameterNames, parameterTypes );

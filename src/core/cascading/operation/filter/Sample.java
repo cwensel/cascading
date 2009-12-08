@@ -21,18 +21,16 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
 import java.util.Random;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
-import cascading.flow.FlowProcess;
 
-/**
- * Class Sample is a {@link Filter} that only allows the given percent of {@link cascading.tuple.Tuple} instances to pass.
- *
- */
+/** Class Sample is a {@link Filter} that only allows the given percent of {@link cascading.tuple.Tuple} instances to pass. */
 public class Sample extends BaseOperation<Random> implements Filter<Random>
   {
   private long seed = System.currentTimeMillis();
@@ -43,6 +41,7 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
    *
    * @param percent of type double
    */
+  @ConstructorProperties({"percent"})
   public Sample( double percent )
     {
     this.percent = percent;
@@ -51,9 +50,10 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
   /**
    * Creates a new Sample that permits percent Tuples to pass. The given seed value seeds the random number generator.
    *
-   * @param seed of type long
+   * @param seed    of type long
    * @param percent of type double
    */
+  @ConstructorProperties({"seed", "percent"})
   public Sample( long seed, double percent )
     {
     this.seed = seed;

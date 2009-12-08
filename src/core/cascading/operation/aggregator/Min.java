@@ -21,6 +21,8 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
@@ -41,6 +43,7 @@ public class Min extends ExtremaBase
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public Min( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -53,6 +56,7 @@ public class Min extends ExtremaBase
    * @param fieldDeclaration of type Fields
    * @param ignoreValues     of type Object...
    */
+  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
   public Min( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );

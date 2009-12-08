@@ -21,6 +21,8 @@
 
 package cascading.operation;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -37,6 +39,7 @@ public class Insert extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param values           of type Object...
    */
+  @ConstructorProperties({"fieldDeclaration", "values"})
   public Insert( Fields fieldDeclaration, Object... values )
     {
     super( 0, fieldDeclaration );

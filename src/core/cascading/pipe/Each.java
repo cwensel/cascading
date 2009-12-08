@@ -21,6 +21,7 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
 import java.util.Set;
 
 import cascading.CascadingException;
@@ -70,6 +71,7 @@ public class Each extends Operator
    * @param name     name for this branch of Pipes
    * @param function Function to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "function"})
   public Each( String name, Function function )
     {
     super( name, function, FUNCTION_SELECTOR );
@@ -82,6 +84,7 @@ public class Each extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param function         Function to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "argumentSelector", "function"})
   public Each( String name, Fields argumentSelector, Function function )
     {
     super( name, argumentSelector, function, FUNCTION_SELECTOR );
@@ -95,6 +98,7 @@ public class Each extends Operator
    * @param function         Function to be applied to each input Tuple
    * @param outputSelector   field selector that selects the output Tuple from the input and Function results Tuples
    */
+  @ConstructorProperties({"name", "argumentSelector", "function", "outputSelector"})
   public Each( String name, Fields argumentSelector, Function function, Fields outputSelector )
     {
     super( name, argumentSelector, function, outputSelector );
@@ -107,6 +111,7 @@ public class Each extends Operator
    * @param function       Function to be applied to each input Tuple
    * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
+  @ConstructorProperties({"name", "function", "outputSelector"})
   public Each( String name, Function function, Fields outputSelector )
     {
     super( name, function, outputSelector );
@@ -118,6 +123,7 @@ public class Each extends Operator
    * @param previous previous Pipe to receive input Tuples from
    * @param function Function to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "function"})
   public Each( Pipe previous, Function function )
     {
     super( previous, function, FUNCTION_SELECTOR );
@@ -130,6 +136,7 @@ public class Each extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param function         Function to be applied to each input Tuple
    */
+  @ConstructorProperties({"previoud", "argumentSelector", "function"})
   public Each( Pipe previous, Fields argumentSelector, Function function )
     {
     super( previous, argumentSelector, function, FUNCTION_SELECTOR );
@@ -143,6 +150,7 @@ public class Each extends Operator
    * @param function         Function to be applied to each input Tuple
    * @param outputSelector   field selector that selects the output Tuple from the input and Function results Tuples
    */
+  @ConstructorProperties({"previous", "argumentSelector", "function", "outputSelector"})
   public Each( Pipe previous, Fields argumentSelector, Function function, Fields outputSelector )
     {
     super( previous, argumentSelector, function, outputSelector );
@@ -155,6 +163,7 @@ public class Each extends Operator
    * @param function       Function to be applied to each input Tuple
    * @param outputSelector field selector that selects the output Tuple from the input and Function results Tuples
    */
+  @ConstructorProperties({"previous", "function", "outputSelector"})
   public Each( Pipe previous, Function function, Fields outputSelector )
     {
     super( previous, function, outputSelector );
@@ -170,6 +179,7 @@ public class Each extends Operator
    * @param name   name for this branch of Pipes
    * @param filter Filter to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "filter"})
   public Each( String name, Filter filter )
     {
     super( name, filter, FILTER_SELECTOR );
@@ -180,6 +190,7 @@ public class Each extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param filter           Filter to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "argumentSelector", "filter"})
   public Each( String name, Fields argumentSelector, Filter filter )
     {
     super( name, argumentSelector, filter, FILTER_SELECTOR );
@@ -189,6 +200,7 @@ public class Each extends Operator
    * @param previous previous Pipe to receive input Tuples from
    * @param filter   Filter to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "filter"})
   public Each( Pipe previous, Filter filter )
     {
     super( previous, filter, FILTER_SELECTOR );
@@ -199,6 +211,7 @@ public class Each extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param filter           Filter to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "argumentSelector", "filter"})
   public Each( Pipe previous, Fields argumentSelector, Filter filter )
     {
     super( previous, argumentSelector, filter, FILTER_SELECTOR );
@@ -215,6 +228,7 @@ public class Each extends Operator
    * @param assertionLevel AssertionLevel to associate with the Assertion
    * @param assertion      Assertion to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "assertionLevel", "assertion"})
   public Each( String name, AssertionLevel assertionLevel, Assertion assertion )
     {
     super( name, assertionLevel, assertion, FILTER_SELECTOR );
@@ -226,6 +240,7 @@ public class Each extends Operator
    * @param assertionLevel   AssertionLevel to associate with the Assertion
    * @param assertion        Assertion to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "argumentSelector", "assertionLevel", "assertion"})
   public Each( String name, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
     super( name, argumentSelector, assertionLevel, assertion, FILTER_SELECTOR );
@@ -236,6 +251,7 @@ public class Each extends Operator
    * @param assertionLevel AssertionLevel to associate with the Assertion
    * @param assertion      Assertion to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "assertionLevel", "assertion"})
   public Each( Pipe previous, AssertionLevel assertionLevel, Assertion assertion )
     {
     super( previous, assertionLevel, assertion, FILTER_SELECTOR );
@@ -247,6 +263,7 @@ public class Each extends Operator
    * @param assertionLevel   AssertionLevel to associate with the Assertion
    * @param assertion        Assertion to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "argumentSelector", "assertionLevel", "assertion"})
   public Each( Pipe previous, Fields argumentSelector, AssertionLevel assertionLevel, Assertion assertion )
     {
     super( previous, argumentSelector, assertionLevel, assertion, FILTER_SELECTOR );
@@ -262,6 +279,7 @@ public class Each extends Operator
    * @param debugLevel       DebugLevel to associate with the Debug
    * @param debug            Debug to be applied to each input Tuple
    */
+  @ConstructorProperties({"name", "argumentSelector", "debugLevel", "debug"})
   public Each( String name, Fields argumentSelector, DebugLevel debugLevel, Debug debug )
     {
     super( name, argumentSelector, debugLevel, debug, FILTER_SELECTOR );
@@ -272,6 +290,7 @@ public class Each extends Operator
    * @param debugLevel DebugLevel to associate with the Debug
    * @param debug      Debug to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "debuglevel", "debug"})
   public Each( Pipe previous, DebugLevel debugLevel, Debug debug )
     {
     super( previous, debugLevel, debug, FILTER_SELECTOR );
@@ -283,6 +302,7 @@ public class Each extends Operator
    * @param debugLevel       DebugLevel to associate with the Debug
    * @param debug            Debug to be applied to each input Tuple
    */
+  @ConstructorProperties({"previous", "argumentSelector", "debugLevel", "debug"})
   public Each( Pipe previous, Fields argumentSelector, DebugLevel debugLevel, Debug debug )
     {
     super( previous, argumentSelector, debugLevel, debug, FILTER_SELECTOR );

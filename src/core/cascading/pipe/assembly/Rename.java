@@ -21,6 +21,8 @@
 
 package cascading.pipe.assembly;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.Identity;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
@@ -45,6 +47,7 @@ public class Rename extends SubAssembly
    * @param fromFields of type Fields
    * @param toFields   of type Fields
    */
+  @ConstructorProperties({"previous", "fromFields", "toFields"})
   public Rename( Pipe previous, Fields fromFields, Fields toFields )
     {
     if( fromFields.isDefined() && fromFields.size() != toFields.size() )

@@ -21,6 +21,7 @@
 
 package cascading.operation;
 
+import java.beans.ConstructorProperties;
 import java.io.PrintStream;
 
 import cascading.flow.FlowProcess;
@@ -67,6 +68,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    *
    * @param prefix of type String
    */
+  @ConstructorProperties({"prefix"})
   public Debug( String prefix )
     {
     this.prefix = prefix;
@@ -79,6 +81,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    * @param prefix      of type String
    * @param printFields of type boolean
    */
+  @ConstructorProperties({"prefix", "printFields"})
   public Debug( String prefix, boolean printFields )
     {
     this.prefix = prefix;
@@ -91,6 +94,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    *
    * @param printFields of type boolean
    */
+  @ConstructorProperties({"printFields"})
   public Debug( boolean printFields )
     {
     this.printFields = printFields;
@@ -102,6 +106,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    *
    * @param output of type Output
    */
+  @ConstructorProperties({"output"})
   public Debug( Output output )
     {
     this.output = output;
@@ -114,6 +119,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    * @param output of type Output
    * @param prefix of type String
    */
+  @ConstructorProperties({"output", "prefix"})
   public Debug( Output output, String prefix )
     {
     this.output = output;
@@ -128,6 +134,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    * @param prefix      of type String
    * @param printFields of type boolean
    */
+  @ConstructorProperties({"output", "prefix", "printFields"})
   public Debug( Output output, String prefix, boolean printFields )
     {
     this.output = output;
@@ -142,6 +149,7 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
    * @param output      of type Output
    * @param printFields of type boolean
    */
+  @ConstructorProperties({"output", "printFields"})
   public Debug( Output output, boolean printFields )
     {
     this.output = output;

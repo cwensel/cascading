@@ -21,6 +21,8 @@
 
 package cascading.pipe.assembly;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.Identity;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
@@ -44,6 +46,7 @@ public class Coerce extends SubAssembly
    * @param previous of type Pipe
    * @param types    of type Class...
    */
+  @ConstructorProperties({"previous", "types"})
   public Coerce( Pipe previous, Class... types )
     {
     setTails( new Each( previous, new Identity( types ) ) );
@@ -58,6 +61,7 @@ public class Coerce extends SubAssembly
    * @param coerceFields of type Fields
    * @param types        of type Class...
    */
+  @ConstructorProperties({"previous", "coerceFields", "types"})
   public Coerce( Pipe previous, Fields coerceFields, Class... types )
     {
     setTails( new Each( previous, coerceFields, new Identity( types ), Fields.REPLACE ) );

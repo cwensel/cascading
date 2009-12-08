@@ -21,15 +21,14 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 import cascading.flow.Flow;
 import cascading.scheme.Scheme;
-import cascading.scheme.SequenceFile;
 import cascading.tuple.Fields;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 
 /**
  * Class Lfs is a {@link Tap} class that provides access to the Local File System via Hadoop.
@@ -42,6 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class Lfs extends Hfs
   {
+  @ConstructorProperties({"scheme"})
   Lfs( Scheme scheme )
     {
     super( scheme );
@@ -50,9 +50,10 @@ public class Lfs extends Hfs
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
+   * @param fields     of type Fields
+   * @param stringPath of type String
    */
+  @ConstructorProperties({"fields", "stringPath"})
   public Lfs( Fields fields, String stringPath )
     {
     super( fields, stringPath );
@@ -64,6 +65,7 @@ public class Lfs extends Hfs
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
+  @ConstructorProperties({"scheme", "stringPath"})
   public Lfs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
@@ -76,6 +78,7 @@ public class Lfs extends Hfs
    * @param stringPath of type String
    * @param replace    of type boolean
    */
+  @ConstructorProperties({"scheme", "stringPath", "replace"})
   public Lfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
@@ -84,10 +87,11 @@ public class Lfs extends Hfs
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param fields of type Fields
-   * @param stringPath   of type String
-   * @param sinkMode     of type SinkMode
+   * @param fields     of type Fields
+   * @param stringPath of type String
+   * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
   public Lfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( fields, stringPath, sinkMode );
@@ -100,6 +104,7 @@ public class Lfs extends Hfs
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
+  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
   public Lfs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );

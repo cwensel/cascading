@@ -21,6 +21,7 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,6 +106,7 @@ public class Pipe implements FlowElement, Serializable
     {
     }
 
+  @ConstructorProperties({"previous"})
   protected Pipe( Pipe previous )
     {
     this.previous = previous;
@@ -118,6 +120,7 @@ public class Pipe implements FlowElement, Serializable
    *
    * @param name name for this branch of Pipes
    */
+  @ConstructorProperties({"name"})
   public Pipe( String name )
     {
     this.name = name;
@@ -130,6 +133,7 @@ public class Pipe implements FlowElement, Serializable
    * @param name     name for this branch of Pipes
    * @param previous previous Pipe to receive input Tuples from
    */
+  @ConstructorProperties({"name", "previous"})
   public Pipe( String name, Pipe previous )
     {
     this.name = name;

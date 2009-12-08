@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
@@ -46,6 +47,7 @@ public class RegexReplace extends RegexOperation<Matcher> implements Function<Ma
    * @param replacement      of type String
    * @param replaceAll       of type boolean
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString", "replacement", "replaceAll"})
   public RegexReplace( Fields fieldDeclaration, String patternString, String replacement, boolean replaceAll )
     {
     this( fieldDeclaration, patternString, replacement );
@@ -59,6 +61,7 @@ public class RegexReplace extends RegexOperation<Matcher> implements Function<Ma
    * @param patternString    of type String
    * @param replacement      of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString", "replacement"})
   public RegexReplace( Fields fieldDeclaration, String patternString, String replacement )
     {
     super( 1, fieldDeclaration, patternString );

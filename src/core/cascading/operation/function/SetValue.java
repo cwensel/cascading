@@ -21,6 +21,9 @@
 
 package cascading.operation.function;
 
+import java.beans.ConstructorProperties;
+import java.io.Serializable;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
@@ -30,8 +33,6 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-
-import java.io.Serializable;
 
 /**
  * Class SetValue is a utility {@link Function} that allows for a Tuple value to be returned based on the outcome
@@ -58,6 +59,7 @@ public class SetValue extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param filter           of type Filter
    */
+  @ConstructorProperties({"fieldDeclaration", "filter"})
   public SetValue( Fields fieldDeclaration, Filter filter )
     {
     super( fieldDeclaration );
@@ -73,6 +75,7 @@ public class SetValue extends BaseOperation implements Function
    * @param filter           of type Filter
    * @param values           of type Comparable<? extends Serializable>...
    */
+  @ConstructorProperties({"fieldDeclaration", "filter", "values"})
   public SetValue( Fields fieldDeclaration, Filter filter, Comparable<? extends Serializable>... values )
     {
     super( fieldDeclaration );

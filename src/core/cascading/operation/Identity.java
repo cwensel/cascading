@@ -21,12 +21,13 @@
 
 package cascading.operation;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuples;
 
 /**
@@ -52,6 +53,7 @@ public class Identity extends BaseOperation implements Function
    *
    * @param types of type Class...
    */
+  @ConstructorProperties({"types"})
   public Identity( Class... types )
     {
     super( Fields.ARGS );
@@ -64,6 +66,7 @@ public class Identity extends BaseOperation implements Function
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public Identity( Fields fieldDeclaration )
     {
     super( fieldDeclaration ); // don't need to set size, default is ANY
@@ -76,6 +79,7 @@ public class Identity extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param types            of type Class...
    */
+  @ConstructorProperties({"fieldDeclaration", "types"})
   public Identity( Fields fieldDeclaration, Class... types )
     {
     super( fieldDeclaration );

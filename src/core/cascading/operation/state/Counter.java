@@ -21,6 +21,8 @@
 
 package cascading.operation.state;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
@@ -47,6 +49,7 @@ public class Counter extends BaseOperation implements Filter
    *
    * @param counter of type Enum
    */
+  @ConstructorProperties({"counter"})
   public Counter( Enum counter )
     {
     this( counter, 1 );
@@ -58,6 +61,7 @@ public class Counter extends BaseOperation implements Filter
    * @param counter   of type Enum
    * @param increment of type int
    */
+  @ConstructorProperties({"counter", "increment"})
   public Counter( Enum counter, int increment )
     {
     this.counter = counter;

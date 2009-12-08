@@ -21,12 +21,14 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
+
+import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
-import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowProcess;
 
 /**
  * Class Limit is a {@link Filter} that will limit the number of {@link cascading.tuple.Tuple} instances that it will
@@ -59,6 +61,7 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
    *
    * @param limit the number of tuples to let pass
    */
+  @ConstructorProperties({"limit"})
   public Limit( long limit )
     {
     this.limit = limit;

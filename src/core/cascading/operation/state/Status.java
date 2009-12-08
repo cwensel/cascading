@@ -21,6 +21,8 @@
 
 package cascading.operation.state;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
@@ -49,6 +51,7 @@ public class Status extends BaseOperation<Boolean> implements Filter<Boolean>
    *
    * @param status of type String
    */
+  @ConstructorProperties({"status"})
   public Status( String status )
     {
     this.status = status;

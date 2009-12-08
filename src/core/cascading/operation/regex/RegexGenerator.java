@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
@@ -38,6 +39,7 @@ public class RegexGenerator extends RegexOperation<Matcher> implements Function<
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexGenerator( String patternString )
     {
     super( 1, Fields.size( 1 ), patternString );
@@ -49,6 +51,7 @@ public class RegexGenerator extends RegexOperation<Matcher> implements Function<
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString"})
   public RegexGenerator( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );

@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -249,6 +250,7 @@ public class FlowConnector
    *
    * @param properties of type Properties
    */
+  @ConstructorProperties({"properties"})
   public FlowConnector( Map<Object, Object> properties )
     {
     this.properties = properties;

@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
@@ -52,6 +53,7 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexFilter( String patternString )
     {
     super( patternString );
@@ -64,6 +66,7 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
    * @param patternString of type String
    * @param removeMatch   of type boolean
    */
+  @ConstructorProperties({"patternString", "removeMatch"})
   public RegexFilter( String patternString, boolean removeMatch )
     {
     super( patternString, removeMatch );
@@ -76,6 +79,7 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
    * @param removeMatch      of type boolean, set to true if a match should be filtered
    * @param matchEachElement of type boolean, set to true if each element should be matched individually
    */
+  @ConstructorProperties({"patternString", "removeMatch", "matchEachElement"})
   public RegexFilter( String patternString, boolean removeMatch, boolean matchEachElement )
     {
     super( patternString, removeMatch );

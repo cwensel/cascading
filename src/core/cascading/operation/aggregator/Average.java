@@ -21,6 +21,8 @@
 
 package cascading.operation.aggregator;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
@@ -61,6 +63,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public Average( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );

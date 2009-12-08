@@ -21,6 +21,7 @@
 
 package cascading.operation.text;
 
+import java.beans.ConstructorProperties;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -48,6 +49,7 @@ public class DateOperation extends BaseOperation
    * @param fieldDeclaration of type Fields
    * @param dateFormatString of type String
    */
+  @ConstructorProperties({"numArgs", "fieldDeclaration", "dateFormatString"})
   public DateOperation( int numArgs, Fields fieldDeclaration, String dateFormatString )
     {
     super( numArgs, fieldDeclaration );
@@ -66,6 +68,7 @@ public class DateOperation extends BaseOperation
    * @param zone             of type TimeZone
    * @param locale           of type Locale
    */
+  @ConstructorProperties({"numArgs", "fieldDeclaration", "dateFormatString", "zone", "locale"})
   public DateOperation( int numArgs, Fields fieldDeclaration, String dateFormatString, TimeZone zone, Locale locale )
     {
     super( numArgs, fieldDeclaration );

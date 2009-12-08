@@ -21,6 +21,8 @@
 
 package cascading.operation.filter;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
@@ -48,6 +50,7 @@ public class Not extends BaseOperation implements Filter
    *
    * @param filter of type Filter
    */
+  @ConstructorProperties({"filter"})
   public Not( Filter filter )
     {
     this.filter = filter;

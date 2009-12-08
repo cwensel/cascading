@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class MapReduceFlow extends Flow
    *
    * @param jobConf of type JobConf
    */
+  @ConstructorProperties({"jobConf"})
   public MapReduceFlow( JobConf jobConf )
     {
     this( jobConf.getJobName(), jobConf, false );
@@ -71,6 +73,7 @@ public class MapReduceFlow extends Flow
    * @param jobConf          of type JobConf
    * @param deleteSinkOnInit of type boolean
    */
+  @ConstructorProperties({"jobConf", "deleteSinkOnInit"})
   public MapReduceFlow( JobConf jobConf, boolean deleteSinkOnInit )
     {
     this( jobConf.getJobName(), jobConf, deleteSinkOnInit );
@@ -82,6 +85,7 @@ public class MapReduceFlow extends Flow
    * @param name    of type String
    * @param jobConf of type JobConf
    */
+  @ConstructorProperties({"name", "jobConf"})
   public MapReduceFlow( String name, JobConf jobConf )
     {
     this( name, jobConf, false );
@@ -94,6 +98,7 @@ public class MapReduceFlow extends Flow
    * @param jobConf          of type JobConf
    * @param deleteSinkOnInit of type boolean
    */
+  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit"})
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
     {
     this( name, jobConf, deleteSinkOnInit, true );
@@ -107,6 +112,7 @@ public class MapReduceFlow extends Flow
    * @param deleteSinkOnInit of type boolean
    * @param stopJobsOnExit   of type boolean
    */
+  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"})
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
     this.deleteSinkOnInit = deleteSinkOnInit;

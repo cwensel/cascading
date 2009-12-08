@@ -21,6 +21,7 @@
 
 package cascading.cascade;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,6 +68,7 @@ public class CascadeConnector
    *
    * @param properties of type Map<Object, Object>
    */
+  @ConstructorProperties({"properties"})
   public CascadeConnector( Map<Object, Object> properties )
     {
     this.properties = properties;

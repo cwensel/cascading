@@ -21,6 +21,7 @@
 
 package cascading.operation.expression;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -61,6 +62,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     private String[] parameterNames;
     }
 
+  @ConstructorProperties({"fieldDeclaration", "expression"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression )
     {
     super( fieldDeclaration );
@@ -68,6 +70,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     this.expression = expression;
     }
 
+  @ConstructorProperties({"fieldDeclaration", "expression", "parameterType"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression, Class parameterType )
     {
     super( fieldDeclaration );
@@ -75,6 +78,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     this.expression = expression;
     }
 
+  @ConstructorProperties({"fieldDeclaration", "expression", "parameterNames", "parameterTypes"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( parameterTypes.length, fieldDeclaration );
@@ -86,12 +90,14 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
     }
 
+  @ConstructorProperties({"fieldDeclaration", "parameterType"})
   protected ExpressionOperation( String expression, Class parameterType )
     {
     this.parameterTypes = new Class[]{parameterType};
     this.expression = expression;
     }
 
+  @ConstructorProperties({"expression", "parameterNames", "parameterTypes"})
   protected ExpressionOperation( String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( parameterTypes.length );
@@ -102,7 +108,6 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     if( parameterNames.length != parameterTypes.length )
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
     }
-
 
   private String[] getParameterNames()
     {

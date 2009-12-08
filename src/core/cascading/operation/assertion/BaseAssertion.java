@@ -21,6 +21,8 @@
 
 package cascading.operation.assertion;
 
+import java.beans.ConstructorProperties;
+
 import cascading.operation.AssertionException;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
@@ -45,16 +47,19 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     {
     }
 
+  @ConstructorProperties({"message"})
   protected BaseAssertion( String message )
     {
     this.message = message;
     }
 
+  @ConstructorProperties({"numArgs"})
   protected BaseAssertion( int numArgs )
     {
     super( numArgs );
     }
 
+  @ConstructorProperties({"numArgs", "message"})
   protected BaseAssertion( int numArgs, String message )
     {
     super( numArgs );

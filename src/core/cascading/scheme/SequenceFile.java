@@ -21,6 +21,7 @@
 
 package cascading.scheme;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 import cascading.tap.Tap;
@@ -53,6 +54,7 @@ public class SequenceFile extends Scheme
    *
    * @param fields
    */
+  @ConstructorProperties({"fields"})
   public SequenceFile( Fields fields )
     {
     super( fields );

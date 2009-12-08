@@ -21,6 +21,8 @@
 
 package cascading.operation.text;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -42,6 +44,7 @@ public class FieldJoiner extends BaseOperation implements Function
    *
    * @param delimiter of type String
    */
+  @ConstructorProperties({"delimiter"})
   public FieldJoiner( String delimiter )
     {
     this( new Fields( FIELD_NAME ) );
@@ -53,6 +56,7 @@ public class FieldJoiner extends BaseOperation implements Function
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public FieldJoiner( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
@@ -64,6 +68,7 @@ public class FieldJoiner extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param delimiter        of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "delimiter"})
   public FieldJoiner( Fields fieldDeclaration, String delimiter )
     {
     super( fieldDeclaration );

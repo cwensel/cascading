@@ -21,11 +21,12 @@
 
 package cascading.operation.expression;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Tuple;
-import cascading.tuple.Fields;
 import org.codehaus.janino.ExpressionEvaluator;
 
 /**
@@ -49,9 +50,10 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Expr
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
-   * @param expression     of type String
+   * @param expression    of type String
    * @param parameterType of type Class
    */
+  @ConstructorProperties({"expression", "parameterType"})
   public ExpressionFilter( String expression, Class parameterType )
     {
     super( expression, parameterType );
@@ -60,10 +62,11 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Expr
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
-   * @param expression of type String
+   * @param expression     of type String
    * @param parameterNames of type String[]
    * @param parameterTypes of type Class[]
    */
+  @ConstructorProperties({"expression", "parameterNames", "parameterTypes"})
   public ExpressionFilter( String expression, String[] parameterNames, Class[] parameterTypes )
     {
     super( expression, parameterNames, parameterTypes );

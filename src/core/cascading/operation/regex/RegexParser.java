@@ -21,6 +21,7 @@
 
 package cascading.operation.regex;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 
@@ -59,6 +60,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
    *
    * @param patternString of type String
    */
+  @ConstructorProperties({"patternString"})
   public RegexParser( String patternString )
     {
     super( 1, patternString );
@@ -80,6 +82,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
+  @ConstructorProperties({"fieldDeclaration", "pattenString"})
   public RegexParser( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );
@@ -94,6 +97,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
    * @param patternString of type String
    * @param groups        of type int[]
    */
+  @ConstructorProperties({"patternString", "groups"})
   public RegexParser( String patternString, int[] groups )
     {
     super( 1, Fields.size( groups.length ), patternString );
@@ -108,6 +112,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
    * @param patternString    of type String
    * @param groups           of type int[]
    */
+  @ConstructorProperties({"fieldDeclaration", "patternString", "groups"})
   public RegexParser( Fields fieldDeclaration, String patternString, int[] groups )
     {
     super( 1, fieldDeclaration, patternString );

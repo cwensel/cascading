@@ -21,6 +21,8 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
@@ -63,6 +65,7 @@ public class GroupBy extends Group
    *
    * @param pipe of type Pipe
    */
+  @ConstructorProperties({"pipe"})
   public GroupBy( Pipe pipe )
     {
     super( pipe );
@@ -74,6 +77,7 @@ public class GroupBy extends Group
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    */
+  @ConstructorProperties({"pipe", "groupFields"})
   public GroupBy( Pipe pipe, Fields groupFields )
     {
     super( pipe, groupFields );
@@ -86,6 +90,7 @@ public class GroupBy extends Group
    * @param groupFields  of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"pipe", "groupFields", "reverseOrder"})
   public GroupBy( Pipe pipe, Fields groupFields, boolean reverseOrder )
     {
     super( pipe, groupFields, null, reverseOrder );
@@ -98,6 +103,7 @@ public class GroupBy extends Group
    * @param pipe        of type Pipe
    * @param groupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields"})
   public GroupBy( String groupName, Pipe pipe, Fields groupFields )
     {
     super( groupName, pipe, groupFields );
@@ -111,6 +117,7 @@ public class GroupBy extends Group
    * @param groupFields  of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "reverseOrder"})
   public GroupBy( String groupName, Pipe pipe, Fields groupFields, boolean reverseOrder )
     {
     super( groupName, pipe, groupFields, null, reverseOrder );
@@ -124,6 +131,7 @@ public class GroupBy extends Group
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
+  @ConstructorProperties({"pipe", "groupFields", "sortFields"})
   public GroupBy( Pipe pipe, Fields groupFields, Fields sortFields )
     {
     super( pipe, groupFields, sortFields );
@@ -138,6 +146,7 @@ public class GroupBy extends Group
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "sortFields"})
   public GroupBy( String groupName, Pipe pipe, Fields groupFields, Fields sortFields )
     {
     super( groupName, pipe, groupFields, sortFields );
@@ -152,6 +161,7 @@ public class GroupBy extends Group
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"pipe", "groupFields", "sortFields", "reverseOrder"})
   public GroupBy( Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     super( pipe, groupFields, sortFields, reverseOrder );
@@ -167,6 +177,7 @@ public class GroupBy extends Group
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"groupName", "pipe", "groupFields", "sortFields", "reverseOrder"})
   public GroupBy( String groupName, Pipe pipe, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     super( groupName, pipe, groupFields, sortFields, reverseOrder );
@@ -188,6 +199,7 @@ public class GroupBy extends Group
    *
    * @param pipes of type Pipe
    */
+  @ConstructorProperties({"pipes"})
   public GroupBy( Pipe[] pipes )
     {
     super( pipes, Fields.FIRST );
@@ -199,6 +211,7 @@ public class GroupBy extends Group
    * @param pipes       of type Pipe
    * @param groupFields of type Fields
    */
+  @ConstructorProperties({"pipes", "groupFields"})
   public GroupBy( Pipe[] pipes, Fields groupFields )
     {
     super( pipes, groupFields );
@@ -211,6 +224,7 @@ public class GroupBy extends Group
    * @param pipes       of type Pipe
    * @param groupFields of type Fields
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields"})
   public GroupBy( String groupName, Pipe[] pipes, Fields groupFields )
     {
     super( groupName, pipes, groupFields );
@@ -224,6 +238,7 @@ public class GroupBy extends Group
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
+  @ConstructorProperties({"pipes", "groupFields", "sortFields"})
   public GroupBy( Pipe[] pipes, Fields groupFields, Fields sortFields )
     {
     super( pipes, groupFields, sortFields );
@@ -238,6 +253,7 @@ public class GroupBy extends Group
    * @param groupFields of type Fields
    * @param sortFields  of type Fields
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "sortFields"})
   public GroupBy( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields )
     {
     super( groupName, pipes, groupFields, sortFields );
@@ -252,6 +268,7 @@ public class GroupBy extends Group
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"pipes", "groupFields", "sortFields", "reverseOrder"})
   public GroupBy( Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     super( pipes, groupFields, sortFields, reverseOrder );
@@ -267,6 +284,7 @@ public class GroupBy extends Group
    * @param sortFields   of type Fields
    * @param reverseOrder of type boolean
    */
+  @ConstructorProperties({"groupName", "pipes", "groupFields", "sortFields", "reverseOrder"})
   public GroupBy( String groupName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
     super( groupName, pipes, groupFields, sortFields, reverseOrder );

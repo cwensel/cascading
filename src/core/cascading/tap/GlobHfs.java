@@ -21,6 +21,7 @@
 
 package cascading.tap;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,7 @@ public class GlobHfs extends MultiSourceTap
    * @param scheme      of type Scheme
    * @param pathPattern of type String
    */
+  @ConstructorProperties({"scheme", "pathPattern"})
   public GlobHfs( Scheme scheme, String pathPattern )
     {
     this( scheme, pathPattern, null );
@@ -68,6 +70,7 @@ public class GlobHfs extends MultiSourceTap
    * @param pathPattern of type String
    * @param pathFilter  of type PathFilter
    */
+  @ConstructorProperties({"scheme", "pathPattern", "pathFilter"})
   public GlobHfs( Scheme scheme, String pathPattern, PathFilter pathFilter )
     {
     super( scheme );
