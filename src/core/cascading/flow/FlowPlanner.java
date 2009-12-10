@@ -191,7 +191,7 @@ public class FlowPlanner
           throw new PlannerException( head, "pipe name not found in either sink or source map: " + headName );
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
-          LOG.warn( "duplicate tail name found, not an error but heads should have unique names: " + headName );
+          LOG.warn( "duplicate head name found, not an error but heads should have unique names: " + headName );
 //          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
