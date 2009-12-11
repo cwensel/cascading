@@ -406,6 +406,12 @@ public class Hfs extends Tap
 
   protected String makeTemporaryPathDir( String name )
     {
+    // _ is treated as a hidden file, so wipe them out
+    name = name.replaceAll( "^[_\\W\\s]+", "" );
+
+    if( name.isEmpty() )
+      name = "temp-path";
+
     return name.replaceAll( "[\\W\\s]+", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
     }
 
