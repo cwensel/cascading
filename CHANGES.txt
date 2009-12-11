@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fix for mixed types in properties object causing ClassCastExceptions.
+
   Fix for case where one side of a branch multiplexed in a mapper could step on c.t.Tuple values before being
   handed to the next branch.
 
