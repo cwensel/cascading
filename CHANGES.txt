@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fix for NPE in c.t.h.MultiInputFormat during certain testing scenarios. Also changed proportioning to honor
+  suggested numSplits value.
+
   Fix for temp files starting with underscores (_) causing them to be ignored.
 
   Fix for mixed types in properties object causing ClassCastExceptions.
