@@ -189,17 +189,20 @@ public class MultiInputFormat implements InputFormat
       }
 
     // attempt to get splits proportionally sized per input format
-    long[] inputSizes = getInputSizes( inputFormats, jobConfs );
-    long totalSize = sum( inputSizes );
+    long[] inputSplitSizes = getInputSplitSizes( inputFormats, jobConfs, numSplits );
+    long totalSplitSize = sum( inputSplitSizes );
 
-    if( totalSize == 0 )
+    if( totalSplitSize == 0 )
       {
       Arrays.fill( indexedSplits, 1 );
       return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
       }
 
-    for( int i = 0; i < inputSizes.length; i++ )
-      indexedSplits[ i ] = (int) Math.ceil( (double) numSplits * inputSizes[ i ] / (double) totalSize );
+    for( int i = 0; i < inputSplitSizes.length; i++ )
+      {
+      int useSplits = (int) Math.ceil( (double) numSplits * inputSplitSizes[ i ] / (double) totalSplitSize );
+      indexedSplits[ i ] = useSplits == 0 ? 1 : useSplits;
+      }
 
     return collapse( getSplits( inputFormats, jobConfs, indexedSplits ), configs );
     }
@@ -239,17 +242,16 @@ public class MultiInputFormat implements InputFormat
     return inputSplits;
     }
 
-  private long[] getInputSizes( InputFormat[] inputFormats, JobConf[] jobConfs ) throws IOException
+  private long[] getInputSplitSizes( InputFormat[] inputFormats, JobConf[] jobConfs, int numSplits ) throws IOException
     {
     long[] inputSizes = new long[inputFormats.length];
 
     for( int i = 0; i < inputFormats.length; i++ )
       {
       InputFormat inputFormat = inputFormats[ i ];
-      InputSplit[] splits = inputFormat.getSplits( jobConfs[ i ], 1 );
+      InputSplit[] splits = inputFormat.getSplits( jobConfs[ i ], numSplits );
 
-      for( InputSplit split : splits )
-        inputSizes[ i ] = inputSizes[ i ] + split.getLength();
+      inputSizes[ i ] = splits.length;
       }
 
     return inputSizes;

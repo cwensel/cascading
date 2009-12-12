@@ -21,12 +21,19 @@
 
 package cascading;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.Function;
+import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
@@ -45,12 +52,6 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleListCollector;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * These tests execute basic function using field positions, not names. so there will be duplicates with
@@ -83,14 +84,16 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileIps ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileIps );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileIps );
     Tap sink = new Hfs( new TextLine(), outputPath + "/count", true );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
-    pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
+    pipe = new Every( pipe, new Fields( 1 ), new Count( new Fields( 0 ) ), new Fields( 0, 1 ) );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "basic.dot" );
 
     flow.start();
     flow.complete();
@@ -138,14 +141,17 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
+    Tap sink = new Hfs( new TextLine( Fields.size( 1 ) ), outputPath + "/simple", true );
 
     Pipe pipe = new Pipe( "test" );
 
     Function parser = new RegexParser( "^[^ ]*" );
 
-    pipe = new Each( pipe, new Fields( 1 ), parser, new Fields( 2 ) );
+    pipe = new Each( pipe, new Fields( 1 ), parser, new Fields( 0, 2 ) );
+
+    // test that selector against incoming creates proper outgoing
+    pipe = new Each( pipe, new Fields( 1 ), new Identity() );
 
     pipe = new GroupBy( pipe, new Fields( 0 ) );
 
@@ -159,7 +165,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 8 );
+    validateLength( flow, 8, 1 );
     }
 
   public void testSimpleRelative() throws Exception
@@ -167,7 +173,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/simplerelative", true );
 
     Pipe pipe = new Pipe( "test" );
@@ -196,7 +202,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileLower ).exists() )
       fail( "data file not found" );
 
-    Tap sourceLower = new Hfs( new TextLine(), inputFileLower );
+    Tap sourceLower = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine(), inputFileUpper );
 
     Map sources = new HashMap();
@@ -236,7 +242,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileJoined ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileJoined );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileJoined );
     Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped", true );
 
     Pipe pipe = new Pipe( "test" );
@@ -259,7 +265,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/filterall", true );
 
     Pipe pipe = new Pipe( "test" );
@@ -280,7 +286,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/filter", true );
 
     Pipe pipe = new Pipe( "test" );
@@ -301,7 +307,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
 
     Pipe pipe = new Pipe( "test" );

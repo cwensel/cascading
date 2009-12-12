@@ -91,6 +91,26 @@ unreleased (wip 1.1)
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
 
+unreleased (wip-1.0.18)
+
+  Fix for NPE in c.t.h.MultiInputFormat during certain testing scenarios. Also changed proportioning to honor
+  suggested numSplits value.
+
+  Fix for temp files starting with underscores (_) causing them to be ignored.
+
+  Fix for mixed types in properties object causing ClassCastExceptions.
+
+  Fix for case where one side of a branch multiplexed in a mapper could step on c.t.Tuple values before being
+  handed to the next branch.
+
+  Fix for edge case where Cascading jars are stored in Hadoop classpath and deserialization of c.f.Flow fails.
+
+  Fix for bad cast of j.l.Error when caught in map/reduce pipeline stack.
+
+  Fix for bug when selecting positional Fields from positional Fields.
+
+  Fix for case when an c.o.Aggregator#start is called when there are no values to iterate across in current grouping.
+
 1.0.17
 
   Changed behavior when cleaning temp files that allows shutdown to continue even if an exception is thrown

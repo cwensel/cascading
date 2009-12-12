@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -116,7 +117,21 @@ public class Util
       {
       ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
 
-      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
+      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes )
+      {
+      @Override
+      protected Class<?> resolveClass( ObjectStreamClass desc ) throws IOException, ClassNotFoundException
+        {
+        try
+          {
+          return Class.forName( desc.getName(), false, Thread.currentThread().getContextClassLoader() );
+          }
+        catch( ClassNotFoundException exception )
+          {
+          return super.resolveClass( desc );
+          }
+        }
+      };
 
       return in.readObject();
       }

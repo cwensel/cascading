@@ -29,6 +29,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.StepCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.operation.Function;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
@@ -92,6 +93,7 @@ public class FlowMapperStack
     stacks = new Stack[incomingScopes.size()];
 
     int i = 0;
+    boolean allFilters = true;
 
     for( Scope incomingScope : incomingScopes )
       {
@@ -106,6 +108,9 @@ public class FlowMapperStack
         Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
         stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Each) operator );
 
+        if( ( (Each) operator ).getOperation() instanceof Function )
+          allFilters = false;
+
         incomingScope = step.getNextScope( operator );
         operator = step.getNextFlowElement( incomingScope );
         }
@@ -115,9 +120,10 @@ public class FlowMapperStack
       if( operator instanceof Group )
         {
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
+        boolean copyTuple = allFilters && i != stacks.length - 1;
 
         Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
-        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope );
+        stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope, copyTuple );
         }
       else if( operator instanceof Tap )
         {

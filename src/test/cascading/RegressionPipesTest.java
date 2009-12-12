@@ -172,6 +172,8 @@ public class RegressionPipesTest extends ClusterTestCase
     if( !new File( inputFileJoined ).exists() )
       fail( "data file not found" );
 
+    copyFromLocal( inputFileJoined );
+
     Tap source = new Hfs( new TextLine(), inputFileJoined );
     Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped-unknown", true );
 
@@ -258,10 +260,16 @@ public class RegressionPipesTest extends ClusterTestCase
 
   public void testIllegalCharsInTempFiles() throws Exception
     {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
     Tap sink = new Hfs( new TextLine(), outputPath + "/illegalchars", true );
 
-    Pipe pipe = new Pipe( "bar:bar@foo://blah/\t(*(**^**&%&%^@#@&&() :::: ///\\\\ \t illegal chars in it" );
+//    Pipe pipe = new Pipe( "bar:bar@foo://blah/\t(*(**^**&%&%^@#@&&() :::: ///\\\\ \t illegal chars in it" );
+    Pipe pipe = new Pipe( "**&%&%bar:bar@foo://blah/\t(*(**^**&%&%^@#@&&() :::: ///\\\\ \t illegal chars in it" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( " " ) );
 

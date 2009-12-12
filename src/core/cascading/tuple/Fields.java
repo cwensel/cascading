@@ -817,6 +817,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         result.set( i, get( indexOf( field ) ) );
       else if( this.get( translatePos( (Integer) field ) ) instanceof String )
         result.set( i, get( translatePos( (Integer) field ) ) );
+      else
+        result.set( i, translatePos( (Integer) field ) ); // use absolute position if no field name
       }
 
     return result;

@@ -28,6 +28,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
@@ -40,12 +41,15 @@ class GroupMapperStackElement extends MapperStackElement
   {
   private final Group group;
   private final Scope outgoingScope;
+  // if multiple branches and this is one is all filters, we need to copy the tuple before cogrouping
+  private boolean copyTuple;
 
-  public GroupMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Group group, Scope outgoingScope )
+  public GroupMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Group group, Scope outgoingScope, boolean copyTuple )
     {
     super( previous, flowProcess, incomingScope, trap );
     this.group = group;
     this.outgoingScope = outgoingScope;
+    this.copyTuple = copyTuple && group instanceof CoGroup;
     }
 
   protected FlowElement getFlowElement()
@@ -57,6 +61,9 @@ class GroupMapperStackElement extends MapperStackElement
   public void collect( Tuple tuple )
     {
     super.collect( tuple );
+
+    if( copyTuple )
+      tuple = new Tuple( tuple );
 
     operateGroup( getTupleEntry( tuple ) );
     }

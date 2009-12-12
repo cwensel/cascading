@@ -74,6 +74,7 @@ public class GroupClosure
       {
       Tuple tuple = (Tuple) values.next();
 
+      // todo: cache pos
       tuple.set( valueFields[ cleanPos ], groupingFields[ cleanPos ], grouping );
 
       return tuple;

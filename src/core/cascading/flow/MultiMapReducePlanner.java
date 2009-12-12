@@ -47,7 +47,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -127,7 +126,7 @@ public class MultiMapReducePlanner extends FlowPlanner
    */
   public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", false );
+    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
     }
 
   /**
