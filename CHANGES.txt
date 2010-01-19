@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed c.t.Tuple#print to not quote null elements to distinguish between 'null' Strings and null values.
+
   Changed planner exception messages to quote head and tail names.
 
   Changed log messages to info when hdfs client finalizer hook cannot be found.
