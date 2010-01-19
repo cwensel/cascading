@@ -535,6 +535,8 @@ public class Util
 
   public static Thread getHDFSShutdownHook()
     {
+    Exception caughtException = null;
+
     try
       {
       // we must init the FS so the finalizer is registered
@@ -546,26 +548,24 @@ public class Util
       Thread finalizer = (Thread) field.get( null );
 
       if( finalizer != null )
-        {
         Runtime.getRuntime().removeShutdownHook( finalizer );
-        return finalizer;
-        }
 
+      return finalizer;
       }
     catch( NoSuchFieldException exception )
       {
-      LOG.warn( "unable to get finalizer", exception );
+      caughtException = exception;
       }
     catch( IllegalAccessException exception )
       {
-      LOG.warn( "unable to get finalizer", exception );
+      caughtException = exception;
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to init FileSystem", exception );
+      caughtException = exception;
       }
 
-    LOG.warn( "unable to find and remove client hdfs shutdown hook" );
+    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: " + caughtException.getClass().getName() );
 
     return null;
     }

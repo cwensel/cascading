@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Changed log messages to info when hdfs client finalizer hook cannot be found.
+
   Fix for NPE in c.t.h.MultiInputFormat during certain testing scenarios. Also changed proportioning to honor
   suggested numSplits value.
 
