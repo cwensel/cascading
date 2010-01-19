@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -225,6 +226,16 @@ public class Util
 
       count++;
       }
+    }
+
+  public static Collection<String> quote( Collection<String> collection, String quote )
+    {
+    List<String> list = new ArrayList<String>();
+
+    for( String string : collection )
+      list.add( quote + string + quote );
+
+    return list;
     }
 
   public static String print( Collection collection, String delim )

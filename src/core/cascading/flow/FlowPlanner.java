@@ -104,9 +104,9 @@ public class FlowPlanner
     for( String tapName : taps.keySet() )
       {
       if( areSources && !taps.get( tapName ).isSource() )
-        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a source: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: '" + tapName + "', cannot be used as a source: " + taps.get( tapName ) );
       else if( !areSources && !taps.get( tapName ).isSink() )
-        throw new PlannerException( "tap named: " + tapName + ", cannot be used as a sink: " + taps.get( tapName ) );
+        throw new PlannerException( "tap named: '" + tapName + "', cannot be used as a sink: " + taps.get( tapName ) );
       }
     }
 
@@ -141,10 +141,10 @@ public class FlowPlanner
           String tailName = tail.getName();
 
           if( !tapNames.contains( tailName ) )
-            throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
+            throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
-            LOG.warn( "duplicate tail name found: " + tailName );
+            LOG.warn( "duplicate tail name found: '" + tailName + "'" );
 //            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
           tailNames.add( tailName );
@@ -156,10 +156,10 @@ public class FlowPlanner
         String tailName = pipe.getName();
 
         if( !tapNames.contains( tailName ) )
-          throw new PlannerException( pipe, "pipe name not found in either sink or source map: " + tailName );
+          throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          LOG.warn( "duplicate tail name found, not an error but tails should have unique names: " + tailName );
+          LOG.warn( "duplicate tail name found, not an error but tails should have unique names: '" + tailName + "'" );
 //          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
@@ -172,7 +172,7 @@ public class FlowPlanner
     remainingSinks.removeAll( tailNames );
 
     if( tailNames.size() != 0 )
-      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( tailNames, ", " ) + "], remaining sinks: [" + Util.join( remainingSinks, ", " ) + "]" );
+      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( Util.quote( tailNames, "'" ), ", " ) + "], remaining sinks: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
 
     // handle heads
     Set<Pipe> heads = new HashSet<Pipe>();
@@ -185,10 +185,10 @@ public class FlowPlanner
         String headName = head.getName();
 
         if( !tapNames.contains( headName ) )
-          throw new PlannerException( head, "pipe name not found in either sink or source map: " + headName );
+          throw new PlannerException( head, "pipe name not found in either sink or source map: '" + headName + "'" );
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
-          LOG.warn( "duplicate tail name found, not an error but heads should have unique names: " + headName );
+          LOG.warn( "duplicate tail name found, not an error but heads should have unique names: '" + headName + "'" );
 //          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
@@ -201,7 +201,7 @@ public class FlowPlanner
     remainingSources.removeAll( headNames );
 
     if( headNames.size() != 0 )
-      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( headNames, ", " ) + "], remaining sources: [" + Util.join( remainingSources, ", " ) + "]" );
+      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "], remaining sources: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "]" );
 
     }
 
@@ -216,7 +216,7 @@ public class FlowPlanner
     for( String name : traps.keySet() )
       {
       if( !names.contains( name ) )
-        throw new PlannerException( "trap name not found in assembly: " + name );
+        throw new PlannerException( "trap name not found in assembly: '" + name + "'" );
       }
     }
 
@@ -309,7 +309,7 @@ public class FlowPlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new PlannerException( (Pipe) flowElement, "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             continue;
@@ -340,7 +340,7 @@ public class FlowPlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new PlannerException( (Pipe) flowElement, "Every may only be preceeded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             {
