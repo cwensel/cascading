@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -268,6 +269,16 @@ public class Util
 
       count++;
       }
+    }
+
+  public static Collection<String> quote( Collection<String> collection, String quote )
+    {
+    List<String> list = new ArrayList<String>();
+
+    for( String string : collection )
+      list.add( quote + string + quote );
+
+    return list;
     }
 
   public static String print( Collection collection, String delim )
@@ -592,6 +603,8 @@ public class Util
 
   public static Thread getHDFSShutdownHook()
     {
+    Exception caughtException = null;
+
     try
       {
       // we must init the FS so the finalizer is registered
@@ -603,26 +616,24 @@ public class Util
       Thread finalizer = (Thread) field.get( null );
 
       if( finalizer != null )
-        {
         Runtime.getRuntime().removeShutdownHook( finalizer );
-        return finalizer;
-        }
 
+      return finalizer;
       }
     catch( NoSuchFieldException exception )
       {
-      LOG.warn( "unable to get finalizer", exception );
+      caughtException = exception;
       }
     catch( IllegalAccessException exception )
       {
-      LOG.warn( "unable to get finalizer", exception );
+      caughtException = exception;
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to init FileSystem", exception );
+      caughtException = exception;
       }
 
-    LOG.warn( "unable to find and remove client hdfs shutdown hook" );
+    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: " + caughtException.getClass().getName() );
 
     return null;
     }

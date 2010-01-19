@@ -91,7 +91,13 @@ unreleased (wip 1.1)
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
 
-unreleased (wip-1.0.18)
+1.0.18
+
+  Changed c.t.Tuple#print to not quote null elements to distinguish between 'null' Strings and null values.
+
+  Changed planner exception messages to quote head and tail names.
+
+  Changed log messages to info when hdfs client finalizer hook cannot be found.
 
   Fix for NPE in c.t.h.MultiInputFormat during certain testing scenarios. Also changed proportioning to honor
   suggested numSplits value.

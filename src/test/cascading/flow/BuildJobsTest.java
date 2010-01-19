@@ -60,7 +60,6 @@ import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-/** @version $Id: //depot/calku/cascading/src/test/cascading/flow/BuildJobsTest.java#2 $ */
 public class BuildJobsTest extends CascadingTestCase
   {
   public BuildJobsTest()
@@ -360,7 +359,7 @@ public class BuildJobsTest extends CascadingTestCase
     catch( Exception exception )
       {
       System.out.println( "exception.getMessage() = " + exception.getMessage() );
-      assertTrue( exception.getMessage().contains( "left, right" ) );
+      assertTrue( exception.getMessage().contains( "'left', 'right'" ) );
       }
     }
 
