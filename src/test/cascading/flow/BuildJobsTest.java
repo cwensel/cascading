@@ -21,6 +21,13 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import cascading.CascadingTestCase;
 import cascading.TestBuffer;
 import cascading.operation.AssertionLevel;
@@ -48,13 +55,6 @@ import cascading.tap.TempHfs;
 import cascading.tuple.Fields;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class BuildJobsTest extends CascadingTestCase
   {
@@ -355,7 +355,7 @@ public class BuildJobsTest extends CascadingTestCase
     catch( Exception exception )
       {
       System.out.println( "exception.getMessage() = " + exception.getMessage() );
-      assertTrue( exception.getMessage().contains( "left, right" ) );
+      assertTrue( exception.getMessage().contains( "'left', 'right'" ) );
       }
     }
 
