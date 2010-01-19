@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.0.18
 
   Changed c.t.Tuple#print to not quote null elements to distinguish between 'null' Strings and null values.
 
