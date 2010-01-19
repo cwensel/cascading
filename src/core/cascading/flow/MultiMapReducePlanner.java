@@ -21,6 +21,15 @@
 
 package cascading.flow;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -33,16 +42,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -121,7 +120,7 @@ public class MultiMapReducePlanner extends FlowPlanner
    */
   public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", false );
+    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
     }
 
   /**
