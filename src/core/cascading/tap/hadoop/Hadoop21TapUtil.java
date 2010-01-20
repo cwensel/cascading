@@ -36,6 +36,8 @@ import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.StatusReporter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.task.MapContextImpl;
+import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.apache.log4j.Logger;
 
 /**
@@ -70,14 +72,14 @@ public class Hadoop21TapUtil
   static MapContext getMapContext( Configuration conf )
     {
     TaskAttemptID attemptID = getTaskAttemptId( conf );
-    return new MapContext( conf, attemptID, null, null, null, new NullStatusReporter(), null );
+    return new MapContextImpl( conf, attemptID, null, null, null, new NullStatusReporter(), null );
     }
 
   static TaskAttemptContext getAttemptContext( Configuration conf )
     {
     TaskAttemptID taskAttemptID = getTaskAttemptId( conf );
 
-    return new TaskAttemptContext( conf, taskAttemptID );
+    return new TaskAttemptContextImpl( conf, taskAttemptID );
     }
 
   static TaskAttemptID getTaskAttemptId( Configuration conf )

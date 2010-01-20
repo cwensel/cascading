@@ -28,11 +28,10 @@ import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.hadoop.HadoopStepStats;
 import cascading.stats.StepStats;
-import cascading.util.Util;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TaskCompletionEvent;
+import cascading.CascadingException;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
+import org.apache.hadoop.mapreduce.TaskCompletionEvent;
 
 /**
  *
@@ -43,10 +42,8 @@ public class FlowStepJob implements Callable<Throwable>
   private final String stepName;
   /** Field currentConf */
   private Job currentJob;
-  /** Field jobClient */
-  private JobClient jobClient;
   /** Field runningJob */
-  private RunningJob runningJob;
+  private JobStatus jobStatus;
   /** Field pollingInterval */
   private long pollingInterval = 5000;
 
@@ -77,15 +74,15 @@ public class FlowStepJob implements Callable<Throwable>
     stepStats = new HadoopStepStats()
     {
     @Override
-    protected JobClient getJobClient()
+    protected JobStatus getRunningJob()
       {
-      return jobClient;
+      return jobStatus;
       }
 
     @Override
-    protected RunningJob getRunningJob()
+    protected Job getJob()
       {
-      return runningJob;
+      return currentJob;
       }
     };
     }
@@ -102,10 +99,14 @@ public class FlowStepJob implements Callable<Throwable>
 
     try
       {
-      if( runningJob != null )
-        runningJob.killJob();
+      if( currentJob != null )
+        currentJob.killJob();
       }
     catch( IOException exception )
+      {
+      flowStep.logWarn( "unable to kill job: " + stepName, exception );
+      }
+    catch( InterruptedException exception )
       {
       flowStep.logWarn( "unable to kill job: " + stepName, exception );
       }
@@ -142,7 +143,7 @@ public class FlowStepJob implements Callable<Throwable>
       }
     }
 
-  protected void blockOnJob() throws IOException
+  protected void blockOnJob() throws IOException, InterruptedException
     {
     if( stop )
       return;
@@ -156,44 +157,49 @@ public class FlowStepJob implements Callable<Throwable>
       {
       currentJob.submit();
 
-      runningJob = (RunningJob) Util.getInstanceField( Job.class, "info", currentJob );
-      jobClient = (JobClient) Util.getInstanceField( Job.class, "jobClient", currentJob );
-
+      jobStatus = currentJob.getStatus();
       }
     catch( InterruptedException exception )
       {
-      throw new RuntimeException( exception );
+      throw new CascadingException( exception );
       }
     catch( ClassNotFoundException exception )
       {
-      throw new RuntimeException( exception );
+      throw new CascadingException( exception );
       }
 
     blockTillCompleteOrStopped();
 
-    if( !stop && !currentJob.isSuccessful() )
+    try
       {
-      if( !stepStats.isFinished() )
-        stepStats.markFailed( null );
+      if( !stop && !currentJob.isSuccessful() )
+        {
+        if( !stepStats.isFinished() )
+          stepStats.markFailed( null );
 
-      dumpCompletionEvents();
+        dumpCompletionEvents();
 
-      throwable = new FlowException( "step failed: " + stepName );
+        throwable = new FlowException( "step failed: " + stepName );
+        }
+      else
+        {
+        if( currentJob.isSuccessful() && !stepStats.isFinished() )
+          stepStats.markSuccessful();
+        }
       }
-    else
+    catch( InterruptedException exception )
       {
-      if( runningJob.isSuccessful() && !stepStats.isFinished() )
-        stepStats.markSuccessful();
+      throw new CascadingException( exception );
       }
 
     stepStats.captureJobStats();
     }
 
-  protected void blockTillCompleteOrStopped() throws IOException
+  protected void blockTillCompleteOrStopped() throws IOException, InterruptedException
     {
     while( true )
       {
-      if( stop || runningJob.isComplete() )
+      if( stop || currentJob.isComplete() )
         break;
 
       sleep();
@@ -229,16 +235,20 @@ public class FlowStepJob implements Callable<Throwable>
     {
     try
       {
-      if( runningJob == null )
+      if( jobStatus == null )
         return;
 
-      TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
+      TaskCompletionEvent[] events = currentJob.getTaskCompletionEvents( 0, Integer.MAX_VALUE );
       flowStep.logWarn( "completion events count: " + events.length );
 
       for( TaskCompletionEvent event : events )
         flowStep.logWarn( "event = " + event );
       }
     catch( IOException exception )
+      {
+      flowStep.logError( "failed reading completion events", exception );
+      }
+    catch( InterruptedException exception )
       {
       flowStep.logError( "failed reading completion events", exception );
       }
@@ -255,7 +265,7 @@ public class FlowStepJob implements Callable<Throwable>
       {
       latch.await();
 
-      return runningJob != null && runningJob.isSuccessful();
+      return jobStatus != null && currentJob.isSuccessful();
       }
     catch( InterruptedException exception )
       {
@@ -276,7 +286,7 @@ public class FlowStepJob implements Callable<Throwable>
    */
   public boolean wasStarted()
     {
-    return runningJob != null;
+    return jobStatus != null;
     }
 
   /**

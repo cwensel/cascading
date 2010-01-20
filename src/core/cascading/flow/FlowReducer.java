@@ -73,7 +73,19 @@ public class FlowReducer extends Reducer
 //      currentProcess.increment( StepCounters.Tuples_Read, 1 );
 
       groupingTuple = Tuple.asUnmodifiable( groupingTuple );
-      groupingTuple = (Tuple) context.getCurrentKey();
+      try
+        {
+        groupingTuple = (Tuple) context.getCurrentKey();
+        }
+      catch( IOException exception )
+        {
+        throw new CascadingException( exception );
+        }
+      catch( InterruptedException exception )
+        {
+        throw new CascadingException( exception );
+        }
+
       groupingTuple = Tuple.asUnmodifiable( groupingTuple );
 
       return groupingTuple;

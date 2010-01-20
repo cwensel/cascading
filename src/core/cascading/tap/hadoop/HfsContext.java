@@ -29,11 +29,12 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.StatusReporter;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.task.TaskInputOutputContextImpl;
 
 /**
  *
  */
-public class HfsContext extends TaskInputOutputContext
+public class HfsContext extends TaskInputOutputContextImpl
   {
   public HfsContext( Configuration conf, TaskAttemptID taskid, RecordWriter output, OutputCommitter committer, StatusReporter reporter )
     {

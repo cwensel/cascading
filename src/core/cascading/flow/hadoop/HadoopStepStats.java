@@ -29,12 +29,16 @@ import java.util.Map;
 
 import cascading.flow.FlowException;
 import cascading.stats.StepStats;
-import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TaskCompletionEvent;
-import org.apache.hadoop.mapred.TaskReport;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.CounterGroup;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
+import org.apache.hadoop.mapreduce.TaskCompletionEvent;
+import org.apache.hadoop.mapreduce.TaskReport;
+import org.apache.hadoop.mapreduce.TaskType;
 import org.apache.log4j.Logger;
 
 /** Class HadoopStepStats ... */
@@ -92,13 +96,13 @@ public abstract class HadoopStepStats extends StepStats
       {
       org.apache.hadoop.mapreduce.TaskType type = taskCompletionEvent.getTaskAttemptId().getTaskID().getTaskType();
       taskType = type == org.apache.hadoop.mapreduce.TaskType.MAP ? TaskType.MAPPER : TaskType.REDUCER;
-      status = taskCompletionEvent.getTaskStatus().toString();
+      status = taskCompletionEvent.getStatus().toString();
       }
 
     public void fill( TaskType taskType, TaskReport taskReport )
       {
       this.taskType = taskType;
-      this.id = taskReport.getTaskID().toString();
+      this.id = taskReport.getTaskId().toString();
       this.startTime = taskReport.getStartTime();
       this.finishTime = taskReport.getFinishTime();
       this.state = taskReport.getState();
@@ -111,12 +115,12 @@ public abstract class HadoopStepStats extends StepStats
       {
       this.counters = new HashMap<String, Long>();
 
-      Counters hadoopCounters = taskReport.getCounters();
+      Counters hadoopCounters = taskReport.getTaskCounters();
 
-      for( Counters.Group group : hadoopCounters )
+      for( CounterGroup group : hadoopCounters )
         {
-        for( Counters.Counter counter : group )
-          this.counters.put( group.getName() + "." + counter.getName(), counter.getCounter() );
+        for( Counter counter : group )
+          this.counters.put( group.getName() + "." + counter.getName(), counter.getValue() );
         }
       }
 
@@ -157,7 +161,7 @@ public abstract class HadoopStepStats extends StepStats
     {
     for( TaskCompletionEvent event : events )
       {
-      if( event.getTaskStatus() != TaskCompletionEvent.Status.SUCCEEDED )
+      if( event.getStatus() != TaskCompletionEvent.Status.SUCCEEDED )
         getTaskStats().add( new HadoopTaskStats( event ) );
       }
     }
@@ -182,26 +186,30 @@ public abstract class HadoopStepStats extends StepStats
     this.numReducerTasks = numReducerTasks;
     }
 
-  protected abstract JobClient getJobClient();
+  protected abstract JobStatus getRunningJob();
 
-  protected abstract RunningJob getRunningJob();
+  protected abstract Job getJob();
 
   @Override
   public long getCounterValue( Enum counter )
     {
     try
       {
-      return getRunningJob().getCounters().getCounter( counter );
+      return getJob().getCounters().findCounter( counter ).getValue();
       }
-    catch( IOException e )
+    catch( IOException exception )
       {
-      throw new FlowException( "unable to get counter values" );
+      throw new FlowException( "unable to get counter values", exception );
+      }
+    catch( InterruptedException exception )
+      {
+      throw new FlowException( "unable to get counter values", exception );
       }
     }
 
   public void captureJobStats()
     {
-    RunningJob runningJob = getRunningJob();
+    JobStatus runningJob = getRunningJob();
     JobConf ranJob = new JobConf( runningJob.getJobFile() );
 
     setNumMapTasks( ranJob.getNumMapTasks() );
@@ -218,29 +226,22 @@ public abstract class HadoopStepStats extends StepStats
     {
     getTaskStats().clear();
 
-    JobClient jobClient = getJobClient();
+    Job currentJob = getJob();
 
     try
       {
-      addTaskStats( HadoopTaskStats.TaskType.SETUP, jobClient.getSetupTaskReports( getRunningJob().getID() ), true );
-      addTaskStats( HadoopTaskStats.TaskType.MAPPER, jobClient.getMapTaskReports( getRunningJob().getID() ), false );
-      addTaskStats( HadoopTaskStats.TaskType.REDUCER, jobClient.getReduceTaskReports( getRunningJob().getID() ), false );
-      addTaskStats( HadoopTaskStats.TaskType.CLEANUP, jobClient.getCleanupTaskReports( getRunningJob().getID() ), true );
+      addTaskStats( HadoopTaskStats.TaskType.SETUP, currentJob.getTaskReports( TaskType.JOB_SETUP ), true );
+      addTaskStats( HadoopTaskStats.TaskType.MAPPER, currentJob.getTaskReports( TaskType.MAP ), false );
+      addTaskStats( HadoopTaskStats.TaskType.REDUCER, currentJob.getTaskReports( TaskType.REDUCE ), false );
+      addTaskStats( HadoopTaskStats.TaskType.CLEANUP, currentJob.getTaskReports( TaskType.JOB_CLEANUP ), true );
 
-      int count = 0;
-
-      while( true )
-        {
-        TaskCompletionEvent[] events = getRunningJob().getTaskCompletionEvents( count );
-
-        if( events.length == 0 )
-          break;
-
-        addTaskStats( events );
-        count += 10;
-        }
+      addTaskStats( currentJob.getTaskCompletionEvents( 0, Integer.MAX_VALUE ) );
       }
     catch( IOException exception )
+      {
+      LOG.warn( "unable to get task stats", exception );
+      }
+    catch( InterruptedException exception )
       {
       LOG.warn( "unable to get task stats", exception );
       }
