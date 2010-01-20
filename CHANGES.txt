@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Changed c.t.TupleOutputStream to lookup tuple element writers by Class identity.
+
   Added j.b.ConstructorProperties annotation to relevant class constructors.
 
   Added new convenience method c.p.Pipe#names to return an array of all the pipe names in an assembly. This supports

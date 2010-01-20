@@ -24,7 +24,9 @@ package cascading.tuple;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 import cascading.tuple.hadoop.TupleSerialization;
 import org.apache.hadoop.io.WritableUtils;
@@ -38,6 +40,117 @@ public class TupleOutputStream extends DataOutputStream
 
   /** Field WRITABLE_TOKEN */
   public static final int WRITABLE_TOKEN = 32;
+
+  private interface TupleElementWriter
+    {
+    void write( TupleOutputStream stream, Object element ) throws IOException;
+    }
+
+  private static Map<Class, TupleElementWriter> tupleElementWriters = new IdentityHashMap<Class, TupleElementWriter>();
+
+  static
+    {
+    tupleElementWriters.put( String.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 1 );
+      WritableUtils.writeString( stream, (String) element );
+      }
+    } );
+
+    tupleElementWriters.put( Float.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 2 );
+      stream.writeFloat( (Float) element );
+      }
+    } );
+
+    tupleElementWriters.put( Double.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 3 );
+      stream.writeDouble( (Double) element );
+      }
+    } );
+
+    tupleElementWriters.put( Integer.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 4 );
+      WritableUtils.writeVInt( stream, (Integer) element );
+      }
+    } );
+
+    tupleElementWriters.put( Long.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 5 );
+      WritableUtils.writeVLong( stream, (Long) element );
+      }
+    } );
+
+    tupleElementWriters.put( Boolean.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 6 );
+      stream.writeBoolean( (Boolean) element );
+      }
+    } );
+
+    tupleElementWriters.put( Short.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 7 );
+      stream.writeShort( (Short) element );
+      }
+    } );
+
+    tupleElementWriters.put( Tuple.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 8 );
+      stream.writeTuple( (Tuple) element );
+      }
+    } );
+
+    tupleElementWriters.put( TuplePair.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 9 );
+      stream.writeTuplePair( (TuplePair) element );
+      }
+    } );
+
+    tupleElementWriters.put( IndexTuple.class, new TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      WritableUtils.writeVInt( stream, 10 );
+      stream.writeIndexTuple( (IndexTuple) element );
+      }
+    } );
+
+    }
 
   /** Field elementWriter */
   ElementWriter elementWriter;
@@ -100,61 +213,12 @@ public class TupleOutputStream extends DataOutputStream
         }
 
       Class type = element.getClass();
+      TupleElementWriter tupleElementWriter = tupleElementWriters.get( type );
 
-      if( String.class == type )
-        {
-        WritableUtils.writeVInt( this, 1 );
-        WritableUtils.writeString( this, (String) element );
-        }
-      else if( Float.class == type )
-        {
-        WritableUtils.writeVInt( this, 2 );
-        writeFloat( (Float) element );
-        }
-      else if( Double.class == type )
-          {
-          WritableUtils.writeVInt( this, 3 );
-          writeDouble( (Double) element );
-          }
-        else if( Integer.class == type )
-            {
-            WritableUtils.writeVInt( this, 4 );
-            WritableUtils.writeVInt( this, (Integer) element );
-            }
-          else if( Long.class == type )
-              {
-              WritableUtils.writeVInt( this, 5 );
-              WritableUtils.writeVLong( this, (Long) element );
-              }
-            else if( Boolean.class == type )
-                {
-                WritableUtils.writeVInt( this, 6 );
-                writeBoolean( (Boolean) element );
-                }
-              else if( Short.class == type )
-                  {
-                  WritableUtils.writeVInt( this, 7 );
-                  writeShort( (Short) element );
-                  }
-                else if( Tuple.class == type )
-                    {
-                    WritableUtils.writeVInt( this, 8 );
-                    writeTuple( (Tuple) element );
-                    }
-                  else if( TuplePair.class == type )
-                      {
-                      WritableUtils.writeVInt( this, 9 );
-                      writeTuplePair( (TuplePair) element );
-                      }
-                    else if( IndexTuple.class == type )
-                        {
-                        WritableUtils.writeVInt( this, 10 );
-                        writeIndexTuple( (IndexTuple) element );
-                        }
-                      else
-                        {
-                        elementWriter.write( this, element );
-                        }
+      if( tupleElementWriter != null )
+        tupleElementWriter.write( this, element );
+      else
+        elementWriter.write( this, element );
       }
     }
 
