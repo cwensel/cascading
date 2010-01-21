@@ -1262,11 +1262,15 @@ public class BuildJobsTest extends CascadingTestCase
     try
       {
       Flow flow = new FlowConnector().connect( sources, sinks, merge );
-      fail( "did not catch missing sink tap" );
+      fail( "did not catch missing source tap" );
+      }
+    catch( PlannerException exception )
+      {
+      // do nothing
       }
     catch( Exception exception )
       {
-      // do nothing
+      fail( "threw wrong exception" );
       }
     }
 
@@ -1292,11 +1296,15 @@ public class BuildJobsTest extends CascadingTestCase
     try
       {
       Flow flow = new FlowConnector().connect( sources, sinks, merge );
-      fail( "did not catch missing source tap" );
+      fail( "did not catch missing sink tap" );
+      }
+    catch( PlannerException exception )
+      {
+      // do nothing
       }
     catch( Exception exception )
       {
-      // do nothing
+      fail( "threw wrong exception" );
       }
     }
 
