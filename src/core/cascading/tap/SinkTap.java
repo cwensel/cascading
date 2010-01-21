@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,8 +25,8 @@ import java.io.IOException;
 
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -47,7 +47,7 @@ public abstract class SinkTap extends Tap
 
   protected SinkTap( Scheme scheme, SinkMode sinkMode )
     {
-    super(scheme, sinkMode );
+    super( scheme, sinkMode );
     }
 
   @Override

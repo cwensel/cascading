@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,9 +21,9 @@
 
 package cascading.flow;
 
-import org.jgrapht.graph.SimpleDirectedGraph;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
+import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
  * Class PlannerException is thrown when a job planner fails.
@@ -46,7 +46,7 @@ public class PlannerException extends FlowException
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe of type Pipe
+   * @param pipe    of type Pipe
    * @param message of type String
    */
   public PlannerException( Pipe pipe, String message )
@@ -57,8 +57,8 @@ public class PlannerException extends FlowException
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe     of type Pipe
-   * @param message    of type String
+   * @param pipe      of type Pipe
+   * @param message   of type String
    * @param throwable of type Throwable
    */
   public PlannerException( Pipe pipe, String message, Throwable throwable )
@@ -69,9 +69,9 @@ public class PlannerException extends FlowException
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe of type Pipe
-   * @param message of type String
-   * @param throwable of type Throwable
+   * @param pipe         of type Pipe
+   * @param message      of type String
+   * @param throwable    of type Throwable
    * @param elementGraph of type ElementGraph
    */
   public PlannerException( Pipe pipe, String message, Throwable throwable, ElementGraph elementGraph )

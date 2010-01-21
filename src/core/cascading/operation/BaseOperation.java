@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,8 @@
 
 package cascading.operation;
 
+import java.io.Serializable;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Each;
@@ -29,8 +31,6 @@ import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
-
-import java.io.Serializable;
 
 /**
  * Class BaseOperation is the base class of predicate types that are applied to {@link Tuple} streams via
@@ -50,6 +50,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   protected String trace = Util.captureDebugTrace( getClass() );
 
   // initialize this operation based on its subclass
+
   {
   if( this instanceof Filter || this instanceof Assertion )
     fieldDeclaration = Fields.ALL;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,11 +21,11 @@
 
 package cascading.flow;
 
+import java.io.IOException;
+
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-
-import java.io.IOException;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each

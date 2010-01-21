@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -29,7 +29,7 @@ import cascading.pipe.Pipe;
  */
 public class ElementGraphException extends FlowException
   {
-  /** Field flowElement  */
+  /** Field flowElement */
   private FlowElement flowElement;
 
   /** Constructor ElementGraphException creates a new ElementGraphException instance. */
@@ -41,7 +41,7 @@ public class ElementGraphException extends FlowException
    * Constructor ElementGraphException creates a new ElementGraphException instance.
    *
    * @param flowElement of type FlowElement
-   * @param message of type String
+   * @param message     of type String
    */
   public ElementGraphException( FlowElement flowElement, String message )
     {
@@ -53,8 +53,8 @@ public class ElementGraphException extends FlowException
    * Constructor ElementGraphException creates a new ElementGraphException instance.
    *
    * @param flowElement of type FlowElement
-   * @param message of type String
-   * @param throwable of type Throwable
+   * @param message     of type String
+   * @param throwable   of type Throwable
    */
   public ElementGraphException( FlowElement flowElement, String message, Throwable throwable )
     {
@@ -105,7 +105,7 @@ public class ElementGraphException extends FlowException
 
   Pipe getPipe()
     {
-    if(flowElement instanceof Pipe)
+    if( flowElement instanceof Pipe )
       return (Pipe) flowElement;
 
     return null;

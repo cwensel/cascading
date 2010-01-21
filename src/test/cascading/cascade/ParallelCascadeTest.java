@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,8 @@
 
 package cascading.cascade;
 
+import java.io.IOException;
+
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -35,8 +37,6 @@ import cascading.scheme.TextLine;
 import cascading.tap.Dfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.IOException;
 
 public class ParallelCascadeTest extends ClusterTestCase
   {

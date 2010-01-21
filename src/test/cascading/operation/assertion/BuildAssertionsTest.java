@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -60,7 +60,8 @@ public class BuildAssertionsTest extends CascadingTestCase
     Pipe pipe = new Pipe( "test" );
 
     String regex = TestConstants.APACHE_COMMON_REGEX;
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{1, 2, 3, 4, 5, 6} ) );
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{
+      1, 2, 3, 4, 5, 6} ) );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -50,7 +50,8 @@ public class AppliedAssertionsTest extends ClusterTestCase
   String inputFileApache = "build/test/data/apache.10.txt";
   String outputPath = "build/test/output/assertions/";
   private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
-  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{1, 2, 3, 4, 5, 6} );
+  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{
+    1, 2, 3, 4, 5, 6} );
 
   public AppliedAssertionsTest()
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,15 +21,15 @@
 
 package cascading.flow.hadoop;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  *

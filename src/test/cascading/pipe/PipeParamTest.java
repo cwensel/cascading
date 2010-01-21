@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -30,7 +30,8 @@ import cascading.tuple.Tuple;
 public class PipeParamTest extends CascadingTestCase
   {
   Fields[] ARGS_PASS = new Fields[]{new Fields( "x" ), Fields.ALL, Fields.GROUP, Fields.VALUES};
-  Fields[] FUNCS_PASS = new Fields[]{new Fields( "y" ), Fields.UNKNOWN, Fields.ALL, Fields.GROUP, Fields.VALUES, Fields.ARGS};
+  Fields[] FUNCS_PASS = new Fields[]{new Fields( "y" ), Fields.UNKNOWN, Fields.ALL, Fields.GROUP, Fields.VALUES,
+                                     Fields.ARGS};
   Fields[] OUTS_PASS = new Fields[]{new Fields( "y" ), Fields.RESULTS, Fields.ALL};
 
   Fields[] ARGS_FAIL = new Fields[]{Fields.UNKNOWN, Fields.ARGS, Fields.RESULTS};

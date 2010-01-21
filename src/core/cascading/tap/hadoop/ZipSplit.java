@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -85,6 +85,7 @@ public class ZipSplit extends FileSplit
   // //////////////////////////////////////////
   // Writable methods
   // //////////////////////////////////////////
+
   public void write( DataOutput out ) throws IOException
     {
     super.write( out );

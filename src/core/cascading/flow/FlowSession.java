@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,16 +31,14 @@ package cascading.flow;
  */
 public class FlowSession
   {
-  /** Field currentProcess  */
+  /** Field currentProcess */
   private FlowProcess currentProcess;
 
   /** Field NULL is a noop implemenation of FlowSession. */
   public static final FlowSession NULL = new FlowSession();
 
 
-  /**
-   * Constructor FlowSession creates a new FlowSession instance.
-   */
+  /** Constructor FlowSession creates a new FlowSession instance. */
   public FlowSession()
     {
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,6 +61,7 @@ public class FlowTest extends ClusterTestCase
     }
 
   // test is not executed, just guarantees flow is run locally
+
   public void testLocalModeSource() throws Exception
     {
     Tap source = new Lfs( new TextLine(), "input/path" );
@@ -84,6 +85,7 @@ public class FlowTest extends ClusterTestCase
     }
 
   // test is not executed, just guarantees flow is run locally
+
   public void testLocalModeSink() throws Exception
     {
     Tap source = new Hfs( new TextLine(), "input/path" );
@@ -107,6 +109,7 @@ public class FlowTest extends ClusterTestCase
     }
 
   // test is not executed, just guarantees flow is run on cluster
+
   public void testNotLocalMode() throws Exception
     {
     Tap source = new Hfs( new TextLine(), "input/path" );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,10 @@
 
 package cascading.flow.stack;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import cascading.flow.FlowCollector;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
@@ -29,10 +33,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector

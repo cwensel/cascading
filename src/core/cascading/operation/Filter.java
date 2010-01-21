@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,9 +23,7 @@ package cascading.operation;
 
 import cascading.flow.FlowProcess;
 
-/**
- * Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}.
- */
+/** Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}. */
 public interface Filter<C> extends Operation<C>
   {
   /**

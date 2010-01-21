@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,8 +23,8 @@ package cascading.operation;
 
 import java.util.Iterator;
 
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 
 /** Interface BufferCall provides access to the current {@link cascading.operation.Buffer} invocation arguments. */
 public interface BufferCall<C> extends OperationCall<C>

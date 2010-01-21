@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,12 +21,12 @@
 
 package cascading.operation.regex;
 
+import java.util.Iterator;
+
 import cascading.CascadingTestCase;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleListCollector;
-
-import java.util.Iterator;
 
 /**
  *

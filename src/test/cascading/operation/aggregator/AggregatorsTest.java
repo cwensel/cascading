@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -41,7 +41,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Average();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -56,7 +58,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Count();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -71,7 +75,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new First();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -86,7 +92,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Last();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -101,7 +109,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Max();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -116,7 +126,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Min();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 
@@ -131,7 +143,9 @@ public class AggregatorsTest extends CascadingTestCase
     {
     Aggregator aggregator = new Sum();
 
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ), new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ), new Tuple( new Double( -5.0 ) )};
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
 
     Fields resultFields = new Fields( "field" );
 

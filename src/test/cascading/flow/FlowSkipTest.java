@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-20010 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,8 @@
 
 package cascading.flow;
 
+import java.io.File;
+
 import cascading.ClusterTestCase;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
@@ -30,8 +32,6 @@ import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-
-import java.io.File;
 
 public class FlowSkipTest extends ClusterTestCase
   {
