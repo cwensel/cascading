@@ -23,6 +23,7 @@ package cascading.pipe;
 
 import cascading.CascadingTestCase;
 import cascading.TestFunction;
+import cascading.operation.Identity;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -154,4 +155,33 @@ public class PipeParamTest extends CascadingTestCase
 
     assertTrue( pipe.getHeads()[ 0 ] == pipeFirst || pipe.getHeads()[ 0 ] == pipeSecond );
     }
+
+  private static class NestedSubAssembly extends SubAssembly
+    {
+    private NestedSubAssembly( Pipe pipe )
+      {
+      Pipe pipe1 = new Pipe( "second", pipe );
+
+      Pipe pipe2 = new Pipe( "third", pipe );
+      pipe2 = new Each( pipe2, new Identity() );
+      pipe2 = new Pipe( "fourth", pipe2 );
+
+      setTails( pipe1, pipe2 );
+      }
+    }
+
+  public void testGetNames()
+    {
+    Pipe pipe = new Pipe( "first" );
+    pipe = new NestedSubAssembly( pipe );
+    Pipe pipe1 = new Pipe( "fifth", ( (SubAssembly) pipe ).getTails()[ 0 ] );
+    Pipe pipe2 = new Pipe( "sixth", ( (SubAssembly) pipe ).getTails()[ 1 ] );
+
+    String[] names = Pipe.names( pipe1, pipe2 );
+
+    assertEquals( 6, names.length );
+
+//    System.out.println( Arrays.toString( names ) );
+    }
+
   }
