@@ -1245,9 +1245,8 @@ public class BuildJobsTest extends CascadingTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
-    sources.put( "a", tap );
-//    sources.put( "b", tap );
+    Hfs source = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", source );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
@@ -1301,6 +1300,78 @@ public class BuildJobsTest extends CascadingTestCase
     catch( PlannerException exception )
       {
       // do nothing
+      }
+    catch( Exception exception )
+      {
+      fail( "threw wrong exception" );
+      }
+    }
+
+  public void testExtraSource() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", tap );
+    sources.put( "b", tap );
+    sources.put( "c", tap );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "b" );
+
+    Pipe group1 = new GroupBy( pipeA );
+    Pipe group2 = new GroupBy( pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( sources, sinks, merge );
+      fail( "did not catch extra source tap" );
+      }
+    catch( PlannerException exception )
+      {
+//      exception.printStackTrace();
+      assertTrue( exception.getMessage().contains( "['c']" ) );
+      }
+    catch( Exception exception )
+      {
+      fail( "threw wrong exception" );
+      }
+    }
+
+  public void testExtraSink() throws IOException
+    {
+    Map sources = new HashMap();
+    Map sinks = new HashMap();
+
+    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    sources.put( "a", tap );
+    sources.put( "b", tap );
+
+    Pipe pipeA = new Pipe( "a" );
+    Pipe pipeB = new Pipe( "b" );
+
+    Pipe group1 = new GroupBy( pipeA );
+    Pipe group2 = new GroupBy( pipeB );
+
+    Pipe merge = new GroupBy( "tail", Pipe.pipes( group1, group2 ), new Fields( "first", "second" ) );
+
+    sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
+    sinks.put( "c", new Hfs( new TextLine(), "output/path" ) );
+
+    try
+      {
+      Flow flow = new FlowConnector().connect( sources, sinks, merge );
+      fail( "did not catch extra sink tap" );
+      }
+    catch( PlannerException exception )
+      {
+//      exception.printStackTrace();
+      assertTrue( exception.getMessage().contains( "['c']" ) );
       }
     catch( Exception exception )
       {

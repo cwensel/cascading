@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -144,7 +145,7 @@ public class FlowPlanner
           String tailName = tail.getName();
 
           if( !tapNames.contains( tailName ) )
-            throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
+            throw new PlannerException( tail, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
             LOG.warn( "duplicate tail name found: '" + tailName + "'" );
@@ -162,20 +163,29 @@ public class FlowPlanner
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          LOG.warn( "duplicate tail name found, not an error but tails should have unique names: '" + tailName + "'" );
-//          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+          LOG.warn( "duplicate tail name found: '" + tailName + "'" );
+//            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
         tails.add( pipe );
         }
       }
 
+//    Set<String> allTailNames = new HashSet<String>( tailNames );
     tailNames.removeAll( sinks.keySet() );
     Set<String> remainingSinks = new HashSet<String>( sinks.keySet() );
     remainingSinks.removeAll( tailNames );
 
     if( tailNames.size() != 0 )
-      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( Util.quote( tailNames, "'" ), ", " ) + "], remaining sinks: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( Util.quote( tailNames, "'" ), ", " ) + "], remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
+
+    // unlike heads, pipes can input to another pipe and simultaneously be a sink
+    // so there is no way to know all the intentional tails, so they aren't listed below in the exception
+    remainingSinks = new HashSet<String>( sinks.keySet() );
+    remainingSinks.removeAll( Arrays.asList( Pipe.names( pipes ) ) );
+
+    if( remainingSinks.size() != 0 )
+      throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
 
     // handle heads
     Set<Pipe> heads = new HashSet<Pipe>();
@@ -199,12 +209,19 @@ public class FlowPlanner
         }
       }
 
+    Set<String> allHeadNames = new HashSet<String>( headNames );
     headNames.removeAll( sources.keySet() );
     Set<String> remainingSources = new HashSet<String>( sources.keySet() );
     remainingSources.removeAll( headNames );
 
     if( headNames.size() != 0 )
-      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "], remaining sources: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "], remaining source tap names: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "]" );
+
+    remainingSources = new HashSet<String>( sources.keySet() );
+    remainingSources.removeAll( allHeadNames );
+
+    if( remainingSources.size() != 0 )
+      throw new PlannerException( "not all source taps bound to head pipes, remaining source tap names: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "], remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "]" );
 
     }
 

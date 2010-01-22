@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Changed c.f.FlowPlanner to fail if not all sources or sinks are bound to heads or tails, respectively.  
+
   Changed c.t.TupleOutputStream to lookup tuple element writers by Class identity.
 
   Added j.b.ConstructorProperties annotation to relevant class constructors.
