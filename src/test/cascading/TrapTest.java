@@ -265,4 +265,35 @@ public class TrapTest extends ClusterTestCase
     validateLength( flow, 6, null );
     validateLength( flow.openTrap(), 4 );
     }
+
+  public void testTrapToSequenceFile() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "seq/tap", true );
+    Tap trap = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + "seq/trap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 0, null );
+    validateLength( flow.openTrap(), 10 );
+    }
+
   }
