@@ -43,7 +43,7 @@ import cascading.tuple.TupleEntryIterator;
  */
 public abstract class FlowProcess
   {
-  /** Field NULL is a noop implemenation of FlowSession. */
+  /** Field NULL is a noop implementation of FlowSession. */
   public static FlowProcess NULL = new FlowProcess( FlowSession.NULL )
   {
   public Object getProperty( String key )
@@ -56,6 +56,10 @@ public abstract class FlowProcess
     }
 
   public void increment( Enum counter, int amount )
+    {
+    }
+
+  public void increment( String group, String counter, int amount )
     {
     }
 
@@ -126,13 +130,22 @@ public abstract class FlowProcess
   public abstract void keepAlive();
 
   /**
-   * Method increement is used to increment a custom counter. Counters must be of type Enum. The amount
-   * to increment must be a positive integer value.
+   * Method increment is used to increment a custom counter. Counters must be of type Enum. The amount
+   * to increment must be a integer value.
    *
    * @param counter of type Enum
    * @param amount  of type int
    */
   public abstract void increment( Enum counter, int amount );
+
+  /**
+   * Method increment is used to increment a custom counter. The amount to increment must be a integer value.
+   *
+   * @param group   of type String
+   * @param counter of type String
+   * @param amount  of type int
+   */
+  public abstract void increment( String group, String counter, int amount );
 
   /**
    * Method setStatus is used to set the status of the current operation.
