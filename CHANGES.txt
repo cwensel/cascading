@@ -2,7 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Changed c.f.FlowPlanner to fail if not all sources or sinks are bound to heads or tails, respectively.  
+  Changed c.f.s.FlowMapperStack to source key/value pairs once, instead of per branch.
+
+  Changed c.f.FlowPlanner to fail if not all sources or sinks are bound to heads or tails, respectively.
 
   Changed c.t.TupleOutputStream to lookup tuple element writers by Class identity.
 

@@ -144,31 +144,31 @@ public class FlowMapperStack
     {
     flowProcess.increment( StepCounters.Tuples_Read, 1 );
 
+    Tuple tuple = currentSource.source( key, value );
+
+    if( LOG.isDebugEnabled() )
+      {
+      if( tuple == null )
+        LOG.debug( "map skipping key and value" );
+
+      if( LOG.isTraceEnabled() )
+        {
+        if( key instanceof Tuple )
+          LOG.trace( "map key: " + ( (Tuple) key ).print() );
+        else
+          LOG.trace( "map key: [" + key + "]" );
+
+        if( tuple != null )
+          LOG.trace( "map value: " + tuple.print() );
+        }
+      }
+
+    // skip the key/value pair if null is returned from the source
+    if( tuple == null )
+      return;
+
     for( int i = 0; i < stacks.length; i++ )
       {
-      Tuple tuple = currentSource.source( key, value );
-
-      if( LOG.isDebugEnabled() )
-        {
-        if( tuple == null )
-          LOG.debug( "map skipping key and value" );
-
-        if( LOG.isTraceEnabled() )
-          {
-          if( key instanceof Tuple )
-            LOG.trace( "map key: " + ( (Tuple) key ).print() );
-          else
-            LOG.trace( "map key: [" + key + "]" );
-
-          if( tuple != null )
-            LOG.trace( "map value: " + tuple.print() );
-          }
-        }
-
-      // skip the key/value pair if null is returned from the source
-      if( tuple == null )
-        return;
-
       stacks[ i ].tail.setLastOutput( output );
 
       try
@@ -191,9 +191,6 @@ public class FlowMapperStack
   public void close() throws IOException
     {
     for( int i = 0; i < stacks.length; i++ )
-      {
-//      stacks[ i ].head.cleanup();
       stacks[ i ].head.close();
-      }
     }
   }
