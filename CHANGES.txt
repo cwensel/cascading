@@ -1,5 +1,10 @@
 Cascading Change Log
 
+unreleased
+
+  Fix for case where one side of a branch multiplexed in a mapper could step on c.t.Tuple values before being
+  handed to the next branch. Previous fix was only for CoGroup, this support GroupBy merges.
+
 1.0.18
 
   Changed c.t.Tuple#print to not quote null elements to distinguish between 'null' Strings and null values.
