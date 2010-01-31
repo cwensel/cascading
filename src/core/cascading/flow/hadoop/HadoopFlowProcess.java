@@ -142,6 +142,12 @@ public class HadoopFlowProcess extends FlowProcess
     reporter.incrCounter( counter, amount );
     }
 
+  /** @see cascading.flow.FlowProcess#increment(String, String, int) */
+  public void increment( String group, String counter, int amount )
+    {
+    reporter.incrCounter( group, counter, amount );
+    }
+
   /** @see cascading.flow.FlowProcess#setStatus(String) */
   public void setStatus( String status )
     {
