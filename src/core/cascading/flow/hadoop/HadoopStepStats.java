@@ -198,6 +198,19 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  @Override
+  public long getCounterValue( String group, String counter )
+    {
+    try
+      {
+      return getRunningJob().getCounters().getGroup( group ).getCounter( counter );
+      }
+    catch( IOException e )
+      {
+      throw new FlowException( "unable to get counter values" );
+      }
+    }
+
   public void captureJobStats()
     {
     RunningJob runningJob = getRunningJob();

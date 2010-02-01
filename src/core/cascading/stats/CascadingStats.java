@@ -221,6 +221,15 @@ public abstract class CascadingStats
   public abstract long getCounterValue( Enum counter );
 
   /**
+   * Method getCounter returns the current value for the given group and counter.
+   *
+   * @param group   of type String
+   * @param counter of type String
+   * @return the current counter value
+   */
+  public abstract long getCounterValue( String group, String counter );
+
+  /**
    * Method captureDetail will recursively capture details about nested systems. Use this method to persist
    * statistics about a given Cascade, Flow, or FlowStep.
    * <p/>

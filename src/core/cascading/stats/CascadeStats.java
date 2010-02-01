@@ -65,6 +65,17 @@ public class CascadeStats extends CascadingStats
     }
 
   @Override
+  public long getCounterValue( String group, String counter )
+    {
+    long value = 0;
+
+    for( FlowStats flowStats : flowStatsList )
+      value += flowStats.getCounterValue( group, counter );
+
+    return value;
+    }
+
+  @Override
   public void captureDetail()
     {
     for( FlowStats flowStats : flowStatsList )

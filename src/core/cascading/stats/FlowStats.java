@@ -70,6 +70,17 @@ public class FlowStats extends CascadingStats
     }
 
   @Override
+  public long getCounterValue( String group, String counter )
+    {
+    long value = 0;
+
+    for( StepStats step : stepStatsList )
+      value += step.getCounterValue( group, counter );
+
+    return value;
+    }
+
+  @Override
   public void captureDetail()
     {
     for( StepStats stepStats : stepStatsList )
