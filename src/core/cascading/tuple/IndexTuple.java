@@ -68,6 +68,25 @@ public class IndexTuple extends Tuple implements Comparable
     return tuple;
     }
 
+  @Override
+  public String print()
+    {
+    return print( new StringBuffer() ).toString();
+    }
+
+  protected StringBuffer print( StringBuffer buffer )
+    {
+    buffer.append( "{" );
+
+    buffer.append( index ).append( ":" );
+
+    tuple.print( buffer );
+
+    buffer.append( "}" );
+
+    return buffer;
+    }
+
   public int compareTo( Object object )
     {
     if( object instanceof IndexTuple )

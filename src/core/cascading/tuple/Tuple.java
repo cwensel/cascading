@@ -763,23 +763,28 @@ public class Tuple implements Comparable, Iterable, Serializable
     return print( new StringBuffer() ).toString();
     }
 
-  private StringBuffer print( StringBuffer buffer )
+  protected StringBuffer print( StringBuffer buffer )
     {
     buffer.append( "[" );
-    for( int i = 0; i < elements.size(); i++ )
+
+    if( elements != null )
       {
-      Object element = elements.get( i );
+      for( int i = 0; i < elements.size(); i++ )
+        {
+        Object element = elements.get( i );
 
-      if( element instanceof Tuple )
-        ( (Tuple) element ).print( buffer );
-      else if( element == null ) // don't quote nulls to distinguish from null strings
-        buffer.append( element );
-      else
-        buffer.append( "\'" ).append( element ).append( "\'" );
+        if( element instanceof Tuple )
+          ( (Tuple) element ).print( buffer );
+        else if( element == null ) // don't quote nulls to distinguish from null strings
+          buffer.append( element );
+        else
+          buffer.append( "\'" ).append( element ).append( "\'" );
 
-      if( i < elements.size() - 1 )
-        buffer.append( ", " );
+        if( i < elements.size() - 1 )
+          buffer.append( ", " );
+        }
       }
+
     buffer.append( "]" );
 
     return buffer;
