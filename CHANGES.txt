@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Updated jgrapht to 0.8.1.
+
   Changed c.f.s.FlowMapperStack to source key/value pairs once, instead of per branch.
 
   Changed c.f.FlowPlanner to fail if not all sources or sinks are bound to heads or tails, respectively.
