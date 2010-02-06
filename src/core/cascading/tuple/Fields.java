@@ -109,7 +109,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public static final Fields SWAP = new Fields( Kind.SWAP );
   /** Field FIRST represents the first field position, 0 */
   public static final Fields FIRST = new Fields( 0 );
-  /** Field LAST represents the last field postition, -1 */
+  /** Field LAST represents the last field position, -1 */
   public static final Fields LAST = new Fields( -1 );
 
   /** Field EMPTY_INT */
