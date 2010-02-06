@@ -255,13 +255,30 @@ public class TupleEntry
 
   /**
    * Method get returns the value in the given field or position.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return Comparable
    */
   public Comparable get( Comparable fieldName )
     {
-    return tuple.get( fields.getPos( fieldName ) );
+    return tuple.get( fields.getPos( asFieldName( fieldName ) ) );
+    }
+
+  /**
+   * Method get returns the value in the given field or position.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
+   *
+   * @param fieldName field name or position to return
+   * @return Comparable
+   */
+  public Object getObject( Comparable fieldName )
+    {
+    return tuple.get( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
@@ -277,80 +294,116 @@ public class TupleEntry
 
   /**
    * Method getString returns the element for the given field name or position as a String.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return String
    */
   public String getString( Comparable fieldName )
     {
-    return tuple.getString( fields.getPos( fieldName ) );
+    return tuple.getString( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getFloat returns the element for the given field name or position as a float. Zero if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return float
    */
   public float getFloat( Comparable fieldName )
     {
-    return tuple.getFloat( fields.getPos( fieldName ) );
+    return tuple.getFloat( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getDouble returns the element for the given field name or position as a double. Zero if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return double
    */
   public double getDouble( Comparable fieldName )
     {
-    return tuple.getDouble( fields.getPos( fieldName ) );
+    return tuple.getDouble( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getInteger  returns the element for the given field name or position as an int. Zero if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return int
    */
   public int getInteger( Comparable fieldName )
     {
-    return tuple.getInteger( fields.getPos( fieldName ) );
+    return tuple.getInteger( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getLong returns the element for the given field name or position as a long. Zero if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return long
    */
   public long getLong( Comparable fieldName )
     {
-    return tuple.getLong( fields.getPos( fieldName ) );
+    return tuple.getLong( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getShort returns the element for the given field name or position as a short. Zero if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return short
    */
   public short getShort( Comparable fieldName )
     {
-    return tuple.getShort( fields.getPos( fieldName ) );
+    return tuple.getShort( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
    * Method getBoolean returns the element for the given field name or position as a boolean.
    * If the value is (case ignored) the string 'true', a {@code true} value will be returned. {@code false} if null.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName field name or position to return
    * @return boolean
    */
   public boolean getBoolean( Comparable fieldName )
     {
-    return tuple.getBoolean( fields.getPos( fieldName ) );
+    return tuple.getBoolean( fields.getPos( asFieldName( fieldName ) ) );
+    }
+
+  private Comparable asFieldName( Comparable fieldName )
+    {
+    if( fieldName instanceof Fields )
+      {
+      Fields fields = (Fields) fieldName;
+
+      if( !fields.isDefined() )
+        throw new TupleException( "given Fields instance must explicitly declare one field name or position: " + fields.printVerbose() );
+
+      fieldName = fields.get( 0 );
+      }
+
+    return fieldName;
     }
 
   /**
@@ -393,6 +446,22 @@ public class TupleEntry
       {
       throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
       }
+    }
+
+  /**
+   * Method selectInteger selects the first field Tuple value in the specified selector.
+   * <br/>
+   * All other fields in the selector are ignored.
+   *
+   * @param selector
+   * @return
+   */
+  public int selectInteger( Fields selector )
+    {
+    if( selector.isDefined() )
+      throw new TupleException( "given selector must define a field name or position to select with" );
+
+    return tuple.getInteger( fields.getPos( selector.get( 0 ) ) );
     }
 
   /**
