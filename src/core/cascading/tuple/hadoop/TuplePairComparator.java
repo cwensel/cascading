@@ -55,8 +55,8 @@ public class TuplePairComparator extends DeserializerComparator<TuplePair>
     if( sort == null && group == null )
       return;
 
-    Comparator groupComparator = comparator;
-    Comparator sortComparator = comparator;
+    Comparator groupComparator = new TupleComparator();
+    Comparator sortComparator = groupComparator;
 
     try
       {

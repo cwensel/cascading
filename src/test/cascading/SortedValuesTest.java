@@ -207,15 +207,25 @@ public class SortedValuesTest extends ClusterTestCase
 
   public void testComparatorSortedValues() throws Exception
     {
-    runComparatorSortTest( "comparesortforward", false );
+    runComparatorSortTest( "comparesortforward", true, false );
     }
 
   public void testComparatorSortedValuesReversed() throws Exception
     {
-    runComparatorSortTest( "comparesortreversed", true );
+    runComparatorSortTest( "comparesortreversed", true, true );
     }
 
-  private void runComparatorSortTest( String path, boolean reverseSort ) throws IOException, ParseException
+  public void testComparatorSortedValuesNoGroup() throws Exception
+    {
+    runComparatorSortTest( "comparesortforwardnogroup", false, false );
+    }
+
+  public void testComparatorSortedValuesReversedNoGroup() throws Exception
+    {
+    runComparatorSortTest( "comparesortreversednogroup", false, true );
+    }
+
+  private void runComparatorSortTest( String path, boolean useGroupComparator, boolean reverseSort ) throws IOException, ParseException
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -235,7 +245,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     Fields groupFields = new Fields( "col" );
 
-    groupFields.setComparator( "col", new TestLongComparator() );
+    if( useGroupComparator )
+      groupFields.setComparator( "col", new TestLongComparator() );
 
     Fields sortFields = new Fields( "status" );
 
