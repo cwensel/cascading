@@ -728,7 +728,7 @@ public class Tuple implements Comparable, Iterable, Serializable
   @Override
   public String toString()
     {
-    return Util.join( elements, printDelim );
+    return Util.join( elements, printDelim, true );
     }
 
   /**
@@ -739,7 +739,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public String toString( String delim )
     {
-    return Util.join( elements, delim );
+    return Util.join( elements, delim, true );
     }
 
   /**
