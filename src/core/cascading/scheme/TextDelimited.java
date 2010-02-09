@@ -22,14 +22,17 @@
 package cascading.scheme;
 
 import java.beans.ConstructorProperties;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +70,8 @@ public class TextDelimited extends TextLine
   protected Pattern cleanPattern;
   /** Field escapePattern */
   protected Pattern escapePattern;
+  /** Field delimiter * */
+  private String delimiter;
   /** Field quote */
   private String quote;
   /** Field strict */
@@ -251,6 +256,7 @@ public class TextDelimited extends TextLine
     setSinkFields( fields );
     setSourceFields( fields );
 
+    this.delimiter = delimiter;
     this.strict = strict;
     this.safe = safe;
     this.numValues = fields.size();
@@ -331,6 +337,15 @@ public class TextDelimited extends TextLine
       }
 
     return new Tuple( split );
+    }
+
+  @Override
+  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+    {
+    Tuple tuple = tupleEntry.selectTuple( sinkFields );
+
+    // it's ok to use NULL here so the collector does not write anything
+    outputCollector.collect( null, tuple.toString( delimiter, false ) );
     }
   }
 

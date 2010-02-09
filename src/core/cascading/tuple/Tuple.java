@@ -743,6 +743,18 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
+   * Method toString writes this Tuple instance values out to a String delimited by the given String value.
+   *
+   * @param delim     of type String
+   * @param printNull of type boolean
+   * @return String
+   */
+  public String toString( String delim, boolean printNull )
+    {
+    return Util.join( elements, delim, printNull );
+    }
+
+  /**
    * Method format uses the {@link Formatter} class for formatting this tuples values into a new string.
    *
    * @param format of type String

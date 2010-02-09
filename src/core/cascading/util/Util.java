@@ -169,18 +169,21 @@ public class Util
    */
   public static String join( int[] list, String delim )
     {
+    return join( list, delim, false );
+    }
+
+  public static String join( int[] list, String delim, boolean printNull )
+    {
     StringBuffer buffer = new StringBuffer();
     int count = 0;
 
     for( Object s : list )
       {
-      if( s == null )
-        continue;
-
       if( count != 0 )
         buffer.append( delim );
 
-      buffer.append( s );
+      if( printNull || s != null )
+        buffer.append( s );
 
       count++;
       }
@@ -190,7 +193,12 @@ public class Util
 
   public static String join( String delim, String... strings )
     {
-    return join( strings, delim );
+    return join( delim, false, strings );
+    }
+
+  public static String join( String delim, boolean printNull, String... strings )
+    {
+    return join( strings, delim, printNull );
     }
 
   /**
@@ -202,18 +210,21 @@ public class Util
    */
   public static String join( Object[] list, String delim )
     {
+    return join( list, delim, false );
+    }
+
+  public static String join( Object[] list, String delim, boolean printNull )
+    {
     StringBuffer buffer = new StringBuffer();
     int count = 0;
 
     for( Object s : list )
       {
-      if( s == null )
-        continue;
-
       if( count != 0 )
         buffer.append( delim );
 
-      buffer.append( s );
+      if( printNull || s != null )
+        buffer.append( s );
 
       count++;
       }
@@ -241,9 +252,14 @@ public class Util
    */
   public static String join( Collection collection, String delim )
     {
+    return join( collection, delim, false );
+    }
+
+  public static String join( Collection collection, String delim, boolean printNull )
+    {
     StringBuffer buffer = new StringBuffer();
 
-    join( buffer, collection, delim );
+    join( buffer, collection, delim, printNull );
 
     return buffer.toString();
     }
@@ -258,6 +274,11 @@ public class Util
    */
   public static void join( StringBuffer buffer, Collection collection, String delim )
     {
+    join( buffer, collection, delim, false );
+    }
+
+  public static void join( StringBuffer buffer, Collection collection, String delim, boolean printNull )
+    {
     int count = 0;
 
     for( Object s : collection )
@@ -265,7 +286,8 @@ public class Util
       if( count != 0 )
         buffer.append( delim );
 
-      buffer.append( s );
+      if( printNull || s != null )
+        buffer.append( s );
 
       count++;
       }
