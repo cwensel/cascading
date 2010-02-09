@@ -293,6 +293,19 @@ public class Util
       }
     }
 
+  public static String[] removeNulls( String... strings )
+    {
+    List<String> list = new ArrayList<String>();
+
+    for( String string : strings )
+      {
+      if( string != null )
+        list.add( string );
+      }
+
+    return list.toArray( new String[list.size()] );
+    }
+
   public static Collection<String> quote( Collection<String> collection, String quote )
     {
     List<String> list = new ArrayList<String>();

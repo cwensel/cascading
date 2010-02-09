@@ -80,7 +80,7 @@ public class TupleSerialization extends Configured implements Serialization
     {
     String tokens = getSerializationTokens( properties );
 
-    properties.put( "cascading.serialization.tokens", Util.join( ",", tokens, token + "=" + className ) );
+    properties.put( "cascading.serialization.tokens", Util.join( ",", Util.removeNulls( tokens, token + "=" + className ) ) );
     }
 
   /**
@@ -109,7 +109,7 @@ public class TupleSerialization extends Configured implements Serialization
     {
     String serializations = (String) properties.get( "io.serializations" );
 
-    properties.put( "io.serializations", Util.join( ",", serializations, className ) );
+    properties.put( "io.serializations", Util.join( ",", Util.removeNulls( serializations, className ) ) );
     }
 
   /**
@@ -124,7 +124,7 @@ public class TupleSerialization extends Configured implements Serialization
     if( serializations.contains( TupleSerialization.class.getName() ) )
       return;
 
-    jobConf.set( "io.serializations", Util.join( ",", serializations, TupleSerialization.class.getName() ) );
+    jobConf.set( "io.serializations", Util.join( ",", Util.removeNulls( serializations, TupleSerialization.class.getName() ) ) );
     }
 
   static String getSerializations( JobConf jobConf )
