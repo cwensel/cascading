@@ -1171,6 +1171,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Method setComparator should be used to associate a {@link java.util.Comparator} with a given field name or position.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
    *
    * @param fieldName  of type Comparable
    * @param comparator of type Comparator
@@ -1185,7 +1188,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     try
       {
-      comparators[ getPos( fieldName ) ] = comparator;
+      comparators[ getPos( asFieldName( fieldName ) ) ] = comparator;
       }
     catch( FieldsResolverException exception )
       {
@@ -1211,6 +1214,21 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     this.comparators = comparators;
+    }
+
+  private Comparable asFieldName( Comparable fieldName )
+    {
+    if( fieldName instanceof Fields )
+      {
+      Fields fields = (Fields) fieldName;
+
+      if( !fields.isDefined() )
+        throw new TupleException( "given Fields instance must explicitly declare one field name or position: " + fields.printVerbose() );
+
+      fieldName = fields.get( 0 );
+      }
+
+    return fieldName;
     }
 
   /**
