@@ -2,7 +2,7 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Updated c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the threshold
+  Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the threshold
   is met, 10% of the least recently used open taps will be closed.
 
   Changed c.t.Fields #setComparator fieldName argument to accept Fields instances as the fieldName argument.
