@@ -363,7 +363,7 @@ public class TemplateTap extends SinkTap
   @ConstructorProperties({"parent", "pathTemplate", "pathFields"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields )
     {
-
+    this( parent, pathTemplate, pathFields, OPEN_TAPS_THRESHOLD_DEFAULT );
     }
 
   /**
