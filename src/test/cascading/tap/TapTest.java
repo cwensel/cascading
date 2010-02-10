@@ -201,7 +201,7 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/testtemplates", true );
 
-    sink = new TemplateTap( (Hfs) sink, "%s-%s" );
+    sink = new TemplateTap( (Hfs) sink, "%s-%s", 1 );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
@@ -229,7 +229,7 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     Tap sink = new Hfs( new SequenceFile( new Fields( "upper" ) ), outputPath + "/testtemplatesview", true );
 
-    sink = new TemplateTap( (Hfs) sink, "%s-%s", new Fields( "number", "lower" ) );
+    sink = new TemplateTap( (Hfs) sink, "%s-%s", new Fields( "number", "lower" ), 1 );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
