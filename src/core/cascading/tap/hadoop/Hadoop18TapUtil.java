@@ -66,6 +66,9 @@ public class Hadoop18TapUtil
 
     makeTempPath( conf );
 
+    if( writeDirectlyToWorkingPath( conf, outputPath ) )
+      return;
+
     // "mapred.work.output.dir"
     Path taskOutputPath = getTaskOutputPath( conf );
     setWorkOutputPath( conf, taskOutputPath );
@@ -141,6 +144,9 @@ public class Hadoop18TapUtil
 
     if( taskOutputPath != null )
       {
+      if( writeDirectlyToWorkingPath( conf, taskOutputPath ) )
+        return;
+
       if( fs.exists( taskOutputPath ) )
         {
         Path jobOutputPath = taskOutputPath.getParent().getParent();
@@ -316,4 +322,17 @@ public class Hadoop18TapUtil
       return jobOutputDir;
       }
     }
+
+
+  /** used in AWS EMR to disable temp paths on some file systems, s3. */
+  private static boolean writeDirectlyToWorkingPath( JobConf conf, Path path )
+    {
+    FileSystem fs = getFSSafe( conf, path );
+
+    if( fs == null )
+      return false;
+
+    return conf.getBoolean( "mapred.output.direct." + fs.getClass().getSimpleName(), false );
+    }
+
   }

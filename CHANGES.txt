@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Added support for custom EMR properties used for managing task attempt temporary path management for some filesystems.
+
   Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the threshold
   is met, 10% of the least recently used open taps will be closed.
 
