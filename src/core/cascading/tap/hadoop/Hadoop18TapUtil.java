@@ -69,6 +69,7 @@ public class Hadoop18TapUtil
     if( writeDirectlyToWorkingPath( conf, outputPath ) )
       {
       LOG.info( "writing directly to output path: " + outputPath );
+      setWorkOutputPath( conf, outputPath );
       return;
       }
 
@@ -106,7 +107,12 @@ public class Hadoop18TapUtil
 
   public static boolean needsTaskCommit( JobConf conf ) throws IOException
     {
-    Path taskOutputPath = getTaskOutputPath( conf );
+    String workpath = conf.get( "mapred.work.output.dir" );
+
+    if( workpath == null )
+      return false;
+
+    Path taskOutputPath = new Path( workpath );
 
     if( taskOutputPath != null )
       {
