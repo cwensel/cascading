@@ -67,7 +67,10 @@ public class Hadoop18TapUtil
     makeTempPath( conf );
 
     if( writeDirectlyToWorkingPath( conf, outputPath ) )
+      {
+      LOG.info( "writing directly to output path: " + outputPath );
       return;
+      }
 
     // "mapred.work.output.dir"
     Path taskOutputPath = getTaskOutputPath( conf );
@@ -126,7 +129,7 @@ public class Hadoop18TapUtil
    */
   public static void commitTask( JobConf conf ) throws IOException
     {
-    Path taskOutputPath = getTaskOutputPath( conf );
+    Path taskOutputPath = new Path( conf.get( "mapred.work.output.dir" ) );
 
     FileSystem fs = getFSSafe( conf, taskOutputPath );
 
