@@ -32,6 +32,8 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
   {
   /** Field tuples */
   private final LinkedList<Tuple> tuples = new LinkedList<Tuple>();
+  /** Field copyTupleOnCollect */
+  private boolean copyTupleOnCollect = false;
 
   /**
    * Constructor TupleEntryCollector creates a new TupleEntryCollector instance.
@@ -47,6 +49,21 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
     }
 
   /**
+   * Constructor TupleListCollector creates a new TupleListCollector instance.
+   * <p/>
+   * Set copyTupleOnCollect to {@code true} if a new Tuple instance should be stored in the
+   * underlying list.
+   *
+   * @param fields             of type Fields
+   * @param copyTupleOnCollect of type boolean
+   */
+  public TupleListCollector( Fields fields, boolean copyTupleOnCollect )
+    {
+    super( fields );
+    this.copyTupleOnCollect = copyTupleOnCollect;
+    }
+
+  /**
    * Method collect adds every given Tuple instance. It tests for and ignores empty Tuples.
    *
    * @param tuples of type Tuple
@@ -59,6 +76,9 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
 
   protected void collect( Tuple tuple )
     {
+    if( copyTupleOnCollect )
+      tuple = new Tuple( tuple );
+
     tuples.add( tuple );
     }
 
