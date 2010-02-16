@@ -97,4 +97,16 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
     {
     return tuples.iterator();
     }
+
+  /**
+   * Method entryIterator return a TupleEntry iterator for this collection.
+   * </p>
+   * Note the same TupleEntry will be returned on each next() call.
+   *
+   * @return Iterator<TupleEntry>
+   */
+  public Iterator<TupleEntry> entryIterator()
+    {
+    return new TupleEntryIterator( declared, tuples.iterator() );
+    }
   }
