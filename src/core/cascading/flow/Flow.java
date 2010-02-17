@@ -175,7 +175,7 @@ public class Flow implements Runnable
 
   /**
    * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
-   * The default value is 5000 msec (5 seconds).   *
+   * The default value is 5000 msec (5 seconds).
    *
    * @param properties of type Map
    * @param interval   of type long
