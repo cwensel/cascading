@@ -23,6 +23,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 
@@ -36,6 +37,8 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   private C context;
   /** Field group */
   private TupleEntry group;
+  /** Field argumentFields */
+  private Fields argumentFields;
   /** Field arguments */
   private TupleEntry arguments;
   /** Field argumentsIterator */
@@ -46,6 +49,16 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   /** Constructor OperationCall creates a new OperationCall instance. */
   public ConcreteCall()
     {
+    }
+
+  /**
+   * Constructor ConcreteCall creates a new ConcreteCall instance.
+   *
+   * @param argumentFields of type Fields
+   */
+  public ConcreteCall( Fields argumentFields )
+    {
+    this.argumentFields = argumentFields;
     }
 
   /**
@@ -80,6 +93,11 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public void setGroup( TupleEntry group )
     {
     this.group = group;
+    }
+
+  public Fields getArgumentFields()
+    {
+    return argumentFields;
     }
 
   /** @see BufferCall#getArgumentsIterator() */

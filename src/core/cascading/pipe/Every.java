@@ -336,7 +336,7 @@ public class Every extends Operator
     public EveryHandler( Scope outgoingScope )
       {
       this.outgoingScope = outgoingScope;
-      this.operationCall = new ConcreteCall();
+      this.operationCall = new ConcreteCall( outgoingScope.getArguments() );
       }
 
     public abstract void start( FlowProcess flowProcess, TupleEntry groupEntry );

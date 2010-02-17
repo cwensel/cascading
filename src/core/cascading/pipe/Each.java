@@ -454,7 +454,7 @@ public class Each extends Operator
       {
       this.flowCollector = flowCollector;
       this.scope = scope;
-      operationCall = new ConcreteCall();
+      operationCall = new ConcreteCall( scope.getArguments() );
       }
 
     public void operate( FlowProcess flowProcess, TupleEntry input )

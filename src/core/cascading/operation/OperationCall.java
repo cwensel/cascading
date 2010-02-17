@@ -21,6 +21,8 @@
 
 package cascading.operation;
 
+import cascading.tuple.Fields;
+
 /**
  *
  */
@@ -39,4 +41,11 @@ public interface OperationCall<C>
    * @param context user defined object
    */
   void setContext( C context );
+
+  /**
+   * Returns the {@link Fields} of the expected arguments {@link cascading.tuple.TupleEntry}.
+   *
+   * @return the argumentFields (type Fields) of this OperationCall object.
+   */
+  Fields getArgumentFields();
   }
