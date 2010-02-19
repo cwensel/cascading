@@ -28,6 +28,7 @@ import cascading.pipe.Each;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -76,7 +77,14 @@ class EachMapperStackElement extends MapperStackElement
     {
     super.collect( tuple );
 
-    operateEach( getTupleEntry( tuple ) );
+    try
+      {
+      operateEach( getTupleEntry( tuple ) );
+      }
+    finally
+      {
+      Tuples.asModifiable( tuple );
+      }
     }
 
   private void operateEach( TupleEntry tupleEntry )

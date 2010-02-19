@@ -83,7 +83,12 @@ public class UnmodifiablePipesTest extends ClusterTestCase
       if( !functionCall.getArguments().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
-      functionCall.getOutputCollector().add( functionCall.getArguments() );
+      Tuple result = new Tuple( functionCall.getArguments().getTuple() );
+
+      functionCall.getOutputCollector().add( result );
+
+      if( result.isUnmodifiable() )
+        throw new IllegalStateException( "is unmodifiable" );
       }
     }
 
@@ -125,7 +130,12 @@ public class UnmodifiablePipesTest extends ClusterTestCase
       if( !aggregatorCall.getGroup().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
-      aggregatorCall.getOutputCollector().add( new Tuple( "some value" ) );
+      Tuple result = new Tuple( "some value" );
+
+      aggregatorCall.getOutputCollector().add( result );
+
+      if( result.isUnmodifiable() )
+        throw new IllegalStateException( "is unmodifiable" );
       }
     }
 
@@ -150,7 +160,12 @@ public class UnmodifiablePipesTest extends ClusterTestCase
         if( !tupleEntry.isUnmodifiable() )
           throw new IllegalStateException( "is modifiable" );
 
-        bufferCall.getOutputCollector().add( tupleEntry );
+        Tuple result = new Tuple( tupleEntry.getTuple() );
+
+        bufferCall.getOutputCollector().add( result );
+
+        if( result.isUnmodifiable() )
+          throw new IllegalStateException( "is unmodifiable" );
         }
       }
     }

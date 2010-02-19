@@ -30,6 +30,7 @@ import cascading.pipe.Each;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -98,6 +99,10 @@ class EachReducerStackElement extends ReducerStackElement
     catch( Exception exception )
       {
       handleException( exception, tupleEntry );
+      }
+    finally
+      {
+      Tuples.asModifiable( tupleEntry.getTuple() );
       }
     }
 

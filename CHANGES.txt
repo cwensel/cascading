@@ -2,7 +2,10 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Add #getArgumentFields() to c.o.OperationCall for all operations. 
+  Changed map and reduce operation stack so that collected c.t.Tuple instances do not remain 'unmodifiable' after
+  being collected via the c.t.TupleEntryCollector.
+
+  Add #getArgumentFields() to c.o.OperationCall for all operations.
 
   Added support for custom EMR properties used for managing task attempt temporary path management for some filesystems.
 

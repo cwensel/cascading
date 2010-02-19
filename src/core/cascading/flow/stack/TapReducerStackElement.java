@@ -35,6 +35,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.Tuples;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -66,13 +67,31 @@ class TapReducerStackElement extends ReducerStackElement
 
   public void collect( Tuple tuple )
     {
-    operateSink( getTupleEntry( tuple ) );
+    try
+      {
+      operateSink( getTupleEntry( tuple ) );
+      }
+    finally
+      {
+      Tuples.asModifiable( tuple );
+      }
     }
 
   private void operateSink( Tuple key, Iterator values )
     {
     while( values.hasNext() )
-      operateSink( (TupleEntry) values.next() );
+      {
+      TupleEntry tupleEntry = (TupleEntry) values.next();
+
+      try
+        {
+        operateSink( tupleEntry );
+        }
+      finally
+        {
+        Tuples.asModifiable( tupleEntry.getTuple() );
+        }
+      }
     }
 
   /**

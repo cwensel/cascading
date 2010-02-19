@@ -67,6 +67,14 @@ public class Tuple implements Comparable, Iterable, Serializable
   /** Field printDelim */
   private final String printDelim = "\t";
 
+  /**
+   * Method asUnmodifiable marks the given Tuple instance as unmodifiable.
+   *
+   * @param tuple of type Tuple
+   * @return Tuple
+   * @deprecated
+   */
+  @Deprecated
   public static Tuple asUnmodifiable( Tuple tuple )
     {
     tuple.isUnmodifiable = true;

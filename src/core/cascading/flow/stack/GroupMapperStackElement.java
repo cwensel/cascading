@@ -32,6 +32,7 @@ import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -64,7 +65,14 @@ class GroupMapperStackElement extends MapperStackElement
     if( copyTuple )
       tuple = new Tuple( tuple );
 
-    operateGroup( getTupleEntry( tuple ) );
+    try
+      {
+      operateGroup( getTupleEntry( tuple ) );
+      }
+    finally
+      {
+      Tuples.asModifiable( tuple );
+      }
     }
 
   private void operateGroup( TupleEntry tupleEntry )

@@ -227,7 +227,7 @@ public class TupleEntry
   public void setTuple( Tuple tuple )
     {
     if( isUnmodifiable )
-      this.tuple = Tuple.asUnmodifiable( tuple );
+      this.tuple = Tuples.asUnmodifiable( tuple );
     else
       this.tuple = tuple;
     }

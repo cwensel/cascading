@@ -34,6 +34,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.Tuples;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -63,7 +64,14 @@ class TapMapperStackElement extends MapperStackElement
     {
     super.collect( tuple );
 
-    operateSink( getTupleEntry( tuple ) );
+    try
+      {
+      operateSink( getTupleEntry( tuple ) );
+      }
+    finally
+      {
+      Tuples.asModifiable( tuple );
+      }
     }
 
   private void operateSink( TupleEntry tupleEntry )

@@ -27,7 +27,7 @@ import cascading.operation.OperationException;
 public class Tuples
   {
   /** A constant empty Tuple instance. Immutability is not currently enforced. Use with caution. */
-  public static final Tuple NULL = Tuple.asUnmodifiable( new Tuple() );
+  public static final Tuple NULL = asUnmodifiable( new Tuple() );
 
   /**
    * Method asArray convert the given {@link Tuple} instance into an Object[]. The given Class[] array
@@ -247,4 +247,29 @@ public class Tuples
     return emptyTuple;
     }
 
+  /**
+   * Method asUnmodifiable marks the given Tuple instance as unmodifiable.
+   *
+   * @param tuple of type Tuple
+   * @return Tuple
+   */
+  public static Tuple asUnmodifiable( Tuple tuple )
+    {
+    tuple.isUnmodifiable = true;
+
+    return tuple;
+    }
+
+  /**
+   * Method asModifiable marks the given Tuple instance as modifiable.
+   *
+   * @param tuple of type Tuple
+   * @return Tuple
+   */
+  public static Tuple asModifiable( Tuple tuple )
+    {
+    tuple.isUnmodifiable = false;
+
+    return tuple;
+    }
   }
