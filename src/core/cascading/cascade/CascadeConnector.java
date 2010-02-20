@@ -47,7 +47,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
  * <p/>
- * Note order is not significant when adding passing Flow instances to the {@link #connect(String, cascading.flow.Flow[])}
+ * Note order is not significant when adding passing Flow instances to the {@link #connect(String, Flow...)}
  * method. This connector will order them based on their dependencies, if any.
  */
 public class CascadeConnector

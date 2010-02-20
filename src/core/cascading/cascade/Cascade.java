@@ -65,7 +65,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * method {@link cascading.flow.Flow#deleteSinksIfNotAppend()} is called. Before appends were supported (logically)
  * the Cascade deleted all the sinks in a Flow.
  * <p/>
- * The new consequence of this is if the Cascade fails, but does compelete a Flow that appended data, re-running
+ * The new consequence of this is if the Cascade fails, but does complete a Flow that appended data, re-running
  * the Cascade (and the successful append Flow) will re-append data to the source. Some systems may be idempotent and
  * may not have any side-effects. So plan accordingly.
  *
