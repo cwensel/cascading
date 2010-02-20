@@ -220,6 +220,16 @@ public class TupleEntry
     }
 
   /**
+   * Method getTupleCopy returns a copy of the tuple of this TupleEntry object.
+   *
+   * @return a copy of the tuple (type Tuple) of this TupleEntry object.
+   */
+  public Tuple getTupleCopy()
+    {
+    return new Tuple( tuple );
+    }
+
+  /**
    * Method setTuple sets the tuple of this TupleEntry object.
    *
    * @param tuple the tuple of this TupleEntry object.
