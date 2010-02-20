@@ -25,7 +25,6 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import cascading.flow.hadoop.HadoopUtil;
@@ -223,7 +222,7 @@ public class Hfs extends Tap
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling path: " + stringPath );
 
-      URI uri = new URI( URLEncoder.encode( stringPath, "UTF-8" ) );
+      URI uri = new URI( stringPath );
       String schemeString = uri.getScheme();
       String authority = uri.getAuthority();
 

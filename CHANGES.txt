@@ -2,8 +2,6 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
-  Fixed bug in c.t.Hfs where path with globing could cause a uri parsing exception. 
-
   Changed map and reduce operation stack so that collected c.t.Tuple instances do not remain 'unmodifiable' after
   being collected via the c.t.TupleEntryCollector.
 
