@@ -23,10 +23,15 @@ package cascading.tuple;
 
 import cascading.operation.OperationException;
 
-/** Class Tuples is a helper class providing common methods to manipulate {@link Tuple} instances. */
+/**
+ * Class Tuples is a helper class providing common methods to manipulate {@link Tuple} and {@link TupleEntry} instances.
+ *
+ * @see Tuple
+ * @see TupleEntry
+ */
 public class Tuples
   {
-  /** A constant empty Tuple instance. Immutability is not currently enforced. Use with caution. */
+  /** A constant empty Tuple instance. This instance is immutable. */
   public static final Tuple NULL = asUnmodifiable( new Tuple() );
 
   /**
