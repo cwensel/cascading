@@ -204,7 +204,8 @@ public class Tuples
     }
 
   /**
-   * Method extractTuple returns a new Tuple based on the given selector. But sets the values of this entries Tuple to null.
+   * Method extractTuple returns a new Tuple based on the given selector. But sets the values of the
+   * given TupleEntry to null.
    *
    * @param tupleEntry of type TupleEntry
    * @param selector   of type Fields
