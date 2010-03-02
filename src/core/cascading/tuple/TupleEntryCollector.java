@@ -62,7 +62,7 @@ public abstract class TupleEntryCollector
    */
   public void add( Tuple tuple )
     {
-    if( tuple.isEmpty() )
+    if( tuple == null || tuple.isEmpty() )
       return;
 
     if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
