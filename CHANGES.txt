@@ -22,7 +22,7 @@ unreleased (wip 1.1)
   Changed c.t.TupleEntry 'get as type' accessors to now also accept c.t.Fields instances as the fieldName argument. Only
   the first field name or position is considered.
 
-  Update janino to 2.5.16.
+  Updated janino to 2.5.16.
 
   Updated jgrapht to 0.8.1.
 
