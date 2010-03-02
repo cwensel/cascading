@@ -42,7 +42,7 @@ class EveryBufferReducerStackElement extends ReducerStackElement
 
   public EveryBufferReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Every.EveryHandler everyHandler )
     {
-    super( previous, flowProcess, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, everyHandler.getEvery().getName(), trap );
     this.everyHandler = everyHandler;
     }
 

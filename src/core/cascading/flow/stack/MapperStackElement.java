@@ -47,9 +47,9 @@ abstract class MapperStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  MapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap )
+  MapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, String trapName, Tap trap )
     {
-    super( flowProcess, trap );
+    super( flowProcess, trapName, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }

@@ -47,7 +47,7 @@ class TapMapperStackElement extends MapperStackElement
 
   public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, flowProcess, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null, null );
     this.sink = sink;
 
     if( useTapCollector )

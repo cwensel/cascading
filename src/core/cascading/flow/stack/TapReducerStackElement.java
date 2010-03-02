@@ -48,7 +48,7 @@ class TapReducerStackElement extends ReducerStackElement
 
   public TapReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, flowProcess, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null, null );
     this.sink = sink;
 
     if( useTapCollector )

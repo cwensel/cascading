@@ -44,7 +44,7 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
 
   public EveryAllAggregatorReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Map<String, Tap> traps, List<Every.EveryHandler> everyHandlers )
     {
-    super( previous, flowProcess, incomingScope, null );
+    super( previous, flowProcess, incomingScope, null, null );
     this.traps = traps;
     this.everyHandlers = everyHandlers;
     }
@@ -77,7 +77,8 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
         }
       catch( Exception exception )
         {
-        handleException( traps.get( handler.getEvery().getName() ), exception, keyEntry );
+        String trapName = handler.getEvery().getName();
+        handleException( trapName, traps.get( trapName ), exception, keyEntry );
         }
       }
 
@@ -93,7 +94,8 @@ class EveryAllAggregatorReducerStackElement extends ReducerStackElement
           }
         catch( Exception exception )
           {
-          handleException( traps.get( handler.getEvery().getName() ), exception, valueEntry );
+          String trapName = handler.getEvery().getName();
+          handleException( trapName, traps.get( trapName ), exception, valueEntry );
           }
         }
       }

@@ -42,7 +42,7 @@ class GroupReducerStackElement extends ReducerStackElement
 
   public GroupReducerStackElement( FlowProcess flowProcess, Set<Scope> incomingScopes, Group group, Scope thisScope, Fields outGroupingFields, Tap trap )
     {
-    super( trap, outGroupingFields, flowProcess );
+    super( flowProcess, outGroupingFields, group.getName(), trap );
     this.group = group;
 
     group.initializeReduce( flowProcess, incomingScopes, thisScope );

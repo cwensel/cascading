@@ -40,7 +40,7 @@ class EachMapperStackElement extends MapperStackElement
 
   public EachMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Each each )
     {
-    super( previous, flowProcess, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, each.getName(), trap );
     this.each = each;
     }
 

@@ -46,7 +46,7 @@ class GroupMapperStackElement extends MapperStackElement
 
   public GroupMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap, Group group, Scope outgoingScope, boolean copyTuple )
     {
-    super( previous, flowProcess, incomingScope, trap );
+    super( previous, flowProcess, incomingScope, group.getName(), trap );
     this.group = group;
     this.outgoingScope = outgoingScope;
     this.copyTuple = copyTuple;

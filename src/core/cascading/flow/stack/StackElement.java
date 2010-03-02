@@ -45,6 +45,7 @@ abstract class StackElement implements FlowCollector
   private static Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
 
   final FlowProcess flowProcess;
+  private String trapName;
   private final Tap trap;
   StackElement previous;
   StackElement next;
@@ -98,9 +99,10 @@ abstract class StackElement implements FlowCollector
     trapCollectors.clear();
     }
 
-  public StackElement( FlowProcess flowProcess, Tap trap )
+  public StackElement( FlowProcess flowProcess, String trapName, Tap trap )
     {
     this.flowProcess = flowProcess;
+    this.trapName = trapName;
     this.trap = trap;
     }
 
@@ -138,10 +140,10 @@ abstract class StackElement implements FlowCollector
 
   protected void handleException( Exception exception, TupleEntry tupleEntry )
     {
-    handleException( trap, exception, tupleEntry );
+    handleException( trapName, trap, exception, tupleEntry );
     }
 
-  protected void handleException( Tap trap, Exception exception, TupleEntry tupleEntry )
+  protected void handleException( String trapName, Tap trap, Exception exception, TupleEntry tupleEntry )
     {
     if( exception instanceof StackException )
       throw (StackException) exception;
@@ -152,7 +154,7 @@ abstract class StackElement implements FlowCollector
     getTrapCollector( trap, getJobConf() ).add( tupleEntry );
     getFlowProcess().increment( StepCounters.Tuples_Trapped, 1 );
 
-    LOG.warn( "captured exception trap for: " + Util.truncate( print( tupleEntry ), 75 ), exception );
+    LOG.warn( "exception trap on branch: '" + trapName + "', for " + Util.truncate( print( tupleEntry ), 75 ), exception );
     }
 
   private String print( TupleEntry tupleEntry )

@@ -51,16 +51,16 @@ abstract class ReducerStackElement extends StackElement
   /** Field lastOutput */
   OutputCollector lastOutput;
 
-  ReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap trap )
+  ReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, String trapName, Tap trap )
     {
-    super( flowProcess, trap );
+    super( flowProcess, trapName, trap );
     this.previous = previous;
     this.incomingScope = incomingScope;
     }
 
-  ReducerStackElement( Tap trap, Fields outGroupingFields, FlowProcess flowProcess )
+  ReducerStackElement( FlowProcess flowProcess, Fields outGroupingFields, String trapName, Tap trap )
     {
-    super( flowProcess, trap );
+    super( flowProcess, trapName, trap );
     this.outGroupingFields = outGroupingFields;
     }
 
