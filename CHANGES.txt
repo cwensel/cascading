@@ -2,6 +2,10 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Changed c.f.s.StackElement to log a warning for each trap captured. This includes a truncated print of the offending
+  c.t.TupleEntry and the thrown exception and stack trace. Traps being for exceptional cases, logging exceptions is a
+  reasonable response.
+
   Changed map and reduce operation stack so that collected c.t.Tuple instances do not remain 'unmodifiable' after
   being collected via the c.t.TupleEntryCollector.
 

@@ -32,11 +32,15 @@ import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tuple.TupleEntry;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 
 /** Class StackElement is the base class for Map and Reduce operation stacks. */
 abstract class StackElement implements FlowCollector
   {
+  /** Field LOG */
+  private static final Logger LOG = Logger.getLogger( StackElement.class );
 
   private static Map<Tap, TapCollector> trapCollectors = new HashMap<Tap, TapCollector>();
 
@@ -147,6 +151,18 @@ abstract class StackElement implements FlowCollector
 
     getTrapCollector( trap, getJobConf() ).add( tupleEntry );
     getFlowProcess().increment( StepCounters.Tuples_Trapped, 1 );
+
+    LOG.warn( "captured exception trap for: " + Util.truncate( print( tupleEntry ), 75 ), exception );
+    }
+
+  private String print( TupleEntry tupleEntry )
+    {
+    if( tupleEntry == null || tupleEntry.getFields() == null )
+      return "[uninitialized]";
+    else if( tupleEntry.getTuple() == null )
+      return "fields: " + tupleEntry.getFields().printVerbose();
+    else
+      return "fields: " + tupleEntry.getFields().printVerbose() + " tuple: " + tupleEntry.getTuple().print();
     }
 
   public void open() throws IOException
