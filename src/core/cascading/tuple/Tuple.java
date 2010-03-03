@@ -112,10 +112,14 @@ public class Tuple implements Comparable, Iterable, Serializable
 
   /**
    * Method parse will parse the {@link #print()} String representation of a Tuple instance and return a new Tuple instance.
+   * <p/>
+   * This method has been deprecated as it doesn't properly handle nulls, and any types other than primitive types.
    *
    * @param string of type String
    * @return Tuple
+   * @deprecated
    */
+  @Deprecated
   public static Tuple parse( String string )
     {
     if( string == null || string.length() == 0 )

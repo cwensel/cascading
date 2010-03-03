@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Deprecated c.t.Tuple#parse(). It does not properly handle null values or types other than primitives.
+
   Changed c.f.s.StackElement to log a warning for each trap captured. This includes a truncated print of the offending
   c.t.TupleEntry and the thrown exception and stack trace. Traps being for exceptional cases, logging exceptions is a
   reasonable response.
