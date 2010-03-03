@@ -35,3 +35,4 @@ public interface Filter<C> extends Operation<C>
    */
   boolean isRemove( FlowProcess flowProcess, FilterCall<C> filterCall );
   }
+  
