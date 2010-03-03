@@ -51,7 +51,7 @@ public class SetValue extends BaseOperation implements Function
   /** Field filter */
   private final Filter filter;
   /** Field values */
-  private Comparable<? extends Serializable>[] values = new Comparable[]{true, false};
+  private Serializable[] values = new Serializable[]{true, false};
 
   /**
    * Constructor SetValue creates a new SetValue instance.
@@ -73,14 +73,15 @@ public class SetValue extends BaseOperation implements Function
    *
    * @param fieldDeclaration of type Fields
    * @param filter           of type Filter
-   * @param values           of type Comparable<? extends Serializable>...
+   * @param firstValue       of type Serializable
+   * @param secondValue      of type Serializable
    */
   @ConstructorProperties({"fieldDeclaration", "filter", "values"})
-  public SetValue( Fields fieldDeclaration, Filter filter, Comparable<? extends Serializable>... values )
+  public SetValue( Fields fieldDeclaration, Filter filter, Serializable firstValue, Serializable secondValue )
     {
     super( fieldDeclaration );
     this.filter = filter;
-    this.values = values;
+    this.values = new Serializable[]{firstValue, secondValue};
 
     verify();
     }
