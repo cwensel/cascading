@@ -176,6 +176,6 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
 
   public String toString()
     {
-    return "MultiTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
+    return "MultiTap[" + ( taps == null ? "none" : Arrays.asList( taps ) ) + ']';
     }
   }

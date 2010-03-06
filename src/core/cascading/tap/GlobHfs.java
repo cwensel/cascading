@@ -157,4 +157,10 @@ public class GlobHfs extends MultiSourceTap
     result = 31 * result + ( pathFilter != null ? pathFilter.hashCode() : 0 );
     return result;
     }
+
+  @Override
+  public String toString()
+    {
+    return "GlobHfs[" + pathPattern + ']';
+    }
   }
