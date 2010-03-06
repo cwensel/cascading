@@ -105,4 +105,23 @@ public class TextDelimitedTest extends CascadingTestCase
       assertEquals( tuples[ count++ ], tuple );
       }
     }
+
+  public void testHeader() throws IOException
+    {
+    Properties properties = new Properties();
+
+    Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
+    Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+
+    Hfs input = new Hfs( new TextDelimited( fields, true, ",", "\"", types ), testData );
+    Hfs output = new Hfs( new TextDelimited( fields, ",", "\"", types ), outputPath + "/header", SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipe" );
+
+    Flow flow = new FlowConnector( properties ).connect( input, output, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 8, 5 );
+    }
   }
