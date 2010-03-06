@@ -83,6 +83,9 @@ public class TextDelimited extends TextLine
   /** Field safe */
   private boolean safe = true;
 
+  /** Field buffer */
+  private Object[] buffer;
+
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
@@ -339,13 +342,42 @@ public class TextDelimited extends TextLine
     return new Tuple( split );
     }
 
+  private Object[] getBuffer( Tuple tuple )
+    {
+    if( buffer == null )
+      buffer = new Object[tuple.size()];
+
+    return buffer;
+    }
+
   @Override
   public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
     Tuple tuple = tupleEntry.selectTuple( sinkFields );
+    Object[] buffer = Tuples.asArray( tuple, getBuffer( tuple ) );
 
-    // it's ok to use NULL here so the collector does not write anything
-    outputCollector.collect( null, tuple.toString( delimiter, false ) );
+    if( quote != null )
+      {
+      for( int i = 0; i < buffer.length; i++ )
+        {
+        Object value = buffer[ i ];
+
+        if( value == null )
+          continue;
+
+        String valueString = value.toString();
+
+        if( valueString.contains( quote ) )
+          valueString = valueString.replaceAll( quote, quote + quote );
+
+        if( valueString.contains( delimiter ) )
+          valueString = quote + valueString + quote;
+
+        buffer[ i ] = valueString;
+        }
+      }
+
+    outputCollector.collect( null, Util.join( buffer, delimiter, false ) );
     }
   }
 

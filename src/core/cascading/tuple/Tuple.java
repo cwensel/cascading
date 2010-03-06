@@ -553,7 +553,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
-   * Method size retuns the number of values in this Tuple instance.
+   * Method size returns the number of values in this Tuple instance.
    *
    * @return int
    */
@@ -563,13 +563,24 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
-   * Method elements returns a new Comparable[] array of this Tuple instances values.
+   * Method elements returns a new Object[] array of this Tuple instances values.
    *
    * @return Object[]
    */
   private Object[] elements()
     {
     return elements.toArray();
+    }
+
+  /**
+   * Method elements returns the given destination array with the values of This tuple instance.
+   *
+   * @param destination of type Object[]
+   * @return Object[]
+   */
+  Object[] elements( Object[] destination )
+    {
+    return elements.toArray( destination );
     }
 
   /**

@@ -34,6 +34,22 @@ public class Tuples
   /** A constant empty Tuple instance. This instance is immutable. */
   public static final Tuple NULL = asUnmodifiable( new Tuple() );
 
+
+  /**
+   * Method asArray copies the elements of the given Tuple instance to the given Object array.
+   *
+   * @param tuple       of type Tuple
+   * @param destination of type Object[]
+   * @return Object[]
+   */
+  public static Object[] asArray( Tuple tuple, Object[] destination )
+    {
+    if( tuple.size() != destination.length )
+      throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match destination array size: " + destination.length );
+
+    return tuple.elements( destination );
+    }
+
   /**
    * Method asArray convert the given {@link Tuple} instance into an Object[]. The given Class[] array
    * denotes the types each tuple element value should be coerced into.

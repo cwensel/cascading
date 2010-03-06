@@ -23,7 +23,6 @@ package cascading.scheme;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import cascading.CascadingTestCase;
 import cascading.flow.Flow;
@@ -32,6 +31,8 @@ import cascading.pipe.Pipe;
 import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  *
@@ -45,25 +46,63 @@ public class TextDelimitedTest extends CascadingTestCase
 
   public TextDelimitedTest()
     {
-    super( "delimite text tests" );
+    super( "delimited text tests" );
     }
 
   public void testQuotedText() throws IOException
     {
+    Object[][] results = new Object[][]{
+      {"foo", "bar", "baz", "bin", 1L},
+      {"foo", "bar", "baz", "bin", 2L},
+      {"foo", "bar,bar", "baz", "bin", 3L},
+      {"foo", "bar\",bar", "baz", "bin", 4L},
+      {"foo", "bar\"\",bar", "baz", "bin", 5L},
+      {null, null, "baz", null, 6L},
+      {null, null, null, null, 7L},
+      {"foo", null, null, null, 8L},
+      {null, null, null, null, 9L}
+    };
+
+    Tuple[] tuples = new Tuple[results.length];
+
+    for( int i = 0; i < results.length; i++ )
+      tuples[ i ] = new Tuple( results[ i ] );
+
     Properties properties = new Properties();
 
-    Class[] types = new Class[]{String.class, String.class, String.class, long.class};
-    Fields fields = new Fields( "first", "second", "third", "fourth" );
-    Hfs text = new Hfs( new TextDelimited( fields, ",", "\"", types ), testData );
+    Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
+    Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+    TextDelimited scheme = new TextDelimited( fields, ",", "\"", types );
 
-    Hfs output = new Hfs( new TextLine( new Fields( "line" ) ), outputPath + "/quoted", SinkMode.REPLACE );
+    Hfs input = new Hfs( scheme, testData );
+    Hfs output = new Hfs( scheme, outputPath + "/quoted", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "pipe" );
 
-    Flow flow = new FlowConnector( properties ).connect( text, output, pipe );
+    Flow flow = new FlowConnector( properties ).connect( input, output, pipe );
 
     flow.complete();
 
-    validateLength( flow, 4, 1, Pattern.compile( "foo\\t(bar.*)\\tbaz\\t[0-9]" ) );
+    validateLength( flow, 9, 5 );
+
+    // validate input parsing compares to expected, and results compare to expected
+
+    TupleEntryIterator iterator = flow.openSource();
+
+    int count = 0;
+    while( iterator.hasNext() )
+      {
+      Tuple tuple = iterator.next().getTuple();
+      assertEquals( tuples[ count++ ], tuple );
+      }
+
+    iterator = flow.openSink();
+
+    count = 0;
+    while( iterator.hasNext() )
+      {
+      Tuple tuple = iterator.next().getTuple();
+      assertEquals( tuples[ count++ ], tuple );
+      }
     }
   }
