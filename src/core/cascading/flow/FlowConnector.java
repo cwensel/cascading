@@ -43,25 +43,32 @@ import org.apache.hadoop.mapred.JobConf;
  * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
  * an executable {@link Flow}.
  * <p/>
- * FlowConnector invokes a planner for the target execution environment. Currently only {@link cascading.flow.MultiMapReducePlanner}
- * is supported. If you have just one pre-existing custom Hadoop job to execute, see {@link cascading.flow.MapReduceFlow}.
+ * FlowConnector invokes a planner for the target execution environment. Currently only {@link MultiMapReducePlanner}
+ * is supported (for Hadoop). If you have just one pre-existing custom Hadoop job to execute, see {@link MapReduceFlow}.
  * <p/>
  * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"
  * refers to the last connected Pipe instances in a pipe-assembly. Pipe-assemblies are graphs of object with "heads"
  * and "tails". From a given "tail", all connected heads can be found, but not the reverse. So "tails" must be
  * supplied by the user.
  * <p/>
- * The FlowConnector and resulting Flow can be configured via a {@link Map} of properties given on the constructor. This properties
- * map can be populated through static methods on FlowConnector and MultiMapReducePlanner. These properties are used
- * to influence the current planner, and are passed down to the execution framework (Hadoop).
+ * The FlowConnector, resulting Flow, and the underlying execution framework (Hadoop) can be configured via a
+ * {@link Map} or {@link Properties} instance given to the constructor. This properties map can be
+ * populated before constructing a FlowConnector instance through static methods on FlowConnector and
+ * MultiMapReducePlanner. These properties are used to influence the current planner and are also passed down to the
+ * execution framework (Hadoop) to override any default values (the number of reducers or mappers, etc. by using
+ * application specific properties).
  * <p/>
- * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or {@link #setApplicationJarPath(java.util.Map, String)}
- * so that the correct application jar file is passed through to all child processes. The Class or path must reference
+ * Custom operations (Functions, Filter, etc) may also retrieve these property values at runtime through calls to
+ * {@link FlowProcess#getProperty(String)}.
+ * <p/>
+ * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
+ * {@link #setApplicationJarPath(java.util.Map, String)} so that the correct application jar file is passed through
+ * to all child processes. The Class or path must reference
  * the custom application jar, not a Cascading library class or jar. The easiest thing to do is give setApplicationJarClass
  * the Class with your static main function and let Cascading figure out which jar to use.
  * <p/>
  * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
- * runtime from a configuation file.
+ * runtime from a configuration file.
  * <p/>
  * By default, all {@link Assertion}s are planned into the resulting Flow instance. This can be
  * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
@@ -78,7 +85,7 @@ import org.apache.hadoop.mapred.JobConf;
  * <li>cascading.flowconnector.intermediateschemeclass</li>
  * </ul>
  *
- * @see cascading.flow.MapReduceFlow
+ * @see MapReduceFlow
  */
 public class FlowConnector
   {
