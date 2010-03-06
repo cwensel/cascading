@@ -30,34 +30,39 @@ import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
 
-/** Class Sample is a {@link Filter} that only allows the given percent of {@link cascading.tuple.Tuple} instances to pass. */
+/**
+ * Class Sample is a {@link Filter} that only allows the given fraction of {@link cascading.tuple.Tuple} instances to pass.
+ * <p/>
+ * Where fraction is between 1 and zero, inclusive. Thus to sample {@code 50%} of the tuples in a stream, use the
+ * fraction {@code 0.5}.
+ */
 public class Sample extends BaseOperation<Random> implements Filter<Random>
   {
   private long seed = System.currentTimeMillis();
-  private double percent = 1.0d;
+  private double fraction = 1.0d;
 
   /**
    * Creates a new Sample that permits percent Tuples to pass.
    *
-   * @param percent of type double
+   * @param fraction of type double
    */
-  @ConstructorProperties({"percent"})
-  public Sample( double percent )
+  @ConstructorProperties({"fraction"})
+  public Sample( double fraction )
     {
-    this.percent = percent;
+    this.fraction = fraction;
     }
 
   /**
    * Creates a new Sample that permits percent Tuples to pass. The given seed value seeds the random number generator.
    *
-   * @param seed    of type long
-   * @param percent of type double
+   * @param seed     of type long
+   * @param fraction of type double
    */
-  @ConstructorProperties({"seed", "percent"})
-  public Sample( long seed, double percent )
+  @ConstructorProperties({"seed", "fraction"})
+  public Sample( long seed, double fraction )
     {
     this.seed = seed;
-    this.percent = percent;
+    this.fraction = fraction;
     }
 
   @Override
@@ -70,6 +75,6 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
 
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Random> filterCall )
     {
-    return !( filterCall.getContext().nextDouble() < percent );
+    return !( filterCall.getContext().nextDouble() < fraction );
     }
   }
