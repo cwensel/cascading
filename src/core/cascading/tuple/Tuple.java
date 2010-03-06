@@ -60,12 +60,13 @@ import cascading.util.Util;
  */
 public class Tuple implements Comparable, Iterable, Serializable
   {
+  /** Field printDelim */
+  private final static String printDelim = "\t";
+
   /** Field isUnmodifiable */
   protected boolean isUnmodifiable = false;
   /** Field elements */
   protected List<Object> elements;
-  /** Field printDelim */
-  private final String printDelim = "\t";
 
   /**
    * Method asUnmodifiable marks the given Tuple instance as unmodifiable.
@@ -358,6 +359,14 @@ public class Tuple implements Comparable, Iterable, Serializable
     this.elements = temp;
 
     return results;
+    }
+
+  /** Method clear empties this Tuple instance. A subsequent call to {@link #size()} will return zero ({@code 0}). */
+  public void clear()
+    {
+    verifyModifiable();
+
+    elements.clear();
     }
 
   /**
