@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased (wip 1.1)
 
+  Changed trap handling to include failures from source and sink c.t.Tap instances. The source Tap will inherit
+  the assembly head trap and the sink will inherit the assembly tail trap.
+
   Deprecated c.t.Tuple#parse(). It does not properly handle null values or types other than primitives.
 
   Changed c.f.s.StackElement to log a warning for each trap captured. This includes a truncated print of the offending

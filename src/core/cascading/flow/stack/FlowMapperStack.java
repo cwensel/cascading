@@ -27,13 +27,13 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
-import cascading.flow.StepCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.Function;
 import cascading.pipe.Each;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
+import cascading.tap.TempHfs;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
@@ -57,6 +57,8 @@ public class FlowMapperStack
 
   /** Field stack */
   private Stack stacks[];
+  /** Field sourceElement */
+  private SourceMapperStackElement sourceElement;
 
   /** Class Stack is a simple holder for stack head and tails */
   private class Stack
@@ -90,6 +92,8 @@ public class FlowMapperStack
     {
     Set<Scope> incomingScopes = step.getNextScopes( currentSource );
 
+    sourceElement = makeSourceElement( incomingScopes );
+
     stacks = new Stack[incomingScopes.size()];
 
     int i = 0;
@@ -103,9 +107,13 @@ public class FlowMapperStack
 
       stacks[ i ].tail = null;
 
+      String trapName = null;
+      Tap trap = null;
+
       while( operator instanceof Each )
         {
-        Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
+        trapName = ( (Pipe) operator ).getName();
+        trap = step.getMapperTrap( trapName );
         stacks[ i ].tail = new EachMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Each) operator );
 
         if( ( (Each) operator ).getOperation() instanceof Function )
@@ -122,14 +130,15 @@ public class FlowMapperStack
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
         boolean copyTuple = allFilters && i != stacks.length - 1;
 
-        Tap trap = step.getMapperTrap( ( (Pipe) operator ).getName() );
+        trapName = ( (Pipe) operator ).getName();
+        trap = step.getMapperTrap( trapName );
         stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope, copyTuple );
         }
       else if( operator instanceof Tap )
         {
         useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
 
-        stacks[ i ].tail = new TapMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, (Tap) operator, useTapCollector );
+        stacks[ i ].tail = new SinkMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trapName, trap, (Tap) operator, useTapCollector );
         }
       else
         throw new IllegalStateException( "operator should be group or tap, is instead: " + operator.getClass().getName() );
@@ -140,11 +149,28 @@ public class FlowMapperStack
       }
     }
 
+  private SourceMapperStackElement makeSourceElement( Set<Scope> incomingScopes ) throws IOException
+    {
+    Scope scope = incomingScopes.iterator().next();
+
+    // no need to bother with traps for intermediate sources
+    // should prevent confusing info message below
+    if( currentSource instanceof TempHfs )
+      return new SourceMapperStackElement( flowProcess, scope, currentSource );
+
+    FlowElement operator = step.getNextFlowElement( scope );
+    String trapName = ( (Pipe) operator ).getName();
+    Tap trap = step.getMapperTrap( trapName );
+
+    if( incomingScopes.size() != 1 )
+      LOG.info( "more than one possible trap for source tap, using trap named: " + trapName );
+
+    return new SourceMapperStackElement( flowProcess, scope, trapName, trap, currentSource );
+    }
+
   public void map( Object key, Object value, OutputCollector output ) throws IOException
     {
-    flowProcess.increment( StepCounters.Tuples_Read, 1 );
-
-    Tuple tuple = currentSource.source( key, value );
+    Tuple tuple = sourceElement.source( key, value );
 
     if( LOG.isDebugEnabled() )
       {

@@ -151,6 +151,12 @@ abstract class StackElement implements FlowCollector
     if( trap == null )
       throw new StackException( exception );
 
+    if( tupleEntry == null )
+      {
+      LOG.error( "failure resolving tuple entry", exception );
+      throw new StackException( "failure resolving tuple entry", exception );
+      }
+
     getTrapCollector( trap, getJobConf() ).add( tupleEntry );
     getFlowProcess().increment( StepCounters.Tuples_Trapped, 1 );
 

@@ -22,6 +22,7 @@
 package cascading.flow.stack;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
@@ -30,7 +31,6 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.flow.StepCounters;
 import cascading.tap.Tap;
-import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -40,33 +40,47 @@ import org.apache.hadoop.mapred.OutputCollector;
 /**
  *
  */
-class TapMapperStackElement extends MapperStackElement
+class SinkReducerStackElement extends ReducerStackElement
   {
   private final Tap sink;
   private OutputCollector outputCollector;
 
-  public TapMapperStackElement( MapperStackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
+  public SinkReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, Tap sink, boolean useTapCollector ) throws IOException
     {
-    super( previous, flowProcess, incomingScope, null, null );
+    this( previous, flowProcess, incomingScope, null, null, sink, useTapCollector );
+    }
+
+  public SinkReducerStackElement( StackElement previous, FlowProcess flowProcess, Scope incomingScope, String trapName, Tap trap, Tap sink, boolean useTapCollector ) throws IOException
+    {
+    super( previous, flowProcess, incomingScope, trapName, trap );
     this.sink = sink;
 
     if( useTapCollector )
       this.outputCollector = (OutputCollector) sink.openForWrite( getJobConf() );
     }
 
-  protected FlowElement getFlowElement()
+  public FlowElement getFlowElement()
     {
     return sink;
     }
 
-  @Override
+  public void collect( Tuple key, Iterator values )
+    {
+    operateSink( key, values );
+    }
+
   public void collect( Tuple tuple )
     {
-    super.collect( tuple );
+    TupleEntry tupleEntry = null;
 
     try
       {
-      operateSink( getTupleEntry( tuple ) );
+      tupleEntry = getTupleEntry( tuple );
+      operateSink( tupleEntry );
+      }
+    catch( Exception exception )
+      {
+      handleException( exception, tupleEntry );
       }
     finally
       {
@@ -74,6 +88,32 @@ class TapMapperStackElement extends MapperStackElement
       }
     }
 
+  private void operateSink( Tuple key, Iterator values )
+    {
+    while( values.hasNext() )
+      {
+      TupleEntry tupleEntry = (TupleEntry) values.next();
+
+      try
+        {
+        operateSink( tupleEntry );
+        }
+      catch( Exception exception )
+        {
+        handleException( exception, tupleEntry );
+        }
+      finally
+        {
+        Tuples.asModifiable( tupleEntry.getTuple() );
+        }
+      }
+    }
+
+  /**
+   * Throws a StackException to flag a hard failure
+   *
+   * @param tupleEntry
+   */
   private void operateSink( TupleEntry tupleEntry )
     {
     try
@@ -81,11 +121,11 @@ class TapMapperStackElement extends MapperStackElement
       if( outputCollector != null )
         {
         getFlowProcess().keepAlive();
-        sink.sink( tupleEntry, outputCollector );
+        ( (Tap) getFlowElement() ).sink( tupleEntry, outputCollector );
         }
       else
         {
-        sink.sink( tupleEntry, lastOutput );
+        ( (Tap) getFlowElement() ).sink( tupleEntry, lastOutput );
         }
 
       getFlowProcess().increment( StepCounters.Tuples_Written, 1 );
@@ -97,10 +137,6 @@ class TapMapperStackElement extends MapperStackElement
     catch( IOException exception )
       {
       throw new StackException( "io exception writing to tap: " + sink.toString(), exception );
-      }
-    catch( TapException exception )
-      {
-      throw new StackException( "exception writing to tap: " + sink.toString(), exception );
       }
     catch( Throwable throwable )
       {

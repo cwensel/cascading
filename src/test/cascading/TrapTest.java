@@ -40,8 +40,11 @@ import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  *
@@ -296,4 +299,94 @@ public class TrapTest extends ClusterTestCase
     validateLength( flow.openTrap(), 10 );
     }
 
+  private static class FailScheme extends TextLine
+    {
+    boolean sourceFired = false;
+    boolean sinkFired = false;
+
+    public FailScheme()
+      {
+      }
+
+    public FailScheme( Fields sourceFields )
+      {
+      super( sourceFields );
+      }
+
+    @Override
+    public Tuple source( Object key, Object value )
+      {
+      if( !sourceFired )
+        {
+        sourceFired = true;
+        throw new TapException( "fail" );
+        }
+
+      return super.source( key, value );
+      }
+
+    @Override
+    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+      {
+      if( !sinkFired )
+        {
+        sinkFired = true;
+        throw new TapException( "fail" );
+        }
+
+      super.sink( tupleEntry, outputCollector );
+      }
+    }
+
+  public void testTrapTapSource() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new FailScheme( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "source/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "source/trap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 7, null );
+    validateLength( flow.openTrap(), 1 );
+    }
+
+  public void testTrapTapSink() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new FailScheme(), outputPath + "sink/tap", true );
+    Tap trap = new Hfs( new TextLine(), outputPath + "sink/trap", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 7, null );
+    validateLength( flow.openTrap(), 1 );
+    }
   }

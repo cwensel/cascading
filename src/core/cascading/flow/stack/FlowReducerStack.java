@@ -35,6 +35,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
+import cascading.tap.TempHfs;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
@@ -83,7 +84,8 @@ public class FlowReducerStack
     {
     Set<Scope> previousScopes = step.getPreviousScopes( step.group );
     Scope nextScope = step.getNextScope( step.group );
-    Tap trap = step.getReducerTrap( ( (Pipe) step.group ).getName() );
+    String trapName = ( (Pipe) step.group ).getName();
+    Tap trap = step.getReducerTrap( trapName );
 
     stackTail = new GroupReducerStackElement( flowProcess, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
 
@@ -103,7 +105,8 @@ public class FlowReducerStack
 
         allAggregators.add( everyHandler );
 
-        trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
+        trapName = ( (Pipe) operator ).getName();
+        trap = step.getReducerTrap( trapName );
         stackTail = new EveryAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
@@ -119,7 +122,8 @@ public class FlowReducerStack
         nextScope = step.getNextScope( operator );
         Every.EveryHandler everyHandler = ( (Every) operator ).getHandler( nextScope );
 
-        trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
+        trapName = ( (Pipe) operator ).getName();
+        trap = step.getReducerTrap( trapName );
         stackTail = new EveryBufferReducerStackElement( stackTail, flowProcess, incomingScope, trap, everyHandler );
         incomingScope = nextScope;
 
@@ -129,7 +133,8 @@ public class FlowReducerStack
 
     while( operator instanceof Each )
       {
-      trap = step.getReducerTrap( ( (Pipe) operator ).getName() );
+      trapName = ( (Pipe) operator ).getName();
+      trap = step.getReducerTrap( trapName );
       stackTail = new EachReducerStackElement( stackTail, flowProcess, nextScope, trap, (Each) operator );
 
       nextScope = step.getNextScope( operator );
@@ -140,7 +145,12 @@ public class FlowReducerStack
 
     useTapCollector = useTapCollector || ( (Tap) operator ).isWriteDirect();
 
-    stackTail = new TapReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator, useTapCollector );
+    // no need for traps around intermediate files
+    if( operator instanceof TempHfs )
+      stackTail = new SinkReducerStackElement( stackTail, flowProcess, nextScope, (Tap) operator, useTapCollector );
+    else
+      stackTail = new SinkReducerStackElement( stackTail, flowProcess, nextScope, trapName, trap, (Tap) operator, useTapCollector );
+
     stackHead = (ReducerStackElement) stackTail.resolveStack();
     }
 

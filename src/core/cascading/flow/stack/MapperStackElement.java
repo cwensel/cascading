@@ -54,6 +54,12 @@ abstract class MapperStackElement extends StackElement
     this.incomingScope = incomingScope;
     }
 
+  MapperStackElement( FlowProcess flowProcess, Scope incomingScope, String trapName, Tap trap )
+    {
+    super( flowProcess, trapName, trap );
+    this.incomingScope = incomingScope;
+    }
+
   public void setLastOutput( OutputCollector lastOutput )
     {
     this.lastOutput = lastOutput;
@@ -82,6 +88,11 @@ abstract class MapperStackElement extends StackElement
     tupleEntry.setTuple( tuple );
 
     return tupleEntry;
+    }
+
+  public Tuple source( Object key, Object value )
+    {
+    throw new UnsupportedOperationException( "collect should never be called" );
     }
 
   public void collect( Tuple tuple )
