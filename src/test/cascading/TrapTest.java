@@ -338,7 +338,7 @@ public class TrapTest extends ClusterTestCase
       }
     }
 
-  public void testTrapTapSource() throws Exception
+  public void testTrapTapSourceSink() throws Exception
     {
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
@@ -346,38 +346,6 @@ public class TrapTest extends ClusterTestCase
     copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new FailScheme( new Fields( "offset", "line" ) ), inputFileApache );
-
-    Pipe pipe = new Pipe( "map" );
-
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
-    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
-
-    Tap sink = new Hfs( new TextLine(), outputPath + "source/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "source/trap", true );
-
-    Map<Object, Object> properties = getProperties();
-
-    // compensate for running in cluster mode
-    properties.put( "mapred.map.tasks", 1 );
-    properties.put( "mapred.reduce.tasks", 1 );
-
-    Flow flow = new FlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
-
-    flow.complete();
-
-    validateLength( flow, 7, null );
-    validateLength( flow.openTrap(), 1 );
-    }
-
-  public void testTrapTapSink() throws Exception
-    {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -398,7 +366,7 @@ public class TrapTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 7, null );
-    validateLength( flow.openTrap(), 1 );
+    validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 6, null );
+    validateLength( flow.openTrap(), 2 );
     }
   }
