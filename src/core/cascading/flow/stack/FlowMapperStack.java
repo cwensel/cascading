@@ -152,13 +152,13 @@ public class FlowMapperStack
   private SourceMapperStackElement makeSourceElement( Set<Scope> incomingScopes ) throws IOException
     {
     Scope scope = incomingScopes.iterator().next();
+    FlowElement operator = step.getNextFlowElement( scope );
 
     // no need to bother with traps for intermediate sources
     // should prevent confusing info message below
-    if( currentSource instanceof TempHfs )
+    if( currentSource instanceof TempHfs || !( operator instanceof Pipe ) )
       return new SourceMapperStackElement( flowProcess, scope, currentSource );
 
-    FlowElement operator = step.getNextFlowElement( scope );
     String trapName = ( (Pipe) operator ).getName();
     Tap trap = step.getMapperTrap( trapName );
 
