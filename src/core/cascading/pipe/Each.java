@@ -78,7 +78,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only pass arguementFields to the given function, only return fields declared by the function.
+   * Only pass argumentFields to the given function, only return fields declared by the function.
    *
    * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
@@ -91,7 +91,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
+   * Only pass argumentFields to the given function, only return fields selected by the outputSelector.
    *
    * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
@@ -105,7 +105,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only return fields selected by the outFieldsSelector.
+   * Only return fields selected by the outputSelector.
    *
    * @param name           name for this branch of Pipes
    * @param function       Function to be applied to each input Tuple
@@ -130,7 +130,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only pass arguementFields to the given function, only return fields declared by the function.
+   * Only pass argumentFields to the given function, only return fields declared by the function.
    *
    * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
@@ -143,7 +143,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
+   * Only pass argumentFields to the given function, only return fields selected by the outputSelector.
    *
    * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
@@ -157,7 +157,7 @@ public class Each extends Operator
     }
 
   /**
-   * Only pass arguementFields to the given function, only return fields selected by the outFieldsSelector.
+   * Only pass argumentFields to the given function, only return fields selected by the outputSelector.
    *
    * @param previous       previous Pipe to receive input Tuples from
    * @param function       Function to be applied to each input Tuple
@@ -186,6 +186,8 @@ public class Each extends Operator
     }
 
   /**
+   * Constructor Each creates a new Each instance.
+   *
    * @param name             name for this branch of Pipes
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param filter           Filter to be applied to each input Tuple
@@ -197,6 +199,8 @@ public class Each extends Operator
     }
 
   /**
+   * Constructor Each creates a new Each instance.
+   *
    * @param previous previous Pipe to receive input Tuples from
    * @param filter   Filter to be applied to each input Tuple
    */
@@ -207,6 +211,8 @@ public class Each extends Operator
     }
 
   /**
+   * Constructor Each creates a new Each instance.
+   *
    * @param previous         previous Pipe to receive input Tuples from
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param filter           Filter to be applied to each input Tuple
