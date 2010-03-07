@@ -356,7 +356,13 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new TextLine(), outputPath + "source/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "source/trap", true );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Map<Object, Object> properties = getProperties();
+
+    // compensate for running in cluster mode
+    properties.put( "mapred.map.tasks", 1 );
+    properties.put( "mapred.reduce.tasks", 1 );
+
+    Flow flow = new FlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -382,7 +388,13 @@ public class TrapTest extends ClusterTestCase
     Tap sink = new Hfs( new FailScheme(), outputPath + "sink/tap", true );
     Tap trap = new Hfs( new TextLine(), outputPath + "sink/trap", true );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Map<Object, Object> properties = getProperties();
+
+    // compensate for running in cluster mode
+    properties.put( "mapred.map.tasks", 1 );
+    properties.put( "mapred.reduce.tasks", 1 );
+
+    Flow flow = new FlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
