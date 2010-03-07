@@ -42,7 +42,7 @@ import cascading.util.Util;
 /**
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
  * name, or it may be a literal Integer value representing a position, where positions start at position 0.
- * A Fields instance may also represent a set of field names.
+ * A Fields instance may also represent a set of field names and positions.
  * <p/>
  * Fields are used as both declarators and selectors. A declarator declares that a given {@link Tap} or
  * {@link cascading.operation.Operation} returns the given field names, for a set of values the size of
@@ -55,7 +55,7 @@ import cascading.util.Util;
  * Or For example; <br/>
  * <code>Fields fields = new Fields( 1, 2, -1 );</code><br/>
  * This creates a new Fields instance that can only be used as a selector. It would select the second, third, and last
- * position from a given Tuple instance, assuming it has atleast four positions. Since the original field names for those
+ * position from a given Tuple instance, assuming it has at least four positions. Since the original field names for those
  * positions will carry over to the new selected Tuple instance, if the original Tuple only had three positions, the third
  * and last positions would be the same, and would throw an error on there being duplicate field names in the selected
  * Tuple instance.
@@ -63,31 +63,32 @@ import cascading.util.Util;
  * Additionally, there are eight predefined Fields sets used for different purposes; {@link #ALL}, {@link #GROUP},
  * {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, {@link #UNKNOWN}, {@link #REPLACE}, and {@link #SWAP}.
  * <p/>
- * The ALL Fields set is a "wildcard" that represents all the current available fields.
+ * The {@code ALL} Fields set is a "wildcard" that represents all the current available fields.
  * <p/>
- * The GROUP Fields set represents all the fields used as grouping values in a previous {@link Group}. If there is no previous
- * Group in the pipe assembly, the GROUP represents all the current field names.
+ * The {@code GROUP} Fields set represents all the fields used as grouping values in a previous {@link Group}.
+ * If there is no previous Group in the pipe assembly, the GROUP represents all the current field names.
  * <p/>
- * The VALUES Fields set represent all the fields not used as grouping fields in a previous Group.
+ * The {@code VALUES} Fields set represent all the fields not used as grouping fields in a previous Group.
  * <p/>
- * The ARGS Fields set is used to let a given Operation inherit the field names of its argument Tuple. This Fields set
- * is a convenience and is typically used when the Pipe output selector is RESULTS.
+ * The {@code ARGS} Fields set is used to let a given Operation inherit the field names of its argument Tuple. This Fields set
+ * is a convenience and is typically used when the Pipe output selector is {@code RESULTS} or {@code REPLACE}.
  * <p/>
- * The RESULTS Fields set is used to represent the field names of the current Operations return values. This Fields
+ * The {@code RESULTS} Fields set is used to represent the field names of the current Operations return values. This Fields
  * set may only be used as an output selector on a Pipe. It effectively replaces in the input Tuple with the Operation result
  * Tuple.
  * <p/>
- * The UNKNOWN Fields set is used when Fields must be declared, but how many and their names is unknown. This allows
- * for arbitrarily lengthed Tuples from an input source or some Operation.
+ * The {@code UNKNOWN} Fields set is used when Fields must be declared, but how many and their names is unknown. This allows
+ * for arbitrarily length Tuples from an input source or some Operation. Use this Fields set with caution.
  * <p/>
- * The REPLACE Fields set is used as an output selector to inline replace the values of the Operation arguments with
+ * The {@code REPLACE} Fields set is used as an output selector to inline replace values in the incoming Tuple with
  * the results of an Operation. This is a convenience Fields set that allows subsequent Operations to 'step' on the
- * value with a given field name. The current Operation must always use the exact same field names, or the ARGS Fields
- * set.
+ * value with a given field name. The current Operation must always use the exact same field names, or the {@code ARGS}
+ * Fields set.
  * <p/>
- * The SWAP Fields set is used as an output selector to swap out Operation arguments with its results. Neither the argument and
- * result field names or size need to be the same. This is useful for when the Operation arguments are no longer necessary
- * and the result Fields and values should be appended to the remainder of the input field names and Tuple.
+ * The {@code SWAP} Fields set is used as an output selector to swap out Operation arguments with its results. Neither
+ * the argument and result field names or size need to be the same. This is useful for when the Operation arguments are
+ * no longer necessary and the result Fields and values should be appended to the remainder of the input field names
+ * and Tuple.
  */
 public class Fields implements Comparable, Iterable<Comparable>, Serializable, Comparator<Tuple>
   {
