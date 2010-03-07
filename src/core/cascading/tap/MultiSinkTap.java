@@ -251,7 +251,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
   @Override
   public String toString()
     {
-    return "MultiSinkTap[" + ( taps == null ? null : Arrays.asList( taps ) ) + ']';
+    return "MultiSinkTap[" + ( taps == null ? "none" : Arrays.asList( taps ) ) + ']';
     }
 
   @Override

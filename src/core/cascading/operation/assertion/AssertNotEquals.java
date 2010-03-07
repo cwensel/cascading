@@ -30,7 +30,8 @@ import cascading.tuple.Tuple;
 
 /**
  * Class AssertNotEquals asserts the number of constructor values is equal
- * to the number of argument values {@link cascading.tuple.Tuple} and each constructor value is not {@code .equals()} to its corresponding argument value.
+ * to the number of argument values {@link cascading.tuple.Tuple} and each constructor value is not
+ * {@code .equals()} to its corresponding argument value.
  */
 public class AssertNotEquals extends BaseAssertion implements ValueAssertion
   {
