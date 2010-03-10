@@ -41,7 +41,9 @@ import cascading.operation.FilterCall;
  */
 public class Counter extends BaseOperation implements Filter
   {
-  private final Enum counter;
+  private final Enum counterEnum;
+  private final String groupString;
+  private final String counterString;
   private final int increment;
 
   /**
@@ -64,14 +66,35 @@ public class Counter extends BaseOperation implements Filter
   @ConstructorProperties({"counter", "increment"})
   public Counter( Enum counter, int increment )
     {
-    this.counter = counter;
+    this.counterEnum = counter;
+    this.groupString = null;
+    this.counterString = null;
+    this.increment = increment;
+    }
+
+  @ConstructorProperties({"group", "counter"})
+  public Counter( String group, String counter )
+    {
+    this( group, counter, 1 );
+    }
+
+  @ConstructorProperties({"group", "counter", "increment"})
+  public Counter( String group, String counter, int increment )
+    {
+    this.counterEnum = null;
+    this.groupString = group;
+    this.counterString = counter;
     this.increment = increment;
     }
 
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    flowProcess.increment( counter, increment );
+    if( counterEnum != null )
+      flowProcess.increment( counterEnum, increment );
+    else
+      flowProcess.increment( groupString, counterString, increment );
+
     return false;
     }
   }
