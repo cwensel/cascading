@@ -31,6 +31,14 @@
   <property file="${cascading.basedir}/build.properties"/>
 
   <property name="cascading.release.version" value="x.y.z"/>
+  <property name="cascading.release.build" value="dev"/>
+
+  <condition property="cascading.release.full" value="${cascading.release.version}"
+             else="${cascading.release.version}-${cascading.release.build}">
+    <isset property="cascading.release.final"/>
+  </condition>
+
+  <property name="cascading.release.full" value="${cascading.release.version}-${cascading.release.build}"/>
   <property name="cascading.hadoop.compatible.version" value="current"/>
 
   <property name="javac.debug" value="true"/>
@@ -61,13 +69,13 @@
 
   <property name="hadoop.home" location="${cascading.basedir}/../hadoop"/>
 
-  <property name="jar.cascading" value="cascading-${cascading.release.version}-${build.number}.jar"/>
-  <property name="jar.cascading-core" value="cascading-core-${cascading.release.version}-${build.number}.jar"/>
-  <property name="jar.cascading-xml" value="cascading-xml-${cascading.release.version}-${build.number}.jar"/>
-  <property name="jar.cascading-test" value="cascading-test-${cascading.release.version}-${build.number}.jar"/>
+  <property name="jar.cascading" value="cascading-${cascading.release.full}.jar"/>
+  <property name="jar.cascading-core" value="cascading-core-${cascading.release.full}.jar"/>
+  <property name="jar.cascading-xml" value="cascading-xml-${cascading.release.full}.jar"/>
+  <property name="jar.cascading-test" value="cascading-test-${cascading.release.full}.jar"/>
 
   <property name="tar.cascading.prefix"
-            value="cascading-${cascading.release.version}-${build.number}-${cascading.hadoop.compatible.version}"/>
+            value="cascading-${cascading.release.full}-${cascading.hadoop.compatible.version}"/>
   <property name="tar.cascading" value="${tar.cascading.prefix}.tgz"/>
 
   <path id="build.class.path">
@@ -161,7 +169,7 @@
     </javac>
 
     <copy todir="${build.core}/cascading" file="${cascading.basedir}/version.properties"/>
-    <echo message="build.number=${build.number}" file="${build.core}/cascading/build.number.properties"/>
+    <echo message="build.number=${cascading.release.build}" file="${build.core}/cascading/build.number.properties"/>
 
     <copy todir="${build.core}">
       <fileset dir="${src.core}">
@@ -203,7 +211,7 @@
       <link href="http://www.janino.net/javadoc/"/>
       <link href="http://www.jgrapht.org/javadoc/"/>
       <link href="http://hadoop.apache.org/core/docs/current/api/index.html"/>
-      <bottom><![CDATA[<i>Copyright &#169; 2007-2009 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
+      <bottom><![CDATA[<i>Copyright &#169; 2007-2010 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
     </javadoc>
 
   </target>
@@ -331,7 +339,6 @@
 
     <manifest file="${build}/MANIFEST.MF">
       <attribute name="Built-By" value="${user.name}"/>
-      <!--<attribute name="Main-Class" value="cascade.Main"/>-->
     </manifest>
 
     <jar jarfile="${build}/${jar.cascading-core}" manifest="${build}/MANIFEST.MF" compress="yes">
@@ -380,10 +387,10 @@
   </target>
 
   <target name="dist" depends="jar,javadoc">
-    <echo message="creating version: ${cascading.release.version}-${build.number}"/>
+    <echo message="creating version: ${cascading.release.full}"/>
     <mkdir dir="${dist}"/>
 
-    <echo message="build.number=${build.number}" file="${dist}/build.number.properties"/>
+    <echo message="build.number=${cascading.release.build}" file="${dist}/build.number.properties"/>
 
     <copy todir="${dist}">
 
