@@ -31,14 +31,17 @@
   <property file="${cascading.basedir}/build.properties"/>
 
   <property name="cascading.release.version" value="x.y.z"/>
-  <property name="cascading.release.build" value="dev"/>
+
+  <condition property="cascading.release.build" value="${build.number}"
+             else="wip-${build.number}">
+    <isset property="cascading.release.final"/>
+  </condition>
 
   <condition property="cascading.release.full" value="${cascading.release.version}"
              else="${cascading.release.version}-${cascading.release.build}">
     <isset property="cascading.release.final"/>
   </condition>
 
-  <property name="cascading.release.full" value="${cascading.release.version}-${cascading.release.build}"/>
   <property name="cascading.hadoop.compatible.version" value="current"/>
 
   <property name="javac.debug" value="true"/>
