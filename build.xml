@@ -167,7 +167,7 @@
   <target name="compile" depends="init">
     <echo message="building cascading..."/>
 
-    <javac srcdir="${src.core}" destdir="${build.core}" verbose="off" debug="${javac.debug}">
+    <javac srcdir="${src.core}" destdir="${build.core}" verbose="off" debug="${javac.debug}" includeantruntime="false">
       <classpath refid="project.class.path"/>
     </javac>
 
@@ -180,7 +180,7 @@
       </fileset>
     </copy>
 
-    <javac srcdir="${src.xml}" destdir="${build.xml}" verbose="off" debug="${javac.debug}">
+    <javac srcdir="${src.xml}" destdir="${build.xml}" verbose="off" debug="${javac.debug}" includeantruntime="false">
       <classpath refid="project.class.path"/>
     </javac>
 
@@ -190,7 +190,7 @@
       </fileset>
     </copy>
 
-    <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}">
+    <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}" includeantruntime="false">
       <classpath refid="project.class.path"/>
     </javac>
 
