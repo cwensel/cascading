@@ -30,7 +30,13 @@
   <property file="${cascading.basedir}/version.properties"/>
   <property file="${cascading.basedir}/build.properties"/>
 
-  <property name="cascading.release.version" value="x.y.z"/>
+  <property name="cascading.release.major" value="x.y"/>
+  <property name="cascading.release.minor" value="z"/>
+
+  <condition property="cascading.release.version" value="${cascading.release.major}"
+             else="${cascading.release.major}.${cascading.release.minor}">
+    <length string="${cascading.release.minor}" trim="true" length="0"/>
+  </condition>
 
   <condition property="cascading.release.build" value="${build.number}"
              else="wip-${build.number}">
@@ -431,6 +437,31 @@
         <include name="**/**"/>
       </tarfileset>
     </tar>
+  </target>
+
+  <target name="s3-package" unless="${package.remote.bucket}">
+
+    <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
+
+    <S3Upload verbose="true"
+              accessId="${package.aws.accessId}"
+              secretKey="${package.aws.secretKey}"
+              bucket="${package.remote.bucket}"
+              prefix="cascading/${cascading.release.major}/"
+              publicRead="true">
+      <fileset file="${tar.cascading}"/>
+    </S3Upload>
+
+    <echo message="http://${package.remote.bucket}/cascading/${cascading.release.major}/${tar.cascading}"
+          file="cascading-current.txt"/>
+
+    <property name="package.remote.port" value="22"/>
+    <scp file="cascading-current.txt" remoteTofile="${package.remote.path}/${tar.cascading}"
+         keyfile="${package.remote.keyfile}"
+         passphrase="" port="${package.remote.port}" trust="true"/>
+
+    <delete file="cascading-current.txt"/>
+
   </target>
 
   <target name="push-package" unless="${package.remote.path}">
