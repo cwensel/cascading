@@ -452,7 +452,7 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method isPreserveTemporaryFiles returns true if temporary files will be cleaned when this Flow completes.
+   * Method isPreserveTemporaryFiles returns false if temporary files will be cleaned when this Flow completes.
    *
    * @return the preserveTemporaryFiles (type boolean) of this Flow object.
    */
