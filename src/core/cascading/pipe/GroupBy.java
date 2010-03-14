@@ -220,6 +220,18 @@ public class GroupBy extends Group
   /**
    * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
    *
+   * @param lhsPipe     of type Pipe
+   * @param rhsPipe     of type Pipe
+   * @param groupFields of type Fields
+   */
+  public GroupBy( Pipe lhsPipe, Pipe rhsPipe, Fields groupFields )
+    {
+    super( Pipe.pipes( lhsPipe, rhsPipe ), groupFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
+   *
    * @param groupName   of type String
    * @param pipes       of type Pipe
    * @param groupFields of type Fields
@@ -228,6 +240,19 @@ public class GroupBy extends Group
   public GroupBy( String groupName, Pipe[] pipes, Fields groupFields )
     {
     super( groupName, pipes, groupFields );
+    }
+
+  /**
+   * Creates a new GroupBy instance that will first merge the given pipes, then group on the given groupFields field names.
+   *
+   * @param groupName   of type String
+   * @param lhsPipe     of type Pipe
+   * @param rhsPipe     of type Pipe
+   * @param groupFields of type Fields
+   */
+  public GroupBy( String groupName, Pipe lhsPipe, Pipe rhsPipe, Fields groupFields )
+    {
+    super( groupName, Pipe.pipes( lhsPipe, rhsPipe ), groupFields );
     }
 
   /**
