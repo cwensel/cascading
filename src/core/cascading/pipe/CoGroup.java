@@ -35,7 +35,7 @@ import cascading.tuple.Fields;
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
  * to overcome field name collisions.
  * <p/>
- * {@code resultGroupFields} value sets the resulting grouping fieldname. By default, if all 'groupFields' values
+ * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' values
  * are equal, that value will be used for resultGroupFields.
  * <p/>
  * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.

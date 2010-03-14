@@ -122,7 +122,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     iterator.close();
     }
 
-  public void testCoGroupWithUnkowns() throws Exception
+  public void testCoGroupWithUnknowns() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
       fail( "data file not found" );
@@ -692,7 +692,10 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new LeftJoin() );
+    Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), new LeftJoin() );
+
+    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), 7 ), Fields.RESULTS );
 
     Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 
@@ -813,7 +816,10 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new RightJoin() );
+    Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), new RightJoin() );
+
+    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), 7 ), Fields.RESULTS );
 
     Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
 

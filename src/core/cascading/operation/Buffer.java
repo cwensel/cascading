@@ -24,10 +24,15 @@ package cascading.operation;
 import cascading.flow.FlowProcess;
 
 /**
- * A Buffer is similiar to an {@link Aggregator} by the fact that it operates on unique groups of values. It differs
+ * A Buffer is similar to an {@link Aggregator} by the fact that it operates on unique groups of values. It differs
  * by the fact that an {@link java.util.Iterator} is provided and it is the responsibility
  * of the {@link #operate(cascading.flow.FlowProcess, BufferCall)} method to iterate overall all the input
- * arguments returned by this Iterator.
+ * arguments returned by this Iterator, if any.
+ * <p/>
+ * For the case where a Buffer follows a CoGroup, the method {@link #operate(cascading.flow.FlowProcess, BufferCall)}
+ * will be called for every unique group whether or not there are values available to iterate over. This may be
+ * counter-intuitive for the case of an 'inner join' where the left or right stream may have a null grouping key value.
+ * Regardless, the current grouping value can be retrieved through {@link BufferCall#getGroup()}.
  * <p/>
  * Buffer is very useful when header or footer values need to be inserted into a grouping, or if values need to be
  * inserted into the middle of the group values. For example, consider a stream of timestamps. A Buffer could
@@ -37,7 +42,7 @@ import cascading.flow.FlowProcess;
  * may not be any additional {@link cascading.pipe.Every} pipes before or after the buffers Every pipe instance. A
  * {@link cascading.flow.PlannerException} will be thrown if these rules are violated.
  * <p/>
- * Buffer implementations should be reentrant. There is no guarantee an Buffer instance will be executed in a
+ * Buffer implementations should be re-entrant. There is no guarantee a Buffer instance will be executed in a
  * unique vm, or by a single thread. Also, note the Iterator will return the same {@link cascading.tuple.TupleEntry}
  * instance, but with new values in its child {@link cascading.tuple.Tuple}.
  */
