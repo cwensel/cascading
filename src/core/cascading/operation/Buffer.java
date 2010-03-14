@@ -55,6 +55,8 @@ public interface Buffer<C> extends Operation<C>
    * <p/>
    * TupleEntry entry, or entry.getTuple() should not be stored directly in a collection or modified.
    * A copy of the tuple should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
+   * <p/>
+   * This method is called for every unique group, whether or not there are values in the arguments Iterator.
    *
    * @param flowProcess of type FlowProcess
    * @param bufferCall  of type BufferCall
