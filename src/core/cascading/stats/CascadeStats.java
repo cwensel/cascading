@@ -27,11 +27,24 @@ import java.util.List;
 
 import cascading.cascade.Cascade;
 
-/** Class Cascadetats collects {@link Cascade} specific statistics. */
+/** Class CascadeStats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats
   {
+  /** Field cascadeId */
+  String cascadeID;
   /** Field flowStatsList */
   List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
+
+  public CascadeStats( String cascadeID )
+    {
+    this.cascadeID = cascadeID;
+    }
+
+  @Override
+  public Object getID()
+    {
+    return cascadeID;
+    }
 
   /**
    * Method addFlowStats add a child {@link cascading.flow.Flow} {2link FlowStats} instance.

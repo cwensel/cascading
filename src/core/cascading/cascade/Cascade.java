@@ -86,7 +86,7 @@ public class Cascade implements Runnable
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field cascadeStats */
-  private CascadeStats cascadeStats = new CascadeStats();
+  private final CascadeStats cascadeStats;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -104,7 +104,7 @@ public class Cascade implements Runnable
     {
     this.name = name;
     this.jobGraph = jobGraph;
-
+    this.cascadeStats = new CascadeStats( getID() );
     setIDOnFlow();
     }
 

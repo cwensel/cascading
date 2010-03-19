@@ -64,6 +64,14 @@ public abstract class CascadingStats
     }
 
   /**
+   * Method getID returns the ID of this CascadingStats object.
+   *
+   * @return the ID (type Object) of this CascadingStats object.
+   */
+  public abstract Object getID();
+
+
+  /**
    * Method isFinished returns true if the current status show no work currently being executed. This method
    * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *

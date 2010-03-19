@@ -181,6 +181,11 @@ public abstract class HadoopStepStats extends StepStats
     this.numReducerTasks = numReducerTasks;
     }
 
+  public String getJobID()
+    {
+    return getRunningJob().getJobID();
+    }
+
   protected abstract JobClient getJobClient();
 
   protected abstract RunningJob getRunningJob();

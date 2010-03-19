@@ -92,7 +92,7 @@ public class Flow implements Runnable
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkStale();
   /** Field flowStats */
-  private final FlowStats flowStats = new FlowStats(); // don't use a listener to set values
+  private final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
   private Map<String, Tap> sources;
   /** Field sinks */
@@ -204,6 +204,8 @@ public class Flow implements Runnable
   /** Used for testing. */
   protected Flow()
     {
+    this.name = "NA";
+    this.flowStats = new FlowStats( getID() );
     }
 
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
@@ -211,6 +213,7 @@ public class Flow implements Runnable
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
+    this.flowStats = new FlowStats( getID() );
     setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );
@@ -223,6 +226,7 @@ public class Flow implements Runnable
     {
     this.name = name;
     this.stepGraph = stepGraph;
+    this.flowStats = new FlowStats( getID() );
     setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );
@@ -269,7 +273,7 @@ public class Flow implements Runnable
    * Method getID returns the ID of this Flow object.
    * <p/>
    * The ID value is a long HEX String used to identify this instance globally. Subsequent Flow
-   * instances created with identical paramers will not return the same ID.
+   * instances created with identical parameters will not return the same ID.
    *
    * @return the ID (type String) of this Flow object.
    */

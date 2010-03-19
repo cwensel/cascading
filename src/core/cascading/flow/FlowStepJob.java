@@ -63,7 +63,7 @@ public class FlowStepJob implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( FlowStep flowStep, String stepName, JobConf currentConf )
+  public FlowStepJob( final FlowStep flowStep, String stepName, JobConf currentConf )
     {
     this.flowStep = flowStep;
     this.stepName = stepName;
@@ -75,6 +75,13 @@ public class FlowStepJob implements Callable<Throwable>
 
     stepStats = new HadoopStepStats()
     {
+
+    @Override
+    public Object getID()
+      {
+      return flowStep.getID();
+      }
+
     @Override
     protected JobClient getJobClient()
       {

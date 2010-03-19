@@ -108,6 +108,16 @@ public class FlowStep implements Serializable
     }
 
   /**
+   * Method getId returns the id of this FlowStep object.
+   *
+   * @return the id (type int) of this FlowStep object.
+   */
+  public int getID()
+    {
+    return id;
+    }
+
+  /**
    * Method getName returns the name of this FlowStep object.
    *
    * @return the name (type String) of this FlowStep object.

@@ -31,7 +31,19 @@ import cascading.flow.Flow;
 /** Class FlowStats collects {@link Flow} specific statistics. */
 public class FlowStats extends CascadingStats
   {
+  String flowID;
   List<StepStats> stepStatsList = new ArrayList<StepStats>();
+
+  public FlowStats( String flowID )
+    {
+    this.flowID = flowID;
+    }
+
+  @Override
+  public Object getID()
+    {
+    return flowID;
+    }
 
   public void addStepStats( StepStats stepStats )
     {

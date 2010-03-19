@@ -88,15 +88,21 @@ public class CascadingStatsTest extends ClusterTestCase
 
     CascadeStats cascadeStats = cascade.getCascadeStats();
 
+    assertNotNull( cascadeStats.getID() );
+
     assertEquals( 40, cascadeStats.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 20, cascadeStats.getCounterValue( TestEnum.SECOND ) );
 
     FlowStats flowStats1 = flow1.getFlowStats();
 
+    assertNotNull( flowStats1.getID() );
+
     assertEquals( 20, flowStats1.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 10, flowStats1.getCounterValue( TestEnum.SECOND ) );
 
     FlowStats flowStats2 = flow2.getFlowStats();
+
+    assertNotNull( flowStats2.getID() );
 
     assertEquals( 20, flowStats2.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 10, flowStats2.getCounterValue( TestEnum.SECOND ) );
@@ -107,6 +113,10 @@ public class CascadingStatsTest extends ClusterTestCase
     assertEquals( 2, flowStats2.getStepsCount() );
 
     HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getStepStats().get( 0 );
+
+    assertNotNull( stats1.getID() );
+    assertNotNull( stats1.getJobID() );
+
     assertEquals( 2, stats1.getNumMapTasks() );
     assertEquals( 1, stats1.getNumReducerTasks() );
 
@@ -118,6 +128,10 @@ public class CascadingStatsTest extends ClusterTestCase
       }
 
     HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getStepStats().get( 0 );
+
+    assertNotNull( stats2.getID() );
+    assertNotNull( stats2.getJobID() );
+
     assertEquals( 2, stats2.getNumMapTasks() );
     assertEquals( 1, stats2.getNumReducerTasks() );
 
