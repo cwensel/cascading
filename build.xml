@@ -456,7 +456,7 @@
           file="cascading-current.txt"/>
 
     <property name="package.remote.port" value="22"/>
-    <scp file="cascading-current.txt" remoteTofile="${package.remote.path}/${tar.cascading}"
+    <scp file="cascading-current.txt" remoteTofile="${package.remote.path}/${cascading.release.major}/${tar.cascading}"
          keyfile="${package.remote.keyfile}"
          passphrase="" port="${package.remote.port}" trust="true"/>
 
