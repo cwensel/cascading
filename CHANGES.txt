@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased (wip 1.1)
+1.1.0
 
   Changed trap handling to include failures from source and sink c.t.Tap instances. The source Tap will inherit
   the assembly head trap and the sink will inherit the assembly tail trap.
@@ -125,8 +125,6 @@ unreleased (wip 1.1)
   Added new c.t.Field field set type named Fields.REPLACE. Can only be used as a result selector. Specifies the
   operation results will replace values in fields with the same names. That is, inline values can be replaced in a
   single c.p.Each or c.p.Every. It is especially useful when used with Fields.ARGS as the operation field declaration.
-
-unreleased
 
   Fix for case where one side of a branch multiplexed in a mapper could step on c.t.Tuple values before being
   handed to the next branch. Previous fix was only for CoGroup, this support GroupBy merges.
