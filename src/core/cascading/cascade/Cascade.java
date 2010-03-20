@@ -419,10 +419,23 @@ public class Cascade implements Runnable
       if( stream != null )
         versionProperties.load( stream );
 
-      String releaseVersion = versionProperties.getProperty( "cascading.release.version" );
-      String releasebuild = versionProperties.getProperty( "build.number", "dev" );
+      String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
+      String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
+      String releaseBuild = versionProperties.getProperty( "build.number", null );
       String hadoopVersion = versionProperties.getProperty( "cascading.hadoop.compatible.version" );
-      String message = String.format( "Concurrent, Inc - Cascading %s-%s [%s]", releaseVersion, releasebuild, hadoopVersion );
+      String releaseFull = null;
+
+      if( releaseMinor == null )
+        releaseFull = releaseMajor;
+      else
+        releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
+
+      String message = null;
+
+      if( releaseBuild == null )
+        message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, hadoopVersion );
+      else
+        message = String.format( "Concurrent, Inc - Cascading %s-%s [%s]", releaseFull, releaseBuild, hadoopVersion );
 
       LOG.info( message );
       }

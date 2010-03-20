@@ -170,7 +170,11 @@
     <!--<echo message="${CLASSPATH}"/>-->
   </target>
 
-  <target name="compile" depends="init">
+  <target name="echo-compile-buildnum" unless="cascading.release.final">
+    <echo message="build.number=${cascading.release.build}" file="${build.core}/cascading/build.number.properties"/>
+  </target>
+
+  <target name="compile" depends="init,echo-compile-buildnum">
     <echo message="building cascading..."/>
 
     <javac srcdir="${src.core}" destdir="${build.core}" verbose="off" debug="${javac.debug}" includeantruntime="false">
@@ -178,7 +182,6 @@
     </javac>
 
     <copy todir="${build.core}/cascading" file="${cascading.basedir}/version.properties"/>
-    <echo message="build.number=${cascading.release.build}" file="${build.core}/cascading/build.number.properties"/>
 
     <copy todir="${build.core}">
       <fileset dir="${src.core}">
@@ -395,11 +398,15 @@
 
   </target>
 
-  <target name="dist" depends="jar,javadoc">
-    <echo message="creating version: ${cascading.release.full}"/>
+  <target name="echo-dist-buildnum" unless="cascading.release.final">
     <mkdir dir="${dist}"/>
-
     <echo message="build.number=${cascading.release.build}" file="${dist}/build.number.properties"/>
+  </target>
+
+  <target name="dist" depends="jar,javadoc,echo-dist-buildnum">
+    <echo message="creating version: ${cascading.release.full}"/>
+
+    <mkdir dir="${dist}"/>
 
     <copy todir="${dist}">
 
