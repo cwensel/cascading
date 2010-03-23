@@ -446,7 +446,7 @@
     </tar>
   </target>
 
-  <target name="s3-package" unless="${package.remote.bucket}">
+  <target name="s3-package" if="package.remote.bucket">
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
 
@@ -469,12 +469,6 @@
 
     <delete file="cascading-current.txt"/>
 
-  </target>
-
-  <target name="push-package" unless="${package.remote.path}">
-    <property name="package.remote.port" value="22"/>
-    <scp file="${tar.cascading}" todir="${package.remote.path}" keyfile="${package.remote.keyfile}"
-         passphrase="" port="${package.remote.port}" trust="true"/>
   </target>
 
 </project>
