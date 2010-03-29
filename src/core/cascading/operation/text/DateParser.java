@@ -139,7 +139,7 @@ public class DateParser extends DateOperation implements Function
 
     try
       {
-      Date date = getDateFormat().parse( (String) functionCall.getArguments().get( 0 ) );
+      Date date = getDateFormat().parse( (String) functionCall.getArguments().getObject( 0 ) );
 
       if( calendarFields == null )
         output.add( date.getTime() );
@@ -148,7 +148,7 @@ public class DateParser extends DateOperation implements Function
       }
     catch( ParseException exception )
       {
-      throw new OperationException( "unable to parse input value: " + functionCall.getArguments().get( 0 ), exception );
+      throw new OperationException( "unable to parse input value: " + functionCall.getArguments().getObject( 0 ), exception );
       }
 
     functionCall.getOutputCollector().add( output );

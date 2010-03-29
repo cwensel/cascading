@@ -66,7 +66,7 @@ public class XPathGenerator extends XPathOperation implements Function<DocumentB
     {
     TupleEntry input = functionCall.getArguments();
 
-    if( input.get( 0 ) == null || !( input.get( 0 ) instanceof String ) )
+    if( input.getObject( 0 ) == null || !( input.getObject( 0 ) instanceof String ) )
       return;
 
     String value = (String) input.getString( 0 );

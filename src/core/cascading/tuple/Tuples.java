@@ -99,7 +99,7 @@ public class Tuples
    */
   public static Object coerce( Tuple tuple, int pos, Class type )
     {
-    Object value = tuple.get( pos );
+    Object value = tuple.getObject( pos );
 
     return coerce( value, type );
     }

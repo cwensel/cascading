@@ -208,7 +208,8 @@ public class Tuple implements Comparable, Iterable, Serializable
   /**
    * Method get returns the element at the given position i.
    * <p/>
-   * This method assumes the element implements {@link Comparable} in order to maintain backwards compatibility.
+   * This method assumes the element implements {@link Comparable} in order to maintain backwards compatibility. See
+   * {@link #getObject(int)} for an alternative.
    *
    * @param pos of type int
    * @return Comparable
@@ -237,7 +238,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public String getString( int pos )
     {
-    return Tuples.toString( get( pos ) );
+    return Tuples.toString( getObject( pos ) );
     }
 
   /**
@@ -248,7 +249,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public float getFloat( int pos )
     {
-    return Tuples.toFloat( get( pos ) );
+    return Tuples.toFloat( getObject( pos ) );
     }
 
   /**
@@ -259,7 +260,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public double getDouble( int pos )
     {
-    return Tuples.toDouble( get( pos ) );
+    return Tuples.toDouble( getObject( pos ) );
     }
 
   /**
@@ -270,7 +271,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public int getInteger( int pos )
     {
-    return Tuples.toInteger( get( pos ) );
+    return Tuples.toInteger( getObject( pos ) );
     }
 
   /**
@@ -281,7 +282,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public long getLong( int pos )
     {
-    return Tuples.toLong( get( pos ) );
+    return Tuples.toLong( getObject( pos ) );
     }
 
   /**
@@ -292,7 +293,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public short getShort( int pos )
     {
-    return Tuples.toShort( get( pos ) );
+    return Tuples.toShort( getObject( pos ) );
     }
 
   /**
@@ -304,7 +305,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public boolean getBoolean( int pos )
     {
-    return Tuples.toBoolean( get( pos ) );
+    return Tuples.toBoolean( getObject( pos ) );
     }
 
   /**
@@ -447,7 +448,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     int[] pos = declarator.getPos( fields, size() );
 
     for( int i = 0; i < pos.length; i++ )
-      elements.set( pos[ i ], tuple.get( i ) );
+      elements.set( pos[ i ], tuple.getObject( i ) );
     }
 
   /**

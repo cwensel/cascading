@@ -59,6 +59,21 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "d", tuple.get( 1 ) );
     }
 
+  public void testSelectNotComparable()
+    {
+    Fields selector = new Fields( 1, "d" );
+
+    Object object = new Object();
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", object ) );
+    TupleEntry entryB = new TupleEntry( new Fields( "c", "d" ), new Tuple( "c", "d" ) );
+
+    Tuple tuple = TupleEntry.select( selector, entryA, entryB );
+
+    assertEquals( "wrong size", 2, tuple.size() );
+    assertEquals( "not equal: tuple.get(0)", object, tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "d", tuple.get( 1 ) );
+    }
+
   public void testSelectComplex()
     {
     Fields selector = new Fields( -1, -3 );

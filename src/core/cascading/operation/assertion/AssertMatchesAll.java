@@ -84,6 +84,6 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
     int pos = matchEachElementPos( assertionCall.getContext(), input.getTuple() );
 
     if( pos != -1 )
-      BaseAssertion.throwFail( message, input.getFields().get( pos ), input.get( pos ), patternString, input.getTuple().print() );
+      BaseAssertion.throwFail( message, input.getFields().get( pos ), input.getObject( pos ), patternString, input.getTuple().print() );
     }
   }

@@ -123,7 +123,7 @@ public class TagSoupParser extends BaseOperation implements Function
       xmlWriter.setPrefix( getSchema().getURI(), "" );
       xmlWriter.setOutputProperty( XMLWriter.OMIT_XML_DECLARATION, "yes" );
 
-      InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().get( 0 ) ) );
+      InputSource source = new InputSource( new StringReader( (String) functionCall.getArguments().getObject( 0 ) ) );
 
       getParser().setContentHandler( xmlWriter );
 

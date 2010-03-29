@@ -101,7 +101,7 @@ public class TupleEntry
             continue;
           }
 
-        result.set( i, entry.get( pos ) ); // last in wins
+        result.set( i, entry.getObject( pos ) ); // last in wins
         }
 
       offset += entry.size();
@@ -288,7 +288,7 @@ public class TupleEntry
    */
   public Object getObject( Comparable fieldName )
     {
-    return tuple.get( fields.getPos( asFieldName( fieldName ) ) );
+    return tuple.getObject( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
@@ -297,7 +297,7 @@ public class TupleEntry
    * @param fieldName field name or position to set
    * @param value     of type Comparable
    */
-  public void set( Comparable fieldName, Comparable value )
+  public void set( Comparable fieldName, Object value )
     {
     tuple.set( fields.getPos( fieldName ), value );
     }
