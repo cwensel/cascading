@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.1.0
 
+  Changed c.p.CoGroup to detect self-joins and optimize for them.
+
   Changed trap handling to include failures from source and sink c.t.Tap instances. The source Tap will inherit
   the assembly head trap and the sink will inherit the assembly tail trap.
 

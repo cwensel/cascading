@@ -222,7 +222,6 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
       fail( "data file not found" );
 
     copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
 
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
@@ -1060,11 +1059,49 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
+
+//    System.out.println( "flow =\n" + flow );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
+  public void testCoGroupSamePipe2() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", source );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same2", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 

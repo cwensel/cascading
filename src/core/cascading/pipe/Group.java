@@ -23,7 +23,9 @@ package cascading.pipe;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -273,26 +275,43 @@ public class Group extends Pipe
     {
     this.groupName = groupName;
 
-    int last = -1;
-    for( int i = 0; i < pipes.length; i++ )
-      {
-      addPipe( pipes[ i ] );
+    int uniques = new HashSet<Pipe>( Arrays.asList( pipes ) ).size();
 
-      if( groupFields == null || groupFields.length == 0 )
+    if( pipes.length > 1 && uniques == 1 )
+      {
+      if( new HashSet<Fields>( Arrays.asList( groupFields ) ).size() != 1 )
+        throw new IllegalArgumentException( "all groupFields must be identical" );
+
+      addPipe( pipes[0] );
+      this.numSelfJoins = pipes.length - 1;
+      this.groupFieldsMap.put( pipes[ 0 ].getName(), groupFields[ 0 ] );
+
+      if( resultGroupFields != null && groupFields[ 0 ].size() != resultGroupFields.size() )
+        throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+      }
+    else
+      {
+      int last = -1;
+      for( int i = 0; i < pipes.length; i++ )
         {
-        addGroupFields( pipes[ i ], Fields.FIRST );
-        continue;
+        addPipe( pipes[ i ] );
+
+        if( groupFields == null || groupFields.length == 0 )
+          {
+          addGroupFields( pipes[ i ], Fields.FIRST );
+          continue;
+          }
+
+        if( last != -1 && last != groupFields[ i ].size() )
+          throw new IllegalArgumentException( "all cogroup fields must be same size" );
+
+        last = groupFields[ i ].size();
+        addGroupFields( pipes[ i ], groupFields[ i ] );
         }
 
-      if( last != -1 && last != groupFields[ i ].size() )
-        throw new IllegalArgumentException( "all cogroup fields must be same size" );
-
-      last = groupFields[ i ].size();
-      addGroupFields( pipes[ i ], groupFields[ i ] );
+      if( resultGroupFields != null && last != resultGroupFields.size() )
+        throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
       }
-
-    if( resultGroupFields != null && last != resultGroupFields.size() )
-      throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
 
     this.declaredFields = declaredFields;
     this.resultGroupFields = resultGroupFields;
