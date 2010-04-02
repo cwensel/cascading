@@ -275,7 +275,7 @@ public class Group extends Pipe
     {
     this.groupName = groupName;
 
-    int uniques = new HashSet<Pipe>( Arrays.asList( pipes ) ).size();
+    int uniques = new HashSet<Pipe>( Arrays.asList( Pipe.resolvePreviousAll( pipes ) ) ).size();
 
     if( pipes.length > 1 && uniques == 1 )
       {

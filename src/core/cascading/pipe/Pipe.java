@@ -102,6 +102,34 @@ public class Pipe implements FlowElement, Serializable
       }
     }
 
+  static Pipe[] resolvePreviousAll( Pipe... pipes )
+    {
+    Pipe[] resolved = new Pipe[pipes.length];
+
+    for( int i = 0; i < pipes.length; i++ )
+      resolved[ i ] = resolvePrevious( pipes[ i ] );
+
+    return resolved;
+    }
+
+  static Pipe resolvePrevious( Pipe pipe )
+    {
+    Pipe[] pipes = pipe.getPrevious();
+
+    if( pipes.length != 1 )
+      throw new IllegalStateException( "cannot resolve SubAssemblies with multiple tails at this time" );
+
+    for( Pipe previous : pipes )
+      {
+      if( previous instanceof Group || previous instanceof Operator )
+        return previous;
+
+      return resolvePrevious( previous );
+      }
+
+    return pipe;
+    }
+
   protected Pipe()
     {
     }

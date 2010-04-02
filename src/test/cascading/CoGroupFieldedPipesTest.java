@@ -46,6 +46,7 @@ import cascading.pipe.cogroup.LeftJoin;
 import cascading.pipe.cogroup.MixedJoin;
 import cascading.pipe.cogroup.OuterJoin;
 import cascading.pipe.cogroup.RightJoin;
+import cascading.scheme.TextDelimited;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
@@ -1102,6 +1103,45 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
+
+//    System.out.println( "flow =\n" + flow );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
+
+    iterator.close();
+    }
+
+  public void testCoGroupSamePipe3() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", source );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same3", true );
+
+    Pipe pipe = new Pipe( "lower" );
+
+    Pipe lhs = new Pipe( "lhs", pipe );
+    Pipe rhs = new Pipe( "rhs", pipe );
+
+    Pipe cogroup = new CoGroup( lhs, new Fields( "num" ), rhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
 
