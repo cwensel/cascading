@@ -114,9 +114,12 @@ public class Pipe implements FlowElement, Serializable
 
   static Pipe resolvePrevious( Pipe pipe )
     {
+    if( pipe instanceof Group || pipe instanceof Operator )
+      return pipe;
+
     Pipe[] pipes = pipe.getPrevious();
 
-    if( pipes.length != 1 )
+    if( pipes.length > 1 )
       throw new IllegalStateException( "cannot resolve SubAssemblies with multiple tails at this time" );
 
     for( Pipe previous : pipes )
