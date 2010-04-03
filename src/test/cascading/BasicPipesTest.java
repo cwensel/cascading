@@ -35,6 +35,7 @@ import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
+import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -166,6 +167,42 @@ public class BasicPipesTest extends CascadingTestCase
     flow.complete();
 
     validateLength( flow, 8, 1 );
+    }
+
+  /**
+   * tests that the Fields.ARGS declarator properly resolves into a declarator
+   *
+   * @throws Exception
+   */
+  public void testSimpleResult() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileLower );
+    Tap sink = new Hfs( new TextLine( Fields.size( 1 ) ), outputPath + "/simpleresult", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( 0 ), new ExpressionFilter( "$0 == 0", Long.class ) );
+
+    pipe = new Each( pipe, new Fields( 1 ), new Identity() );
+
+    pipe = new Each( pipe, Fields.ALL, new RegexFilter( "a|b|c" ) );
+
+    pipe = new GroupBy( pipe, new Fields( 0 ) );
+
+    Aggregator counter = new Count();
+
+    pipe = new Every( pipe, new Fields( 0 ), counter, new Fields( 0, 1 ) );
+
+    Flow flow = new FlowConnector().connect( source, sink, pipe );
+
+//    flow.writeDOT( "simple.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 2, 1 );
     }
 
   public void testSimpleRelative() throws Exception

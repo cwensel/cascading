@@ -615,6 +615,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   final void set( int i, Comparable comparable )
     {
     fields[ i ] = comparable;
+
+    if( isOrdered() && comparable instanceof Integer )
+      isOrdered = i == (Integer) comparable;
     }
 
   /**
