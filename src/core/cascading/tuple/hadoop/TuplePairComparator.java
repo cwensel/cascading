@@ -26,20 +26,12 @@ import java.util.Comparator;
 
 import cascading.CascadingException;
 import cascading.tuple.TuplePair;
-import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 
 /** Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
 public class TuplePairComparator extends DeserializerComparator<TuplePair>
   {
-  private Comparator comparator = new Comparator<TuplePair>()
-  {
-  @Override
-  public int compare( TuplePair lhs, TuplePair rhs )
-    {
-    return lhs.compareTo( rhs );
-    }
-  };
+  Comparator[] sortComparators;
 
   @Override
   public void setConf( Configuration conf )
@@ -55,54 +47,36 @@ public class TuplePairComparator extends DeserializerComparator<TuplePair>
     if( sort == null && group == null )
       return;
 
-    Comparator groupComparator = new TupleComparator();
-    Comparator sortComparator = groupComparator;
+    sortComparators = deserializeComparatorsFor( "cascading.sort.comparator" );
+    }
 
-    try
-      {
-      if( group != null )
-        groupComparator = (Comparator) Util.deserializeBase64( group );
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( "unable to deserialize grouping comparator" );
-      }
-
-    try
-      {
-      if( sort != null )
-        sortComparator = (Comparator) Util.deserializeBase64( sort );
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( "unable to deserialize sorting comparator" );
-      }
-
-    final Comparator finalGroupComparator = groupComparator;
-    final Comparator finalSortComparator = sortComparator;
-
-    comparator = new Comparator<TuplePair>()
+  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
     {
-    @Override
-    public int compare( TuplePair lhs, TuplePair rhs )
+    try
       {
-      int c = finalGroupComparator.compare( lhs.getLhs(), rhs.getLhs() );
+      lhsBuffer.reset( b1, s1, l1 );
+      rhsBuffer.reset( b2, s2, l2 );
+
+      int c = compareTuples( groupComparators );
 
       if( c != 0 )
         return c;
 
-      return finalSortComparator.compare( lhs.getRhs(), rhs.getRhs() );
+      return compareTuples( sortComparators );
       }
-    };
-    }
-
-  void setDeserializer( TupleSerialization tupleSerialization ) throws IOException
-    {
-    setDeserializer( tupleSerialization.getTuplePairDeserializer() );
+    catch( IOException exception )
+      {
+      throw new CascadingException( exception );
+      }
     }
 
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return comparator.compare( lhs, rhs );
+    int c = lhs.getLhs().compareTo( groupComparators, rhs.getLhs() );
+
+    if( c != 0 )
+      return c;
+
+    return lhs.getRhs().compareTo( sortComparators, rhs.getRhs() );
     }
   }

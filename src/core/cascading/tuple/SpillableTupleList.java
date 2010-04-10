@@ -262,7 +262,7 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      long size = tupleInputStream.readLong();
+      long size = tupleInputStream.readVLong();
       List<Tuple> list = new LinkedList<Tuple>();
 
       for( int i = 0; i < size; i++ )
@@ -288,9 +288,9 @@ public class SpillableTupleList implements Iterable<Tuple>
         inputStream = codec.createInputStream( new FileInputStream( file ) );
 
       if( tupleSerialization == null )
-        return new TupleInputStream( inputStream, false );
+        return new TupleInputStream( inputStream );
       else
-        return new TupleInputStream( inputStream, tupleSerialization.getElementReader( false ) );
+        return new TupleInputStream( inputStream, tupleSerialization.getElementReader() );
       }
     catch( IOException exception )
       {

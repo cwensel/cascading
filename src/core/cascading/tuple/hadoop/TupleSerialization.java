@@ -302,23 +302,22 @@ public class TupleSerialization extends Configured implements Serialization
 
   TuplePairDeserializer getTuplePairDeserializer()
     {
-    return new TuplePairDeserializer( getElementReader( true ) );
+    return new TuplePairDeserializer( getElementReader() );
     }
 
   /**
    * Method getElementReader returns the elementReader of this TupleSerialization object.
    *
-   * @param reuseInstances
    * @return the elementReader (type SerializationElementReader) of this TupleSerialization object.
    */
-  public SerializationElementReader getElementReader( boolean reuseInstances )
+  public SerializationElementReader getElementReader()
     {
     return new SerializationElementReader( this );
     }
 
   TupleDeserializer getTupleDeserializer()
     {
-    return new TupleDeserializer( getElementReader( true ) );
+    return new TupleDeserializer( getElementReader() );
     }
 
   private TuplePairSerializer getTuplePairSerializer()
@@ -328,7 +327,7 @@ public class TupleSerialization extends Configured implements Serialization
 
   IndexTupleDeserializer getIndexTupleDeserializer()
     {
-    return new IndexTupleDeserializer( getElementReader( false ) );
+    return new IndexTupleDeserializer( getElementReader() );
     }
 
   /**

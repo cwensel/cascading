@@ -22,22 +22,27 @@
 package cascading.tuple.hadoop;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 import cascading.CascadingException;
+import cascading.tuple.Fields;
+import cascading.tuple.TupleInputStream;
+import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.InputBuffer;
 import org.apache.hadoop.io.RawComparator;
-import org.apache.hadoop.io.serializer.Deserializer;
 
 /** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
   {
-  InputBuffer buffer = new InputBuffer();
-  Deserializer<T> deserializer;
+  InputBuffer lhsBuffer = new InputBuffer();
+  InputBuffer rhsBuffer = new InputBuffer();
 
-  private T key1;
-  private T key2;
+  TupleInputStream lhsStream;
+  TupleInputStream rhsStream;
+
+  Comparator[] groupComparators = null;
 
   @Override
   public void setConf( Configuration conf )
@@ -46,49 +51,79 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     TupleSerialization tupleSerialization = new TupleSerialization( conf );
 
+    lhsStream = new TupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
+    rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
+
+    if( conf == null )
+      return;
+
+    groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
+    }
+
+  Comparator[] deserializeComparatorsFor( String name )
+    {
     try
       {
-      setDeserializer( tupleSerialization );
+      String value = getConf().get( name );
+
+      if( value == null )
+        return null;
+
+      return ( (Fields) Util.deserializeBase64( value ) ).getComparators();
       }
     catch( IOException exception )
       {
-      throw new CascadingException( "unable to create deserializer", exception );
+      throw new CascadingException( "unable to deserialize comparators for: " + name );
       }
     }
 
-  abstract void setDeserializer( TupleSerialization tupleSerialization ) throws IOException;
-
-  void setDeserializer( Deserializer<T> deserializer ) throws IOException
+  int compareTuples( Comparator[] comparators ) throws IOException
     {
-    this.deserializer = deserializer;
-    this.deserializer.open( buffer );
-    }
+    int lhsLen = lhsStream.getNumElements();
+    int rhsLen = rhsStream.getNumElements();
 
-  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
-    {
-    try
+    int c = lhsLen - rhsLen;
+
+    if( c != 0 )
+      return c;
+
+    if( comparators == null )
+      comparators = new Comparator[lhsLen];
+
+    for( int i = 0; i < lhsLen; i++ )
       {
+      try
+        {
+        Object lhs = lhsStream.getNextElement();
+        Object rhs = rhsStream.getNextElement();
 
-      buffer.reset( b1, s1, l1 );
-      key1 = deserializer.deserialize( key1 );
+        c = 0;
 
-      buffer.reset( b2, s2, l2 );
-      key2 = deserializer.deserialize( key2 );
+        if( comparators[ i ] != null )
+          c = comparators[ i ].compare( lhs, rhs );
+        else if( lhs == null && rhs == null )
+          c = 0;
+        else if( lhs == null && rhs != null )
+            return -1;
+          else if( lhs != null && rhs == null )
+              return 1;
+            else
+              c = ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
 
-      }
-    catch( IOException e )
-      {
-      throw new CascadingException( e );
+        if( c != 0 )
+          return c;
+
+        }
+      catch( Exception exception )
+        {
+        throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
+          "different types or custom comparators are incorrectly set on Fields", exception );
+        }
+
+      if( c != 0 )
+        return c;
       }
 
-    try
-      {
-      return compare( key1, key2 );
-      }
-    catch( ClassCastException exception )
-      {
-      throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
-        "different types or custom comparators are incorrectly set on Fields", exception );
-      }
+    return 0;
     }
   }

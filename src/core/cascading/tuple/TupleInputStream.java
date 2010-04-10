@@ -51,10 +51,10 @@ public class TupleInputStream extends DataInputStream
     this.elementReader = elementReader;
     }
 
-  public TupleInputStream( InputStream inputStream, boolean reuseInstances )
+  public TupleInputStream( InputStream inputStream )
     {
     super( inputStream );
-    this.elementReader = new TupleSerialization().getElementReader( reuseInstances );
+    this.elementReader = new TupleSerialization().getElementReader();
     }
 
   public Tuple readTuple() throws IOException
@@ -67,12 +67,22 @@ public class TupleInputStream extends DataInputStream
     List<Object> elements = Tuple.elements( tuple );
 
     elements.clear();
-    int len = WritableUtils.readVInt( this );
+    int len = getNumElements();
 
     for( int i = 0; i < len; i++ )
-      elements.add( readType( WritableUtils.readVInt( this ) ) );
+      elements.add( getNextElement() );
 
     return tuple;
+    }
+
+  public int getNumElements() throws IOException
+    {
+    return readVInt();
+    }
+
+  public Object getNextElement() throws IOException
+    {
+    return readType( readVInt() );
     }
 
   public TuplePair readTuplePair() throws IOException
@@ -97,10 +107,25 @@ public class TupleInputStream extends DataInputStream
 
   public IndexTuple readIndexTuple( IndexTuple indexTuple ) throws IOException
     {
-    indexTuple.setIndex( WritableUtils.readVInt( this ) );
+    indexTuple.setIndex( readVInt() );
     indexTuple.setTuple( readTuple() );
 
     return indexTuple;
+    }
+
+  public long readVLong() throws IOException
+    {
+    return WritableUtils.readVLong( this );
+    }
+
+  public int readVInt() throws IOException
+    {
+    return WritableUtils.readVInt( this );
+    }
+
+  public String readString() throws IOException
+    {
+    return WritableUtils.readString( this );
     }
 
   private final Object readType( int type ) throws IOException
@@ -110,15 +135,15 @@ public class TupleInputStream extends DataInputStream
       case 0:
         return null;
       case 1:
-        return WritableUtils.readString( this );
+        return readString();
       case 2:
         return readFloat();
       case 3:
         return readDouble();
       case 4:
-        return WritableUtils.readVInt( this );
+        return readVInt();
       case 5:
-        return WritableUtils.readVLong( this );
+        return readVLong();
       case 6:
         return readBoolean();
       case 7:
