@@ -24,7 +24,7 @@ package cascading.tuple.hadoop;
 import cascading.tuple.TuplePair;
 
 /** Class ReverseTuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
-public class ReverseTuplePairComparator extends TuplePairComparator
+public class ReverseGroupingSortingComparator extends GroupingSortingComparator
   {
   @Override
   public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )

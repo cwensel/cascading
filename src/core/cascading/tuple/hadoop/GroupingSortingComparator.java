@@ -29,7 +29,7 @@ import cascading.tuple.TuplePair;
 import org.apache.hadoop.conf.Configuration;
 
 /** Class TuplePairComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
-public class TuplePairComparator extends DeserializerComparator<TuplePair>
+public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
   {
   Comparator[] sortComparators;
 
