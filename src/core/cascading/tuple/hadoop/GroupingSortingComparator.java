@@ -41,12 +41,6 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
     if( conf == null )
       return;
 
-    String group = conf.get( "cascading.group.comparator" );
-    String sort = conf.get( "cascading.sort.comparator" );
-
-    if( sort == null && group == null )
-      return;
-
     sortComparators = deserializeComparatorsFor( "cascading.sort.comparator" );
     }
 
