@@ -21,32 +21,39 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
-import cascading.CascadingException;
-import cascading.tuple.TuplePair;
-
-/** Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
-public class GroupingComparator extends DeserializerComparator<TuplePair>
+/**
+ *
+ */
+public class BufferedInputStream extends ByteArrayInputStream
   {
-  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
+  public BufferedInputStream()
     {
-    try
-      {
-      lhsBuffer.reset( b1, s1, l1 );
-      rhsBuffer.reset( b2, s2, l2 );
-
-      // only compare the first tuple in the pair
-      return compareTuples( groupStreamComparators );
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( exception );
-      }
+    super( new byte[]{} );
     }
 
-  public int compare( TuplePair lhs, TuplePair rhs )
+  public void reset( byte[] input, int start, int length )
     {
-    return lhs.getLhs().compareTo( groupComparators, rhs.getLhs() );
+    this.buf = input;
+    this.count = start + length;
+    this.mark = start;
+    this.pos = start;
+    }
+
+  public byte[] getBuffer()
+    {
+    return buf;
+    }
+
+  public int getPosition()
+    {
+    return pos;
+    }
+
+  public int getLength()
+    {
+    return count;
     }
   }
+

@@ -21,32 +21,38 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.IOException;
+import java.io.InputStream;
 
 import cascading.CascadingException;
-import cascading.tuple.TuplePair;
+import cascading.tuple.StreamComparator;
+import cascading.tuple.TupleInputStream;
 
-/** Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
-public class GroupingComparator extends DeserializerComparator<TuplePair>
+/**
+ *
+ */
+public class TupleElementStreamComparator implements StreamComparator<TupleInputStream>
   {
-  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
+  StreamComparator comparator;
+
+  public TupleElementStreamComparator( StreamComparator comparator )
+    {
+    this.comparator = comparator;
+    }
+
+  @Override
+  public int compare( TupleInputStream lhsStream, TupleInputStream rhsStream )
     {
     try
       {
-      lhsBuffer.reset( b1, s1, l1 );
-      rhsBuffer.reset( b2, s2, l2 );
+      InputStream lhs = (InputStream) lhsStream.getInputStream();
+      InputStream rhs = (InputStream) rhsStream.getInputStream();
 
-      // only compare the first tuple in the pair
-      return compareTuples( groupStreamComparators );
+      return comparator.compare( lhs, rhs );
       }
-    catch( IOException exception )
+    catch( Exception exception )
       {
-      throw new CascadingException( exception );
+      throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
+        "different types or custom comparators are incorrectly set on Fields", exception );
       }
-    }
-
-  public int compare( TuplePair lhs, TuplePair rhs )
-    {
-    return lhs.getLhs().compareTo( groupComparators, rhs.getLhs() );
     }
   }

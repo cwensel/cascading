@@ -21,13 +21,18 @@
 
 package cascading;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
+
+import cascading.tuple.TupleInputStream;
+import cascading.tuple.hadoop.BufferedInputStream;
+import cascading.tuple.StreamComparator;
 
 /**
  *
  */
-public class TestStringComparator implements Comparator<String>, Serializable
+public class TestStringComparator implements StreamComparator<BufferedInputStream>, Comparator<String>, Serializable
   {
   boolean reverse = true;
 
@@ -44,5 +49,21 @@ public class TestStringComparator implements Comparator<String>, Serializable
   public int compare( String o1, String o2 )
     {
     return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
+    }
+
+  @Override
+  public int compare( BufferedInputStream lhsStream, BufferedInputStream rhsStream )
+    {
+    TupleInputStream lhsInput = new TupleInputStream( lhsStream );
+    TupleInputStream rhsInput = new TupleInputStream( rhsStream );
+
+    try
+      {
+      return compare( (String) lhsInput.getNextElement(), (String) rhsInput.getNextElement() );
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( exception );
+      }
     }
   }

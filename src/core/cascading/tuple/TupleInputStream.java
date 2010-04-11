@@ -36,6 +36,7 @@ public class TupleInputStream extends DataInputStream
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
 
+  InputStream inputStream;
   ElementReader elementReader;
 
   public interface ElementReader
@@ -48,13 +49,20 @@ public class TupleInputStream extends DataInputStream
   public TupleInputStream( InputStream inputStream, ElementReader elementReader )
     {
     super( inputStream );
+    this.inputStream = inputStream;
     this.elementReader = elementReader;
     }
 
   public TupleInputStream( InputStream inputStream )
     {
     super( inputStream );
+    this.inputStream = inputStream;
     this.elementReader = new TupleSerialization().getElementReader();
+    }
+
+  public InputStream getInputStream()
+    {
+    return inputStream;
     }
 
   public Tuple readTuple() throws IOException

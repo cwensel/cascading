@@ -25,24 +25,27 @@ import java.io.IOException;
 import java.util.Comparator;
 
 import cascading.CascadingException;
+import cascading.tuple.StreamComparator;
+import cascading.tuple.hadoop.BufferedInputStream;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleInputStream;
+import cascading.tuple.hadoop.TupleElementComparator;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.io.InputBuffer;
 import org.apache.hadoop.io.RawComparator;
 
 /** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
   {
-  InputBuffer lhsBuffer = new InputBuffer();
-  InputBuffer rhsBuffer = new InputBuffer();
+  BufferedInputStream lhsBuffer = new BufferedInputStream();
+  BufferedInputStream rhsBuffer = new BufferedInputStream();
 
   TupleInputStream lhsStream;
   TupleInputStream rhsStream;
 
-  Comparator[] groupComparators = null;
+  Comparator[] groupComparators;
+  StreamComparator<TupleInputStream>[] groupStreamComparators;
 
   @Override
   public void setConf( Configuration conf )
@@ -54,17 +57,15 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     lhsStream = new TupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
     rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
 
-    if( conf == null )
-      return;
-
     groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
+    groupStreamComparators = streamComparatorsFor( groupComparators );
     }
 
   Comparator[] deserializeComparatorsFor( String name )
     {
     try
       {
-      String value = getConf().get( name );
+      String value = getConf() == null ? null : getConf().get( name );
 
       if( value == null )
         return null;
@@ -77,7 +78,25 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       }
     }
 
-  int compareTuples( Comparator[] comparators ) throws IOException
+  StreamComparator<TupleInputStream>[] streamComparatorsFor( Comparator[] fieldComparators )
+    {
+    if( fieldComparators == null )
+      return new TupleElementComparator[]{new TupleElementComparator()};
+
+    StreamComparator<TupleInputStream>[] comparators = new StreamComparator[fieldComparators.length];
+
+    for( int i = 0; i < comparators.length; i++ )
+      {
+      if( fieldComparators[ i ] instanceof StreamComparator )
+        comparators[ i ] = new TupleElementStreamComparator( (StreamComparator) fieldComparators[ i ] );
+      else
+        comparators[ i ] = new TupleElementComparator( fieldComparators[ i ] );
+      }
+
+    return comparators;
+    }
+
+  int compareTuples( StreamComparator<TupleInputStream>[] comparators ) throws IOException
     {
     int lhsLen = lhsStream.getNumElements();
     int rhsLen = rhsStream.getNumElements();
@@ -87,38 +106,10 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     if( c != 0 )
       return c;
 
-    if( comparators == null )
-      comparators = new Comparator[lhsLen];
-
     for( int i = 0; i < lhsLen; i++ )
       {
-      try
-        {
-        Object lhs = lhsStream.getNextElement();
-        Object rhs = rhsStream.getNextElement();
-
-        c = 0;
-
-        if( comparators[ i ] != null )
-          c = comparators[ i ].compare( lhs, rhs );
-        else if( lhs == null && rhs == null )
-          c = 0;
-        else if( lhs == null && rhs != null )
-            return -1;
-          else if( lhs != null && rhs == null )
-              return 1;
-            else
-              c = ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
-
-        if( c != 0 )
-          return c;
-
-        }
-      catch( Exception exception )
-        {
-        throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
-          "different types or custom comparators are incorrectly set on Fields", exception );
-        }
+      // hack to support comparators array length of 1
+      c = comparators[ i % comparators.length ].compare( lhsStream, rhsStream );
 
       if( c != 0 )
         return c;
