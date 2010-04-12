@@ -262,7 +262,7 @@ public class SpillableTupleList implements Iterable<Tuple>
     {
     try
       {
-      long size = tupleInputStream.readVLong();
+      long size = tupleInputStream.readLong();
       List<Tuple> list = new LinkedList<Tuple>();
 
       for( int i = 0; i < size; i++ )
