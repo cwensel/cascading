@@ -59,7 +59,10 @@ public class TestLongComparator implements StreamComparator<BufferedInputStream>
 
     try
       {
-      return compare( (Long) lhsInput.getNextElement(), (Long) rhsInput.getNextElement() );
+      // explicit for debugging purposes
+      Long l1 = (Long) lhsInput.getNextElement();
+      Long l2 = (Long) rhsInput.getNextElement();
+      return reverse ? l2.compareTo( l1 ) : l1.compareTo( l2 );
       }
     catch( IOException exception )
       {

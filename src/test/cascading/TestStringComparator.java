@@ -59,7 +59,10 @@ public class TestStringComparator implements StreamComparator<BufferedInputStrea
 
     try
       {
-      return compare( (String) lhsInput.getNextElement(), (String) rhsInput.getNextElement() );
+      // explicit for debugging purposes
+      String s1 = (String) lhsInput.getNextElement();
+      String s2 = (String) rhsInput.getNextElement();
+      return reverse ? s2.compareTo( s1 ) : s1.compareTo( s2 );
       }
     catch( IOException exception )
       {
