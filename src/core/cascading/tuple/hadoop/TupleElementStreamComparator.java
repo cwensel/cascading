@@ -44,6 +44,11 @@ public class TupleElementStreamComparator implements StreamComparator<TupleInput
     {
     try
       {
+      // pop off element type, its assumed we know it as we have a stream comparator
+      // to delegate too
+      lhsStream.readVInt();
+      rhsStream.readVInt();
+
       InputStream lhs = (InputStream) lhsStream.getInputStream();
       InputStream rhs = (InputStream) rhsStream.getInputStream();
 

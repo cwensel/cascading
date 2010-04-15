@@ -24,10 +24,11 @@ package cascading.tuple.hadoop;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import cascading.tuple.StreamComparator;
 import org.apache.hadoop.io.WritableComparator;
 
 /** Class BytesComparator is used to compare arrays of bytes. */
-public class BytesComparator implements Comparator<byte[]>, Serializable
+public class BytesComparator implements StreamComparator<BufferedInputStream>, Comparator<byte[]>, Serializable
   {
   @Override
   public int compare( byte[] lhs, byte[] rhs )
@@ -36,5 +37,27 @@ public class BytesComparator implements Comparator<byte[]>, Serializable
       return 0;
 
     return WritableComparator.compareBytes( lhs, 0, lhs.length, rhs, 0, rhs.length );
+    }
+
+  @Override
+  public int compare( BufferedInputStream lhsStream, BufferedInputStream rhsStream )
+    {
+    byte[] lhs = lhsStream.getBuffer();
+    int lhsPos = lhsStream.getPosition();
+    int lhsLen = readLen( lhs, lhsPos );
+
+    byte[] rhs = rhsStream.getBuffer();
+    int rhsPos = rhsStream.getPosition();
+    int rhsLen = readLen( rhs, rhsPos );
+
+    return WritableComparator.compareBytes( lhs, lhsPos + 4, lhsLen, rhs, rhsPos + 4, rhsLen );
+    }
+
+  private int readLen( byte[] buffer, int off )
+    {
+    return ( ( buffer[ off ] & 0xff ) << 24 ) +
+      ( ( buffer[ off + 1 ] & 0xff ) << 16 ) +
+      ( ( buffer[ off + 2 ] & 0xff ) << 8 ) +
+      ( buffer[ off + 3 ] & 0xff );
     }
   }

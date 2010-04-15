@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import cascading.tuple.StreamComparator;
 import cascading.tuple.TupleInputStream;
 import cascading.tuple.hadoop.BufferedInputStream;
-import cascading.tuple.StreamComparator;
 
 /**
  *
@@ -60,8 +60,8 @@ public class TestStringComparator implements StreamComparator<BufferedInputStrea
     try
       {
       // explicit for debugging purposes
-      String s1 = (String) lhsInput.getNextElement();
-      String s2 = (String) rhsInput.getNextElement();
+      String s1 = (String) lhsInput.readString();
+      String s2 = (String) rhsInput.readString();
       return reverse ? s2.compareTo( s1 ) : s1.compareTo( s2 );
       }
     catch( IOException exception )
