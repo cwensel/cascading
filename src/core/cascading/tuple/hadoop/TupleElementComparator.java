@@ -30,12 +30,12 @@ import cascading.tuple.TupleInputStream;
 /**
  *
  */
-public class TupleElementComparator implements StreamComparator<TupleInputStream>
+public class TupleElementComparator implements StreamComparator<TupleInputStream>, Comparator<Object>
   {
-  Comparator comparator = new Comparator()
+  Comparator comparator = new Comparator<Comparable>()
   {
   @Override
-  public int compare( Object lhs, Object rhs )
+  public int compare( Comparable lhs, Comparable rhs )
     {
     if( lhs == null && rhs == null )
       return 0;
@@ -46,7 +46,7 @@ public class TupleElementComparator implements StreamComparator<TupleInputStream
     if( lhs != null && rhs == null )
       return 1;
 
-    return ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
+    return lhs.compareTo( rhs ); // guaranteed to not be null
     }
   };
 
@@ -58,6 +58,12 @@ public class TupleElementComparator implements StreamComparator<TupleInputStream
     {
     if( comparator != null )
       this.comparator = comparator;
+    }
+
+  @Override
+  public int compare( Object lhs, Object rhs )
+    {
+    return comparator.compare( lhs, rhs );
     }
 
   @Override

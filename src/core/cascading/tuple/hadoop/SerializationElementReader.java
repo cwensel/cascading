@@ -25,6 +25,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,19 +59,8 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
 
   public Object read( int token, DataInputStream inputStream ) throws IOException
     {
-    String className = tupleSerialization.getClassNameFor( token );
-
-    if( className == null )
-      className = WritableUtils.readString( inputStream );
-
-    Deserializer deserializer = deserializers.get( className );
-
-    if( deserializer == null )
-      {
-      deserializer = tupleSerialization.getNewDeserializer( className );
-      deserializer.open( inputStream );
-      deserializers.put( className, deserializer );
-      }
+    String className = getClassNameFor( token, inputStream );
+    Deserializer deserializer = getDeserializerFor( inputStream, className );
 
     Object foundObject = null;
     Object object = null;
@@ -87,6 +77,38 @@ public class SerializationElementReader implements TupleInputStream.ElementReade
       }
 
     return object;
+    }
+
+  @Override
+  public Comparator getComparatorFor( int token, DataInputStream inputStream ) throws IOException
+    {
+    Class type = tupleSerialization.getClass( getClassNameFor( token, inputStream ) );
+
+    return tupleSerialization.getComparator( type );
+    }
+
+  private Deserializer getDeserializerFor( DataInputStream inputStream, String className ) throws IOException
+    {
+    Deserializer deserializer = deserializers.get( className );
+
+    if( deserializer == null )
+      {
+      deserializer = tupleSerialization.getNewDeserializer( className );
+      deserializer.open( inputStream );
+      deserializers.put( className, deserializer );
+      }
+
+    return deserializer;
+    }
+
+  public String getClassNameFor( int token, DataInputStream inputStream ) throws IOException
+    {
+    String className = tupleSerialization.getClassNameFor( token );
+
+    if( className == null )
+      className = WritableUtils.readString( inputStream );
+
+    return className;
     }
 
   public void close()

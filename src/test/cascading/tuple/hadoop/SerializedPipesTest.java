@@ -22,6 +22,7 @@
 package cascading.tuple.hadoop;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -338,6 +339,17 @@ public class SerializedPipesTest extends ClusterTestCase
 
   public void testCoGroupRawAsKeyValue() throws Exception
     {
+    invokeRawAsKeyValue( false );
+    }
+
+  public void testCoGroupRawAsKeyValueDefault() throws Exception
+    {
+    invokeRawAsKeyValue( true );
+    }
+
+  private void invokeRawAsKeyValue( boolean useDefaultComparator )
+    throws IOException
+    {
     if( !new File( inputFileLower ).exists() )
       fail( "data file not found" );
 
@@ -366,14 +378,19 @@ public class SerializedPipesTest extends ClusterTestCase
     pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes" ), Fields.ALL );
 
     Fields groupFields = new Fields( "group" );
-    groupFields.setComparator( "group", new BytesComparator() );
+
+    if( !useDefaultComparator )
+      groupFields.setComparator( "group", new BytesComparator() );
 
     Fields declaredFields = new Fields( "num", "char", "group", "value", "num2", "char2", "group2", "value2" );
     Pipe splice = new CoGroup( pipeLower, groupFields, pipeUpper, groupFields, declaredFields );
 
     // test sorting comparison
     Fields valueFields = new Fields( "value" );
-    valueFields.setComparator( "value", new BytesComparator() );
+
+    if( !useDefaultComparator )
+      valueFields.setComparator( "value", new BytesComparator() );
+
     splice = new GroupBy( splice, groupFields, valueFields );
 
     Map<Object, Object> properties = getProperties();

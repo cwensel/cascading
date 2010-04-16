@@ -19,34 +19,14 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.tuple.hadoop;
+package cascading.tuple;
 
-import java.io.IOException;
+import java.util.Comparator;
 
-import cascading.CascadingException;
-import cascading.tuple.TuplePair;
-
-/** Class GroupingComparator is an implementation of {@link org.apache.hadoop.io.RawComparator}. */
-public class GroupingComparator extends DeserializerComparator<TuplePair>
+/**
+ *
+ */
+public interface Comparison<T>
   {
-  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
-    {
-    try
-      {
-      lhsBuffer.reset( b1, s1, l1 );
-      rhsBuffer.reset( b2, s2, l2 );
-
-      // only compare the first tuple in the pair
-      return compareTuples( groupComparators );
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( exception );
-      }
-    }
-
-  public int compare( TuplePair lhs, TuplePair rhs )
-    {
-    return lhs.getLhs().compareTo( groupComparators, rhs.getLhs() );
-    }
+  Comparator<T> getComparator( Class<T> type );
   }

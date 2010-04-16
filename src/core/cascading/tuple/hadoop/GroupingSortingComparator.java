@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.Comparator;
 
 import cascading.CascadingException;
-import cascading.tuple.StreamComparator;
-import cascading.tuple.TupleInputStream;
 import cascading.tuple.TuplePair;
 import org.apache.hadoop.conf.Configuration;
 
@@ -34,7 +32,6 @@ import org.apache.hadoop.conf.Configuration;
 public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
   {
   Comparator[] sortComparators;
-  StreamComparator<TupleInputStream>[] sortStreamComparators;
 
   @Override
   public void setConf( Configuration conf )
@@ -42,7 +39,7 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
     super.setConf( conf );
 
     sortComparators = deserializeComparatorsFor( "cascading.sort.comparator" );
-    sortStreamComparators = streamComparatorsFor( sortComparators );
+    sortComparators = streamComparatorsFor( sortComparators );
     }
 
   public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
@@ -52,12 +49,12 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
       lhsBuffer.reset( b1, s1, l1 );
       rhsBuffer.reset( b2, s2, l2 );
 
-      int c = compareTuples( groupStreamComparators );
+      int c = compareTuples( groupComparators );
 
       if( c != 0 )
         return c;
 
-      return compareTuples( sortStreamComparators );
+      return compareTuples( sortComparators );
       }
     catch( IOException exception )
       {

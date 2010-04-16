@@ -39,7 +39,7 @@ public class IndexTupleCoGroupingComparator extends DeserializerComparator<Index
       int lhsIndex = lhsStream.readVInt();
       int rhsIndex = rhsStream.readVInt();
 
-      int c = compareTuples( groupStreamComparators );
+      int c = compareTuples( groupComparators );
 
       if( c != 0 )
         return c;

@@ -26,7 +26,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Comparator;
 
+import cascading.tuple.Comparison;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
@@ -40,7 +42,7 @@ import org.apache.hadoop.io.serializer.Serializer;
  * {@code TupleSerialization.addSerialization(properties,BytesSerialization.class.getName() );}
  */
 @SerializationToken(tokens = {126}, classNames = {"[B"})
-public class BytesSerialization extends Configured implements Serialization<byte[]>
+public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>
   {
 
   public static class RawBytesDeserializer implements Deserializer<byte[]>
@@ -123,5 +125,11 @@ public class BytesSerialization extends Configured implements Serialization<byte
   public Deserializer<byte[]> getDeserializer( Class<byte[]> c )
     {
     return new RawBytesDeserializer();
+    }
+
+  @Override
+  public Comparator<byte[]> getComparator( Class<byte[]> type )
+    {
+    return new BytesComparator();
     }
   }

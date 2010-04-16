@@ -22,6 +22,7 @@
 package cascading.tuple.hadoop;
 
 import java.io.InputStream;
+import java.util.Comparator;
 
 import cascading.CascadingException;
 import cascading.tuple.StreamComparator;
@@ -30,7 +31,7 @@ import cascading.tuple.TupleInputStream;
 /**
  *
  */
-public class TupleElementStreamComparator implements StreamComparator<TupleInputStream>
+public class TupleElementStreamComparator implements StreamComparator<TupleInputStream>, Comparator<Object>
   {
   StreamComparator comparator;
 
@@ -40,14 +41,20 @@ public class TupleElementStreamComparator implements StreamComparator<TupleInput
     }
 
   @Override
+  public int compare( Object lhs, Object rhs )
+    {
+    return ( (Comparator<Object>) comparator ).compare( lhs, rhs );
+    }
+
+  @Override
   public int compare( TupleInputStream lhsStream, TupleInputStream rhsStream )
     {
     try
       {
       // pop off element type, its assumed we know it as we have a stream comparator
       // to delegate too
-      lhsStream.readVInt();
-      rhsStream.readVInt();
+      lhsStream.readToken();
+      rhsStream.readToken();
 
       InputStream lhs = (InputStream) lhsStream.getInputStream();
       InputStream rhs = (InputStream) rhsStream.getInputStream();

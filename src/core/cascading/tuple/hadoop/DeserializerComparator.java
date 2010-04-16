@@ -25,11 +25,9 @@ import java.io.IOException;
 import java.util.Comparator;
 
 import cascading.CascadingException;
-import cascading.tuple.StreamComparator;
-import cascading.tuple.hadoop.BufferedInputStream;
 import cascading.tuple.Fields;
+import cascading.tuple.StreamComparator;
 import cascading.tuple.TupleInputStream;
-import cascading.tuple.hadoop.TupleElementComparator;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -41,24 +39,25 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
   BufferedInputStream lhsBuffer = new BufferedInputStream();
   BufferedInputStream rhsBuffer = new BufferedInputStream();
 
+  TupleSerialization tupleSerialization;
+
   TupleInputStream lhsStream;
   TupleInputStream rhsStream;
 
   Comparator[] groupComparators;
-  StreamComparator<TupleInputStream>[] groupStreamComparators;
 
   @Override
   public void setConf( Configuration conf )
     {
     super.setConf( conf );
 
-    TupleSerialization tupleSerialization = new TupleSerialization( conf );
+    tupleSerialization = new TupleSerialization( conf );
 
     lhsStream = new TupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
     rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
 
     groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
-    groupStreamComparators = streamComparatorsFor( groupComparators );
+    groupComparators = streamComparatorsFor( groupComparators );
     }
 
   Comparator[] deserializeComparatorsFor( String name )
@@ -78,25 +77,27 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       }
     }
 
-  StreamComparator<TupleInputStream>[] streamComparatorsFor( Comparator[] fieldComparators )
+  Comparator[] streamComparatorsFor( Comparator[] fieldComparators )
     {
     if( fieldComparators == null )
-      return new TupleElementComparator[]{new TupleElementComparator()};
+      return new Comparator[]{new DelegatingTupleElementComparator( tupleSerialization )};
 
-    StreamComparator<TupleInputStream>[] comparators = new StreamComparator[fieldComparators.length];
+    Comparator[] comparators = new Comparator[fieldComparators.length];
 
     for( int i = 0; i < comparators.length; i++ )
       {
       if( fieldComparators[ i ] instanceof StreamComparator )
         comparators[ i ] = new TupleElementStreamComparator( (StreamComparator) fieldComparators[ i ] );
-      else
+      else if( comparators[ i ] != null )
         comparators[ i ] = new TupleElementComparator( fieldComparators[ i ] );
+      else
+        comparators[ i ] = new DelegatingTupleElementComparator( tupleSerialization );
       }
 
     return comparators;
     }
 
-  int compareTuples( StreamComparator<TupleInputStream>[] comparators ) throws IOException
+  int compareTuples( Comparator[] comparators ) throws IOException
     {
     int lhsLen = lhsStream.getNumElements();
     int rhsLen = rhsStream.getNumElements();
@@ -109,7 +110,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     for( int i = 0; i < lhsLen; i++ )
       {
       // hack to support comparators array length of 1
-      c = comparators[ i % comparators.length ].compare( lhsStream, rhsStream );
+      c = ( (StreamComparator) comparators[ i % comparators.length ] ).compare( lhsStream, rhsStream );
 
       if( c != 0 )
         return c;

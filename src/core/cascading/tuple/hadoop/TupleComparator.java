@@ -36,7 +36,7 @@ public class TupleComparator extends DeserializerComparator<Tuple> implements Co
       lhsBuffer.reset( b1, s1, l1 );
       rhsBuffer.reset( b2, s2, l2 );
 
-      return compareTuples( groupStreamComparators );
+      return compareTuples( groupComparators );
       }
     catch( IOException exception )
       {

@@ -21,10 +21,12 @@
 
 package cascading.tuple.hadoop;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import cascading.CascadingException;
+import cascading.tuple.Comparison;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
@@ -276,6 +278,26 @@ public class TupleSerialization extends Configured implements Serialization
     return classesTokensMap.get( className );
     }
 
+  public Comparator getComparator( Class type )
+    {
+    Serialization serialization = getSerialization( type );
+
+    if( serialization instanceof Comparison )
+      return ( (Comparison) serialization ).getComparator( type );
+
+    return null;
+    }
+
+  Serialization getSerialization( String className )
+    {
+    return getSerialization( getClass( className ) );
+    }
+
+  Serialization getSerialization( Class type )
+    {
+    return getSerializationFactory().getSerialization( type );
+    }
+
   Serializer getNewSerializer( Class type )
     {
     try
@@ -397,7 +419,7 @@ public class TupleSerialization extends Configured implements Serialization
     throw new IllegalArgumentException( "unknown class, cannot serialize: " + c.getName() );
     }
 
-  private Class getClass( String className )
+  public Class getClass( String className )
     {
     Class type = classCache.get( className );
 

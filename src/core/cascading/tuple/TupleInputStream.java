@@ -24,6 +24,7 @@ package cascading.tuple;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.List;
 
 import cascading.tuple.hadoop.TupleSerialization;
@@ -42,6 +43,8 @@ public class TupleInputStream extends DataInputStream
   public interface ElementReader
     {
     Object read( int token, DataInputStream inputStream ) throws IOException;
+
+    Comparator getComparatorFor( int type, DataInputStream inputStream ) throws IOException;
 
     void close();
     }
@@ -88,9 +91,14 @@ public class TupleInputStream extends DataInputStream
     return readVInt();
     }
 
+  public int readToken() throws IOException
+    {
+    return readVInt();
+    }
+
   public Object getNextElement() throws IOException
     {
-    return readType( readVInt() );
+    return readType( readToken() );
     }
 
   public TuplePair readTuplePair() throws IOException
@@ -165,6 +173,14 @@ public class TupleInputStream extends DataInputStream
       default:
         return elementReader.read( type, this );
       }
+    }
+
+  public Comparator getComparatorFor( int type ) throws IOException
+    {
+    if( type >= 0 && type <= 10 )
+      return null;
+
+    return elementReader.getComparatorFor( type, this );
     }
 
   @Override
