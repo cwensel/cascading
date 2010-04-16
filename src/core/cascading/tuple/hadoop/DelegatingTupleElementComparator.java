@@ -42,10 +42,6 @@ public class DelegatingTupleElementComparator implements StreamComparator<TupleI
     this.tupleSerialization = tupleSerialization;
     }
 
-  public DelegatingTupleElementComparator()
-    {
-    }
-
   @Override
   public int compare( Object lhs, Object rhs )
     {

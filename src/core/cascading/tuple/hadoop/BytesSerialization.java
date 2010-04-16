@@ -40,6 +40,12 @@ import org.apache.hadoop.io.serializer.Serializer;
  * <p/>
  * To use, call<br/>
  * {@code TupleSerialization.addSerialization(properties,BytesSerialization.class.getName() );}
+ * <p/>
+ * This class also implements {@link Comparison} so it is not required to set a {@link BytesComparator}
+ * when attempting to group on a byte array via GroupBy or CoGroup.
+ *
+ * @see cascading.tuple.hadoop.BytesComparator
+ * @see Comparison
  */
 @SerializationToken(tokens = {126}, classNames = {"[B"})
 public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>

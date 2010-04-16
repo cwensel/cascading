@@ -57,7 +57,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
 
     groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
-    groupComparators = streamComparatorsFor( groupComparators );
+    groupComparators = delegatingComparatorsFor( groupComparators );
     }
 
   Comparator[] deserializeComparatorsFor( String name )
@@ -77,7 +77,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       }
     }
 
-  Comparator[] streamComparatorsFor( Comparator[] fieldComparators )
+  Comparator[] delegatingComparatorsFor( Comparator[] fieldComparators )
     {
     if( fieldComparators == null )
       return new Comparator[]{new DelegatingTupleElementComparator( tupleSerialization )};

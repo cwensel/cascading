@@ -39,7 +39,7 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
     super.setConf( conf );
 
     sortComparators = deserializeComparatorsFor( "cascading.sort.comparator" );
-    sortComparators = streamComparatorsFor( sortComparators );
+    sortComparators = delegatingComparatorsFor( sortComparators );
     }
 
   public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
