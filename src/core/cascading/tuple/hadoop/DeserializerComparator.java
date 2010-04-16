@@ -27,6 +27,7 @@ import java.util.Comparator;
 import cascading.CascadingException;
 import cascading.tuple.Fields;
 import cascading.tuple.StreamComparator;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleInputStream;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
@@ -45,7 +46,6 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
   TupleInputStream rhsStream;
 
   Comparator[] groupComparators;
-  Comparator[] streamGroupComparators;
 
   @Override
   public void setConf( Configuration conf )
@@ -58,12 +58,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
 
     groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
-    streamGroupComparators = delegatingComparatorsFor( groupComparators );
-
-    // leave groupComparators null so tuple compare delegation works
-    // when the grouping fields is a substitution
-    if( groupComparators != null )
-      groupComparators = streamGroupComparators;
+    groupComparators = delegatingComparatorsFor( groupComparators );
     }
 
   Comparator[] deserializeComparatorsFor( String name )
@@ -103,7 +98,29 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     return comparators;
     }
 
-  int compareTuples( Comparator[] comparators ) throws IOException
+  final int compareTuples( Comparator[] comparators, Tuple lhs, Tuple rhs )
+    {
+    int lhsLen = lhs.size();
+    int rhsLen = rhs.size();
+
+    int c = lhsLen - rhsLen;
+
+    if( c != 0 )
+      return c;
+
+    for( int i = 0; i < lhsLen; i++ )
+      {
+      // hack to support comparators array length of 1
+      c = comparators[ i % comparators.length ].compare( lhs.getObject( i ), rhs.getObject( i ) );
+
+      if( c != 0 )
+        return c;
+      }
+
+    return 0;
+    }
+
+  final int compareTuples( Comparator[] comparators ) throws IOException
     {
     int lhsLen = lhsStream.getNumElements();
     int rhsLen = rhsStream.getNumElements();

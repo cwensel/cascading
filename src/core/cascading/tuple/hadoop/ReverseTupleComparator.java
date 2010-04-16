@@ -36,5 +36,4 @@ public class ReverseTupleComparator extends TupleComparator
     {
     return super.compare( rhs, lhs );
     }
-
   }

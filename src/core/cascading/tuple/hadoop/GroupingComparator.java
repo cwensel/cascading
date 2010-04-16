@@ -37,7 +37,7 @@ public class GroupingComparator extends DeserializerComparator<TuplePair>
       rhsBuffer.reset( b2, s2, l2 );
 
       // only compare the first tuple in the pair
-      return compareTuples( streamGroupComparators );
+      return compareTuples( groupComparators );
       }
     catch( IOException exception )
       {
@@ -47,6 +47,6 @@ public class GroupingComparator extends DeserializerComparator<TuplePair>
 
   public int compare( TuplePair lhs, TuplePair rhs )
     {
-    return lhs.getLhs().compareTo( groupComparators, rhs.getLhs() );
+    return compareTuples( groupComparators, lhs.getLhs(), rhs.getLhs() );
     }
   }

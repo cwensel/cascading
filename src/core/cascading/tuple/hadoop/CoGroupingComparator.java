@@ -40,7 +40,7 @@ public class CoGroupingComparator extends DeserializerComparator<IndexTuple>
       lhsStream.readVInt();
       rhsStream.readVInt();
 
-      return compareTuples( streamGroupComparators );
+      return compareTuples( groupComparators );
       }
     catch( IOException exception )
       {
@@ -50,6 +50,6 @@ public class CoGroupingComparator extends DeserializerComparator<IndexTuple>
 
   public int compare( IndexTuple lhs, IndexTuple rhs )
     {
-    return lhs.getTuple().compareTo( groupComparators, rhs.getTuple() );
+    return compareTuples( groupComparators, lhs.getTuple(), rhs.getTuple() );
     }
   }

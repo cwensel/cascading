@@ -37,5 +37,4 @@ public class ReverseGroupingSortingComparator extends GroupingSortingComparator
     {
     return super.compare( rhs, lhs );
     }
-
   }
