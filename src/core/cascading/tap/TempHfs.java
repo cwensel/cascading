@@ -22,6 +22,7 @@
 package cascading.tap;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Set;
 
 import cascading.CascadingException;
@@ -131,6 +132,13 @@ public class TempHfs extends Hfs
 
     temporaryPath = makeTemporaryPathDir( name );
     stringPath = new Path( getTempPath( conf ), temporaryPath ).toString();
+    }
+
+  @Override
+  public URI getURIScheme( JobConf jobConf ) throws IOException
+    {
+    makeTemporaryFile( jobConf );
+    return super.getURIScheme( jobConf );
     }
 
   @Override
