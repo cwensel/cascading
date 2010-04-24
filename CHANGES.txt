@@ -1,5 +1,12 @@
 Cascading Change Log
 
+1.2-WIP
+
+  Added c.t.Comparison and c.t.StreamComparator interfaces which allow for custom types to be
+  lazily deserialized during sort comparisons.
+
+  Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
+
 1.1.0
 
   Fixed bug where a c.t.Fields instance can be marked as ordered when modified via #set call.
