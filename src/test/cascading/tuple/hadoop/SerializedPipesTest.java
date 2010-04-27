@@ -35,6 +35,7 @@ import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
@@ -92,19 +93,35 @@ public class SerializedPipesTest extends ClusterTestCase
       }
     }
 
-  public static class InsertRawBytes extends BaseOperation implements Function
+  public static class InsertRawBytes extends BaseOperation<Long> implements Function<Long>
     {
     String asBytes;
+    private boolean increment;
 
-    public InsertRawBytes( Fields fieldDeclaration, String asBytes )
+    public InsertRawBytes( Fields fieldDeclaration, String asBytes, boolean increment )
       {
       super( fieldDeclaration );
       this.asBytes = asBytes;
+      this.increment = increment;
       }
 
-    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+    @Override
+    public void prepare( FlowProcess flowProcess, OperationCall<Long> operationCall )
       {
-      functionCall.getOutputCollector().add( new Tuple( (Object) asBytes.getBytes() ) );
+      operationCall.setContext( increment ? 0L : -1L );
+      }
+
+    public void operate( FlowProcess flowProcess, FunctionCall<Long> functionCall )
+      {
+      String string = asBytes;
+
+      if( functionCall.getContext() != -1 )
+        {
+        string = functionCall.getContext() + string;
+        functionCall.setContext( functionCall.getContext() + 1 );
+        }
+
+      functionCall.getOutputCollector().add( new Tuple( (Object) string.getBytes() ) );
       }
     }
 
@@ -367,15 +384,15 @@ public class SerializedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/hadoop/rawbyteskeyvalue", true );
+    Tap sink = new Hfs( new SequenceFile( new Fields( "num", "char", "group", "value", "num2", "char2", "group2", "value2" ) ), outputPath + "/hadoop/rawbyteskeyvalue", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "group" ), "inserted text as bytes" ), Fields.ALL );
-    pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes" ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "group" ), "inserted text as bytes", true ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-    pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "group" ), "inserted text as bytes" ), Fields.ALL );
-    pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes" ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "group" ), "inserted text as bytes", true ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Fields groupFields = new Fields( "group" );
 
@@ -402,7 +419,23 @@ public class SerializedPipesTest extends ClusterTestCase
 
     countFlow.complete();
 
-    validateLength( countFlow, 25, null );
+    validateLength( countFlow, 5, null );
+
+    // test the ordering
+    TupleEntryIterator iterator = countFlow.openSink();
+    String value = new String( (byte[]) iterator.next().getObject( "value" ) );
+
+    while( iterator.hasNext() )
+      {
+      String next = new String( (byte[]) iterator.next().getObject( "value" ) );
+
+      if( value.compareTo( next ) >= 0 )
+        fail( "not increasing: " + value + " " + value );
+
+      value = next;
+      }
+
+    iterator.close();
     }
 
   }
