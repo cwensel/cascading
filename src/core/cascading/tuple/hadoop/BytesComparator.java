@@ -46,9 +46,13 @@ public class BytesComparator implements StreamComparator<BufferedInputStream>, C
     int lhsPos = lhsStream.getPosition();
     int lhsLen = readLen( lhs, lhsPos );
 
+    lhsStream.skip( lhsLen + 4 );
+
     byte[] rhs = rhsStream.getBuffer();
     int rhsPos = rhsStream.getPosition();
     int rhsLen = readLen( rhs, rhsPos );
+
+    rhsStream.skip( rhsLen + 4 );
 
     return WritableComparator.compareBytes( lhs, lhsPos + 4, lhsLen, rhs, rhsPos + 4, rhsLen );
     }

@@ -356,15 +356,25 @@ public class SerializedPipesTest extends ClusterTestCase
 
   public void testCoGroupRawAsKeyValue() throws Exception
     {
-    invokeRawAsKeyValue( false );
+    invokeRawAsKeyValue( false, true );
     }
 
   public void testCoGroupRawAsKeyValueDefault() throws Exception
     {
-    invokeRawAsKeyValue( true );
+    invokeRawAsKeyValue( true, true );
     }
 
-  private void invokeRawAsKeyValue( boolean useDefaultComparator )
+  public void testCoGroupRawAsKeyValueNoSecondary() throws Exception
+    {
+    invokeRawAsKeyValue( false, false );
+    }
+
+  public void testCoGroupRawAsKeyValueDefaultNoSecondary() throws Exception
+    {
+    invokeRawAsKeyValue( true, false );
+    }
+
+  private void invokeRawAsKeyValue( boolean useDefaultComparator, boolean secondarySortOnValue )
     throws IOException
     {
     if( !new File( inputFileLower ).exists() )
@@ -384,7 +394,8 @@ public class SerializedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new SequenceFile( new Fields( "num", "char", "group", "value", "num2", "char2", "group2", "value2" ) ), outputPath + "/hadoop/rawbyteskeyvalue", true );
+    Fields fields = new Fields( "num", "char", "group", "value", "num2", "char2", "group2", "value2" );
+    Tap sink = new Hfs( new SequenceFile( fields ), outputPath + "/hadoop/rawbyteskeyvalue/" + useDefaultComparator + "/" + secondarySortOnValue, true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "group" ), "inserted text as bytes", true ), Fields.ALL );
@@ -408,26 +419,26 @@ public class SerializedPipesTest extends ClusterTestCase
     if( !useDefaultComparator )
       valueFields.setComparator( "value", new BytesComparator() );
 
-    splice = new GroupBy( splice, groupFields, valueFields );
+    if( secondarySortOnValue )
+      splice = new GroupBy( splice, groupFields, valueFields );
+    else
+      splice = new GroupBy( splice, groupFields );
 
     Map<Object, Object> properties = getProperties();
     TupleSerialization.addSerialization( properties, BytesSerialization.class.getName() );
-    Flow countFlow = new FlowConnector( properties ).connect( sources, sink, splice );
+    Flow flow = new FlowConnector( properties ).connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
-
-    validateLength( countFlow, 5, null );
+    validateLength( flow, 5, null );
 
     // test the ordering
-    TupleEntryIterator iterator = countFlow.openSink();
-    String value = new String( (byte[]) iterator.next().getObject( "value" ) );
+    TupleEntryIterator iterator = flow.openSink();
+    String value = new String( (byte[]) iterator.next().getObject( "group" ) );
 
     while( iterator.hasNext() )
       {
-      String next = new String( (byte[]) iterator.next().getObject( "value" ) );
+      String next = new String( (byte[]) iterator.next().getObject( "group" ) );
 
       if( value.compareTo( next ) >= 0 )
         fail( "not increasing: " + value + " " + value );
