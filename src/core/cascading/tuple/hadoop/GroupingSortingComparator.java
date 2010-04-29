@@ -38,6 +38,9 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
     {
     super.setConf( conf );
 
+    if( conf == null )
+      return;
+
     sortComparators = deserializeComparatorsFor( "cascading.sort.comparator" );
     sortComparators = delegatingComparatorsFor( sortComparators );
     }

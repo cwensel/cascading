@@ -50,6 +50,9 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
   @Override
   public void setConf( Configuration conf )
     {
+    if( conf == null )
+      return;
+
     super.setConf( conf );
 
     tupleSerialization = new TupleSerialization( conf );
@@ -65,12 +68,20 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     {
     try
       {
-      String value = getConf() == null ? null : getConf().get( name );
-
-      if( value == null )
+      if( getConf() == null )
         return null;
 
-      return ( (Fields) Util.deserializeBase64( value ) ).getComparators();
+      String value = getConf().get( name );
+
+      if( value == null )
+        return new Comparator[getConf().getInt( name + ".size", 0 )];
+
+      Fields fields = (Fields) Util.deserializeBase64( value );
+
+      if( fields.isSubstitution() )
+        throw new CascadingException( "unable to perform comparison when grouping or sorting fields are unknown" );
+
+      return fields.getComparators();
       }
     catch( IOException exception )
       {
@@ -80,9 +91,6 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
   Comparator[] delegatingComparatorsFor( Comparator[] fieldComparators )
     {
-    if( fieldComparators == null )
-      return new Comparator[]{new DelegatingTupleElementComparator( tupleSerialization )};
-
     Comparator[] comparators = new Comparator[fieldComparators.length];
 
     for( int i = 0; i < comparators.length; i++ )

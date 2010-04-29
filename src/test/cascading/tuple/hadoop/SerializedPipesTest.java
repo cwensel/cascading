@@ -356,25 +356,40 @@ public class SerializedPipesTest extends ClusterTestCase
 
   public void testCoGroupRawAsKeyValue() throws Exception
     {
-    invokeRawAsKeyValue( false, true );
+    invokeRawAsKeyValue( false, true, false, false );
     }
 
   public void testCoGroupRawAsKeyValueDefault() throws Exception
     {
-    invokeRawAsKeyValue( true, true );
+    invokeRawAsKeyValue( true, true, false, false );
+    }
+
+  public void testCoGroupRawAsKeyValueDefaultIgnoreToken() throws Exception
+    {
+    invokeRawAsKeyValue( true, true, true, false );
+    }
+
+  public void testCoGroupRawAsKeyValueDefaultIgnoreTokenCompositeGrouping() throws Exception
+    {
+    invokeRawAsKeyValue( true, true, true, true );
     }
 
   public void testCoGroupRawAsKeyValueNoSecondary() throws Exception
     {
-    invokeRawAsKeyValue( false, false );
+    invokeRawAsKeyValue( false, false, false, false );
     }
 
   public void testCoGroupRawAsKeyValueDefaultNoSecondary() throws Exception
     {
-    invokeRawAsKeyValue( true, false );
+    invokeRawAsKeyValue( true, false, false, false );
     }
 
-  private void invokeRawAsKeyValue( boolean useDefaultComparator, boolean secondarySortOnValue )
+  public void testCoGroupRawAsKeyValueDefaultNoSecondaryCompositeGrouping() throws Exception
+    {
+    invokeRawAsKeyValue( true, false, false, true );
+    }
+
+  private void invokeRawAsKeyValue( boolean useDefaultComparator, boolean secondarySortOnValue, boolean ignoreSerializationToken, boolean compositeGrouping )
     throws IOException
     {
     if( !new File( inputFileLower ).exists() )
@@ -407,6 +422,9 @@ public class SerializedPipesTest extends ClusterTestCase
 
     Fields groupFields = new Fields( "group" );
 
+    if( compositeGrouping )
+      groupFields = new Fields( "group", "num" );
+
     if( !useDefaultComparator )
       groupFields.setComparator( "group", new BytesComparator() );
 
@@ -425,7 +443,12 @@ public class SerializedPipesTest extends ClusterTestCase
       splice = new GroupBy( splice, groupFields );
 
     Map<Object, Object> properties = getProperties();
-    TupleSerialization.addSerialization( properties, BytesSerialization.class.getName() );
+
+    if( !ignoreSerializationToken )
+      TupleSerialization.addSerialization( properties, BytesSerialization.class.getName() );
+    else
+      TupleSerialization.addSerialization( properties, TestBytesSerialization.class.getName() );
+
     Flow flow = new FlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();

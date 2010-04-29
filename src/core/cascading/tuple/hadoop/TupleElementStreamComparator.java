@@ -27,6 +27,7 @@ import java.util.Comparator;
 import cascading.CascadingException;
 import cascading.tuple.StreamComparator;
 import cascading.tuple.TupleInputStream;
+import cascading.tuple.TupleOutputStream;
 
 /**
  *
@@ -53,8 +54,14 @@ public class TupleElementStreamComparator implements StreamComparator<TupleInput
       {
       // pop off element type, its assumed we know it as we have a stream comparator
       // to delegate too
-      lhsStream.readToken();
+      int lhsToken = lhsStream.readToken();
       rhsStream.readToken();
+
+      if( lhsToken == TupleOutputStream.WRITABLE_TOKEN )
+        {
+        lhsStream.readString();
+        rhsStream.readString();
+        }
 
       InputStream lhs = (InputStream) lhsStream.getInputStream();
       InputStream rhs = (InputStream) rhsStream.getInputStream();

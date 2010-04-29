@@ -51,8 +51,8 @@ import cascading.tuple.hadoop.GroupingComparator;
 import cascading.tuple.hadoop.GroupingPartitioner;
 import cascading.tuple.hadoop.GroupingSortingComparator;
 import cascading.tuple.hadoop.IndexTupleCoGroupingComparator;
-import cascading.tuple.hadoop.ReverseTupleComparator;
 import cascading.tuple.hadoop.ReverseGroupingSortingComparator;
+import cascading.tuple.hadoop.ReverseTupleComparator;
 import cascading.tuple.hadoop.TupleComparator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
@@ -319,6 +319,8 @@ public class FlowStep implements Serializable
 
     if( fields.hasComparators() )
       conf.set( property, Util.serializeBase64( fields ) );
+    else
+      conf.setInt( property + ".size", fields.size() );
 
     return;
     }
