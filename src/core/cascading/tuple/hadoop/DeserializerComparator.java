@@ -75,13 +75,9 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       String value = getConf().get( name );
 
       if( value == null )
-        return new Comparator[getConf().getInt( name + ".size", 0 )];
+        return new Comparator[getConf().getInt( name + ".size", 1 )];
 
       Fields fields = (Fields) Util.deserializeBase64( value );
-
-      // todo: need to serialize resolved fields if are substitution
-      if( fields.isSubstitution() )
-        throw new CascadingException( "unable to perform comparison when grouping or sorting fields are unknown" );
 
       return fields.getComparators();
       }

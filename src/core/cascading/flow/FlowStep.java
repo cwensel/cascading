@@ -327,7 +327,9 @@ public class FlowStep implements Serializable
     Set<Scope> previousScopes = getPreviousScopes( group );
 
     fields = previousScopes.iterator().next().getOutValuesFields();
-    conf.setInt( property + ".size", fields.size() );
+
+    if( fields.size() != 0 ) // allows fields.UNKNOWN to be used
+      conf.setInt( property + ".size", fields.size() );
 
     return;
     }
