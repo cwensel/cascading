@@ -57,6 +57,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     tupleSerialization = new TupleSerialization( conf );
 
+    // get new readers so deserializers don't compete for the buffer
     lhsStream = new TupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
     rhsStream = new TupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
 
@@ -69,7 +70,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     try
       {
       if( getConf() == null )
-        return null;
+        throw new IllegalStateException( "no conf set" );
 
       String value = getConf().get( name );
 
@@ -78,6 +79,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
       Fields fields = (Fields) Util.deserializeBase64( value );
 
+      // todo: need to serialize resolved fields if are substitution
       if( fields.isSubstitution() )
         throw new CascadingException( "unable to perform comparison when grouping or sorting fields are unknown" );
 

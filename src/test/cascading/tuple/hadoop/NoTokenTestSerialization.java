@@ -24,44 +24,9 @@ package cascading.tuple.hadoop;
 /**
  *
  */
-public class TestText implements Comparable<TestText>
+public class NoTokenTestSerialization extends TestSerialization
   {
-  String value;
-
-  public TestText()
+  public NoTokenTestSerialization()
     {
-    }
-
-  public TestText( String string )
-    {
-    this.value = string;
-    }
-
-  @Override
-  public int compareTo( TestText o )
-    {
-    return value.compareTo( o.value );
-    }
-
-  @Override
-  public int hashCode()
-    {
-    return value.hashCode();
-    }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-
-    TestText testText = (TestText) object;
-
-    if( value != null ? !value.equals( testText.value ) : testText.value != null )
-      return false;
-
-    return true;
     }
   }

@@ -318,9 +318,16 @@ public class FlowStep implements Serializable
     Fields fields = fieldsIterator.next();
 
     if( fields.hasComparators() )
+      {
       conf.set( property, Util.serializeBase64( fields ) );
-    else
-      conf.setInt( property + ".size", fields.size() );
+      return;
+      }
+
+    // use resolved fields if there are no comparators.
+    Set<Scope> previousScopes = getPreviousScopes( group );
+
+    fields = previousScopes.iterator().next().getOutValuesFields();
+    conf.setInt( property + ".size", fields.size() );
 
     return;
     }

@@ -24,9 +24,9 @@ package cascading.tuple.hadoop;
 /**
  *
  */
-public class TestBytesSerialization extends BytesSerialization
+public class NoTokenTestBytesSerialization extends BytesSerialization
   {
-  public TestBytesSerialization()
+  public NoTokenTestBytesSerialization()
     {
     }
   }

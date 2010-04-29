@@ -26,7 +26,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Comparator;
 
+import cascading.tuple.Comparison;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.io.serializer.Deserializer;
@@ -37,7 +39,7 @@ import org.apache.hadoop.io.serializer.Serializer;
  *
  */
 @SerializationToken(tokens = {222}, classNames = {"cascading.tuple.hadoop.TestText"})
-public class TestSerialization extends Configured implements Serialization<TestText>
+public class TestSerialization extends Configured implements Comparison<TestText>, Serialization<TestText>
   {
 
   public static class TestTextDeserializer implements Deserializer<TestText>
@@ -113,5 +115,11 @@ public class TestSerialization extends Configured implements Serialization<TestT
   public Deserializer<TestText> getDeserializer( Class<TestText> c )
     {
     return new TestTextDeserializer();
+    }
+
+  @Override
+  public Comparator<TestText> getComparator( Class<TestText> type )
+    {
+    return new TestTextComparator();
     }
   }
