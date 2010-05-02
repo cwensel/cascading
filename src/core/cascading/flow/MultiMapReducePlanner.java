@@ -366,7 +366,7 @@ public class MultiMapReducePlanner extends FlowPlanner
   /**
    * will collapse adjacent and equivalent taps.
    * equivalence is based on the tap adjacent taps using the same filesystem
-   * and the sink being symetrical, and having the same fields as the temp tap.
+   * and the sink being symmetrical, and having the same fields as the temp tap.
    * <p/>
    * <p/>
    * must be run after fields are resolved so temp taps have fully defined scheme instances.

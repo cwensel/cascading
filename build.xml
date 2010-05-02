@@ -459,8 +459,13 @@
       <fileset file="${tar.cascading}"/>
     </S3Upload>
 
-    <echo message="http://${package.remote.bucket}/cascading/${cascading.release.major}/${tar.cascading}"
-          file="cascading-current.txt"/>
+    <exec executable="git" outputproperty="current-git-id">
+      <arg value="rev-parse"/>
+      <arg value="HEAD"/>
+    </exec>
+    <echo
+      message="http://${package.remote.bucket}/cascading/${cascading.release.major}/${tar.cascading} ${current-git-id}"
+      file="cascading-current.txt"/>
 
     <property name="package.remote.port" value="22"/>
     <scp file="cascading-current.txt" remoteTofile="${package.remote.path}/${cascading.release.major}/${tar.cascading}"
