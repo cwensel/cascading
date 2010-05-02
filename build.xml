@@ -459,12 +459,8 @@
       <fileset file="${tar.cascading}"/>
     </S3Upload>
 
-    <exec executable="git" outputproperty="current-git-id">
-      <arg value="rev-parse"/>
-      <arg value="HEAD"/>
-    </exec>
     <echo
-      message="http://${package.remote.bucket}/cascading/${cascading.release.major}/${tar.cascading} ${current-git-id}"
+      message="http://${package.remote.bucket}/cascading/${cascading.release.major}/${tar.cascading} ${build.vcs.number}"
       file="cascading-current.txt"/>
 
     <property name="package.remote.port" value="22"/>
