@@ -2,7 +2,7 @@ Cascading Change Log
 
 unreleased
 
-  
+  Fixed bug where c.t.Fields.SWAP did not properly resolve when following a c.p.Every pipe.  
 
 1.1.0
 

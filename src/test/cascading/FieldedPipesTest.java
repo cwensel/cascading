@@ -887,12 +887,15 @@ public class FieldedPipesTest extends ClusterTestCase
       fail( "data file not found" );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "ip" ) ), outputPath + "/swap", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "count", "ipaddress" ) ), outputPath + "/swap", true );
 
     Pipe pipe = new Pipe( "test" );
 
     Function parser = new RegexParser( new Fields( "ip" ), "^[^ ]*" );
     pipe = new Each( pipe, new Fields( "line" ), parser, Fields.SWAP );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Fields( "ip" ), new Count( new Fields( "count" ) ) );
+    pipe = new Each( pipe, new Fields( "ip" ), new Identity( new Fields( "ipaddress" ) ), Fields.SWAP );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
@@ -900,7 +903,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 10, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
+    validateLength( flow, 8, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
     }
 
   }
