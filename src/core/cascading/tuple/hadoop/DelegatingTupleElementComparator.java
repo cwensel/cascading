@@ -46,7 +46,12 @@ public class DelegatingTupleElementComparator implements StreamComparator<TupleI
   public int compare( Object lhs, Object rhs )
     {
     if( objectComparator == null )
+      {
+      if( lhs == null && rhs == null )
+        return 0;
+
       objectComparator = getComparator( lhs, rhs );
+      }
 
     return objectComparator.compare( lhs, rhs );
     }
