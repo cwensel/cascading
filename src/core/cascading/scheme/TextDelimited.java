@@ -34,8 +34,7 @@ import cascading.tuple.Tuples;
 import cascading.util.Util;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Class TextDelimited is a sub-class of {@link TextLine}. It provides direct support for delimited text files, like
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TextDelimited extends TextLine
   {
-  private static final Logger LOG = LoggerFactory.getLogger( TextDelimited.class );
+  private static final Logger LOG = Logger.getLogger( TextDelimited.class );
 
   private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s]%2$s[^%1$s])+%1$s)";
   private static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
