@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.
+
   Removed imports for SLF4J and replaced with Apache LOG4j in c.s.TextDelimited.
 
   Fixed bug where c.t.Fields.SWAP did not properly resolve when following a c.p.Every pipe.

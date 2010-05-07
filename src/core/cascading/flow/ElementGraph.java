@@ -614,6 +614,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return findAllOfType( 1, 2, Each.class, new LinkedList<Each>() );
     }
 
+  public List<Pipe> findAllPipeSplits()
+    {
+    return findAllOfType( 1, 2, Pipe.class, new LinkedList<Pipe>() );
+    }
+
   /**
    * Method findAllOfType ...
    *

@@ -331,10 +331,10 @@ public class MultiMapReducePlanner extends FlowPlanner
     {
     Set<Pipe> tapInsertions = new HashSet<Pipe>();
 
-    List<Each> splits = elementGraph.findAllEachSplits();
+    List<Pipe> splits = elementGraph.findAllPipeSplits();
 
-    // if any predecessor is safe, insert temp
-    for( Each split : splits )
+    // if any predecessor is unsafe, insert temp
+    for( Pipe split : splits )
       {
       List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsTo( split );
 
@@ -345,8 +345,11 @@ public class MultiMapReducePlanner extends FlowPlanner
 
         for( FlowElement element : elements )
           {
-          if( !( element instanceof Each ) )
+          if( !( element instanceof Each ) && element.getClass() != Pipe.class )
             break;
+
+          if( element.getClass() == Pipe.class )
+            continue;
 
           if( !( (Each) element ).getOperation().isSafe() )
             {

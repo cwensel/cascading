@@ -399,6 +399,49 @@ public class BuildJobsTest extends CascadingTestCase
     assertEquals( "wrong number of operations", 2, step.getAllOperations().size() );
     }
 
+  // verify unsafe splits happen when splitting on a pipe
+
+  public void testSplitOnNonSafeOperations2()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink3 = new Hfs( new TextLine(), "foo/split3", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    // this operation is not safe
+    pipe = new Each( pipe, new Fields( "line" ), new TestFunction( new Fields( "ignore" ), new Tuple( 1 ), false ), new Fields( "line" ) );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    pipe = new Pipe( "middle", pipe );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+    sinks.put( "middle", sink3 );
+
+    Flow flow = new FlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "splitonnonsafe.dot" );
+//    flow.writeStepsDOT( "splitonnonsafe-steps.dot" );
+
+    List<FlowStep> steps = flow.getSteps();
+
+    assertEquals( "not equal: steps.size()", 4, steps.size() );
+
+    FlowStep step = steps.get( 0 );
+
+    assertEquals( "wrong number of operations", 2, step.getAllOperations().size() );
+    }
+
   /**
    * This should result in a Temp Tap after the Each split.
    * <p/>
