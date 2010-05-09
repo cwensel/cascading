@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.1.1
 
   Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.
 
