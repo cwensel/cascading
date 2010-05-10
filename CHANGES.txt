@@ -7,6 +7,14 @@ Cascading Change Log
 
   Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
 
+1.1.1
+
+  Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.
+
+  Removed imports for SLF4J and replaced with Apache LOG4j in c.s.TextDelimited.
+
+  Fixed bug where c.t.Fields.SWAP did not properly resolve when following a c.p.Every pipe.
+
 1.1.0
 
   Fixed bug where a c.t.Fields instance can be marked as ordered when modified via #set call.

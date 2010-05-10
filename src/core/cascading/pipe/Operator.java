@@ -348,10 +348,12 @@ public abstract class Operator extends Pipe
     if( outputSelector.isValues() )
       return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
 
-    if( outputSelector.isSwap() )
-      return incomingScope.getOutValuesFields().subtract( argumentFields ).append( declaredFields );
-
+    // resolveFields returns the proper incoming fields
     Fields incomingFields = resolveFields( incomingScope );
+
+    // not part of resolve as we need the argumentFields
+    if( outputSelector.isSwap() )
+      return incomingFields.subtract( argumentFields ).append( declaredFields );
 
     try
       {
