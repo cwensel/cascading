@@ -7,6 +7,8 @@ Cascading Change Log
 
   Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
 
+unreleased
+
 1.1.1
 
   Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.
