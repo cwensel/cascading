@@ -204,7 +204,6 @@ public class SortedValuesTest extends ClusterTestCase
 
     pipe = new GroupBy( pipe, groupFields, sortFields, testCase[ 2 ] );
 
-
     Map<Object, Object> properties = getProperties();
 
     if( MultiMapReducePlanner.getJobConf( properties ) != null )
@@ -214,7 +213,7 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateCase( test, testCase, sink );
+    validateCase( test, testCase, sink, 0, 2 );
     }
 
   private void runComprehensiveCaseComplex( Boolean[] testCase ) throws IOException
@@ -225,7 +224,7 @@ public class SortedValuesTest extends ClusterTestCase
     copyFromLocal( inputFileCross );
 
     String test = Util.join( testCase, "_", true );
-    String path = "comprehensive/" + test;
+    String path = "comprehensivecomplex/" + test;
 
     Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
     Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "upper", "count" ), 1 ), outputPath + path, true );
@@ -238,21 +237,19 @@ public class SortedValuesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Fields( "upper" ), new Count( new Fields( "count" ) ) );
 
-    pipe = new Each( pipe, new Fields( "count" ), new Identity( long.class ), Fields.REPLACE );
-
-    Fields groupFields = new Fields( "upper" );
+    Fields groupFields = new Fields( "count" );
 
     if( testCase[ 0 ] )
-      groupFields.setComparator( "upper", new TestStringComparator() );
+      groupFields.setComparator( "count", new TestLongComparator() );
 
     Fields sortFields = null;
 
     if( testCase[ 1 ] != null )
       {
-      sortFields = new Fields( "count" );
+      sortFields = new Fields( "upper" );
 
       if( testCase[ 1 ] )
-        sortFields.setComparator( "count", new TestLongComparator() );
+        sortFields.setComparator( "upper", new TestStringComparator() );
       }
 
     pipe = new GroupBy( pipe, groupFields, sortFields, testCase[ 2 ] );
@@ -266,13 +263,12 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateCaseComplex( test, testCase, sink );
+    validateCase( test, testCase, sink, 1, 0 );
     }
 
-  private void validateCase( String test, Boolean[] testCase, Tap sink ) throws IOException
+  private void validateCase( String test, Boolean[] testCase, Tap sink, int numIndex, int charIndex ) throws IOException
     {
     TupleEntryIterator iterator = sink.openForRead( new JobConf() );
-
     LinkedHashMap<Long, List<String>> group = new LinkedHashMap<Long, List<String>>();
 
     while( iterator.hasNext() )
@@ -281,12 +277,12 @@ public class SortedValuesTest extends ClusterTestCase
 
       String[] values = tuple.getString( 0 ).split( "\\s" );
 
-      long num = Long.parseLong( values[ 0 ] );
+      long num = Long.parseLong( values[ numIndex ] );
 
       if( !group.containsKey( num ) )
         group.put( num, new ArrayList<String>() );
 
-      group.get( num ).add( values[ 2 ] );
+      group.get( num ).add( values[ charIndex ] );
       }
 
     boolean groupIsReversed = testCase[ 0 ];
@@ -305,46 +301,6 @@ public class SortedValuesTest extends ClusterTestCase
       valueIsReversed = !valueIsReversed;
 
     for( Long grouping : group.keySet() )
-      compare( "values+" + test, valueIsReversed, group.get( grouping ) );
-
-    }
-
-  private void validateCaseComplex( String test, Boolean[] testCase, Tap sink ) throws IOException
-    {
-    TupleEntryIterator iterator = sink.openForRead( new JobConf() );
-
-    LinkedHashMap<String, List<Long>> group = new LinkedHashMap<String, List<Long>>();
-
-    while( iterator.hasNext() )
-      {
-      Tuple tuple = iterator.next().getTuple();
-
-      String[] values = tuple.getString( 0 ).split( "\\s" );
-
-      String value = values[ 0 ];
-
-      if( !group.containsKey( value ) )
-        group.put( value, new ArrayList<Long>() );
-
-      group.get( value ).add( Long.parseLong( values[ 1 ] ) );
-      }
-
-    boolean groupIsReversed = testCase[ 0 ];
-
-    if( testCase[ 2 ] )
-      groupIsReversed = !groupIsReversed;
-
-    compare( "grouping+" + test, groupIsReversed, group.keySet() );
-
-    if( testCase[ 1 ] == null )
-      return;
-
-    boolean valueIsReversed = testCase[ 1 ];
-
-    if( testCase[ 2 ] )
-      valueIsReversed = !valueIsReversed;
-
-    for( String grouping : group.keySet() )
       compare( "values+" + test, valueIsReversed, group.get( grouping ) );
     }
 
