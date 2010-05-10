@@ -90,6 +90,7 @@ public class SortedValuesTest extends ClusterTestCase
       fail( "data file not found" );
 
     copyFromLocal( inputFileApache );
+    copyFromLocal( inputFileIps );
 
     Tap sourceApache = new Hfs( new TextLine(), inputFileApache );
     Tap sourceIP = new Hfs( new TextLine(), inputFileIps );
@@ -363,6 +364,8 @@ public class SortedValuesTest extends ClusterTestCase
 
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
 
     Tap source = new Lfs( new TextLine(), inputFileApache );
     Tap sink = new Lfs( new TextLine(), outputPath + path, true );
