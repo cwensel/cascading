@@ -95,7 +95,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       {
       if( fieldComparators[ i ] instanceof StreamComparator )
         comparators[ i ] = new TupleElementStreamComparator( (StreamComparator) fieldComparators[ i ] );
-      else if( comparators[ i ] != null )
+      else if( fieldComparators[ i ] != null )
         comparators[ i ] = new TupleElementComparator( fieldComparators[ i ] );
       else
         comparators[ i ] = new DelegatingTupleElementComparator( tupleSerialization );
