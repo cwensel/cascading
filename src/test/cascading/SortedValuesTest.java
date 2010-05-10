@@ -39,13 +39,11 @@ import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
-import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.DateParser;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
-import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
@@ -162,13 +160,13 @@ public class SortedValuesTest extends ClusterTestCase
     };
 
     for( int i = 0; i < testArray.length; i++ )
-      runComprehensiveCase( testArray[ i ] );
+      runComprehensiveCase( testArray[ i ], false );
 
     for( int i = 0; i < testArray.length; i++ )
-      runComprehensiveCaseComplex( testArray[ i ] );
+      runComprehensiveCase( testArray[ i ], true );
     }
 
-  private void runComprehensiveCase( Boolean[] testCase ) throws IOException
+  private void runComprehensiveCase( Boolean[] testCase, boolean useCollectionsComparator ) throws IOException
     {
     if( !new File( inputFileCross ).exists() )
       fail( "data file not found" );
@@ -190,7 +188,7 @@ public class SortedValuesTest extends ClusterTestCase
     Fields groupFields = new Fields( "num" );
 
     if( testCase[ 0 ] )
-      groupFields.setComparator( "num", new TestLongComparator() );
+      groupFields.setComparator( "num", useCollectionsComparator ? Collections.reverseOrder() : new TestLongComparator() );
 
     Fields sortFields = null;
 
@@ -199,7 +197,7 @@ public class SortedValuesTest extends ClusterTestCase
       sortFields = new Fields( "upper" );
 
       if( testCase[ 1 ] )
-        sortFields.setComparator( "upper", new TestStringComparator() );
+        sortFields.setComparator( "upper", useCollectionsComparator ? Collections.reverseOrder() : new TestStringComparator() );
       }
 
     pipe = new GroupBy( pipe, groupFields, sortFields, testCase[ 2 ] );
@@ -213,60 +211,10 @@ public class SortedValuesTest extends ClusterTestCase
 
     flow.complete();
 
-    validateCase( test, testCase, sink, 0, 2 );
+    validateCase( test, testCase, sink );
     }
 
-  private void runComprehensiveCaseComplex( Boolean[] testCase ) throws IOException
-    {
-    if( !new File( inputFileCross ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileCross );
-
-    String test = Util.join( testCase, "_", true );
-    String path = "comprehensivecomplex/" + test;
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
-    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "upper", "count" ), 1 ), outputPath + path, true );
-
-    Pipe pipe = new Pipe( "comprehensivesortcomplex" );
-
-    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ), "\\s" ) );
-
-    pipe = new GroupBy( pipe, new Fields( "upper" ) );
-
-    pipe = new Every( pipe, new Fields( "upper" ), new Count( new Fields( "count" ) ) );
-
-    Fields groupFields = new Fields( "count" );
-
-    if( testCase[ 0 ] )
-      groupFields.setComparator( "count", new TestLongComparator() );
-
-    Fields sortFields = null;
-
-    if( testCase[ 1 ] != null )
-      {
-      sortFields = new Fields( "upper" );
-
-      if( testCase[ 1 ] )
-        sortFields.setComparator( "upper", new TestStringComparator() );
-      }
-
-    pipe = new GroupBy( pipe, groupFields, sortFields, testCase[ 2 ] );
-
-    Map<Object, Object> properties = getProperties();
-
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
-
-    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    validateCase( test, testCase, sink, 1, 0 );
-    }
-
-  private void validateCase( String test, Boolean[] testCase, Tap sink, int numIndex, int charIndex ) throws IOException
+  private void validateCase( String test, Boolean[] testCase, Tap sink ) throws IOException
     {
     TupleEntryIterator iterator = sink.openForRead( new JobConf() );
     LinkedHashMap<Long, List<String>> group = new LinkedHashMap<Long, List<String>>();
@@ -277,12 +225,12 @@ public class SortedValuesTest extends ClusterTestCase
 
       String[] values = tuple.getString( 0 ).split( "\\s" );
 
-      long num = Long.parseLong( values[ numIndex ] );
+      long num = Long.parseLong( values[ 0 ] );
 
       if( !group.containsKey( num ) )
         group.put( num, new ArrayList<String>() );
 
-      group.get( num ).add( values[ charIndex ] );
+      group.get( num ).add( values[ 2 ] );
       }
 
     boolean groupIsReversed = testCase[ 0 ];
