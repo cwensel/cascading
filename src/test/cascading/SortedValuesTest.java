@@ -69,7 +69,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   public SortedValuesTest()
     {
-    super( "sorted values", true );
+    super( "sorted values", false ); // disable cluster
     }
 
   public void testCoGroupComparatorValues() throws Exception
@@ -133,7 +133,6 @@ public class SortedValuesTest extends ClusterTestCase
 
     validateFile( sink, 199, 16, reverseSort, 5 );
     }
-
 
   public void testComprehensiveGroupBy() throws IOException
     {
