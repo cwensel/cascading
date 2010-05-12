@@ -9,6 +9,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed NPE when counter group does not exist yet when querying c.s.FlowStats#getCounterValue.
+
 1.1.1
 
   Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.
