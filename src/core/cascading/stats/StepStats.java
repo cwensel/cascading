@@ -24,6 +24,12 @@ package cascading.stats;
 /** Class StepStats collects {@link cascading.flow.FlowStep} specific statistics. */
 public abstract class StepStats extends CascadingStats
   {
+  /** Constructor CascadingStats creates a new CascadingStats instance. */
+  protected StepStats( String name )
+    {
+    super( name );
+    }
+
   @Override
   public String toString()
     {

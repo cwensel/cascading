@@ -205,7 +205,7 @@ public class Flow implements Runnable
   protected Flow()
     {
     this.name = "NA";
-    this.flowStats = new FlowStats( getID() );
+    this.flowStats = new FlowStats( name, getID() );
     }
 
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
@@ -213,7 +213,7 @@ public class Flow implements Runnable
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
-    this.flowStats = new FlowStats( getID() );
+    this.flowStats = new FlowStats( name, getID() );
     setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );
@@ -226,7 +226,7 @@ public class Flow implements Runnable
     {
     this.name = name;
     this.stepGraph = stepGraph;
-    this.flowStats = new FlowStats( getID() );
+    this.flowStats = new FlowStats( name, getID() );
     setJobConf( jobConf );
     setSources( sources );
     setSinks( sinks );

@@ -104,7 +104,7 @@ public class Cascade implements Runnable
     {
     this.name = name;
     this.jobGraph = jobGraph;
-    this.cascadeStats = new CascadeStats( getID() );
+    this.cascadeStats = new CascadeStats( name, getID() );
     setIDOnFlow();
     }
 

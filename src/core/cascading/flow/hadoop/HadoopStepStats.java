@@ -138,6 +138,11 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  protected HadoopStepStats( String stepName )
+    {
+    super( stepName );
+    }
+
   public ArrayList<HadoopTaskStats> getTaskStats()
     {
     if( taskStats == null )
@@ -240,6 +245,7 @@ public abstract class HadoopStepStats extends StepStats
     setNumReducerTasks( ranJob.getNumReduceTasks() );
     }
 
+  @Override
   public Collection getChildren()
     {
     return getTaskStats();
