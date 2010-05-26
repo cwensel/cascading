@@ -23,6 +23,7 @@ package cascading;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -103,5 +104,4 @@ public class RegressionMiscTest extends CascadingTestCase
       // ignore
       }
     }
-
   }

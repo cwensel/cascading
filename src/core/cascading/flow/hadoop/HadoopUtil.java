@@ -70,6 +70,9 @@ public class HadoopUtil
       {
       Object value = properties.get( key );
 
+      if( value == null && properties instanceof Properties && key instanceof String )
+        value = ( (Properties) properties ).getProperty( (String) key );
+
       if( value == null ) // don't stuff null values
         continue;
 

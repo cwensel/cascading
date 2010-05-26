@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed missing property values when stored in a nested j.u.Properties object.
+
   Fixed NPE when counter group does not exist yet when querying c.s.FlowStats#getCounterValue.
 
 1.1.1
