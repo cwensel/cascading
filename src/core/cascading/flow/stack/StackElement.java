@@ -82,7 +82,7 @@ abstract class StackElement implements FlowCollector
     return trapCollector;
     }
 
-  private static void closeTraps()
+  private static synchronized void closeTraps()
     {
     for( TapCollector trapCollector : trapCollectors.values() )
       {
