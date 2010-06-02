@@ -1696,4 +1696,24 @@ public class BuildJobsTest extends CascadingTestCase
     {
     return DijkstraShortestPath.findPathBetween( graph, lhs, rhs ).size() - 1;
     }
+
+  public void testNestedProperties() throws IOException
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), "/input" );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.ALL );
+
+    Tap sink = new Hfs( new TextLine(), "output", true );
+
+    Properties defaultProperties = new Properties();
+
+    defaultProperties.setProperty( "test.key", "test.value" );
+
+    Flow flow = new FlowConnector( new Properties( defaultProperties ) ).connect( source, sink, pipe );
+
+    assertEquals( "test flow", "test.value", flow.getProperty( "test.key" ) );
+    assertEquals( "test step", "test.value", flow.getSteps().get( 0 ).getJobConf( flow.getJobConf() ).get( "test.key" ) );
+    }
   }

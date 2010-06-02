@@ -34,8 +34,9 @@ public class FlowStats extends CascadingStats
   String flowID;
   List<StepStats> stepStatsList = new ArrayList<StepStats>();
 
-  public FlowStats( String flowID )
+  public FlowStats( String flowName, String flowID )
     {
+    super( flowName );
     this.flowID = flowID;
     }
 
@@ -99,6 +100,7 @@ public class FlowStats extends CascadingStats
       stepStats.captureDetail();
     }
 
+  @Override
   public Collection getChildren()
     {
     return getStepStats();
