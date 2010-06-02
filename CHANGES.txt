@@ -9,6 +9,13 @@ Cascading Change Log
 
 unreleased
 
+  Fixed random j.u.ConcurrentModificationException error when running in Hadoop local mode by synchronizing
+  the c.f.s.StackElement#closeTraps method. 
+
+  Fixed missing property values when stored in a nested j.u.Properties object.
+
+  Fixed NPE when counter group does not exist yet when querying c.s.FlowStats#getCounterValue.
+
 1.1.1
 
   Fixed bug where some unsafe operations followed by named c.p.Pipe instances were not considered during planning.

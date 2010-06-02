@@ -49,6 +49,8 @@ public abstract class CascadingStats
       PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED;
     }
 
+  /** Field name */
+  String name;
   /** Field status */
   Status status = Status.PENDING;
   /** Field startTime */
@@ -59,8 +61,9 @@ public abstract class CascadingStats
   Throwable throwable;
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  CascadingStats()
+  CascadingStats( String name )
     {
+    this.name = name;
     }
 
   /**
@@ -70,6 +73,15 @@ public abstract class CascadingStats
    */
   public abstract Object getID();
 
+  /**
+   * Method getName returns the name of this CascadingStats object.
+   *
+   * @return the name (type String) of this CascadingStats object.
+   */
+  public String getName()
+    {
+    return name;
+    }
 
   /**
    * Method isFinished returns true if the current status show no work currently being executed. This method
@@ -205,6 +217,16 @@ public abstract class CascadingStats
   public long getStartTime()
     {
     return startTime;
+    }
+
+  /**
+   * Method getFinishedTime returns the finishedTime of this CascadingStats object.
+   *
+   * @return the finishedTime (type long) of this CascadingStats object.
+   */
+  public long getFinishedTime()
+    {
+    return finishedTime;
     }
 
   /**

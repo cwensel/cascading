@@ -35,8 +35,9 @@ public class CascadeStats extends CascadingStats
   /** Field flowStatsList */
   List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
 
-  public CascadeStats( String cascadeID )
+  public CascadeStats( String name, String cascadeID )
     {
+    super( name );
     this.cascadeID = cascadeID;
     }
 
@@ -95,6 +96,7 @@ public class CascadeStats extends CascadingStats
       flowStats.captureDetail();
     }
 
+  @Override
   public Collection getChildren()
     {
     return flowStatsList;

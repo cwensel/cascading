@@ -138,6 +138,11 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  protected HadoopStepStats( String stepName )
+    {
+    super( stepName );
+    }
+
   public ArrayList<HadoopTaskStats> getTaskStats()
     {
     if( taskStats == null )
@@ -195,11 +200,16 @@ public abstract class HadoopStepStats extends StepStats
     {
     try
       {
-      return getRunningJob().getCounters().getCounter( counter );
+      Counters counters = getRunningJob().getCounters();
+
+      if( counters == null )
+        return 0;
+
+      return counters.getCounter( counter );
       }
-    catch( IOException e )
+    catch( IOException exception )
       {
-      throw new FlowException( "unable to get counter values" );
+      throw new FlowException( "unable to get remote counter values" );
       }
     }
 
@@ -208,11 +218,21 @@ public abstract class HadoopStepStats extends StepStats
     {
     try
       {
-      return getRunningJob().getCounters().getGroup( group ).getCounter( counter );
+      Counters counters = getRunningJob().getCounters();
+
+      if( counters == null )
+        return 0;
+
+      Counters.Group counterGroup = counters.getGroup( group );
+
+      if( group == null )
+        return 0;
+
+      return counterGroup.getCounter( counter );
       }
-    catch( IOException e )
+    catch( IOException exception )
       {
-      throw new FlowException( "unable to get counter values" );
+      throw new FlowException( "unable to get remote counter values" );
       }
     }
 
@@ -225,6 +245,7 @@ public abstract class HadoopStepStats extends StepStats
     setNumReducerTasks( ranJob.getNumReduceTasks() );
     }
 
+  @Override
   public Collection getChildren()
     {
     return getTaskStats();

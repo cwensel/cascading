@@ -73,7 +73,7 @@ public class FlowStepJob implements Callable<Throwable>
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
 
-    stepStats = new HadoopStepStats()
+    stepStats = new HadoopStepStats( stepName )
     {
 
     @Override
