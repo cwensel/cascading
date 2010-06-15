@@ -40,6 +40,7 @@ import cascading.tuple.TupleEntryIterator;
 public class TextDelimitedTest extends CascadingTestCase
   {
   String testData = "build/test/data/delimited.txt";
+  String testSpecialCharData = "build/test/data/delimited-spec-char.txt";
 
   String outputPath = "build/test/output/delim";
 
@@ -51,12 +52,22 @@ public class TextDelimitedTest extends CascadingTestCase
 
   public void testQuotedText() throws IOException
     {
+    runQuotedText( "normchar", testData, "," );
+    }
+
+  public void testQuotedTextSpecChar() throws IOException
+    {
+    runQuotedText( "specchar", testSpecialCharData, "|" );
+    }
+
+  public void runQuotedText( String path, String inputData, String delimiter ) throws IOException
+    {
     Object[][] results = new Object[][]{
       {"foo", "bar", "baz", "bin", 1L},
       {"foo", "bar", "baz", "bin", 2L},
-      {"foo", "bar,bar", "baz", "bin", 3L},
-      {"foo", "bar\",bar", "baz", "bin", 4L},
-      {"foo", "bar\"\",bar", "baz", "bin", 5L},
+      {"foo", "bar" + delimiter + "bar", "baz", "bin", 3L},
+      {"foo", "bar\"" + delimiter + "bar", "baz", "bin", 4L},
+      {"foo", "bar\"\"" + delimiter + "bar", "baz", "bin", 5L},
       {null, null, "baz", null, 6L},
       {null, null, null, null, 7L},
       {"foo", null, null, null, 8L},
@@ -72,10 +83,10 @@ public class TextDelimitedTest extends CascadingTestCase
 
     Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
-    TextDelimited scheme = new TextDelimited( fields, ",", "\"", types );
+    TextDelimited scheme = new TextDelimited( fields, delimiter, "\"", types );
 
-    Hfs input = new Hfs( scheme, testData );
-    Hfs output = new Hfs( scheme, outputPath + "/quoted", SinkMode.REPLACE );
+    Hfs input = new Hfs( scheme, inputData );
+    Hfs output = new Hfs( scheme, outputPath + "/quoted/" + path, SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "pipe" );
 
