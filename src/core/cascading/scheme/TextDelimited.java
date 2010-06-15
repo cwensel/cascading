@@ -65,7 +65,7 @@ import org.apache.log4j.Logger;
 public class TextDelimited extends TextLine
   {
   private static final Logger LOG = Logger.getLogger( TextDelimited.class );
-
+  private static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!])";
   private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s]%2$s[^%1$s])+%1$s)";
   private static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
   private static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
@@ -443,10 +443,12 @@ public class TextDelimited extends TextLine
     if( quote != null && !quote.isEmpty() ) // if empty, leave null
       this.quote = quote;
 
+    String escapedDelimiter = delimiter.replaceAll( SPECIAL_REGEX_CHARS, "\\\\$1" );
+
     if( this.quote == null )
-      splitPattern = Pattern.compile( delimiter );
+      splitPattern = Pattern.compile( escapedDelimiter );
     else
-      splitPattern = Pattern.compile( String.format( QUOTED_REGEX_FORMAT, this.quote, delimiter ) );
+      splitPattern = Pattern.compile( String.format( QUOTED_REGEX_FORMAT, this.quote, escapedDelimiter ) );
 
     if( this.quote != null )
       {

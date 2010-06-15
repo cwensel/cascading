@@ -9,8 +9,10 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.s.TextDelimited would fail on delimiters that are also regex special characters.
+
   Fixed random j.u.ConcurrentModificationException error when running in Hadoop local mode by synchronizing
-  the c.f.s.StackElement#closeTraps method. 
+  the c.f.s.StackElement#closeTraps method.
 
   Fixed missing property values when stored in a nested j.u.Properties object.
 
