@@ -32,18 +32,19 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
   /** Field entry */
   final TupleEntry entry = new TupleEntry( true );
   /** Field iterator */
-  final Iterator iterator;
+  final Iterator[] iterators;
+  int currentIterator = 0;
 
   /**
    * Constructor TupleEntryIterator creates a new TupleEntryIterator instance.
    *
-   * @param fields   of type Fields
-   * @param iterator of type Iterator
+   * @param fields    of type Fields
+   * @param iterators of type Iterator
    */
-  public TupleEntryIterator( Fields fields, Iterator iterator )
+  public TupleEntryIterator( Fields fields, Iterator... iterators )
     {
     this.entry.fields = fields;
-    this.iterator = iterator;
+    this.iterators = iterators;
     }
 
   /**
@@ -76,7 +77,12 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
    */
   public boolean hasNext()
     {
-    return iterator.hasNext();
+    if( iterators[ currentIterator ].hasNext() )
+      return true;
+
+    currentIterator++;
+
+    return iterators.length != currentIterator && hasNext();
     }
 
   /**
@@ -86,7 +92,9 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
    */
   public TupleEntry next()
     {
-    entry.setTuple( (Tuple) iterator.next() );
+    hasNext(); // force roll to next iterator
+
+    entry.setTuple( (Tuple) iterators[ currentIterator ].next() );
 
     return entry;
     }
@@ -94,13 +102,16 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
   /** Method remove removes the current TypleEntry from the underlying collection. */
   public void remove()
     {
-    iterator.remove();
+    iterators[ currentIterator ].remove();
     }
 
   /** Method close closes all underlying resources. */
   public void close()
     {
-    if( iterator instanceof TupleIterator )
-      ( (TupleIterator) iterator ).close();
+    for( Iterator iterator : iterators )
+      {
+      if( iterator instanceof TupleIterator )
+        ( (TupleIterator) iterator ).close();
+      }
     }
   }

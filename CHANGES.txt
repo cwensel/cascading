@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.t.MultiSourceTap to support #openForRead().
+
   Added c.t.Comparison and c.t.StreamComparator interfaces which allow for custom types to be
   lazily deserialized during sort comparisons.
 
