@@ -177,7 +177,15 @@ public class CoGroupClosure extends GroupClosure
       {
       try
         {
+        LOG.info( "attempting to load codec: " + codec );
         codecClass = Thread.currentThread().getContextClassLoader().loadClass( codec ).asSubclass( CompressionCodec.class );
+
+        if( codecClass != null )
+          {
+          LOG.info( "found codec: " + codec );
+
+          break;
+          }
         }
       catch( ClassNotFoundException exception )
         {
