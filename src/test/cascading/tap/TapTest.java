@@ -43,6 +43,7 @@ import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -335,5 +336,21 @@ public class TapTest extends ClusterTestCase implements Serializable
 //    System.out.println( "countFlow =\n" + countFlow );
 
     validateLength( concatFlow, 10, null );
+    }
+
+  public void testMultiSourceIterator() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+
+    Tap source = new MultiSourceTap( sourceLower, sourceUpper );
+
+    validateLength( source.openForRead( new JobConf() ), 10, null );
     }
   }

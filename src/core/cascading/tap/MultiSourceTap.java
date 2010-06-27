@@ -24,8 +24,10 @@ package cascading.tap;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import cascading.scheme.Scheme;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -43,6 +45,34 @@ import org.apache.hadoop.mapred.JobConf;
 public class MultiSourceTap extends SourceTap implements CompositeTap
   {
   protected Tap[] taps;
+
+  private class TupleIterator implements Iterator
+    {
+    TupleEntryIterator iterator;
+
+    private TupleIterator( TupleEntryIterator iterator )
+      {
+      this.iterator = iterator;
+      }
+
+    @Override
+    public boolean hasNext()
+      {
+      return iterator.hasNext();
+      }
+
+    @Override
+    public Object next()
+      {
+      return iterator.next().getTuple();
+      }
+
+    @Override
+    public void remove()
+      {
+      iterator.remove();
+      }
+    }
 
   protected MultiSourceTap( Scheme scheme )
     {
@@ -148,6 +178,17 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
       modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
 
     return modified;
+    }
+
+  @Override
+  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+    {
+    Iterator iterators[] = new Iterator[getTaps().length];
+
+    for( int i = 0; i < getTaps().length; i++ )
+      iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( conf ) );
+
+    return new TupleEntryIterator( getSourceFields(), iterators );
     }
 
   public boolean equals( Object object )

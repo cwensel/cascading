@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.t.MultiSourceTap to support #openForRead().
+
   Added c.t.Comparison and c.t.StreamComparator interfaces which allow for custom types to be
   lazily deserialized during sort comparisons.
 
@@ -10,7 +12,7 @@ Cascading Change Log
 unreleased
 
   Fixed random j.u.ConcurrentModificationException error when running in Hadoop local mode by synchronizing
-  the c.f.s.StackElement#closeTraps method. 
+  the c.f.s.StackElement#closeTraps method.
 
   Fixed missing property values when stored in a nested j.u.Properties object.
 
