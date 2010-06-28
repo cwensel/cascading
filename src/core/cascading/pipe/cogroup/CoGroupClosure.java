@@ -173,7 +173,7 @@ public class CoGroupClosure extends GroupClosure
 
     Class<? extends CompressionCodec> codecClass = null;
 
-    for( String codec : codecs.split( "[,\\s]*" ) )
+    for( String codec : codecs.split( "[,\\s]+" ) )
       {
       try
         {
