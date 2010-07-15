@@ -52,15 +52,25 @@ public class TextDelimitedTest extends CascadingTestCase
 
   public void testQuotedText() throws IOException
     {
-    runQuotedText( "normchar", testData, "," );
+    runQuotedText( "normchar", testData, ",", false );
+    }
+
+  public void testQuotedTextAll() throws IOException
+    {
+    runQuotedText( "normchar", testData, ",", true );
     }
 
   public void testQuotedTextSpecChar() throws IOException
     {
-    runQuotedText( "specchar", testSpecialCharData, "|" );
+    runQuotedText( "specchar", testSpecialCharData, "|", false );
     }
 
-  public void runQuotedText( String path, String inputData, String delimiter ) throws IOException
+  public void testQuotedTextSpecCharAll() throws IOException
+    {
+    runQuotedText( "specchar", testSpecialCharData, "|", true );
+    }
+
+  public void runQuotedText( String path, String inputData, String delimiter, boolean useAll ) throws IOException
     {
     Object[][] results = new Object[][]{
       {"foo", "bar", "baz", "bin", 1L},
@@ -74,6 +84,17 @@ public class TextDelimitedTest extends CascadingTestCase
       {null, null, null, null, 9L}
     };
 
+    if( useAll )
+      {
+      for( int i = 0; i < results.length; i++ )
+        {
+        Object[] result = results[ i ];
+
+        for( int j = 0; j < result.length; j++ )
+          result[ j ] = result[ j ] != null ? result[ j ].toString() : null;
+        }
+      }
+
     Tuple[] tuples = new Tuple[results.length];
 
     for( int i = 0; i < results.length; i++ )
@@ -83,6 +104,13 @@ public class TextDelimitedTest extends CascadingTestCase
 
     Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+
+    if( useAll )
+      {
+      types = null;
+      fields = Fields.ALL;
+      }
+
     TextDelimited scheme = new TextDelimited( fields, delimiter, "\"", types );
 
     Hfs input = new Hfs( scheme, inputData );

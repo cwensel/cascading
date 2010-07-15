@@ -59,6 +59,10 @@ import org.apache.log4j.Logger;
  * double quotes (").
  * <p/>
  * Note all empty fields in a line will be returned as {@code null} unless coerced into a new type.
+ * <p/>
+ * This Scheme may source/sink {@code Fields.ALL}, when given on the constructor the new instance will automatically
+ * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
+ * either, so all values will be returned as Strings.
  *
  * @see TextLine
  */
@@ -428,8 +432,12 @@ public class TextDelimited extends TextLine
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
     super( sinkCompression );
+
+    if( fields.isUnknown() )
+      fields = Fields.ALL;
+
     setSinkFields( fields );
-    setSourceFields( fields );
+    setSourceFields( fields.isAll() ? Fields.UNKNOWN : fields );
 
     this.skipHeader = skipHeader;
     this.delimiter = delimiter;
@@ -437,7 +445,10 @@ public class TextDelimited extends TextLine
     this.safe = safe;
     this.numValues = fields.size();
 
-    if( this.numValues == 0 )
+    if( fields.isAll() )
+      this.strict = false;
+
+    if( !fields.isAll() && this.numValues == 0 )
       throw new IllegalArgumentException( "may not be zero declared fields, found: " + fields.printVerbose() );
 
     if( quote != null && !quote.isEmpty() ) // if empty, leave null
@@ -462,7 +473,10 @@ public class TextDelimited extends TextLine
     if( types != null )
       this.types = Arrays.copyOf( types, types.length );
 
-    if( types != null && types.length != fields.size() )
+    if( this.types != null && fields.isAll() )
+      throw new IllegalArgumentException( "when using Fields.ALL, field types may not be used" );
+
+    if( this.types != null && this.types.length != fields.size() )
       throw new IllegalArgumentException( "num of types must equal number of fields: " + fields.printVerbose() + ", found: " + types.length );
     }
 

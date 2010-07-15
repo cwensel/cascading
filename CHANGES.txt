@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.s.TextDelimited to accept Fields.ALL or Fields.UNKNOWN for arbitrarily sized or unknown records.
+
   Changed c.t.MultiSourceTap to support #openForRead().
 
   Added c.t.Comparison and c.t.StreamComparator interfaces which allow for custom types to be
