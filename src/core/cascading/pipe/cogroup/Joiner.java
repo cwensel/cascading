@@ -30,7 +30,7 @@ import cascading.tuple.Tuple;
 public interface Joiner extends Serializable
   {
   /**
-   * Returns an interator that joins the given CoGroupClosure co-groups.
+   * Returns an iterator that joins the given CoGroupClosure co-groups.
    *
    * @param closure of type GroupClosure
    * @return an iterator
