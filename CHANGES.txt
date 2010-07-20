@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug preventing Fields.ALL selector in c.p.Every when incoming positions are used instead of field names
+  and the given aggregator declares field names.
+
   Fixed bug that prevented the configured codecs from loading for co-group spills.
 
   Fixed bug where c.s.TextDelimited would fail on delimiters that are also regex special characters.

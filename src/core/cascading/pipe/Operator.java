@@ -353,11 +353,11 @@ public abstract class Operator extends Pipe
 
     // not part of resolve as we need the argumentFields
     if( outputSelector.isSwap() )
-      return incomingFields.subtract( argumentFields ).append( declaredFields );
+      return Fields.asDeclaration( incomingFields.subtract( argumentFields ) ).append( declaredFields );
 
     try
       {
-      return Fields.resolve( outputSelector, incomingFields, declaredFields );
+      return Fields.resolve( outputSelector, Fields.asDeclaration( incomingFields ), declaredFields );
       }
     catch( TupleException exception )
       {
