@@ -82,6 +82,26 @@ public class BasicPipesTest extends CascadingTestCase
    */
   public void testCount() throws Exception
     {
+    runTestCount( new Fields( 1 ), new Fields( 0 ), new Fields( 0, 1 ) );
+    }
+
+  public void testCount2() throws Exception
+    {
+    runTestCount( new Fields( 1 ), new Fields( "count" ), new Fields( 0, "count" ) );
+    }
+
+  public void testCount3() throws Exception
+    {
+    runTestCount( new Fields( 1 ), new Fields( "count" ), Fields.ALL );
+    }
+
+  public void testCount4() throws Exception
+    {
+    runTestCount( Fields.ALL, new Fields( "count" ), Fields.ALL );
+    }
+
+  void runTestCount( Fields argumentSelector, Fields fieldDeclaration, Fields outputSelector ) throws Exception
+    {
     if( !new File( inputFileIps ).exists() )
       fail( "data file not found" );
 
@@ -90,7 +110,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
-    pipe = new Every( pipe, new Fields( 1 ), new Count( new Fields( 0 ) ), new Fields( 0, 1 ) );
+    pipe = new Every( pipe, argumentSelector, new Count( fieldDeclaration ), outputSelector );
 
     Flow flow = new FlowConnector().connect( source, sink, pipe );
 
