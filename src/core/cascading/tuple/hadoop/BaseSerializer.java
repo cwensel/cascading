@@ -49,7 +49,8 @@ abstract class BaseSerializer<T> implements Serializer<T>
     {
     try
       {
-      outputStream.close();
+      if( outputStream != null ) // my never be opened
+        outputStream.close();
       }
     finally
       {
