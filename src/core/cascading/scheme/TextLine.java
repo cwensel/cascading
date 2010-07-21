@@ -54,6 +54,9 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
  * writing out the line.
  * <p/>
+ * Note sink compression is {@link Compress#DISABLE} by default. If {@code null} is passed to the constructor
+ * for the compression value, it will remain disabled.
+ * <p/>
  * If all the input files end with ".zip", the {@link ZipInputFormat} will be used. This is not
  * bi-directional, so zip files cannot be written.
  */
@@ -104,7 +107,7 @@ public class TextLine extends Scheme
     {
     super( DEFAULT_SOURCE_FIELDS );
 
-    this.sinkCompression = sinkCompression;
+    setSinkCompression( sinkCompression );
     }
 
   /**
@@ -173,7 +176,7 @@ public class TextLine extends Scheme
     {
     super( sourceFields, sinkFields, numSinkParts );
 
-    this.sinkCompression = sinkCompression;
+    setSinkCompression( sinkCompression );
 
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
       throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
@@ -221,13 +224,14 @@ public class TextLine extends Scheme
     }
 
   /**
-   * Method setSinkCompression sets the sinkCompression of this TextLine object.
+   * Method setSinkCompression sets the sinkCompression of this TextLine object. If null, compression will remain disabled.
    *
    * @param sinkCompression the sinkCompression of this TextLine object.
    */
   public void setSinkCompression( Compress sinkCompression )
     {
-    this.sinkCompression = sinkCompression;
+    if( sinkCompression != null ) // leave disabled if null
+      this.sinkCompression = sinkCompression;
     }
 
   @Override
