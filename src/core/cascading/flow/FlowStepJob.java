@@ -170,7 +170,7 @@ public class FlowStepJob implements Callable<Throwable>
 
       dumpCompletionEvents();
 
-      throwable = new FlowException( "step failed: " + stepName );
+      throwable = new FlowException( "step failed: " + stepName + ", with job id: " + runningJob.getJobID() + ", please see cluster logs for failure messages" );
       }
     else
       {
