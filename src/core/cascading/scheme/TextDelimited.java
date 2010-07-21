@@ -24,6 +24,7 @@ package cascading.scheme;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import cascading.tap.TapException;
@@ -69,7 +70,7 @@ import org.apache.log4j.Logger;
 public class TextDelimited extends TextLine
   {
   private static final Logger LOG = Logger.getLogger( TextDelimited.class );
-  private static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!])";
+  private static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
   private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s]%2$s[^%1$s])+%1$s)";
   private static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
   private static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
@@ -97,6 +98,30 @@ public class TextDelimited extends TextLine
 
   /** Field buffer */
   private Object[] buffer;
+
+  private DecoratorTuple decoratorTuple;
+
+  private static class DecoratorTuple extends Tuple
+    {
+    String string;
+
+    private DecoratorTuple()
+      {
+      super( (List<Object>) null );
+      }
+
+    public void set( Tuple tuple, String string )
+      {
+      this.elements = Tuple.elements( tuple );
+      this.string = string;
+      }
+
+    @Override
+    public String toString()
+      {
+      return string;
+      }
+    }
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
@@ -570,7 +595,12 @@ public class TextDelimited extends TextLine
         }
       }
 
-    outputCollector.collect( null, Util.join( buffer, delimiter, false ) );
+    if( decoratorTuple == null )
+      decoratorTuple = new DecoratorTuple();
+
+    decoratorTuple.set( tupleEntry.getTuple(), Util.join( buffer, delimiter, false ) );
+
+    outputCollector.collect( null, decoratorTuple );
     }
   }
 

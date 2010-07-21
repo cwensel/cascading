@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 import cascading.ClusterTestCase;
 import cascading.cascade.Cascade;
@@ -39,6 +40,7 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
+import cascading.scheme.TextDelimited;
 import cascading.scheme.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -215,6 +217,34 @@ public class TapTest extends ClusterTestCase implements Serializable
     validateLength( flow.openTapForRead( test ), 1 );
     }
 
+  public void testTemplateTapTextDelimited() throws IOException
+    {
+    if( !new File( inputFileJoined ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileJoined );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = new Hfs( new TextDelimited( new Fields( "number", "lower", "upper" ), "+" ), outputPath + "/testdelimitedtemplates", true );
+
+    sink = new TemplateTap( (Hfs) sink, "%s-%s", 1 );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getPath().toString() + "/1-a" );
+    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+
+    test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getPath().toString() + "/2-b" );
+    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+    }
+
   public void testTemplateTapView() throws IOException
     {
     if( !new File( inputFileJoined ).exists() )
@@ -276,6 +306,35 @@ public class TapTest extends ClusterTestCase implements Serializable
 
     String line = iterator.next().getString( 0 );
     assertTrue( "not equal: wrong values", line.matches( "[a-z]\t[0-9]\t[A-Z]" ) );
+
+    iterator.close();
+    }
+
+  public void testSinkUnknown() throws IOException
+    {
+    if( !new File( inputFileCross ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileCross );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.RESULTS );
+
+    Tap sink = new Hfs( new SequenceFile( Fields.UNKNOWN ), outputPath + "/unknownsinks", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    String line = iterator.next().getTuple().toString();
+    assertTrue( "not equal: wrong values: " + line, line.matches( "[0-9]\t[a-z]\t[A-Z]" ) );
 
     iterator.close();
     }
