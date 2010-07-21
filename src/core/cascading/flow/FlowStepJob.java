@@ -225,14 +225,15 @@ public class FlowStepJob implements Callable<Throwable>
         return;
 
       TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-      flowStep.logWarn( "completion events count: " + events.length );
+      flowStep.logWarn( "task completion events identify failed tasks" );
+      flowStep.logWarn( "task completion events count: " + events.length );
 
       for( TaskCompletionEvent event : events )
         flowStep.logWarn( "event = " + event );
       }
     catch( IOException exception )
       {
-      flowStep.logError( "failed reading completion events", exception );
+      flowStep.logError( "failed reading task completion events", exception );
       }
     }
 
