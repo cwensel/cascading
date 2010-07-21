@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug preventing c.s.TextDelimited schemes from being used with a c.t.TemplateTap.
+
   Updated c.t.Scheme base class to force Field.ALL source declaration to Fields.UNKNOWN, and to force Fields.UNKNOWN
   sink declaration to Fields.ALL.
 

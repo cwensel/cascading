@@ -151,11 +151,13 @@ public class Tuple implements Comparable, Iterable, Serializable
 
   /**
    * Returns a reference to the private elements of the given Tuple.
+   * <p/>
+   * This method is for internal use and is subject to change scope in a future release.
    *
    * @param tuple of type Tuple
    * @return List<Comparable>
    */
-  static List<Object> elements( Tuple tuple )
+  public static List<Object> elements( Tuple tuple )
     {
     return tuple.elements;
     }
