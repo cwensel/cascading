@@ -57,7 +57,7 @@ public class SequenceFile extends Scheme
   @ConstructorProperties({"fields"})
   public SequenceFile( Fields fields )
     {
-    super( fields );
+    super( fields, fields );
     }
 
   @Override
@@ -78,12 +78,6 @@ public class SequenceFile extends Scheme
   public Tuple source( Object key, Object value )
     {
     return (Tuple) value;
-    }
-
-  @Override
-  public Fields getSinkFields()
-    {
-    return super.getSourceFields();
     }
 
   @Override

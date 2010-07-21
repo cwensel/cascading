@@ -279,6 +279,35 @@ public class TapTest extends ClusterTestCase implements Serializable
     iterator.close();
     }
 
+  public void testSinkUnknown() throws IOException
+    {
+    if( !new File( inputFileCross ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileCross );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.RESULTS );
+
+    Tap sink = new Hfs( new SequenceFile( Fields.UNKNOWN ), outputPath + "/unknownsinks", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    String line = iterator.next().getTuple().toString();
+    assertTrue( "not equal: wrong values: " + line, line.matches( "[0-9]\t[a-z]\t[A-Z]" ) );
+
+    iterator.close();
+    }
+
   public void testMultiSinkTap() throws IOException
     {
     if( !new File( inputFileJoined ).exists() )

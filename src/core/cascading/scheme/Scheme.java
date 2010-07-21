@@ -70,7 +70,7 @@ public abstract class Scheme implements Serializable
    */
   protected Scheme( Fields sourceFields )
     {
-    this.sourceFields = sourceFields;
+    setSourceFields( sourceFields );
     }
 
   /**
@@ -81,7 +81,7 @@ public abstract class Scheme implements Serializable
    */
   protected Scheme( Fields sourceFields, int numSinkParts )
     {
-    this.sourceFields = sourceFields;
+    setSourceFields( sourceFields );
     this.numSinkParts = numSinkParts;
     }
 
@@ -93,8 +93,8 @@ public abstract class Scheme implements Serializable
    */
   protected Scheme( Fields sourceFields, Fields sinkFields )
     {
-    this.sourceFields = sourceFields;
-    this.sinkFields = sinkFields;
+    setSourceFields( sourceFields );
+    setSinkFields( sinkFields );
     }
 
   /**
@@ -106,8 +106,8 @@ public abstract class Scheme implements Serializable
    */
   protected Scheme( Fields sourceFields, Fields sinkFields, int numSinkParts )
     {
-    this.sinkFields = sinkFields;
-    this.sourceFields = sourceFields;
+    setSourceFields( sourceFields );
+    setSinkFields( sinkFields );
     this.numSinkParts = numSinkParts;
     }
 
@@ -128,7 +128,10 @@ public abstract class Scheme implements Serializable
    */
   public void setSinkFields( Fields sinkFields )
     {
-    this.sinkFields = sinkFields;
+    if( sinkFields.isUnknown() )
+      this.sinkFields = Fields.ALL;
+    else
+      this.sinkFields = sinkFields;
     }
 
   /**
@@ -148,7 +151,10 @@ public abstract class Scheme implements Serializable
    */
   public void setSourceFields( Fields sourceFields )
     {
-    this.sourceFields = sourceFields;
+    if( sourceFields.isAll() )
+      this.sourceFields = Fields.UNKNOWN;
+    else
+      this.sourceFields = sourceFields;
     }
 
   /**

@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Updated c.t.Scheme base class to force Field.ALL source declaration to Fields.UNKNOWN, and to force Fields.UNKNOWN
+  sink declaration to Fields.ALL.
+
   Fixed bug where if null was passed to c.s.TextLine sinkCompression, the behavior would be undefined.
 
   Added back c.t.Tuple#add( Comparable ) to remain backwards compatible with 1.0.
