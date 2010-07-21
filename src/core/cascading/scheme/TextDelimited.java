@@ -458,11 +458,11 @@ public class TextDelimited extends TextLine
     {
     super( sinkCompression );
 
-    if( fields.isUnknown() )
-      fields = Fields.ALL;
-
+    // normalizes ALL and UNKNOWN
     setSinkFields( fields );
-    setSourceFields( fields.isAll() ? Fields.UNKNOWN : fields );
+    setSourceFields( fields );
+
+    fields = getSinkFields();
 
     this.skipHeader = skipHeader;
     this.delimiter = delimiter;
