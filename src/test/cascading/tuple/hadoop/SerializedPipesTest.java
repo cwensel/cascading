@@ -161,12 +161,19 @@ public class SerializedPipesTest extends ClusterTestCase
     {
     private String testText;
     private boolean increment;
+    private int moduloIsNull;
 
     public InsertTestText( Fields fieldDeclaration, String testText, boolean increment )
+      {
+      this( fieldDeclaration, testText, increment, -1 );
+      }
+
+    public InsertTestText( Fields fieldDeclaration, String testText, boolean increment, int moduloIsNull )
       {
       super( fieldDeclaration );
       this.testText = testText;
       this.increment = increment;
+      this.moduloIsNull = moduloIsNull;
       }
 
     @Override
@@ -182,7 +189,11 @@ public class SerializedPipesTest extends ClusterTestCase
       if( functionCall.getContext() != -1 )
         {
         string = functionCall.getContext() + string;
+
         functionCall.setContext( functionCall.getContext() + 1 );
+
+        if( moduloIsNull != -1 && functionCall.getContext() % moduloIsNull == 0 )
+          string = null;
         }
 
       functionCall.getOutputCollector().add( new Tuple( new TestText( string ) ) );
@@ -429,11 +440,11 @@ public class SerializedPipesTest extends ClusterTestCase
     Tap sink = new Hfs( new SequenceFile( fields ), outputPath + "/hadoop/rawbyteskeyvalue/" + useDefaultComparator + "/" + secondarySortOnValue + "/" + ignoreSerializationToken + "/" + compositeGrouping, true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3 ), Fields.ALL );
     pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3 ), Fields.ALL );
     pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Fields groupFields = new Fields( "group" );
@@ -488,7 +499,7 @@ public class SerializedPipesTest extends ClusterTestCase
       {
       String next = ( (TestText) iterator.next().getObject( "group" ) ).value;
 
-      if( value.compareTo( next ) >= 0 )
+      if( value != null && value.compareTo( next ) >= 0 )
         fail( "not increasing: " + value + " " + value );
 
       value = next;

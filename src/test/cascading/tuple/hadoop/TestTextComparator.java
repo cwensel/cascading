@@ -39,6 +39,15 @@ public class TestTextComparator implements StreamComparator<BufferedInputStream>
     if( lhs == rhs )
       return 0;
 
+    if( lhs.value == null && rhs.value == null )
+      return 0;
+
+    if( lhs.value == null )
+      return -1;
+
+    if( rhs.value == null )
+      return 1;
+
     return lhs.value.compareTo( rhs.value );
     }
 
@@ -49,6 +58,15 @@ public class TestTextComparator implements StreamComparator<BufferedInputStream>
       {
       String lhsString = WritableUtils.readString( new DataInputStream( lhsStream ) );
       String rhsString = WritableUtils.readString( new DataInputStream( rhsStream ) );
+
+      if( lhsString == null && rhsString == null )
+        return 0;
+
+      if( lhsString == null )
+        return -1;
+
+      if( rhsString == null )
+        return 1;
 
       return lhsString.compareTo( rhsString );
       }
