@@ -55,16 +55,16 @@ public class TupleElementStreamComparator implements StreamComparator<TupleInput
       // pop off element type, its assumed we know it as we have a stream comparator
       // to delegate too
       int lhsToken = lhsStream.readToken();
-      rhsStream.readToken();
+      int rhsToken = rhsStream.readToken();
 
       if( lhsToken == TupleOutputStream.WRITABLE_TOKEN )
-        {
         lhsStream.readString();
-        rhsStream.readString();
-        }
 
-      InputStream lhs = (InputStream) lhsStream.getInputStream();
-      InputStream rhs = (InputStream) rhsStream.getInputStream();
+      if( rhsToken == TupleOutputStream.WRITABLE_TOKEN )
+        rhsStream.readString();
+
+      InputStream lhs = lhsToken == 0 ? null : (InputStream) lhsStream.getInputStream();
+      InputStream rhs = rhsToken == 0 ? null : (InputStream) rhsStream.getInputStream();
 
       return comparator.compare( lhs, rhs );
       }

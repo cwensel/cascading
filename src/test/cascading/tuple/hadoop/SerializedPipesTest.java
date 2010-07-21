@@ -161,19 +161,21 @@ public class SerializedPipesTest extends ClusterTestCase
     {
     private String testText;
     private boolean increment;
-    private int moduloIsNull;
+    private int moduloValueIsNull;
+    private int moduloResultIsNull;
 
     public InsertTestText( Fields fieldDeclaration, String testText, boolean increment )
       {
-      this( fieldDeclaration, testText, increment, -1 );
+      this( fieldDeclaration, testText, increment, -1, -1 );
       }
 
-    public InsertTestText( Fields fieldDeclaration, String testText, boolean increment, int moduloIsNull )
+    public InsertTestText( Fields fieldDeclaration, String testText, boolean increment, int moduloValueIsNull, int moduloResultIsNull )
       {
       super( fieldDeclaration );
       this.testText = testText;
       this.increment = increment;
-      this.moduloIsNull = moduloIsNull;
+      this.moduloValueIsNull = moduloValueIsNull;
+      this.moduloResultIsNull = moduloResultIsNull;
       }
 
     @Override
@@ -192,11 +194,16 @@ public class SerializedPipesTest extends ClusterTestCase
 
         functionCall.setContext( functionCall.getContext() + 1 );
 
-        if( moduloIsNull != -1 && functionCall.getContext() % moduloIsNull == 0 )
+        if( moduloValueIsNull != -1 && functionCall.getContext() % moduloValueIsNull == 0 )
           string = null;
         }
 
-      functionCall.getOutputCollector().add( new Tuple( new TestText( string ) ) );
+      TestText result = null;
+
+      if( moduloResultIsNull != -1 && functionCall.getContext() % moduloResultIsNull != 0 )
+        result = new TestText( string );
+
+      functionCall.getOutputCollector().add( new Tuple( result ) );
       }
     }
 
@@ -440,11 +447,11 @@ public class SerializedPipesTest extends ClusterTestCase
     Tap sink = new Hfs( new SequenceFile( fields ), outputPath + "/hadoop/rawbyteskeyvalue/" + useDefaultComparator + "/" + secondarySortOnValue + "/" + ignoreSerializationToken + "/" + compositeGrouping, true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3 ), Fields.ALL );
+    pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3, 4 ), Fields.ALL );
     pipeLower = new Each( pipeLower, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3 ), Fields.ALL );
+    pipeUpper = new Each( pipeUpper, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3, 4 ), Fields.ALL );
     pipeUpper = new Each( pipeUpper, new InsertRawBytes( new Fields( "value" ), "inserted text as bytes", true ), Fields.ALL );
 
     Fields groupFields = new Fields( "group" );
@@ -492,12 +499,14 @@ public class SerializedPipesTest extends ClusterTestCase
 
     // test the ordering
     TupleEntryIterator iterator = flow.openSink();
-    String value = ( (TestText) iterator.next().getObject( "group" ) ).value;
+    TestText target = (TestText) iterator.next().getObject( "group" );
+    String value = target == null ? null : target.value;
 //    System.out.println( "value = " + value );
 
     while( iterator.hasNext() )
       {
-      String next = ( (TestText) iterator.next().getObject( "group" ) ).value;
+      TestText nextTarget = (TestText) iterator.next().getObject( "group" );
+      String next = nextTarget == null ? null : nextTarget.value;
 
       if( value != null && value.compareTo( next ) >= 0 )
         fail( "not increasing: " + value + " " + value );
