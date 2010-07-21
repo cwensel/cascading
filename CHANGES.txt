@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added back c.t.Tuple#add( Comparable ) to remain backwards compatible with 1.0.
+
   Fixed bug preventing Fields.ALL selector in c.p.Every when incoming positions are used instead of field names
   and the given aggregator declares field names.
 

@@ -373,6 +373,16 @@ public class Tuple implements Comparable, Iterable, Serializable
   /**
    * Method add adds a new element value to this instance.
    *
+   * @param value of type Comparable
+   */
+  public void add( Comparable value )
+    {
+    add( (Object) value );
+    }
+
+  /**
+   * Method add adds a new element value to this instance.
+   *
    * @param value of type Object
    */
   public void add( Object value )
