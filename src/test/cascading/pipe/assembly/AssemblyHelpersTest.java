@@ -23,9 +23,11 @@ package cascading.pipe.assembly;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.ClusterTestCase;
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Function;
@@ -44,6 +46,8 @@ public class AssemblyHelpersTest extends ClusterTestCase
   {
   String inputFileUpper = "build/test/data/upper.txt";
   String inputFileLower = "build/test/data/lower.txt";
+  String inputFileLhs = "build/test/data/lhs.txt";
+  String inputFileRhs = "build/test/data/rhs.txt";
 
   String outputPath = "build/test/output/assembly/";
 
@@ -170,5 +174,59 @@ public class AssemblyHelpersTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 5, 1, Pattern.compile( "^\\w+\\s\\d+$" ) );
+    }
+
+  public void testUnique() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
+    Tap sink = new Hfs( new TextLine( new Fields( "item" ), new Fields( "num", "char" ) ), outputPath + "/unique", true );
+
+    Pipe pipe = new Pipe( "shape" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    pipe = new Unique( pipe, new Fields( "num" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
+    }
+
+  public void testUniqueMerge() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+    copyFromLocal( inputFileRhs );
+
+    Tap sourceLhs = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
+    Tap sourceRhs = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhs );
+    Tap sink = new Hfs( new TextLine( new Fields( "item" ), new Fields( "num", "char" ) ), outputPath + "/unique", true );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Pipe lhsPipe = new Pipe( "lhs" );
+    lhsPipe = new Each( lhsPipe, new Fields( "line" ), splitter );
+
+    Pipe rhsPipe = new Pipe( "rhs" );
+    rhsPipe = new Each( rhsPipe, new Fields( "line" ), splitter );
+
+    Pipe pipe = new Unique( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "num" ) );
+
+    Map<String, Tap> sources = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( sourceLhs, sourceRhs ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
     }
   }

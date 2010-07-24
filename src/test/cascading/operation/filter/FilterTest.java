@@ -182,4 +182,27 @@ public class FilterTest extends CascadingTestCase
 
     assertTrue( invokeFilter( filter, new Tuple( 1, 2 ) ) );
     }
+
+  public void testPartialDuplicates()
+    {
+    Filter filter = new FilterPartialDuplicates( 2 );
+
+    Tuple[] tuples = new Tuple[]{new Tuple( 1 ), // false - first time
+                                 new Tuple( 1 ), // true - second time
+                                 new Tuple( (Comparable) null ), // false
+                                 new Tuple( (Comparable) null ), // true - make lots, its a LRU
+                                 new Tuple( (Comparable) null ), // true
+                                 new Tuple( (Comparable) null ), // true
+                                 new Tuple( 1 ), // true - holds two, so still cached
+                                 new Tuple( 2 ), // false - force least recently seen out
+                                 new Tuple( 1 )}; // false
+
+    boolean[] expected = new boolean[]{false, true, false, true, true, true, true, false, false};
+
+    boolean[] results = invokeFilter( filter, tuples );
+
+    for( int i = 0; i < results.length; i++ )
+      assertEquals( "failed on: " + i, expected[ i ], results[ i ] );
+
+    }
   }

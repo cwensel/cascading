@@ -162,6 +162,36 @@ public class CascadingTestCase extends TestCase
     return isRemove;
     }
 
+  protected boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
+    {
+    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
+
+    for( int i = 0; i < argumentsArray.length; i++ )
+      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+
+    return invokeFilter( filter, entries );
+    }
+
+  protected boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+
+    filter.prepare( FlowProcess.NULL, operationCall );
+
+    boolean[] results = new boolean[argumentsArray.length];
+
+    for( int i = 0; i < argumentsArray.length; i++ )
+      {
+      operationCall.setArguments( argumentsArray[ i ] );
+
+      results[ i ] = filter.isRemove( FlowProcess.NULL, operationCall );
+      }
+
+    filter.cleanup( FlowProcess.NULL, operationCall );
+
+    return results;
+    }
+
   protected TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
     {
     TupleEntry[] entries = new TupleEntry[argumentsArray.length];
