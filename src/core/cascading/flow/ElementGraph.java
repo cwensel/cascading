@@ -395,7 +395,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     }
 
   /**
-   * Method writeDOT writes this element graph to a DOT file for easy vizualization and debugging.
+   * Method writeDOT writes this element graph to a DOT file for easy visualization and debugging.
    *
    * @param filename of type String
    */
