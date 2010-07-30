@@ -88,6 +88,8 @@ public class Cascade implements Runnable
   private String id;
   /** Field name */
   private String name;
+  /** Field properties */
+  private Map<Object, Object> properties;
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field tapGraph */
@@ -107,9 +109,30 @@ public class Cascade implements Runnable
   /** Field flowSkipStrategy */
   private FlowSkipStrategy flowSkipStrategy = null;
 
-  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+  /**
+   * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
+   * <p/>
+   * By default a Cascade will attempt to run all give Flow instances at the same time. But there are occasions
+   * where limiting the number for flows helps manages resources.
+   *
+   * @param properties         of type Map<Object, Object>
+   * @param numConcurrentFlows of type int
+   */
+  public static void setMaxConcurrentFlows( Map<Object, Object> properties, int numConcurrentFlows )
+    {
+    properties.put( "cascading.cascade.maxconcurrentflows", Integer.toString( numConcurrentFlows ) );
+    }
+
+  public int getMaxConcurrentFlows( Map<Object, Object> properties )
+    {
+    return Integer.parseInt( Util.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
+    }
+
+
+  Cascade( String name, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
     {
     this.name = name;
+    this.properties = properties;
     this.jobGraph = jobGraph;
     this.tapGraph = tapGraph;
     this.cascadeStats = new CascadeStats( name, getID() );
@@ -273,11 +296,14 @@ public class Cascade implements Runnable
 
       initializeNewJobsMap();
 
-      int numThreads = jobsMap.size();
+      int numThreads = getMaxConcurrentFlows( properties );
+
+      if( numThreads == 0 )
+        numThreads = jobsMap.size();
 
       if( LOG.isInfoEnabled() )
         {
-        logInfo( " starting flows: " + numThreads );
+        logInfo( " starting flows: " + jobsMap.size() );
         logInfo( " allocating threads: " + numThreads );
         }
 

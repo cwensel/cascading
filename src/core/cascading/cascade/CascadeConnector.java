@@ -104,7 +104,7 @@ public class CascadeConnector
     makeTapGraph( tapGraph, flows );
     makeFlowGraph( flowGraph, tapGraph );
 
-    return new Cascade( name, flowGraph, tapGraph );
+    return new Cascade( name, properties, flowGraph, tapGraph );
     }
 
   private void verifyUniqueFlowNames( Flow[] flows )
