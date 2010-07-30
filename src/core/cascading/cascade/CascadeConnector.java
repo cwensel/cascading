@@ -104,7 +104,6 @@ public class CascadeConnector
     makeTapGraph( tapGraph, flows );
     makeFlowGraph( flowGraph, tapGraph );
 
-
     return new Cascade( name, flowGraph );
     }
 
