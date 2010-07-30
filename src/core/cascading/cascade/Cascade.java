@@ -301,8 +301,16 @@ public class Cascade implements Runnable
       if( numThreads == 0 )
         numThreads = jobsMap.size();
 
+      int numLocalFlows = numLocalFlows();
+
+      boolean runFlowsLocal = numLocalFlows > 1;
+
+      if( runFlowsLocal )
+        numThreads = 1;
+
       if( LOG.isInfoEnabled() )
         {
+        logInfo( " parallel execution is enabled: " + !runFlowsLocal );
         logInfo( " starting flows: " + jobsMap.size() );
         logInfo( " allocating threads: " + numThreads );
         }
@@ -337,6 +345,24 @@ public class Cascade implements Runnable
       if( !cascadeStats.isFinished() )
         cascadeStats.markSuccessful();
       }
+    }
+
+  /**
+   * If the number of flows that are local is greater than one, force the Cascade to run without parallelization.
+   *
+   * @return
+   */
+  private int numLocalFlows()
+    {
+    int countLocalJobs = 0;
+
+    for( Flow flow : getFlows() )
+      {
+      if( flow.jobsAreLocal() )
+        countLocalJobs++;
+      }
+
+    return countLocalJobs;
     }
 
   private void initializeNewJobsMap()

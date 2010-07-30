@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.c.Cascade instances to disable parallel execution if more than one Flow is a local only job. 
+
   Added c.c.Cascade#setMaxConcurrentFlows() property that limits the number of concurrently running Flows.
 
   Added c.c.Cascade#writeDOT method for visualizing the dependencies between flow instances.
