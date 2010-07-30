@@ -435,7 +435,7 @@ public class Cascade implements Runnable
       if( releaseBuild == null )
         message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, hadoopVersion );
       else
-        message = String.format( "Concurrent, Inc - Cascading %s-%s [%s]", releaseFull, releaseBuild, hadoopVersion );
+        message = String.format( "Concurrent, Inc - Cascading %s%s [%s]", releaseFull, releaseBuild, hadoopVersion );
 
       LOG.info( message );
       }
