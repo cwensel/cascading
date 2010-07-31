@@ -23,7 +23,6 @@ package cascading.cascade;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,22 +134,13 @@ public class CascadeConnector
     for( Flow flow : flows )
       {
       LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSourcesCollection() );
-      Collection<Tap> sinks = flow.getSinksCollection();
+      LinkedList<Tap> sinks = new LinkedList<Tap>( flow.getSinksCollection() );
 
       // account for MultiTap sources
-      ListIterator<Tap> iterator = sources.listIterator();
-      while( iterator.hasNext() )
-        {
-        Tap source = iterator.next();
+      unwrapCompositeTaps( sources );
 
-        if( source instanceof CompositeTap )
-          {
-          iterator.remove();
-
-          for( Tap tap : ( (CompositeTap) source ).getChildTaps() )
-            iterator.add( tap );
-          }
-        }
+      // account for MultiTap sinks
+      unwrapCompositeTaps( sinks );
 
       for( Tap source : sources )
         tapGraph.addVertex( source.getResource() );
@@ -162,6 +152,24 @@ public class CascadeConnector
         {
         for( Tap sink : sinks )
           tapGraph.addEdge( source.getResource(), sink.getResource(), flow.getHolder() );
+        }
+      }
+    }
+
+  private void unwrapCompositeTaps( LinkedList<Tap> taps )
+    {
+    ListIterator<Tap> iterator = taps.listIterator();
+
+    while( iterator.hasNext() )
+      {
+      Tap tap = iterator.next();
+
+      if( tap instanceof CompositeTap )
+        {
+        iterator.remove();
+
+        for( Tap childTap : ( (CompositeTap) tap ).getChildTaps() )
+          iterator.add( childTap );
         }
       }
     }

@@ -158,15 +158,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      Object resource = processParent.getDependencyIncoming();
-      Collection paths = makeCollection( resource );
-
-      Map<String, Tap> taps = new HashMap<String, Tap>();
-
-      for( Object path : paths )
-        taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );
-
-      return taps;
+      return makeTapMap( processParent.getDependencyIncoming() );
       }
     catch( ProcessException exception )
       {
@@ -177,29 +169,11 @@ public class ProcessFlow extends Flow
       }
     }
 
-  private Collection makeCollection( Object resource )
-    {
-    if( resource instanceof Collection )
-      return (Collection) resource;
-    else if( resource instanceof Object[] )
-      return Arrays.asList( (Object[]) resource );
-    else
-      return Arrays.asList( resource );
-    }
-
   private Map<String, Tap> createSinks( ProcessWrapper processParent )
     {
     try
       {
-      Object resource = processParent.getDependencyOutgoing();
-      Collection paths = makeCollection( resource );
-
-      Map<String, Tap> taps = new HashMap<String, Tap>();
-
-      for( Object path : paths )
-        taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );
-
-      return taps;
+      return makeTapMap( processParent.getDependencyOutgoing() );
       }
     catch( ProcessException exception )
       {
@@ -208,6 +182,32 @@ public class ProcessFlow extends Flow
 
       throw new FlowException( "could not get process outgoing dependency", exception.getCause() );
       }
+    }
+
+  private Map<String, Tap> makeTapMap( Object resource )
+    {
+    Collection paths = makeCollection( resource );
+
+    Map<String, Tap> taps = new HashMap<String, Tap>();
+
+    for( Object path : paths )
+      {
+      if( path instanceof Tap )
+        taps.put( ( (Tap) path ).getResource(), (Tap) path );
+      else
+        taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );
+      }
+    return taps;
+    }
+
+  private Collection makeCollection( Object resource )
+    {
+    if( resource instanceof Collection )
+      return (Collection) resource;
+    else if( resource instanceof Object[] )
+      return Arrays.asList( (Object[]) resource );
+    else
+      return Arrays.asList( resource );
     }
 
   private Map<String, Tap> createTraps( ProcessWrapper processParent )
