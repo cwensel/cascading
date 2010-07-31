@@ -51,6 +51,13 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import riffle.process.DependencyIncoming;
+import riffle.process.DependencyOutgoing;
+import riffle.process.ProcessCleanup;
+import riffle.process.ProcessComplete;
+import riffle.process.ProcessPrepare;
+import riffle.process.ProcessStart;
+import riffle.process.ProcessStop;
 
 /**
  * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
@@ -73,6 +80,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  *
  * @see cascading.flow.FlowConnector
  */
+@riffle.process.Process
 public class Flow implements Runnable
   {
   /** Field LOG */
@@ -94,7 +102,7 @@ public class Flow implements Runnable
   /** Field flowStats */
   private final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
-  private Map<String, Tap> sources;
+  protected Map<String, Tap> sources;
   /** Field sinks */
   private Map<String, Tap> sinks;
   /** Field traps */
@@ -107,9 +115,9 @@ public class Flow implements Runnable
   /** Field stepGraph */
   private StepGraph stepGraph;
   /** Field jobConf */
-  private JobConf jobConf;
+  private transient JobConf jobConf;
   /** Field thread */
-  private Thread thread;
+  private transient Thread thread;
   /** Field throwable */
   private Throwable throwable;
   /** Field stop */
@@ -426,6 +434,17 @@ public class Flow implements Runnable
     }
 
   /**
+   * Method getSourcesCollection returns a {@link Collection) of source {@link Tap}s for this Flow object.
+   *
+   * @return the sourcesCollection (type Collection<Tap>) of this Flow object.
+   */
+  @DependencyIncoming
+  public Collection<Tap> getSourcesCollection()
+    {
+    return getSources().values();
+    }
+
+  /**
    * Method getSinks returns the sinks of this Flow object.
    *
    * @return the sinks (type Map) of this Flow object.
@@ -436,6 +455,17 @@ public class Flow implements Runnable
     }
 
   /**
+   * Method getSinksCollection returns a {@link Collection) of sink {@link Tap}s for this Flow object.
+   *
+   * @return the sinkCollection (type Collection<Tap>) of this Flow object.
+   */
+  @DependencyOutgoing
+  public Collection<Tap> getSinksCollection()
+    {
+    return getSinks().values();
+    }
+
+  /**
    * Method getTraps returns the traps of this Flow object.
    *
    * @return the traps (type Map<String, Tap>) of this Flow object.
@@ -443,6 +473,16 @@ public class Flow implements Runnable
   public Map<String, Tap> getTraps()
     {
     return Collections.unmodifiableMap( traps );
+    }
+
+  /**
+   * Method getTrapsCollection returns a {@link Collection) of trap {@link Tap}s for this Flow object.
+   *
+   * @return the trapsCollection (type Collection<Tap>) of this Flow object.
+   */
+  public Collection<Tap> getTrapsCollection()
+    {
+    return getTraps().values();
     }
 
   /**
@@ -631,9 +671,31 @@ public class Flow implements Runnable
     }
 
   /**
+   * Method prepare is used by a {@link Cascade} to notify the given Flow it should initialize or clear any resources
+   * necessary for {@link #start()} to be called successfully.
+   * <p/>
+   * Specifically, this implementation calls {@link #deleteSinksIfNotUpdate()}.
+   *
+   * @throws IOException when
+   */
+  @ProcessPrepare
+  public void prepare()
+    {
+    try
+      {
+      deleteSinksIfNotUpdate();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to prepare flow", exception );
+      }
+    }
+
+  /**
    * Method start begins the execution of this Flow instance. It will return immediately. Use the method {@link #complete()}
    * to block until this Flow completes.
    */
+  @ProcessStart
   public synchronized void start()
     {
     if( thread != null )
@@ -650,6 +712,7 @@ public class Flow implements Runnable
     }
 
   /** Method stop stops all running jobs, killing any currently executing. */
+  @ProcessStop
   public synchronized void stop()
     {
     if( stop )
@@ -674,6 +737,7 @@ public class Flow implements Runnable
     }
 
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
+  @ProcessComplete
   public void complete()
     {
     start();
@@ -718,6 +782,12 @@ public class Flow implements Runnable
           safeFlowListener.throwable = null;
         }
       }
+    }
+
+  @ProcessCleanup
+  public void cleanup()
+    {
+    // do nothing
     }
 
   /**
@@ -795,7 +865,7 @@ public class Flow implements Runnable
    * Use with caution.
    *
    * @throws IOException when
-   * @see cascading.flow.Flow#deleteSinksIfNotAppend()
+   * @see Flow#deleteSinksIfNotUpdate()
    */
   public void deleteSinks() throws IOException
     {
@@ -812,6 +882,7 @@ public class Flow implements Runnable
    *
    * @throws IOException when
    */
+  @Deprecated
   public void deleteSinksIfNotAppend() throws IOException
     {
     for( Tap tap : sinks.values() )
@@ -903,9 +974,9 @@ public class Flow implements Runnable
         {
         logInfo( "starting" );
 
-        for( Tap source : getSources().values() )
+        for( Tap source : getSourcesCollection() )
           logInfo( " source: " + source );
-        for( Tap sink : getSinks().values() )
+        for( Tap sink : getSinksCollection() )
           logInfo( " sink: " + sink );
         }
 

@@ -21,6 +21,7 @@
 
 package cascading.stats;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -42,7 +43,7 @@ import java.util.Collection;
  * @see FlowStats
  * @see StepStats
  */
-public abstract class CascadingStats
+public abstract class CascadingStats implements Serializable
   {
   public enum Status
     {

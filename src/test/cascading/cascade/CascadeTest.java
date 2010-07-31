@@ -32,6 +32,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowSkipStrategy;
 import cascading.flow.FlowStepJob;
 import cascading.flow.LockingFlowListener;
+import cascading.flow.ProcessFlow;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -43,6 +44,7 @@ import cascading.tap.Hfs;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import riffle.process.scheduler.ProcessChain;
 
 public class CascadeTest extends ClusterTestCase
   {
@@ -137,7 +139,7 @@ public class CascadeTest extends ClusterTestCase
     Flow third = thirdFlow( second.getSink(), path );
     Flow fourth = fourthFlow( third.getSink(), path );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+    Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
 
     cascade.start();
 
@@ -257,4 +259,50 @@ public class CascadeTest extends ClusterTestCase
     assertEquals( third.getProperty( "cascading.cascade.id" ), id );
     assertEquals( fourth.getProperty( "cascading.cascade.id" ), id );
     }
+
+  public void testSimplePerpetual() throws IOException
+    {
+    copyFromLocal( inputFile );
+
+    String path = "perpetual";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    ProcessChain chain = new ProcessChain( true, fourth, second, first, third );
+
+    chain.start();
+
+    chain.complete();
+
+    validateLength( fourth, 20 );
+    }
+
+  public void testSimplePerpetualCascade() throws IOException
+    {
+    copyFromLocal( inputFile );
+
+    String path = "perpetualcascade";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    ProcessFlow firstProcess = new ProcessFlow( "first", first );
+    ProcessFlow secondProcess = new ProcessFlow( "second", second );
+    ProcessFlow thirdProcess = new ProcessFlow( "third", third );
+    ProcessFlow fourthProcess = new ProcessFlow( "fourth", fourth );
+
+    Cascade cascade = new CascadeConnector().connect( fourthProcess, secondProcess, firstProcess, thirdProcess );
+
+    cascade.start();
+
+    cascade.complete();
+
+    validateLength( fourth, 20 );
+    }
+
   }

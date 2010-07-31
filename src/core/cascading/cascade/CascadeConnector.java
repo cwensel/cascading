@@ -98,7 +98,7 @@ public class CascadeConnector
     verifyUniqueFlowNames( flows );
     name = name == null ? makeName( flows ) : name;
 
-    SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<Tap, Flow.FlowHolder>( Flow.FlowHolder.class );
+    SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<String, Flow.FlowHolder>( Flow.FlowHolder.class );
     SimpleDirectedGraph<Flow, Integer> flowGraph = new SimpleDirectedGraph<Flow, Integer>( Integer.class );
 
     makeTapGraph( tapGraph, flows );
@@ -130,12 +130,12 @@ public class CascadeConnector
     return Util.join( names, "+" );
     }
 
-  private void makeTapGraph( SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph, Flow[] flows )
+  private void makeTapGraph( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow[] flows )
     {
     for( Flow flow : flows )
       {
-      LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSources().values() );
-      Collection<Tap> sinks = flow.getSinks().values();
+      LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSourcesCollection() );
+      Collection<Tap> sinks = flow.getSinksCollection();
 
       // account for MultiTap sources
       ListIterator<Tap> iterator = sources.listIterator();
@@ -153,34 +153,34 @@ public class CascadeConnector
         }
 
       for( Tap source : sources )
-        tapGraph.addVertex( source );
+        tapGraph.addVertex( source.getResource() );
 
       for( Tap sink : sinks )
-        tapGraph.addVertex( sink );
+        tapGraph.addVertex( sink.getResource() );
 
       for( Tap source : sources )
         {
         for( Tap sink : sinks )
-          tapGraph.addEdge( source, sink, flow.getHolder() );
+          tapGraph.addEdge( source.getResource(), sink.getResource(), flow.getHolder() );
         }
       }
     }
 
-  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {
-    TopologicalOrderIterator<Tap, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<Tap, Flow.FlowHolder>( tapGraph );
+    TopologicalOrderIterator<String, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<String, Flow.FlowHolder>( tapGraph );
     int count = 0;
 
     while( topoIterator.hasNext() )
       {
-      Tap source = topoIterator.next();
+      String source = topoIterator.next();
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling flow source: " + source );
 
-      List<Tap> sinks = Graphs.successorListOf( tapGraph, (Tap) source );
+      List<String> sinks = Graphs.successorListOf( tapGraph, source );
 
-      for( Tap sink : sinks )
+      for( String sink : sinks )
         {
         if( LOG.isDebugEnabled() )
           LOG.debug( "handling flow path: " + source + " -> " + sink );

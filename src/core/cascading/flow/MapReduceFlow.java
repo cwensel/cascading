@@ -39,10 +39,10 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
 /**
- * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs preconfigured via the {@link JobConf}
+ * Class MapReduceFlow is a {@link Flow} subclass that supports custom MapReduce jobs pre-configured via the {@link JobConf}
  * object.
  * <p/>
- * Use this class to allow custom MapReduce jobs to participage in the {@link cascading.cascade.Cascade} scheduler. If
+ * Use this class to allow custom MapReduce jobs to participate in the {@link cascading.cascade.Cascade} scheduler. If
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
  * <p/>
@@ -129,7 +129,7 @@ public class MapReduceFlow extends Flow
     {
     StepGraph stepGraph = new StepGraph();
 
-    Tap sink = getSinks().values().iterator().next();
+    Tap sink = getSinksCollection().iterator().next();
     FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );
 
     step.setParentFlowName( getName() );

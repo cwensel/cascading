@@ -67,11 +67,11 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * The concept of 'stale' is pluggable, see the {@link cascading.flow.FlowSkipStrategy} class.
  * <p/>
  * When a Cascade starts up, if first verifies which Flow instances have stale sinks, if the sinks are not stale, the
- * method {@link cascading.flow.Flow#deleteSinksIfNotAppend()} is called. Before appends were supported (logically)
+ * method {@link cascading.flow.Flow#deleteSinksIfNotUpdate()} is called. Before appends were supported (logically)
  * the Cascade deleted all the sinks in a Flow.
  * <p/>
- * The new consequence of this is if the Cascade fails, but does complete a Flow that appended data, re-running
- * the Cascade (and the successful append Flow) will re-append data to the source. Some systems may be idempotent and
+ * The new consequence of this is if the Cascade fails, but does complete a Flow that appended or updated data, re-running
+ * the Cascade (and the successful append/update Flow) will re-update data to the source. Some systems may be idempotent and
  * may not have any side-effects. So plan accordingly.
  *
  * @see Flow
@@ -93,7 +93,7 @@ public class Cascade implements Runnable
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field tapGraph */
-  private final SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph;
+  private final SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
   /** Field thread */
@@ -129,7 +129,7 @@ public class Cascade implements Runnable
     }
 
 
-  Cascade( String name, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+  Cascade( String name, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {
     this.name = name;
     this.properties = properties;
@@ -447,15 +447,15 @@ public class Cascade implements Runnable
     printElementGraph( filename, tapGraph );
     }
 
-  protected void printElementGraph( String filename, final SimpleDirectedGraph<Tap, Flow.FlowHolder> graph )
+  protected void printElementGraph( String filename, final SimpleDirectedGraph<String, Flow.FlowHolder> graph )
     {
     try
       {
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, graph, new IntegerNameProvider<Tap>(), new VertexNameProvider<Tap>()
+      Util.writeDOT( writer, graph, new IntegerNameProvider<String>(), new VertexNameProvider<String>()
       {
-      public String getVertexName( Tap object )
+      public String getVertexName( String object )
         {
         return object.toString().replaceAll( "\"", "\'" );
         }
@@ -593,7 +593,7 @@ public class Cascade implements Runnable
             return null;
             }
 
-          flow.deleteSinksIfNotAppend(); // do not delete append mode taps
+          flow.prepare(); // do not delete append/update mode taps
           flow.complete();
 
           if( LOG.isInfoEnabled() )
@@ -604,6 +604,10 @@ public class Cascade implements Runnable
           logWarn( "flow failed: " + flow.getName(), exception );
           failed = true;
           return new CascadeException( "flow failed: " + flow.getName(), exception );
+          }
+        finally
+          {
+          flow.cleanup();
           }
         }
       catch( Throwable throwable )
