@@ -71,7 +71,7 @@ public abstract class SubAssembly extends Pipe
   public String[] getTailNames()
     {
     if( tails == null )
-      throw new IllegalStateException( "setTails must be called in the constructor" );
+      throw new IllegalStateException( Util.formatTrace( this, "setTails must be called in the constructor" ) );
 
     String[] names = new String[tails.length];
 
@@ -91,7 +91,7 @@ public abstract class SubAssembly extends Pipe
   public Pipe[] getPrevious()
     {
     if( tails == null )
-      throw new IllegalStateException( "setTails must be called in the constructor" );
+      throw new IllegalStateException( Util.formatTrace( this, "setTails must be called in the constructor" ) );
 
     return Arrays.copyOf( tails, tails.length );
     }
