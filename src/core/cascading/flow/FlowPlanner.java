@@ -341,7 +341,7 @@ public class FlowPlanner
         for( FlowElement flowElement : flowElements )
           {
           if( flowElement instanceof Each )
-            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
+            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a GroupBy or CoGroup pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
             {
@@ -350,7 +350,7 @@ public class FlowPlanner
             boolean isBuffer = ( (Every) flowElement ).isBuffer();
 
             if( foundEveries != 0 && ( isBuffer || foundBuffer ) )
-              throw new PlannerException( (Pipe) flowElement, "Only one Every Buffer may follow a Group pipe, found: " + flowElement + " before: " + last );
+              throw new PlannerException( (Pipe) flowElement, "Only one Every with a Buffer may follow a GroupBy or CoGroup pipe, no other Every instances are allowed immediately before or after, found: " + flowElement + " before: " + last );
 
             if( !foundBuffer )
               foundBuffer = isBuffer;
