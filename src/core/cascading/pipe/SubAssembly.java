@@ -36,7 +36,7 @@ import cascading.util.Util;
  * arguments for configuring the resulting sub-assembly.
  * <p/>
  * If the SubAssembly represents a split in the pipeline process,
- * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe[])}.
+ * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe...)}.
  */
 public abstract class SubAssembly extends Pipe
   {
@@ -54,7 +54,7 @@ public abstract class SubAssembly extends Pipe
     }
 
   /**
-   * Method getTails returns all the tails of this PipeAssembly object. These values are set by {@link #setTails(Pipe[])}.
+   * Method getTails returns all the tails of this PipeAssembly object. These values are set by {@link #setTails(Pipe...)}.
    *
    * @return the tails (type Pipe[]) of this PipeAssembly object.
    */
