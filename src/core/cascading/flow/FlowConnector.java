@@ -22,6 +22,7 @@
 package cascading.flow;
 
 import java.beans.ConstructorProperties;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -400,6 +401,39 @@ public class FlowConnector
     sinks.put( tail.getName(), sink );
 
     return connect( name, sources, sinks, traps, tail );
+    }
+
+  /**
+   * Method connect links the named source Taps and sink Tap to the given pipe assembly.
+   * <p/>
+   * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
+   * So the head pipe does not need to be included as an argument.
+   *
+   * @param source source Tap to bind to the head of the given tail Pipes
+   * @param sinks  all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails  all tail ends of a pipe assembly
+   * @return Flow
+   */
+  public Flow connect( Tap source, Map<String, Tap> sinks, Collection<Pipe> tails )
+    {
+    return connect( null, source, sinks, tails.toArray( new Pipe[tails.size()] ) );
+    }
+
+  /**
+   * Method connect links the named source Taps and sink Tap to the given pipe assembly.
+   * <p/>
+   * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
+   * So the head pipe does not need to be included as an argument.
+   *
+   * @param name   name to give the resulting Flow
+   * @param source source Tap to bind to the head of the given tail Pipes
+   * @param sinks  all tail names and sink Taps to bind to the given tail Pipes
+   * @param tails  all tail ends of a pipe assembly
+   * @return Flow
+   */
+  public Flow connect( String name, Tap source, Map<String, Tap> sinks, Collection<Pipe> tails )
+    {
+    return connect( name, source, sinks, tails.toArray( new Pipe[tails.size()] ) );
     }
 
   /**

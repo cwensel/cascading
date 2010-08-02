@@ -23,6 +23,7 @@ package cascading.cascade;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +72,30 @@ public class CascadeConnector
   public CascadeConnector( Map<Object, Object> properties )
     {
     this.properties = properties;
+    }
+
+  /**
+   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
+   * of the Cascade is derived from the given Flow instances.
+   *
+   * @param flows of type Collection<Flow>
+   * @return Cascade
+   */
+  public Cascade connect( Collection<Flow> flows )
+    {
+    return connect( null, flows.toArray( new Flow[flows.size()] ) );
+    }
+
+  /**
+   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance.
+   *
+   * @param name  of type String
+   * @param flows of type Collection<Flow>
+   * @return Cascade
+   */
+  public Cascade connect( String name, Collection<Flow> flows )
+    {
+    return connect( name, flows.toArray( new Flow[flows.size()] ) );
     }
 
   /**

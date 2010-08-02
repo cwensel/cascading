@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added convenience methods on c.c.CascadeConnector#connect() and c.f.FlowConnector#connect() to accept
+  j.u.Collection<Flow> and j.u.Collection<Pipe> arguments, respectively.
+
   Added Riffle support via the new c.f.ProcessFlow wrapper class. Riffle allows for non-Cascading jobs and/or
   sets of iterative Flows to participate in a c.c.Cascade.
 
