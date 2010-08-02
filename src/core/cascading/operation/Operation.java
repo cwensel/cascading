@@ -27,7 +27,7 @@ import cascading.tuple.Fields;
 /**
  * Interface Operation is the base interface for all functions applied to {@link cascading.tuple.Tuple} streams.
  * <p/>
- * Specificlly {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer}, and {@link Assertion}.
+ * Specifically {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer}, and {@link Assertion}.
  * <p/>
  * Use {@link BaseOperation} for a convenient way to create new Operation types.
  *
@@ -44,11 +44,15 @@ public interface Operation<C>
   int ANY = Integer.MAX_VALUE;
 
   /**
-   * The prepare method is called immediately before the current Operation instance is put into play. This method
-   * should initialize any resources that can be shutdown or released in the {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} method.
+   * The prepare method is called immediately before the current Operation instance is put into play processing Tuples.
+   * This method should initialize any resources that can be shutdown or released in the
+   * {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a cleanup invocation immediately before subsequent invocations.
+   * <p/>
+   * If the Flow this Operation instance belongs will execute on a remote cluster, this method will be called
+   * cluster side, not client side.
    *
    * @param flowProcess
    * @param operationCall
@@ -56,11 +60,15 @@ public interface Operation<C>
   void prepare( FlowProcess flowProcess, OperationCall<C> operationCall );
 
   /**
-   * The cleanup method is called immediately after the current Operation instance is taken out of play. This method
-   * should shutdown any resources created or initialized during the {@link #prepare(cascading.flow.FlowProcess, OperationCall)} method.
+   * The cleanup method is called immediately after the current Operation instance is taken out of play processing Tuples.
+   * This method should shutdown any resources created or initialized during the
+   * {@link #prepare(cascading.flow.FlowProcess, OperationCall)} method.
    * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a prepare invocation before.
+   * <p/>
+   * If the Flow this Operation instance belongs will execute on a remote cluster, this method will be called
+   * cluster side, not client side.
    *
    * @param flowProcess
    * @param operationCall
