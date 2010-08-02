@@ -496,6 +496,26 @@ public class Util
     }
 
 
+  /**
+   * Method formatRawTrace does not include the pipe name
+   *
+   * @param pipe    of type Pipe
+   * @param message of type String
+   * @return String
+   */
+  public static String formatRawTrace( Pipe pipe, String message )
+    {
+    if( pipe == null )
+      return message;
+
+    String trace = pipe.getTrace();
+
+    if( trace == null )
+      return message;
+
+    return "[" + trace + "] " + message;
+    }
+
   public static String formatTrace( Pipe pipe, String message )
     {
     if( pipe == null )
