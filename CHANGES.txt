@@ -25,7 +25,7 @@ Cascading Change Log
 
   Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
 
-unreleased
+1.1.2
 
   Fixed bug preventing c.s.TextDelimited schemes from being used with a c.t.TemplateTap.
 
