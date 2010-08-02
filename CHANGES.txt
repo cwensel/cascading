@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.1.2
 
   Fixed bug preventing c.s.TextDelimited schemes from being used with a c.t.TemplateTap.
 
