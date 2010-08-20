@@ -400,7 +400,7 @@ public class MultiMapReducePlanner extends FlowPlanner
         Hfs successorTap = (Hfs) successor;
 
         // does this scheme source what it sinks
-        if( !successorTap.getScheme().isSymetrical() )
+        if( !successorTap.getScheme().isSymmetrical() )
           continue;
 
         URI tempURIScheme = getDefaultURIScheme( tap ); // temp uses default fs

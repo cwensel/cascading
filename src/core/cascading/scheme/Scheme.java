@@ -198,12 +198,12 @@ public abstract class Scheme implements Serializable
     }
 
   /**
-   * Method isSymetrical returns {@code true} if the sink fields equal the source fields. That is, this
+   * Method isSymmetrical returns {@code true} if the sink fields equal the source fields. That is, this
    * scheme sources the same fields as it sinks.
    *
-   * @return the symetrical (type boolean) of this Scheme object.
+   * @return the symmetrical (type boolean) of this Scheme object.
    */
-  public boolean isSymetrical()
+  public boolean isSymmetrical()
     {
     return getSinkFields().equals( getSourceFields() );
     }
