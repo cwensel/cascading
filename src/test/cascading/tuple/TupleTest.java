@@ -161,6 +161,12 @@ public class TupleTest extends CascadingTestCase
     Tuple bTuple = new Tuple( tuple, "a" );
 
     assertEquals( "not equal: tuple", aTuple, bTuple );
+
+    aTuple = new Tuple( "a", new Tuple( tuple ), "a" ); // test new instances
+    bTuple = new Tuple( "a", new Tuple( tuple ), "a" );
+
+    assertEquals( "not equal: tuple", aTuple, bTuple );
+    assertEquals( "not equal: hash code", aTuple.hashCode(), bTuple.hashCode() );
     }
 
   public void testCompare()
