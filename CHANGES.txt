@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.t.Fields#merge() method to allow simple merging of Fields instances which discarding duplicate names and
+  positions.
+
   Added convenience methods on c.c.CascadeConnector#connect() and c.f.FlowConnector#connect() to accept
   j.u.Collection<Flow> and j.u.Collection<Pipe> arguments, respectively.
 

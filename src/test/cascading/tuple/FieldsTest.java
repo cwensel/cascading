@@ -739,4 +739,39 @@ public class FieldsTest extends CascadingTestCase
       // ignore
       }
     }
+
+  public void testMergeFields()
+    {
+    Fields fieldA = new Fields( "a", "b" );
+    Fields fieldB = new Fields( "c", "d" );
+
+    Fields join = Fields.merge( fieldA, fieldB );
+
+    assertEquals( "not equal: ", 4, join.size() );
+    assertEquals( "not equal: ", "a", join.get( 0 ) );
+    assertEquals( "not equal: ", "b", join.get( 1 ) );
+    assertEquals( "not equal: ", "c", join.get( 2 ) );
+    assertEquals( "not equal: ", "d", join.get( 3 ) );
+
+    fieldA = new Fields( "a", "b" );
+    fieldB = new Fields( "a", "d" );
+
+    join = Fields.merge( fieldA, fieldB );
+
+    assertEquals( "not equal: ", 3, join.size() );
+    assertEquals( "not equal: ", "a", join.get( 0 ) );
+    assertEquals( "not equal: ", "b", join.get( 1 ) );
+    assertEquals( "not equal: ", "d", join.get( 2 ) );
+
+    fieldA = Fields.size( 2 );
+    fieldB = new Fields( "a", "d" );
+
+    join = Fields.merge( fieldA, fieldB );
+
+    assertEquals( "not equal: ", 4, join.size() );
+    assertEquals( "not equal: ", 0, join.get( 0 ) );
+    assertEquals( "not equal: ", 1, join.get( 1 ) );
+    assertEquals( "not equal: ", "a", join.get( 2 ) );
+    assertEquals( "not equal: ", "d", join.get( 3 ) );
+    }
   }

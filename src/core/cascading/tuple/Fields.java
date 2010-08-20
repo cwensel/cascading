@@ -23,6 +23,7 @@ package cascading.tuple;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -204,6 +205,34 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     return elements;
+    }
+
+  /**
+   * Method merge merges all given Fields instances into a new Fields instance where a merge is a set union of all the
+   * given Fields instances.
+   * <p/>
+   * Thus duplicate positions or field names are allowed, they are subsequently discarded in favor of the first
+   * occurrence. That is, merging "a" and "a" would yield "a", not "a, a", yet merging "a,b" and "c" would yield "a,b,c".
+   * <p/>
+   * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
+   *
+   * @param fields of type Fields
+   * @return Fields
+   */
+  public static Fields merge( Fields... fields )
+    {
+    List<Comparable> elements = new ArrayList<Comparable>();
+
+    for( Fields field : fields )
+      {
+      for( Comparable comparable : field )
+        {
+        if( !elements.contains( comparable ) )
+          elements.add( comparable );
+        }
+      }
+
+    return new Fields( elements.toArray( new Comparable[elements.size()] ) );
     }
 
   /**
