@@ -34,7 +34,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Class ExpressionFunction dynamically resolves a given expression using argument {@link Tuple} values. This {@link Function}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifially this function uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifically this function uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
