@@ -209,6 +209,26 @@ public abstract class Scheme implements Serializable
     }
 
   /**
+   * Method isSource returns true if this Scheme instance can be used as a source.
+   *
+   * @return boolean
+   */
+  public boolean isSource()
+    {
+    return true;
+    }
+
+  /**
+   * Method isSink returns true if this Scheme instance can be used as a sink.
+   *
+   * @return boolean
+   */
+  public boolean isSink()
+    {
+    return true;
+    }
+
+  /**
    * Method sourceInit initializes this instance as a source.
    *
    * @param tap  of type Tap

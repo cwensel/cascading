@@ -421,7 +421,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public boolean isSink()
     {
-    return true;
+    return getScheme().isSink();
     }
 
   /**
@@ -431,7 +431,7 @@ public abstract class Tap implements FlowElement, Serializable
    */
   public boolean isSource()
     {
-    return true;
+    return getScheme().isSource();
     }
 
   @Override

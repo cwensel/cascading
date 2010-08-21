@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added #isSource() and #isSink() methods to c.s.Scheme so that some Scheme instances can report they are either
+  sink or source only.
+
   Added c.t.Fields#merge() method to allow simple merging of Fields instances which discarding duplicate names and
   positions.
 
