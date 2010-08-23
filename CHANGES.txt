@@ -1,5 +1,9 @@
 Cascading Change Log
 
+unreleased
+
+  Added c.c.Cascade#writeDOT method to simplify debugging Cascade instances.
+
 1.1.2
 
   Fixed bug preventing c.s.TextDelimited schemes from being used with a c.t.TemplateTap.

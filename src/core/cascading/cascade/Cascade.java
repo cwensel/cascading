@@ -21,8 +21,10 @@
 
 package cascading.cascade;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -45,6 +47,9 @@ import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
+import org.jgrapht.ext.EdgeNameProvider;
+import org.jgrapht.ext.IntegerNameProvider;
+import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -85,6 +90,8 @@ public class Cascade implements Runnable
   private String name;
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
+  /** Field tapGraph */
+  private final SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
   /** Field thread */
@@ -100,10 +107,11 @@ public class Cascade implements Runnable
   /** Field flowSkipStrategy */
   private FlowSkipStrategy flowSkipStrategy = null;
 
-  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph )
+  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
     {
     this.name = name;
     this.jobGraph = jobGraph;
+    this.tapGraph = tapGraph;
     this.cascadeStats = new CascadeStats( name, getID() );
     setIDOnFlow();
     }
@@ -375,6 +383,44 @@ public class Cascade implements Runnable
       ( (CascadeJob) callable ).stop();
 
     logWarn( "stopped flows" );
+    }
+
+  /**
+   * Method writeDOT writes this element graph to a DOT file for easy visualization and debugging.
+   *
+   * @param filename of type String
+   */
+  public void writeDOT( String filename )
+    {
+    printElementGraph( filename, tapGraph );
+    }
+
+  protected void printElementGraph( String filename, final SimpleDirectedGraph<Tap, Flow.FlowHolder> graph )
+    {
+    try
+      {
+      Writer writer = new FileWriter( filename );
+
+      Util.writeDOT( writer, graph, new IntegerNameProvider<Tap>(), new VertexNameProvider<Tap>()
+      {
+      public String getVertexName( Tap object )
+        {
+        return object.getPath().toString().replaceAll( "\"", "\'" );
+        }
+      }, new EdgeNameProvider<Flow.FlowHolder>()
+      {
+      public String getEdgeName( Flow.FlowHolder object )
+        {
+        return object.flow.getName().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+        }
+      } );
+
+      writer.close();
+      }
+    catch( IOException exception )
+      {
+      exception.printStackTrace();
+      }
     }
 
   @Override
