@@ -73,6 +73,10 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * The new consequence of this is if the Cascade fails, but does complete a Flow that appended data, re-running
  * the Cascade (and the successful append Flow) will re-append data to the source. Some systems may be idempotent and
  * may not have any side-effects. So plan accordingly.
+ * <p/>
+ * For a Cascade to properly manage both {@link Flow} and {@link cascading.flow.MapReduceFlow} instances, all
+ * paths must be absolute. So when constructing {@link Tap} instances, each Tap must have the fully
+ * qualified path to the input directories and files.
  *
  * @see Flow
  * @see cascading.flow.FlowSkipStrategy
