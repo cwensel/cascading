@@ -23,7 +23,6 @@ package cascading.cascade;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,12 +97,11 @@ public class CascadeConnector
     verifyUniqueFlowNames( flows );
     name = name == null ? makeName( flows ) : name;
 
-    SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<Tap, Flow.FlowHolder>( Flow.FlowHolder.class );
+    SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<String, Flow.FlowHolder>( Flow.FlowHolder.class );
     SimpleDirectedGraph<Flow, Integer> flowGraph = new SimpleDirectedGraph<Flow, Integer>( Integer.class );
 
     makeTapGraph( tapGraph, flows );
     makeFlowGraph( flowGraph, tapGraph );
-
 
     return new Cascade( name, flowGraph, tapGraph );
     }
@@ -131,57 +129,63 @@ public class CascadeConnector
     return Util.join( names, "+" );
     }
 
-  private void makeTapGraph( SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph, Flow[] flows )
+  private void makeTapGraph( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow[] flows )
     {
     for( Flow flow : flows )
       {
       LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSources().values() );
-      Collection<Tap> sinks = flow.getSinks().values();
+      LinkedList<Tap> sinks = new LinkedList<Tap>( flow.getSinks().values() );
 
-      // account for MultiTap sources
-      ListIterator<Tap> iterator = sources.listIterator();
-      while( iterator.hasNext() )
-        {
-        Tap source = iterator.next();
-
-        if( source instanceof CompositeTap )
-          {
-          iterator.remove();
-
-          for( Tap tap : ( (CompositeTap) source ).getChildTaps() )
-            iterator.add( tap );
-          }
-        }
+      unwrapCompositeTaps( sources );
+      unwrapCompositeTaps( sinks );
 
       for( Tap source : sources )
-        tapGraph.addVertex( source );
+        tapGraph.addVertex( source.getPath().toString() );
 
       for( Tap sink : sinks )
-        tapGraph.addVertex( sink );
+        tapGraph.addVertex( sink.getPath().toString() );
 
       for( Tap source : sources )
         {
         for( Tap sink : sinks )
-          tapGraph.addEdge( source, sink, flow.getHolder() );
+          tapGraph.addEdge( source.getPath().toString(), sink.getPath().toString(), flow.getHolder() );
         }
       }
     }
 
-  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+  private void unwrapCompositeTaps( LinkedList<Tap> taps )
     {
-    TopologicalOrderIterator<Tap, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<Tap, Flow.FlowHolder>( tapGraph );
+    ListIterator<Tap> iterator = taps.listIterator();
+
+    while( iterator.hasNext() )
+      {
+      Tap tap = iterator.next();
+
+      if( tap instanceof CompositeTap )
+        {
+        iterator.remove();
+
+        for( Tap childTap : ( (CompositeTap) tap ).getChildTaps() )
+          iterator.add( childTap );
+        }
+      }
+    }
+
+  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
+    {
+    TopologicalOrderIterator<String, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<String, Flow.FlowHolder>( tapGraph );
     int count = 0;
 
     while( topoIterator.hasNext() )
       {
-      Tap source = topoIterator.next();
+      String source = topoIterator.next();
 
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling flow source: " + source );
 
-      List<Tap> sinks = Graphs.successorListOf( tapGraph, (Tap) source );
+      List<String> sinks = Graphs.successorListOf( tapGraph, source );
 
-      for( Tap sink : sinks )
+      for( String sink : sinks )
         {
         if( LOG.isDebugEnabled() )
           LOG.debug( "handling flow path: " + source + " -> " + sink );

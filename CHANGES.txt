@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where a c.c.Cascading of c.f.Flow and c.f.MapReduceFlow instances did not properly sort topologically.
+
   Added c.c.Cascade#writeDOT method to simplify debugging Cascade instances.
 
 1.1.2

@@ -95,7 +95,7 @@ public class Cascade implements Runnable
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field tapGraph */
-  private final SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph;
+  private final SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
   /** Field thread */
@@ -111,7 +111,7 @@ public class Cascade implements Runnable
   /** Field flowSkipStrategy */
   private FlowSkipStrategy flowSkipStrategy = null;
 
-  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<Tap, Flow.FlowHolder> tapGraph )
+  Cascade( String name, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {
     this.name = name;
     this.jobGraph = jobGraph;
@@ -399,17 +399,17 @@ public class Cascade implements Runnable
     printElementGraph( filename, tapGraph );
     }
 
-  protected void printElementGraph( String filename, final SimpleDirectedGraph<Tap, Flow.FlowHolder> graph )
+  protected void printElementGraph( String filename, final SimpleDirectedGraph<String, Flow.FlowHolder> graph )
     {
     try
       {
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, graph, new IntegerNameProvider<Tap>(), new VertexNameProvider<Tap>()
+      Util.writeDOT( writer, graph, new IntegerNameProvider<String>(), new VertexNameProvider<String>()
       {
-      public String getVertexName( Tap object )
+      public String getVertexName( String object )
         {
-        return object.getPath().toString().replaceAll( "\"", "\'" );
+        return object.replaceAll( "\"", "\'" );
         }
       }, new EdgeNameProvider<Flow.FlowHolder>()
       {
