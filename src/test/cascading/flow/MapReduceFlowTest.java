@@ -95,14 +95,16 @@ public class MapReduceFlowTest extends ClusterTestCase
     validateLength( flow.openSink(), 10 );
     }
 
-  private String resolve( String path, boolean delete ) throws IOException
+  private String remove( String path, boolean delete ) throws IOException
     {
     FileSystem fs = FileSystem.get( URI.create( path ), MultiMapReducePlanner.getJobConf( getProperties() ) );
 
     if( delete )
       fs.delete( new Path( path ), true );
 
-    return fs.makeQualified( new Path( path ) ).toString();
+    return path;
+
+//    return fs.makeQualified( new Path( path ) ).toString();
     }
 
   public void testCascade() throws IOException
@@ -113,11 +115,11 @@ public class MapReduceFlowTest extends ClusterTestCase
     copyFromLocal( inputFileApache );
 
     // Setup two standard cascading flows that will generate the input for the first MapReduceFlow
-    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), resolve( inputFileApache, false ) );
-    Tap sink1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), resolve( outputPath4, true ), true );
+    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( inputFileApache, false ) );
+    Tap sink1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( outputPath4, true ), true );
     Flow firstFlow = new FlowConnector().connect( source1, sink1, new Pipe( "first-flow" ) );
 
-    Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), resolve( outputPath5, true ), true );
+    Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( outputPath5, true ), true );
     Flow secondFlow = new FlowConnector().connect( sink1, sink2, new Pipe( "second-flow" ) );
 
     JobConf defaultConf = MultiMapReducePlanner.getJobConf( getProperties() );
@@ -134,8 +136,8 @@ public class MapReduceFlowTest extends ClusterTestCase
     firstConf.setInputFormat( TextInputFormat.class );
     firstConf.setOutputFormat( TextOutputFormat.class );
 
-    FileInputFormat.setInputPaths( firstConf, new Path( resolve( outputPath5, true ) ) );
-    FileOutputFormat.setOutputPath( firstConf, new Path( resolve( outputPath1, true ) ) );
+    FileInputFormat.setInputPaths( firstConf, new Path( remove( outputPath5, true ) ) );
+    FileOutputFormat.setOutputPath( firstConf, new Path( remove( outputPath1, true ) ) );
 
     Flow firstMR = new MapReduceFlow( firstConf, true );
 
@@ -151,8 +153,8 @@ public class MapReduceFlowTest extends ClusterTestCase
     secondConf.setInputFormat( TextInputFormat.class );
     secondConf.setOutputFormat( TextOutputFormat.class );
 
-    FileInputFormat.setInputPaths( secondConf, new Path( resolve( outputPath1, true ) ) );
-    FileOutputFormat.setOutputPath( secondConf, new Path( resolve( outputPath2, true ) ) );
+    FileInputFormat.setInputPaths( secondConf, new Path( remove( outputPath1, true ) ) );
+    FileOutputFormat.setOutputPath( secondConf, new Path( remove( outputPath2, true ) ) );
 
     Flow secondMR = new MapReduceFlow( secondConf, true );
 
@@ -168,8 +170,8 @@ public class MapReduceFlowTest extends ClusterTestCase
     thirdConf.setInputFormat( TextInputFormat.class );
     thirdConf.setOutputFormat( TextOutputFormat.class );
 
-    FileInputFormat.setInputPaths( thirdConf, new Path( resolve( outputPath2, true ) ) );
-    FileOutputFormat.setOutputPath( thirdConf, new Path( resolve( outputPath3, true ) ) );
+    FileInputFormat.setInputPaths( thirdConf, new Path( remove( outputPath2, true ) ) );
+    FileOutputFormat.setOutputPath( thirdConf, new Path( remove( outputPath3, true ) ) );
 
     Flow thirdMR = new MapReduceFlow( thirdConf, true );
 
@@ -178,7 +180,7 @@ public class MapReduceFlowTest extends ClusterTestCase
     // pass out of order
     Cascade cascade = cascadeConnector.connect( firstFlow, secondFlow, thirdMR, firstMR, secondMR );
 
-//    cascade.writeDOT( "mrcascade.dot" );
+    cascade.writeDOT( "mrcascade.dot" );
 
     cascade.complete();
 

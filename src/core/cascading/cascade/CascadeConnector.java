@@ -32,6 +32,7 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.tap.CompositeTap;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -140,17 +141,41 @@ public class CascadeConnector
       unwrapCompositeTaps( sinks );
 
       for( Tap source : sources )
-        tapGraph.addVertex( source.getPath().toString() );
+        tapGraph.addVertex( getFullPath( flow, source ) );
 
       for( Tap sink : sinks )
-        tapGraph.addVertex( sink.getPath().toString() );
+        tapGraph.addVertex( getFullPath( flow, sink ) );
 
       for( Tap source : sources )
         {
         for( Tap sink : sinks )
-          tapGraph.addEdge( source.getPath().toString(), sink.getPath().toString(), flow.getHolder() );
+          {
+          String sourcePath = getFullPath( flow, source );
+          String sinkPath = getFullPath( flow, sink );
+
+          tapGraph.addEdge( sourcePath, sinkPath, flow.getHolder() );
+          }
         }
       }
+    }
+
+  private String getFullPath( Flow flow, Tap tap )
+    {
+    Path path = tap.getPath();
+
+    if( tap instanceof Hfs )
+      {
+      try
+        {
+        path = ( (Hfs) tap ).getQualifiedPath( flow.getJobConf() );
+        }
+      catch( IOException exception )
+        {
+        throw new CascadeException( "could not get fully qualified path for: " + tap );
+        }
+      }
+
+    return path.toString();
     }
 
   private void unwrapCompositeTaps( LinkedList<Tap> taps )
