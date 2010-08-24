@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed c.t.TupleEntry#set method so that it may take a c.t.Fields instance for a field name.
+
   Fixed NPE in c.t.TempHfs when parent c.f.Flow is used in a Cascade under certain conditions.
 
   Fixed bug where mixed absolute and relative paths didn't not result in a proper topological sort when used
