@@ -82,7 +82,7 @@ public class FlowStep implements Serializable
   private int submitPriority = 5;
 
   /** Field name */
-  final String name;
+  String name;
   /** Field id */
   private int id;
   /** Field graph */
@@ -125,6 +125,14 @@ public class FlowStep implements Serializable
   public String getName()
     {
     return name;
+    }
+
+  public void setName( String name )
+    {
+    if( name == null || name.isEmpty() )
+      throw new IllegalArgumentException( "step name may not be null or empty" );
+
+    this.name = name;
     }
 
   /**
