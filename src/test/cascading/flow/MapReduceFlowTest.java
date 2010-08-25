@@ -103,8 +103,6 @@ public class MapReduceFlowTest extends ClusterTestCase
       fs.delete( new Path( path ), true );
 
     return path;
-
-//    return fs.makeQualified( new Path( path ) ).toString();
     }
 
   public void testCascade() throws IOException
@@ -117,10 +115,10 @@ public class MapReduceFlowTest extends ClusterTestCase
     // Setup two standard cascading flows that will generate the input for the first MapReduceFlow
     Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( inputFileApache, false ) );
     Tap sink1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( outputPath4, true ), true );
-    Flow firstFlow = new FlowConnector().connect( source1, sink1, new Pipe( "first-flow" ) );
+    Flow firstFlow = new FlowConnector( getProperties() ).connect( source1, sink1, new Pipe( "first-flow" ) );
 
     Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( outputPath5, true ), true );
-    Flow secondFlow = new FlowConnector().connect( sink1, sink2, new Pipe( "second-flow" ) );
+    Flow secondFlow = new FlowConnector( getProperties() ).connect( sink1, sink2, new Pipe( "second-flow" ) );
 
     JobConf defaultConf = MultiMapReducePlanner.getJobConf( getProperties() );
 
@@ -180,7 +178,7 @@ public class MapReduceFlowTest extends ClusterTestCase
     // pass out of order
     Cascade cascade = cascadeConnector.connect( firstFlow, secondFlow, thirdMR, firstMR, secondMR );
 
-    cascade.writeDOT( "mrcascade.dot" );
+//    cascade.writeDOT( "mrcascade.dot" );
 
     cascade.complete();
 
