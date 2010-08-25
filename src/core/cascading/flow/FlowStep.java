@@ -230,6 +230,9 @@ public class FlowStep implements Serializable
         conf.set( entry.getKey().toString(), entry.getValue().toString() );
       }
 
+    // disable warning
+    conf.setBoolean( "mapred.used.genericoptionsparser", true );
+
     conf.setJobName( getStepName() );
 
     conf.setOutputKeyClass( Tuple.class );
