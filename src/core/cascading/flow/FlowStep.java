@@ -23,10 +23,11 @@ package cascading.flow;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -457,7 +458,7 @@ public class FlowStep implements Serializable
   public Collection<Operation> getAllOperations()
     {
     Set<FlowElement> vertices = graph.vertexSet();
-    Set<Operation> operations = new HashSet<Operation>();
+    List<Operation> operations = new ArrayList<Operation>(); // operations impl equals, so two instance may be the same
 
     for( FlowElement vertice : vertices )
       {
