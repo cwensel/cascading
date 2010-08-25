@@ -67,6 +67,8 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  * FlowSteps are submited in order of dependency. If two or more steps do not share the same dependencies and all
  * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
  * all steps will be submitted for execution.
+ * <p/>
+ * This class is for internal use, there are no stable public methods.
  */
 public class FlowStep implements Serializable
   {
@@ -82,7 +84,7 @@ public class FlowStep implements Serializable
   private int submitPriority = 5;
 
   /** Field name */
-  final String name;
+  String name;
   /** Field id */
   private int id;
   /** Field graph */
@@ -125,6 +127,14 @@ public class FlowStep implements Serializable
   public String getName()
     {
     return name;
+    }
+
+  public void setName( String name )
+    {
+    if( name == null || name.isEmpty() )
+      throw new IllegalArgumentException( "step name may not be null or empty" );
+
+    this.name = name;
     }
 
   /**
