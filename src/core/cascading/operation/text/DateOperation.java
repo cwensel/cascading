@@ -114,4 +114,35 @@ public class DateOperation extends BaseOperation
     return Calendar.getInstance( TimeZone.getTimeZone( "UTC" ), getLocale() );
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof DateOperation ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    DateOperation that = (DateOperation) object;
+
+    if( dateFormatString != null ? !dateFormatString.equals( that.dateFormatString ) : that.dateFormatString != null )
+      return false;
+    if( locale != null ? !locale.equals( that.locale ) : that.locale != null )
+      return false;
+    if( zone != null ? !zone.equals( that.zone ) : that.zone != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( zone != null ? zone.hashCode() : 0 );
+    result = 31 * result + ( locale != null ? locale.hashCode() : 0 );
+    result = 31 * result + ( dateFormatString != null ? dateFormatString.hashCode() : 0 );
+    return result;
+    }
   }

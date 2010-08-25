@@ -75,4 +75,29 @@ public class Status extends BaseOperation<Boolean> implements Filter<Boolean>
     return false;
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Status ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Status status1 = (Status) object;
+
+    if( status != null ? !status.equals( status1.status ) : status1.status != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( status != null ? status.hashCode() : 0 );
+    return result;
+    }
   }

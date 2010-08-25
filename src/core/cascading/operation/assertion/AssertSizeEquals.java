@@ -58,4 +58,30 @@ public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
     if( input.size() != size )
       fail( input.size(), size, input.getTuple().print() );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof AssertSizeEquals ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    AssertSizeEquals that = (AssertSizeEquals) object;
+
+    if( size != that.size )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + size;
+    return result;
+    }
   }

@@ -97,4 +97,39 @@ public class Counter extends BaseOperation implements Filter
 
     return false;
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Counter ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Counter counter = (Counter) object;
+
+    if( increment != counter.increment )
+      return false;
+    if( counterEnum != null ? !counterEnum.equals( counter.counterEnum ) : counter.counterEnum != null )
+      return false;
+    if( counterString != null ? !counterString.equals( counter.counterString ) : counter.counterString != null )
+      return false;
+    if( groupString != null ? !groupString.equals( counter.groupString ) : counter.groupString != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( counterEnum != null ? counterEnum.hashCode() : 0 );
+    result = 31 * result + ( groupString != null ? groupString.hashCode() : 0 );
+    result = 31 * result + ( counterString != null ? counterString.hashCode() : 0 );
+    result = 31 * result + increment;
+    return result;
+    }
   }

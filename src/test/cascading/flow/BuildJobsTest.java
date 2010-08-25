@@ -702,11 +702,43 @@ public class BuildJobsTest extends CascadingTestCase
 //    flow.writeDOT( "dupesource.dot" );
       fail( "did not throw planner exception" );
       }
-    catch( Exception exception )
+    catch( PlannerException exception )
       {
-
+//      exception.printStackTrace();
       }
     }
+
+//  public void testEquivalentPaths()
+//    {
+//    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+//    Tap source2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge" );
+//
+//    Tap sink = new Hfs( new TextLine(), "foo" );
+//
+//    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+//    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+//
+//    Pipe join = new CoGroup( "cogroup", left, new Fields( "offset" ), right, new Fields( "offset" ), Fields.size( 4 ) );
+//
+//    Map sources = new HashMap();
+//    sources.put( "left", source1 );
+//    sources.put( "right", source2 );
+//
+//    Map sinks = new HashMap();
+//    sinks.put( "cogroup", sink );
+//
+//    Flow flow = new FlowConnector().connect( sources, sinks, join );
+//    flow.writeDOT( "identicalpaths.dot" );
+//
+//    List<FlowStep> steps = flow.getSteps();
+//
+//    assertEquals( "not equal: steps.size()", 1, steps.size() );
+//
+//    FlowStep step = steps.get( 0 );
+//    System.out.println( "size: " + step.sources.size() );
+//
+//    System.out.println( "size: " + step.getNextScopes( step.sources.keySet().iterator().next()).size() );
+//    }
 
   public void testMerge2()
     {

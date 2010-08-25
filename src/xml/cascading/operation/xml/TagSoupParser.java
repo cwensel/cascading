@@ -148,4 +148,30 @@ public class TagSoupParser extends BaseOperation implements Function
       LOG.warn( "ignoring TagSoup exception", exception );
       }
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof TagSoupParser ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    TagSoupParser that = (TagSoupParser) object;
+
+    if( features != null ? !features.equals( that.features ) : that.features != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( features != null ? features.hashCode() : 0 );
+    return result;
+    }
   }

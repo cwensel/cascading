@@ -134,4 +134,30 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     {
     return new Tuple( (Comparable) aggregatorCall.getContext().value );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof ExtremaBase ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    ExtremaBase that = (ExtremaBase) object;
+
+    if( ignoreValues != null ? !ignoreValues.equals( that.ignoreValues ) : that.ignoreValues != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( ignoreValues != null ? ignoreValues.hashCode() : 0 );
+    return result;
+    }
   }

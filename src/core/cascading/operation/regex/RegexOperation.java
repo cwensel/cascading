@@ -127,4 +127,30 @@ public class RegexOperation<C> extends BaseOperation<C>
 
     return pattern;
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof RegexOperation ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    RegexOperation that = (RegexOperation) object;
+
+    if( patternString != null ? !patternString.equals( that.patternString ) : that.patternString != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( patternString != null ? patternString.hashCode() : 0 );
+    return result;
+    }
   }

@@ -21,6 +21,7 @@
 
 package cascading.assembly;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -59,5 +60,31 @@ public class SortElements extends BaseOperation implements Function
       inputCopy.put( input.getFields(), fields[ i++ ], tuple );
 
     functionCall.getOutputCollector().add( inputCopy );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof SortElements ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    SortElements that = (SortElements) object;
+
+    if( !Arrays.equals( fields, that.fields ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( fields != null ? Arrays.hashCode( fields ) : 0 );
+    return result;
     }
   }

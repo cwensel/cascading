@@ -90,4 +90,30 @@ public class FieldJoiner extends BaseOperation implements Function
     {
     functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().toString( delimiter ) ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof FieldJoiner ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    FieldJoiner that = (FieldJoiner) object;
+
+    if( delimiter != null ? !delimiter.equals( that.delimiter ) : that.delimiter != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( delimiter != null ? delimiter.hashCode() : 0 );
+    return result;
+    }
   }

@@ -54,4 +54,30 @@ public class Insert extends BaseOperation implements Function
     {
     functionCall.getOutputCollector().add( new Tuple( values ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Insert ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Insert insert = (Insert) object;
+
+    if( values != null ? !values.equals( insert.values ) : insert.values != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( values != null ? values.hashCode() : 0 );
+    return result;
+    }
   }

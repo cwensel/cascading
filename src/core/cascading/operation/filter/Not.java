@@ -76,4 +76,30 @@ public class Not extends BaseOperation implements Filter
     {
     return !filter.isRemove( flowProcess, filterCall );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Not ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Not not = (Not) object;
+
+    if( filter != null ? !filter.equals( not.filter ) : not.filter != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( filter != null ? filter.hashCode() : 0 );
+    return result;
+    }
   }

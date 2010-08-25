@@ -229,4 +229,36 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
       throw new OperationException( "could not evaluate expression: " + expression, exception );
       }
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof ExpressionOperation ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    ExpressionOperation that = (ExpressionOperation) object;
+
+    if( expression != null ? !expression.equals( that.expression ) : that.expression != null )
+      return false;
+    if( !Arrays.equals( parameterNames, that.parameterNames ) )
+      return false;
+    if( !Arrays.equals( parameterTypes, that.parameterTypes ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( expression != null ? expression.hashCode() : 0 );
+    result = 31 * result + ( parameterTypes != null ? Arrays.hashCode( parameterTypes ) : 0 );
+    result = 31 * result + ( parameterNames != null ? Arrays.hashCode( parameterNames ) : 0 );
+    return result;
+    }
   }

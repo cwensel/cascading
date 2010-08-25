@@ -68,4 +68,29 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
       }
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof AssertEqualsAll ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    AssertEqualsAll that = (AssertEqualsAll) object;
+
+    if( value != null ? !value.equals( that.value ) : that.value != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( value != null ? value.hashCode() : 0 );
+    return result;
+    }
   }

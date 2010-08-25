@@ -199,4 +199,29 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof BaseOperation ) )
+      return false;
+
+    BaseOperation that = (BaseOperation) object;
+
+    if( numArgs != that.numArgs )
+      return false;
+    if( fieldDeclaration != null ? !fieldDeclaration.equals( that.fieldDeclaration ) : that.fieldDeclaration != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = fieldDeclaration != null ? fieldDeclaration.hashCode() : 0;
+    result = 31 * result + numArgs;
+    return result;
+    }
   }

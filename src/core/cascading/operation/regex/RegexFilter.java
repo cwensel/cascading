@@ -95,4 +95,29 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
       return matchWholeTuple( filterCall.getContext(), filterCall.getArguments().getTuple() );
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof RegexFilter ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    RegexFilter that = (RegexFilter) object;
+
+    if( matchEachElement != that.matchEachElement )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( matchEachElement ? 1 : 0 );
+    return result;
+    }
   }

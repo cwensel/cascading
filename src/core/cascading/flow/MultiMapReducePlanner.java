@@ -25,14 +25,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import cascading.flow.hadoop.HadoopUtil;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -182,6 +185,7 @@ public class MultiMapReducePlanner extends FlowPlanner
       failOnGroupEverySplit( elementGraph );
 
       // m/r specific
+      handleWarnEquivalentPaths( elementGraph );
       handleSplit( elementGraph );
       handleGroupPartitioning( elementGraph );
       handleNonSafeOperations( elementGraph );
@@ -237,6 +241,84 @@ public class MultiMapReducePlanner extends FlowPlanner
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
       throw new PlannerException( message, exception, elementGraph );
       }
+    }
+
+  private void handleWarnEquivalentPaths( ElementGraph elementGraph )
+    {
+    List<CoGroup> joins = elementGraph.findAllJoinGroups();
+
+    for( CoGroup coGroup : joins )
+      {
+      List<GraphPath<FlowElement, Scope>> graphPaths = elementGraph.getAllShortestPathsTo( coGroup );
+
+      List<List<FlowElement>> paths = ElementGraph.asPathList( graphPaths );
+
+      if( !areEquivalentPaths( elementGraph, paths ) )
+        continue;
+
+      LOG.warn( "found equivalent paths from: " + paths.get( 0 ).get( 1 ) + " to: " + coGroup );
+
+      // in order to remove dupe paths, we need to verify there isn't any branching
+      }
+    }
+
+  private boolean areEquivalentPaths( ElementGraph elementGraph, List<List<FlowElement>> paths )
+    {
+    int length = sameLength( paths );
+
+    if( length == -1 )
+      return false;
+
+    Set<FlowElement> elements = new TreeSet<FlowElement>( new EquivalenceComparator( elementGraph ) );
+
+    for( int i = 0; i < length; i++ )
+      {
+      elements.clear();
+
+      for( List<FlowElement> path : paths )
+        elements.add( path.get( i ) );
+
+      if( elements.size() != 1 )
+        return false;
+      }
+
+    return true;
+    }
+
+  private class EquivalenceComparator implements Comparator<FlowElement>
+    {
+    private ElementGraph elementGraph;
+
+    public EquivalenceComparator( ElementGraph elementGraph )
+      {
+      this.elementGraph = elementGraph;
+      }
+
+    @Override
+    public int compare( FlowElement lhs, FlowElement rhs )
+      {
+      boolean areEquivalent = lhs.isEquivalentTo( rhs );
+      boolean sameIncoming = elementGraph.inDegreeOf( lhs ) == elementGraph.inDegreeOf( rhs );
+      boolean sameOutgoing = elementGraph.outDegreeOf( lhs ) == elementGraph.outDegreeOf( rhs );
+
+      if( areEquivalent && sameIncoming && sameOutgoing )
+        return 0;
+
+      return System.identityHashCode( lhs ) - System.identityHashCode( rhs );
+      }
+    }
+
+  private int sameLength( List<List<FlowElement>> paths )
+    {
+    int lastSize = paths.get( 0 ).size();
+
+    for( int i = 1; i < paths.size(); i++ )
+      {
+      if( paths.get( i ).size() != lastSize )
+        return -1;
+      }
+
+    return lastSize;
     }
 
   /**

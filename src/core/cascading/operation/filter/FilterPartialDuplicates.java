@@ -96,4 +96,30 @@ public class FilterPartialDuplicates extends BaseOperation<LinkedHashMap<Tuple, 
     {
     operationCall.setContext( null );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof FilterPartialDuplicates ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    FilterPartialDuplicates that = (FilterPartialDuplicates) object;
+
+    if( threshold != that.threshold )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + threshold;
+    return result;
+    }
   }

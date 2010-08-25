@@ -176,4 +176,33 @@ public abstract class Logic extends BaseOperation implements Filter
 
     return argumentEntries;
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Logic ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Logic logic = (Logic) object;
+
+    if( !Arrays.equals( argumentSelectors, logic.argumentSelectors ) )
+      return false;
+    if( !Arrays.equals( filters, logic.filters ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( argumentSelectors != null ? Arrays.hashCode( argumentSelectors ) : 0 );
+    result = 31 * result + ( filters != null ? Arrays.hashCode( filters ) : 0 );
+    return result;
+    }
   }

@@ -173,4 +173,30 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
 
     functionCall.getOutputCollector().add( output );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof RegexParser ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    RegexParser that = (RegexParser) object;
+
+    if( !Arrays.equals( groups, that.groups ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( groups != null ? Arrays.hashCode( groups ) : 0 );
+    return result;
+    }
   }

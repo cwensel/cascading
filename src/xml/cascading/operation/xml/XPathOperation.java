@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -269,5 +270,34 @@ public class XPathOperation extends BaseOperation<DocumentBuilder>
       throw new OperationException( "could not parse xml document", exception );
       }
     return document;
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof XPathOperation ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    XPathOperation that = (XPathOperation) object;
+
+    if( expressions != null ? !expressions.equals( that.expressions ) : that.expressions != null )
+      return false;
+    if( !Arrays.equals( paths, that.paths ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( paths != null ? Arrays.hashCode( paths ) : 0 );
+    result = 31 * result + ( expressions != null ? expressions.hashCode() : 0 );
+    return result;
     }
   }

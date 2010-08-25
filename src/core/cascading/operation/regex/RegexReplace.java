@@ -100,4 +100,33 @@ public class RegexReplace extends RegexOperation<Matcher> implements Function<Ma
 
     functionCall.getOutputCollector().add( output );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof RegexReplace ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    RegexReplace that = (RegexReplace) object;
+
+    if( replaceAll != that.replaceAll )
+      return false;
+    if( replacement != null ? !replacement.equals( that.replacement ) : that.replacement != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( replacement != null ? replacement.hashCode() : 0 );
+    result = 31 * result + ( replaceAll ? 1 : 0 );
+    return result;
+    }
   }

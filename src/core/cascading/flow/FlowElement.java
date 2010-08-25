@@ -52,4 +52,6 @@ public interface FlowElement
    * @return Fields
    */
   Fields resolveFields( Scope scope ); // todo: consider moving this functionality to Scope
+
+  boolean isEquivalentTo( FlowElement element );
   }

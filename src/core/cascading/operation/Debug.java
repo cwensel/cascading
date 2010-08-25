@@ -236,4 +236,42 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
 
     stream.println( message );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Debug ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Debug debug = (Debug) object;
+
+    if( printFields != debug.printFields )
+      return false;
+    if( printFieldsEvery != debug.printFieldsEvery )
+      return false;
+    if( printTupleEvery != debug.printTupleEvery )
+      return false;
+    if( output != debug.output )
+      return false;
+    if( prefix != null ? !prefix.equals( debug.prefix ) : debug.prefix != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( output != null ? output.hashCode() : 0 );
+    result = 31 * result + ( prefix != null ? prefix.hashCode() : 0 );
+    result = 31 * result + ( printFields ? 1 : 0 );
+    result = 31 * result + printFieldsEvery;
+    result = 31 * result + printTupleEvery;
+    return result;
+    }
   }

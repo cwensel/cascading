@@ -77,4 +77,35 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     {
     return !( filterCall.getContext().nextDouble() < fraction );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Sample ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Sample sample = (Sample) object;
+
+    if( Double.compare( sample.fraction, fraction ) != 0 )
+      return false;
+    if( seed != sample.seed )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    long temp;
+    result = 31 * result + (int) ( seed ^ ( seed >>> 32 ) );
+    temp = fraction != +0.0d ? Double.doubleToLongBits( fraction ) : 0L;
+    result = 31 * result + (int) ( temp ^ ( temp >>> 32 ) );
+    return result;
+    }
   }

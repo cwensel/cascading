@@ -35,6 +35,7 @@ import java.util.Set;
 
 import cascading.operation.PlannedOperation;
 import cascading.operation.PlannerLevel;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -346,6 +347,19 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return paths;
     }
 
+  public static List<List<FlowElement>> asPathList( List<GraphPath<FlowElement, Scope>> paths )
+    {
+    List<List<FlowElement>> results = new LinkedList<List<FlowElement>>();
+
+    if( paths == null )
+      return results;
+
+    for( GraphPath<FlowElement, Scope> path : paths )
+      results.add( Graphs.getPathVertexList( path ) );
+
+    return results;
+    }
+
   /**
    * Method getDepthFirstIterator returns the depthFirstIterator of this ElementGraph object.
    *
@@ -572,6 +586,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   public List<Group> findAllMergeJoinGroups()
     {
     return findAllOfType( 2, 1, Group.class, new LinkedList<Group>() );
+    }
+
+  public List<CoGroup> findAllJoinGroups()
+    {
+    return findAllOfType( 2, 1, CoGroup.class, new LinkedList<CoGroup>() );
     }
 
   /**

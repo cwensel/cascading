@@ -87,4 +87,30 @@ public class FieldFormatter extends BaseOperation implements Function
     {
     functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().format( format ) ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof FieldFormatter ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    FieldFormatter that = (FieldFormatter) object;
+
+    if( format != null ? !format.equals( that.format ) : that.format != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( format != null ? format.hashCode() : 0 );
+    return result;
+    }
   }

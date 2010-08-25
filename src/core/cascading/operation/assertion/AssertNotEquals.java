@@ -67,4 +67,29 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
       fail( tuple.print(), values.print() );
     }
 
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof AssertNotEquals ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    AssertNotEquals that = (AssertNotEquals) object;
+
+    if( values != null ? !values.equals( that.values ) : that.values != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( values != null ? values.hashCode() : 0 );
+    return result;
+    }
   }

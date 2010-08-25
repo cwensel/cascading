@@ -157,4 +157,33 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     }
 
   protected abstract boolean assertFails( Long groupSize );
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof AssertGroupBase ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    AssertGroupBase that = (AssertGroupBase) object;
+
+    if( size != that.size )
+      return false;
+    if( patternString != null ? !patternString.equals( that.patternString ) : that.patternString != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( patternString != null ? patternString.hashCode() : 0 );
+    result = 31 * result + (int) ( size ^ ( size >>> 32 ) );
+    return result;
+    }
   }

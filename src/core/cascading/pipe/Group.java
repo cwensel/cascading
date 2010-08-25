@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.cogroup.CoGroupClosure;
@@ -282,7 +283,7 @@ public class Group extends Pipe
       if( new HashSet<Fields>( Arrays.asList( groupFields ) ).size() != 1 )
         throw new IllegalArgumentException( "all groupFields must be identical" );
 
-      addPipe( pipes[0] );
+      addPipe( pipes[ 0 ] );
       this.numSelfJoins = pipes.length - 1;
       this.groupFieldsMap.put( pipes[ 0 ].getName(), groupFields[ 0 ] );
 
@@ -1238,6 +1239,25 @@ public class Group extends Pipe
   Fields resolveOutgoingSelector( Fields declared )
     {
     return declared;
+    }
+
+  @Override
+  public boolean isEquivalentTo( FlowElement element )
+    {
+    boolean equivalentTo = super.isEquivalentTo( element );
+
+    if( !equivalentTo )
+      return equivalentTo;
+
+    Group group = (Group) element;
+
+    if( !groupFieldsMap.equals( group.groupFieldsMap ) )
+      return false;
+
+    if( !pipes.equals( group.pipes ) )
+      return false;
+
+    return true;
     }
 
   // OBJECT OVERRIDES

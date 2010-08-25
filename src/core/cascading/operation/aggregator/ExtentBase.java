@@ -91,4 +91,30 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
     {
     return aggregatorCall.getContext()[ 0 ];
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof ExtentBase ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    ExtentBase that = (ExtentBase) object;
+
+    if( ignoreTuples != null ? !ignoreTuples.equals( that.ignoreTuples ) : that.ignoreTuples != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( ignoreTuples != null ? ignoreTuples.hashCode() : 0 );
+    return result;
+    }
   }

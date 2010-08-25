@@ -276,6 +276,18 @@ public class Pipe implements FlowElement, Serializable
     }
 
   @Override
+  public boolean isEquivalentTo( FlowElement element )
+    {
+    if( element == null )
+      return false;
+
+    if( this == element )
+      return true;
+
+    return getClass() == element.getClass();
+    }
+
+  @Override
   public boolean equals( Object object )
     {
     // we cannot test equality by names for this class, prevents detection of dupe names in heads or tails

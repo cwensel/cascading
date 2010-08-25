@@ -162,4 +162,30 @@ public class DateParser extends DateOperation implements Function
     for( int i = 0; i < calendarFields.length; i++ )
       output.add( calendar.get( calendarFields[ i ] ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof DateParser ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    DateParser that = (DateParser) object;
+
+    if( !Arrays.equals( calendarFields, that.calendarFields ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( calendarFields != null ? Arrays.hashCode( calendarFields ) : 0 );
+    return result;
+    }
   }

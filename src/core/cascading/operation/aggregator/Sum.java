@@ -98,4 +98,30 @@ public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
     Tuple tuple = new Tuple( (Comparable) aggregatorCall.getContext()[ 0 ] );
     return new Tuple( (Comparable) Tuples.coerce( tuple, 0, type ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof Sum ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    Sum sum = (Sum) object;
+
+    if( type != null ? !type.equals( sum.type ) : sum.type != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( type != null ? type.hashCode() : 0 );
+    return result;
+    }
   }

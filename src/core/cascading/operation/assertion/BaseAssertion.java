@@ -107,4 +107,30 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     {
     throw new AssertionException( String.format( message, args ) );
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof BaseAssertion ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    BaseAssertion that = (BaseAssertion) object;
+
+    if( message != null ? !message.equals( that.message ) : that.message != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( message != null ? message.hashCode() : 0 );
+    return result;
+    }
   }

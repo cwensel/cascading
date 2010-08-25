@@ -23,6 +23,7 @@ package cascading.operation.function;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -118,5 +119,34 @@ public class SetValue extends BaseOperation implements Function
     int pos = isRemove ? 0 : 1;
 
     functionCall.getOutputCollector().add( new Tuple( values[ pos ] ) );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof SetValue ) )
+      return false;
+    if( !super.equals( object ) )
+      return false;
+
+    SetValue setValue = (SetValue) object;
+
+    if( filter != null ? !filter.equals( setValue.filter ) : setValue.filter != null )
+      return false;
+    if( !Arrays.equals( values, setValue.values ) )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( filter != null ? filter.hashCode() : 0 );
+    result = 31 * result + ( values != null ? Arrays.hashCode( values ) : 0 );
+    return result;
     }
   }

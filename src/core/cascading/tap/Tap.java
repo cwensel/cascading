@@ -435,6 +435,23 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   @Override
+  public boolean isEquivalentTo( FlowElement element )
+    {
+    if( element == null )
+      return false;
+
+    if( this == element )
+      return true;
+
+    boolean compare = getClass() == element.getClass();
+
+    if( !compare )
+      return false;
+
+    return equals( element );
+    }
+
+  @Override
   public boolean equals( Object object )
     {
     if( this == object )
