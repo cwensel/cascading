@@ -31,7 +31,12 @@ import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** Class RegexReplace is used to replace a matched regex with a replacement value. */
+/**
+ * Class RegexReplace is used to replace a matched regex with a replacement value.
+ * <p/>
+ * RegexReplace only expects one field value. If more than one argument value is passed, only the
+ * first is handled, the remainder are ignored.
+ */
 public class RegexReplace extends RegexOperation<Matcher> implements Function<Matcher>
   {
   /** Field replacement */

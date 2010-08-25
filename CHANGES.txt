@@ -31,6 +31,22 @@ Cascading Change Log
 
   Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
 
+unreleased
+
+  Fixed bug where c.f.MultiMapReducePlanner did not detect a split after a c.p.GroupBy or c.p.CoGroup where
+  one or more of the immediate pipes is an c.p.Every instance. An Each split is allowed.
+
+  Fixed c.t.TupleEntry#set method so that it may take a c.t.Fields instance for a field name.
+
+  Fixed NPE in c.t.TempHfs when parent c.f.Flow is used in a Cascade under certain conditions.
+
+  Fixed bug where mixed absolute and relative paths didn't not result in a proper topological sort when used
+  in a c.c.Cascade.
+
+  Fixed bug where a c.c.Cascading of c.f.Flow and c.f.MapReduceFlow instances did not properly sort topologically.
+
+  Added c.c.Cascade#writeDOT method to simplify debugging Cascade instances.
+
 1.1.2
 
   Fixed bug preventing c.s.TextDelimited schemes from being used with a c.t.TemplateTap.

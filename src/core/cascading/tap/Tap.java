@@ -190,13 +190,13 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract Path getPath();
 
   /**
-   * Method getStringPath returns a String representing the resource this Tap instance represents.
+   * Method getIdentifier returns a String representing the resource identifier this Tap instance represents.
    * <p/>
    * By default, simply calls {@code getPath().toString()}.
    *
    * @return the resource (type String) of this Tap object.
    */
-  public String getResource()
+  public String getIdentifier()
     {
     if( getPath() == null )
       return null;

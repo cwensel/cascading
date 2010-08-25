@@ -792,6 +792,28 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       }
     }
 
+  public Set<FlowElement> getAllChildrenNotExactlyType( FlowElement flowElement, Class<? extends FlowElement> type )
+    {
+    Set<FlowElement> allChildren = new HashSet<FlowElement>();
+
+    getAllChildrenNotExactlyType( allChildren, flowElement, type );
+
+    return allChildren;
+    }
+
+  private void getAllChildrenNotExactlyType( Set<FlowElement> allSuccessors, FlowElement flowElement, Class<? extends FlowElement> type )
+    {
+    List<FlowElement> sucessors = getAllSuccessors( flowElement );
+
+    for( FlowElement sucessor : sucessors )
+      {
+      if( type != sucessor.getClass() )
+        allSuccessors.add( (FlowElement) sucessor );
+      else
+        getAllChildrenNotExactlyType( allSuccessors, sucessor, type );
+      }
+    }
+
   public static class Extent extends Pipe
     {
 

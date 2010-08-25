@@ -193,7 +193,7 @@ public class ProcessFlow extends Flow
     for( Object path : paths )
       {
       if( path instanceof Tap )
-        taps.put( ( (Tap) path ).getResource(), (Tap) path );
+        taps.put( ( (Tap) path ).getIdentifier(), (Tap) path );
       else
         taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );
       }

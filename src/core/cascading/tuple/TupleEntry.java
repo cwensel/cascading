@@ -299,7 +299,7 @@ public class TupleEntry
    */
   public void set( Comparable fieldName, Object value )
     {
-    tuple.set( fields.getPos( fieldName ), value );
+    tuple.set( fields.getPos( asFieldName( fieldName ) ), value );
     }
 
   /**

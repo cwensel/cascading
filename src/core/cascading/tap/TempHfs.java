@@ -190,6 +190,9 @@ public class TempHfs extends Hfs
   @Override
   public boolean deletePath( JobConf conf ) throws IOException
     {
+    if( temporaryPath == null ) // never initialized
+      return true;
+
     return super.deletePath( conf ) && getFileSystem( conf ).delete( new Path( getTempPath( conf ), temporaryPath ), true );
     }
 
