@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug where c.f.MultiMapReducePlanner did not detect a split after a c.p.GroupBy or c.p.CoGroup where
+  one or more of the immediate pipes is an c.p.Every instance. An Each split is allowed.
+
   Fixed c.t.TupleEntry#set method so that it may take a c.t.Fields instance for a field name.
 
   Fixed NPE in c.t.TempHfs when parent c.f.Flow is used in a Cascade under certain conditions.

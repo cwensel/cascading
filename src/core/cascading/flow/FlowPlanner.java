@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -361,6 +362,24 @@ public class FlowPlanner
           if( flowElement instanceof Group )
             break;
           }
+        }
+      }
+    }
+
+  protected void failOnGroupEverySplit( ElementGraph elementGraph )
+    {
+    List<Group> groups = new ArrayList<Group>();
+
+    elementGraph.findAllOfType( 1, 2, Group.class, groups );
+
+    for( Group group : groups )
+      {
+      Set<FlowElement> children = elementGraph.getAllChildrenNotExactlyType( group, Pipe.class );
+
+      for( FlowElement flowElement : children )
+        {
+        if( flowElement instanceof Every )
+          throw new PlannerException( (Every) flowElement, "Every instances may not split after a GroupBy or CoGroup pipe, found: " + flowElement + " after: " + group );
         }
       }
     }
