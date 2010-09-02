@@ -137,9 +137,21 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     // need to verify that only Extent instances are origins in this graph. Otherwise a Tap was not properly connected
     TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
 
+    FlowElement flowElement = null;
+
     while( iterator.hasNext() )
       {
-      FlowElement flowElement = iterator.next();
+      try
+        {
+        flowElement = iterator.next();
+        }
+      catch( IllegalArgumentException exception )
+        {
+        if( flowElement == null )
+          new ElementGraphException( "unable to traverse to the first element" );
+
+        throw new ElementGraphException( flowElement, "unable to traverse to the next element after " + flowElement );
+        }
 
       if( incomingEdgesOf( flowElement ).size() != 0 )
         break;
@@ -148,9 +160,9 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         continue;
 
       if( flowElement instanceof Pipe )
-        throw new ElementGraphException( flowElement, "no Tap instance given to connect Pipe " + flowElement.toString() );
+        throw new ElementGraphException( flowElement, "no Tap instance given to connect Pipe " + flowElement );
       else if( flowElement instanceof Tap )
-        throw new ElementGraphException( flowElement, "no Pipe instance given to connect Tap " + flowElement.toString() );
+        throw new ElementGraphException( flowElement, "no Pipe instance given to connect Tap " + flowElement );
       else
         throw new ElementGraphException( flowElement, "unknown element type: " + flowElement );
       }
