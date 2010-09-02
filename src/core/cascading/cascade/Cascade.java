@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -196,6 +197,30 @@ public class Cascade implements Runnable
       flows.add( topoIterator.next() );
 
     return flows;
+    }
+
+  /**
+   * Method getSuccessorFlows returns a Collection of all the Flow instances that will be
+   * executed after the given Flow instance.
+   *
+   * @param flow of type Flow
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> getSuccessorFlows( Flow flow )
+    {
+    return Graphs.successorListOf( jobGraph, flow );
+    }
+
+  /**
+   * Method getPredecessorFlows returns a Collection of all the Flow instances that will be
+   * executed before the given Flow instance.
+   *
+   * @param flow of type Flow
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> getPredecessorFlows( Flow flow )
+    {
+    return Graphs.predecessorListOf( jobGraph, flow );
     }
 
   /**
