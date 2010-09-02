@@ -25,9 +25,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
 import cascading.flow.MultiMapReducePlanner;
+import cascading.scheme.SequenceFile;
+import cascading.scheme.TextLine;
+import cascading.tap.Hfs;
+import cascading.tuple.Fields;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -162,5 +168,53 @@ public class ClusterTestCase extends CascadingTestCase
   public void tearDown() throws IOException
     {
     // do nothing, let the jvm shut things down
+    }
+
+  public void validateLengthText( String path, int length ) throws IOException
+    {
+    validateLengthText( path, length, null );
+    }
+
+  public void validateLengthText( String path, int length, String regex ) throws IOException
+    {
+    Hfs tap = new Hfs( new TextLine( new Fields( "line" ) ), path );
+
+    assertTrue( "path does not exist: " + path, tap.pathExists( getJobConf() ) );
+
+    TupleEntryIterator iterator = tap.openForRead( getJobConf() );
+
+    try
+      {
+      validateLength( iterator, length, -1, regex == null ? null : Pattern.compile( regex ) );
+      }
+    finally
+      {
+      if( iterator != null )
+        iterator.close();
+      }
+    }
+
+  public void validateLengthSequence( String path, Fields fields, int length ) throws IOException
+    {
+    validateLengthSequence( path, fields, length, null );
+    }
+
+  public void validateLengthSequence( String path, Fields fields, int length, String regex ) throws IOException
+    {
+    Hfs tap = new Hfs( new SequenceFile( fields ), path );
+
+    assertTrue( "path does not exist: " + path, tap.pathExists( getJobConf() ) );
+
+    TupleEntryIterator iterator = tap.openForRead( getJobConf() );
+
+    try
+      {
+      validateLength( iterator, length, -1, regex == null ? null : Pattern.compile( regex ) );
+      }
+    finally
+      {
+      if( iterator != null )
+        iterator.close();
+      }
     }
   }
