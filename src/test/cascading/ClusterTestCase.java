@@ -130,6 +130,24 @@ public class ClusterTestCase extends CascadingTestCase
     return new HashMap<Object, Object>( properties );
     }
 
+  public JobConf getJobConf()
+    {
+    return new JobConf( jobConf );
+    }
+
+  public FileSystem getFileSystem() throws IOException
+    {
+    if( fileSys != null )
+      return fileSys;
+
+    return FileSystem.get( jobConf );
+    }
+
+  public String makeQualifiedPath( String path ) throws IOException
+    {
+    return new Path( path ).makeQualified( getFileSystem() ).toString();
+    }
+
   protected void copyFromLocal( String inputFile ) throws IOException
     {
     if( !enableCluster )
