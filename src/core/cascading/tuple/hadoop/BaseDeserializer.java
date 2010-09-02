@@ -49,7 +49,8 @@ abstract class BaseDeserializer<T> implements Deserializer<T>
     {
     try
       {
-      inputStream.close();
+      if( inputStream != null )
+        inputStream.close();
       }
     finally
       {
