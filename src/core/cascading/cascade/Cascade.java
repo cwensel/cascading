@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -190,11 +191,30 @@ public class Cascade implements Runnable
    */
   public List<Flow> getFlows()
     {
-    List<Flow> flows = new ArrayList<Flow>();
+    List<Flow> flows = new LinkedList<Flow>();
     TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
 
     while( topoIterator.hasNext() )
       flows.add( topoIterator.next() );
+
+    return flows;
+    }
+
+  /**
+   * Method findFlows returns a List of flows whos names match the given regex pattern.
+   *
+   * @param regex of type String
+   * @return List<Flow>
+   */
+  public List<Flow> findFlows( String regex )
+    {
+    List<Flow> flows = new ArrayList<Flow>();
+
+    for( Flow flow : getFlows() )
+      {
+      if( flow.getName().matches( regex ) )
+        flows.add( flow );
+      }
 
     return flows;
     }
