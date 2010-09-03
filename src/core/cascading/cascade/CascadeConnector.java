@@ -129,6 +129,8 @@ public class CascadeConnector
     makeTapGraph( tapGraph, flows );
     makeFlowGraph( flowGraph, tapGraph );
 
+    verifyNoCycles( flowGraph );
+
     return new Cascade( name, properties, flowGraph, tapGraph );
     }
 
@@ -153,6 +155,19 @@ public class CascadeConnector
       names[ i ] = flows[ i ].getName();
 
     return Util.join( names, "+" );
+    }
+
+  private void verifyNoCycles( SimpleDirectedGraph<Flow, Integer> flowGraph )
+    {
+    Set<Flow> flows = new HashSet<Flow>();
+
+    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( flowGraph );
+
+    while( topoIterator.hasNext() )
+      flows.add( topoIterator.next() );
+
+    if( flows.size() != flowGraph.vertexSet().size() )
+      throw new CascadeException( "there are likely cycles in the set of given flows, topological iterator cannot traverse flows with cycles" );
     }
 
   private void makeTapGraph( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow[] flows )
@@ -218,13 +233,12 @@ public class CascadeConnector
 
   private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {
-    TopologicalOrderIterator<String, Flow.FlowHolder> topoIterator = new TopologicalOrderIterator<String, Flow.FlowHolder>( tapGraph );
+    Set<String> identifiers = tapGraph.vertexSet();
+
     int count = 0;
 
-    while( topoIterator.hasNext() )
+    for( String source : identifiers )
       {
-      String source = topoIterator.next();
-
       if( LOG.isDebugEnabled() )
         LOG.debug( "handling flow source: " + source );
 
@@ -242,7 +256,12 @@ public class CascadeConnector
         Set<Flow.FlowHolder> previous = tapGraph.incomingEdgesOf( source );
 
         for( Flow.FlowHolder previousFlow : previous )
-          jobGraph.addEdge( previousFlow.flow, flow, count++ );
+          {
+          jobGraph.addVertex( previousFlow.flow );
+
+          if( !jobGraph.addEdge( previousFlow.flow, flow, count++ ) )
+            throw new CascadeException( "unable to add path between: " + previousFlow.flow.getName() + " and: " + flow.getName() );
+          }
         }
       }
     }
