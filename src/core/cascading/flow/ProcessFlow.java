@@ -21,6 +21,7 @@
 
 package cascading.flow;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,31 +48,52 @@ import riffle.process.scheduler.ProcessWrapper;
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
  */
-public class ProcessFlow extends Flow
+public class ProcessFlow<P> extends Flow
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( ProcessFlow.class );
 
   /** Field process */
-  private ProcessWrapper process;
+  private P process;
+  /** Field processWrapper */
+  private ProcessWrapper processWrapper;
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
-   * @param name   of type String
-   * @param object of type JobConf
+   * @param name    of type String
+   * @param process of type JobConf
    */
-//  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"})
-  public ProcessFlow( String name, Object object )
+  @ConstructorProperties({"name", "process"})
+  public ProcessFlow( String name, P process )
     {
-    process = new ProcessWrapper( object );
+    this.process = process;
+    this.processWrapper = new ProcessWrapper( this.process );
 
     setName( name );
-    setSources( createSources( process ) );
-    setSinks( createSinks( process ) );
-    setTraps( createTraps( process ) );
+    setTapFromProcess();
+    }
 
-//    setStepGraph( makeStepGraph( processParent ) );
+  /**
+   * Method setTapFromProcess build {@link Tap} instance for the give process incoming and outgoing dependencies.
+   * <p/>
+   * This method may be called repeatedly to re-configure the source and sink taps.
+   */
+  public void setTapFromProcess()
+    {
+    setSources( createSources( this.processWrapper ) );
+    setSinks( createSinks( this.processWrapper ) );
+    setTraps( createTraps( this.processWrapper ) );
+    }
+
+  /**
+   * Method getProcess returns the process of this ProcessFlow object.
+   *
+   * @return the process (type P) of this ProcessFlow object.
+   */
+  public P getProcess()
+    {
+    return process;
     }
 
   @Override
@@ -79,7 +101,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      process.prepare();
+      processWrapper.prepare();
       }
     catch( ProcessException exception )
       {
@@ -95,7 +117,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      process.start();
+      processWrapper.start();
       }
     catch( ProcessException exception )
       {
@@ -111,7 +133,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      process.stop();
+      processWrapper.stop();
       }
     catch( ProcessException exception )
       {
@@ -127,7 +149,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      process.complete();
+      processWrapper.complete();
       }
     catch( ProcessException exception )
       {
@@ -143,7 +165,7 @@ public class ProcessFlow extends Flow
     {
     try
       {
-      process.cleanup();
+      processWrapper.cleanup();
       }
     catch( ProcessException exception )
       {
@@ -215,7 +237,13 @@ public class ProcessFlow extends Flow
     return new HashMap<String, Tap>();
     }
 
-  class NullScheme extends Scheme
+  @Override
+  public String toString()
+    {
+    return getName() + ":" + process;
+    }
+
+  static class NullScheme extends Scheme
     {
     public void sourceInit( Tap tap, JobConf conf ) throws IOException
       {
