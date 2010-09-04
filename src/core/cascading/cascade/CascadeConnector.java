@@ -259,6 +259,9 @@ public class CascadeConnector
           {
           jobGraph.addVertex( previousFlow.flow );
 
+          if( jobGraph.getEdge( previousFlow.flow, flow ) != null )
+            continue;
+
           if( !jobGraph.addEdge( previousFlow.flow, flow, count++ ) )
             throw new CascadeException( "unable to add path between: " + previousFlow.flow.getName() + " and: " + flow.getName() );
           }
