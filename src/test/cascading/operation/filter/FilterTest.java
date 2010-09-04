@@ -26,6 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
+import cascading.pipe.assembly.Unique;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -185,7 +186,7 @@ public class FilterTest extends CascadingTestCase
 
   public void testPartialDuplicates()
     {
-    Filter filter = new FilterPartialDuplicates( 2 );
+    Filter filter = new Unique.FilterPartialDuplicates( 2 );
 
     Tuple[] tuples = new Tuple[]{new Tuple( 1 ), // false - first time
                                  new Tuple( 1 ), // true - second time

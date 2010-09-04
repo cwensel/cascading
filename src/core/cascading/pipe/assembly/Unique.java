@@ -22,15 +22,22 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import cascading.flow.FlowProcess;
+import cascading.operation.BaseOperation;
+import cascading.operation.Filter;
+import cascading.operation.FilterCall;
+import cascading.operation.OperationCall;
 import cascading.operation.aggregator.First;
-import cascading.operation.filter.FilterPartialDuplicates;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
@@ -49,6 +56,98 @@ import cascading.tuple.Fields;
  */
 public class Unique extends SubAssembly
   {
+
+  /**
+   * Class FilterPartialDuplicates is a {@link cascading.operation.Filter} that is used to remove observed duplicates from the tuple stream.
+   * <p/>
+   * Use this class typically in tandem with a {@link cascading.operation.aggregator.First}
+   * {@link cascading.operation.Aggregator} in order to improve de-duping performance by removing as many values
+   * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
+   * <p/>
+   * The {@code threshold} value is used to maintain a LRU of a constant size. If more than threshold unique values
+   * are seen, the oldest cached values will be removed from the cache.
+   *
+   * @see Unique
+   */
+  public static class FilterPartialDuplicates extends BaseOperation<LinkedHashMap<Tuple, Object>> implements Filter<LinkedHashMap<Tuple, Object>>
+    {
+    private int threshold = 10000;
+
+    /** Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance. */
+    public FilterPartialDuplicates()
+      {
+      }
+
+    /**
+     * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
+     *
+     * @param threshold of type int
+     */
+    @ConstructorProperties({"threshold"})
+    public FilterPartialDuplicates( int threshold )
+      {
+      this.threshold = threshold;
+      }
+
+    @Override
+    public void prepare( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+      {
+      operationCall.setContext( new LinkedHashMap<Tuple, Object>( threshold, 0.75f, true )
+      {
+      @Override
+      protected boolean removeEldestEntry( Map.Entry eldest )
+        {
+        return size() > threshold;
+        }
+      } );
+      }
+
+    @Override
+    public boolean isRemove( FlowProcess flowProcess, FilterCall<LinkedHashMap<Tuple, Object>> filterCall )
+      {
+      // we assume its more painful to create lots of tuple copies vs comparisons
+      Tuple args = filterCall.getArguments().getTuple();
+
+      if( filterCall.getContext().containsKey( args ) )
+        return true;
+
+      filterCall.getContext().put( filterCall.getArguments().getTupleCopy(), null );
+
+      return false;
+      }
+
+    @Override
+    public void cleanup( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+      {
+      operationCall.setContext( null );
+      }
+
+    @Override
+    public boolean equals( Object object )
+      {
+      if( this == object )
+        return true;
+      if( !( object instanceof FilterPartialDuplicates ) )
+        return false;
+      if( !super.equals( object ) )
+        return false;
+
+      FilterPartialDuplicates that = (FilterPartialDuplicates) object;
+
+      if( threshold != that.threshold )
+        return false;
+
+      return true;
+      }
+
+    @Override
+    public int hashCode()
+      {
+      int result = super.hashCode();
+      result = 31 * result + threshold;
+      return result;
+      }
+    }
 
   /**
    * Constructor Unique creates a new Unique instance.
