@@ -216,6 +216,14 @@ public class Flow implements Runnable
     this.flowStats = new FlowStats( name, getID() );
     }
 
+  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name )
+    {
+    this.name = name;
+    this.flowStats = new FlowStats( name, getID() );
+    setJobConf( jobConf );
+    initFromProperties( properties );
+    }
+
   protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;

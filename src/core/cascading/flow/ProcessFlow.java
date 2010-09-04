@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
@@ -59,7 +60,7 @@ public class ProcessFlow<P> extends Flow
   private ProcessWrapper processWrapper;
 
   /**
-   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   * Constructor ProcessFlow creates a new ProcessFlow instance.
    *
    * @param name    of type String
    * @param process of type JobConf
@@ -67,11 +68,30 @@ public class ProcessFlow<P> extends Flow
   @ConstructorProperties({"name", "process"})
   public ProcessFlow( String name, P process )
     {
+    this( null, name, process );
+    }
+
+  /**
+   * Constructor ProcessFlow creates a new ProcessFlow instance.
+   *
+   * @param properties of type Map<Object, Object>
+   * @param name       of type String
+   * @param process    of type P
+   */
+  @ConstructorProperties({"properties", "name", "process"})
+  public ProcessFlow( Map<Object, Object> properties, String name, P process )
+    {
+    super( properties, getJobConf( properties ), name );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
 
     setName( name );
     setTapFromProcess();
+    }
+
+  private static JobConf getJobConf( Map<Object, Object> properties )
+    {
+    return HadoopUtil.createJobConf( properties, MultiMapReducePlanner.getJobConf( properties ) );
     }
 
   /**
