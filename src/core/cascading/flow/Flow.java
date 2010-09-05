@@ -72,6 +72,11 @@ import riffle.process.ProcessStop;
  * within the cluster. Thus any overhead inherent to a give {@link Pipe} assembly will be removed
  * once it's placed in context with the actual execution environment.
  * <p/>
+ * <p/>
+ * Flows are submitted in order of dependency. If two or more steps do not share the same dependencies and all
+ * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
+ * all steps will be submitted for execution. The default submit priority is 5.
+ * </p>
  * <strong>Properties</strong><br/>
  * <ul>
  * <li>cascading.flow.preservetemporaryfiles</li>
@@ -99,6 +104,8 @@ public class Flow implements Runnable
   private List<SafeFlowListener> listeners;
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkStale();
+  /** Field submitPriority */
+  private int submitPriority = 5;
   /** Field flowStats */
   private final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
@@ -299,6 +306,30 @@ public class Flow implements Runnable
       id = Util.createUniqueID( getName() );
 
     return id;
+    }
+
+  /**
+   * Method getSubmitPriority returns the submitPriority of this Flow object.
+   * <p/>
+   * 10 is lowest, 1 is the highest, 5 is the default.
+   *
+   * @return the submitPriority (type int) of this FlowStep object.
+   */
+  public int getSubmitPriority()
+    {
+    return submitPriority;
+    }
+
+  /**
+   * Method setSubmitPriority sets the submitPriority of this Flow object.
+   * <p/>
+   * 10 is lowest, 1 is the highest, 5 is the default.
+   *
+   * @param submitPriority the submitPriority of this FlowStep object.
+   */
+  public void setSubmitPriority( int submitPriority )
+    {
+    this.submitPriority = submitPriority;
     }
 
   protected void setSources( Map<String, Tap> sources )

@@ -28,10 +28,12 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -192,7 +194,7 @@ public class Cascade implements Runnable
   public List<Flow> getFlows()
     {
     List<Flow> flows = new LinkedList<Flow>();
-    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
+    TopologicalOrderIterator<Flow, Integer> topoIterator = getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       flows.add( topoIterator.next() );
@@ -414,7 +416,7 @@ public class Cascade implements Runnable
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( jobGraph );
+    TopologicalOrderIterator<Flow, Integer> topoIterator = getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       {
@@ -433,6 +435,18 @@ public class Cascade implements Runnable
 
       job.init( predecessors );
       }
+    }
+
+  private TopologicalOrderIterator<Flow, Integer> getTopologicalIterator()
+    {
+    return new TopologicalOrderIterator<Flow, Integer>( jobGraph, new PriorityQueue<Flow>( 10, new Comparator<Flow>()
+    {
+    @Override
+    public int compare( Flow lhs, Flow rhs )
+      {
+      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
+      }
+    } ) );
     }
 
   public synchronized void stop()

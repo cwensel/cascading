@@ -25,9 +25,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import cascading.pipe.Group;
@@ -242,7 +244,14 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
   public TopologicalOrderIterator<FlowStep, Integer> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<FlowStep, Integer>( this );
+    return new TopologicalOrderIterator<FlowStep, Integer>( this, new PriorityQueue<FlowStep>( 10, new Comparator<FlowStep>()
+    {
+    @Override
+    public int compare( FlowStep lhs, FlowStep rhs )
+      {
+      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
+      }
+    } ) );
     }
 
   /**
