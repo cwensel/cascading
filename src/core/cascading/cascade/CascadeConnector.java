@@ -189,8 +189,20 @@ public class CascadeConnector
       for( Tap source : sources )
         {
         for( Tap sink : sinks )
-          tapGraph.addEdge( getFullPath( flow, source ), getFullPath( flow, sink ), flow.getHolder() );
+          addEdgeFor( tapGraph, flow, source, sink );
         }
+      }
+    }
+
+  private void addEdgeFor( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow flow, Tap source, Tap sink )
+    {
+    try
+      {
+      tapGraph.addEdge( getFullPath( flow, source ), getFullPath( flow, sink ), flow.getHolder() );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      throw new CascadeException( "no loops allowed in cascade, flow: " + flow.getName() + ", source: " + source + ", sink: " + sink );
       }
     }
 
