@@ -157,11 +157,11 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     {
     for( Tap tap : getTaps() )
       {
-      if( tap.pathExists( conf ) )
-        return true;
+      if( !tap.pathExists( conf ) )
+        return false;
       }
 
-    return false;
+    return true;
     }
 
   /** Returns the most current modified time. */
@@ -217,6 +217,6 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
 
   public String toString()
     {
-    return "MultiTap[" + ( taps == null ? "none" : Arrays.asList( taps ) ) + ']';
+    return "MultiSourceTap[" + ( taps == null ? "none" : Arrays.asList( taps ) ) + ']';
     }
   }

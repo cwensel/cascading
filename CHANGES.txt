@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Fixed bug where c.t.MultiSourceTap#pathExists would return true if one of the child paths was missing.
+
   Changed c.c.CascadeConnector to fail if it detects cycles in the set of given c.f.Flow instances to manage.
 
   Disable Hadoop warning about not using "options parser".
