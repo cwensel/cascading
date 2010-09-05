@@ -370,6 +370,16 @@ public abstract class Tap implements FlowElement, Serializable
   public abstract long getPathModified( JobConf conf ) throws IOException;
 
   /**
+   * Method getSinkMode returns the {@link SinkMode} }of this Tap object.
+   *
+   * @return the sinkMode (type SinkMode) of this Tap object.
+   */
+  public SinkMode getSinkMode()
+    {
+    return sinkMode;
+    }
+
+  /**
    * Method isKeep indicates whether the resource represented by this instance should be kept if it
    * already exists when the Flow is started.
    *
