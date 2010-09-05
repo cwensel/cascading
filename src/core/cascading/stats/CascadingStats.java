@@ -47,7 +47,7 @@ public abstract class CascadingStats implements Serializable
   {
   public enum Status
     {
-      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED;
+      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED, SKIPPED;
     }
 
   /** Field name */
@@ -146,6 +146,19 @@ public abstract class CascadingStats implements Serializable
     }
 
   /**
+   * Method isSkipped returns true when the works was skipped.
+   * <p/>
+   * Flows are skipped if the apporpriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
+   * returns {@code true};
+   *
+   * @return the skipped (type boolean) of this CascadingStats object.
+   */
+  public boolean isSkipped()
+    {
+    return status == Status.SKIPPED;
+    }
+
+  /**
    * Method getStatus returns the status of this CascadingStats object.
    *
    * @return the status (type Status) of this CascadingStats object.
@@ -208,6 +221,15 @@ public abstract class CascadingStats implements Serializable
 
     status = Status.STOPPED;
     markFinishedTime();
+    }
+
+  /** Method markSkipped sets the status to skipped. */
+  public void markSkipped()
+    {
+    if( status != Status.PENDING )
+      throw new IllegalStateException( "may not mark flow as " + Status.SKIPPED + ", is already " + status );
+
+    status = Status.SKIPPED;
     }
 
   /**

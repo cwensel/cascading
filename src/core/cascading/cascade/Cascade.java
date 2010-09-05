@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -243,6 +245,52 @@ public class Cascade implements Runnable
   public Collection<Flow> getPredecessorFlows( Flow flow )
     {
     return Graphs.predecessorListOf( jobGraph, flow );
+    }
+
+  /**
+   * Method findFlowsSourcingFrom returns all Flow instances that reads from a source with the given identifier.
+   *
+   * @param identifier of type String
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> findFlowsSourcingFrom( String identifier )
+    {
+    try
+      {
+      return unwrapFlows( tapGraph.outgoingEdgesOf( identifier ) );
+      }
+    catch( Exception exception )
+      {
+      return Collections.emptySet();
+      }
+    }
+
+  /**
+   * Method findFlowsSinkingTo returns all Flow instances that writes to a sink with the given identifier.
+   *
+   * @param identifier of type String
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> findFlowsSinkingTo( String identifier )
+    {
+    try
+      {
+      return unwrapFlows( tapGraph.incomingEdgesOf( identifier ) );
+      }
+    catch( Exception exception )
+      {
+      return Collections.emptySet();
+      }
+    }
+
+  private Collection<Flow> unwrapFlows( Set<Flow.FlowHolder> flowHolders )
+    {
+    Set<Flow> flows = new HashSet<Flow>();
+
+    for( Flow.FlowHolder flowHolder : flowHolders )
+      flows.add( flowHolder.flow );
+
+    return flows;
     }
 
   /**
@@ -648,6 +696,8 @@ public class Cascade implements Runnable
             {
             if( LOG.isInfoEnabled() )
               logInfo( "skipping flow: " + flow.getName() );
+
+            flow.getFlowStats().markSkipped();
 
             return null;
             }

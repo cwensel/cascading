@@ -2,7 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
-  Added c.f.Flow#setSubmitPriority() to allow for custom order of Flows.  
+  Added c.s.CascadingStatus.Status.Skipped state so skipped c.f.Flow instances can be identified.
+
+  Added c.f.Flow#setSubmitPriority() to allow for custom order of Flows.
 
   Fixed bug where c.t.MultiSourceTap#pathExists() would return true if one of the child paths was missing.
 
