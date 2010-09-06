@@ -204,6 +204,5 @@ public class FilterTest extends CascadingTestCase
 
     for( int i = 0; i < results.length; i++ )
       assertEquals( "failed on: " + i, expected[ i ], results[ i ] );
-
     }
   }

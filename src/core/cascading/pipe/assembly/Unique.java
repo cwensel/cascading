@@ -220,6 +220,19 @@ public class Unique extends SubAssembly
   /**
    * Constructor Unique creates a new Unique instance.
    *
+   * @param pipes          of type Pipe[]
+   * @param groupingFields of type Fields
+   * @param threshold      of type int
+   */
+  @ConstructorProperties({"pipes", "groupingFields", "threshold"})
+  public Unique( Pipe[] pipes, Fields groupingFields, int threshold )
+    {
+    this( null, pipes, groupingFields, threshold );
+    }
+
+  /**
+   * Constructor Unique creates a new Unique instance.
+   *
    * @param name           of type String
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields

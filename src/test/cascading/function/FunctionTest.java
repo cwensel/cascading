@@ -23,10 +23,12 @@ package cascading.function;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 import cascading.CascadingTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.operation.Function;
 import cascading.operation.Insert;
 import cascading.operation.function.SetValue;
 import cascading.operation.regex.RegexFilter;
@@ -35,11 +37,15 @@ import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Count;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleListCollector;
 
 /**
  *
@@ -135,4 +141,40 @@ public class FunctionTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
     assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
     }
+
+  public void testPartialCounts()
+    {
+    Function function = new Count.CountPartials( new Fields( "count" ), 2 );
+
+    Fields incoming = new Fields( "value" );
+    TupleEntry[] tuples = new TupleEntry[]{
+      new TupleEntry( incoming, new Tuple( "a" ) ),
+      new TupleEntry( incoming, new Tuple( "a" ) ),
+      new TupleEntry( incoming, new Tuple( "b" ) ),
+      new TupleEntry( incoming, new Tuple( "b" ) ),
+      new TupleEntry( incoming, new Tuple( "c" ) ),
+      new TupleEntry( incoming, new Tuple( "c" ) ),
+      new TupleEntry( incoming, new Tuple( "a" ) ),
+      new TupleEntry( incoming, new Tuple( "a" ) ),
+      new TupleEntry( incoming, new Tuple( "d" ) ),
+      new TupleEntry( incoming, new Tuple( "d" ) ),
+    };
+
+    Tuple[] expected = new Tuple[]{
+      new Tuple( "a", 2L ),
+      new Tuple( "b", 2L ),
+      new Tuple( "c", 2L ),
+      new Tuple( "a", 2L ),
+      new Tuple( "d", 2L ),
+    };
+
+    TupleListCollector collector = invokeFunction( function, tuples, new Fields( "value", "count" ) );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    int count = 0;
+    while( iterator.hasNext() )
+      assertEquals( expected[ count++ ], iterator.next() );
+    }
+
   }

@@ -31,13 +31,18 @@ import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Function;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.scheme.TextDelimited;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  *
@@ -228,5 +233,88 @@ public class AssemblyHelpersTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
+    }
+
+  public void testCount() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "count" ), "\t", new Class[]{String.class,
+                                                                                            Integer.TYPE} ), outputPath + "/count", SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    pipe = new Count( pipe, new Fields( "char" ), new Fields( "count" ), 2 );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 2 ),
+      new Tuple( "b", 4 ),
+      new Tuple( "c", 4 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 1 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  public void testCountMerge() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+    copyFromLocal( inputFileRhs );
+
+    Tap lhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap rhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileRhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "count" ), "\t", new Class[]{String.class,
+                                                                                            Integer.TYPE} ), outputPath + "/mergecount", SinkMode.REPLACE );
+
+    Pipe lhsPipe = new Pipe( "count-lhs" );
+    Pipe rhsPipe = new Pipe( "count-rhs" );
+
+    rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
+
+    Pipe countPipe = new Count( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "count" ), 2 );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( tapMap, sink, countPipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 4 ),
+      new Tuple( "b", 8 ),
+      new Tuple( "c", 8 ),
+      new Tuple( "d", 4 ),
+      new Tuple( "e", 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
     }
   }

@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.p.a.Count sub-assembly for optimizing counting processes.
+
   Added c.s.CascadingStatus.Status.Skipped state so skipped c.f.Flow instances can be identified.
 
   Added c.f.Flow#setSubmitPriority() to allow for custom order of Flows.
@@ -30,7 +32,7 @@ Cascading Change Log
 
   Added c.c.Cascade#writeDOT method for visualizing the dependencies between flow instances.
 
-  Added c.o.f.FilterPartialDuplicates filter and c.p.a.Unique sub-assembly for optimizing de-duping processes.
+  Added c.p.a.Unique sub-assembly for optimizing de-duping processes.
 
   Changed c.s.TextDelimited to accept Fields.ALL or Fields.UNKNOWN for arbitrarily sized or unknown records.
 

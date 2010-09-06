@@ -142,6 +142,32 @@ public class CascadingTestCase extends TestCase
     return collector;
     }
 
+  protected TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields )
+    {
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
+
+    return invokeFunction( function, entries, resultFields );
+    }
+
+  protected TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
+    {
+    ConcreteCall operationCall = new ConcreteCall();
+    TupleListCollector collector = new TupleListCollector( resultFields );
+
+    function.prepare( FlowProcess.NULL, operationCall );
+    operationCall.setOutputCollector( collector );
+
+    for( TupleEntry arguments : argumentsArray )
+      {
+      operationCall.setArguments( arguments );
+      function.operate( FlowProcess.NULL, operationCall );
+      }
+
+    function.cleanup( FlowProcess.NULL, operationCall );
+
+    return collector;
+    }
+
   protected boolean invokeFilter( Filter filter, Tuple arguments )
     {
     return invokeFilter( filter, new TupleEntry( arguments ) );
@@ -164,10 +190,7 @@ public class CascadingTestCase extends TestCase
 
   protected boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
     {
-    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
-
-    for( int i = 0; i < argumentsArray.length; i++ )
-      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeFilter( filter, entries );
     }
@@ -194,10 +217,7 @@ public class CascadingTestCase extends TestCase
 
   protected TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
     {
-    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
-
-    for( int i = 0; i < argumentsArray.length; i++ )
-      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeAggregator( aggregator, entries, resultFields );
     }
@@ -235,10 +255,7 @@ public class CascadingTestCase extends TestCase
 
   protected TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields )
     {
-    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
-
-    for( int i = 0; i < argumentsArray.length; i++ )
-      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeBuffer( buffer, entries, resultFields );
     }
@@ -265,5 +282,15 @@ public class CascadingTestCase extends TestCase
     buffer.cleanup( null, operationCall );
 
     return collector;
+    }
+
+  private TupleEntry[] makeArgumentsArray( Tuple[] argumentsArray )
+    {
+    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
+
+    for( int i = 0; i < argumentsArray.length; i++ )
+      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
+
+    return entries;
     }
   }
