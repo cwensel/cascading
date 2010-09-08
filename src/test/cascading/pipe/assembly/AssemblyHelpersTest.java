@@ -317,4 +317,87 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     iterator.close();
     }
+
+  public void testSum() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum" ), "\t", new Class[]{String.class,
+                                                                                          Integer.TYPE} ), outputPath + "/sum", SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "sum" );
+
+    pipe = new Sum( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 6 ),
+      new Tuple( "b", 12 ),
+      new Tuple( "c", 10 ),
+      new Tuple( "d", 6 ),
+      new Tuple( "e", 5 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  public void testSumMerge() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+    copyFromLocal( inputFileRhs );
+
+    Tap lhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap rhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileRhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum" ), "\t", new Class[]{String.class,
+                                                                                          Integer.TYPE} ), outputPath + "/mergesum", SinkMode.REPLACE );
+
+    Pipe lhsPipe = new Pipe( "sum-lhs" );
+    Pipe rhsPipe = new Pipe( "sum-rhs" );
+
+    rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
+
+    Pipe sumPipe = new Sum( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( tapMap, sink, sumPipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 12 ),
+      new Tuple( "b", 24 ),
+      new Tuple( "c", 20 ),
+      new Tuple( "d", 12 ),
+      new Tuple( "e", 10 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
   }

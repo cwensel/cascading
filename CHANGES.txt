@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.p.a.Sum sub-assembly for optimizing summing processes.
+
   Added c.p.a.Count sub-assembly for optimizing counting processes.
 
   Added c.s.CascadingStatus.Status.Skipped state so skipped c.f.Flow instances can be identified.

@@ -38,6 +38,7 @@ import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Count;
+import cascading.pipe.assembly.Sum;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
@@ -177,4 +178,38 @@ public class FunctionTest extends CascadingTestCase
       assertEquals( expected[ count++ ], iterator.next() );
     }
 
+  public void testPartialSums()
+    {
+    Function function = new Sum.SumPartials( new Fields( "key" ), new Fields( "value" ), new Fields( "sum" ), float.class, 2 );
+
+    Fields incoming = new Fields( "key", "value" );
+    TupleEntry[] tuples = new TupleEntry[]{
+      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "b", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "b", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "c", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "c", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "d", 1 ) ),
+      new TupleEntry( incoming, new Tuple( "d", 1 ) ),
+    };
+
+    Tuple[] expected = new Tuple[]{
+      new Tuple( "a", 2F ),
+      new Tuple( "b", 2F ),
+      new Tuple( "c", 2F ),
+      new Tuple( "a", 2F ),
+      new Tuple( "d", 2F ),
+    };
+
+    TupleListCollector collector = invokeFunction( function, tuples, new Fields( "key", "sum" ) );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    int count = 0;
+    while( iterator.hasNext() )
+      assertEquals( expected[ count++ ], iterator.next() );
+    }
   }

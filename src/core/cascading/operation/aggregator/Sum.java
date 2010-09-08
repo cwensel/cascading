@@ -95,8 +95,7 @@ public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
 
   protected Tuple getResult( AggregatorCall<Double[]> aggregatorCall )
     {
-    Tuple tuple = new Tuple( (Comparable) aggregatorCall.getContext()[ 0 ] );
-    return new Tuple( (Comparable) Tuples.coerce( tuple, 0, type ) );
+    return new Tuple( (Comparable) Tuples.coerce( aggregatorCall.getContext()[ 0 ], type ) );
     }
 
   @Override
