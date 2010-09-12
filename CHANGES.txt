@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.s.TextDelimited to always return the expected number of fields even if they are not parsed from
+  the current line and strict is false, unless Fields.ALL or Fields.UNKNOWN is declared.
+
   Added c.p.a.Sum sub-assembly for optimizing summing processes.
 
   Added c.p.a.Count sub-assembly for optimizing counting processes.

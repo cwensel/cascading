@@ -50,7 +50,8 @@ import org.apache.log4j.Logger;
  * By default this {@link Scheme} is both {@code strict} and {@code safe}.
  * <p/>
  * Strict meaning if a line of text does not parse into the expected number of fields, this class will throw a
- * {@link TapException}. If strict is {@code false}, then arbitrarily sized {@link Tuple} instances will be returned.
+ * {@link TapException}. If strict is {@code false}, then {@link Tuple} will be returned with {@code null} values
+ * for the missing fields.
  * <p/>
  * Safe meaning if a field cannot be coerced into an expected type, a {@code null} will be used for the value.
  * If safe is {@code false}, a {@link TapException} will be thrown.
@@ -513,8 +514,21 @@ public class TextDelimited extends TextLine
 
     Object[] split = splitPattern.split( value.toString(), numValues );
 
-    if( strict && split.length != numValues )
-      throw new TapException( "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split ) );
+    if( numValues != 0 && split.length != numValues )
+      {
+      String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
+
+      if( strict )
+        throw new TapException( message );
+
+      LOG.warn( message );
+
+      Object[] array = new Object[numValues];
+      Arrays.fill( array, "" );
+      System.arraycopy( split, 0, array, 0, split.length );
+
+      split = array;
+      }
 
     if( cleanPattern != null )
       {
