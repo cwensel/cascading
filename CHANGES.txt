@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed bug in c.s.TextDelimited where some unquoted empty values would not be properly parsed.
+
   Added c.f.FlowStep#setName() method to allow override of MR job names. Use in conjunction with
   FlowStep#containsPipeNamed() to find appropriate steps.
 

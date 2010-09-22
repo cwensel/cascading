@@ -71,7 +71,8 @@ public class TextDelimitedTest extends CascadingTestCase
       {null, null, "baz", null, 6L},
       {null, null, null, null, 7L},
       {"foo", null, null, null, 8L},
-      {null, null, null, null, 9L}
+      {null, null, null, null, 9L},
+      {"f", null, null, null, 10L} // this one is quoted, single char
     };
 
     Tuple[] tuples = new Tuple[results.length];
@@ -94,7 +95,7 @@ public class TextDelimitedTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 9, 5 );
+    validateLength( flow, 10, 5 );
 
     // validate input parsing compares to expected, and results compare to expected
 
@@ -133,6 +134,6 @@ public class TextDelimitedTest extends CascadingTestCase
 
     flow.complete();
 
-    validateLength( flow, 8, 5 );
+    validateLength( flow, 9, 5 );
     }
   }

@@ -67,7 +67,7 @@ public class TextDelimited extends TextLine
   {
   private static final Logger LOG = Logger.getLogger( TextDelimited.class );
   private static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
-  private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s]%2$s[^%1$s])+%1$s)";
+  private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s%2$s]%2$s[^%1$s])+%1$s)";
   private static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
   private static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
 
