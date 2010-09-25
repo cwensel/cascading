@@ -226,6 +226,14 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
     return false;
     }
 
+  @Override
+  public void cleanup( FlowProcess flowProcess, OperationCall<Long> longOperationCall )
+    {
+    PrintStream stream = output == Output.STDOUT ? System.out : System.err;
+
+    print( stream, "tuples count: " + longOperationCall.getContext().toString() );
+    }
+
   private void print( PrintStream stream, String message )
     {
     if( prefix != null )

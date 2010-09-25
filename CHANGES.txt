@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Changed c.o.Debug to print the number of tuples encountered on #cleanup().
+
   Changed c.s.TextDelimited to always return the expected number of fields even if they are not parsed from
   the current line and strict is false, unless Fields.ALL or Fields.UNKNOWN is declared.
 
