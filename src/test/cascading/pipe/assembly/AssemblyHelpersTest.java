@@ -400,4 +400,95 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     iterator.close();
     }
+
+  public void testParallelAggregates() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count" ), "\t", new Class[]{String.class,
+                                                                                                   Integer.TYPE,
+                                                                                                   Integer.TYPE} ), outputPath + "/multi", SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "multi" );
+
+    Sum sumPipe = new Sum( new Fields( "num" ), new Fields( "sum" ), long.class );
+    Count countPipe = new Count( new Fields( "count" ) );
+
+    pipe = new CompositeAggregator( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 3, Pattern.compile( "^\\w+\\s\\d+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 6, 2 ),
+      new Tuple( "b", 12, 4 ),
+      new Tuple( "c", 10, 4 ),
+      new Tuple( "d", 6, 2 ),
+      new Tuple( "e", 5, 1 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  public void testParallelAggregatesMerge() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+    copyFromLocal( inputFileRhs );
+
+    Tap lhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap rhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileRhs );
+
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count" ), "\t", new Class[]{String.class,
+                                                                                                   Integer.TYPE,
+                                                                                                   Integer.TYPE} ), outputPath + "/multimerge", SinkMode.REPLACE );
+    Pipe lhsPipe = new Pipe( "multi-lhs" );
+    Pipe rhsPipe = new Pipe( "multi-rhs" );
+
+    rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
+
+    Sum sumPipe = new Sum( new Fields( "num" ), new Fields( "sum" ), long.class );
+    Count countPipe = new Count( new Fields( "count" ) );
+
+    Pipe pipe = new CompositeAggregator( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( tapMap, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 3, Pattern.compile( "^\\w+\\s\\d+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 12, 4 ),
+      new Tuple( "b", 24, 8 ),
+      new Tuple( "c", 20, 8 ),
+      new Tuple( "d", 12, 4 ),
+      new Tuple( "e", 10, 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
   }

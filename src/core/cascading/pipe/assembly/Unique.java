@@ -198,11 +198,7 @@ public class Unique extends SubAssembly
   @ConstructorProperties({"name", "pipe", "groupingFields", "threshold"})
   public Unique( String name, Pipe pipe, Fields groupingFields, int threshold )
     {
-    pipe = new Each( pipe, groupingFields, new FilterPartialDuplicates( threshold ) );
-    pipe = new GroupBy( name, pipe, groupingFields );
-    pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
-
-    setTails( pipe );
+    this( name, Pipe.pipes( pipe ), groupingFields, threshold );
     }
 
   /**

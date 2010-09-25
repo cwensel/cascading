@@ -22,30 +22,21 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Function;
-import cascading.operation.FunctionCall;
-import cascading.operation.OperationCall;
 import cascading.operation.aggregator.Sum;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 
 /**
- * Class Count {@link cascading.pipe.SubAssembly} is used to count duplicates in a tuple stream.
+ * Class Count {@link CompositeAggregator} is used to count duplicates in a tuple stream.
  * <p/>
  * Typically finding Count value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count()}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link cascading.pipe.assembly.Count.CountPartials} {@link cascading.operation.Function}
+ * This SubAssembly also uses the {@link cascading.pipe.assembly.Count.CountPartials} {@link Functor}
  * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -53,117 +44,74 @@ import cascading.tuple.Tuple;
  * <p/>
  * The {@code threshold} value tells the underlying CountPartials functions how many values to cache for each
  * unique key before dropping values from the LRU cache.
+ *
+ * @see CompositeAggregator
  */
-public class Count extends SubAssembly
+public class Count extends CompositeAggregator
   {
-
   /**
-   * Class CountPartials is a {@link cascading.operation.Function} that is used to count observed duplicates from the tuple stream.
+   * Class CountPartials is a {@link Functor} that is used to count observed duplicates from the tuple stream.
    * <p/>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.Sum}
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
-   * <p/>
-   * The {@code threshold} value is used to maintain a LRU of a constant size. If more than threshold Count values
-   * are seen, the oldest cached values will be removed from the cache.
    *
    * @see cascading.pipe.assembly.Count
    */
-  public static class CountPartials extends BaseOperation<LinkedHashMap<Tuple, Long[]>> implements Function<LinkedHashMap<Tuple, Long[]>>
+  public static class CountPartials implements Functor
     {
-    private int threshold = 10000;
+    private Fields declaredFields;
 
     /**
      * Constructor CountPartials creates a new CountPartials instance.
      *
      * @param declaredFields of type Fields
-     * @param threshold      of type int
      */
-    @ConstructorProperties({"threshold"})
-    public CountPartials( Fields declaredFields, int threshold )
+    public CountPartials( Fields declaredFields )
       {
-      super( declaredFields );
-      this.threshold = threshold;
+      this.declaredFields = declaredFields;
+
+      if( !declaredFields.isDeclarator() || declaredFields.size() != 1 )
+        throw new IllegalArgumentException( "declaredFields should declare only one field name" );
       }
 
     @Override
-    public void prepare( FlowProcess flowProcess, final OperationCall<LinkedHashMap<Tuple, Long[]>> operationCall )
+    public Fields getDeclaredFields()
       {
-      operationCall.setContext( new LinkedHashMap<Tuple, Long[]>( threshold, 0.75f, true )
-      {
-      @Override
-      protected boolean removeEldestEntry( Map.Entry<Tuple, Long[]> eldest )
-        {
-        boolean doRemove = size() > threshold;
-
-        if( doRemove )
-          ( (FunctionCall) operationCall ).getOutputCollector().add( makeResult( eldest ) );
-
-        return doRemove;
-        }
-      } );
-      }
-
-    private Tuple makeResult( Map.Entry<Tuple, Long[]> entry )
-      {
-      Tuple result = new Tuple( entry.getKey() );
-
-      result.add( entry.getValue()[ 0 ] );
-
-      return result;
+      return declaredFields;
       }
 
     @Override
-    public void operate( FlowProcess flowProcess, FunctionCall<LinkedHashMap<Tuple, Long[]>> functionCall )
+    public Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context )
       {
-      // we assume its more painful to create lots of tuple copies vs comparisons
-      Tuple args = functionCall.getArguments().getTuple();
-
-      Long[] count = functionCall.getContext().get( args );
-
-      if( count == null )
-        functionCall.getContext().put( functionCall.getArguments().getTupleCopy(), new Long[]{1L} );
+      if( context == null )
+        context = new Tuple( 1L );
       else
-        count[ 0 ]++;
+        context.set( 0, context.getLong( 0 ) + 1L );
+
+      return context;
       }
 
     @Override
-    public void cleanup( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Long[]>> operationCall )
+    public Tuple complete( FlowProcess flowProcess, Tuple context )
       {
-      // need to drain context
-
-      for( Map.Entry<Tuple, Long[]> entry : operationCall.getContext().entrySet() )
-        ( (FunctionCall) operationCall ).getOutputCollector().add( makeResult( entry ) );
-
-      operationCall.setContext( null );
-      }
-
-    @Override
-    public boolean equals( Object object )
-      {
-      if( this == object )
-        return true;
-      if( !( object instanceof CountPartials ) )
-        return false;
-      if( !super.equals( object ) )
-        return false;
-
-      CountPartials that = (CountPartials) object;
-
-      if( threshold != that.threshold )
-        return false;
-
-      return true;
-      }
-
-    @Override
-    public int hashCode()
-      {
-      int result = super.hashCode();
-      result = 31 * result + threshold;
-      return result;
+      return context;
       }
     }
+
+  /**
+   * Constructor Count creates a new Count instance. Use this constructor when used with a {@link CompositeAggregator}
+   * instance.
+   *
+   * @param countField of type Fields
+   */
+  @ConstructorProperties({"countField"})
+  public Count( Fields countField )
+    {
+    super( Fields.ALL, new CountPartials( countField ), new Sum( countField, Long.TYPE ) );
+    }
+
+  ///////
 
   /**
    * Constructor Count creates a new Count instance.
@@ -218,14 +166,7 @@ public class Count extends SubAssembly
   @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "threshold"})
   public Count( String name, Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
-    if( !countField.isDeclarator() || countField.size() != 1 )
-      throw new IllegalArgumentException( "countField should declare only one field name" );
-
-    pipe = new Each( pipe, groupingFields, new CountPartials( groupingFields.append( countField ), threshold ), Fields.RESULTS );
-    pipe = new GroupBy( name, pipe, groupingFields );
-    pipe = new Every( pipe, countField, new Sum( countField, Long.TYPE ), Fields.ALL );
-
-    setTails( pipe );
+    this( name, Pipe.pipes( pipe ), groupingFields, countField, threshold );
     }
 
   /**
@@ -281,18 +222,6 @@ public class Count extends SubAssembly
   @ConstructorProperties({"name", "pipes", "groupingFields", "countField", "threshold"})
   public Count( String name, Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
     {
-    if( !countField.isDeclarator() || countField.size() != 1 )
-      throw new IllegalArgumentException( "countField should declare only one field name" );
-
-    Pipe[] functions = new Pipe[pipes.length];
-    CountPartials partialDuplicates = new CountPartials( groupingFields.append( countField ), threshold );
-
-    for( int i = 0; i < functions.length; i++ )
-      functions[ i ] = new Each( pipes[ i ], groupingFields, partialDuplicates, Fields.RESULTS );
-
-    Pipe pipe = new GroupBy( name, functions, groupingFields );
-    pipe = new Every( pipe, countField, new Sum( countField, Long.TYPE ), Fields.ALL );
-
-    setTails( pipe );
+    super( name, pipes, groupingFields, groupingFields, new CountPartials( countField ), new Sum( countField, Long.TYPE ), threshold );
     }
   }

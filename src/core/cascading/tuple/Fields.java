@@ -891,6 +891,27 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * <p/>
    * See {@link #subtract(Fields)} for removing field names.
    *
+   * @param fields of type Fields[]
+   * @return Fields
+   */
+  public Fields append( Fields[] fields )
+    {
+    if( fields.length == 0 )
+      return null;
+
+    Fields field = fields[ 0 ];
+
+    for( int i = 1; i < fields.length; i++ )
+      field = field.append( fields[ i ] );
+
+    return field;
+    }
+
+  /**
+   * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
+   * <p/>
+   * See {@link #subtract(Fields)} for removing field names.
+   *
    * @param fields of type Fields
    * @return Fields
    */
