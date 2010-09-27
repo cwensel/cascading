@@ -480,13 +480,9 @@ public class TextDelimited extends TextLine
     if( quote != null && !quote.isEmpty() ) // if empty, leave null
       this.quote = quote;
 
-    splitPattern = createSplitPatternFor( delimiter, this.quote );
-
-    if( this.quote != null )
-      {
-      cleanPattern = createCleanPatternFor( this.quote );
-      escapePattern = createEscapePatternFor( this.quote );
-      }
+    splitPattern = createSplitPatternFor( this.delimiter, this.quote );
+    cleanPattern = createCleanPatternFor( this.quote );
+    escapePattern = createEscapePatternFor( this.quote );
 
     if( types != null && types.length == 0 )
       this.types = null;
@@ -503,29 +499,39 @@ public class TextDelimited extends TextLine
 
   /**
    * Method createEscapePatternFor creates a regex {@link Pattern} cleaning quote escapes from a String.
+   * <p/>
+   * If {@code quote} is null or empty, a null value will be returned;
    *
    * @param quote of type String
    * @return Pattern
    */
   public static Pattern createEscapePatternFor( String quote )
     {
+    if( quote == null || quote.isEmpty() )
+      return null;
+
     return Pattern.compile( String.format( ESCAPE_REGEX_FORMAT, quote ) );
     }
 
   /**
    * Method createCleanPatternFor creates a regex {@link Pattern} for removing quote characters from a String.
+   * <p/>
+   * If {@code quote} is null or empty, a null value will be returned;
    *
    * @param quote of type String
    * @return Pattern
    */
   public static Pattern createCleanPatternFor( String quote )
     {
+    if( quote == null || quote.isEmpty() )
+      return null;
+
     return Pattern.compile( String.format( CLEAN_REGEX_FORMAT, quote ) );
     }
 
   /**
    * Method createSplitPatternFor creates a regex {@link Pattern} for splitting a line of text into its component
-   * parts using the givin delimiter and quote Strings.
+   * parts using the given delimiter and quote Strings. {@code quote} may be null.
    *
    * @param delimiter of type String
    * @param quote     of type String
@@ -535,7 +541,7 @@ public class TextDelimited extends TextLine
     {
     String escapedDelimiter = delimiter.replaceAll( SPECIAL_REGEX_CHARS, "\\\\$1" );
 
-    if( quote == null )
+    if( quote == null || quote.isEmpty() )
       return Pattern.compile( escapedDelimiter );
     else
       return Pattern.compile( String.format( QUOTED_REGEX_FORMAT, quote, escapedDelimiter ) );
@@ -547,7 +553,7 @@ public class TextDelimited extends TextLine
     if( skipHeader && ( (LongWritable) key ).get() == 0 )
       return null;
 
-    Object[] split = splitPattern.split( value.toString(), numValues );
+    Object[] split = createSplit( value.toString(), splitPattern, numValues );
 
     if( numValues != 0 && split.length != numValues )
       {
@@ -565,20 +571,7 @@ public class TextDelimited extends TextLine
       split = array;
       }
 
-    if( cleanPattern != null )
-      {
-      for( int i = 0; i < split.length; i++ )
-        {
-        split[ i ] = cleanPattern.matcher( (String) split[ i ] ).replaceAll( "$1" );
-        split[ i ] = escapePattern.matcher( (String) split[ i ] ).replaceAll( quote );
-        }
-      }
-
-    for( int i = 0; i < split.length; i++ )
-      {
-      if( ( (String) split[ i ] ).isEmpty() )
-        split[ i ] = null;
-      }
+    cleanSplit( split, cleanPattern, escapePattern, quote );
 
     if( types != null ) // forced null in ctor
       {
@@ -607,6 +600,52 @@ public class TextDelimited extends TextLine
       }
 
     return new Tuple( split );
+    }
+
+  /**
+   * Method createSplit will split the given {@value} with the given {@code splitPattern}.
+   *
+   * @param value of type String
+   * @param splitPattern of type Pattern
+   * @param numValues of type int
+   * @return String[]
+   */
+  public static String[] createSplit( String value, Pattern splitPattern, int numValues )
+    {
+    return splitPattern.split( value, numValues );
+    }
+
+  /**
+   * Method cleanSplit will return a quote free array of String values, the given {@code split} array
+   * will be updated in place.
+   * <p/>
+   * If {@code cleanPattern} is null, quote cleaning will not be performed, but all empty String values
+   * will be replaces with a {@code null} value.
+   *
+   * @param split of type Object[]
+   * @param cleanPattern of type Pattern
+   * @param escapePattern of type Pattern
+   * @param quote of type String
+   * @return Object[] as a convenience
+   */
+  public static Object[] cleanSplit( Object[] split, Pattern cleanPattern, Pattern escapePattern, String quote )
+    {
+    if( cleanPattern != null )
+      {
+      for( int i = 0; i < split.length; i++ )
+        {
+        split[ i ] = cleanPattern.matcher( (String) split[ i ] ).replaceAll( "$1" );
+        split[ i ] = escapePattern.matcher( (String) split[ i ] ).replaceAll( quote );
+        }
+      }
+
+    for( int i = 0; i < split.length; i++ )
+      {
+      if( ( (String) split[ i ] ).isEmpty() )
+        split[ i ] = null;
+      }
+
+    return split;
     }
 
   private Object[] getBuffer( Tuple tuple )
