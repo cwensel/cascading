@@ -480,17 +480,12 @@ public class TextDelimited extends TextLine
     if( quote != null && !quote.isEmpty() ) // if empty, leave null
       this.quote = quote;
 
-    String escapedDelimiter = delimiter.replaceAll( SPECIAL_REGEX_CHARS, "\\\\$1" );
-
-    if( this.quote == null )
-      splitPattern = Pattern.compile( escapedDelimiter );
-    else
-      splitPattern = Pattern.compile( String.format( QUOTED_REGEX_FORMAT, this.quote, escapedDelimiter ) );
+    splitPattern = createSplitPatternFor( delimiter, this.quote );
 
     if( this.quote != null )
       {
-      cleanPattern = Pattern.compile( String.format( CLEAN_REGEX_FORMAT, this.quote ) );
-      escapePattern = Pattern.compile( String.format( ESCAPE_REGEX_FORMAT, this.quote ) );
+      cleanPattern = createCleanPatternFor( this.quote );
+      escapePattern = createEscapePatternFor( this.quote );
       }
 
     if( types != null && types.length == 0 )
@@ -504,6 +499,46 @@ public class TextDelimited extends TextLine
 
     if( this.types != null && this.types.length != fields.size() )
       throw new IllegalArgumentException( "num of types must equal number of fields: " + fields.printVerbose() + ", found: " + types.length );
+    }
+
+  /**
+   * Method createEscapePatternFor creates a regex {@link Pattern} cleaning quote escapes from a String.
+   *
+   * @param quote of type String
+   * @return Pattern
+   */
+  public static Pattern createEscapePatternFor( String quote )
+    {
+    return Pattern.compile( String.format( ESCAPE_REGEX_FORMAT, quote ) );
+    }
+
+  /**
+   * Method createCleanPatternFor creates a regex {@link Pattern} for removing quote characters from a String.
+   *
+   * @param quote of type String
+   * @return Pattern
+   */
+  public static Pattern createCleanPatternFor( String quote )
+    {
+    return Pattern.compile( String.format( CLEAN_REGEX_FORMAT, quote ) );
+    }
+
+  /**
+   * Method createSplitPatternFor creates a regex {@link Pattern} for splitting a line of text into its component
+   * parts using the givin delimiter and quote Strings.
+   *
+   * @param delimiter of type String
+   * @param quote     of type String
+   * @return Pattern
+   */
+  public static Pattern createSplitPatternFor( String delimiter, String quote )
+    {
+    String escapedDelimiter = delimiter.replaceAll( SPECIAL_REGEX_CHARS, "\\\\$1" );
+
+    if( quote == null )
+      return Pattern.compile( escapedDelimiter );
+    else
+      return Pattern.compile( String.format( QUOTED_REGEX_FORMAT, quote, escapedDelimiter ) );
     }
 
   @Override
