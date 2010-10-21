@@ -231,6 +231,9 @@ public abstract class CascadingStats
 
   /**
    * Method getDuration returns the duration the work executed before being finished.
+   * </p>
+   * This method will return zero until the work is finished. See {@link #getCurrentDuration()}
+   * if you wish to poll for the current duration value.
    *
    * @return the duration (type long) of this CascadingStats object.
    */
@@ -240,6 +243,20 @@ public abstract class CascadingStats
       return finishedTime - startTime;
     else
       return 0;
+    }
+
+  /**
+   * Method getCurrentDuration returns the current duration of the current work whether or not
+   * the work is finished. When finished, the return value will be the same as {@link #getDuration()}.
+   *
+   * @return the currentDuration (type long) of this CascadingStats object.
+   */
+  public long getCurrentDuration()
+    {
+    if( finishedTime != 0 )
+      return finishedTime - startTime;
+    else
+      return System.currentTimeMillis() - startTime;
     }
 
   /**
