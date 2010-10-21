@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Fixed issues where c.t.Fields#getIndex may return invalid results if accessed from multiple threads simultaneously.
+
   Fixed NPE when attempting to increment a counter before the first map/reduce invocation. Now throws a more
   informative ISE message.
 
