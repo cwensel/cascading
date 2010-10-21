@@ -2,6 +2,9 @@ Cascading Change Log
 
 unreleased
 
+  Fixed NPE when attempting to increment a counter before the first map/reduce invocation. Now throws a more
+  informative ISE message.
+
   Fixed possible NPE when accessing counters via c.f.h.HadoopStepStats.
 
   Fixed bug in c.s.TextDelimited where some unquoted empty values would not be properly parsed.
