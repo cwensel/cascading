@@ -14,9 +14,13 @@ General Information:
 
 Building:
 
-  To build Cascading,
+  To retrieve all immediate dependencies, excluding Hadoop (see below)
 
   > cd <path to cascading>
+  > ant retrieve
+
+  To build Cascading,
+
   > ant -Dhadoop.home=<path to hadoop> compile
 
   To make all jars:
