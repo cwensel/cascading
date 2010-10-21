@@ -2,6 +2,8 @@ Cascading Change Log
 
 unreleased
 
+  Added publishing of artifacts to the conjars.org jar repo via Ivy.
+
   Added method c.s.CascadingStats#getCurrentDuration to return the current execution duration whether or not the
   process/work is finished.
 

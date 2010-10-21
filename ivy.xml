@@ -1,0 +1,68 @@
+<!--
+  ~ Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+  ~
+  ~ Project and contact information: http://www.cascading.org/
+  ~
+  ~ This file is part of the Cascading project.
+  ~
+  ~ Cascading is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Cascading is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<ivy-module version="2.0">
+  <info organisation="cascading" module="cascading-core" revision="${cascading.release.full}">
+
+    <license name="GNU General Public License version 3" url="http://www.gnu.org/licenses/"/>
+
+    <ivyauthor name="Concurrent, Inc." url="http://concurrentinc.com/"/>
+
+    <description homepage="http://cascading.org">
+    </description>
+  </info>
+
+  <configurations>
+    <conf name="core"/>
+    <conf name="xml"/>
+
+    <conf name="default" extends="core,xml"/>
+
+    <conf name="test"/>
+    <conf name="compile"/>
+  </configurations>
+
+  <publications>
+    <artifact conf="core" name="cascading-core" type="jar" ext="jar"/>
+    <artifact conf="core" name="cascading-core" type="pom" ext="pom"/>
+
+    <artifact conf="xml" name="cascading-xml" type="jar" ext="jar"/>
+    <artifact conf="xml" name="cascading-xml" type="pom" ext="pom"/>
+
+    <artifact conf="test" name="cascading-test" type="jar" ext="jar"/>
+    <artifact conf="test" name="cascading-test" type="pom" ext="pom"/>
+  </publications>
+
+  <dependencies>
+    <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="compile->default">
+      <exclude org="ant"/>
+    </dependency>
+    <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="compile->default"/>
+
+    <dependency org="thirdparty" name="jgrapht-jdk1.6" rev="0.8.1" conf="core->default"/>
+    <dependency org="riffle" name="riffle" rev="0.1-dev" conf="core->default"/>
+    <dependency org="org.codehaus.janino" name="janino" rev="2.5.16" conf="core->default"/>
+
+    <dependency org="org.ccil.cowan.tagsoup" name="tagsoup" rev="1.2" conf="xml->default"/>
+
+    <dependency org="junit" name="junit" rev="4.4" conf="test->default"/>
+  </dependencies>
+</ivy-module>

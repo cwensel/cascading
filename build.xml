@@ -21,7 +21,7 @@
   ~ along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<project name="cascading" default="compile" basedir=".">
+<project name="cascading" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <dirname property="cascading.basedir" file="${ant.file.cascading}"/>
 
@@ -469,6 +469,57 @@
          passphrase="" port="${package.remote.port}" trust="true"/>
 
     <delete file="cascading-current.txt"/>
+
+  </target>
+
+  <target name="publish" depends="jar">
+
+    <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
+
+    <ivy:resolve settingsRef="ivy.conjars.settings" file="ivy.xml"/>
+
+    <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-core"
+                 pomfile="${build}/cascading-core-${cascading.release.full}.pom"
+                 conf="core,compile">
+      <ivy:mapping conf="core" scope="compile"/>
+      <ivy:mapping conf="compile" scope="runtime"/>
+    </ivy:makepom>
+
+    <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-xml"
+                 pomfile="${build}/cascading-xml-${cascading.release.full}.pom"
+                 conf="xml">
+      <dependency group="cascading" artifact="cascading-core" version="${cascading.release.full}"/>
+      <ivy:mapping conf="xml" scope="compile"/>
+    </ivy:makepom>
+
+    <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-test"
+                 pomfile="${build}/cascading-test-${cascading.release.full}.pom"
+                 conf="test">
+      <dependency group="cascading" artifact="cascading-core" version="${cascading.release.full}" scope="test"/>
+      <dependency group="cascading" artifact="cascading-xml" version="${cascading.release.full}" scope="test"/>
+      <ivy:mapping conf="test" scope="compile"/>
+    </ivy:makepom>
+
+    <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
+      <fileset dir="${build}">
+        <include name="cascading-core-${cascading.release.full}.pom"/>
+        <include name="${jar.cascading-core}"/>
+      </fileset>
+    </scp>
+
+    <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
+      <fileset dir="${build}">
+        <include name="cascading-xml-${cascading.release.full}.pom"/>
+        <include name="${jar.cascading-xml}"/>
+      </fileset>
+    </scp>
+
+    <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
+      <fileset dir="${build}">
+        <include name="cascading-test-${cascading.release.full}.pom"/>
+        <include name="${jar.cascading-test}"/>
+      </fileset>
+    </scp>
 
   </target>
 
