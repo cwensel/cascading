@@ -781,12 +781,13 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( index != null )
       return index;
 
-    index = new HashMap<Comparable, Integer>();
+    // make thread-safe by not having invalid intermediate state
+    Map<Comparable, Integer> local = new HashMap<Comparable, Integer>();
 
     for( int i = 0; i < size(); i++ )
-      index.put( get( i ), i );
+      local.put( get( i ), i );
 
-    return index;
+    return index = local;
     }
 
   private int indexOf( Comparable fieldName )

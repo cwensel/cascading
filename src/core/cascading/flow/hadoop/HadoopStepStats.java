@@ -200,7 +200,12 @@ public abstract class HadoopStepStats extends StepStats
     {
     try
       {
-      Counters counters = getRunningJob().getCounters();
+      RunningJob runningJob = getRunningJob();
+
+      if( runningJob == null )
+        return 0;
+
+      Counters counters = runningJob.getCounters();
 
       if( counters == null )
         return 0;
@@ -218,7 +223,12 @@ public abstract class HadoopStepStats extends StepStats
     {
     try
       {
-      Counters counters = getRunningJob().getCounters();
+      RunningJob runningJob = getRunningJob();
+
+      if( runningJob == null )
+        return 0;
+
+      Counters counters = runningJob.getCounters();
 
       if( counters == null )
         return 0;
@@ -239,6 +249,10 @@ public abstract class HadoopStepStats extends StepStats
   public void captureJobStats()
     {
     RunningJob runningJob = getRunningJob();
+
+    if( runningJob == null )
+      return;
+
     JobConf ranJob = new JobConf( runningJob.getJobFile() );
 
     setNumMapTasks( ranJob.getNumMapTasks() );

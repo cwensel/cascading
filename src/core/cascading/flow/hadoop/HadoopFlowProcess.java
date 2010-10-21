@@ -124,6 +124,14 @@ public class HadoopFlowProcess extends FlowProcess
     return reporter;
     }
 
+  private final Reporter getReporterOrFail()
+    {
+    if( reporter == null )
+      throw new IllegalStateException( "unable to access the hadoop reporter, it is not available until the first map/reduce invocation" );
+
+    return reporter;
+    }
+
   /** @see cascading.flow.FlowProcess#getProperty(String) */
   public Object getProperty( String key )
     {
@@ -133,25 +141,25 @@ public class HadoopFlowProcess extends FlowProcess
   /** @see cascading.flow.FlowProcess#keepAlive() */
   public void keepAlive()
     {
-    reporter.progress();
+    getReporterOrFail().progress();
     }
 
   /** @see cascading.flow.FlowProcess#increment(Enum, int) */
   public void increment( Enum counter, int amount )
     {
-    reporter.incrCounter( counter, amount );
+    getReporterOrFail().incrCounter( counter, amount );
     }
 
   /** @see cascading.flow.FlowProcess#increment(String, String, int) */
   public void increment( String group, String counter, int amount )
     {
-    reporter.incrCounter( group, counter, amount );
+    getReporterOrFail().incrCounter( group, counter, amount );
     }
 
   /** @see cascading.flow.FlowProcess#setStatus(String) */
   public void setStatus( String status )
     {
-    reporter.setStatus( status );
+    getReporterOrFail().setStatus( status );
     }
 
   /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */

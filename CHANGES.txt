@@ -57,6 +57,18 @@ Cascading Change Log
 
 unreleased
 
+  Added publishing of artifacts to the conjars.org jar repo via Ivy.
+
+  Added method c.s.CascadingStats#getCurrentDuration to return the current execution duration whether or not the
+  process/work is finished.
+
+  Fixed issues where c.t.Fields#getIndex may return invalid results if accessed from multiple threads simultaneously.
+
+  Fixed NPE when attempting to increment a counter before the first map/reduce invocation. Now throws a more
+  informative ISE message.
+
+  Fixed possible NPE when accessing counters via c.f.h.HadoopStepStats.
+
   Fixed bug in c.s.TextDelimited where some unquoted empty values would not be properly parsed.
 
   Added c.f.FlowStep#setName() method to allow override of MR job names. Use in conjunction with
