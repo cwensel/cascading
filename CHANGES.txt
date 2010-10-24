@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.s.WritableSequenceFile as a convenience for reading/writing sequence files holding custom Hadoop
+  Writable types in either they key, value, or key and value positions.
+
   Added retrieve/publish support to the Conjars repo via Ivy.
 
   Added the c.p.a.AggregateBy class to encapsulate parallel partial Function aggregations and their reduce
