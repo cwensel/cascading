@@ -37,9 +37,9 @@ import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.assembly.CompositeAggregator;
-import cascading.pipe.assembly.Count;
-import cascading.pipe.assembly.Sum;
+import cascading.pipe.assembly.AggregateBy;
+import cascading.pipe.assembly.CountBy;
+import cascading.pipe.assembly.SumBy;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
@@ -146,7 +146,7 @@ public class FunctionTest extends CascadingTestCase
 
   public void testPartialCounts()
     {
-    Function function = new CompositeAggregator.CompositeFunction( new Fields( "value" ), Fields.ALL, new Count.CountPartials( new Fields( "count" ) ), 2 );
+    Function function = new AggregateBy.CompositeFunction( new Fields( "value" ), Fields.ALL, new CountBy.CountPartials( new Fields( "count" ) ), 2 );
 
     Fields incoming = new Fields( "value" );
     TupleEntry[] tuples = new TupleEntry[]{
@@ -181,7 +181,7 @@ public class FunctionTest extends CascadingTestCase
 
   public void testPartialSums()
     {
-    Function function = new CompositeAggregator.CompositeFunction( new Fields( "key" ), new Fields( "value" ), new Sum.SumPartials( new Fields( "sum" ), float.class ), 2 );
+    Function function = new AggregateBy.CompositeFunction( new Fields( "key" ), new Fields( "value" ), new SumBy.SumPartials( new Fields( "sum" ), float.class ), 2 );
 
     Fields incoming = new Fields( "key", "value" );
     TupleEntry[] tuples = new TupleEntry[]{

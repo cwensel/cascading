@@ -46,13 +46,13 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 
 /**
- * Class CompositeAggregator is a {@link SubAssembly} that serves two roles for handling aggregate operations.
+ * Class AggregateBy is a {@link SubAssembly} that serves two roles for handling aggregate operations.
  * <p/>
  * The first role is as a base class for composable aggregate operations that have a MapReduce Map side optimization for the
  * Reduce side aggregation. For example 'summing' a value within a grouping can be performed partially Map side and
  * completed Reduce side. Summing is associative and commutative.
  * <p/>
- * CompositeAggregators also support operations that are not associative/commutative like 'counting'. Counting
+ * AggregateBy also supports operations that are not associative/commutative like 'counting'. Counting
  * would result in 'counting' value occurrences Map side but summing those counts Reduce side. (Yes, counting can be
  * transposed to summing Map and Reduce sides by emitting 1's before the first sum, but that's three operations over
  * two, and a hack)
@@ -63,27 +63,31 @@ import cascading.tuple.TupleEntryCollector;
  * <p/>
  * Further, Combiners are limited to only associative/commutative operations.
  * <p/>
- * And Combiners are limited to being applied only Map side, where the Cascading planner can move the optimization
+ * Additionally the Cascading planner can move the Map side optimization
  * to the previous Reduce operation further increasing IO performance (between the preceding Reduce and Map phase which
  * is over HDFS).
  * <p/>
- * The second role of the CompositeAggregator class is to allow for composition of CompositeAggregator
- * sub-classes. That is, {@link Sum} and {@link Count} CompositeAggregator sub-classes can be performed
+ * The second role of the AggregateBy class is to allow for composition of AggregateBy
+ * sub-classes. That is, {@link SumBy} and {@link CountBy} AggregateBy sub-classes can be performed
  * in parallel on the same grouping keys.
  * </p>
- * Custom CompositeAggregator classes can be created by sub-classing this class and implementing a special
+ * Custom AggregateBy classes can be created by sub-classing this class and implementing a special
  * {@link Functor} for use on the Map side. Multiple Functor instances are managed by the {@link CompositeFunction}
  * class allowing them all to share the same LRU value map for more efficiency.
  * <p/>
  * To tune the LRU, set the {@code threshold} value to a high enough value to utilize available memory.
  * <p/>
- * Note that {@link Unique} is not a CompositeAggregator as it makes no sense to combine it with other aggregators,
+ * Note using a AggregateBy instance automatically inserts a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
+ * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
+ * <p/>
+ * Also note that {@link Unique} is not a CompositeAggregator as it makes no sense to combine it with other aggregators,
  * and so is slightly more optimized internally.
  *
- * @see Sum
- * @see Count
+ * @see SumBy
+ * @see CountBy
+ * @see Unique
  */
-public class CompositeAggregator extends SubAssembly
+public class AggregateBy extends SubAssembly
   {
   private String name;
   private int threshold;
@@ -296,7 +300,7 @@ public class CompositeAggregator extends SubAssembly
    * @param name      of type String
    * @param threshold of type int
    */
-  protected CompositeAggregator( String name, int threshold )
+  protected AggregateBy( String name, int threshold )
     {
     this.name = name;
     this.threshold = threshold;
@@ -309,7 +313,7 @@ public class CompositeAggregator extends SubAssembly
    * @param functor        of type Functor
    * @param aggregator     of type Aggregator
    */
-  protected CompositeAggregator( Fields argumentFields, Functor functor, Aggregator aggregator )
+  protected AggregateBy( Fields argumentFields, Functor functor, Aggregator aggregator )
     {
     this.argumentFields = Fields.fields( argumentFields );
     this.functors = new Functor[]{functor};
@@ -323,7 +327,7 @@ public class CompositeAggregator extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  public CompositeAggregator( Pipe pipe, Fields groupingFields, CompositeAggregator... assemblies )
+  public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, CompositeFunction.DEFAULT_THRESHOLD, assemblies );
     }
@@ -336,7 +340,7 @@ public class CompositeAggregator extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  public CompositeAggregator( Pipe pipe, Fields groupingFields, int threshold, CompositeAggregator... assemblies )
+  public AggregateBy( Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
     }
@@ -349,7 +353,7 @@ public class CompositeAggregator extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  public CompositeAggregator( String name, Pipe[] pipes, Fields groupingFields, CompositeAggregator... assemblies )
+  public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
     {
     this( name, pipes, groupingFields, CompositeFunction.DEFAULT_THRESHOLD, assemblies );
     }
@@ -363,7 +367,7 @@ public class CompositeAggregator extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  public CompositeAggregator( String name, Pipe[] pipes, Fields groupingFields, int threshold, CompositeAggregator... assemblies )
+  public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( name, threshold );
 
@@ -373,7 +377,7 @@ public class CompositeAggregator extends SubAssembly
 
     for( int i = 0; i < assemblies.length; i++ )
       {
-      CompositeAggregator assembly = assemblies[ i ];
+      AggregateBy assembly = assemblies[ i ];
 
       Collections.addAll( arguments, assembly.getArgumentFields() );
       Collections.addAll( functors, assembly.getFunctors() );
@@ -383,7 +387,7 @@ public class CompositeAggregator extends SubAssembly
     initialize( groupingFields, pipes, arguments.toArray( new Fields[0] ), functors.toArray( new Functor[0] ), aggregators.toArray( new Aggregator[0] ) );
     }
 
-  protected CompositeAggregator( String name, Pipe[] pipes, Fields groupingFields, Fields argument, Functor functor, Aggregator aggregator, int threshold )
+  protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argument, Functor functor, Aggregator aggregator, int threshold )
     {
     this( name, threshold );
     initialize( groupingFields, pipes, argument, functor, aggregator );

@@ -31,12 +31,12 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /**
- * Class Sum {@link CompositeAggregator} is used to sum values associated with duplicate keys in a tuple stream.
+ * Class Sum {@link AggregateBy} is used to sum values associated with duplicate keys in a tuple stream.
  * <p/>
  * Typically finding Sum value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum()}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link cascading.pipe.assembly.Sum.SumPartials} {@link Functor}
+ * This SubAssembly also uses the {@link SumBy.SumPartials} {@link Functor}
  * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -45,9 +45,9 @@ import cascading.tuple.Tuples;
  * The {@code threshold} value tells the underlying SumPartials functions how many values to cache for each
  * unique key before dropping values from the LRU cache.
  *
- * @see cascading.pipe.assembly.CompositeAggregator
+ * @see AggregateBy
  */
-public class Sum extends CompositeAggregator
+public class SumBy extends AggregateBy
   {
   /**
    * Class SumPartials is a {@link Functor} that is used to sum observed duplicates from the tuple stream.
@@ -56,7 +56,7 @@ public class Sum extends CompositeAggregator
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
    *
-   * @see Sum
+   * @see SumBy
    */
   public static class SumPartials implements Functor
     {
@@ -100,7 +100,7 @@ public class Sum extends CompositeAggregator
     }
 
   /**
-   * Constructor Sum creates a new Sum instance. Use this constructor when used with a {@link CompositeAggregator}
+   * Constructor Sum creates a new Sum instance. Use this constructor when used with a {@link AggregateBy}
    * instance.
    *
    * @param valueField of type Fields
@@ -108,7 +108,7 @@ public class Sum extends CompositeAggregator
    * @param sumType    of type Class
    */
   @ConstructorProperties({"valueField", "sumField", "sumType"})
-  public Sum( Fields valueField, Fields sumField, Class sumType )
+  public SumBy( Fields valueField, Fields sumField, Class sumType )
     {
     super( valueField, new SumPartials( sumField, sumType ), new cascading.operation.aggregator.Sum( sumField, sumType ) );
     }
@@ -125,7 +125,7 @@ public class Sum extends CompositeAggregator
    * @param sumType        of type Class
    */
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField", "sumType"})
-  public Sum( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
+  public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
     this( null, pipe, groupingFields, valueField, sumField, sumType, 10000 );
     }
@@ -141,7 +141,7 @@ public class Sum extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
-  public Sum( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
+  public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
     this( null, pipe, groupingFields, valueField, sumField, sumType, threshold );
     }
@@ -157,7 +157,7 @@ public class Sum extends CompositeAggregator
    * @param sumType        of type Class
    */
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField", "sumType"})
-  public Sum( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
+  public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
     this( name, pipe, groupingFields, valueField, sumField, sumType, 10000 );
     }
@@ -174,7 +174,7 @@ public class Sum extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
-  public Sum( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
+  public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueField, sumField, sumType, threshold );
     }
@@ -189,7 +189,7 @@ public class Sum extends CompositeAggregator
    * @param sumType        of type Class
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
-  public Sum( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
+  public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
     this( null, pipes, groupingFields, valueField, sumField, sumType, 10000 );
     }
@@ -205,7 +205,7 @@ public class Sum extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
-  public Sum( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
+  public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
     this( null, pipes, groupingFields, valueField, sumField, sumType, threshold );
     }
@@ -221,7 +221,7 @@ public class Sum extends CompositeAggregator
    * @param sumType        of type Class
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
-  public Sum( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
+  public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
     this( name, pipes, groupingFields, valueField, sumField, sumType, 10000 );
     }
@@ -238,7 +238,7 @@ public class Sum extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
-  public Sum( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
+  public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
     super( name, pipes, groupingFields, valueField, new SumPartials( sumField, sumType ), new cascading.operation.aggregator.Sum( sumField, sumType ), threshold );
     }

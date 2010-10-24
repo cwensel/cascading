@@ -31,12 +31,12 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class Count {@link CompositeAggregator} is used to count duplicates in a tuple stream.
+ * Class Count {@link AggregateBy} is used to count duplicates in a tuple stream.
  * <p/>
  * Typically finding Count value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count()}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link cascading.pipe.assembly.Count.CountPartials} {@link Functor}
+ * This SubAssembly also uses the {@link CountBy.CountPartials} {@link Functor}
  * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -45,9 +45,9 @@ import cascading.tuple.TupleEntry;
  * The {@code threshold} value tells the underlying CountPartials functions how many values to cache for each
  * unique key before dropping values from the LRU cache.
  *
- * @see CompositeAggregator
+ * @see AggregateBy
  */
-public class Count extends CompositeAggregator
+public class CountBy extends AggregateBy
   {
   /**
    * Class CountPartials is a {@link Functor} that is used to count observed duplicates from the tuple stream.
@@ -56,7 +56,7 @@ public class Count extends CompositeAggregator
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
    *
-   * @see cascading.pipe.assembly.Count
+   * @see CountBy
    */
   public static class CountPartials implements Functor
     {
@@ -100,13 +100,13 @@ public class Count extends CompositeAggregator
     }
 
   /**
-   * Constructor Count creates a new Count instance. Use this constructor when used with a {@link CompositeAggregator}
+   * Constructor Count creates a new Count instance. Use this constructor when used with a {@link AggregateBy}
    * instance.
    *
    * @param countField of type Fields
    */
   @ConstructorProperties({"countField"})
-  public Count( Fields countField )
+  public CountBy( Fields countField )
     {
     super( Fields.ALL, new CountPartials( countField ), new Sum( countField, Long.TYPE ) );
     }
@@ -121,7 +121,7 @@ public class Count extends CompositeAggregator
    * @param countField     of type Fields
    */
   @ConstructorProperties({"pipe", "groupingFields", "countField"})
-  public Count( Pipe pipe, Fields groupingFields, Fields countField )
+  public CountBy( Pipe pipe, Fields groupingFields, Fields countField )
     {
     this( null, pipe, groupingFields, countField );
     }
@@ -135,7 +135,7 @@ public class Count extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"pipe", "groupingFields", "countField", "threshold"})
-  public Count( Pipe pipe, Fields groupingFields, Fields countField, int threshold )
+  public CountBy( Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
     this( null, pipe, groupingFields, countField, threshold );
     }
@@ -149,7 +149,7 @@ public class Count extends CompositeAggregator
    * @param countField     of type Fields
    */
   @ConstructorProperties({"name", "pipe", "groupingFields", "countField"})
-  public Count( String name, Pipe pipe, Fields groupingFields, Fields countField )
+  public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField )
     {
     this( name, pipe, groupingFields, countField, 10000 );
     }
@@ -164,7 +164,7 @@ public class Count extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "threshold"})
-  public Count( String name, Pipe pipe, Fields groupingFields, Fields countField, int threshold )
+  public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, countField, threshold );
     }
@@ -177,7 +177,7 @@ public class Count extends CompositeAggregator
    * @param countField     of type Fields
    */
   @ConstructorProperties({"pipes", "groupingFields", "countField"})
-  public Count( Pipe[] pipes, Fields groupingFields, Fields countField )
+  public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField )
     {
     this( null, pipes, groupingFields, countField, 10000 );
     }
@@ -191,7 +191,7 @@ public class Count extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"pipes", "groupingFields", "countField", "threshold"})
-  public Count( Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
+  public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
     {
     this( null, pipes, groupingFields, countField, threshold );
     }
@@ -205,7 +205,7 @@ public class Count extends CompositeAggregator
    * @param countField     of type Fields
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "countField"})
-  public Count( String name, Pipe[] pipes, Fields groupingFields, Fields countField )
+  public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField )
     {
     this( name, pipes, groupingFields, countField, 10000 );
     }
@@ -220,7 +220,7 @@ public class Count extends CompositeAggregator
    * @param threshold      of type int
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "countField", "threshold"})
-  public Count( String name, Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
+  public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
     {
     super( name, pipes, groupingFields, groupingFields, new CountPartials( countField ), new Sum( countField, Long.TYPE ), threshold );
     }

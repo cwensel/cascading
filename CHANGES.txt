@@ -4,7 +4,7 @@ Cascading Change Log
 
   Added retrieve/publish support to the Conjars repo via Ivy.
 
-  Added the c.p.a.CompositeAggregator class to encapsulate parallel partial Function aggregations and their reduce
+  Added the c.p.a.AggregateBy class to encapsulate parallel partial Function aggregations and their reduce
   side Aggregator. This is a superior alternative to so called MapReduce Combiners. See javadoc for details.
 
   Changed c.o.Debug to print the number of tuples encountered on #cleanup().
@@ -12,9 +12,9 @@ Cascading Change Log
   Changed c.s.TextDelimited to always return the expected number of fields even if they are not parsed from
   the current line and strict is false, unless Fields.ALL or Fields.UNKNOWN is declared.
 
-  Added c.p.a.Sum sub-assembly for optimizing summing processes.
+  Added c.p.a.SumBy sub-assembly for optimizing summing processes.
 
-  Added c.p.a.Count sub-assembly for optimizing counting processes.
+  Added c.p.a.CountBy sub-assembly for optimizing counting processes.
 
   Added c.s.CascadingStatus.Status.Skipped state so skipped c.f.Flow instances can be identified.
 

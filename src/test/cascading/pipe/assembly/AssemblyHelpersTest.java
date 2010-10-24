@@ -248,7 +248,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "count" );
 
-    pipe = new Count( pipe, new Fields( "char" ), new Fields( "count" ), 2 );
+    pipe = new CountBy( pipe, new Fields( "char" ), new Fields( "count" ), 2 );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
@@ -291,7 +291,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
 
-    Pipe countPipe = new Count( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "count" ), 2 );
+    Pipe countPipe = new CountBy( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "count" ), 2 );
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
@@ -331,7 +331,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "sum" );
 
-    pipe = new Sum( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
+    pipe = new SumBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
@@ -374,7 +374,7 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
 
-    Pipe sumPipe = new Sum( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
+    Pipe sumPipe = new SumBy( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 2 );
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
@@ -415,10 +415,10 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     Pipe pipe = new Pipe( "multi" );
 
-    Sum sumPipe = new Sum( new Fields( "num" ), new Fields( "sum" ), long.class );
-    Count countPipe = new Count( new Fields( "count" ) );
+    SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
+    CountBy countPipe = new CountBy( new Fields( "count" ) );
 
-    pipe = new CompositeAggregator( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
@@ -462,10 +462,10 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
 
-    Sum sumPipe = new Sum( new Fields( "num" ), new Fields( "sum" ), long.class );
-    Count countPipe = new Count( new Fields( "count" ) );
+    SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
+    CountBy countPipe = new CountBy( new Fields( "count" ) );
 
-    Pipe pipe = new CompositeAggregator( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+    Pipe pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe );
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
