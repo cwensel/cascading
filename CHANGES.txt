@@ -1,6 +1,6 @@
 Cascading Change Log
 
-unreleased
+1.1.3
 
   Added publishing of artifacts to the conjars.org jar repo via Ivy.
 
