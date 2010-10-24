@@ -55,7 +55,7 @@ Cascading Change Log
 
   Added support for lazy deserialization during c.t.Tuple comparisons while shuffle sorting.
 
-unreleased
+1.1.3
 
   Added publishing of artifacts to the conjars.org jar repo via Ivy.
 
