@@ -43,7 +43,7 @@ import cascading.tuple.Tuple;
  * <p/>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
-public class DateParser extends DateOperation implements Function
+public class DateParser extends DateOperation implements Function<SimpleDateFormat>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "ts";
@@ -133,13 +133,13 @@ public class DateParser extends DateOperation implements Function
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<SimpleDateFormat> functionCall )
     {
     Tuple output = new Tuple();
 
     try
       {
-      Date date = getDateFormat().parse( (String) functionCall.getArguments().getObject( 0 ) );
+      Date date = functionCall.getContext().parse( (String) functionCall.getArguments().getObject( 0 ) );
 
       if( calendarFields == null )
         output.add( date.getTime() );

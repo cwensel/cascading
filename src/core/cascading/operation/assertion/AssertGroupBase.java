@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import cascading.flow.FlowProcess;
 import cascading.operation.GroupAssertion;
 import cascading.operation.GroupAssertionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.log4j.Logger;
@@ -43,14 +44,12 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
   /** Field patternString */
   protected String patternString;
 
-  /** Field pattern */
-  private transient Pattern pattern;
-
   /** Field size */
   protected long size;
 
   public static class Context
     {
+    Pattern pattern;
     Long count;
     String fields;
     String group;
@@ -91,8 +90,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
 
   private Pattern getPattern()
     {
-    if( pattern != null )
-      return pattern;
+    Pattern pattern = null;
 
     if( patternString == null )
       pattern = Pattern.compile( ".*" );
@@ -102,29 +100,35 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     return pattern;
     }
 
-  private boolean matchWholeTuple( Tuple input )
+  private boolean matchWholeTuple( Tuple input, Pattern pattern )
     {
     if( patternString == null )
       return true;
 
-    Matcher matcher = getPattern().matcher( input.toString( "\t" ) );
+    Matcher matcher = pattern.matcher( input.toString( "\t" ) );
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + getPattern() + ", matches: " + matcher.matches() );
+      LOG.debug( "pattern: " + pattern + ", matches: " + matcher.matches() );
 
     return matcher.matches();
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
+    {
+    if( operationCall.getContext() == null )
+      operationCall.setContext( new Context() );
+
+    operationCall.getContext().pattern = getPattern();
+    }
+
   public void start( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
-    if( assertionCall.getContext() == null )
-      assertionCall.setContext( new Context() );
-
     TupleEntry groupEntry = assertionCall.getGroup();
     Context context = assertionCall.getContext();
 
     // didn't match, so skip
-    if( !matchWholeTuple( groupEntry.getTuple() ) )
+    if( !matchWholeTuple( groupEntry.getTuple(), assertionCall.getContext().pattern ) )
       context.reset();
     else
       context.set( 0L, groupEntry.getFields().print(), groupEntry.getTuple().print() );

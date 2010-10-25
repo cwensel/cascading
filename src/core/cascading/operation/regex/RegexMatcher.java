@@ -102,7 +102,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
     boolean matchFound = matcher.find();
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + getPattern() + ", matches: " + matchFound );
+      LOG.debug( "pattern: " + getPatternString() + ", matches: " + matchFound );
 
     return matchFound == negateMatch;
     }
@@ -131,7 +131,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
       boolean matchFound = matcher.find();
 
       if( LOG.isDebugEnabled() )
-        LOG.debug( "pattern: " + getPattern() + ", matches: " + matchFound + ", element: '" + value + "'" );
+        LOG.debug( "pattern: " + getPatternString() + ", matches: " + matchFound + ", element: '" + value + "'" );
 
       if( matchFound == negateMatch )
         return pos;

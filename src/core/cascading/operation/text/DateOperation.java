@@ -27,11 +27,13 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 
 /** Class DateOperation is the base class for {@link DateFormatter} and {@link DateParser}. */
-public class DateOperation extends BaseOperation
+public class DateOperation extends BaseOperation<SimpleDateFormat>
   {
   /** Field zone */
   protected TimeZone zone;
@@ -39,8 +41,6 @@ public class DateOperation extends BaseOperation
   protected Locale locale;
   /** Field dateFormatString */
   final String dateFormatString;
-  /** Field dateFormat */
-  transient SimpleDateFormat dateFormat;
 
   /**
    * Constructor DateOperation creates a new DateOperation instance.
@@ -84,11 +84,9 @@ public class DateOperation extends BaseOperation
    */
   public SimpleDateFormat getDateFormat()
     {
-    if( dateFormat == null )
-      {
-      dateFormat = new SimpleDateFormat( dateFormatString, getLocale() );
-      dateFormat.setTimeZone( getZone() );
-      }
+    SimpleDateFormat dateFormat = new SimpleDateFormat( dateFormatString, getLocale() );
+
+    dateFormat.setTimeZone( getZone() );
 
     return dateFormat;
     }
@@ -112,6 +110,12 @@ public class DateOperation extends BaseOperation
   protected Calendar getCalendar()
     {
     return Calendar.getInstance( TimeZone.getTimeZone( "UTC" ), getLocale() );
+    }
+
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<SimpleDateFormat> operationCall )
+    {
+    operationCall.setContext( getDateFormat() );
     }
 
   @Override

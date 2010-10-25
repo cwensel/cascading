@@ -139,7 +139,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     Matcher matcher = functionCall.getContext().reset( value );
 
     if( !matcher.find() )
-      throw new OperationException( "could not match pattern: [" + getPattern() + "] with value: [" + value + "]" );
+      throw new OperationException( "could not match pattern: [" + getPatternString() + "] with value: [" + value + "]" );
 
     Tuple output = new Tuple();
 

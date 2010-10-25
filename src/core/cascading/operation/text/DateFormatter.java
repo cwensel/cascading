@@ -40,7 +40,7 @@ import cascading.tuple.Tuple;
  * Note the timezone data is given to the SimpleDateFormat, not the internal Calendar instance which interprets
  * the 'timestamp' value as it is assumed the timestamp is already in GMT.
  */
-public class DateFormatter extends DateOperation implements Function
+public class DateFormatter extends DateOperation implements Function<SimpleDateFormat>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "datetime";
@@ -96,7 +96,7 @@ public class DateFormatter extends DateOperation implements Function
     }
 
   /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<SimpleDateFormat> functionCall )
     {
     Tuple output = new Tuple();
 
@@ -106,7 +106,7 @@ public class DateFormatter extends DateOperation implements Function
 
     calendar.setTimeInMillis( ts );
 
-    output.add( getDateFormat().format( calendar.getTime() ) );
+    output.add( functionCall.getContext().format( calendar.getTime() ) );
 
     functionCall.getOutputCollector().add( output );
     }

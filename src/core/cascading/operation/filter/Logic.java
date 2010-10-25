@@ -40,18 +40,22 @@ import cascading.tuple.TupleEntry;
  * @see Or
  * @see Xor
  */
-public abstract class Logic extends BaseOperation implements Filter
+public abstract class Logic extends BaseOperation<Logic.Context> implements Filter<Logic.Context>
   {
   /** Field fields */
   protected final Fields[] argumentSelectors;
   /** Field filters */
   protected final Filter[] filters;
-  /** Field argumentEnties */
-  private transient TupleEntry[] argumentEntries;
 
   private static Filter[] filters( Filter... filters )
     {
     return filters;
+    }
+
+  public class Context
+    {
+    TupleEntry[] argumentEntries;
+    Object[] contexts;
     }
 
   @ConstructorProperties({"filters"})
@@ -114,7 +118,10 @@ public abstract class Logic extends BaseOperation implements Filter
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall operationCall )
     {
-    Object[] contexts = new Object[filters.length];
+    Context context = new Context();
+
+    context.argumentEntries = getArgumentEntries();
+    context.contexts = new Object[filters.length];
 
     for( int i = 0; i < filters.length; i++ )
       {
@@ -122,18 +129,19 @@ public abstract class Logic extends BaseOperation implements Filter
 
       filter.prepare( flowProcess, operationCall );
 
-      contexts[ i ] = operationCall.getContext();
+      context.contexts[ i ] = operationCall.getContext();
 
       operationCall.setContext( null );
       }
 
-    operationCall.setContext( contexts );
+    operationCall.setContext( context );
     }
 
   @Override
   public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
     {
-    Object[] contexts = (Object[]) operationCall.getContext();
+    Context context = (Context) operationCall.getContext();
+    Object[] contexts = context.contexts;
 
     for( int i = 0; i < filters.length; i++ )
       {
@@ -143,6 +151,8 @@ public abstract class Logic extends BaseOperation implements Filter
 
       filter.cleanup( flowProcess, operationCall );
       }
+
+    operationCall.setContext( null );
     }
 
   protected int getFieldsSize()
@@ -161,12 +171,9 @@ public abstract class Logic extends BaseOperation implements Filter
     return pos.size();
     }
 
-  protected final TupleEntry[] getArgumentEntries()
+  private final TupleEntry[] getArgumentEntries()
     {
-    if( argumentEntries != null )
-      return argumentEntries;
-
-    argumentEntries = new TupleEntry[argumentSelectors.length];
+    TupleEntry[] argumentEntries = new TupleEntry[argumentSelectors.length];
 
     for( int i = 0; i < argumentSelectors.length; i++ )
       {

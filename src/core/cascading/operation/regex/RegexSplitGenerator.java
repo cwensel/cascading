@@ -22,10 +22,12 @@
 package cascading.operation.regex;
 
 import java.beans.ConstructorProperties;
+import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -34,7 +36,7 @@ import cascading.tuple.Tuple;
  * <p/>
  * This could be used to break a document into single word tuples for later processing for a word count.
  */
-public class RegexSplitGenerator extends RegexOperation implements Function
+public class RegexSplitGenerator extends RegexOperation<Pattern> implements Function<Pattern>
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -62,15 +64,21 @@ public class RegexSplitGenerator extends RegexOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Pattern> operationCall )
+    {
+    operationCall.setContext( getPattern() );
+    }
+
   /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pattern> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    String[] split = getPattern().split( value );
+    String[] split = functionCall.getContext().split( value );
 
     for( String string : split )
       functionCall.getOutputCollector().add( new Tuple( string ) );

@@ -82,13 +82,15 @@ public class And extends Logic
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    Object[] contexts = (Object[]) filterCall.getContext();
+    Context context = (Context) filterCall.getContext();
+    TupleEntry[] argumentEntries = context.argumentEntries;
+    Object[] contexts = context.contexts;
 
     try
       {
       for( int i = 0; i < argumentSelectors.length; i++ )
         {
-        TupleEntry entry = getArgumentEntries()[ i ];
+        TupleEntry entry = argumentEntries[ i ];
 
         entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
 
@@ -102,7 +104,7 @@ public class And extends Logic
       }
     finally
       {
-      filterCall.setContext( contexts );
+      filterCall.setContext( context );
       }
     }
   }

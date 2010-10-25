@@ -72,13 +72,15 @@ public class Xor extends Logic
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    TupleEntry lhsEntry = getArgumentEntries()[ 0 ];
-    TupleEntry rhsEntry = getArgumentEntries()[ 1 ];
+    Context context = (Logic.Context) filterCall.getContext();
+    TupleEntry[] argumentEntries = context.argumentEntries;
+    Object[] contexts = context.contexts;
+
+    TupleEntry lhsEntry = argumentEntries[ 0 ];
+    TupleEntry rhsEntry = argumentEntries[ 1 ];
 
     lhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 0 ] ) );
     rhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 1 ] ) );
-
-    Object[] contexts = (Object[]) filterCall.getContext();
 
     filterCall.setContext( contexts[ 0 ] );
     boolean lhsResult = filters[ 0 ].isRemove( flowProcess, filterCall );
@@ -92,7 +94,7 @@ public class Xor extends Logic
       }
     finally
       {
-      filterCall.setContext( contexts );
+      filterCall.setContext( context );
       }
     }
   }

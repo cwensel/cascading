@@ -33,9 +33,6 @@ public class RegexOperation<C> extends BaseOperation<C>
   /** Field patternString */
   protected String patternString = ".*";
 
-  /** Field pattern */
-  private transient Pattern pattern;
-
   /** Constructor RegexOperation creates a new RegexOperation instance. */
   public RegexOperation()
     {
@@ -114,18 +111,23 @@ public class RegexOperation<C> extends BaseOperation<C>
     }
 
   /**
+   * Method getPatternString returns the patternString of this RegexOperation object.
+   *
+   * @return the patternString (type String) of this RegexOperation object.
+   */
+  public String getPatternString()
+    {
+    return patternString;
+    }
+
+  /**
    * Method getPattern returns the pattern of this RegexOperation object.
    *
    * @return the pattern (type Pattern) of this RegexOperation object.
    */
   protected Pattern getPattern()
     {
-    if( pattern != null )
-      return pattern;
-
-    pattern = Pattern.compile( patternString );
-
-    return pattern;
+    return Pattern.compile( getPatternString() );
     }
 
   @Override
