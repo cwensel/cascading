@@ -133,6 +133,7 @@ public class BasicPipesTest extends CascadingTestCase
       TupleListCollector tupleEntryCollector = new TupleListCollector( Fields.size( 2 ) );
       Tuple tuple1 = tuple.get( new int[]{1} );
       ConcreteCall operationCall = new ConcreteCall( new TupleEntry( tuple1 ), tupleEntryCollector );
+      splitter.prepare( null, operationCall );
       splitter.operate( null, operationCall );
 
       Tuple tupleEntry = tupleEntryCollector.iterator().next();
