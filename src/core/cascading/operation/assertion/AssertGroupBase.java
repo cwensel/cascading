@@ -116,9 +116,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
-    if( operationCall.getContext() == null )
-      operationCall.setContext( new Context() );
-
+    operationCall.setContext( new Context() );
     operationCall.getContext().pattern = getPattern();
     }
 
@@ -128,7 +126,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     Context context = assertionCall.getContext();
 
     // didn't match, so skip
-    if( !matchWholeTuple( groupEntry.getTuple(), assertionCall.getContext().pattern ) )
+    if( !matchWholeTuple( groupEntry.getTuple(), context.pattern ) )
       context.reset();
     else
       context.set( 0L, groupEntry.getFields().print(), groupEntry.getTuple().print() );

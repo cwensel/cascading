@@ -51,6 +51,7 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     operationCall.setGroup( groupEntry );
 
+    assertion.prepare( FlowProcess.NULL, operationCall );
     assertion.start( FlowProcess.NULL, operationCall );
 
     for( TupleEntry value : values )
@@ -78,7 +79,8 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     operationCall.setGroup( groupEntry );
 
-    assertion.start( null, operationCall );
+    assertion.prepare( FlowProcess.NULL, operationCall );
+    assertion.start( FlowProcess.NULL, operationCall );
 
     for( TupleEntry value : values )
       {
@@ -88,6 +90,8 @@ public class GroupAssertionsTest extends CascadingTestCase
 
     operationCall.setArguments( null );
     assertion.doAssert( FlowProcess.NULL, operationCall );
+
+    assertion.cleanup( FlowProcess.NULL, operationCall );
     }
 
   public void testSizeEquals()
