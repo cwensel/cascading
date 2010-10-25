@@ -1003,7 +1003,7 @@ public class Group extends Pipe
       Fields[] groupFields = Fields.fields( outgoingScope.getGroupingSelectors().get( incomingScope.getName() ) );
       Fields[] valuesFields = Fields.fields( incomingScope.getOutValuesFields() );
 
-      closure = new GroupClosure( groupFields, valuesFields );
+      closure = new GroupClosure( flowProcess, groupFields, valuesFields );
       }
     else
       {

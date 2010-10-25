@@ -62,7 +62,7 @@ public class CoGroupClosure extends GroupClosure
 
   public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
-    super( groupingFields, valueFields );
+    super( flowProcess, groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
     this.codec = getCompressionCodec( flowProcess );
     this.threshold = getLong( flowProcess, SPILL_THRESHOLD, defaultThreshold );

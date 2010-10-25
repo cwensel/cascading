@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.p.c.GroupClosure#getFlowProcess method to allow c.p.c.Joiner implementations access to current
+  properties and counters.
+
   Added c.s.CascadingStats methods for accessing available counter groups and names.
 
   Added c.s.WritableSequenceFile as a convenience for reading/writing sequence files holding custom Hadoop

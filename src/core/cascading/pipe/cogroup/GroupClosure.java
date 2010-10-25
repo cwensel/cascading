@@ -24,6 +24,7 @@ package cascading.pipe.cogroup;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -34,11 +35,18 @@ public class GroupClosure
   final Fields[] valueFields;
   Tuple grouping;
   Iterator values;
+  private FlowProcess flowProcess;
 
-  public GroupClosure( Fields[] groupingFields, Fields[] valueFields )
+  public GroupClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
     {
+    this.flowProcess = flowProcess;
     this.groupingFields = Arrays.copyOf( groupingFields, groupingFields.length );
     this.valueFields = Arrays.copyOf( valueFields, valueFields.length );
+    }
+
+  public FlowProcess getFlowProcess()
+    {
+    return flowProcess;
     }
 
   public int size()
