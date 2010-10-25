@@ -386,7 +386,7 @@ public class MultiMapReducePlanner extends FlowPlanner
         // we are at the root of a split here
 
         // do any split paths converge on a single Group?
-        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergJoin( flowElement );
+        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergeJoin( flowElement );
         if( maxPaths <= 1 && lastInsertable instanceof Tap )
           continue;
 

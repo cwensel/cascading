@@ -742,7 +742,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return tapGraph;
     }
 
-  public int getMaxNumPathsBetweenElementAndMergJoin( FlowElement flowElement )
+  public int getMaxNumPathsBetweenElementAndMergeJoin( FlowElement flowElement )
     {
     List<Group> groups = findAllMergeJoinGroups();
 
