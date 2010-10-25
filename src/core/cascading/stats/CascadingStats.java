@@ -283,6 +283,41 @@ public abstract class CascadingStats implements Serializable
     }
 
   /**
+   * Method getCounterGroups returns all the available counter group names.
+   *
+   * @return the counterGroups (type Collection<String>) of this CascadingStats object.
+   */
+  public abstract Collection<String> getCounterGroups();
+
+  /**
+   * Method getCounterGroupsMatching returns all the available counter group names that match
+   * the given regular expression.
+   *
+   * @param regex of type String
+   * @return Collection<String>
+   */
+  public abstract Collection<String> getCounterGroupsMatching( String regex );
+
+  /**
+   * Method getCountersFor returns all the counter names for the give group name.
+   *
+   * @param group
+   * @return Collection<String>
+   */
+  public abstract Collection<String> getCountersFor( String group );
+
+  /**
+   * Method getCountersFor returns all the counter names for the counter enums.
+   *
+   * @param group
+   * @return Collection<String>
+   */
+  public Collection<String> getCountersFor( Class<? extends Enum> group )
+    {
+    return getCountersFor( group.getName() );
+    }
+
+  /**
    * Method getCounter returns the current value for the given counter Enum.
    *
    * @param counter of type Enum

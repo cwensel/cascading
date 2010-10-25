@@ -90,6 +90,10 @@ public class CascadingStatsTest extends ClusterTestCase
 
     assertNotNull( cascadeStats.getID() );
 
+    assertEquals( isEnableCluster() ? 5 : 4, cascadeStats.getCounterGroups().size() );
+    assertEquals( 1, cascadeStats.getCounterGroupsMatching( "cascading\\.stats\\..*" ).size() );
+    assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class.getName() ).size() );
+    assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class ).size() );
     assertEquals( 40, cascadeStats.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 20, cascadeStats.getCounterValue( TestEnum.SECOND ) );
 

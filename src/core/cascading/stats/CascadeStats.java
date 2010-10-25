@@ -22,8 +22,10 @@
 package cascading.stats;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import cascading.cascade.Cascade;
 
@@ -65,6 +67,39 @@ public class CascadeStats extends CascadingStats
   public int getFlowCount()
     {
     return flowStatsList.size();
+    }
+
+  @Override
+  public Collection<String> getCounterGroups()
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( FlowStats flowStats : flowStatsList )
+      results.addAll( flowStats.getCounterGroups() );
+
+    return results;
+    }
+
+  @Override
+  public Collection<String> getCounterGroupsMatching( String regex )
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( FlowStats flowStats : flowStatsList )
+      results.addAll( flowStats.getCounterGroupsMatching( regex ) );
+
+    return results;
+    }
+
+  @Override
+  public Collection<String> getCountersFor( String group )
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( FlowStats flowStats : flowStatsList )
+      results.addAll( flowStats.getCountersFor( group ) );
+
+    return results;
     }
 
   @Override

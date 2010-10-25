@@ -23,7 +23,9 @@ package cascading.stats;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import cascading.flow.Flow;
 
@@ -72,12 +74,45 @@ public class FlowStats extends CascadingStats
     }
 
   @Override
+  public Collection<String> getCounterGroups()
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( StepStats stepStats : stepStatsList )
+      results.addAll( stepStats.getCounterGroups() );
+
+    return results;
+    }
+
+  @Override
+  public Collection<String> getCounterGroupsMatching( String regex )
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( StepStats stepStats : stepStatsList )
+      results.addAll( stepStats.getCounterGroupsMatching( regex ) );
+
+    return results;
+    }
+
+  @Override
+  public Collection<String> getCountersFor( String group )
+    {
+    Set<String> results = new HashSet<String>();
+
+    for( StepStats stepStats : stepStatsList )
+      results.addAll( stepStats.getCountersFor( group ) );
+
+    return results;
+    }
+
+  @Override
   public long getCounterValue( Enum counter )
     {
     long value = 0;
 
-    for( StepStats step : stepStatsList )
-      value += step.getCounterValue( counter );
+    for( StepStats stepStats : stepStatsList )
+      value += stepStats.getCounterValue( counter );
 
     return value;
     }
@@ -87,8 +122,8 @@ public class FlowStats extends CascadingStats
     {
     long value = 0;
 
-    for( StepStats step : stepStatsList )
-      value += step.getCounterValue( group, counter );
+    for( StepStats stepStats : stepStatsList )
+      value += stepStats.getCounterValue( group, counter );
 
     return value;
     }

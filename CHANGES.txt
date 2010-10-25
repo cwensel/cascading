@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.s.CascadingStats methods for accessing available counter groups and names.
+
   Added c.s.WritableSequenceFile as a convenience for reading/writing sequence files holding custom Hadoop
   Writable types in either they key, value, or key and value positions.
 

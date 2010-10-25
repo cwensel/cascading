@@ -24,8 +24,11 @@ package cascading.flow.hadoop;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.FlowException;
 import cascading.stats.StepStats;
@@ -194,6 +197,88 @@ public abstract class HadoopStepStats extends StepStats
   protected abstract JobClient getJobClient();
 
   protected abstract RunningJob getRunningJob();
+
+  @Override
+  public Collection<String> getCounterGroups()
+    {
+    try
+      {
+      RunningJob runningJob = getRunningJob();
+
+      if( runningJob == null )
+        return Collections.emptySet();
+
+      Counters counters = runningJob.getCounters();
+
+      if( counters == null )
+        return Collections.emptySet();
+
+      return Collections.unmodifiableCollection( counters.getGroupNames() );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get remote counter groups" );
+      }
+    }
+
+  @Override
+  public Collection<String> getCounterGroupsMatching( String regex )
+    {
+    try
+      {
+      RunningJob runningJob = getRunningJob();
+
+      if( runningJob == null )
+        return Collections.emptySet();
+
+      Counters counters = runningJob.getCounters();
+
+      if( counters == null )
+        return Collections.emptySet();
+
+      Set<String> results = new HashSet<String>();
+
+      for( String counter : counters.getGroupNames() )
+        {
+        if( counter.matches( regex ) )
+          results.add( counter );
+        }
+
+      return Collections.unmodifiableCollection( results );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get remote counter groups" );
+      }
+    }
+
+  @Override
+  public Collection<String> getCountersFor( String group )
+    {
+    try
+      {
+      RunningJob runningJob = getRunningJob();
+
+      if( runningJob == null )
+        return Collections.emptySet();
+
+      Counters counters = runningJob.getCounters();
+
+      if( counters == null )
+        return Collections.emptySet();
+
+      Set<String> results = new HashSet<String>();
+
+      for( Counters.Counter counter : counters.getGroup( group ) )
+        results.add( counter.getName() );
+
+      return Collections.unmodifiableCollection( results );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get remote counter groups" );
+      }
+    }
 
   @Override
   public long getCounterValue( Enum counter )
