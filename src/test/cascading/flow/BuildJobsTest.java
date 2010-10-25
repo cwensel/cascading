@@ -90,7 +90,7 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
-    assertNull( "not null: step.groupBy", step.group );
+    assertNull( "not null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
     }
 
@@ -128,13 +128,13 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
-    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -161,13 +161,13 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
-    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 2, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -195,16 +195,16 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
     Iterator<Tap> iterator = step.sources.keySet().iterator();
-    int mapDist = countDistance( step.graph, iterator.next(), step.group );
+    int mapDist = countDistance( step.graph, iterator.next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
-    mapDist = countDistance( step.graph, iterator.next(), step.group );
+    mapDist = countDistance( step.graph, iterator.next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 0, reduceDist );
     }
 
@@ -234,13 +234,13 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
-    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -270,13 +270,13 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 2, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
-    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -484,7 +484,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = steps.get( 0 );
 
-    Scope nextScope = step.getNextScope( step.group );
+    Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );
 
     assertTrue( "not an Every", operator instanceof Every );
@@ -542,7 +542,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = steps.get( 0 );
 
-    Scope nextScope = step.getNextScope( step.group );
+    Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );
 
     assertTrue( "not an Every", operator instanceof Every );
@@ -1511,13 +1511,13 @@ public class BuildJobsTest extends CascadingTestCase
     step.getJobConf(); // called init the step
 
     assertEquals( "not equal: step.sources.size()", 1, step.sources.size() );
-    assertNotNull( "null: step.groupBy", step.group );
+    assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.sink );
 
-    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.group );
+    int mapDist = countDistance( step.graph, step.sources.keySet().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.graph, step.group, step.sink );
+    int reduceDist = countDistance( step.graph, step.getGroup(), step.sink );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -1697,7 +1697,7 @@ public class BuildJobsTest extends CascadingTestCase
 
     FlowStep step = steps.get( 0 );
 
-    Scope nextScope = step.getNextScope( step.group );
+    Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );
 
     assertTrue( "not an Each", operator instanceof Each );

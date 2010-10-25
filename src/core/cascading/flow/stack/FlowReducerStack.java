@@ -72,7 +72,7 @@ public class FlowReducerStack
     if( jobConf.getNumReduceTasks() == 0 )
       return;
 
-    if( step.group == null )
+    if( step.getGroup() == null )
       throw new IllegalStateException( "this step reducer should not be created, num reducers should be zero, found: " + jobConf.getNumReduceTasks() + ", in step: " + step.getStepName() );
 
     buildStack();
@@ -82,12 +82,12 @@ public class FlowReducerStack
 
   private void buildStack() throws IOException
     {
-    Set<Scope> previousScopes = step.getPreviousScopes( step.group );
-    Scope nextScope = step.getNextScope( step.group );
-    String trapName = ( (Pipe) step.group ).getName();
+    Set<Scope> previousScopes = step.getPreviousScopes( step.getGroup() );
+    Scope nextScope = step.getNextScope( step.getGroup() );
+    String trapName = ( (Pipe) step.getGroup() ).getName();
     Tap trap = step.getReducerTrap( trapName );
 
-    stackTail = new GroupReducerStackElement( flowProcess, previousScopes, step.group, nextScope, nextScope.getOutGroupingFields(), trap );
+    stackTail = new GroupReducerStackElement( flowProcess, previousScopes, step.getGroup(), nextScope, nextScope.getOutGroupingFields(), trap );
 
     FlowElement operator = step.getNextFlowElement( nextScope );
 
@@ -96,7 +96,7 @@ public class FlowReducerStack
       List<Every.EveryHandler> allAggregators = new ArrayList<Every.EveryHandler>();
       Scope incomingScope = nextScope;
 
-      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, step.reducerTraps, allAggregators );
+      stackTail = new EveryAllAggregatorReducerStackElement( stackTail, flowProcess, incomingScope, step.getReducerTraps(), allAggregators );
 
       while( operator instanceof Every && !( (Every) operator ).isBuffer() )
         {

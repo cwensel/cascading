@@ -188,7 +188,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
             if( rhs instanceof Group )
               {
-              step.group = (Group) rhs;
+              step.setGroup( (Group) rhs );
               onMapSide = false;
               }
             else if( rhs instanceof Pipe ) // add relevant traps to step
@@ -199,9 +199,9 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
               if( traps.containsKey( name ) )
                 {
                 if( onMapSide )
-                  step.mapperTraps.put( name, traps.get( name ) );
+                  step.getMapperTraps().put( name, traps.get( name ) );
                 else
-                  step.reducerTraps.put( name, traps.get( name ) );
+                  step.getReducerTraps().put( name, traps.get( name ) );
                 }
               }
 
@@ -286,7 +286,7 @@ public class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
 
         String sinkName = object.sink instanceof TempHfs ? "" : "[" + object.sink.getPath() + "]";
 
-        String groupName = object.group == null ? "" : object.group.getName();
+        String groupName = object.getGroup() == null ? "" : object.getGroup().getName();
 
         String name = "[" + object.getName() + "]";
 

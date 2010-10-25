@@ -96,13 +96,13 @@ public class FlowStep implements Serializable
   /** Field sink */
   protected Tap sink;
   /** Field mapperTraps */
-  public final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
+  private final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
   /** Field reducerTraps */
-  public final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
+  private final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
   /** Field tempSink */
   TempHfs tempSink; // used if we need to bypass
   /** Field group */
-  public Group group;
+  private Group group;
 
   protected FlowStep( String name, int id )
     {
@@ -192,6 +192,26 @@ public class FlowStep implements Serializable
     this.submitPriority = submitPriority;
     }
 
+  public Group getGroup()
+    {
+    return group;
+    }
+
+  protected void setGroup( Group group )
+    {
+    this.group = group;
+    }
+
+  public Map<String, Tap> getMapperTraps()
+    {
+    return mapperTraps;
+    }
+
+  public Map<String, Tap> getReducerTraps()
+    {
+    return reducerTraps;
+    }
+
   /**
    * Method getProperties returns the properties of this FlowStep object.
    *
@@ -264,7 +284,7 @@ public class FlowStep implements Serializable
     if( sink.getScheme().getNumSinkParts() != 0 )
       {
       // if no reducer, set num map tasks to control parts
-      if( group != null )
+      if( getGroup() != null )
         conf.setNumReduceTasks( sink.getScheme().getNumSinkParts() );
       else
         conf.setNumMapTasks( sink.getScheme().getNumSinkParts() );
@@ -272,7 +292,7 @@ public class FlowStep implements Serializable
 
     conf.setOutputKeyComparatorClass( TupleComparator.class );
 
-    if( group == null )
+    if( getGroup() == null )
       {
       conf.setNumReduceTasks( 0 ); // disable reducers
       }
@@ -283,15 +303,15 @@ public class FlowStep implements Serializable
       conf.setMapOutputValueClass( Tuple.class );
 
       // handles the case the groupby sort should be reversed
-      if( group.isSortReversed() )
+      if( getGroup().isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
 
-      addComparators( conf, "cascading.group.comparator", group.getGroupingSelectors() );
+      addComparators( conf, "cascading.group.comparator", getGroup().getGroupingSelectors() );
 
-      if( group.isGroupBy() )
-        addComparators( conf, "cascading.sort.comparator", group.getSortingSelectors() );
+      if( getGroup().isGroupBy() )
+        addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors() );
 
-      if( !group.isGroupBy() )
+      if( !getGroup().isGroupBy() )
         {
         conf.setPartitionerClass( CoGroupingPartitioner.class );
         conf.setMapOutputKeyClass( IndexTuple.class ); // allows groups to be sorted by index
@@ -300,12 +320,12 @@ public class FlowStep implements Serializable
         conf.setOutputValueGroupingComparator( CoGroupingComparator.class );
         }
 
-      if( group.isSorted() )
+      if( getGroup().isSorted() )
         {
         conf.setPartitionerClass( GroupingPartitioner.class );
         conf.setMapOutputKeyClass( TuplePair.class );
 
-        if( group.isSortReversed() )
+        if( getGroup().isSortReversed() )
           conf.setOutputKeyComparatorClass( ReverseGroupingSortingComparator.class );
         else
           conf.setOutputKeyComparatorClass( GroupingSortingComparator.class );
@@ -338,7 +358,7 @@ public class FlowStep implements Serializable
       }
 
     // use resolved fields if there are no comparators.
-    Set<Scope> previousScopes = getPreviousScopes( group );
+    Set<Scope> previousScopes = getPreviousScopes( getGroup() );
 
     fields = previousScopes.iterator().next().getOutValuesFields();
 
@@ -350,8 +370,8 @@ public class FlowStep implements Serializable
 
   private void initFromTraps( JobConf conf ) throws IOException
     {
-    initFromTraps( conf, mapperTraps );
-    initFromTraps( conf, reducerTraps );
+    initFromTraps( conf, getMapperTraps() );
+    initFromTraps( conf, getReducerTraps() );
     }
 
   private void initFromTraps( JobConf conf, Map<String, Tap> traps ) throws IOException
@@ -404,12 +424,12 @@ public class FlowStep implements Serializable
 
   public Tap getMapperTrap( String name )
     {
-    return mapperTraps.get( name );
+    return getMapperTraps().get( name );
     }
 
   public Tap getReducerTrap( String name )
     {
-    return reducerTraps.get( name );
+    return getReducerTraps().get( name );
     }
 
   /**
@@ -519,10 +539,10 @@ public class FlowStep implements Serializable
       cleanTap( jobConf, sink );
       }
 
-    for( Tap tap : mapperTraps.values() )
+    for( Tap tap : getMapperTraps().values() )
       cleanTap( jobConf, tap );
 
-    for( Tap tap : reducerTraps.values() )
+    for( Tap tap : getReducerTraps().values() )
       cleanTap( jobConf, tap );
 
     }
