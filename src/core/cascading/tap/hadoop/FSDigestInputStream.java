@@ -32,8 +32,8 @@ import org.apache.hadoop.fs.FSInputStream;
 import org.apache.log4j.Logger;
 
 /**
- * Class FSDigestInputStream is an {@link FSInputStream} implementation that can verify a {@link MessageDigest} and will count
- * the number of bytes read for use in progress status.
+ * Class FSDigestInputStream is an {@link FSInputStream} implementation that can verify a
+ * {@link MessageDigest} and will count the number of bytes read for use in progress status.
  */
 public class FSDigestInputStream extends FSInputStream
   {
@@ -52,7 +52,7 @@ public class FSDigestInputStream extends FSInputStream
    *
    * @param inputStream of type InputStream
    * @param digestHex   of type String
-   * @throws IOException when
+   * @throws IOException if unable to get md5 digest
    */
   public FSDigestInputStream( InputStream inputStream, String digestHex ) throws IOException
     {
@@ -72,6 +72,12 @@ public class FSDigestInputStream extends FSInputStream
     this.digestHex = digestHex;
     }
 
+  /**
+   * Method getMD5Digest returns the MD5Digest of this FSDigestInputStream object.
+   *
+   * @return the MD5Digest (type MessageDigest) of this FSDigestInputStream object.
+   * @throws IOException when
+   */
   private static MessageDigest getMD5Digest() throws IOException
     {
     try

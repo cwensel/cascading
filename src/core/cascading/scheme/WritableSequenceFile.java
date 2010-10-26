@@ -21,6 +21,7 @@
 
 package cascading.scheme;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 import cascading.tap.Tap;
@@ -57,6 +58,7 @@ public class WritableSequenceFile extends SequenceFile
    * @param fields    of type Fields
    * @param valueType of type Class<? extends Writable>, may not be null
    */
+  @ConstructorProperties({"fields", "valueType"})
   public WritableSequenceFile( Fields fields, Class<? extends Writable> valueType )
     {
     this( fields, null, valueType );
@@ -69,6 +71,7 @@ public class WritableSequenceFile extends SequenceFile
    * @param keyType   of type Class<? extends Writable>
    * @param valueType of type Class<? extends Writable>
    */
+  @ConstructorProperties({"fields", "keyType", "valueType"})
   public WritableSequenceFile( Fields fields, Class<? extends Writable> keyType, Class<? extends Writable> valueType )
     {
     super( fields );

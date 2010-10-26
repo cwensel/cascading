@@ -51,7 +51,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
    * Use this method inside an Operation to find the current file being processed.
    *
    * @param jobConf
-   * @return
+   * @return a String
    */
   public static String getCurrentTapSourcePath( JobConf jobConf )
     {

@@ -473,7 +473,7 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method getSourcesCollection returns a {@link Collection) of source {@link Tap}s for this Flow object.
+   * Method getSourcesCollection returns a {@link Collection} of source {@link Tap}s for this Flow object.
    *
    * @return the sourcesCollection (type Collection<Tap>) of this Flow object.
    */
@@ -494,7 +494,7 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method getSinksCollection returns a {@link Collection) of sink {@link Tap}s for this Flow object.
+   * Method getSinksCollection returns a {@link Collection} of sink {@link Tap}s for this Flow object.
    *
    * @return the sinkCollection (type Collection<Tap>) of this Flow object.
    */
@@ -515,7 +515,7 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method getTrapsCollection returns a {@link Collection) of trap {@link Tap}s for this Flow object.
+   * Method getTrapsCollection returns a {@link Collection} of trap {@link Tap}s for this Flow object.
    *
    * @return the trapsCollection (type Collection<Tap>) of this Flow object.
    */

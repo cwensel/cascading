@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
 /**
- * A SequenceFile is a type of {@link Scheme}, which is a flat files consisting of
+ * A SequenceFile is a type of {@link Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
 public class SequenceFile extends Scheme
@@ -87,5 +87,4 @@ public class SequenceFile extends Scheme
 
     outputCollector.collect( Tuples.NULL, result );
     }
-
   }

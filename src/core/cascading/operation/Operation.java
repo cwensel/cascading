@@ -79,7 +79,7 @@ public interface Operation<C>
    * Returns the fields created by this Operation instance. If this instance is a {@link Filter}, it should always
    * return {@link Fields#ALL}.
    *
-   * @return
+   * @return a Fields instance
    */
   Fields getFieldDeclaration();
 

@@ -33,10 +33,10 @@ import cascading.tuple.Tuples;
 /**
  * Class Sum {@link AggregateBy} is used to sum values associated with duplicate keys in a tuple stream.
  * <p/>
- * Typically finding Sum value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum()}
+ * Typically finding Sum value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link SumBy.SumPartials} {@link Functor}
+ * This SubAssembly also uses the {@link SumBy.SumPartials} {@link AggregateBy.Functor}
  * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -50,7 +50,7 @@ import cascading.tuple.Tuples;
 public class SumBy extends AggregateBy
   {
   /**
-   * Class SumPartials is a {@link Functor} that is used to sum observed duplicates from the tuple stream.
+   * Class SumPartials is a {@link AggregateBy.Functor} that is used to sum observed duplicates from the tuple stream.
    * <p/>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.Sum}
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values

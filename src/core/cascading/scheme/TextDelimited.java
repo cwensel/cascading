@@ -58,11 +58,11 @@ import org.apache.log4j.Logger;
  * <p/>
  * Also by default, {@code quote} strings are not searched for to improve processing speed. If a file is
  * COMMA delimited but may have COMMA's in a value, the whole value should be surrounded by the quote string, typically
- * double quotes (").
+ * double quotes ({@literal "}).
  * <p/>
  * Note all empty fields in a line will be returned as {@code null} unless coerced into a new type.
  * <p/>
- * This Scheme may source/sink {@code Fields.ALL}, when given on the constructor the new instance will automatically
+ * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
  * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
  * either, so all values will be returned as Strings.
  *
@@ -100,8 +100,10 @@ public class TextDelimited extends TextLine
   /** Field buffer */
   private Object[] buffer;
 
+  /** Field decoratorTuple */
   private DecoratorTuple decoratorTuple;
 
+  /** Class DecoratorTuple just wraps a Tuple. */
   private static class DecoratorTuple extends Tuple
     {
     String string;
@@ -605,9 +607,9 @@ public class TextDelimited extends TextLine
   /**
    * Method createSplit will split the given {@value} with the given {@code splitPattern}.
    *
-   * @param value of type String
+   * @param value        of type String
    * @param splitPattern of type Pattern
-   * @param numValues of type int
+   * @param numValues    of type int
    * @return String[]
    */
   public static String[] createSplit( String value, Pattern splitPattern, int numValues )
@@ -622,10 +624,10 @@ public class TextDelimited extends TextLine
    * If {@code cleanPattern} is null, quote cleaning will not be performed, but all empty String values
    * will be replaces with a {@code null} value.
    *
-   * @param split of type Object[]
-   * @param cleanPattern of type Pattern
+   * @param split         of type Object[]
+   * @param cleanPattern  of type Pattern
    * @param escapePattern of type Pattern
-   * @param quote of type String
+   * @param quote         of type String
    * @return Object[] as a convenience
    */
   public static Object[] cleanSplit( Object[] split, Pattern cleanPattern, Pattern escapePattern, String quote )

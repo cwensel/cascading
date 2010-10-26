@@ -21,6 +21,7 @@
 
 package cascading.operation.xml;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -63,6 +64,7 @@ public class TagSoupParser extends BaseOperation implements Function
    *
    * @param fieldDeclaration of type Fields
    */
+  @ConstructorProperties({"fieldDeclaration"})
   public TagSoupParser( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -97,7 +99,7 @@ public class TagSoupParser extends BaseOperation implements Function
     }
 
   /**
-   * Method setFeature allows the user to set 'features' directly on the TagSoup parser, {@link Parser#setFeature(String, boolean)}.
+   * Method setFeature allows the user to set 'features' directly on the TagSoup parser, {@link Parser#setFeature}.
    * <p/>
    * Note, all features are lazily added when the Parser is instantiated.
    *

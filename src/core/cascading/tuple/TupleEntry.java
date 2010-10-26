@@ -464,7 +464,7 @@ public class TupleEntry
    * All other fields in the selector are ignored.
    *
    * @param selector
-   * @return
+   * @return an int value
    */
   public int selectInteger( Fields selector )
     {

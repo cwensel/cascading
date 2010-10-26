@@ -593,7 +593,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   /**
    * Finds all groups that merge/join streams. returned in topological order.
    *
-   * @return
+   * @return a List fo Group instances
    */
   public List<Group> findAllMergeJoinGroups()
     {
@@ -854,7 +854,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       super( name );
       }
 
-    /** @see cascading.pipe.Pipe#outgoingScopeFor(java.util.Set < cascading.flow.Scope>) */
+    /** @see cascading.pipe.Pipe#outgoingScopeFor */
     @Override
     public Scope outgoingScopeFor( Set<Scope> scopes )
       {

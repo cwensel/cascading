@@ -33,10 +33,10 @@ import cascading.tuple.TupleEntry;
 /**
  * Class Count {@link AggregateBy} is used to count duplicates in a tuple stream.
  * <p/>
- * Typically finding Count value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count()}
+ * Typically finding Count value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link CountBy.CountPartials} {@link Functor}
+ * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
  * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -50,7 +50,7 @@ import cascading.tuple.TupleEntry;
 public class CountBy extends AggregateBy
   {
   /**
-   * Class CountPartials is a {@link Functor} that is used to count observed duplicates from the tuple stream.
+   * Class CountPartials is a {@link AggregateBy.Functor} that is used to count observed duplicates from the tuple stream.
    * <p/>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.Sum}
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values

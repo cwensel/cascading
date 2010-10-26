@@ -100,7 +100,7 @@ public class Util
    * This method deserializes the Base64 encoded String into an Object instance.
    *
    * @param string
-   * @return
+   * @return an Object
    */
   public static Object deserializeBase64( String string ) throws IOException
     {
@@ -151,7 +151,7 @@ public class Util
    * This method creates a globally unique HEX value seeded by the given string.
    *
    * @param seed
-   * @return
+   * @return a String
    */
   public static String createUniqueID( String seed )
     {
@@ -206,7 +206,7 @@ public class Util
    *
    * @param list
    * @param delim
-   * @return
+   * @return a String
    */
   public static String join( Object[] list, String delim )
     {
@@ -236,7 +236,7 @@ public class Util
    * This method joins each value in the collection with a tab character as the delimiter.
    *
    * @param collection
-   * @return
+   * @return a String
    */
   public static String join( Collection collection )
     {
@@ -248,7 +248,7 @@ public class Util
    *
    * @param collection
    * @param delim
-   * @return
+   * @return a String
    */
   public static String join( Collection collection, String delim )
     {
@@ -346,7 +346,7 @@ public class Util
    * This method attempts to remove any username and password from the given url String.
    *
    * @param url
-   * @return
+   * @return a String
    */
   public static String sanitizeUrl( String url )
     {
@@ -360,7 +360,7 @@ public class Util
    * This methdo attempts to remove duplicate consecutive forward slashes from the given url.
    *
    * @param url
-   * @return
+   * @return a String
    */
   public static String normalizeUrl( String url )
     {
@@ -375,7 +375,7 @@ public class Util
    * is null.
    *
    * @param object
-   * @return
+   * @return a String
    */
   public static String toNull( Object object )
     {
@@ -391,7 +391,7 @@ public class Util
    *
    * @param string
    * @param maxSize
-   * @return
+   * @return a String
    */
   public static String truncate( String string, int maxSize )
     {

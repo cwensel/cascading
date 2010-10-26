@@ -248,7 +248,7 @@ public class Every extends Operator
       return scope.getOutGroupingFields();
     }
 
-  /** @see Operator#outgoingScopeFor(Set<Scope>) */
+  /** @see Operator#outgoingScopeFor */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     Fields argumentFields = resolveArgumentSelector( incomingScopes );

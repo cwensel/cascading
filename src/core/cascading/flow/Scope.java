@@ -32,9 +32,10 @@ import cascading.tuple.TupleEntry;
 /** Class Scope is an internal representation of the linkages between operations. */
 public class Scope implements Serializable
   {
+  /** Enum Kind */
   static public enum Kind
     {
-      TAP, EACH, EVERY, GROUP
+      TAP, EACH, EVERY, GROUP;
     }
 
   /** Field name */
@@ -106,6 +107,7 @@ public class Scope implements Serializable
    *
    * @param name              of type String
    * @param kind              of type Kind
+   * @param remainderFields   of type Fields
    * @param argumentFields    of type Fields
    * @param declaredFields    of type Fields
    * @param outGroupingFields of type Fields
@@ -148,8 +150,11 @@ public class Scope implements Serializable
    *
    * @param name              of type String
    * @param declaredFields    of type Fields
+   * @param outGroupingFields of type Fields
    * @param groupingSelectors of type Map<String, Fields>
+   * @param sortingSelectors  of type Fields
    * @param outValuesFields   of type Fields
+   * @param isGroupBy         of type boolean
    */
   public Scope( String name, Fields declaredFields, Fields outGroupingFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
     {
@@ -450,5 +455,4 @@ public class Scope implements Serializable
 
     return buffer.toString();
     }
-
   }

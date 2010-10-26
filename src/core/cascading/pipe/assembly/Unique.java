@@ -42,7 +42,7 @@ import cascading.tuple.Tuple;
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
  * <p/>
- * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link First()}
+ * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link First}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * This SubAssembly also uses the {@link FilterPartialDuplicates} {@link cascading.operation.Filter}
