@@ -70,10 +70,15 @@ import org.apache.log4j.Logger;
  */
 public class TextDelimited extends TextLine
   {
+  /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TextDelimited.class );
+  /** Field SPECIAL_REGEX_CHARS */
   private static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
+  /** Field QUOTED_REGEX_FORMAT */
   private static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s%2$s]%2$s[^%1$s])+%1$s)";
+  /** Field CLEAN_REGEX_FORMAT */
   private static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
+  /** Field ESCAPE_REGEX_FORMAT */
   private static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
 
   /** Field splitPattern */
@@ -605,7 +610,7 @@ public class TextDelimited extends TextLine
     }
 
   /**
-   * Method createSplit will split the given {@value} with the given {@code splitPattern}.
+   * Method createSplit will split the given {@code value} with the given {@code splitPattern}.
    *
    * @param value        of type String
    * @param splitPattern of type Pattern

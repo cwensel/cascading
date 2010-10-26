@@ -402,7 +402,7 @@ public class Each extends Operator
     return getFieldsFor( scope );
     }
 
-  /** @see Operator#outgoingScopeFor(Set<Scope>) */
+  /** @see Operator#outgoingScopeFor(Set) */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     Fields argumentFields = resolveArgumentSelector( incomingScopes );

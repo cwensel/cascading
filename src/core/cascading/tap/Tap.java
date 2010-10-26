@@ -266,7 +266,7 @@ public abstract class Tap implements FlowElement, Serializable
     getScheme().sink( tupleEntry, outputCollector );
     }
 
-  /** @see FlowElement#outgoingScopeFor(Set<Scope>) */
+  /** @see FlowElement#outgoingScopeFor(Set) */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     // as a source Tap, we emit the scheme defined Fields

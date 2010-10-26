@@ -218,7 +218,8 @@
     <javadoc sourcepathref="javadoc.src.path"
              destdir="${javadoc}"
              packagenames="cascading.*"
-             windowtitle="Cascading">
+             windowtitle="Cascading ${cascading.release.major}">
+      <classpath refid="project.class.path"/>
       <link href="http://java.sun.com/javase/6/docs/api/"/>
       <link href="http://www.janino.net/javadoc/"/>
       <link href="http://www.jgrapht.org/javadoc/"/>
