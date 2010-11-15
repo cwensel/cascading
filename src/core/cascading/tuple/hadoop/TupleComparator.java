@@ -42,6 +42,11 @@ public class TupleComparator extends DeserializerComparator<Tuple> implements Co
       {
       throw new CascadingException( exception );
       }
+    finally
+      {
+      lhsBuffer.clear();
+      rhsBuffer.clear();
+      }
     }
 
   public int compare( Tuple lhs, Tuple rhs )

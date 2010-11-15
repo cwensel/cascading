@@ -28,9 +28,11 @@ import java.io.ByteArrayInputStream;
  */
 public class BufferedInputStream extends ByteArrayInputStream
   {
+  private static final byte[] ZERO_BYTES = new byte[]{};
+
   public BufferedInputStream()
     {
-    super( new byte[]{} );
+    super( ZERO_BYTES );
     }
 
   public void reset( byte[] input, int start, int length )
@@ -54,6 +56,14 @@ public class BufferedInputStream extends ByteArrayInputStream
   public int getLength()
     {
     return count;
+    }
+
+  public void clear()
+    {
+    this.buf = ZERO_BYTES;
+    this.count = 0;
+    this.mark = 0;
+    this.pos = 0;
     }
   }
 
