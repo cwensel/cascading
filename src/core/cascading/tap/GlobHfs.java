@@ -39,6 +39,10 @@ import org.apache.hadoop.mapred.JobConf;
  * <p/>
  * See {@link FileSystem#globStatus(org.apache.hadoop.fs.Path)} for details on the globbing syntax. But in short
  * it is similiar to standard regular expressions except alternation is done via {foo,bar} instead of (foo|bar).
+ * <p/>
+ * Note that a {@link cascading.flow.Flow} sourcing from GlobHfs is not currently compatible with the {@link cascading.cascade.Cascade}
+ * scheduler. GlobHfs expects the files and paths to exist so the wildcards can be resolved into concrete values so
+ * that the scheduler can order the Flows properly.
  *
  * @see Hfs
  * @see MultiSourceTap
