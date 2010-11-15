@@ -40,12 +40,16 @@ import org.apache.hadoop.mapred.OutputCollector;
  * A Scheme defines the type of resource data will be sourced from or sinked to.
  * <p/>
  * The given sourcFields only label the values in the {@link Tuple}s as they are sourced.
- * It does not necessarily filter the output since a given implemenation may choose to
+ * It does not necessarily filter the output since a given implementation may choose to
  * collapse values and ignore keys depending on the format.
  * <p/>
- * Setting the {@code numSinkParts} value insures the output resource has only one part.
+ * Setting the {@code numSinkParts} value to 1 (one) insures the output resource has only one part.
  * In the case of MapReduce, it does this by setting the number of reducers to the given value.
  * This may affect performance, so be cautioned.
+ * </p>
+ * Note that setting numSinkParts does not force the planner to insert a final Reduce operation in the job, so
+ * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
+ * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
 public abstract class Scheme implements Serializable
   {
