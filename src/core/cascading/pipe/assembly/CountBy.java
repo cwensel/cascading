@@ -31,9 +31,9 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class Count {@link AggregateBy} is used to count duplicates in a tuple stream.
+ * Class CountBy is used to count duplicates in a tuple stream.
  * <p/>
- * Typically finding Count value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count}
+ * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
@@ -100,7 +100,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance. Use this constructor when used with a {@link AggregateBy}
+   * Constructor CountBy creates a new CountBy instance. Use this constructor when used with a {@link AggregateBy}
    * instance.
    *
    * @param countField of type Fields
@@ -114,7 +114,7 @@ public class CountBy extends AggregateBy
   ///////
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
@@ -127,7 +127,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
@@ -141,7 +141,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param name           of type String
    * @param pipe           of type Pipe
@@ -155,7 +155,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param name           of type String
    * @param pipe           of type Pipe
@@ -170,7 +170,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
@@ -183,7 +183,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
@@ -197,7 +197,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]
@@ -211,7 +211,7 @@ public class CountBy extends AggregateBy
     }
 
   /**
-   * Constructor Count creates a new Count instance.
+   * Constructor CountBy creates a new CountBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]

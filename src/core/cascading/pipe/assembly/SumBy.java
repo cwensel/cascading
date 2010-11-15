@@ -24,6 +24,7 @@ package cascading.pipe.assembly;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.aggregator.Sum;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -31,9 +32,9 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /**
- * Class Sum {@link AggregateBy} is used to sum values associated with duplicate keys in a tuple stream.
+ * Class SumBy is used to sum values associated with duplicate keys in a tuple stream.
  * <p/>
- * Typically finding Sum value in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum}
+ * Typically finding the sum of field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * This SubAssembly also uses the {@link SumBy.SumPartials} {@link AggregateBy.Functor}
@@ -100,7 +101,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance. Use this constructor when used with a {@link AggregateBy}
+   * Constructor SumBy creates a new SumBy instance. Use this constructor when used with a {@link AggregateBy}
    * instance.
    *
    * @param valueField of type Fields
@@ -110,13 +111,13 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"valueField", "sumField", "sumType"})
   public SumBy( Fields valueField, Fields sumField, Class sumType )
     {
-    super( valueField, new SumPartials( sumField, sumType ), new cascading.operation.aggregator.Sum( sumField, sumType ) );
+    super( valueField, new SumPartials( sumField, sumType ), new Sum( sumField, sumType ) );
     }
 
   //////////////
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
@@ -131,7 +132,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
@@ -147,7 +148,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param name           of type String
    * @param pipe           of type Pipe
@@ -163,7 +164,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param name           of type String
    * @param pipe           of type Pipe
@@ -180,7 +181,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
@@ -195,7 +196,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
@@ -211,7 +212,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]
@@ -227,7 +228,7 @@ public class SumBy extends AggregateBy
     }
 
   /**
-   * Constructor Sum creates a new Sum instance.
+   * Constructor SumBy creates a new SumBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]
@@ -240,6 +241,6 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
   public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
-    super( name, pipes, groupingFields, valueField, new SumPartials( sumField, sumType ), new cascading.operation.aggregator.Sum( sumField, sumType ), threshold );
+    super( name, pipes, groupingFields, valueField, new SumPartials( sumField, sumType ), new Sum( sumField, sumType ), threshold );
     }
   }

@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2-WIP
 
+  Added c.p.a.AverageBy sub-assembly for optimizing averaging processes.
+
   Added c.p.c.GroupClosure#getFlowProcess method to allow c.p.c.Joiner implementations access to current
   properties and counters.
 

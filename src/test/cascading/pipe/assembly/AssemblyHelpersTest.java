@@ -401,6 +401,89 @@ public class AssemblyHelpersTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testAverage() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "average" ), "\t", new Class[]{String.class,
+                                                                                              Double.TYPE} ), outputPath + "/average", SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "average" );
+
+    pipe = new AverageBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), 2 );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s[\\d.]+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", (double) 6 / 2 ),
+      new Tuple( "b", (double) 12 / 4 ),
+      new Tuple( "c", (double) 10 / 4 ),
+      new Tuple( "d", (double) 6 / 2 ),
+      new Tuple( "e", (double) 5 / 1 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  public void testAverageMerge() throws IOException
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+    copyFromLocal( inputFileRhs );
+
+    Tap lhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+    Tap rhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileRhs );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "average" ), "\t", new Class[]{String.class,
+                                                                                              Double.TYPE} ), outputPath + "/mergeaverage", SinkMode.REPLACE );
+
+    Pipe lhsPipe = new Pipe( "average-lhs" );
+    Pipe rhsPipe = new Pipe( "average-rhs" );
+
+    rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
+
+    Pipe sumPipe = new AverageBy( Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), 2 );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( tapMap, sink, sumPipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s[\\d.]+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", (double) 12 / 4 ),
+      new Tuple( "b", (double) 24 / 8 ),
+      new Tuple( "c", (double) 20 / 8 ),
+      new Tuple( "d", (double) 12 / 4 ),
+      new Tuple( "e", (double) 10 / 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
   public void testParallelAggregates() throws IOException
     {
     if( !new File( inputFileLhs ).exists() )
@@ -409,29 +492,32 @@ public class AssemblyHelpersTest extends ClusterTestCase
     copyFromLocal( inputFileLhs );
 
     Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
-    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count" ), "\t", new Class[]{String.class,
-                                                                                                   Integer.TYPE,
-                                                                                                   Integer.TYPE} ), outputPath + "/multi", SinkMode.REPLACE );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count", "average" ), "\t", new Class[]{
+      String.class,
+      Integer.TYPE,
+      Integer.TYPE,
+      Double.TYPE} ), outputPath + "/multi", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "multi" );
 
     SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
     CountBy countPipe = new CountBy( new Fields( "count" ) );
+    AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
 
-    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
 
     Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 5, 3, Pattern.compile( "^\\w+\\s\\d+\\s\\d+$" ) );
+    validateLength( flow, 5, 4, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+$" ) );
 
     Tuple[] results = new Tuple[]{
-      new Tuple( "a", 6, 2 ),
-      new Tuple( "b", 12, 4 ),
-      new Tuple( "c", 10, 4 ),
-      new Tuple( "d", 6, 2 ),
-      new Tuple( "e", 5, 1 ),
+      new Tuple( "a", 6, 2, (double) 6 / 2 ),
+      new Tuple( "b", 12, 4, (double) 12 / 4 ),
+      new Tuple( "c", 10, 4, (double) 10 / 4 ),
+      new Tuple( "d", 6, 2, (double) 6 / 2 ),
+      new Tuple( "e", 5, 1, (double) 5 / 1 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();
@@ -454,9 +540,12 @@ public class AssemblyHelpersTest extends ClusterTestCase
     Tap lhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
     Tap rhs = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileRhs );
 
-    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count" ), "\t", new Class[]{String.class,
-                                                                                                   Integer.TYPE,
-                                                                                                   Integer.TYPE} ), outputPath + "/multimerge", SinkMode.REPLACE );
+    Tap sink = new Hfs( new TextDelimited( new Fields( "char", "sum", "count", "average" ), "\t", new Class[]{
+      String.class,
+      Integer.TYPE,
+      Integer.TYPE, Double.TYPE} ),
+      outputPath + "/multimerge", SinkMode.REPLACE );
+
     Pipe lhsPipe = new Pipe( "multi-lhs" );
     Pipe rhsPipe = new Pipe( "multi-rhs" );
 
@@ -464,8 +553,9 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
     CountBy countPipe = new CountBy( new Fields( "count" ) );
+    AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
 
-    Pipe pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe );
+    Pipe pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
@@ -473,14 +563,14 @@ public class AssemblyHelpersTest extends ClusterTestCase
 
     flow.complete();
 
-    validateLength( flow, 5, 3, Pattern.compile( "^\\w+\\s\\d+\\s\\d+$" ) );
+    validateLength( flow, 5, 4, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+$" ) );
 
     Tuple[] results = new Tuple[]{
-      new Tuple( "a", 12, 4 ),
-      new Tuple( "b", 24, 8 ),
-      new Tuple( "c", 20, 8 ),
-      new Tuple( "d", 12, 4 ),
-      new Tuple( "e", 10, 2 ),
+      new Tuple( "a", 12, 4, (double) 12 / 4 ),
+      new Tuple( "b", 24, 8, (double) 24 / 8 ),
+      new Tuple( "c", 20, 8, (double) 20 / 8 ),
+      new Tuple( "d", 12, 4, (double) 12 / 4 ),
+      new Tuple( "e", 10, 2, (double) 10 / 2 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();

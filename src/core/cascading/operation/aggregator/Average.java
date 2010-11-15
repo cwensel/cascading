@@ -52,14 +52,14 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
       }
     }
 
-  /** Constructs a new instance that returns the average of the values encoutered in the field name "average". */
+  /** Constructs a new instance that returns the average of the values encountered in the field name "average". */
   public Average()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
   /**
-   * Constructs a new instance that returns the average of the values encoutered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the average of the values encountered in the given fieldDeclaration field name.
    *
    * @param fieldDeclaration of type Fields
    */
