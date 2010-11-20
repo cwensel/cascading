@@ -499,7 +499,7 @@
                  pomfile="${build}/cascading-core-${cascading.release.full}.pom"
                  conf="core,compile">
       <ivy:mapping conf="core" scope="compile"/>
-      <ivy:mapping conf="compile" scope="runtime"/>
+      <ivy:mapping conf="compile" scope="provided"/>
     </ivy:makepom>
 
     <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-xml"
