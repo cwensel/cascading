@@ -497,9 +497,9 @@
 
     <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-core"
                  pomfile="${build}/cascading-core-${cascading.release.full}.pom"
-                 conf="core,compile">
+                 conf="core,default.provided">
       <ivy:mapping conf="core" scope="compile"/>
-      <ivy:mapping conf="compile" scope="provided"/>
+      <ivy:mapping conf="default.provided" scope="provided"/>
     </ivy:makepom>
 
     <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-xml"
@@ -511,9 +511,10 @@
 
     <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-test"
                  pomfile="${build}/cascading-test-${cascading.release.full}.pom"
-                 conf="test">
+                 conf="test,test.provided">
       <dependency group="cascading" artifact="cascading-core" version="${cascading.release.full}" scope="test"/>
       <dependency group="cascading" artifact="cascading-xml" version="${cascading.release.full}" scope="test"/>
+      <ivy:mapping conf="test.provided" scope="provided"/>
       <ivy:mapping conf="test" scope="compile"/>
     </ivy:makepom>
 
