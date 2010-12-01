@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2-WIP
+1.2.0
 
   Added c.p.a.AverageBy sub-assembly for optimizing averaging processes.
 
