@@ -63,6 +63,11 @@ public class GroupingSortingComparator extends DeserializerComparator<TuplePair>
       {
       throw new CascadingException( exception );
       }
+    finally
+      {
+      lhsBuffer.clear();
+      rhsBuffer.clear();
+      }
     }
 
   public int compare( TuplePair lhs, TuplePair rhs )

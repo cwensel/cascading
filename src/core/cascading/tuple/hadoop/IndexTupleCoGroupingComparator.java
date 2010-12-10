@@ -50,6 +50,11 @@ public class IndexTupleCoGroupingComparator extends DeserializerComparator<Index
       {
       throw new CascadingException( exception );
       }
+    finally
+      {
+      lhsBuffer.clear();
+      rhsBuffer.clear();
+      }
     }
 
   public int compare( IndexTuple lhs, IndexTuple rhs )
