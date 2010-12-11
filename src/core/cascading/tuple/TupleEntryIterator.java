@@ -33,6 +33,7 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
   final TupleEntry entry = new TupleEntry( true );
   /** Field iterator */
   final Iterator[] iterators;
+  /** Field currentIterator */
   int currentIterator = 0;
 
   /**
@@ -77,12 +78,15 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
    */
   public boolean hasNext()
     {
+    if( iterators.length == currentIterator )
+      return false;
+
     if( iterators[ currentIterator ].hasNext() )
       return true;
 
     currentIterator++;
 
-    return iterators.length != currentIterator && hasNext();
+    return hasNext();
     }
 
   /**

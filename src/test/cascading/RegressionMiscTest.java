@@ -23,7 +23,6 @@ package cascading;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -37,9 +36,12 @@ import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleEntryIterator;
+import org.apache.hadoop.mapred.JobConf;
 
 public class RegressionMiscTest extends CascadingTestCase
   {
+  String inputFileNums10 = "build/test/data/nums.10.txt";
 
   String outputPath = "build/test/output/regressionmisc/";
 
@@ -104,4 +106,22 @@ public class RegressionMiscTest extends CascadingTestCase
       // ignore
       }
     }
+
+  public void testTupleEntryNextTwice() throws IOException
+    {
+    Tap tap = new Hfs( new TextLine(), inputFileNums10 );
+
+    TupleEntryIterator iterator = tap.openForRead( new JobConf() );
+
+    int count = 0;
+    while( iterator.hasNext() )
+      {
+      iterator.next();
+      count++;
+      }
+
+    assertFalse( iterator.hasNext() );
+    assertEquals( 10, count );
+    }
+
   }
