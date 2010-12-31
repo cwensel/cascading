@@ -79,6 +79,12 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
     functionCall.getOutputCollector().add( value );
     }
 
+  @Override
+  public void cleanup( FlowProcess flowProcess, OperationCall<Integer> operationCall )
+    {
+    if( value != null && value.get( 0 ) == null )
+      throw new RuntimeException( "tuple was modified" );
+    }
 
   @Override
   public boolean isSafe()

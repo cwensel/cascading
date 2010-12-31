@@ -130,6 +130,9 @@ public class FlowMapperStack
         Scope outgoingScope = step.getNextScope( operator ); // is always Group
         boolean copyTuple = allFilters && i != stacks.length - 1;
 
+        if( !copyTuple ) // only copy if the out values are the function results
+          copyTuple = incomingScope.getOutValuesSelector() == null || incomingScope.getOutValuesSelector().equals( incomingScope.getDeclaredFields() );
+
         trapName = ( (Pipe) operator ).getName();
         trap = step.getMapperTrap( trapName );
         stacks[ i ].tail = new GroupMapperStackElement( stacks[ i ].tail, flowProcess, incomingScope, trap, (Group) operator, outgoingScope, copyTuple );

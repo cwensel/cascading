@@ -45,6 +45,7 @@ import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 
 public class RegressionPipesTest extends ClusterTestCase
@@ -409,4 +410,27 @@ public class RegressionPipesTest extends ClusterTestCase
     iterator.close();
     }
 
+  public void testLastEachNotModified() throws Exception
+    {
+    if( !new File( inputFileApache ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new TestFunction( new Fields( "insert" ), new Tuple( "inserted" ) ) );
+
+    pipe = new GroupBy( pipe, new Fields( "insert" ) );
+
+    Tap sink = new Hfs( new TextLine(), outputPath + "/regression/lasteachmodified", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, null );
+    }
   }
