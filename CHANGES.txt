@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.1 (wip)
 
+  Changed info message to not announce ambiguous source trap if none has been set.
+
   Fixed bug where if the c.o.Function result c.t.Tuple was passed immediately to a c.p.Group, it may become modified.
 
   Fixed bug where c.t.TupleEntryIterator#hasNext() failed if called again after returning false.

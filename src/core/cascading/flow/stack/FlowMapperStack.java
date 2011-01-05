@@ -165,7 +165,7 @@ public class FlowMapperStack
     String trapName = ( (Pipe) operator ).getName();
     Tap trap = step.getMapperTrap( trapName );
 
-    if( incomingScopes.size() != 1 )
+    if( trap != null && incomingScopes.size() != 1 )
       LOG.info( "more than one possible trap for source tap, using trap named: " + trapName );
 
     return new SourceMapperStackElement( flowProcess, scope, trapName, trap, currentSource );
