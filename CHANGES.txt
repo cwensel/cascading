@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2.1 (wip)
+1.2.1
 
   Changed info message to not announce ambiguous source trap if none has been set.
 
