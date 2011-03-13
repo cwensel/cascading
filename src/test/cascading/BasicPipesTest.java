@@ -395,7 +395,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/replace", true );
 
     Pipe pipe = new Pipe( "test" );
@@ -417,7 +417,7 @@ public class BasicPipesTest extends CascadingTestCase
     if( !new File( inputFileApache ).exists() )
       fail( "data file not found" );
 
-    Tap source = new Hfs( new TextLine(), inputFileApache );
+    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
     Tap sink = new Hfs( new TextLine(), outputPath + "/swap", true );
 
     Pipe pipe = new Pipe( "test" );

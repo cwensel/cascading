@@ -399,6 +399,17 @@ public abstract class Operator extends Pipe
     {
     Fields fieldDeclaration = getFieldDeclaration();
 
+    if( getOutputSelector().isReplace() )
+      {
+      if( arguments.isDefined() && fieldDeclaration.isDefined() && arguments.size() != fieldDeclaration.size() )
+        throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
+
+      if( fieldDeclaration.isArguments() )
+        return arguments;
+
+      return arguments.project( fieldDeclaration );
+      }
+
     try
       {
       Scope incomingScope = getFirst( incomingScopes );
@@ -423,14 +434,6 @@ public abstract class Operator extends Pipe
     catch( Exception exception )
       {
       throw new OperatorException( this, "could not resolve declared fields in:  " + this, exception );
-      }
-
-    if( getOutputSelector().isReplace() )
-      {
-      if( arguments.isDefined() && fieldDeclaration.isDefined() && arguments.size() != fieldDeclaration.size() )
-        throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
-
-      return arguments.project( fieldDeclaration );
       }
 
     return fieldDeclaration;

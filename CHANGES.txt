@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2.2 [unreleased]
 
+  Fixed bug where if an operation declared it returned Fields.ARGS and the argument selector used positions, the
+  outgoing values may merge incorrectly.
+
 1.2.1
 
   Changed info message to not announce ambiguous source trap if none has been set.
