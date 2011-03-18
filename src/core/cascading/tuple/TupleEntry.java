@@ -113,7 +113,7 @@ public class TupleEntry
   /** Constructor TupleEntry creates a new TupleEntry instance. */
   public TupleEntry()
     {
-    this.fields = new Fields();
+    setFields( new Fields() );
     }
 
   /**
@@ -124,7 +124,7 @@ public class TupleEntry
   @ConstructorProperties({"isUnmodifiable"})
   public TupleEntry( boolean isUnmodifiable )
     {
-    this.fields = new Fields();
+    setFields( new Fields() );
     this.isUnmodifiable = isUnmodifiable;
     }
 
@@ -136,7 +136,7 @@ public class TupleEntry
   @ConstructorProperties({"fields"})
   public TupleEntry( Fields fields )
     {
-    this.fields = fields;
+    setFields( fields );
     }
 
   /**
@@ -148,7 +148,7 @@ public class TupleEntry
   @ConstructorProperties({"fields", "isUnmodifiable"})
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
-    this.fields = fields;
+    setFields( fields );
     this.isUnmodifiable = isUnmodifiable;
     }
 
@@ -161,8 +161,8 @@ public class TupleEntry
   @ConstructorProperties({"fields", "tuple"})
   public TupleEntry( Fields fields, Tuple tuple )
     {
-    this.fields = fields;
-    this.tuple = tuple;
+    setFields( fields );
+    setTuple( tuple );
     }
 
   /**
@@ -173,8 +173,8 @@ public class TupleEntry
   @ConstructorProperties({"tupleEntry"})
   public TupleEntry( TupleEntry tupleEntry )
     {
-    this.fields = tupleEntry.fields;
-    this.tuple = new Tuple( tupleEntry.getTuple() );
+    setFields( tupleEntry.fields );
+    setTuple( tupleEntry.getTupleCopy() );
     }
 
   /**
@@ -185,8 +185,8 @@ public class TupleEntry
   @ConstructorProperties({"tuple"})
   public TupleEntry( Tuple tuple )
     {
-    this.fields = Fields.size( tuple.size() );
-    this.tuple = tuple;
+    setFields( Fields.size( tuple.size() ) );
+    setTuple( tuple );
     }
 
   /**
@@ -197,6 +197,14 @@ public class TupleEntry
   public boolean isUnmodifiable()
     {
     return isUnmodifiable;
+    }
+
+  private void setFields( Fields fields )
+    {
+    if( fields == null )
+      throw new IllegalArgumentException( "fields many not be null" );
+
+    this.fields = fields;
     }
 
   /**
@@ -236,6 +244,9 @@ public class TupleEntry
    */
   public void setTuple( Tuple tuple )
     {
+    if( tuple == null )
+      throw new IllegalArgumentException( "tuple may not be null" );
+
     if( isUnmodifiable )
       this.tuple = Tuples.asUnmodifiable( tuple );
     else
