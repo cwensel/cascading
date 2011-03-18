@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2.2 [unreleased]
+1.2.2
 
   Fixed bug where OOME caught from within the source c.t.Tap was not being re-thrown properly.
 
