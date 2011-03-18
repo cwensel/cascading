@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.2 [unreleased]
 
+  Fixed bug where OOME caught from within the source c.t.Tap was not being re-thrown properly.
+
   Added #getMapProgress() and #getReduceProgress() to c.f.h.HadoopStepStats.
 
   Fixed NPE with some invocations of c.t.TupleEntry ctor.

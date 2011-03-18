@@ -94,7 +94,7 @@ public class FlowMapperStack
 
     sourceElement = makeSourceElement( incomingScopes );
 
-    stacks = new Stack[incomingScopes.size()];
+    stacks = new Stack[ incomingScopes.size() ];
 
     int i = 0;
     boolean allFilters = true;
@@ -173,7 +173,22 @@ public class FlowMapperStack
 
   public void map( Object key, Object value, OutputCollector output ) throws IOException
     {
-    Tuple tuple = sourceElement.source( key, value );
+    Tuple tuple = null;
+
+    try
+      {
+      tuple = sourceElement.source( key, value );
+      }
+    catch( StackException exception )
+      {
+      if( exception.getCause() instanceof Error )
+        throw (Error) exception.getCause();
+
+      if( exception.getCause() instanceof IOException )
+        throw (IOException) exception.getCause();
+
+      throw (RuntimeException) exception.getCause();
+      }
 
     if( LOG.isDebugEnabled() )
       {
