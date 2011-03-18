@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.2 [unreleased]
 
+  Added #getMapProgress() and #getReduceProgress() to c.f.h.HadoopStepStats.
+
   Fixed NPE with some invocations of c.t.TupleEntry ctor.
 
   Fixed bug where if an operation declared it returned Fields.ARGS and the argument selector used positions, the

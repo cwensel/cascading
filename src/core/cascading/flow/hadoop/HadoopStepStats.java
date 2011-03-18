@@ -331,6 +331,54 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Returns the underlying Map tasks progress.
+   * <p/>
+   * This method is experimental.
+   *
+   * @return float
+   */
+  public float getMapProgress()
+    {
+    RunningJob runningJob = getRunningJob();
+
+    if( runningJob == null )
+      return 0;
+
+    try
+      {
+      return runningJob.mapProgress();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get progress" );
+      }
+    }
+
+  /**
+   * Returns the underlying Reduce tasks progress.
+   * <p/>
+   * This method is experimental.
+   *
+   * @return float
+   */
+  public float getReduceProgress()
+    {
+    RunningJob runningJob = getRunningJob();
+
+    if( runningJob == null )
+      return 0;
+
+    try
+      {
+      return runningJob.reduceProgress();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get progress" );
+      }
+    }
+
   public void captureJobStats()
     {
     RunningJob runningJob = getRunningJob();
