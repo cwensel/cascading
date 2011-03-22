@@ -24,7 +24,9 @@ package cascading.tap;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.FileStatus;
@@ -34,15 +36,19 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class GlobHfs is a type of {@link MultiSourceTap} that accepts Hadoop style 'file globbing' expressions so
+ * Class GlobHfs is a type of {@link MultiSourceTap} that accepts Hadoop style 'file globing' expressions so
  * multiple files that match the given pattern may be used as the input sources for a given {@link cascading.flow.Flow}.
  * <p/>
- * See {@link FileSystem#globStatus(org.apache.hadoop.fs.Path)} for details on the globbing syntax. But in short
- * it is similiar to standard regular expressions except alternation is done via {foo,bar} instead of (foo|bar).
+ * See {@link FileSystem#globStatus(org.apache.hadoop.fs.Path)} for details on the globing syntax. But in short
+ * it is similar to standard regular expressions except alternation is done via {foo,bar} instead of (foo|bar).
  * <p/>
  * Note that a {@link cascading.flow.Flow} sourcing from GlobHfs is not currently compatible with the {@link cascading.cascade.Cascade}
  * scheduler. GlobHfs expects the files and paths to exist so the wildcards can be resolved into concrete values so
  * that the scheduler can order the Flows properly.
+ * <p/>
+ * Note that globing can match files or directories. It may consume less resources to match directories and let
+ * Hadoop include all sub-files immediately contained in the directory instead of enumerating every individual file.
+ * Ending the glob path with a {@code /} should match only directories.
  *
  * @see Hfs
  * @see MultiSourceTap
@@ -124,7 +130,7 @@ public class GlobHfs extends MultiSourceTap
         notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
       }
 
-    return notEmpty.toArray( new Tap[notEmpty.size()] );
+    return notEmpty.toArray( new Tap[ notEmpty.size() ] );
     }
 
   @Override
@@ -141,11 +147,12 @@ public class GlobHfs extends MultiSourceTap
       return true;
     if( object == null || getClass() != object.getClass() )
       return false;
-    if( !super.equals( object ) )
-      return false;
 
     GlobHfs globHfs = (GlobHfs) object;
 
+    // do not compare tap arrays, these values should be sufficient to show identity
+    if( getScheme() != null ? !getScheme().equals( globHfs.getScheme() ) : globHfs.getScheme() != null )
+      return false;
     if( pathFilter != null ? !pathFilter.equals( globHfs.pathFilter ) : globHfs.pathFilter != null )
       return false;
     if( pathPattern != null ? !pathPattern.equals( globHfs.pathPattern ) : globHfs.pathPattern != null )

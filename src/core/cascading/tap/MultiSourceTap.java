@@ -183,7 +183,7 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
   @Override
   public TupleEntryIterator openForRead( JobConf conf ) throws IOException
     {
-    Iterator iterators[] = new Iterator[getTaps().length];
+    Iterator iterators[] = new Iterator[ getTaps().length ];
 
     for( int i = 0; i < getTaps().length; i++ )
       iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( conf ) );
@@ -202,7 +202,7 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
 
     MultiSourceTap multiTap = (MultiSourceTap) object;
 
-    if( !Arrays.equals( taps, multiTap.taps ) )
+    if( !Arrays.equals( getTaps(), multiTap.getTaps() ) )
       return false;
 
     return true;
@@ -211,12 +211,12 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
   public int hashCode()
     {
     int result = super.hashCode();
-    result = 31 * result + ( taps != null ? Arrays.hashCode( taps ) : 0 );
+    result = 31 * result + ( getTaps() != null ? Arrays.hashCode( getTaps() ) : 0 );
     return result;
     }
 
   public String toString()
     {
-    return "MultiSourceTap[" + ( taps == null ? "none" : Arrays.asList( taps ) ) + ']';
+    return "MultiSourceTap[" + ( getTaps() == null ? "none" : Arrays.asList( Arrays.copyOf( getTaps(), 10 ) ) ) + ']';
     }
   }

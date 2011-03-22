@@ -373,7 +373,12 @@ public class TapTest extends ClusterTestCase implements Serializable
     copyFromLocal( inputFileLower );
     copyFromLocal( inputFileUpper );
 
-    Tap source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{ppe[_r],owe?}.txt" );
+    GlobHfs source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{ppe[_r],owe?}.txt" );
+
+    assertEquals( 2, source.getTaps().length );
+
+    // show globhfs will just match a directory if ended with a /
+    assertEquals( 1, new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/?ata/" ).getTaps().length );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), outputPath + "/glob/", true );

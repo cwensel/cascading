@@ -1,5 +1,9 @@
 Cascading Change Log
 
+1.2.3 [unreleased]
+
+  Fixed bug in c.t.GlobHfs where #equals() and #hashCode() were not consistent between calls.
+
 1.2.2
 
   Fixed bug where OOME caught from within the source c.t.Tap was not being re-thrown properly.
