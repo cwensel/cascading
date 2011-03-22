@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2.3 [unreleased]
 
+  Added error message explaining the Hadoop mapred.jobtracker.completeuserjobs.maximum property needs to be increased
+  when dealing with large numbers of jobs.
+
   Fixed bug in c.t.GlobHfs where #equals() and #hashCode() were not consistent between calls.
 
 1.2.2

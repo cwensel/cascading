@@ -258,6 +258,10 @@ public class FlowStepJob implements Callable<Throwable>
       {
       flowStep.logWarn( "error querying job", exception );
       }
+    catch( NullPointerException exception )
+      {
+      throw new FlowException( "Hadoop is not keeping a large enough job history, please increase the \'mapred.jobtracker.completeuserjobs.maximum\' property", exception );
+      }
 
     return false;
     }
