@@ -26,8 +26,9 @@
 
     <ivyauthor name="Concurrent, Inc." url="http://concurrentinc.com/"/>
 
-    <description homepage="http://cascading.org">
-    </description>
+    <repository name="conjars" url="http://conjars.org/repo/" artifacts="true"/>
+
+    <description homepage="http://cascading.org"/>
   </info>
 
   <configurations>
