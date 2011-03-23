@@ -2,6 +2,11 @@ Cascading Change Log
 
 1.2.3 [unreleased]
 
+  Updated c.f.FlowProcess to include #isCounterStatusInitialized() to test if the underlying reporting framework
+  is initialized.
+
+  Updated c.f.FlowProcess#keepAlive() method to fail silently if the underlying reporting framework is not initialized.
+
   Updated error message thrown by c.f.FlowStep when unable to find c.t.Tap or c.p.Pipe instances in the flow plan due
   to a Class serialized field not implementing #hashCode() or #equals() and relying in the object identity.
 

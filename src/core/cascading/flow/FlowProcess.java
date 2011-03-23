@@ -67,6 +67,12 @@ public abstract class FlowProcess
     {
     }
 
+  @Override
+  public boolean isCounterStatusInitialized()
+    {
+    return true;
+    }
+
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
     return null;
@@ -126,12 +132,16 @@ public abstract class FlowProcess
    * Method keepAlive notifies the system that the current process is still alive. Use this method if a particular
    * {@link cascading.operation.Operation} takes some moments to complete. Each system is different, so calling
    * ping every few seconds to every minute or so would be best.
+   * <p/>
+   * This method will fail silently if the underlying mechanism to notify keepAlive status are not initialized.
    */
   public abstract void keepAlive();
 
   /**
    * Method increment is used to increment a custom counter. Counters must be of type Enum. The amount
    * to increment must be a integer value.
+   * <p/>
+   * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param counter of type Enum
    * @param amount  of type int
@@ -140,6 +150,8 @@ public abstract class FlowProcess
 
   /**
    * Method increment is used to increment a custom counter. The amount to increment must be a integer value.
+   * <p/>
+   * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param group   of type String
    * @param counter of type String
@@ -149,10 +161,19 @@ public abstract class FlowProcess
 
   /**
    * Method setStatus is used to set the status of the current operation.
+   * <p/>
+   * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param status of type String
    */
   public abstract void setStatus( String status );
+
+  /**
+   * Method isCounterStatusInitialized returns true if it is safe to increment a counter or set a status.
+   *
+   * @return boolean
+   */
+  public abstract boolean isCounterStatusInitialized();
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleIterator} for the given Tap instance.

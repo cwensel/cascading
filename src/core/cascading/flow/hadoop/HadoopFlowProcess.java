@@ -141,7 +141,8 @@ public class HadoopFlowProcess extends FlowProcess
   /** @see cascading.flow.FlowProcess#keepAlive() */
   public void keepAlive()
     {
-    getReporterOrFail().progress();
+    if( getReporter() != null )
+      getReporter().progress();
     }
 
   /** @see cascading.flow.FlowProcess#increment(Enum, int) */
@@ -160,6 +161,12 @@ public class HadoopFlowProcess extends FlowProcess
   public void setStatus( String status )
     {
     getReporterOrFail().setStatus( status );
+    }
+
+  /** @see cascading.flow.FlowProcess#isCounterStatusInitialized() */
+  public boolean isCounterStatusInitialized()
+    {
+    return getReporter() != null;
     }
 
   /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
