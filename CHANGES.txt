@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2.3 [unreleased]
 
+  Updated error message thrown by c.f.FlowStep when unable to find c.t.Tap or c.p.Pipe instances in the flow plan due
+  to a Class serialized field not implementing #hashCode() or #equals() and relying in the object identity.
+
   Added error message explaining the Hadoop mapred.jobtracker.completeuserjobs.maximum property needs to be increased
   when dealing with large numbers of jobs.
 

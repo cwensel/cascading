@@ -37,6 +37,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -67,6 +68,9 @@ public abstract class Tap implements FlowElement, Serializable
   boolean writeDirect = false;
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
+
+  /** Field trace */
+  private String trace = Util.captureDebugTrace( getClass() );
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -107,6 +111,16 @@ public abstract class Tap implements FlowElement, Serializable
   public Scheme getScheme()
     {
     return scheme;
+    }
+
+  /**
+   * Method getTrace return the trace of this object.
+   *
+   * @return String
+   */
+  public String getTrace()
+    {
+    return trace;
     }
 
   /**

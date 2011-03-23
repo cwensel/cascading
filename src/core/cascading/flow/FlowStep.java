@@ -387,7 +387,7 @@ public class FlowStep implements Serializable
 
   private void initFromSources( JobConf conf ) throws IOException
     {
-    JobConf[] fromJobs = new JobConf[sources.size()];
+    JobConf[] fromJobs = new JobConf[ sources.size() ];
     int i = 0;
 
     for( Tap tap : sources.keySet() )
@@ -441,6 +441,8 @@ public class FlowStep implements Serializable
    */
   public Set<Scope> getPreviousScopes( FlowElement flowElement )
     {
+    assertFlowElement( flowElement );
+
     return graph.incomingEdgesOf( flowElement );
     }
 
@@ -452,6 +454,8 @@ public class FlowStep implements Serializable
    */
   public Scope getNextScope( FlowElement flowElement )
     {
+    assertFlowElement( flowElement );
+
     Set<Scope> set = graph.outgoingEdgesOf( flowElement );
 
     if( set.size() != 1 )
@@ -462,7 +466,24 @@ public class FlowStep implements Serializable
 
   public Set<Scope> getNextScopes( FlowElement flowElement )
     {
+    assertFlowElement( flowElement );
+
     return graph.outgoingEdgesOf( flowElement );
+    }
+
+  private void assertFlowElement( FlowElement flowElement )
+    {
+    if( !graph.containsVertex( flowElement ) )
+      {
+      String message = "unable to find %s in plan, class and serializable fields must implement #hashCode() and #equals()";
+
+      if( flowElement instanceof Pipe )
+        message = Util.formatTrace( (Pipe) flowElement, String.format( message, "pipe" ) );
+      else if( flowElement instanceof Tap )
+        message = Util.formatTrace( (Tap) flowElement, String.format( message, "tap" ) );
+
+      throw new IllegalStateException( message );
+      }
     }
 
   public FlowElement getNextFlowElement( Scope scope )

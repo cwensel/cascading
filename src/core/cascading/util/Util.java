@@ -49,6 +49,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
+import cascading.tap.Tap;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -303,7 +304,7 @@ public class Util
         list.add( string );
       }
 
-    return list.toArray( new String[list.size()] );
+    return list.toArray( new String[ list.size() ] );
     }
 
   public static Collection<String> quote( Collection<String> collection, String quote )
@@ -527,6 +528,19 @@ public class Util
       return message;
 
     return "[" + truncate( pipe.getName(), 25 ) + "][" + trace + "] " + message;
+    }
+
+  public static String formatTrace( Tap tap, String message )
+    {
+    if( tap == null )
+      return message;
+
+    String trace = tap.getTrace();
+
+    if( trace == null )
+      return message;
+
+    return "[" + truncate( tap.toString(), 25 ) + "][" + trace + "] " + message;
     }
 
   public static String formatTrace( Operation operation, String message )
