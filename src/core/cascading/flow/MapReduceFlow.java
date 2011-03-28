@@ -125,6 +125,67 @@ public class MapReduceFlow extends Flow
     setStepGraph( makeStepGraph( jobConf ) );
     }
 
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param source           of type Tap
+   * @param sink             of type Tap
+   * @param deleteSinkOnInit of type boolean
+   * @param stopJobsOnExit   of type boolean
+   */
+  @ConstructorProperties({"name", "jobConf", "source", "sink", "deleteSinkOnInit", "stopJobsOnExit"})
+  public MapReduceFlow( String name, JobConf jobConf, Tap source, Tap sink, boolean deleteSinkOnInit, boolean stopJobsOnExit )
+    {
+      this( name, jobConf, null, null, null, deleteSinkOnInit, stopJobsOnExit );
+
+      Map<String, Tap> sources = new HashMap<String, Tap>();
+      Map<String, Tap> sinks   = new HashMap<String, Tap>();
+      Map<String, Tap> traps   = new HashMap<String, Tap>();
+
+      sources.put( source.getPath().toString(), source );
+      sinks.put( sink.getPath().toString(), sink );
+
+      setSources( sources );
+      setSinks( sinks );
+      setTraps( traps );
+      setStepGraph( makeStepGraph( jobConf ) );
+    }
+
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param sources          of type Map<String, Tap>
+   * @param sinks            of type Map<String, Tap>
+   * @param traps            of type Map<String, Tap>
+   * @param deleteSinkOnInit of type boolean
+   * @param stopJobsOnExit   of type boolean
+   */
+  @ConstructorProperties({"name", "jobConf", "sources", "sinks", "traps", "deleteSinkOnInit", "stopJobsOnExit"})
+  public MapReduceFlow( String name, JobConf jobConf, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, 
+      boolean deleteSinkOnInit, boolean stopJobsOnExit )
+    {
+    this.deleteSinkOnInit = deleteSinkOnInit;
+    this.stopJobsOnExit = stopJobsOnExit;
+
+    setName( name );
+
+    if( sources != null )
+      setSources( sources );
+
+    if( sinks != null )
+      setSinks( sinks );
+
+    if( traps != null )
+      setTraps( traps );
+
+    if( (sources != null) && (sinks != null) && (traps != null) )
+      setStepGraph( makeStepGraph( jobConf ) );
+    }
+
   private StepGraph makeStepGraph( JobConf jobConf )
     {
     StepGraph stepGraph = new StepGraph();
