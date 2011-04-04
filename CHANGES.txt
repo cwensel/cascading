@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.3 [unreleased]
 
+  Fixed bug where c.t.Fields#append() would fail when appending unordered selectors.
+
   Updated c.f.FlowProcess to include #isCounterStatusInitialized() to test if the underlying reporting framework
   is initialized.
 

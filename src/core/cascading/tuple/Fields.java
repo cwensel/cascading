@@ -115,7 +115,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public static final Fields LAST = new Fields( -1 );
 
   /** Field EMPTY_INT */
-  private static final int[] EMPTY_INT = new int[0];
+  private static final int[] EMPTY_INT = new int[ 0 ];
 
   /**
    */
@@ -125,7 +125,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /** Field fields */
-  Comparable[] fields = new Comparable[0];
+  Comparable[] fields = new Comparable[ 0 ];
   /** Field isOrdered */
   boolean isOrdered = true;
   /** Field kind */
@@ -232,7 +232,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         }
       }
 
-    return new Fields( elements.toArray( new Comparable[elements.size()] ) );
+    return new Fields( elements.toArray( new Comparable[ elements.size() ] ) );
     }
 
   /**
@@ -261,7 +261,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( startPos < 0 )
       throw new TupleException( "invalid start position for fields: " + startPos );
 
-    Comparable[] fields = new Comparable[size];
+    Comparable[] fields = new Comparable[ size ];
 
     for( int i = 0; i < fields.length; i++ )
       fields[ i ] = i + startPos;
@@ -334,7 +334,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     notFound.removeAll( found );
 
     if( !notFound.isEmpty() )
-      throw new FieldsResolverException( new Fields( join( size, fields ) ), new Fields( notFound.toArray( new Comparable[0] ) ) );
+      throw new FieldsResolverException( new Fields( join( size, fields ) ), new Fields( notFound.toArray( new Comparable[ 0 ] ) ) );
 
     if( hasUnknowns )
       return selector;
@@ -669,7 +669,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   private int[] makeThisPos()
     {
-    int[] pos = new int[size()];
+    int[] pos = new int[ size() ];
 
     for( int i = 0; i < size(); i++ )
       {
@@ -727,7 +727,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   private int[] translatePos( Fields fields, int fieldSize )
     {
-    int[] pos = new int[fields.size()];
+    int[] pos = new int[ fields.size() ];
 
     for( int i = 0; i < fields.size(); i++ )
       {
@@ -882,7 +882,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Util.removeAllNulls( list );
 
-    minus.fields = list.toArray( new Comparable[list.size()] );
+    minus.fields = list.toArray( new Comparable[ list.size() ] );
 
     return minus;
     }
@@ -921,7 +921,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( fields == null )
       return this;
 
-    if( this.isAll() || fields.isAll() || !this.isOrdered() || !fields.isOrdered() )
+    // allow unordered fields to be appended to build more complex selectors
+    if( this.isAll() || fields.isAll() )
       throw new TupleException( "cannot append fields: " + this.print() + " + " + fields.print() );
 
     if( ( this.isUnknown() || this.size() == 0 ) && fields.isUnknown() )
@@ -1239,7 +1240,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       throw new IllegalArgumentException( "given comparator must be serializable" );
 
     if( comparators == null )
-      comparators = new Comparator[size()];
+      comparators = new Comparator[ size() ];
 
     try
       {
@@ -1293,7 +1294,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public Comparator[] getComparators()
     {
-    Comparator[] copy = new Comparator[size()];
+    Comparator[] copy = new Comparator[ size() ];
 
     System.arraycopy( comparators, 0, copy, 0, size() );
 

@@ -72,6 +72,19 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  public void testAppend2()
+    {
+    Fields fieldA = new Fields( 0, 1 );
+    Fields fieldB = new Fields( 2 );
+
+    Fields appended = fieldA.append( fieldB );
+
+    assertEquals( "not equal: ", 3, appended.size() );
+    assertEquals( "not equal: ", 0, appended.get( 0 ) );
+    assertEquals( "not equal: ", 1, appended.get( 1 ) );
+    assertEquals( "not equal: ", 2, appended.get( 2 ) );
+    }
+
   public void testAppendNamed()
     {
     Fields fieldA = new Fields( 0, 1 );
