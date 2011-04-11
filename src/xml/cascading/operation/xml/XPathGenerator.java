@@ -32,7 +32,8 @@ import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -43,7 +44,7 @@ import org.w3c.dom.NodeList;
 public class XPathGenerator extends XPathOperation implements Function<DocumentBuilder>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( XPathGenerator.class );
+  private static final Logger LOG = LoggerFactory.getLogger( XPathGenerator.class );
 
   /**
    * Constructor XPathGenerator creates a new XPathGenerator instance.
@@ -83,7 +84,7 @@ public class XPathGenerator extends XPathOperation implements Function<DocumentB
         NodeList nodeList = (NodeList) getExpressions().get( i ).evaluate( document, XPathConstants.NODESET );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "xpath: " + paths[ i ] + " was: " + ( nodeList != null && nodeList.getLength() != 0 ) );
+          LOG.debug( "xpath: {} was: {}", paths[ i ], nodeList != null && nodeList.getLength() != 0 );
 
         if( nodeList == null )
           continue;

@@ -31,12 +31,13 @@ import java.util.Map;
 import cascading.tuple.TupleOutputStream;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.io.serializer.Serializer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SerializationElementWriter implements TupleOutputStream.ElementWriter
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( SerializationElementWriter.class );
+  private static final Logger LOG = LoggerFactory.getLogger( SerializationElementWriter.class );
 
   /** Field tupleSerialization */
   private final TupleSerialization tupleSerialization;
@@ -59,8 +60,7 @@ public class SerializationElementWriter implements TupleOutputStream.ElementWrit
 
     if( token == null )
       {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "no serialization token found for classname: " + className );
+      LOG.debug( "no serialization token found for classname: {}", className );
 
       WritableUtils.writeVInt( outputStream, HadoopTupleOutputStream.WRITABLE_TOKEN ); // denotes to punt to hadoop serialization
       WritableUtils.writeString( outputStream, className );

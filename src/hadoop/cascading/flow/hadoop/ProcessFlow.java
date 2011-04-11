@@ -36,7 +36,6 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.log4j.Logger;
 import riffle.process.scheduler.ProcessException;
 import riffle.process.scheduler.ProcessWrapper;
 
@@ -49,9 +48,6 @@ import riffle.process.scheduler.ProcessWrapper;
  */
 public class ProcessFlow<P> extends HadoopFlow
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( ProcessFlow.class );
-
   /** Field process */
   private final P process;
   /** Field processWrapper */

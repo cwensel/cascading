@@ -40,11 +40,12 @@ import cascading.util.Util;
 import data.InputData;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class PipeAssemblyTestBase extends PlatformTestCase
   {
-  private static final Logger LOG = Logger.getLogger( PipeAssemblyTestBase.class );
+  private static final Logger LOG = LoggerFactory.getLogger( PipeAssemblyTestBase.class );
 
   static Fields[] OP_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] OP_DECL_FIELDS = new Fields[]{new Fields( "field" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
@@ -68,7 +69,7 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
     for( String name : pipes.keySet() )
       {
       if( isUNDEFINED( properties, name ) )
-        LOG.debug( "skipping: " + name );
+        LOG.debug( "skipping: {}", name );
       else
         suite.addTest( (Test) type.getConstructors()[ 0 ].newInstance( properties, name, pipes.get( name ) ) );
       }

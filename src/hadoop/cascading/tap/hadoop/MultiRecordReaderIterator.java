@@ -34,7 +34,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link cascading.tap.Tap} instances when
@@ -43,7 +44,7 @@ import org.apache.log4j.Logger;
 public class MultiRecordReaderIterator implements CloseableIterator<RecordReader>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( MultiRecordReaderIterator.class );
+  private static final Logger LOG = LoggerFactory.getLogger( MultiRecordReaderIterator.class );
 
   /** Field tap */
   private final Tap tap;
@@ -103,8 +104,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
 
   private RecordReader makeReader( int currentSplit ) throws IOException
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "reading split: " + currentSplit );
+    LOG.debug( "reading split: {}", currentSplit );
 
     return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
     }

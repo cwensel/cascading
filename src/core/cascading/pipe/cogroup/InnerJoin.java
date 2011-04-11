@@ -24,7 +24,8 @@ package cascading.pipe.cogroup;
 import java.util.Iterator;
 
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
@@ -33,7 +34,7 @@ import org.apache.log4j.Logger;
 public class InnerJoin implements Joiner
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( InnerJoin.class );
+  private static final Logger LOG = LoggerFactory.getLogger( InnerJoin.class );
 
   public Iterator<Tuple> getIterator( GroupClosure closure )
     {
@@ -55,8 +56,7 @@ public class InnerJoin implements Joiner
       {
       this.closure = closure;
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "cogrouped size: " + closure.size() );
+      LOG.debug( "cogrouped size: {}", closure.size() );
 
       init();
       }
@@ -138,7 +138,7 @@ public class InnerJoin implements Joiner
         result.addAll( lastValue );
 
       if( LOG.isTraceEnabled() )
-        LOG.trace( "tuple: " + result.print() );
+        LOG.trace( "tuple: {}", result.print() );
 
       return result;
       }

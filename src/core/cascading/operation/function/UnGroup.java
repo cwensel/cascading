@@ -32,7 +32,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class UnGroup is a {@link Function} that will 'un-group' data from a given dataset.
@@ -59,7 +60,7 @@ import org.apache.log4j.Logger;
 public class UnGroup extends BaseOperation implements Function
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( UnGroup.class );
+  private static final Logger LOG = LoggerFactory.getLogger( UnGroup.class );
 
   /** Field groupFieldSelector */
   private Fields groupFieldSelector;
@@ -152,8 +153,7 @@ public class UnGroup extends BaseOperation implements Function
 
   private void useSize( TupleEntry input, TupleEntryCollector outputCollector )
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "using size: " + size );
+    LOG.debug( "using size: {}", size );
 
     Tuple tuple = new Tuple( input.getTuple() ); // make clone
     Tuple group = tuple.remove( input.getFields(), groupFieldSelector );
@@ -169,8 +169,7 @@ public class UnGroup extends BaseOperation implements Function
 
   private void useResultSelectors( TupleEntry input, TupleEntryCollector outputCollector )
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "using result selectors: " + resultFieldSelectors.length );
+    LOG.debug( "using result selectors: {}", resultFieldSelectors.length );
 
     for( Fields resultFieldSelector : resultFieldSelectors )
       {

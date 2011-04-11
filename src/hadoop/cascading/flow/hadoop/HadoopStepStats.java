@@ -38,13 +38,14 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskReport;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class HadoopStepStats ... */
 public abstract class HadoopStepStats extends StepStats
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HadoopStepStats.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
 
   /** Field numMapTasks */
   int numMapTasks;

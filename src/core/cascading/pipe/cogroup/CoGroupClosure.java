@@ -28,7 +28,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams.
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
 public class CoGroupClosure extends GroupByClosure
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( CoGroupClosure.class );
+  private static final Logger LOG = LoggerFactory.getLogger( CoGroupClosure.class );
 
   /** Field groups */
   SpillableTupleList[] groups;
@@ -102,7 +103,7 @@ public class CoGroupClosure extends GroupByClosure
 
       if( spilled && ( groups[ pos ].getNumFiles() - 1 ) % 10 == 0 )
         {
-        LOG.info( "spilled group: " + groupingFields[ pos ].printVerbose() + ", on grouping: " + getGrouping().print() );
+        LOG.info( "spilled group: {}, on grouping: {}", groupingFields[ pos ].printVerbose(), getGrouping().print() );
 
         Runtime runtime = Runtime.getRuntime();
         long freeMem = runtime.freeMemory() / 1024 / 1024;

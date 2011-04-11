@@ -38,8 +38,9 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.log4j.Logger;
 import org.jets3t.service.S3ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
@@ -48,7 +49,7 @@ import org.jets3t.service.S3ServiceException;
 public class MultiInputFormat implements InputFormat
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( MultiInputFormat.class );
+  private static final Logger LOG = LoggerFactory.getLogger( MultiInputFormat.class );
 
   /**
    * Used to set the current JobConf with all sub jobs configurations.

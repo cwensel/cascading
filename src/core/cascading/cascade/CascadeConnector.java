@@ -38,10 +38,11 @@ import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
@@ -52,7 +53,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 public class CascadeConnector
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( CascadeConnector.class );
+  private static final Logger LOG = LoggerFactory.getLogger( CascadeConnector.class );
 
   /** Field properties */
   private Map<Object, Object> properties;
@@ -250,14 +251,14 @@ public class CascadeConnector
     for( String source : identifiers )
       {
       if( LOG.isDebugEnabled() )
-        LOG.debug( "handling flow source: " + source );
+        LOG.debug( "handling flow source: {}", source );
 
       List<String> sinks = Graphs.successorListOf( tapGraph, source );
 
       for( String sink : sinks )
         {
         if( LOG.isDebugEnabled() )
-          LOG.debug( "handling flow path: " + source + " -> " + sink );
+          LOG.debug( "handling flow path: {} -> {}", source, sink );
 
         Flow flow = tapGraph.getEdge( source, sink ).flow;
 

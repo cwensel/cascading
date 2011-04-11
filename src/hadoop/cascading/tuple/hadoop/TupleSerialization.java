@@ -39,7 +39,8 @@ import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TupleSerialization is an implementation of Hadoop's {@link Serialization} interface.
@@ -56,7 +57,7 @@ import org.apache.log4j.Logger;
 public class TupleSerialization extends Configured implements Serialization
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TupleSerialization.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TupleSerialization.class );
 
   /** Field classCache */
   private final Map<String, Class> classCache = new HashMap<String, Class>();
@@ -216,7 +217,7 @@ public class TupleSerialization extends Configured implements Serialization
         }
       catch( ClassNotFoundException exception )
         {
-        LOG.warn( "unable to load serialization class: " + serializationName, exception );
+        LOG.warn( "unable to load serialization class: {}", serializationName, exception );
         }
       }
 

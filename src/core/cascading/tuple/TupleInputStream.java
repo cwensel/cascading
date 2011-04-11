@@ -27,15 +27,18 @@ import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class TupleInputStream is used internally to read Tuples from storage. */
 public abstract class TupleInputStream extends DataInputStream
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TupleInputStream.class );
 
+  /** Field inputStream */
   protected final InputStream inputStream;
+  /** Field elementReader */
   protected final ElementReader elementReader;
 
   public interface ElementReader
@@ -118,8 +121,7 @@ public abstract class TupleInputStream extends DataInputStream
   @Override
   public void close() throws IOException
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "closing tuple input stream" );
+    LOG.debug( "closing tuple input stream" );
 
     try
       {

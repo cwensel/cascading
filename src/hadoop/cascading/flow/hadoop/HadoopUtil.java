@@ -43,13 +43,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class HadoopUtil
   {
-  private static final Logger LOG = Logger.getLogger( HadoopUtil.class );
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
 
   public static void initLog4j( JobConf jobConf )
     {
@@ -143,7 +144,7 @@ public class HadoopUtil
       caughtException = exception;
       }
 
-    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: " + caughtException.getClass().getName() );
+    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: {}", caughtException.getClass().getName() );
 
     return null;
     }
@@ -238,13 +239,13 @@ public class HadoopUtil
         {
         try
           {
-          LOG.info( "resolving application jar from found main method on: " + stackTraceElement.getClassName() );
+          LOG.info( "resolving application jar from found main method on: {}", stackTraceElement.getClassName() );
 
           return Thread.currentThread().getContextClassLoader().loadClass( stackTraceElement.getClassName() );
           }
         catch( ClassNotFoundException exception )
           {
-          LOG.warn( "unable to load class while discovering application jar: " + stackTraceElement.getClassName(), exception );
+          LOG.warn( "unable to load class while discovering application jar: {}", stackTraceElement.getClassName(), exception );
           }
         }
       }
@@ -298,8 +299,7 @@ public class HadoopUtil
 
     for( String key : config.keySet() )
       {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "merging key: " + key + " value: " + config.get( key ) );
+      LOG.debug( "merging key: {} value: {}", key, config.get( key ) );
 
       currentConf.set( key, config.get( key ) );
       }

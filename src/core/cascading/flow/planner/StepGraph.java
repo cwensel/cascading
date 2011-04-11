@@ -93,8 +93,7 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     if( steps.containsKey( sinkName ) )
       return steps.get( sinkName );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "creating step: " + sinkName );
+    LOG.debug( "creating step: {}", sinkName );
 
     String stepName = makeStepName( steps, numJobs, sinkName );
     int stepNum = steps.size() + 1;

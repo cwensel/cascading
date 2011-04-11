@@ -43,10 +43,11 @@ import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -61,7 +62,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 public abstract class FlowStep<Config> implements Serializable
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( FlowStep.class );
+  private static final Logger LOG = LoggerFactory.getLogger( FlowStep.class );
 
   /** Field properties */
   private Map<Object, Object> properties = null;

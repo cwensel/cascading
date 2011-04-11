@@ -27,13 +27,14 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class TupleOutputStream is used internally to write Tuples to storage. */
 public abstract class TupleOutputStream extends DataOutputStream
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TupleOutputStream.class );
 
   protected interface TupleElementWriter
     {
@@ -109,8 +110,7 @@ public abstract class TupleOutputStream extends DataOutputStream
   @Override
   public void close() throws IOException
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "closing tuple output stream" );
+    LOG.debug( "closing tuple output stream" );
 
     try
       {

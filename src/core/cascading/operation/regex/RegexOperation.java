@@ -115,7 +115,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    *
    * @return the patternString (type String) of this RegexOperation object.
    */
-  public String getPatternString()
+  public final String getPatternString()
     {
     return patternString;
     }

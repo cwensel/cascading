@@ -45,15 +45,16 @@ import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public abstract class FlowPlanner
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( FlowPlanner.class );
+  private static final Logger LOG = LoggerFactory.getLogger( FlowPlanner.class );
 
   /** Field properties */
   protected Map<Object, Object> properties;
@@ -167,7 +168,7 @@ public abstract class FlowPlanner
             throw new PlannerException( tail, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
-            LOG.warn( "duplicate tail name found: '" + tailName + "'" );
+            LOG.warn( "duplicate tail name found: '{}'", tailName );
 //            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
           tailNames.add( tailName );
@@ -182,7 +183,7 @@ public abstract class FlowPlanner
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          LOG.warn( "duplicate tail name found: '" + tailName + "'" );
+          LOG.warn( "duplicate tail name found: '{}'", tailName );
 //            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
@@ -220,7 +221,7 @@ public abstract class FlowPlanner
           throw new PlannerException( head, "pipe name not found in either sink or source map: '" + headName + "'" );
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
-          LOG.warn( "duplicate head name found, not an error but heads should have unique names: '" + headName + "'" );
+          LOG.warn( "duplicate head name found, not an error but heads should have unique names: '{}'", headName );
 //          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
@@ -492,8 +493,7 @@ public abstract class FlowPlanner
    */
   protected void insertTempTapAfter( ElementGraph graph, Pipe pipe )
     {
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "inserting tap after: " + pipe );
+    LOG.debug( "inserting tap after: {}", pipe );
 
     graph.insertFlowElementAfter( pipe, makeTempTap( pipe.getName() ) );
     }

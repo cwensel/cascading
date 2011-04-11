@@ -30,7 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,7 +39,8 @@ import org.apache.log4j.Logger;
 public abstract class SpillableTupleList implements Iterable<Tuple>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( SpillableTupleList.class );
+  private static final Logger LOG = LoggerFactory.getLogger( SpillableTupleList.class );
+
   /** Field threshold */
   protected long threshold = 10000;
   /** Field flowProcess */
@@ -199,7 +201,7 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
     if( current.size() != threshold )
       return false;
 
-    LOG.info( "spilling tuple list to file number " + ( getNumFiles() + 1 ) );
+    LOG.info( "spilling tuple list to file number {}", getNumFiles() + 1 );
 
     if( flowProcess != null )
       flowProcess.increment( Spill.Num_Spills_Written, 1 );

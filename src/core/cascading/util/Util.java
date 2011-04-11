@@ -44,21 +44,20 @@ import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
-import org.apache.log4j.Logger;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.MatrixExporter;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class Util provides reusable operations. */
 public class Util
   {
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( Util.class );
-
   static final String HEXES = "0123456789ABCDEF";
+  private static final Logger LOG = LoggerFactory.getLogger( Util.class );
 
   /**
    * This method creates a globally unique HEX value seeded by the given string.

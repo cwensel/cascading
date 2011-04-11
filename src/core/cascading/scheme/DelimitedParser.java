@@ -30,12 +30,13 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DelimitedParser implements Serializable
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( DelimitedParser.class );
+  private static final Logger LOG = LoggerFactory.getLogger( DelimitedParser.class );
 
   /** Field SPECIAL_REGEX_CHARS */
   static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";

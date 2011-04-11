@@ -44,7 +44,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TemplateTap can be used to write tuple streams out to subdirectories based on the values in the {@link Tuple}
@@ -60,7 +61,7 @@ import org.apache.log4j.Logger;
 public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TemplateTap.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TemplateTap.class );
 
   /** Field OPEN_FILES_THRESHOLD_DEFAULT */
   private static final int OPEN_TAPS_THRESHOLD_DEFAULT = 300;
@@ -104,8 +105,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
         Path fullPath = new Path( parent.getQualifiedPath( conf ), path );
         Tap tap = new Hfs( parent.getScheme(), fullPath.toString() );
 
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "creating collector for path: " + fullPath );
+        LOG.debug( "creating collector for path: {}", fullPath );
 
         collector = tap.openForWrite( flowProcess );
         }
@@ -120,7 +120,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
       collectors.put( path, collector );
 
       if( LOG.isInfoEnabled() && collectors.size() % 100 == 0 )
-        LOG.info( "caching " + collectors.size() + " open Taps" );
+        LOG.info( "caching {} open Taps", collectors.size() );
 
       return collector;
       }
@@ -130,7 +130,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
       int numToClose = Math.max( 1, (int) ( openTapsThreshold * .10 ) );
 
       if( LOG.isInfoEnabled() )
-        LOG.info( "removing " + numToClose + " open Taps from cache of size " + collectors.size() );
+        LOG.info( "removing {} open Taps from cache of size {}", numToClose, collectors.size() );
 
       Set<String> removeKeys = new HashSet<String>();
       Set<String> keys = collectors.keySet();

@@ -31,7 +31,8 @@ import cascading.operation.GroupAssertionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
 public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Context> implements GroupAssertion<AssertGroupBase.Context>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( AssertGroupBase.class );
+  private static final Logger LOG = LoggerFactory.getLogger( AssertGroupBase.class );
 
   /** Field patternString */
   protected String patternString;
@@ -107,8 +108,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
 
     Matcher matcher = pattern.matcher( input.toString( "\t" ) );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + pattern + ", matches: " + matcher.matches() );
+    LOG.debug( "pattern: {}, matches: {}", pattern, matcher.matches() );
 
     return matcher.matches();
     }

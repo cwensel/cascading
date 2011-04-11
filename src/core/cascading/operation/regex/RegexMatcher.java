@@ -28,7 +28,8 @@ import cascading.flow.FlowProcess;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class RegexMatcher is the base class for common regular expression operations.
@@ -41,7 +42,8 @@ import org.apache.log4j.Logger;
 public class RegexMatcher extends RegexOperation<Matcher>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( RegexMatcher.class );
+  private static final Logger LOG = LoggerFactory.getLogger( RegexMatcher.class );
+
   /** Field removeMatch */
   protected final boolean negateMatch;
 
@@ -101,8 +103,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
 
     boolean matchFound = matcher.find();
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "pattern: " + getPatternString() + ", matches: " + matchFound );
+    LOG.debug( "pattern: {}, matches: {}", getPatternString(), matchFound );
 
     return matchFound == negateMatch;
     }

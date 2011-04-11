@@ -36,7 +36,8 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class MultiSinkTap is both a {@link cascading.tap.CompositeTap} and {@link cascading.tap.SinkTap} that can write to
@@ -47,7 +48,7 @@ import org.apache.log4j.Logger;
 public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Output> extends SinkTap<Process, Config, Input, Output> implements CompositeTap
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( MultiSinkTap.class );
+  private static final Logger LOG = LoggerFactory.getLogger( MultiSinkTap.class );
 
   /** Field taps */
   private final Tap[] taps;
@@ -72,7 +73,7 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
         {
         Config mergedConf = flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
         Tap tap = taps[ i ];
-        LOG.info( "opening for write: " + tap.toString() );
+        LOG.info( "opening for write: {}", tap.toString() );
 
         collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ) );
         }

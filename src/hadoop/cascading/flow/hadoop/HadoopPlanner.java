@@ -50,9 +50,10 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -79,7 +80,7 @@ import org.jgrapht.Graphs;
 public class HadoopPlanner extends FlowPlanner
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HadoopPlanner.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopPlanner.class );
 
   /** Field jobConf */
   private JobConf jobConf;
@@ -154,7 +155,7 @@ public class HadoopPlanner extends FlowPlanner
     if( jobConf.getJar() == null )
       jobConf.setJarByClass( HadoopUtil.findMainClass( HadoopPlanner.class ) );
 
-    LOG.info( "using application jar: " + jobConf.getJar() );
+    LOG.info( "using application jar: {}", jobConf.getJar() );
     }
 
   @Override
@@ -219,7 +220,7 @@ public class HadoopPlanner extends FlowPlanner
       if( !areEquivalentPaths( elementGraph, paths ) )
         continue;
 
-      LOG.warn( "found equivalent paths from: " + paths.get( 0 ).get( 1 ) + " to: " + coGroup );
+      LOG.warn( "found equivalent paths from: {} to: {}", paths.get( 0 ).get( 1 ), coGroup );
 
       // in order to remove dupe paths, we need to verify there isn't any branching
       }
@@ -524,7 +525,7 @@ public class HadoopPlanner extends FlowPlanner
           if( flowElement instanceof TempHfs )
             continue;
 
-          LOG.warn( "inserting step to normalize incompatible sources: " + tap );
+          LOG.warn( "inserting step to normalize incompatible sources: {}", tap );
 
           insertTempTapAfter( elementGraph, (Pipe) flowElement );
 

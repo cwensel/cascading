@@ -29,7 +29,8 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.fs.FSInputStream;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class FSDigestInputStream is an {@link FSInputStream} implementation that can verify a
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
 public class FSDigestInputStream extends FSInputStream
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( FSDigestInputStream.class );
+  private static final Logger LOG = LoggerFactory.getLogger( FSDigestInputStream.class );
 
   /** Field count */
   int count = 0;
@@ -110,7 +111,7 @@ public class FSDigestInputStream extends FSInputStream
     {
     inputStream.close();
 
-    LOG.info( "closing stream, testing digest: [" + ( digestHex == null ? "none" : digestHex ) + "]" );
+    LOG.info( "closing stream, testing digest: [{}]", digestHex == null ? "none" : digestHex );
 
     if( digestHex == null )
       return;

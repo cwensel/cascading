@@ -34,11 +34,12 @@ import cascading.flow.planner.StepGraph;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,7 +47,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 public class HadoopStepGraph extends StepGraph
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HadoopStepGraph.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopStepGraph.class );
 
   public HadoopStepGraph()
     {
@@ -83,15 +84,13 @@ public class HadoopStepGraph extends StepGraph
       {
       Tap source = topoIterator.next();
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "handling source: " + source );
+      LOG.debug( "handling source: {}", source );
 
       List<Tap> sinks = Graphs.successorListOf( tapGraph, source );
 
       for( Tap sink : sinks )
         {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "handling path: " + source + " -> " + sink );
+        LOG.debug( "handling path: {} -> {}", source, sink );
 
         HadoopFlowStep step = (HadoopFlowStep) getCreateFlowStep( flowName, steps, sink.toString(), numJobs );
 
@@ -169,6 +168,4 @@ public class HadoopStepGraph extends StepGraph
 
     return count;
     }
-
-
   }

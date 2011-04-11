@@ -35,7 +35,8 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
@@ -44,7 +45,7 @@ import org.apache.log4j.Logger;
 public class HadoopTapCollector extends TupleEntrySchemeCollector implements OutputCollector
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HadoopTapCollector.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopTapCollector.class );
 
   /** Field conf */
   private final JobConf conf;
@@ -130,9 +131,9 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
     try
       {
       if( isFileOutputFormat )
-        LOG.info( "closing tap collector for: " + new Path( tap.getPath(), filename ) );
+        LOG.info( "closing tap collector for: {}", new Path( tap.getPath(), filename ) );
       else
-        LOG.info( "closing tap collector for: " + tap.toString() );
+        LOG.info( "closing tap collector for: {}", tap );
 
       try
         {
@@ -151,7 +152,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
       }
     catch( IOException exception )
       {
-      LOG.warn( "exception closing: " + filename, exception );
+      LOG.warn( "exception closing: {}", filename, exception );
       throw new TapException( "exception closing: " + filename, exception );
       }
     finally

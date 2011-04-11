@@ -34,10 +34,11 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -50,7 +51,7 @@ import org.xml.sax.SAXNotSupportedException;
 public class TagSoupParser extends BaseOperation implements Function
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( TagSoupParser.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TagSoupParser.class );
 
   /** Field features */
   private Map<String, Boolean> features;

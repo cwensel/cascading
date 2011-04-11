@@ -32,12 +32,13 @@ import java.util.Map;
 import cascading.tuple.TupleInputStream;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.io.serializer.Deserializer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SerializationElementReader implements TupleInputStream.ElementReader
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( SerializationElementReader.class );
+  private static final Logger LOG = LoggerFactory.getLogger( SerializationElementReader.class );
 
   /** Field tupleSerialization */
   private final TupleSerialization tupleSerialization;

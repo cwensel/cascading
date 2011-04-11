@@ -31,7 +31,8 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -47,7 +48,7 @@ import org.w3c.dom.NodeList;
 public class XPathParser extends XPathOperation implements Function<DocumentBuilder>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( XPathParser.class );
+  private static final Logger LOG = LoggerFactory.getLogger( XPathParser.class );
 
   /**
    * Constructor XPathParser creates a new XPathParser instance.
@@ -92,7 +93,7 @@ public class XPathParser extends XPathOperation implements Function<DocumentBuil
         NodeList value = (NodeList) getExpressions().get( i ).evaluate( document, XPathConstants.NODESET );
 
         if( LOG.isDebugEnabled() )
-          LOG.debug( "xpath: " + paths[ i ] + " was: " + ( value != null && value.getLength() != 0 ) );
+          LOG.debug( "xpath: {} was: {}", paths[ i ], value != null && value.getLength() != 0 );
 
         if( value != null && value.getLength() != 0 )
           tuple.add( writeAsXML( value.item( 0 ) ) );

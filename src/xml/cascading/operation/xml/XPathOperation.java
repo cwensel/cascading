@@ -53,7 +53,8 @@ import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -67,7 +68,7 @@ public class XPathOperation extends BaseOperation<DocumentBuilder>
     new String[]{"xhtml", "http://www.w3.org/1999/xhtml"}};
 
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( XPathOperation.class );
+  private static final Logger LOG = LoggerFactory.getLogger( XPathOperation.class );
 
   /** Field namespaces */
   protected final String[][] namespaces;
@@ -139,7 +140,7 @@ public class XPathOperation extends BaseOperation<DocumentBuilder>
       for( String[] namespace : namespaces )
         {
         if( LOG.isDebugEnabled() )
-          LOG.debug( "adding namespace: " + namespace[ 0 ] + ":" + namespace[ 1 ] );
+          LOG.debug( "adding namespace: {}:{}", namespace[ 0 ], namespace[ 1 ] );
 
         namespaceContext.addNamespace( namespace[ 0 ], namespace[ 1 ] );
         }

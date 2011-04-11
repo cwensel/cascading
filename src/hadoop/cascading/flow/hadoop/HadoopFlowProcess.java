@@ -38,7 +38,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class HadoopFlowProcess is an implementation of {@link FlowProcess} for Hadoop. Use this interface to get direct
@@ -54,7 +55,7 @@ import org.apache.log4j.Logger;
 public class HadoopFlowProcess extends FlowProcess<JobConf>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HadoopFlowProcess.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopFlowProcess.class );
 
   public static final String SPILL_THRESHOLD = "cascading.cogroup.spill.threshold";
   public static final int defaultThreshold = 10 * 1000;
@@ -322,12 +323,12 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
       {
       try
         {
-        LOG.info( "attempting to load codec: " + codec );
+        LOG.info( "attempting to load codec: {}", codec );
         codecClass = Thread.currentThread().getContextClassLoader().loadClass( codec ).asSubclass( CompressionCodec.class );
 
         if( codecClass != null )
           {
-          LOG.info( "found codec: " + codec );
+          LOG.info( "found codec: {}", codec );
 
           break;
           }
@@ -340,7 +341,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
 
     if( codecClass == null )
       {
-      LOG.warn( "codecs set, but unable to load any: " + codecs );
+      LOG.warn( "codecs set, but unable to load any: {}", codecs );
       return null;
       }
 

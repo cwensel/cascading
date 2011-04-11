@@ -33,11 +33,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Hadoop18TapUtil
   {
-  private static final Logger LOG = Logger.getLogger( Hadoop18TapUtil.class );
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( Hadoop18TapUtil.class );
+
   private static final String TEMPORARY_PATH = "_temporary";
 
   private static final Map<String, AtomicInteger> pathCounts = new HashMap<String, AtomicInteger>();
@@ -68,7 +71,7 @@ public class Hadoop18TapUtil
 
     if( writeDirectlyToWorkingPath( conf, outputPath ) )
       {
-      LOG.info( "writing directly to output path: " + outputPath );
+      LOG.info( "writing directly to output path: {}", outputPath );
       setWorkOutputPath( conf, outputPath );
       return;
       }
@@ -92,7 +95,7 @@ public class Hadoop18TapUtil
 
     String taskId = conf.get( "mapred.task.id" );
 
-    LOG.info( "setting up task: '" + taskId + "' - " + workpath );
+    LOG.info( "setting up task: '{}' - {}", taskId, workpath );
 
     AtomicInteger integer = pathCounts.get( workpath );
 
@@ -149,7 +152,7 @@ public class Hadoop18TapUtil
 
     String taskId = conf.get( "mapred.task.id" );
 
-    LOG.info( "committing task: '" + taskId + "' - " + taskOutputPath );
+    LOG.info( "committing task: '{}' - {}", taskId, taskOutputPath );
 
     if( taskOutputPath != null )
       {
@@ -164,9 +167,9 @@ public class Hadoop18TapUtil
 
         // Delete the temporary task-specific output directory
         if( !fs.delete( taskOutputPath, true ) )
-          LOG.info( "failed to delete the temporary output directory of task: '" + taskId + "' - " + taskOutputPath );
+          LOG.info( "failed to delete the temporary output directory of task: '{}' - {}", taskId, taskOutputPath );
 
-        LOG.info( "saved output of task '" + taskId + "' to " + jobOutputPath );
+        LOG.info( "saved output of task '{}' to {}", taskId, jobOutputPath );
         }
       }
     }
@@ -213,7 +216,7 @@ public class Hadoop18TapUtil
 
       Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
 
-      LOG.info( "deleting temp path " + tmpDir );
+      LOG.info( "deleting temp path {}", tmpDir );
 
       if( fileSys.exists( tmpDir ) )
         fileSys.delete( tmpDir, true );
@@ -273,9 +276,7 @@ public class Hadoop18TapUtil
       FileSystem fileSys = tmpDir.getFileSystem( conf );
 
       if( !fileSys.exists( tmpDir ) && !fileSys.mkdirs( tmpDir ) )
-        {
-        LOG.error( "mkdirs failed to create " + tmpDir.toString() );
-        }
+        LOG.error( "mkdirs failed to create {}", tmpDir );
       }
     }
 
@@ -297,7 +298,8 @@ public class Hadoop18TapUtil
           throw new IOException( "Failed to save output of task: " + taskId );
           }
         }
-      LOG.debug( "Moved " + taskOutput + " to " + finalOutputPath );
+
+      LOG.debug( "Moved {} to {}", taskOutput, finalOutputPath );
       }
     else if( fs.getFileStatus( taskOutput ).isDir() )
       {
@@ -307,9 +309,7 @@ public class Hadoop18TapUtil
       if( paths != null )
         {
         for( FileStatus path : paths )
-          {
           moveTaskOutputs( conf, fs, jobOutputDir, path.getPath() );
-          }
         }
       }
     }

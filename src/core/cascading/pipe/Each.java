@@ -34,7 +34,6 @@ import cascading.operation.Function;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.log4j.Logger;
 
 /**
  * The Each operator applies either a {@link Function} or a {@link Filter} to each entry in the {@link Tuple}
@@ -43,8 +42,6 @@ import org.apache.log4j.Logger;
  */
 public class Each extends Operator
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Each.class );
   /** Field FUNCTION_SELECTOR */
   private static final Fields FUNCTION_SELECTOR = Fields.RESULTS;
   /** Field FILTER_SELECTOR */

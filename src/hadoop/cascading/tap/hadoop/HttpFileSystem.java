@@ -34,7 +34,8 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class HttpFileSystem provides a basic read-only {@link FileSystem} for accessing remote HTTP and HTTPS data.
@@ -44,7 +45,7 @@ import org.apache.log4j.Logger;
 public class HttpFileSystem extends StreamedFileSystem
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( HttpFileSystem.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HttpFileSystem.class );
 
   /** Field HTTP_SCHEME */
   public static final String HTTP_SCHEME = "http";
@@ -149,11 +150,11 @@ public class HttpFileSystem extends StreamedFileSystem
     {
     if( LOG.isDebugEnabled() )
       {
-      LOG.debug( "connection.getURL() = " + connection.getURL() );
-      LOG.debug( "connection.getRequestMethod() = " + connection.getRequestMethod() );
-      LOG.debug( "connection.getResponseCode() = " + connection.getResponseCode() );
-      LOG.debug( "connection.getResponseMessage() = " + connection.getResponseMessage() );
-      LOG.debug( "connection.getContentLength() = " + connection.getContentLength() );
+      LOG.debug( "connection.getURL() = {}", connection.getURL() );
+      LOG.debug( "connection.getRequestMethod() = {}", connection.getRequestMethod() );
+      LOG.debug( "connection.getResponseCode() = {}", connection.getResponseCode() );
+      LOG.debug( "connection.getResponseMessage() = {}", connection.getResponseMessage() );
+      LOG.debug( "connection.getContentLength() = {}", connection.getContentLength() );
       }
     }
 

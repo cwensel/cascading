@@ -49,7 +49,8 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class Hfs is the base class for all Hadoop file system access. Use {@link cascading.tap.hadoop.Dfs}, or {@link Lfs}
@@ -65,9 +66,7 @@ import org.apache.log4j.Logger;
 public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Hfs.class );
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
+  private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
 
   /** Field TEMPORARY_DIRECTORY */
   private static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
@@ -228,8 +227,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       {
       URI uriScheme = null;
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "handling path: " + stringPath );
+      LOG.debug( "handling path: {}", stringPath );
 
       URI uri = new URI( stringPath );
       String schemeString = uri.getScheme();
@@ -237,8 +235,8 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
       if( LOG.isDebugEnabled() )
         {
-        LOG.debug( "found scheme: " + schemeString );
-        LOG.debug( "found authority: " + authority );
+        LOG.debug( "found scheme: {}", schemeString );
+        LOG.debug( "found authority: {}", authority );
         }
 
       if( schemeString != null && authority != null )
@@ -248,8 +246,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       else
         uriScheme = getDefaultFileSystemURIScheme( jobConf );
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "using uri scheme: " + uriScheme );
+      LOG.debug( "using uri scheme: {}", uriScheme );
 
       return uriScheme;
       }
@@ -387,7 +384,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   public boolean deletePath( JobConf conf ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "deleting: " + getQualifiedPath( conf ) );
+      LOG.debug( "deleting: {}", getQualifiedPath( conf ) );
 
     // do not delete the root directory
     if( new Path( getQualifiedPath( conf ) ).depth() == 0 )

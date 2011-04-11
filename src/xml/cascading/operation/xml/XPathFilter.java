@@ -30,7 +30,8 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
@@ -40,7 +41,7 @@ import org.w3c.dom.Document;
 public class XPathFilter extends XPathOperation implements Filter<DocumentBuilder>
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( XPathFilter.class );
+  private static final Logger LOG = LoggerFactory.getLogger( XPathFilter.class );
 
   /** Field removeMatch */
   private boolean removeMatch = false;
@@ -80,8 +81,7 @@ public class XPathFilter extends XPathOperation implements Filter<DocumentBuilde
       {
       boolean value = (Boolean) expression.evaluate( document, XPathConstants.BOOLEAN );
 
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "xpath: " + paths[ 0 ] + " matches: " + value );
+      LOG.debug( "xpath: {} matches: {}", paths[ 0 ], value );
 
       return value == removeMatch;
       }

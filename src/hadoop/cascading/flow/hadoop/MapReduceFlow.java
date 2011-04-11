@@ -34,7 +34,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 
 /**
  * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs pre-configured via the {@link JobConf}
@@ -48,9 +47,6 @@ import org.apache.log4j.Logger;
  */
 public class MapReduceFlow extends HadoopFlow
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( MapReduceFlow.class );
-
   /** Field deleteSinkOnInit */
   private boolean deleteSinkOnInit = false;
 

@@ -49,9 +49,10 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleIterator;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import riffle.process.DependencyIncoming;
 import riffle.process.DependencyOutgoing;
 import riffle.process.ProcessCleanup;
@@ -85,7 +86,7 @@ import riffle.process.ProcessStop;
 public abstract class Flow<Config> implements Runnable
   {
   /** Field LOG */
-  protected static final Logger LOG = Logger.getLogger( Flow.class );
+  private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
 
   /** Field id */
   private String id;
