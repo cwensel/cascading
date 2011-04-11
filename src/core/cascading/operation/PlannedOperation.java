@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,11 +22,11 @@
 package cascading.operation;
 
 /**
- * Interface PlannedOperation is implemened by all {@link Operation} implementations
- * that use a {@link PlannerLevel} value to inform the {@link cascading.flow.FlowPlanner} how to treat the operation
+ * Interface PlannedOperation is implemented by all {@link Operation} implementations
+ * that use a {@link PlannerLevel} value to inform the {@link cascading.flow.planner.FlowPlanner} how to treat the operation
  * during job planning.
  */
-public interface PlannedOperation<C> extends Operation<C>
+public interface PlannedOperation<Context> extends Operation<Context>
   {
   boolean supportsPlannerLevel( PlannerLevel plannerLevel );
   }

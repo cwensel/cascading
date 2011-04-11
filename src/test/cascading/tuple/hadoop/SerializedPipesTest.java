@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,17 +21,18 @@
 
 package cascading.tuple.hadoop;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
-import cascading.flow.MultiMapReducePlanner;
+import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.hadoop.HadoopPlanner;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -44,26 +45,23 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.CoGroupClosure;
-import cascading.scheme.SequenceFile;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.scheme.hadoop.SequenceFile;
+import cascading.scheme.hadoop.TextLine;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.Hfs;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 
-public class SerializedPipesTest extends ClusterTestCase
+import static data.InputData.*;
+
+@PlatformTest(platforms = {"hadoop"})
+public class SerializedPipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-
-  String outputPath = "build/test/output/tuple/";
-
   public static class InsertBytes extends BaseOperation implements Function
     {
     String asBytes;
@@ -209,15 +207,12 @@ public class SerializedPipesTest extends ClusterTestCase
 
   public SerializedPipesTest()
     {
-    super( "serialized pipes", true ); // leave cluster testing enabled
+    super( true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
@@ -233,15 +228,13 @@ public class SerializedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new InsertBoolean( new Fields( "boolean" ), false ), Fields.ALL );
 
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/hadoop/serialization", true );
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), getOutputPath( "serialization" ), SinkMode.REPLACE );
 
     Map<Object, Object> jobProperties = getProperties();
 
     TupleSerialization.addSerializationToken( jobProperties, 1000, BooleanWritable.class.getName() );
 
-    Flow flow = new FlowConnector( jobProperties ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "groupcount.dot" );
+    Flow flow = new HadoopFlowConnector( jobProperties ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -251,11 +244,8 @@ public class SerializedPipesTest extends ClusterTestCase
 
   public void testCoGroupWritableAsKeyValue() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
@@ -268,7 +258,7 @@ public class SerializedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/hadoop/writablekeyvalue", true );
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), getOutputPath( "writablekeyvalue" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new Each( pipeLower, new InsertBytes( new Fields( "group" ), "inserted text as bytes" ), Fields.ALL );
@@ -280,23 +270,17 @@ public class SerializedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "group" ), pipeUpper, new Fields( "group" ), Fields.size( 8 ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    Flow countFlow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
 
     countFlow.complete();
 
-    validateLength( countFlow, 25, null );
+    validateLength( countFlow, 25 );
     }
 
   public void testCoGroupBytesWritableAsKeyValue() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
@@ -309,7 +293,7 @@ public class SerializedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/hadoop/byteswritablekeyvalue", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "line" ) ), getOutputPath( "byteswritablekeyvalue" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new Each( pipeLower, new Fields( "char" ), new ReplaceAsBytes( new Fields( "char" ) ), Fields.REPLACE );
@@ -319,30 +303,21 @@ public class SerializedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> results = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\t61\t1\t41", iterator.next().get( 1 ) );
-
-    iterator.close();
-
+    assertTrue( results.contains( new Tuple( "1\t61\t1\t41" ) ) );
     }
 
   public void testCoGroupSpillCustomWritable() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
@@ -354,8 +329,7 @@ public class SerializedPipesTest extends ClusterTestCase
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/hadoop/customerwritable", true );
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), getOutputPath( "customerwritable" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", false ), Fields.ALL );
@@ -371,21 +345,18 @@ public class SerializedPipesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    properties.put( CoGroupClosure.SPILL_THRESHOLD, 1 );
+    properties.put( HadoopFlowProcess.SPILL_THRESHOLD, 1 );
 //    String serializations = MultiMapReducePlanner.getJobConf( properties ).get( "io.serializations" );
 //    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
 //    System.out.println( "serializations = " + serializations );
 //    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations",serializations );
-    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations", TestSerialization.class.getName() );
+    HadoopPlanner.getJobConf( properties ).set( "io.serializations", TestSerialization.class.getName() );
 
-    Flow countFlow = new FlowConnector( properties ).connect( sources, sink, splice );
+    Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
-
-    validateLength( countFlow, 25, null );
+    validateLength( flow, 25 );
     }
 
   public void testCoGroupRawAsKeyValue() throws Exception
@@ -426,11 +397,8 @@ public class SerializedPipesTest extends ClusterTestCase
   private void invokeRawAsKeyValue( boolean useDefaultComparator, boolean secondarySortOnValue, boolean ignoreSerializationToken, boolean compositeGrouping )
     throws IOException
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
@@ -444,7 +412,7 @@ public class SerializedPipesTest extends ClusterTestCase
 
     // using null pos so all fields are written
     Fields fields = new Fields( "num", "char", "group", "value", "num2", "char2", "group2", "value2" );
-    Tap sink = new Hfs( new SequenceFile( fields ), outputPath + "/hadoop/rawbyteskeyvalue/" + useDefaultComparator + "/" + secondarySortOnValue + "/" + ignoreSerializationToken + "/" + compositeGrouping, true );
+    Tap sink = new Hfs( new SequenceFile( fields ), getOutputPath( "/rawbyteskeyvalue/" + useDefaultComparator + "/" + secondarySortOnValue + "/" + ignoreSerializationToken + "/" + compositeGrouping ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new Each( pipeLower, new InsertTestText( new Fields( "group" ), "inserted text as bytes", true, 3, 4 ), Fields.ALL );
@@ -489,13 +457,13 @@ public class SerializedPipesTest extends ClusterTestCase
       TupleSerialization.addSerialization( properties, NoTokenTestBytesSerialization.class.getName() );
       }
 
-    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 1 );
+    HadoopPlanner.getJobConf( properties ).setNumMapTasks( 1 );
 
-    Flow flow = new FlowConnector( properties ).connect( sources, sink, splice );
+    Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5 );
 
     // test the ordering
     TupleEntryIterator iterator = flow.openSink();

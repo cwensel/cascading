@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -33,9 +33,9 @@ import cascading.cascade.Cascade;
 public class CascadeStats extends CascadingStats
   {
   /** Field cascadeId */
-  String cascadeID;
+  final String cascadeID;
   /** Field flowStatsList */
-  List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
+  final List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
 
   public CascadeStats( String name, String cascadeID )
     {

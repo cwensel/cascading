@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -35,6 +35,7 @@ import cascading.flow.FlowProcess;
  * The frequency that fields and tuples are printed can be set via {@link #setPrintFieldsEvery(int)} and
  * {@link #setPrintTupleEvery(int)} methods, respectively.
  */
+@SuppressWarnings({"UseOfSystemOutOrSystemErr"})
 public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedOperation<Long>
   {
   static public enum Output
@@ -229,6 +230,9 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
   @Override
   public void cleanup( FlowProcess flowProcess, OperationCall<Long> longOperationCall )
     {
+    if( longOperationCall.getContext() == null )
+      return;
+
     PrintStream stream = output == Output.STDOUT ? System.out : System.err;
 
     print( stream, "tuples count: " + longOperationCall.getContext().toString() );

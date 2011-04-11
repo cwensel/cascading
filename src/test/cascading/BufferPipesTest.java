@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,56 +21,38 @@
 
 package cascading;
 
-import java.io.File;
+import java.util.List;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Insert;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryIterator;
 
-public class BufferPipesTest extends ClusterTestCase
+import static data.InputData.inputFileJoined;
+import static data.InputData.inputFileLhs;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class BufferPipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums20 = "build/test/data/nums.20.txt";
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-  String inputFileCritics = "build/test/data/critics.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-  String inputFileLowerOffset = "build/test/data/lower-offset.txt";
-  String inputFileJoined = "build/test/data/lower+upper.txt";
-
-  String inputFileLhs = "build/test/data/lhs.txt";
-  String inputFileRhs = "build/test/data/rhs.txt";
-  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
-
-  String outputPath = "build/test/output/buffer/";
-
   public BufferPipesTest()
     {
-    super( "buffer pipes", false ); // no need for clustering
+    super( false ); // no need for clustering
     }
 
   public void testSimpleBuffer() throws Exception
     {
-    if( !new File( inputFileLhs ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLhs );
 
-    copyFromLocal( inputFileLhs );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "simple" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -82,34 +64,27 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "unknownselect.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 23, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\tnull\tnext\tfinal", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\ta\tnext\tfinal", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\tb\tnext\tfinal", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\tc\tnext\tfinal", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\tnull\tnext\tfinal", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( results.contains( new Tuple( "1\tnull\tnext\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "1\ta\tnext\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tb\tnext\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tc\tnext\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tnull\tnext\tfinal" ) ) );
     }
 
   public void testSimpleBuffer2() throws Exception
     {
-    if( !new File( inputFileLhs ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLhs );
 
-    copyFromLocal( inputFileLhs );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple2", true );
+    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "simple2" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -121,35 +96,25 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Insert( new Fields( "final" ), "final" ), Fields.ALL );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "unknownselect.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 18, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    Comparable line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "next\tfinal", line );
-
-    iterator.close();
+    assertTrue( results.contains( new Tuple( "next\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "next\tfinal" ) ) );
+    assertTrue( results.contains( new Tuple( "next\tfinal" ) ) );
     }
 
   public void testSimpleBuffer3() throws Exception
     {
-    if( !new File( inputFileJoined ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileJoined );
 
-    copyFromLocal( inputFileJoined );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple3", true );
+    Tap source = getPlatform().getTextFile( inputFileJoined );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "simple3" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -159,23 +124,16 @@ public class BufferPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new TestBuffer( new Fields( "new" ), new Tuple( "new" ) ), new Fields( "new", "lower", "upper" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "unknownselect.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 5, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    Comparable line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "new\ta\tA", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "new\tb\tB", line );
-    line = iterator.next().get( 1 );
-    assertEquals( "not equal: tuple.get(1)", "new\tc\tC", line );
-
-    iterator.close();
+    assertTrue( results.contains( new Tuple( "new\ta\tA" ) ) );
+    assertTrue( results.contains( new Tuple( "new\tb\tB" ) ) );
+    assertTrue( results.contains( new Tuple( "new\tc\tC" ) ) );
     }
   }

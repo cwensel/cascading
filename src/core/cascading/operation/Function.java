@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.flow.FlowProcess;
 
 /** Interface Function marks a given {@link BaseOperation} as a function, as opposed to being a {@link Filter}. */
-public interface Function<C> extends Operation<C>
+public interface Function<Context> extends Operation<Context>
   {
   /**
    * Method operate provides the implementation of this Function.
@@ -32,5 +32,5 @@ public interface Function<C> extends Operation<C>
    * @param flowProcess  of type FlowProcess
    * @param functionCall of type FunctionCall
    */
-  void operate( FlowProcess flowProcess, FunctionCall<C> functionCall );
+  void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall );
   }

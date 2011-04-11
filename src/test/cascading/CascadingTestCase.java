@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,7 +22,12 @@
 package cascading;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
@@ -32,6 +37,7 @@ import cascading.operation.Buffer;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.Function;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -46,13 +52,9 @@ import junit.framework.TestCase;
  */
 public class CascadingTestCase extends TestCase
   {
+
   public CascadingTestCase()
     {
-    }
-
-  public CascadingTestCase( String string )
-    {
-    super( string );
     }
 
   protected void validateLength( Flow flow, int length ) throws IOException
@@ -104,6 +106,7 @@ public class CascadingTestCase extends TestCase
   protected void validateLength( TupleEntryIterator iterator, int length, int size, Pattern regex )
     {
     int count = 0;
+
     while( iterator.hasNext() )
       {
       TupleEntry tupleEntry = iterator.next();
@@ -117,7 +120,14 @@ public class CascadingTestCase extends TestCase
       count++;
       }
 
-    iterator.close();
+    try
+      {
+      iterator.close();
+      }
+    catch( IOException exception )
+      {
+      throw new RuntimeException( exception );
+      }
 
     assertEquals( "wrong number of lines", length, count );
     }
@@ -201,7 +211,7 @@ public class CascadingTestCase extends TestCase
 
     filter.prepare( FlowProcess.NULL, operationCall );
 
-    boolean[] results = new boolean[argumentsArray.length];
+    boolean[] results = new boolean[ argumentsArray.length ];
 
     for( int i = 0; i < argumentsArray.length; i++ )
       {
@@ -286,11 +296,74 @@ public class CascadingTestCase extends TestCase
 
   private TupleEntry[] makeArgumentsArray( Tuple[] argumentsArray )
     {
-    TupleEntry[] entries = new TupleEntry[argumentsArray.length];
+    TupleEntry[] entries = new TupleEntry[ argumentsArray.length ];
 
     for( int i = 0; i < argumentsArray.length; i++ )
       entries[ i ] = new TupleEntry( argumentsArray[ i ] );
 
     return entries;
+    }
+
+  protected List<Tuple> getSourceAsList( Flow flow ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openSource();
+
+    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
+
+    iterator.close();
+
+    return result;
+    }
+
+  protected List<Tuple> getSinkAsList( Flow flow ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openSink();
+
+    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
+
+    iterator.close();
+
+    return result;
+    }
+
+  protected List<Tuple> asList( Flow flow, Tap tap ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openTapForRead( tap );
+
+    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
+
+    iterator.close();
+
+    return result;
+    }
+
+  protected Set<Tuple> asSet( Flow flow, Tap tap ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openTapForRead( tap );
+
+    Set<Tuple> result = asCollection( iterator, new HashSet<Tuple>() );
+
+    iterator.close();
+
+    return result;
+    }
+
+  protected <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, C collection ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openTapForRead( tap );
+
+    C result = asCollection( iterator, collection );
+
+    iterator.close();
+
+    return result;
+    }
+
+  protected <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, C result )
+    {
+    while( iterator.hasNext() )
+      result.add( iterator.next().getTupleCopy() );
+
+    return result;
     }
   }

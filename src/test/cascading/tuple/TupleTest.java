@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,16 +27,19 @@ import java.io.IOException;
 import java.util.Date;
 
 import cascading.CascadingTestCase;
+import cascading.test.PlatformTest;
+import cascading.tuple.hadoop.HadoopTupleInputStream;
+import cascading.tuple.hadoop.HadoopTupleOutputStream;
+import cascading.tuple.hadoop.TupleSerialization;
 
+@PlatformTest(platforms = {"none"})
 public class TupleTest extends CascadingTestCase
   {
   private Tuple tuple;
 
   public TupleTest()
     {
-    super( "tuple tests" );
     }
-
 
   @Override
   protected void setUp() throws Exception
@@ -284,14 +287,14 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0", true );
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    TupleOutputStream dataOutputStream = new TupleOutputStream( byteArrayOutputStream );
+    TupleOutputStream dataOutputStream = new HadoopTupleOutputStream( byteArrayOutputStream, new TupleSerialization().getElementWriter() );
 
     dataOutputStream.writeTuple( aTuple );
 
     dataOutputStream.flush();
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray() );
-    TupleInputStream dataInputStream = new TupleInputStream( byteArrayInputStream );
+    TupleInputStream dataInputStream = new HadoopTupleInputStream( byteArrayInputStream, new TupleSerialization().getElementReader() );
 
     Tuple newTuple = new Tuple();
 

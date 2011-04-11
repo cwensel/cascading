@@ -34,13 +34,12 @@
   <configurations>
     <conf name="core"/>
     <conf name="xml"/>
+    <conf name="local"/>
+    <conf name="hadoop"/>
 
-    <conf name="default" extends="core,xml"/>
+    <conf name="default" extends="core,xml,local,hadoop"/>
 
     <conf name="test"/>
-
-    <conf name="default.provided"/>
-    <conf name="test.provided"/>
   </configurations>
 
   <publications>
@@ -50,22 +49,46 @@
     <artifact conf="xml" name="cascading-xml" type="jar" ext="jar"/>
     <artifact conf="xml" name="cascading-xml" type="pom" ext="pom"/>
 
+    <artifact conf="local" name="cascading-local" type="jar" ext="jar"/>
+    <artifact conf="local" name="cascading-local" type="pom" ext="pom"/>
+
+    <artifact conf="hadoop" name="cascading-hadoop" type="jar" ext="jar"/>
+    <artifact conf="hadoop" name="cascading-hadoop" type="pom" ext="pom"/>
+
     <artifact conf="test" name="cascading-test" type="jar" ext="jar"/>
     <artifact conf="test" name="cascading-test" type="pom" ext="pom"/>
   </publications>
 
   <dependencies>
-    <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="default.provided->default">
-      <exclude org="ant"/>
-    </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test.provided->default"/>
 
+    <!-- core -->
     <dependency org="thirdparty" name="jgrapht-jdk1.6" rev="0.8.1" conf="core->default"/>
     <dependency org="riffle" name="riffle" rev="0.1-dev" conf="core->default"/>
     <dependency org="org.codehaus.janino" name="janino" rev="2.5.16" conf="core->default"/>
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.6.1" conf="core->default"/>
+    <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.1" conf="core->default"/>
 
+    <!-- need to remove dep -->
+    <dependency org="log4j" name="log4j" rev="1.2.16" conf="core->default"/>
+
+    <!-- xml -->
     <dependency org="org.ccil.cowan.tagsoup" name="tagsoup" rev="1.2" conf="xml->default"/>
 
-    <dependency org="junit" name="junit" rev="4.4" conf="test->default"/>
+    <!-- local -->
+    <dependency org="com.google.guava" name="guava" rev="r08" conf="local->default"/>
+
+    <!-- hadoop -->
+    <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="hadoop->default">
+      <exclude org="ant"/>
+    </dependency>
+
+    <!-- test -->
+    <dependency org="junit" name="junit" rev="4.8.+" conf="test->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->default">
+      <exclude org="ant"/>
+      <exclude name="hadoop-core"/>
+    </dependency>
+    <dependency org="commons-io" name="commons-io" rev="2.0.1" conf="test->default"/>
+
   </dependencies>
 </ivy-module>

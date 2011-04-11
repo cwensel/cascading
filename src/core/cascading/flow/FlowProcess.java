@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,70 +22,139 @@
 package cascading.flow;
 
 import java.io.IOException;
+import java.util.Map;
 
 import cascading.tap.Tap;
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
 /**
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
- * {@link cascading.operation.Operation} is given a reference to a particluar implemenation, allowing it
+ * {@link cascading.operation.Operation} is given a reference to a particular implementation, allowing it
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>
  * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link cascading.flow.Flow}.
  * Thus, a call to {@link #increment(Enum, int)} may start incrementing from zero if the operation making the call
- * belongs to a subsquent 'job' or 'step' from any previous operations calling increment.
+ * belongs to a subsequent 'job' or 'step' from any previous operations calling increment.
  * <p/>
  * A FlowProcess is roughly a child of {@link FlowSession}. FlowSession is roughly one to one with a particular {@link Flow}.
  * And every FlowSession will have one or more FlowProcesses.
  *
  * @see FlowSession
  */
-public abstract class FlowProcess
+public abstract class FlowProcess<Config>
   {
   /** Field NULL is a noop implementation of FlowSession. */
-  public static FlowProcess NULL = new FlowProcess( FlowSession.NULL )
-  {
-  public Object getProperty( String key )
-    {
-    return null;
-    }
+  public static FlowProcess NULL = new BaseFlowProcess();
 
-  public void keepAlive()
+  public static class BaseFlowProcess extends FlowProcess<Object>
     {
-    }
+    public BaseFlowProcess()
+      {
+      super( FlowSession.NULL );
+      }
 
-  public void increment( Enum counter, int amount )
-    {
-    }
+    @Override
+    public FlowProcess copyWith( Object object )
+      {
+      return new BaseFlowProcess();
+      }
 
-  public void increment( String group, String counter, int amount )
-    {
-    }
+    public Object getProperty( String key )
+      {
+      return null;
+      }
 
-  public void setStatus( String status )
-    {
-    }
+    public void keepAlive()
+      {
+      }
 
-  @Override
-  public boolean isCounterStatusInitialized()
-    {
-    return true;
-    }
+    public void increment( Enum counter, int amount )
+      {
+      }
 
-  public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
-    {
-    return null;
-    }
+    public void increment( String group, String counter, int amount )
+      {
+      }
 
-  public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
-    {
-    return null;
+    public void setStatus( String status )
+      {
+      }
+
+    @Override
+    public boolean isCounterStatusInitialized()
+      {
+      return true;
+      }
+
+    @Override
+    public int getNumConcurrentTasks()
+      {
+      return 0;
+      }
+
+    @Override
+    public int getCurrentTaskNum()
+      {
+      return 0;
+      }
+
+    public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
+      {
+      return tap.openForRead( this );
+      }
+
+    public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
+      {
+      return tap.openForWrite( this );
+      }
+
+    @Override
+    public TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException
+      {
+      return trap.openForWrite( this );
+      }
+
+    @Override
+    public TupleEntryCollector openSystemIntermediateForWrite() throws IOException
+      {
+      return null;
+      }
+
+    @Override
+    public SpillableTupleList createSpillableTupleList()
+      {
+      return null;
+      }
+
+    @Override
+    public Object getConfigCopy()
+      {
+      return null;
+      }
+
+    @Override
+    public Object copyConfig( Object jobConf )
+      {
+      return jobConf;
+      }
+
+    @Override
+    public Map<String, String> diffConfigIntoMap( Object defaultConfig, Object updatedConfig )
+      {
+      return null;
+      }
+
+    @Override
+    public Object mergeMapIntoConfig( Object defaultConfig, Map<String, String> map )
+      {
+      return null;
+      }
     }
-  };
 
   /** Field currentSession */
-  private FlowSession currentSession;
+  private FlowSession currentSession = FlowSession.NULL;
 
   protected FlowProcess()
     {
@@ -95,6 +164,8 @@ public abstract class FlowProcess
     {
     setCurrentSession( currentSession );
     }
+
+  public abstract FlowProcess copyWith( Config config );
 
   /**
    * Method getCurrentSession returns the currentSession of this FlowProcess object.
@@ -117,6 +188,10 @@ public abstract class FlowProcess
 
     currentSession.setCurrentProcess( this );
     }
+
+  public abstract int getNumConcurrentTasks();
+
+  public abstract int getCurrentTaskNum();
 
   /**
    * Method getProperty should be used to return configuration parameters from the underlying system.
@@ -192,4 +267,18 @@ public abstract class FlowProcess
    * @throws java.io.IOException when there is a failure opening the resource
    */
   public abstract TupleEntryCollector openTapForWrite( Tap tap ) throws IOException;
+
+  public abstract TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException;
+
+  public abstract TupleEntryCollector openSystemIntermediateForWrite() throws IOException;
+
+  public abstract SpillableTupleList createSpillableTupleList();
+
+  public abstract Config getConfigCopy();
+
+  public abstract Config copyConfig( Config jobConf );
+
+  public abstract Map<String, String> diffConfigIntoMap( Config defaultConfig, Config updatedConfig );
+
+  public abstract Config mergeMapIntoConfig( Config defaultConfig, Map<String, String> map );
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -66,7 +66,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     if( filters == null )
       throw new IllegalArgumentException( "given filters array must not be null" );
 
-    this.argumentSelectors = new Fields[filters.length];
+    this.argumentSelectors = new Fields[ filters.length ];
     Arrays.fill( this.argumentSelectors, Fields.ALL );
 
     verify();
@@ -121,7 +121,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     Context context = new Context();
 
     context.argumentEntries = getArgumentEntries();
-    context.contexts = new Object[filters.length];
+    context.contexts = new Object[ filters.length ];
 
     for( int i = 0; i < filters.length; i++ )
       {
@@ -173,7 +173,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
 
   private final TupleEntry[] getArgumentEntries()
     {
-    TupleEntry[] argumentEntries = new TupleEntry[argumentSelectors.length];
+    TupleEntry[] argumentEntries = new TupleEntry[ argumentSelectors.length ];
 
     for( int i = 0; i < argumentSelectors.length; i++ )
       {

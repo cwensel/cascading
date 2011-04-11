@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -30,65 +30,58 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowProcess;
+import cascading.scheme.NullScheme;
 import cascading.scheme.Scheme;
-import cascading.scheme.SequenceFile;
-import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.log4j.Logger;
 
 /**
- * Class MultiSinkTap is both a {@link CompositeTap} and {@link SinkTap} that can write to multiple child {@link Tap} instances simultaneously.
+ * Class MultiSinkTap is both a {@link cascading.tap.CompositeTap} and {@link cascading.tap.SinkTap} that can write to
+ * multiple child {@link cascading.tap.Tap} instances simultaneously.
  * <p/>
- * It is the counterpart to {@link MultiSourceTap}.
+ * It is the counterpart to {@link cascading.tap.MultiSourceTap}.
  */
-public class MultiSinkTap extends SinkTap implements CompositeTap
+public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Output> extends SinkTap<Process, Config, Input, Output> implements CompositeTap
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( MultiSinkTap.class );
 
   /** Field taps */
-  private Tap[] taps;
+  private final Tap[] taps;
   /** Field tempPath */
-  private String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
+  private final String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
   /** Field childConfigs */
   private List<Map<String, String>> childConfigs;
 
-  private class MultiSinkCollector extends TupleEntryCollector implements OutputCollector
+  private class MultiSinkCollector extends TupleEntryCollector
     {
-    OutputCollector[] collectors;
+    TupleEntryCollector[] collectors;
 
-    public MultiSinkCollector( JobConf conf, Tap... taps ) throws IOException
+    public MultiSinkCollector( Process flowProcess, Tap... taps ) throws IOException
       {
-      collectors = new OutputCollector[taps.length];
+      super( Fields.asDeclaration( getSinkFields() ) );
 
-      conf = new JobConf( conf );
+      collectors = new TupleEntryCollector[ taps.length ];
 
-      JobConf[] jobConfs = MultiInputFormat.getJobConfs( conf, childConfigs );
+      Config conf = flowProcess.getConfigCopy();
 
       for( int i = 0; i < taps.length; i++ )
         {
+        Config mergedConf = flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
         Tap tap = taps[ i ];
         LOG.info( "opening for write: " + tap.toString() );
 
-        collectors[ i ] = (OutputCollector) tap.openForWrite( jobConfs[ i ] );
+        collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ) );
         }
       }
 
-    protected void collect( Tuple tuple )
+    protected void collect( TupleEntry tupleEntry ) throws IOException
       {
-      throw new UnsupportedOperationException( "collect should never be called on MultiSinkCollector" );
-      }
-
-    public void collect( Object key, Object value ) throws IOException
-      {
-      for( OutputCollector collector : collectors )
-        collector.collect( key, value );
+      for( int i = 0; i < taps.length; i++ )
+        collectors[ i ].add( tupleEntry );
       }
 
     @Override
@@ -98,11 +91,11 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
 
       try
         {
-        for( OutputCollector collector : collectors )
+        for( TupleEntryCollector collector : collectors )
           {
           try
             {
-            ( (TupleEntryCollector) collector ).close();
+            collector.close();
             }
           catch( Exception exception )
             {
@@ -140,41 +133,35 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public boolean isWriteDirect()
+  public String getPath()
     {
-    return true;
+    return tempPath;
     }
 
   @Override
-  public Path getPath()
+  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
-    return new Path( tempPath );
+    return new MultiSinkCollector( flowProcess, getTaps() );
     }
 
   @Override
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
-    {
-    return new MultiSinkCollector( conf, getTaps() );
-    }
-
-  @Override
-  public void sinkInit( JobConf conf ) throws IOException
+  public void sinkConfInit( Process process, Config conf ) throws IOException
     {
     childConfigs = new ArrayList<Map<String, String>>();
 
     for( int i = 0; i < getTaps().length; i++ )
       {
       Tap tap = getTaps()[ i ];
-      JobConf jobConf = new JobConf( conf );
+      Config jobConf = process.copyConfig( conf );
 
-      tap.sinkInit( jobConf );
+      tap.sinkConfInit( process, jobConf );
 
-      childConfigs.add( MultiInputFormat.getConfig( conf, jobConf ) );
+      childConfigs.add( process.diffConfigIntoMap( conf, jobConf ) );
       }
     }
 
   @Override
-  public boolean makeDirs( JobConf conf ) throws IOException
+  public boolean makeDirs( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
@@ -186,7 +173,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public boolean deletePath( JobConf conf ) throws IOException
+  public boolean deletePath( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
@@ -198,7 +185,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean pathExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
@@ -210,7 +197,7 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
     }
 
   @Override
-  public long getPathModified( JobConf conf ) throws IOException
+  public long getPathModified( Config conf ) throws IOException
     {
     long modified = getTaps()[ 0 ].getPathModified( conf );
 
@@ -218,13 +205,6 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
       modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
 
     return modified;
-    }
-
-  @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
-    {
-    for( int i = 0; i < taps.length; i++ )
-      taps[ i ].sink( tupleEntry, ( (MultiSinkCollector) outputCollector ).collectors[ i ] );
     }
 
   @Override
@@ -241,9 +221,9 @@ public class MultiSinkTap extends SinkTap implements CompositeTap
         fieldNames.add( (Comparable) o );
       }
 
-    Fields allFields = new Fields( fieldNames.toArray( new Comparable[fieldNames.size()] ) );
+    Fields allFields = new Fields( fieldNames.toArray( new Comparable[ fieldNames.size() ] ) );
 
-    setScheme( new SequenceFile( allFields ) );
+    setScheme( new NullScheme( allFields, allFields ) );
 
     return super.getScheme();
     }

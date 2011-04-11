@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,9 +28,9 @@ package cascading.tuple;
 public class FieldsResolverException extends TupleException
   {
   /** Field sourceFields */
-  private Fields sourceFields;
+  private final Fields sourceFields;
   /** Field selectorFields */
-  private Fields selectorFields;
+  private final Fields selectorFields;
 
   /**
    * Constructor FieldsResolverException creates a new FieldsResolverException instance.

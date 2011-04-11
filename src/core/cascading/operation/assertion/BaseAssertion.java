@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,7 +32,7 @@ import cascading.util.Util;
 
 /**
  * Class BaseAssertion is a convenience class for {@link cascading.operation.Assertion} implementations. Subclassing
- * this class is not required, but does provide some conveneince functions for signaling assertion failures.
+ * this class is not required, but does provide some convenience functions for signaling assertion failures.
  *
  * @see cascading.operation.Assertion
  * @see cascading.operation.GroupAssertion
@@ -88,7 +88,7 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     }
 
   /**
-   * Static method throwFail shoudl be used to throw an {@link AssertionException}.
+   * Static method throwFail should be used to throw an {@link AssertionException}.
    *
    * @param message of type String, the message to be thrown
    */
@@ -98,7 +98,7 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     }
 
   /**
-   * Static method throwFail shoudl be used to throw an {@link AssertionException}.
+   * Static method throwFail should be used to throw an {@link AssertionException}.
    *
    * @param message of type String, the message to be thrown as a format string
    * @param args    of type Object[], the values to be passed into the message format string

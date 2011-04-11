@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -33,7 +33,7 @@ import cascading.operation.OperationCall;
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
  * instance.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for the given instance,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for the given instance,
  * this filter will return the opposite, {@code false}.
  *
  * @see And
@@ -71,7 +71,7 @@ public class Not extends BaseOperation implements Filter
     filter.cleanup( flowProcess, operationCall );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     return !filter.isRemove( flowProcess, filterCall );

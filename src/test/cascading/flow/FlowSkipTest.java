@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,48 +21,41 @@
 
 package cascading.flow;
 
-import java.io.File;
-
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
-public class FlowSkipTest extends ClusterTestCase
+import static data.InputData.inputFileApache;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class FlowSkipTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-
-  String outputPath = "build/test/output/flowskip/";
-
   public FlowSkipTest()
     {
-    super( "flow skip", false ); // leave cluster testing disabled
+    super( false ); // leave cluster testing disabled
     }
 
   public void testSkipStrategiesReplace() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     // !!! enable replace
-    Tap sink = new Hfs( new TextLine(), outputPath + "/replace", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "replace" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-    sink.deletePath( flow.getJobConf() );
+    sink.deletePath( flow.getConfig() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );
@@ -84,23 +77,20 @@ public class FlowSkipTest extends ClusterTestCase
 
   public void testSkipStrategiesKeep() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     // !!! enable replace
-    Tap sink = new Hfs( new TextLine(), outputPath + "/keep", SinkMode.KEEP );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "keep" ), SinkMode.KEEP );
 
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-    sink.deletePath( flow.getJobConf() );
+    sink.deletePath( flow.getConfig() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );

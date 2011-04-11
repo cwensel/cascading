@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -47,7 +47,7 @@ import org.codehaus.janino.Scanner;
 public class ExpressionOperation extends BaseOperation<ExpressionOperation.Context>
   {
   /** Field expression */
-  protected String expression;
+  protected final String expression;
 
   /** Field parameterTypes */
   private Class[] parameterTypes;
@@ -147,7 +147,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     if( parameterTypes.length != 1 )
       throw new IllegalStateException( "wrong number of parameter types, expects: " + parameterNames.length );
 
-    Class[] types = new Class[parameterNames.length];
+    Class[] types = new Class[ parameterNames.length ];
 
     Arrays.fill( types, parameterTypes[ 0 ] );
 
@@ -178,7 +178,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
 
   private Fields makeFields( String[] parameters )
     {
-    Comparable[] fields = new Comparable[parameters.length];
+    Comparable[] fields = new Comparable[ parameters.length ];
 
     for( int i = 0; i < parameters.length; i++ )
       {

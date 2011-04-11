@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -38,16 +38,17 @@ import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
+import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.StepGraph;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.HttpFileSystem;
-import cascading.tap.hadoop.S3HttpFileSystem;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleIterator;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -71,11 +72,6 @@ import riffle.process.ProcessStop;
  * When a Flow is created, an optimized internal representation is created that is then executed
  * within the cluster. Thus any overhead inherent to a give {@link Pipe} assembly will be removed
  * once it's placed in context with the actual execution environment.
- * <p/>
- * <p/>
- * Flows are submitted in order of dependency. If two or more steps do not share the same dependencies and all
- * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
- * all steps will be submitted for execution. The default submit priority is 5.
  * </p>
  * <strong>Properties</strong><br/>
  * <ul>
@@ -86,15 +82,10 @@ import riffle.process.ProcessStop;
  * @see cascading.flow.FlowConnector
  */
 @riffle.process.Process
-public class Flow implements Runnable
+public abstract class Flow<Config> implements Runnable
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Flow.class );
-
-  /** Field hdfsShutdown */
-  private static Thread hdfsShutdown = null;
-  /** Field shutdownCount */
-  private static int shutdownCount = 0;
+  protected static final Logger LOG = Logger.getLogger( Flow.class );
 
   /** Field id */
   private String id;
@@ -104,31 +95,27 @@ public class Flow implements Runnable
   private List<SafeFlowListener> listeners;
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkStale();
-  /** Field submitPriority */
-  private int submitPriority = 5;
   /** Field flowStats */
-  private final FlowStats flowStats; // don't use a listener to set values
+  protected final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
   protected Map<String, Tap> sources;
   /** Field sinks */
-  private Map<String, Tap> sinks;
+  protected Map<String, Tap> sinks;
   /** Field traps */
   private Map<String, Tap> traps;
-  /** Field preserveTemporaryFiles */
-  private boolean preserveTemporaryFiles = false;
   /** Field stopJobsOnExit */
   protected boolean stopJobsOnExit = true;
+  /** Field submitPriority */
+  private int submitPriority = 5;
 
   /** Field stepGraph */
   private StepGraph stepGraph;
-  /** Field jobConf */
-  private transient JobConf jobConf;
   /** Field thread */
-  private transient Thread thread;
+  protected transient Thread thread;
   /** Field throwable */
   private Throwable throwable;
   /** Field stop */
-  private boolean stop;
+  protected boolean stop;
 
   /** Field pipeGraph */
   private ElementGraph pipeGraph; // only used for documentation purposes
@@ -139,31 +126,6 @@ public class Flow implements Runnable
   private transient Map<String, Callable<Throwable>> jobsMap;
   /** Field executor */
   private transient ExecutorService executor;
-  /** Field shutdownHook */
-  private transient Thread shutdownHook;
-
-  /**
-   * Property preserveTemporaryFiles forces the Flow instance to keep any temporary intermediate data sets. Useful
-   * for debugging. Defaults to {@code false}.
-   *
-   * @param properties             of type Map
-   * @param preserveTemporaryFiles of type boolean
-   */
-  public static void setPreserveTemporaryFiles( Map<Object, Object> properties, boolean preserveTemporaryFiles )
-    {
-    properties.put( "cascading.flow.preservetemporaryfiles", Boolean.toString( preserveTemporaryFiles ) );
-    }
-
-  /**
-   * Returns property preserveTemporaryFiles.
-   *
-   * @param properties of type Map
-   * @return a boolean
-   */
-  public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
-    {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", "false" ) );
-    }
 
   /**
    * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
@@ -188,34 +150,6 @@ public class Flow implements Runnable
     return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", "true" ) );
     }
 
-  /**
-   * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
-   * The default value is 5000 msec (5 seconds).
-   *
-   * @param properties of type Map
-   * @param interval   of type long
-   */
-  public static void setJobPollingInterval( Map<Object, Object> properties, long interval )
-    {
-    properties.put( "cascading.flow.job.pollinginterval", Long.toString( interval ) );
-    }
-
-  /**
-   * Returns property jobPollingInterval. The default is 5000 (5 sec).
-   *
-   * @param properties of type Map
-   * @return a long
-   */
-  public static long getJobPollingInterval( Map<Object, Object> properties )
-    {
-    return Long.parseLong( Util.getProperty( properties, "cascading.flow.job.pollinginterval", "500" ) );
-    }
-
-  public static long getJobPollingInterval( JobConf jobConf )
-    {
-    return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
-    }
-
   /** Used for testing. */
   protected Flow()
     {
@@ -223,21 +157,21 @@ public class Flow implements Runnable
     this.flowStats = new FlowStats( name, getID() );
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name )
+  protected Flow( Map<Object, Object> properties, Config config, String name )
     {
     this.name = name;
     this.flowStats = new FlowStats( name, getID() );
-    setJobConf( jobConf );
+    setConfig( properties, config );
     initFromProperties( properties );
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Config config, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
     this.flowStats = new FlowStats( name, getID() );
-    setJobConf( jobConf );
+    setConfig( properties, config );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
@@ -245,23 +179,17 @@ public class Flow implements Runnable
     initFromTaps();
     }
 
-  protected Flow( Map<Object, Object> properties, JobConf jobConf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Config config, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
     this.stepGraph = stepGraph;
     this.flowStats = new FlowStats( name, getID() );
-    setJobConf( jobConf );
+    setConfig( properties, config );
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
     initFromProperties( properties );
     initFromTaps();
-    }
-
-  private void initFromProperties( Map<Object, Object> properties )
-    {
-    preserveTemporaryFiles = getPreserveTemporaryFiles( properties );
-    stopJobsOnExit = getStopJobsOnExit( properties );
     }
 
   private void initFromTaps()
@@ -274,7 +202,7 @@ public class Flow implements Runnable
   private void initFromTaps( Map<String, Tap> taps )
     {
     for( Tap tap : taps.values() )
-      tap.flowInit( this );
+      tap.flowConfInit( this );
     }
 
   /**
@@ -355,54 +283,22 @@ public class Flow implements Runnable
     this.stepGraph = stepGraph;
     }
 
-  private void setJobConf( JobConf jobConf )
+  protected abstract void setConfig( Map<Object, Object> properties, Config parentConfig );
+
+  public abstract Config getConfig();
+
+  public abstract Config getConfigCopy();
+
+  public abstract void setProperty( String key, String value );
+
+  public abstract String getProperty( String key );
+
+  protected void initFromProperties( Map<Object, Object> properties )
     {
-    if( jobConf == null ) // this is ok, getJobConf will pass a default parent in
-      return;
-
-    this.jobConf = new JobConf( jobConf ); // prevent local values from being shared
-    this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
-    this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
-    this.jobConf.set( "fs.s3tp.impl", S3HttpFileSystem.class.getName() );
-
-    // set the ID for future reference
-    this.jobConf.set( "cascading.flow.id", getID() );
+    stopJobsOnExit = getStopJobsOnExit( properties );
     }
 
-  /**
-   * Method getJobConf returns the jobConf of this Flow object.
-   *
-   * @return the jobConf (type JobConf) of this Flow object.
-   */
-  public JobConf getJobConf()
-    {
-    if( jobConf == null )
-      setJobConf( new JobConf() );
-
-    return jobConf;
-    }
-
-  /**
-   * Method setProperty sets the given key and value on the underlying properites system.
-   *
-   * @param key   of type String
-   * @param value of type String
-   */
-  public void setProperty( String key, String value )
-    {
-    getJobConf().set( key, value );
-    }
-
-  /**
-   * Method getProperty returns the value associated with the given key from the underlying properties system.
-   *
-   * @param key of type String
-   * @return String
-   */
-  public String getProperty( String key )
-    {
-    return getJobConf().get( key );
-    }
+  public abstract FlowProcess getFlowProcess();
 
   /**
    * Method getFlowStats returns the flowStats of this Flow object.
@@ -472,6 +368,11 @@ public class Flow implements Runnable
     return Collections.unmodifiableMap( sources );
     }
 
+  public Tap getSource( String name )
+    {
+    return sources.get( name );
+    }
+
   /**
    * Method getSourcesCollection returns a {@link Collection} of source {@link Tap}s for this Flow object.
    *
@@ -491,6 +392,11 @@ public class Flow implements Runnable
   public Map<String, Tap> getSinks()
     {
     return Collections.unmodifiableMap( sinks );
+    }
+
+  public Tap getSink( String name )
+    {
+    return sinks.get( name );
     }
 
   /**
@@ -532,16 +438,6 @@ public class Flow implements Runnable
   public Tap getSink()
     {
     return sinks.values().iterator().next();
-    }
-
-  /**
-   * Method isPreserveTemporaryFiles returns false if temporary files will be cleaned when this Flow completes.
-   *
-   * @return the preserveTemporaryFiles (type boolean) of this Flow object.
-   */
-  public boolean isPreserveTemporaryFiles()
-    {
-    return preserveTemporaryFiles;
     }
 
   /**
@@ -605,10 +501,10 @@ public class Flow implements Runnable
 
   /**
    * Method areSinksStale returns true if any of the sinks referenced are out of date in relation to the sources. Or
-   * if any sink method {@link Tap#isReplace()} returns true.
+   * if any sink method {@link cascading.tap.Tap#isReplace()} returns true.
    *
    * @return boolean
-   * @throws IOException when
+   * @throws java.io.IOException when
    */
   public boolean areSinksStale() throws IOException
     {
@@ -620,11 +516,11 @@ public class Flow implements Runnable
    *
    * @param sinkModified of type long
    * @return boolean
-   * @throws IOException when
+   * @throws java.io.IOException when
    */
   public boolean areSourcesNewer( long sinkModified ) throws IOException
     {
-    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
+    Config confCopy = getConfigCopy();
     long sourceMod = 0;
 
     try
@@ -650,17 +546,17 @@ public class Flow implements Runnable
     }
 
   /**
-   * Method getSinkModified returns the youngest modified date of any sink {@link Tap} managed by this Flow instance.
+   * Method getSinkModified returns the youngest modified date of any sink {@link cascading.tap.Tap} managed by this Flow instance.
    * <p/>
-   * If zero (0) is returned, atleast one of the sink resources does not exist. If minus one (-1) is returned,
-   * atleast one of the sinks are marked for delete ({@link Tap#isReplace() returns true}).
+   * If zero (0) is returned, at least one of the sink resources does not exist. If minus one (-1) is returned,
+   * atleast one of the sinks are marked for delete ({@link cascading.tap.Tap#isReplace() returns true}).
    *
    * @return the sinkModified (type long) of this Flow object.
-   * @throws IOException when
+   * @throws java.io.IOException when
    */
   public long getSinkModified() throws IOException
     {
-    JobConf confCopy = new JobConf( getJobConf() ); // let's not add unused values by accident
+    Config confCopy = getConfigCopy();
     long sinkModified = Long.MAX_VALUE;
 
     for( Tap sink : sinks.values() )
@@ -679,9 +575,9 @@ public class Flow implements Runnable
     if( LOG.isInfoEnabled() )
       {
       if( sinkModified == -1L )
-        logInfo( "atleast one sink is marked for delete" );
+        logInfo( "at least one sink is marked for delete" );
       if( sinkModified == 0L )
-        logInfo( "atleast one sink does not exist" );
+        logInfo( "at least one sink does not exist" );
       else
         logInfo( "sink oldest modified date: " + new Date( sinkModified ) );
       }
@@ -743,12 +639,14 @@ public class Flow implements Runnable
     if( stop )
       return;
 
-    registerShutdownHook();
+    internalStart();
 
     thread = new Thread( this, ( "flow " + Util.toNull( getName() ) ).trim() );
 
     thread.start();
     }
+
+  protected abstract void internalStart();
 
   /** Method stop stops all running jobs, killing any currently executing. */
   @ProcessStop
@@ -771,9 +669,10 @@ public class Flow implements Runnable
 
     handleExecutorShutdown();
 
-    if( !isPreserveTemporaryFiles() )
-      cleanTemporaryFiles( false ); // force cleanup
+    internalClean( true );
     }
+
+  protected abstract void internalClean( boolean force );
 
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
   @ProcessComplete
@@ -837,7 +736,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSource() throws IOException
     {
-    return sources.values().iterator().next().openForRead( getJobConf() );
+    return sources.values().iterator().next().openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -849,7 +748,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSource( String name ) throws IOException
     {
-    return sources.get( name ).openForRead( getJobConf() );
+    return sources.get( name ).openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -860,7 +759,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSink() throws IOException
     {
-    return sinks.values().iterator().next().openForRead( getJobConf() );
+    return sinks.values().iterator().next().openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -872,7 +771,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openSink( String name ) throws IOException
     {
-    return sinks.get( name ).openForRead( getJobConf() );
+    return sinks.get( name ).openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -883,7 +782,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTrap() throws IOException
     {
-    return traps.values().iterator().next().openForRead( getJobConf() );
+    return traps.values().iterator().next().openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -895,7 +794,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTrap( String name ) throws IOException
     {
-    return traps.get( name ).openForRead( getJobConf() );
+    return traps.get( name ).openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -909,26 +808,7 @@ public class Flow implements Runnable
   public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
-      tap.deletePath( getJobConf() );
-    }
-
-  /**
-   * Method deleteSinksIfNotAppend deletes all sinks if they are not configured with the {@link cascading.tap.SinkMode#APPEND} flag.
-   * <p/>
-   * Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
-   * <p/>
-   * Use with caution.
-   *
-   * @throws IOException when
-   */
-  @Deprecated
-  public void deleteSinksIfNotAppend() throws IOException
-    {
-    for( Tap tap : sinks.values() )
-      {
-      if( !tap.isUpdate() )
-        tap.deletePath( getJobConf() );
-      }
+      tap.deletePath( getConfig() );
     }
 
   /**
@@ -945,7 +825,16 @@ public class Flow implements Runnable
     for( Tap tap : sinks.values() )
       {
       if( !tap.isUpdate() )
-        tap.deletePath( getJobConf() );
+        tap.deletePath( getConfig() );
+      }
+    }
+
+  public void deleteSinksIfReplace() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      {
+      if( tap.isReplace() )
+        tap.deletePath( getConfig() );
       }
     }
 
@@ -958,7 +847,7 @@ public class Flow implements Runnable
    */
   public boolean tapPathExists( Tap tap ) throws IOException
     {
-    return tap.pathExists( getJobConf() );
+    return tap.pathExists( getConfig() );
     }
 
   /**
@@ -970,7 +859,7 @@ public class Flow implements Runnable
    */
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
-    return tap.openForRead( getJobConf() );
+    return tap.openForRead( getFlowProcess(), null );
     }
 
   /**
@@ -982,7 +871,7 @@ public class Flow implements Runnable
    */
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( getJobConf() );
+    return tap.openForWrite( getFlowProcess(), null );
     }
 
   /**
@@ -990,10 +879,7 @@ public class Flow implements Runnable
    *
    * @return boolean
    */
-  public boolean jobsAreLocal()
-    {
-    return getJobConf().get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
-    }
+  public abstract boolean stepsAreLocal();
 
   /** Method run implements the Runnable run method and should not be called by users. */
   public void run()
@@ -1022,14 +908,14 @@ public class Flow implements Runnable
       initializeNewJobsMap();
 
       // if jobs are run local, then only use one thread to force execution serially
-      int numThreads = jobsAreLocal() ? 1 : jobsMap.size();
+      int numThreads = allowParallelExecution() ? 1 : jobsMap.size();
 
       if( numThreads == 0 )
         throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
 
       if( LOG.isInfoEnabled() )
         {
-        logInfo( " parallel execution is enabled: " + !jobsAreLocal() );
+        logInfo( " parallel execution is enabled: " + !allowParallelExecution() );
         logInfo( " starting jobs: " + jobsMap.size() );
         logInfo( " allocating threads: " + numThreads );
         }
@@ -1056,8 +942,7 @@ public class Flow implements Runnable
       }
     finally
       {
-      if( !isPreserveTemporaryFiles() )
-        cleanTemporaryFiles( stop );
+      internalClean( stop );
 
       handleThrowableAndMarkFailed();
 
@@ -1070,10 +955,14 @@ public class Flow implements Runnable
         }
       finally
         {
-        deregisterShutdownHook();
+        internalShutdown();
         }
       }
     }
+
+  protected abstract boolean allowParallelExecution();
+
+  protected abstract void internalShutdown();
 
   private List<Future<Throwable>> spawnJobs( int numThreads ) throws InterruptedException
     {
@@ -1081,8 +970,11 @@ public class Flow implements Runnable
       return new ArrayList<Future<Throwable>>();
 
     executor = Executors.newFixedThreadPool( numThreads );
+
     List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() ); // todo: consider submit()
+
     executor.shutdown(); // don't accept any more work
+
     return futures;
     }
 
@@ -1096,12 +988,12 @@ public class Flow implements Runnable
       }
     }
 
-  synchronized Map<String, Callable<Throwable>> getJobsMap()
+  public synchronized Map<String, Callable<Throwable>> getJobsMap()
     {
     return jobsMap;
     }
 
-  private synchronized void initializeNewJobsMap() throws IOException
+  protected synchronized void initializeNewJobsMap() throws IOException
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
@@ -1110,7 +1002,7 @@ public class Flow implements Runnable
     while( topoIterator.hasNext() )
       {
       FlowStep step = (FlowStep) topoIterator.next();
-      FlowStepJob flowStepJob = step.createFlowStepJob( getJobConf() );
+      FlowStepJob flowStepJob = step.createFlowStepJob( getFlowProcess(), getConfig() );
 
       jobsMap.put( step.getName(), flowStepJob );
 
@@ -1125,7 +1017,7 @@ public class Flow implements Runnable
       }
     }
 
-  private void internalStopAllJobs()
+  protected void internalStopAllJobs()
     {
     LOG.warn( "stopping jobs" );
 
@@ -1147,7 +1039,7 @@ public class Flow implements Runnable
       }
     }
 
-  private void handleExecutorShutdown()
+  protected void handleExecutorShutdown()
     {
     if( executor == null )
       return;
@@ -1195,7 +1087,7 @@ public class Flow implements Runnable
       }
     }
 
-  private void fireOnStopping()
+  protected void fireOnStopping()
     {
     if( hasListeners() )
       {
@@ -1207,7 +1099,7 @@ public class Flow implements Runnable
       }
     }
 
-  private void fireOnStarting()
+  protected void fireOnStarting()
     {
     if( hasListeners() )
       {
@@ -1217,61 +1109,6 @@ public class Flow implements Runnable
       for( FlowListener flowListener : getListeners() )
         flowListener.onStarting( this );
       }
-    }
-
-  private void cleanTemporaryFiles( boolean stop )
-    {
-    if( stop ) // unstable to call fs operations during shutdown
-      return;
-
-    for( FlowStep step : getSteps() )
-      step.clean( getJobConf() );
-    }
-
-  private void registerShutdownHook()
-    {
-    if( !isStopJobsOnExit() )
-      return;
-
-    getHdfsShutdownHook();
-
-    shutdownHook = new Thread()
-    {
-    @Override
-    public void run()
-      {
-      Flow.this.stop();
-
-      callHdfsShutdownHook();
-      }
-    };
-
-    Runtime.getRuntime().addShutdownHook( shutdownHook );
-    }
-
-  private synchronized static void callHdfsShutdownHook()
-    {
-    if( --shutdownCount != 0 )
-      return;
-
-    if( hdfsShutdown != null )
-      hdfsShutdown.start();
-    }
-
-  private synchronized static void getHdfsShutdownHook()
-    {
-    shutdownCount++;
-
-    if( hdfsShutdown == null )
-      hdfsShutdown = Util.getHDFSShutdownHook();
-    }
-
-  private void deregisterShutdownHook()
-    {
-    if( !isStopJobsOnExit() || stop )
-      return;
-
-    Runtime.getRuntime().removeShutdownHook( shutdownHook );
     }
 
   @Override
@@ -1288,7 +1125,7 @@ public class Flow implements Runnable
     return buffer.toString();
     }
 
-  private void logInfo( String message )
+  protected void logInfo( String message )
     {
     LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
     }
@@ -1360,7 +1197,7 @@ public class Flow implements Runnable
    * Class SafeFlowListener safely calls a wrapped FlowListener.
    * <p/>
    * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
-   * can be caught by the calling Thread. Since Flow is asyncronous, much of the work is done in the run() method
+   * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
    * which in turn is run in a new Thread.
    */
   private class SafeFlowListener implements FlowListener
@@ -1437,8 +1274,8 @@ public class Flow implements Runnable
 
     public boolean equals( Object object )
       {
-      if( object instanceof SafeFlowListener )
-        return flowListener.equals( ( (SafeFlowListener) object ).flowListener );
+      if( object instanceof Flow.SafeFlowListener )
+        return flowListener.equals( ( (Flow.SafeFlowListener) object ).flowListener );
 
       return flowListener.equals( object );
       }
@@ -1448,5 +1285,4 @@ public class Flow implements Runnable
       return flowListener.hashCode();
       }
     }
-
   }

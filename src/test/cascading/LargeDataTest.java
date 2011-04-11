@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,12 +21,10 @@
 
 package cascading;
 
-import java.io.File;
 import java.util.Map;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexGenerator;
@@ -39,33 +37,28 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
-public class LargeDataTest extends ClusterTestCase
+import static data.InputData.inputPageData;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class LargeDataTest extends PlatformTestCase
   {
-  String inputPageData = "build/test/data/url+page.200.txt";
-
-  String outputPathUrl = "build/test/output/large/url";
-  String outputPathWord = "build/test/output/large/word";
-
   public LargeDataTest()
     {
-    super( "large data", true );
+    super( true );
     }
 
   public void testLargeDataSet() throws Exception
     {
-    if( !new File( inputPageData ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputPageData );
 
-    copyFromLocal( inputPageData );
-
-    Tap source = new Hfs( new TextLine(), inputPageData );
-    Tap sinkUrl = new Hfs( new TextLine(), outputPathUrl, true );
-    Tap sinkWord = new Hfs( new TextLine(), outputPathWord, true );
+    Tap source = getPlatform().getTextFile( inputPageData );
+    Tap sinkUrl = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "url" ), SinkMode.REPLACE );
+    Tap sinkWord = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "word" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "large" );
 
@@ -86,12 +79,10 @@ public class LargeDataTest extends ClusterTestCase
     Map<String, Tap> sources = Cascades.tapsMap( Pipe.pipes( pipe ), Tap.taps( source ) );
     Map<String, Tap> sinks = Cascades.tapsMap( Pipe.pipes( pipeUrl, pipeWord ), Tap.taps( sinkUrl, sinkWord ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
-
-    //    flow.writeDOT( "large.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, Pipe.pipes( pipeUrl, pipeWord ) );
 
     flow.complete();
 
-    validateLength( flow, 23807 );
+    validateLength( flow, 23807, "word" );
     }
   }

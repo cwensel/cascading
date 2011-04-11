@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,14 +21,14 @@
 
 package cascading;
 
-import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Debug;
 import cascading.operation.Filter;
 import cascading.operation.Function;
@@ -41,54 +41,34 @@ import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
-import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.InnerJoin;
-import cascading.scheme.SequenceFile;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
 import cascading.tap.MultiSourceTap;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 
-public class FieldedPipesTest extends ClusterTestCase
+import static data.InputData.*;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class FieldedPipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums20 = "build/test/data/nums.20.txt";
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-  String inputFileCritics = "build/test/data/critics.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-  String inputFileLowerOffset = "build/test/data/lower-offset.txt";
-  String inputFileJoined = "build/test/data/lower+upper.txt";
-  String inputFileJoinedExtra = "build/test/data/extra+lower+upper.txt";
-
-  String inputFileLhs = "build/test/data/lhs.txt";
-  String inputFileRhs = "build/test/data/rhs.txt";
-  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
-
-  String outputPath = "build/test/output/fields/";
-
   public FieldedPipesTest()
     {
-    super( "fielded pipes", true ); // leave cluster testing enabled
+    super( true ); // leave cluster testing enabled
     }
 
   public void testSimpleGroup() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -98,11 +78,9 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simple" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "groupcount.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -112,12 +90,9 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testSimpleChain() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -130,11 +105,9 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count( new Fields( "count3" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count4" ) ) );
 
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "/simplechain", true );
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "simplechain" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "chainedevery.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -143,12 +116,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testChainEndingWithEach() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -160,11 +128,11 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ) );
 
     pipe = new Each( pipe, new Fields( "count1", "count2" ), new ExpressionFunction( new Fields( "sum" ), "count1 + count2", int.class ), Fields.ALL );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/chaineach", true );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "chaineach" ), SinkMode.REPLACE );
 
-//    flow.writeDOT( "chainedevery.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -175,46 +143,38 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testNoGroup() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new RegexSplitter( "\\s+" ), new Fields( 1 ) );
 
-    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/simplesplit", true );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "nogroup" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 10, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "75.185.76.245", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( results.contains( new Tuple( "75.185.76.245" ) ) );
     }
 
   public void testCopy() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
-    Tap sink = new Hfs( new TextLine( 1 ), outputPath + "/copy", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "copy" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -223,14 +183,11 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testSimpleMerge() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -240,27 +197,23 @@ public class FieldedPipesTest extends ClusterTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/merge/", true );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "simplemerge" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
     flow.complete();
 
-    validateLength( flow, 10, null );
+    validateLength( flow, 10 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    Collection results = getSinkAsList( flow );
 
-    Comparable line = iterator.next().get( 1 );
-    assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
-    line = iterator.next().get( 1 );
-    assertTrue( "not equal: tuple.get(1)", line.equals( "1\ta" ) || line.equals( "1\tA" ) );
-
-    iterator.close();
+    assertTrue( "missing value", results.contains( new Tuple( "1\ta" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "1\tA" ) ) );
     }
 
   /**
@@ -270,16 +223,13 @@ public class FieldedPipesTest extends ClusterTestCase
    */
   public void testSimpleMergeThree() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-    copyFromLocal( inputFileLowerOffset );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
-    Tap sourceLowerOffset = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+    Tap sourceLowerOffset = getPlatform().getTextFile( inputFileLowerOffset );
 
     Map sources = new HashMap();
 
@@ -287,38 +237,33 @@ public class FieldedPipesTest extends ClusterTestCase
     sources.put( "upper", sourceUpper );
     sources.put( "offset", sourceLowerOffset );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simplemergethree" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/mergethree/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
     Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper, pipeOffset ), new Fields( "num" ) );
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper, pipeOffset ), new Fields( "num" ), new Fields( "char" ) );
 
     splice = new Every( splice, new Fields( "char" ), new First( new Fields( "first" ) ) );
 
     splice = new Each( splice, new Fields( "num", "first" ), new Identity() );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
     flow.complete();
 
-    validateLength( flow, 6, null );
+    validateLength( flow, 6 );
     }
-
 
   public void testUnGroup() throws Exception
     {
-    if( !new File( inputFileJoined ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileJoined );
 
-    copyFromLocal( inputFileJoined );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoined );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped", true );
+    Tap source = getPlatform().getTextFile( inputFileJoined );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "ungrouped" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -326,24 +271,19 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new UnGroup( new Fields( "num", "char" ), new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "ungroup.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 10, null );
+    validateLength( flow, 10 );
     }
 
   public void testUnGroupBySize() throws Exception
     {
-    if( !new File( inputFileJoinedExtra ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileJoinedExtra );
 
-    copyFromLocal( inputFileJoinedExtra );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileJoinedExtra );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped_size", true );
+    Tap source = getPlatform().getTextFile( inputFileJoinedExtra );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "ungrouped_size" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -351,9 +291,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new UnGroup( new Fields( "num1", "num2", "char" ), new Fields( "num1", "num2" ), 1 ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "ungroup.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -367,18 +305,14 @@ public class FieldedPipesTest extends ClusterTestCase
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\tA" ) );
 
     iterator.close();
-
     }
 
   public void testFilter() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/filter", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "filter" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -386,24 +320,19 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), filter );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "flow.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 3, null );
+    validateLength( flow, 3 );
     }
 
   public void testLogicFilter() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/logicfilter", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "logicfilter" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -411,28 +340,22 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), filter );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "flow.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 3, null );
+    validateLength( flow, 3 );
     }
 
   public void testFilterComplex() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/filtercomplex", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "filtercomplex" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
-//    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
     pipe = new Each( pipe, new Fields( "line" ), TestConstants.APACHE_COMMON_PARSER );
 
     pipe = new Each( pipe, new Fields( "method" ), new RegexFilter( "^POST" ) );
@@ -444,10 +367,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
 
-
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "filter.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -461,13 +381,10 @@ public class FieldedPipesTest extends ClusterTestCase
    */
   public void testFilterAll() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/filtercomplex", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "filterall" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -487,9 +404,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "value", "count" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "filter.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -498,9 +413,6 @@ public class FieldedPipesTest extends ClusterTestCase
 
 //  public void testLimitFilter() throws Exception
 //    {
-//    if( !new File( inputFileApache ).exists() )
-//      fail( "data file not found" );
-//
 //    copyFromLocal( inputFileApache );
 //
 //    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
@@ -523,55 +435,15 @@ public class FieldedPipesTest extends ClusterTestCase
 
   //
 
-  public void testCross() throws Exception
-    {
-    if( !new File( inputFileLhs ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLhs );
-    copyFromLocal( inputFileRhs );
-
-    Map sources = new HashMap();
-
-    sources.put( "lhs", new Hfs( new TextLine(), inputFileLhs ) );
-    sources.put( "rhs", new Hfs( new TextLine(), inputFileRhs ) );
-
-    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
-    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
-
-    Pipe cross = new CoGroup( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cross/", true );
-
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cross );
-
-//    System.out.println( "flow =\n" + flow );
-
-    flow.complete();
-
-    validateLength( flow, 37, null );
-
-    TupleEntryIterator iterator = flow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
-    }
-
   public void testSplit() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     // 46 192
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink1 = new Hfs( new TextLine(), outputPath + "/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), outputPath + "/split2", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "split1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "split2" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -587,9 +459,7 @@ public class FieldedPipesTest extends ClusterTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
-
-//    flow.writeDOT( "split.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     flow.complete();
 
@@ -604,16 +474,13 @@ public class FieldedPipesTest extends ClusterTestCase
    */
   public void testSplitNonSafe() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     // 46 192
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink1 = new Hfs( new TextLine(), outputPath + "/nonsafesplit1", true );
-    Tap sink2 = new Hfs( new TextLine(), outputPath + "/nonsafesplit2", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "nonsafesplit1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "nonsafesplit2" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -632,9 +499,7 @@ public class FieldedPipesTest extends ClusterTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
-
-//    flow.writeDOT( "split.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     flow.complete();
 
@@ -644,15 +509,12 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testSplitSameSourceMerged() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     // 46 192
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/splitsourcemerged", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "splitsourcemerged" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -663,9 +525,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     Pipe merged = new GroupBy( "merged", Pipe.pipes( left, right ), new Fields( "line" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, merged );
-
-//    flow.writeDOT( "splitmerged.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, merged );
 
     flow.complete();
 
@@ -679,20 +539,17 @@ public class FieldedPipesTest extends ClusterTestCase
    */
   public void testSplitOut() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "num", "line" ) ), inputFileApache );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "num", "line" ), inputFileApache );
 
     Map sources = new HashMap();
 
     sources.put( "lower1", sourceLower );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), outputPath + "/splitout1", true );
-    Tap sink2 = new Hfs( new TextLine(), outputPath + "/splitout2", true );
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "splitout1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "splitout2" ), SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -704,28 +561,28 @@ public class FieldedPipesTest extends ClusterTestCase
     Pipe left = new GroupBy( "output1", pipeLower1, new Fields( 0 ) );
     Pipe right = new GroupBy( "output2", left, new Fields( 0 ) );
 
-    Flow flow = new FlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
 
-//    flow.writeDOT( "splitout.dot" );
+//    flow.writeDOT( "spit.dot" );
 
     flow.complete();
 
     validateLength( flow, 10, "output1" );
     validateLength( flow, 10, "output2" );
+
+    assertEquals( 10, asSet( flow, sink1 ).size() );
+    assertEquals( 10, asSet( flow, sink2 ).size() );
     }
 
   public void testSplitComplex() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     // 46 192
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink1 = new Hfs( new TextLine(), outputPath + "/splitcomp1", true );
-    Tap sink2 = new Hfs( new TextLine(), outputPath + "/splitcomp2", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "splitcomp1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "splitcomp2" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -744,9 +601,7 @@ public class FieldedPipesTest extends ClusterTestCase
     Map sources = Cascades.tapsMap( "split", source );
     Map sinks = Cascades.tapsMap( Pipe.pipes( left, right ), Tap.taps( sink1, sink2 ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sinks, left, right );
-
-//    flow.writeDOT( "splitcomplex.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     flow.complete();
 
@@ -754,32 +609,26 @@ public class FieldedPipesTest extends ClusterTestCase
     validateLength( flow, 1, "right" );
     }
 
-  public void testConcatentation() throws Exception
+  public void testConcatenation() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
 
     Tap source = new MultiSourceTap( sourceLower, sourceUpper );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/concat/", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "complexconcat" ), SinkMode.REPLACE );
 
     Pipe pipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 
     Pipe splice = new GroupBy( pipe, new Fields( "num" ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( source, sink, splice );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    Flow countFlow = getPlatform().getFlowConnector().connect( source, sink, splice );
 
     countFlow.complete();
 
@@ -788,12 +637,9 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testGeneratorAggregator() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -804,9 +650,9 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new TestAggregator( new Fields( "count1" ), new Fields( "ip" ), new Tuple( "first1" ), new Tuple( "first2" ) ) );
     pipe = new Every( pipe, new TestAggregator( new Fields( "count2" ), new Fields( "ip" ), new Tuple( "second" ), new Tuple( "second2" ), new Tuple( "second3" ) ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/generatoraggregator", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "generatoraggregator" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -820,12 +666,9 @@ public class FieldedPipesTest extends ClusterTestCase
    */
   public void testChainedTaps() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
 
     Pipe pipe = new Each( new Pipe( "first" ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
@@ -836,32 +679,27 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Each( new Pipe( "third", pipe ), new Fields( "ip" ), new RegexFilter( "6" ) );
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
-    String path = outputPath + "/chainedtaps/";
-    Tap sinkFirst = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "first", true );
-    Tap sinkSecond = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "second", true );
-    Tap sinkThird = new Hfs( new SequenceFile( new Fields( "ip" ) ), path + "third", true );
+    Tap sinkFirst = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/first" ), SinkMode.REPLACE );
+    Tap sinkSecond = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/second" ), SinkMode.REPLACE );
+    Tap sinkThird = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/third" ), SinkMode.REPLACE );
 
     Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second",
                                                             "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sinks, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sinks, pipe );
 
-    assertEquals( "wrong number of steps", 3, flow.getSteps().size() );
-
-//    flow.writeDOT( "chainedtaps.dot" );
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong number of steps", 3, flow.getSteps().size() );
 
     flow.complete();
 
-    validateLength( flow, 3, null );
+    validateLength( flow, 3 );
     }
 
   public void testReplace() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "line" ) ), outputPath + "/replace", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( new Fields( "offset", "line" ), new Fields( "offset", "line" ), getOutputPath( "replace" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -872,9 +710,7 @@ public class FieldedPipesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Debug( true ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector( disableDebug() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -883,11 +719,8 @@ public class FieldedPipesTest extends ClusterTestCase
 
   public void testSwap() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "count", "ipaddress" ) ), outputPath + "/swap", true );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( new Fields( "offset", "line" ), new Fields( "count", "ipaddress" ), getOutputPath( "swap" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -897,13 +730,10 @@ public class FieldedPipesTest extends ClusterTestCase
     pipe = new Every( pipe, new Fields( "ip" ), new Count( new Fields( "count" ) ) );
     pipe = new Each( pipe, new Fields( "ip" ), new Identity( new Fields( "ipaddress" ) ), Fields.SWAP );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 8, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
     }
-
   }

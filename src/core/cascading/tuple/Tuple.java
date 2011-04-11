@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -66,22 +66,7 @@ public class Tuple implements Comparable, Iterable, Serializable
   /** Field isUnmodifiable */
   protected boolean isUnmodifiable = false;
   /** Field elements */
-  protected List<Object> elements;
-
-  /**
-   * Method asUnmodifiable marks the given Tuple instance as unmodifiable.
-   *
-   * @param tuple of type Tuple
-   * @return Tuple
-   * @deprecated
-   */
-  @Deprecated
-  public static Tuple asUnmodifiable( Tuple tuple )
-    {
-    tuple.isUnmodifiable = true;
-
-    return tuple;
-    }
+  protected ArrayList<Object> elements;
 
   /**
    * Method size returns a new Tuple instance of the given size with nulls as its element values.
@@ -103,12 +88,17 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public static Tuple size( int size, Comparable value )
     {
-    Tuple result = new Tuple();
+    Tuple result = new Tuple( createElements( size ) );
 
     for( int i = 0; i < size; i++ )
       result.add( value );
 
     return result;
+    }
+
+  private static ArrayList<Object> createElements( int size )
+    {
+    return new ArrayList<Object>( size );
     }
 
   /**
@@ -162,7 +152,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     return tuple.elements;
     }
 
-  protected Tuple( List<Object> elements )
+  protected Tuple( ArrayList<Object> elements )
     {
     this.elements = elements;
     }
@@ -311,7 +301,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
-   * Method get will return a new Tuple instace populated with element values from the given array of positions.
+   * Method get will return a new Tuple instance populated with element values from the given array of positions.
    *
    * @param pos of type int[]
    * @return Tuple
@@ -357,7 +347,7 @@ public class Tuple implements Comparable, Iterable, Serializable
 
     Tuple results = remove( pos );
 
-    List<Object> temp = results.elements;
+    ArrayList<Object> temp = results.elements;
     results.elements = this.elements;
     this.elements = temp;
 
@@ -475,7 +465,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     verifyModifiable();
 
     // calculate offsets to apply when removing values from elements
-    int offset[] = new int[pos.length];
+    int offset[] = new int[ pos.length ];
 
     for( int i = 0; i < pos.length; i++ )
       {
@@ -524,6 +514,19 @@ public class Tuple implements Comparable, Iterable, Serializable
     return results;
     }
 
+  Tuple nulledCopy( int[] pos )
+    {
+    if( pos == null )
+      return size( size() );
+
+    Tuple results = new Tuple( this );
+
+    for( int i : pos )
+      results.set( i, null );
+
+    return results;
+    }
+
   /**
    * Sets the values in the given positions to the values from the given Tuple.
    *
@@ -551,6 +554,12 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void set( Fields declarator, Fields selector, Tuple tuple )
     {
+//    if( declarator.isUnknown() )
+//      {
+//      elements = (ArrayList<Object>) tuple.elements.clone();
+//      return;
+//      }
+
     set( declarator.getPos( selector ), tuple );
     }
 
@@ -612,7 +621,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public Class[] getTypes()
     {
-    Class[] types = new Class[elements.size()];
+    Class[] types = new Class[ elements.size() ];
 
     for( int i = 0; i < elements.size(); i++ )
       {
@@ -702,11 +711,11 @@ public class Tuple implements Comparable, Iterable, Serializable
       else if( lhs == null && rhs == null )
         c = 0;
       else if( lhs == null && rhs != null )
-          return -1;
-        else if( lhs != null && rhs == null )
-            return 1;
-          else
-            c = ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
+        return -1;
+      else if( lhs != null && rhs == null )
+        return 1;
+      else
+        c = ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
 
       if( c != 0 )
         return c;

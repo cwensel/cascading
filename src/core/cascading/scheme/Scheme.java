@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,13 +24,11 @@ package cascading.scheme;
 import java.io.IOException;
 import java.io.Serializable;
 
+import cascading.flow.FlowProcess;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -39,7 +37,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * <p/>
  * A Scheme defines the type of resource data will be sourced from or sinked to.
  * <p/>
- * The given sourcFields only label the values in the {@link Tuple}s as they are sourced.
+ * The given sourceFields only label the values in the {@link Tuple}s as they are sourced.
  * It does not necessarily filter the output since a given implementation may choose to
  * collapse values and ignore keys depending on the format.
  * <p/>
@@ -51,7 +49,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
-public abstract class Scheme implements Serializable
+public abstract class Scheme<Process extends FlowProcess, Config, Input, Output, Context> implements Serializable
   {
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;
@@ -60,7 +58,7 @@ public abstract class Scheme implements Serializable
   /** Field numSinkParts */
   int numSinkParts;
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private final String trace = Util.captureDebugTrace( getClass() );
 
   /** Constructor Scheme creates a new Scheme instance. */
   protected Scheme()
@@ -192,16 +190,6 @@ public abstract class Scheme implements Serializable
     }
 
   /**
-   * Method isWriteDirect returns true if the parent {@link Tap} instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
-   *
-   * @return the writeDirect (type boolean) of this Tap object.
-   */
-  public boolean isWriteDirect()
-    {
-    return false;
-    }
-
-  /**
    * Method isSymmetrical returns {@code true} if the sink fields equal the source fields. That is, this
    * scheme sources the same fields as it sinks.
    *
@@ -235,38 +223,52 @@ public abstract class Scheme implements Serializable
   /**
    * Method sourceInit initializes this instance as a source.
    *
-   * @param tap  of type Tap
-   * @param conf of type JobConf
-   * @throws IOException on initializatin failure
+   * @param process
+   * @param tap     of type Tap
+   * @param conf    of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sourceInit( Tap tap, JobConf conf ) throws IOException;
+  public abstract void sourceConfInit( Process process, Tap tap, Config conf ) throws IOException;
 
   /**
    * Method sinkInit initializes this instance as a sink.
    *
-   * @param tap  of type Tap
-   * @param conf of type JobConf
-   * @throws IOException on initialization failure
+   * @param process
+   * @param tap     of type Tap
+   * @param conf    of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sinkInit( Tap tap, JobConf conf ) throws IOException;
+  public abstract void sinkConfInit( Process process, Tap tap, Config conf ) throws IOException;
+
+  public void sourcePrepare( Process flowProcess, SourceCall<Context, Input> sourceCall )
+    {
+    }
 
   /**
-   * Method source takes the given Hadoop key and value and returns a new {@link Tuple} instance.
+   * Method source takes the given key and value and returns a new {@link Tuple} instance.
    *
-   * @param key   of type WritableComparable
-   * @param value of type Writable
-   * @return Tuple
+   * @param flowProcess
+   * @param sourceCall
    */
-  public abstract Tuple source( Object key, Object value );
+  public abstract boolean source( Process flowProcess, SourceCall<Context, Input> sourceCall ) throws IOException;
+
+  public void sourceCleanup( Process flowProcess, SourceCall<Context, Input> sourceCall )
+    {
+    }
+
+  public void sinkPrepare( Process flowProcess, SinkCall<Context, Output> sinkCall )
+    {
+    }
 
   /**
    * Method sink writes out the given {@link Tuple} instance to the outputCollector.
    *
-   * @param tupleEntry
-   * @param outputCollector of type OutputCollector @throws IOException when
+   * @param flowProcess
+   * @param sinkCall
    */
-  public abstract void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException;
+  public abstract void sink( Process flowProcess, SinkCall<Context, Output> sinkCall ) throws IOException;
 
+  public void sinkCleanup( Process flowProcess, SinkCall<Context, Output> sinkCall )
+    {
+    }
 
   @Override
   public boolean equals( Object object )
@@ -300,7 +302,7 @@ public abstract class Scheme implements Serializable
   public int hashCode()
     {
     int result;
-    result = ( sinkFields != null ? sinkFields.hashCode() : 0 );
+    result = sinkFields != null ? sinkFields.hashCode() : 0;
     result = 31 * result + ( sourceFields != null ? sourceFields.hashCode() : 0 );
     result = 31 * result + numSinkParts;
     return result;

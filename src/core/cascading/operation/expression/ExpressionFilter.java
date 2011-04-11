@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -34,7 +34,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * returns true for the given expression will be removed from the stream. This {@link Filter}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifially this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifically this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
@@ -72,7 +72,7 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Expr
     super( expression, parameterNames, parameterTypes );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Context> filterCall )
     {
     return (Boolean) evaluate( filterCall.getContext(), filterCall.getArguments() );

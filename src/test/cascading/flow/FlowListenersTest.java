@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,21 +21,87 @@
 
 package cascading.flow;
 
+import java.util.Map;
+
 import cascading.CascadingTestCase;
+import cascading.test.PlatformTest;
 
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class FlowListenersTest extends CascadingTestCase
   {
   public FlowListenersTest()
     {
-    super( "flow test" );
     }
 
-  public void testListners()
+  public void testListeners()
     {
-    Flow flow = new Flow();
+    Flow flow = new Flow<Object>()
+    {
+
+    @Override
+    protected void setConfig( Map<Object, Object> properties, Object parentConfig )
+      {
+      }
+
+    @Override
+    public Object getConfig()
+      {
+      return null;
+      }
+
+    @Override
+    public Object getConfigCopy()
+      {
+      return null;
+      }
+
+    @Override
+    public void setProperty( String key, String value )
+      {
+      }
+
+    @Override
+    public String getProperty( String key )
+      {
+      return null;
+      }
+
+    @Override
+    public FlowProcess getFlowProcess()
+      {
+      return null;
+      }
+
+    @Override
+    protected void internalStart()
+      {
+      }
+
+    @Override
+    protected void internalClean( boolean force )
+      {
+      }
+
+    @Override
+    public boolean stepsAreLocal()
+      {
+      return false;
+      }
+
+    @Override
+    protected boolean allowParallelExecution()
+      {
+      return false;
+      }
+
+    @Override
+    protected void internalShutdown()
+      {
+      }
+    };
 
     FlowListener listener = new FlowListener()
     {

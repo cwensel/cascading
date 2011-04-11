@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,7 +61,7 @@ public class Pipe implements FlowElement, Serializable
   /** Field previous */
   protected Pipe previous;
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private final String trace = Util.captureDebugTrace( getClass() );
 
   /**
    * Convenience method to create an array of Pipe instances.
@@ -86,7 +86,7 @@ public class Pipe implements FlowElement, Serializable
 
     collectNames( tails, names );
 
-    return names.toArray( new String[names.size()] );
+    return names.toArray( new String[ names.size() ] );
     }
 
   private static void collectNames( Pipe[] pipes, Set<String> names )
@@ -104,7 +104,7 @@ public class Pipe implements FlowElement, Serializable
 
   static Pipe[] resolvePreviousAll( Pipe... pipes )
     {
-    Pipe[] resolved = new Pipe[pipes.length];
+    Pipe[] resolved = new Pipe[ pipes.length ];
 
     for( int i = 0; i < pipes.length; i++ )
       resolved[ i ] = resolvePrevious( pipes[ i ] );
@@ -208,7 +208,7 @@ public class Pipe implements FlowElement, Serializable
   public Pipe[] getPrevious()
     {
     if( previous == null )
-      return new Pipe[0];
+      return new Pipe[ 0 ];
 
     return new Pipe[]{previous};
     }
@@ -233,7 +233,7 @@ public class Pipe implements FlowElement, Serializable
     for( Pipe pipe : pipes )
       Collections.addAll( heads, pipe.getHeads() );
 
-    return heads.toArray( new Pipe[heads.size()] );
+    return heads.toArray( new Pipe[ heads.size() ] );
     }
 
   /** @see FlowElement#outgoingScopeFor */
@@ -287,6 +287,7 @@ public class Pipe implements FlowElement, Serializable
     return getClass() == element.getClass();
     }
 
+  @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
   @Override
   public boolean equals( Object object )
     {

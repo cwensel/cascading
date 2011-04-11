@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,7 +39,7 @@ public interface AggregatorCall<C> extends OperationCall<C>
   /**
    * Returns the current grouping {@link TupleEntry}.
    *
-   * @return TupleEnry
+   * @return TupleEntry
    */
   TupleEntry getGroup();
 

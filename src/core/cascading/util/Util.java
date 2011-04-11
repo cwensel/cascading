@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,26 +21,20 @@
 
 package cascading.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -50,10 +44,6 @@ import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
@@ -61,92 +51,14 @@ import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.MatrixExporter;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.slf4j.LoggerFactory;
 
 /** Class Util provides reusable operations. */
 public class Util
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Util.class );
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( Util.class );
 
-  /**
-   * This method serializes the given Object instance and retunrs a String Base64 representation.
-   *
-   * @param object to be serialized
-   * @return String
-   */
-  public static String serializeBase64( Object object ) throws IOException
-    {
-    return serializeBase64( object, true );
-    }
-
-  public static String serializeBase64( Object object, boolean compress ) throws IOException
-    {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
-    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
-
-    try
-      {
-      out.writeObject( object );
-      }
-    finally
-      {
-      out.close();
-      }
-
-    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
-    }
-
-  /**
-   * This method deserializes the Base64 encoded String into an Object instance.
-   *
-   * @param string
-   * @return an Object
-   */
-  public static Object deserializeBase64( String string ) throws IOException
-    {
-    return deserializeBase64( string, true );
-    }
-
-  public static Object deserializeBase64( String string, boolean decompress ) throws IOException
-    {
-    if( string == null || string.length() == 0 )
-      return null;
-
-    ObjectInputStream in = null;
-
-    try
-      {
-      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
-
-      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes )
-      {
-      @Override
-      protected Class<?> resolveClass( ObjectStreamClass desc ) throws IOException, ClassNotFoundException
-        {
-        try
-          {
-          return Class.forName( desc.getName(), false, Thread.currentThread().getContextClassLoader() );
-          }
-        catch( ClassNotFoundException exception )
-          {
-          return super.resolveClass( desc );
-          }
-        }
-      };
-
-      return in.readObject();
-      }
-    catch( ClassNotFoundException exception )
-      {
-      throw new FlowException( "unable to deserialize data", exception );
-      }
-    finally
-      {
-      if( in != null )
-        in.close();
-      }
-    }
+  static final String HEXES = "0123456789ABCDEF";
 
   /**
    * This method creates a globally unique HEX value seeded by the given string.
@@ -158,7 +70,27 @@ public class Util
     {
     String base = String.format( "%s%d%.10f", seed, System.currentTimeMillis(), Math.random() );
 
-    return DigestUtils.md5Hex( base );
+    try
+      {
+      return getHex( MessageDigest.getInstance( "MD5" ).digest( base.getBytes() ) );
+      }
+    catch( NoSuchAlgorithmException exception )
+      {
+      throw new RuntimeException( "unable to digest string" );
+      }
+    }
+
+  private static String getHex( byte[] bytes )
+    {
+    if( bytes == null )
+      return null;
+
+    final StringBuilder hex = new StringBuilder( 2 * bytes.length );
+
+    for( final byte b : bytes )
+      hex.append( HEXES.charAt( ( b & 0xF0 ) >> 4 ) ).append( HEXES.charAt( b & 0x0F ) );
+
+    return hex.toString();
     }
 
   /**
@@ -358,7 +290,7 @@ public class Util
     }
 
   /**
-   * This methdo attempts to remove duplicate consecutive forward slashes from the given url.
+   * This method attempts to remove duplicate consecutive forward slashes from the given url.
    *
    * @param url
    * @return a String
@@ -414,6 +346,7 @@ public class Util
     return value == null ? defaultValue : value;
     }
 
+
   public static String printGraph( SimpleDirectedGraph graph )
     {
     StringWriter writer = new StringWriter();
@@ -436,13 +369,18 @@ public class Util
       {
       Writer writer = new FileWriter( filename );
 
-      printGraph( writer, graph );
-
-      writer.close();
+      try
+        {
+        printGraph( writer, graph );
+        }
+      finally
+        {
+        writer.close();
+        }
       }
     catch( IOException exception )
       {
-      exception.printStackTrace();
+      LOG.error( "failed printing graph to {}", filename, exception );
       }
     }
 
@@ -453,12 +391,18 @@ public class Util
     {
     public String getVertexName( Object object )
       {
+      if( object == null )
+        return "none";
+
       return object.toString().replaceAll( "\"", "\'" );
       }
     }, new EdgeNameProvider<Object>()
     {
     public String getEdgeName( Object object )
       {
+      if( object == null )
+        return "none";
+
       return object.toString().replaceAll( "\"", "\'" );
       }
     } );
@@ -575,32 +519,6 @@ public class Util
     return null;
     }
 
-  public static Class findMainClass( Class defaultType )
-    {
-    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-    for( StackTraceElement stackTraceElement : stackTrace )
-      {
-      if( stackTraceElement.getMethodName().equals( "main" ) && !stackTraceElement.getClassName().startsWith( "org.apache.hadoop" ) )
-        {
-        try
-          {
-          LOG.info( "resolving application jar from found main method on: " + stackTraceElement.getClassName() );
-
-          return Thread.currentThread().getContextClassLoader().loadClass( stackTraceElement.getClassName() );
-          }
-        catch( ClassNotFoundException exception )
-          {
-          LOG.warn( "unable to load class while discovering application jar: " + stackTraceElement.getClassName(), exception );
-          }
-        }
-      }
-
-    LOG.info( "using default application jar, may cause class not found exceptions on the cluster" );
-
-    return defaultType;
-    }
-
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
@@ -664,47 +582,10 @@ public class Util
       }
     catch( Exception exception )
       {
-      exception.printStackTrace();
+      LOG.error( "unable to instantiate type: {}", type.getName(), exception );
 
       throw new FlowException( "unable to instantiate type: " + type.getName(), exception );
       }
-    }
-
-  public static Thread getHDFSShutdownHook()
-    {
-    Exception caughtException = null;
-
-    try
-      {
-      // we must init the FS so the finalizer is registered
-      FileSystem.getLocal( new JobConf() );
-
-      Field field = FileSystem.class.getDeclaredField( "clientFinalizer" );
-      field.setAccessible( true );
-
-      Thread finalizer = (Thread) field.get( null );
-
-      if( finalizer != null )
-        Runtime.getRuntime().removeShutdownHook( finalizer );
-
-      return finalizer;
-      }
-    catch( NoSuchFieldException exception )
-      {
-      caughtException = exception;
-      }
-    catch( IllegalAccessException exception )
-      {
-      caughtException = exception;
-      }
-    catch( IOException exception )
-      {
-      caughtException = exception;
-      }
-
-    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: " + caughtException.getClass().getName() );
-
-    return null;
     }
 
   public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )
@@ -721,5 +602,15 @@ public class Util
       {
       throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
       }
+    }
+
+  public static String makeTempPath( String name )
+    {
+    if( name == null || name.isEmpty() )
+      throw new IllegalArgumentException( "name may not be null or empty " );
+
+    name = name.substring( 0, name.length() < 25 ? name.length() : 25 ).replaceAll( "\\s+|\\*|\\+", "_" );
+
+    return name + "/" + (int) ( Math.random() * 100000 ) + "/";
     }
   }

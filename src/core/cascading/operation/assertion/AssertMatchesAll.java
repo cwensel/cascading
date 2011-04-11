@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,7 +45,7 @@ import cascading.tuple.TupleEntry;
 public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Matcher>
   {
   /** Field message */
-  private final String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
+  private final static String message = "argument '%s' value was: %s, did not match: %s, in tuple: %s";
 
   /**
    * Constructor AssertMatchesAll creates a new AssertMatchesAll instance.
@@ -76,7 +76,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
     return plannerLevel instanceof AssertionLevel;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Matcher> assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

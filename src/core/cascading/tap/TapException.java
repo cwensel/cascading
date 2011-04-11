@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,9 +28,6 @@ import cascading.util.Util;
 /** Class TapException is thrown from {@link Tap} subclasses. */
 public class TapException extends CascadingException
   {
-  private Fields incomingFields;
-  private Fields selectorFields;
-
   /** Constructor TapException creates a new TapException instance. */
   public TapException()
     {
@@ -78,9 +75,6 @@ public class TapException extends CascadingException
   public TapException( Tap tap, Fields incomingFields, Fields selectorFields, Throwable throwable )
     {
     super( createMessage( tap, incomingFields, selectorFields ), throwable );
-
-    this.incomingFields = incomingFields;
-    this.selectorFields = selectorFields;
     }
 
   private static String createMessage( Tap tap, Fields incomingFields, Fields selectorFields )
@@ -89,6 +83,5 @@ public class TapException extends CascadingException
       ", with incoming: " + incomingFields.printVerbose();
 
     return Util.formatTrace( tap.getScheme(), message );
-
     }
   }

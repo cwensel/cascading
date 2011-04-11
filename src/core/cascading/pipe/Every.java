@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,24 +22,14 @@
 package cascading.pipe;
 
 import java.beans.ConstructorProperties;
-import java.util.Iterator;
 import java.util.Set;
 
-import cascading.CascadingException;
-import cascading.flow.FlowCollector;
-import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Aggregator;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Buffer;
-import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.Tuples;
 
 /**
  * The Every operator applies an {@link Aggregator} or {@link Buffer} to every grouping.
@@ -212,17 +202,22 @@ public class Every extends Operator
     return operation instanceof Aggregator;
     }
 
-  private Aggregator getAggregator()
+  public boolean isGroupAssertion()
+    {
+    return operation instanceof GroupAssertion;
+    }
+
+  public Aggregator getAggregator()
     {
     return (Aggregator) operation;
     }
 
-  private Buffer getReducer()
+  public Buffer getBuffer()
     {
     return (Buffer) operation;
     }
 
-  private GroupAssertion getGroupAssertion()
+  public GroupAssertion getGroupAssertion()
     {
     return (GroupAssertion) operation;
     }
@@ -248,7 +243,6 @@ public class Every extends Operator
       return scope.getOutGroupingFields();
     }
 
-  /** @see Operator#outgoingScopeFor */
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     Fields argumentFields = resolveArgumentSelector( incomingScopes );
@@ -304,281 +298,6 @@ public class Every extends Operator
     catch( Exception exception )
       {
       throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
-      }
-    }
-
-  /**
-   * Method getHandler returns the {@link EveryHandler} for this instnce.
-   *
-   * @param outgoingScope of type Scope
-   * @return EveryHandler
-   */
-  public EveryHandler getHandler( Scope outgoingScope )
-    {
-    if( isAssertion() )
-      return new EveryAssertionHandler( outgoingScope );
-    else if( isAggregator() )
-      return new EveryAggregatorHandler( outgoingScope );
-    else
-      return new EveryBufferHandler( outgoingScope );
-    }
-
-  /** Class EveryHandler is a helper class that wraps Every instances. */
-  public abstract class EveryHandler
-    {
-    /** Field outgoingScope */
-    public final Scope outgoingScope;
-    /** Field outputCollector */
-    public FlowCollector outputCollector;
-    /** Field operationCall */
-    ConcreteCall operationCall;
-
-    public EveryHandler( Scope outgoingScope )
-      {
-      this.outgoingScope = outgoingScope;
-      this.operationCall = new ConcreteCall( outgoingScope.getArguments() );
-      }
-
-    public abstract void start( FlowProcess flowProcess, TupleEntry groupEntry );
-
-    public abstract void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator );
-
-    public abstract void complete( FlowProcess flowProcess, TupleEntry groupEntry );
-
-
-    @Override
-    public String toString()
-      {
-      return Every.this.toString();
-      }
-
-    public Every getEvery()
-      {
-      return Every.this;
-      }
-
-    public void prepare( FlowProcess flowProcess )
-      {
-      getOperation().prepare( flowProcess, operationCall );
-      }
-
-    public void cleanup( FlowProcess flowProcess )
-      {
-      getOperation().cleanup( flowProcess, operationCall );
-      }
-    }
-
-  public class EveryAggregatorHandler extends EveryHandler
-    {
-    EveryTupleCollector tupleCollector;
-
-    private abstract class EveryTupleCollector extends TupleEntryCollector
-      {
-      TupleEntry value;
-
-      public EveryTupleCollector( Fields fields )
-        {
-        super( fields );
-        }
-      }
-
-    public EveryAggregatorHandler( final Scope outgoingScope )
-      {
-      super( outgoingScope );
-
-      tupleCollector = new EveryTupleCollector( outgoingScope.getDeclaredFields() )
-      {
-      protected void collect( Tuple tuple )
-        {
-        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getRemainderFields(), outgoingScope.getDeclaredEntry(), tuple ) );
-        }
-      };
-      }
-
-    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      operationCall.setArguments( null );  // zero it out
-      operationCall.setOutputCollector( null ); // zero it out
-      operationCall.setGroup( groupEntry );
-
-      try
-        {
-        getAggregator().start( flowProcess, operationCall );
-        }
-      catch( CascadingException exception )
-        {
-        throw exception;
-        }
-      catch( Exception exception )
-        {
-        throw new OperatorException( Every.this, "operator Every failed starting aggregator", exception );
-        }
-      }
-
-    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
-      {
-      try
-        {
-        TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
-
-        operationCall.setArguments( arguments );
-
-        getAggregator().aggregate( flowProcess, operationCall );
-        }
-      catch( CascadingException exception )
-        {
-        throw exception;
-        }
-      catch( Throwable throwable )
-        {
-        throw new OperatorException( Every.this, "operator Every failed executing aggregator: " + operation, throwable );
-        }
-      }
-
-    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      tupleCollector.value = groupEntry;
-
-      operationCall.setArguments( null );
-      operationCall.setOutputCollector( tupleCollector );
-
-      try
-        {
-        getAggregator().complete( flowProcess, operationCall );
-        }
-      catch( CascadingException exception )
-        {
-        throw exception;
-        }
-      catch( Exception exception )
-        {
-        throw new OperatorException( Every.this, "operator Every failed completing aggregator", exception );
-        }
-      }
-    }
-
-  public class EveryBufferHandler extends EveryHandler
-    {
-    EveryTupleCollector tupleCollector;
-
-    private abstract class EveryTupleCollector extends TupleEntryCollector
-      {
-      TupleEntry value;
-
-      public EveryTupleCollector( Fields fields )
-        {
-        super( fields );
-        }
-      }
-
-    public EveryBufferHandler( final Scope outgoingScope )
-      {
-      super( outgoingScope );
-
-      tupleCollector = new EveryTupleCollector( outgoingScope.getDeclaredFields() )
-      {
-      protected void collect( Tuple tuple )
-        {
-        outputCollector.collect( makeResult( outgoingScope.getOutGroupingSelector(), value, outgoingScope.getRemainderFields(), outgoingScope.getDeclaredEntry(), tuple ) );
-        }
-      };
-      }
-
-    public TupleEntry getLastValue()
-      {
-      return tupleCollector.value;
-      }
-
-    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      }
-
-    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, final TupleEntryIterator tupleEntryIterator )
-      {
-      // we want to null out any 'values' before and after the iterator begins/ends
-      // this allows buffers to emit tuples before next() and when hasNext() return false;
-      final TupleEntry tupleEntry = tupleEntryIterator.getTupleEntry();
-      final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, groupEntry );
-      tupleEntry.setTuple( valueNulledTuple );
-
-      tupleCollector.value = tupleEntry; // null out header entries
-
-      operationCall.setOutputCollector( tupleCollector );
-      operationCall.setGroup( groupEntry );
-
-      operationCall.setArgumentsIterator( new Iterator<TupleEntry>()
-      {
-      public boolean hasNext()
-        {
-        boolean hasNext = tupleEntryIterator.hasNext();
-
-        if( !hasNext )
-          tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
-
-        return hasNext;
-        }
-
-      public TupleEntry next()
-        {
-        return outgoingScope.getArgumentsEntry( (TupleEntry) tupleEntryIterator.next() );
-        }
-
-      public void remove()
-        {
-        tupleEntryIterator.remove();
-        }
-      } );
-
-      try
-        {
-        getReducer().operate( flowProcess, operationCall );
-        }
-      catch( CascadingException exception )
-        {
-        throw exception;
-        }
-      catch( Throwable throwable )
-        {
-        throw new OperatorException( Every.this, "operator Every failed executing buffer: " + operation, throwable );
-        }
-      }
-
-    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      }
-    }
-
-  public class EveryAssertionHandler extends EveryHandler
-    {
-    public EveryAssertionHandler( Scope outgoingScope )
-      {
-      super( outgoingScope );
-      }
-
-    public void start( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      operationCall.setArguments( null );
-      operationCall.setOutputCollector( null ); // zero it out
-      operationCall.setGroup( groupEntry );
-
-      getGroupAssertion().start( flowProcess, operationCall );
-      }
-
-    public void operate( FlowProcess flowProcess, TupleEntry groupEntry, TupleEntry inputEntry, TupleEntryIterator tupleEntryIterator )
-      {
-      TupleEntry arguments = outgoingScope.getArgumentsEntry( inputEntry );
-
-      operationCall.setArguments( arguments );
-
-      getGroupAssertion().aggregate( flowProcess, operationCall ); // don't catch exceptions
-      }
-
-    public void complete( FlowProcess flowProcess, TupleEntry groupEntry )
-      {
-      operationCall.setArguments( null );
-      getGroupAssertion().doAssert( flowProcess, operationCall );
-
-      outputCollector.collect( groupEntry.getTuple() );
       }
     }
   }

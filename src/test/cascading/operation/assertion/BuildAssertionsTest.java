@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,10 +21,9 @@
 
 package cascading.operation.assertion;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexParser;
@@ -32,19 +31,19 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class BuildAssertionsTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class BuildAssertionsTest extends PlatformTestCase
   {
   public BuildAssertionsTest()
     {
-    super( "build assertions" );
     }
 
   /**
@@ -54,14 +53,14 @@ public class BuildAssertionsTest extends CascadingTestCase
    */
   public void testLoneGroupAssertion() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "input" );
-    Tap sink = new Hfs( new TextLine(), "output", true );
+    Tap source = getPlatform().getTextFile( "input" );
+    Tap sink = getPlatform().getTextFile( "output", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
     String regex = TestConstants.APACHE_COMMON_REGEX;
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex, new int[]{
-      1, 2, 3, 4, 5, 6} ) );
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), regex,
+      new int[]{1, 2, 3, 4, 5, 6} ) );
 
     pipe = new Each( pipe, AssertionLevel.STRICT, new AssertNotNull() );
 
@@ -75,7 +74,7 @@ public class BuildAssertionsTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new FlowConnector().connect( source, sink, pipe );
+      Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
       fail( "did not throw lone group assertion error" );
       }
     catch( Exception exception )

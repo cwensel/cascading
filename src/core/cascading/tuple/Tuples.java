@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -66,7 +66,7 @@ public class Tuples
    */
   public static Object[] asArray( Tuple tuple, Class[] types )
     {
-    return asArray( tuple, types, new Object[tuple.size()] );
+    return asArray( tuple, types, new Object[ tuple.size() ] );
     }
 
   /**
@@ -216,7 +216,7 @@ public class Tuples
    */
   public static Tuple coerce( Tuple tuple, Class[] types )
     {
-    return new Tuple( (Object[]) asArray( tuple, types, new Object[types.length] ) );
+    return new Tuple( (Object[]) asArray( tuple, types, new Object[ types.length ] ) );
     }
 
   /**
@@ -258,6 +258,11 @@ public class Tuples
   public static Tuple extract( TupleEntry tupleEntry, Fields selector )
     {
     return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
+    }
+
+  public static Tuple nulledCopy( TupleEntry tupleEntry, Fields selector )
+    {
+    return tupleEntry.tuple.nulledCopy( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
     }
 
   public static Tuple setOnEmpty( TupleEntry baseEntry, TupleEntry valuesEntry )

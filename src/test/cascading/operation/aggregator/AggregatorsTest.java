@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,6 +23,7 @@ package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
 import cascading.operation.Aggregator;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleListCollector;
@@ -30,11 +31,12 @@ import cascading.tuple.TupleListCollector;
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class AggregatorsTest extends CascadingTestCase
   {
   public AggregatorsTest()
     {
-    super( "aggregators tests" );
+    super();
     }
 
   public void testAverage()

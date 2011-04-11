@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,18 +23,17 @@ package cascading.tap;
 
 import java.io.IOException;
 
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class SinkTap is the base class for {@link cascading.tap.TemplateTap}. Some {@link cascading.tap.Tap} instances may only be sinks (as opposed
+ * Class SinkTap is the base class for sink only Taps. Some {@link cascading.tap.Tap} instances may only be sinks (as opposed
  * to being a source). These types should subclass SinkTap for convenience.
  */
-public abstract class SinkTap extends Tap
+public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
   {
   protected SinkTap()
     {
@@ -57,28 +56,25 @@ public abstract class SinkTap extends Tap
     }
 
   @Override
-  public Tuple source( Object key, Object value )
-    {
-    throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
-    }
-
-  @Override
   public boolean isSource()
     {
     return false;
     }
 
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  @Override
+  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  @Override
+  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SinkTap instance" );
     }
 
-  public void sourceInit( JobConf conf ) throws IOException
+  @Override
+  public void sourceConfInit( Process flowProcess, Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }

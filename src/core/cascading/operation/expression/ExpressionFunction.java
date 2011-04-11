@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,8 +61,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression );
 
-    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
+    verify( fieldDeclaration );
     }
 
   /**
@@ -79,8 +78,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression, parameterType );
 
-    if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
-      throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
+    verify( fieldDeclaration );
     }
 
   /**
@@ -99,11 +97,16 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
     {
     super( fieldDeclaration, expression, parameterNames, parameterTypes );
 
+    verify( fieldDeclaration );
+    }
+
+  private void verify( Fields fieldDeclaration )
+    {
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {
     functionCall.getOutputCollector().add( new Tuple( evaluate( functionCall.getContext(), functionCall.getArguments() ) ) );

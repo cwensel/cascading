@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,13 +21,11 @@
 
 package cascading;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.assertion.AssertNotEquals;
@@ -36,37 +34,30 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.SequenceFile;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.tap.TapException;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.OutputCollector;
+
+import static data.InputData.inputFileApache;
 
 /**
  *
  */
-public class TrapTest extends ClusterTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class TrapTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String outputPath = "build/test/output/traps/";
-
   public TrapTest()
     {
-    super( "trap tests", true, 4, 4 );
+    super( true, 4, 4 );
     }
 
   public void testTrapNone() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -74,10 +65,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "none/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "none/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "none/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( "none/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -87,12 +78,9 @@ public class TrapTest extends ClusterTestCase
 
   public void testTrapEachAll() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -104,10 +92,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "all/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( "all/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -117,12 +105,9 @@ public class TrapTest extends ClusterTestCase
 
   public void testTrapEachAllSequence() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -134,12 +119,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/tap", true );
-    Tap trap = new Hfs( new SequenceFile( Fields.ALL ), outputPath + "allseq/trap", true );
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "allseq/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "allseq/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
-
-//    flow.writeDOT( "traps.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -164,12 +147,9 @@ public class TrapTest extends ClusterTestCase
 
   private void runTrapEveryAll( int failAt, String path, int failSize ) throws IOException
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -179,12 +159,12 @@ public class TrapTest extends ClusterTestCase
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
     pipe = new Every( pipe, new TestFailAggregator( new Fields( "fail" ), failAt ), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + path + "/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + path + "/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( path + "/trap" ), SinkMode.REPLACE );
 
     Map<String, Tap> traps = Cascades.tapsMap( "reduce", trap );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, traps, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, traps, pipe );
 
     flow.complete();
 
@@ -199,12 +179,9 @@ public class TrapTest extends ClusterTestCase
    */
   public void testTrapEachAllChained() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -216,12 +193,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new Each( pipe, new TestFunction( new Fields( "test3" ), new Tuple( 3 ), 3 ), Fields.ALL );
     pipe = new Each( pipe, new TestFunction( new Fields( "test4" ), new Tuple( 4 ), 4 ), Fields.ALL );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "allchain/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "allchain/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "allchain/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( "allchain/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
-
-//    flow.writeDOT( "traps.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -237,12 +212,9 @@ public class TrapTest extends ClusterTestCase
    */
   public void testTrapEachEveryAllChained() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -256,12 +228,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "76.197.151.0" ) );
     pipe = new Each( pipe, AssertionLevel.VALID, new AssertNotEquals( "12.215.138.88" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "eacheverychain/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "eacheverychain/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "eacheverychain/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( "eacheverychain/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
-
-//    flow.writeDOT( "traps.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -271,12 +241,9 @@ public class TrapTest extends ClusterTestCase
 
   public void testTrapToSequenceFile() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( inputFileApache );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -288,10 +255,10 @@ public class TrapTest extends ClusterTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "seq/tap", true );
-    Tap trap = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + "seq/trap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "seq/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "seq/trap" ), SinkMode.REPLACE );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( "trap test", source, sink, trap, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
     flow.complete();
 
@@ -299,74 +266,74 @@ public class TrapTest extends ClusterTestCase
     validateLength( flow.openTrap(), 10 );
     }
 
-  private static class FailScheme extends TextLine
-    {
-    boolean sourceFired = false;
-    boolean sinkFired = false;
+//  private static class FailScheme extends TextLine
+//    {
+//    boolean sourceFired = false;
+//    boolean sinkFired = false;
+//
+//    public FailScheme()
+//      {
+//      }
+//
+//    public FailScheme( Fields sourceFields )
+//      {
+//      super( sourceFields );
+//      }
+//
+//    @Override
+//    public boolean source( HadoopFlowProcess flowProcess, SourceCall sourceCall ) throws IOException
+//      {
+//      if( !sourceFired )
+//        {
+//        sourceFired = true;
+//        throw new TapException( "fail" );
+//        }
+//
+//      return super.source( flowProcess, sourceCall );
+//      }
+//
+//    @Override
+//    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+//      {
+//      if( !sinkFired )
+//        {
+//        sinkFired = true;
+//        throw new TapException( "fail" );
+//        }
+//
+//      super.sink( flowProcess, sinkCall );
+//      }
+//    }
 
-    public FailScheme()
-      {
-      }
+/**  public void testTrapTapSourceSink() throws Exception
+ {
+ if( !new File( inputFileApache ).exists() )
+ fail( "data file not found" );
 
-    public FailScheme( Fields sourceFields )
-      {
-      super( sourceFields );
-      }
+ copyFromLocal( inputFileApache );
 
-    @Override
-    public Tuple source( Object key, Object value )
-      {
-      if( !sourceFired )
-        {
-        sourceFired = true;
-        throw new TapException( "fail" );
-        }
+ Tap source = new Hfs( new FailScheme( new Fields( "offset", "line" ) ), inputFileApache );
 
-      return super.source( key, value );
-      }
+ Pipe pipe = new Pipe( "map" );
 
-    @Override
-    public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
-      {
-      if( !sinkFired )
-        {
-        sinkFired = true;
-        throw new TapException( "fail" );
-        }
+ pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+ pipe = new GroupBy( pipe, new Fields( "ip" ) );
+ pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-      super.sink( tupleEntry, outputCollector );
-      }
-    }
+ Tap sink = new Hfs( new FailScheme(), outputPath + "sink/tap", true );
+ Tap trap = new Hfs( new TextLine(), outputPath + "sink/trap", true );
 
-  public void testTrapTapSourceSink() throws Exception
-    {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+ Map<Object, Object> properties = getProperties();
 
-    copyFromLocal( inputFileApache );
+ // compensate for running in cluster mode
+ properties.put( "mapred.map.tasks", 1 );
+ properties.put( "mapred.reduce.tasks", 1 );
 
-    Tap source = new Hfs( new FailScheme( new Fields( "offset", "line" ) ), inputFileApache );
+ Flow flow = new HadoopFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
 
-    Pipe pipe = new Pipe( "map" );
+ flow.complete();
 
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new GroupBy( pipe, new Fields( "ip" ) );
-    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
-
-    Tap sink = new Hfs( new FailScheme(), outputPath + "sink/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "sink/trap", true );
-
-    Map<Object, Object> properties = getProperties();
-
-    // compensate for running in cluster mode
-    properties.put( "mapred.map.tasks", 1 );
-    properties.put( "mapred.reduce.tasks", 1 );
-
-    Flow flow = new FlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
-
-    flow.complete();
-
-    validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 6, null );
-    validateLength( flow.openTrap(), 2 );
-    }
+ validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 6, null );
+ validateLength( flow.openTrap(), 2 );
+ } **/
   }

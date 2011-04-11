@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -51,13 +51,14 @@ import cascading.flow.FlowSkipStrategy;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Cascade is an assembly of {@link Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
@@ -86,16 +87,17 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 public class Cascade implements Runnable
   {
   /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Cascade.class );
+  private static final Logger LOG = LoggerFactory.getLogger( Cascade.class );
+
   /** Field versionProperties */
   private static Properties versionProperties;
 
   /** Field id */
   private String id;
   /** Field name */
-  private String name;
+  private final String name;
   /** Field properties */
-  private Map<Object, Object> properties;
+  private final Map<Object, Object> properties;
   /** Field jobGraph */
   private final SimpleDirectedGraph<Flow, Integer> jobGraph;
   /** Field tapGraph */
@@ -159,7 +161,7 @@ public class Cascade implements Runnable
    * Method getID returns the ID of this Cascade object.
    * <p/>
    * The ID value is a long HEX String used to identify this instance globally. Subsequent Cascade
-   * instances created with identical paramers will not return the same ID.
+   * instances created with identical parameters will not return the same ID.
    *
    * @return the ID (type String) of this Cascade object.
    */
@@ -205,7 +207,7 @@ public class Cascade implements Runnable
     }
 
   /**
-   * Method findFlows returns a List of flows whos names match the given regex pattern.
+   * Method findFlows returns a List of flows whose names match the given regex pattern.
    *
    * @param regex of type String
    * @return List<Flow>
@@ -453,7 +455,7 @@ public class Cascade implements Runnable
 
     for( Flow flow : getFlows() )
       {
-      if( flow.jobsAreLocal() )
+      if( flow.stepsAreLocal() )
         countLocalJobs++;
       }
 
@@ -554,7 +556,7 @@ public class Cascade implements Runnable
     printElementGraph( filename, tapGraph );
     }
 
-  protected void printElementGraph( String filename, final SimpleDirectedGraph<String, Flow.FlowHolder> graph )
+  protected void printElementGraph( String filename, SimpleDirectedGraph<String, Flow.FlowHolder> graph )
     {
     try
       {
@@ -578,7 +580,7 @@ public class Cascade implements Runnable
       }
     catch( IOException exception )
       {
-      exception.printStackTrace();
+      LOG.error( "failed printing graph to {}", filename, exception );
       }
     }
 
@@ -654,11 +656,11 @@ public class Cascade implements Runnable
   protected class CascadeJob implements Callable<Throwable>
     {
     /** Field flow */
-    Flow flow;
+    final Flow flow;
     /** Field predecessors */
     private List<CascadeJob> predecessors;
     /** Field latch */
-    private CountDownLatch latch = new CountDownLatch( 1 );
+    private final CountDownLatch latch = new CountDownLatch( 1 );
     /** Field stop */
     private boolean stop = false;
     /** Field failed */

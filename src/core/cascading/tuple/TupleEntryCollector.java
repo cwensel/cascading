@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,11 +21,12 @@
 
 package cascading.tuple;
 
+import java.io.IOException;
+
 /** Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
 public abstract class TupleEntryCollector
   {
-  /** Field declared */
-  protected Fields declared;
+  protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null );
 
   protected TupleEntryCollector()
     {
@@ -41,18 +42,28 @@ public abstract class TupleEntryCollector
     if( declared == null )
       throw new IllegalArgumentException( "declared fields must not be null" );
 
-    this.declared = declared;
+    if( declared.isUnknown() )
+      return;
+
+    this.tupleEntry = new TupleEntry( declared, Tuple.size( declared.size() ) );
     }
 
   /**
    * Method add inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
    * more efficient as it simply calls {@link TupleEntry#getTuple()};
    *
-   * @param entry of type TupleEntry
+   * @param tupleEntry of type TupleEntry
    */
-  public void add( TupleEntry entry )
+  public void add( TupleEntry tupleEntry )
     {
-    add( entry.getTuple() );
+    Fields expectedFields = this.tupleEntry.getFields();
+
+    if( expectedFields.isUnknown() )
+      this.tupleEntry.setTuple( tupleEntry.getTuple() );
+    else
+      this.tupleEntry.setTuple( tupleEntry.selectTuple( expectedFields ) );
+
+    safeCollect( this.tupleEntry );
     }
 
   /**
@@ -63,15 +74,29 @@ public abstract class TupleEntryCollector
   public void add( Tuple tuple )
     {
     if( tuple == null || tuple.isEmpty() )
-      return;
+      throw new IllegalArgumentException( "tuple may not be null or empty" );
 
-    if( declared != null && !declared.isUnknown() && declared.size() != tuple.size() )
-      throw new TupleException( "operation added the wrong number of fields, expected: " + declared.print() + ", got result size: " + tuple.size() );
+    if( !tupleEntry.getFields().isUnknown() && tupleEntry.getFields().size() != tuple.size() )
+      throw new TupleException( "operation added the wrong number of fields, expected: " + tupleEntry.getFields().print() + ", got result size: " + tuple.size() );
 
-    collect( tuple );
+    tupleEntry.setTuple( tuple );
+
+    safeCollect( tupleEntry );
     }
 
-  protected abstract void collect( Tuple tuple );
+  private void safeCollect( TupleEntry tupleEntry )
+    {
+    try
+      {
+      collect( tupleEntry );
+      }
+    catch( IOException exception )
+      {
+      throw new TupleException( "unable to collect tuple", exception );
+      }
+    }
+
+  protected abstract void collect( TupleEntry tupleEntry ) throws IOException;
 
   /**
    * Method close closes the underlying resource being written to. This method should be called when no more {@link Tuple}

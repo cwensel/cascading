@@ -1,5 +1,17 @@
 Cascading Change Log
 
+2.0.0 [unreleased]
+
+  Decoupled core from Apache Hadoop, removed stack based streaming model. Use c.f.h.HadoopFlowConnector to plan
+  Hadoop specific flows.
+
+  Implemented 'local' mode to support independent processing of complex processes in memory. Use
+  c.f.l.LocalFlowConnector for local mode specific flows.
+
+  Updated and simplified c.t.Tap and c.t.Scheme interfaces. Changes are not backwards compatible to 1.x releases.
+
+  Implemented new pipelining infrastructure to support more complex streaming topologies.
+
 1.2.3 [unreleased]
 
   Fixed bug where c.t.Fields#append() would fail when appending unordered selectors.

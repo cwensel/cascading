@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
+import cascading.test.PlatformTest;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleInputStream;
 import cascading.tuple.TupleOutputStream;
@@ -39,13 +40,11 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  *
  */
-public class HadoopSerializationTest extends CascadingTestCase
+@PlatformTest(platforms = {"hadoop"})
+public class HadoopSerializationTest extends PlatformTestCase
   {
-  String outputPath = "build/test/output/tuples/serialization";
-
   public HadoopSerializationTest()
     {
-    super( "serialization tuple test" );
     }
 
   public void testInputOutputSerialization() throws IOException
@@ -59,12 +58,12 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     TupleSerialization tupleSerialization = new TupleSerialization( jobConf );
 
-    File file = new File( outputPath );
+    File file = new File( getOutputPath( "serialization" ) );
 
     file.mkdirs();
     file = new File( file, "/test.bytes" );
 
-    TupleOutputStream output = new TupleOutputStream( new FileOutputStream( file, false ), tupleSerialization.getElementWriter() );
+    TupleOutputStream output = new HadoopTupleOutputStream( new FileOutputStream( file, false ), tupleSerialization.getElementWriter() );
 
     for( int i = 0; i < 501; i++ ) // 501 is arbitrary
       {
@@ -78,7 +77,7 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     assertEquals( "wrong size", 89967L, file.length() ); // just makes sure the file size doesnt change from expected
 
-    TupleInputStream input = new TupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
+    TupleInputStream input = new HadoopTupleInputStream( new FileInputStream( file ), tupleSerialization.getElementReader() );
 
     int k = -1;
     for( int i = 0; i < 501; i++ )
@@ -101,6 +100,4 @@ public class HadoopSerializationTest extends CascadingTestCase
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
-
-
   }

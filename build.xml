@@ -56,105 +56,155 @@
   <property name="src" location="${cascading.basedir}/src"/>
   <property name="src.core" location="${src}/core"/>
   <property name="src.xml" location="${src}/xml"/>
+  <property name="src.local" location="${src}/local"/>
+  <property name="src.hadoop" location="${src}/hadoop"/>
   <property name="src.test" location="${src}/test"/>
 
   <property name="build" location="${cascading.basedir}/build/"/>
   <property name="build.classes" location="${build}"/>
   <property name="build.core" location="${build.classes}/core"/>
   <property name="build.xml" location="${build.classes}/xml"/>
+  <property name="build.local" location="${build.classes}/local"/>
+  <property name="build.hadoop" location="${build.classes}/hadoop"/>
   <property name="build.test" location="${build.classes}/test"/>
 
   <property name="test.results" location="${build}/testresults"/>
+  <property name="test.output.root" location="${build}/test/output"/>
   <property name="test.showoutput" value="no"/>
 
   <property name="test.cluster.enabled" value="true"/>
 
   <property name="lib" location="${cascading.basedir}/lib"/>
+  <property name="lib.core" location="${lib}/core"/>
   <property name="lib.xml" location="${lib}/xml"/>
+  <property name="lib.local" location="${lib}/local"/>
+  <property name="lib.hadoop" location="${lib}/hadoop"/>
   <property name="lib.test" location="${lib}/test"/>
+
   <property name="dist" location="${cascading.basedir}/dist"/>
   <property name="javadoc" location="${cascading.basedir}/javadoc"/>
   <property name="log" location="${cascading.basedir}/log"/>
 
-  <property name="hadoop.home" location="${cascading.basedir}/../hadoop"/>
+  <!--<property name="hadoop.home" location="${cascading.basedir}/../hadoop"/>-->
 
   <property name="jar.cascading" value="cascading-${cascading.release.full}.jar"/>
   <property name="jar.cascading-core" value="cascading-core-${cascading.release.full}.jar"/>
   <property name="jar.cascading-xml" value="cascading-xml-${cascading.release.full}.jar"/>
+  <property name="jar.cascading-local" value="cascading-local-${cascading.release.full}.jar"/>
+  <property name="jar.cascading-hadoop" value="cascading-hadoop-${cascading.release.full}.jar"/>
   <property name="jar.cascading-test" value="cascading-test-${cascading.release.full}.jar"/>
 
   <property name="tar.cascading.prefix"
             value="cascading-${cascading.release.full}-${cascading.hadoop.compatible.version}"/>
   <property name="tar.cascading" value="${tar.cascading.prefix}.tgz"/>
 
-  <path id="build.class.path">
+  <path id="build.classpath">
     <pathelement location="${build.core}"/>
     <pathelement location="${build.xml}"/>
+    <pathelement location="${build.local}"/>
+    <pathelement location="${build.hadoop}"/>
     <pathelement location="${build.test}"/>
   </path>
 
-  <path id="jars.class.path">
+  <path id="build.classpath.core">
+    <pathelement location="${build.core}"/>
+  </path>
+
+  <path id="build.classpath.xml">
+    <pathelement location="${build.xml}"/>
+  </path>
+
+  <path id="build.classpath.local">
+    <pathelement location="${build.local}"/>
+  </path>
+
+  <path id="build.classpath.hadoop">
+    <pathelement location="${build.hadoop}"/>
+  </path>
+
+  <path id="build.classpath.test">
+    <pathelement location="${build.test}"/>
+  </path>
+
+  <path id="deps.classpath.core">
+    <fileset dir="${lib.core}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="deps.classpath.xml">
+    <fileset dir="${lib.xml}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="deps.classpath.local">
+    <fileset dir="${lib.local}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="deps.classpath.hadoop">
+    <fileset dir="${lib.hadoop}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="deps.classpath.test">
+    <fileset dir="${lib.test}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="jars.classpath">
     <fileset dir="${build}" erroronmissingdir="false">
       <include name="cascading-core-*.jar"/>
       <include name="cascading-xml-*.jar"/>
+      <include name="cascading-local-*.jar"/>
+      <include name="cascading-hadoop-*.jar"/>
       <include name="cascading-test-*.jar"/>
     </fileset>
 
     <fileset dir="${basedir}" erroronmissingdir="false">
       <include name="cascading-core-*.jar"/>
       <include name="cascading-xml-*.jar"/>
+      <include name="cascading-local-*.jar"/>
+      <include name="cascading-hadoop-*.jar"/>
       <include name="cascading-test-*.jar"/>
     </fileset>
   </path>
 
-  <path id="deps.class.path">
-    <fileset dir="${lib}">
-      <include name="*.jar"/>
-    </fileset>
-
-    <fileset dir="${lib.xml}">
-      <include name="*.jar"/>
-    </fileset>
-
-    <fileset dir="${lib.test}">
-      <include name="*.jar"/>
-    </fileset>
-
-    <fileset dir="${hadoop.home}">
-      <include name="hadoop-*-core.jar"/>
-      <include name="hadoop-*-test.jar"/>
-    </fileset>
-
-    <fileset dir="${hadoop.home}/build" erroronmissingdir="false">
-      <include name="hadoop-*-core.jar"/>
-      <include name="hadoop-*-test.jar"/>
-    </fileset>
-
-    <fileset dir="${hadoop.home}/lib">
-      <include name="**/*.jar"/>
-      <exclude name="**/junit*"/>
-    </fileset>
+  <path id="project.classpath">
+    <path refid="build.classpath"/>
+    <path refid="deps.classpath.core"/>
+    <path refid="deps.classpath.xml"/>
+    <path refid="deps.classpath.local"/>
+    <path refid="deps.classpath.hadoop"/>
+    <path refid="deps.classpath.test"/>
   </path>
 
-  <path id="project.class.path">
-    <path refid="build.class.path"/>
-    <path refid="deps.class.path"/>
+  <path id="package.classpath">
+    <path refid="jars.classpath"/>
+    <path refid="deps.classpath.core"/>
+    <path refid="deps.classpath.xml"/>
+    <path refid="deps.classpath.local"/>
+    <path refid="deps.classpath.hadoop"/>
+    <path refid="deps.classpath.test"/>
   </path>
 
-  <path id="package.class.path">
-    <path refid="jars.class.path"/>
-    <path refid="deps.class.path"/>
-  </path>
-
-  <path id="project.src.path">
+  <path id="project.srcpath">
     <pathelement location="${src.core}"/>
     <pathelement location="${src.xml}"/>
+    <pathelement location="${src.local}"/>
+    <pathelement location="${src.hadoop}"/>
     <pathelement location="${src.test}"/>
   </path>
 
-  <path id="javadoc.src.path">
+  <path id="javadoc.srcpath">
     <pathelement location="${src.core}"/>
     <pathelement location="${src.xml}"/>
+    <pathelement location="${src.local}"/>
+    <pathelement location="${src.hadoop}"/>
   </path>
 
   <!-- sets up environment -->
@@ -163,10 +213,12 @@
 
     <mkdir dir="${build.core}"/>
     <mkdir dir="${build.xml}"/>
+    <mkdir dir="${build.local}"/>
+    <mkdir dir="${build.hadoop}"/>
     <mkdir dir="${build.test}"/>
     <mkdir dir="${test.results}"/>
 
-    <property name="CLASSPATH" refid="project.class.path"/>
+    <!--<property name="CLASSPATH" refid="project.classpath"/>-->
     <!--<echo message="${CLASSPATH}"/>-->
   </target>
 
@@ -174,11 +226,9 @@
     <echo message="build.number=${cascading.release.build}" file="${build.core}/cascading/build.number.properties"/>
   </target>
 
-  <target name="compile" depends="init,echo-compile-buildnum">
-    <echo message="building cascading..."/>
-
+  <target name="compile.core" depends="init,echo-compile-buildnum">
     <javac srcdir="${src.core}" destdir="${build.core}" verbose="off" debug="${javac.debug}" includeantruntime="false">
-      <classpath refid="project.class.path"/>
+      <classpath refid="deps.classpath.core"/>
     </javac>
 
     <copy todir="${build.core}/cascading" file="${cascading.basedir}/version.properties"/>
@@ -188,9 +238,13 @@
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
+  </target>
 
+  <target name="compile.xml" depends="init,echo-compile-buildnum,compile.core">
     <javac srcdir="${src.xml}" destdir="${build.xml}" verbose="off" debug="${javac.debug}" includeantruntime="false">
-      <classpath refid="project.class.path"/>
+      <classpath refid="build.classpath.core"/>
+      <classpath refid="deps.classpath.core"/>
+      <classpath refid="deps.classpath.xml"/>
     </javac>
 
     <copy todir="${build.xml}">
@@ -198,9 +252,50 @@
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
+  </target>
 
+  <target name="compile.local" depends="init,echo-compile-buildnum,compile.core">
+    <javac srcdir="${src.local}" destdir="${build.local}" verbose="off" debug="${javac.debug}"
+           includeantruntime="false">
+      <classpath refid="build.classpath.core"/>
+      <classpath refid="deps.classpath.core"/>
+      <classpath refid="deps.classpath.local"/>
+    </javac>
+
+    <copy todir="${build.local}">
+      <fileset dir="${src.local}">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile.hadoop" depends="init,echo-compile-buildnum,compile.core">
+    <javac srcdir="${src.hadoop}" destdir="${build.hadoop}" verbose="off" debug="${javac.debug}"
+           includeantruntime="false">
+      <classpath refid="build.classpath.core"/>
+      <classpath refid="deps.classpath.core"/>
+      <classpath refid="deps.classpath.hadoop"/>
+    </javac>
+
+    <copy todir="${build.hadoop}">
+      <fileset dir="${src.hadoop}">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile.test"
+          depends="init,echo-compile-buildnum,compile.core,compile.xml,compile.local,compile.hadoop">
     <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}" includeantruntime="false">
-      <classpath refid="project.class.path"/>
+      <classpath refid="deps.classpath.core"/>
+      <classpath refid="build.classpath.core"/>
+      <classpath refid="deps.classpath.xml"/>
+      <classpath refid="build.classpath.xml"/>
+      <classpath refid="deps.classpath.local"/>
+      <classpath refid="build.classpath.local"/>
+      <classpath refid="deps.classpath.hadoop"/>
+      <classpath refid="build.classpath.hadoop"/>
+      <classpath refid="deps.classpath.test"/>
     </javac>
 
     <copy todir="${build.test}">
@@ -210,49 +305,86 @@
     </copy>
   </target>
 
+  <target name="compile"
+          depends="init,echo-compile-buildnum,compile.core,compile.xml,compile.local,compile.hadoop,compile.test"/>
+
   <target name="javadoc" depends="init">
     <echo message="creating cascading javadoc..."/>
     <delete dir="${javadoc}"/>
     <mkdir dir="${javadoc}"/>
 
-    <javadoc sourcepathref="javadoc.src.path"
+    <javadoc sourcepathref="javadoc.srcpath"
              destdir="${javadoc}"
              packagenames="cascading.*"
              windowtitle="Cascading ${cascading.release.major}">
-      <classpath refid="project.class.path"/>
+      <classpath refid="project.classpath"/>
       <link href="http://java.sun.com/javase/6/docs/api/"/>
       <link href="http://dist.codehaus.org/janino/javadoc/"/>
       <link href="http://hadoop.apache.org/common/docs/r0.20.2/api/"/>
-      <bottom><![CDATA[<i>Copyright &#169; 2007-2010 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
+      <bottom><![CDATA[<i>Copyright &#169; 2007-2011 Concurrent, Inc. All Rights Reserved.</i>]]></bottom>
     </javadoc>
 
   </target>
 
   <!-- runs JUnit tests -->
-  <target name="test" depends="init, compile">
-    <echo message="running all cascading tests..."/>
+  <target name="test" depends="test-none,test-local,test-hadoop,test-compare"/>
+
+  <target name="test-local" depends="init, compile">
+    <antcall target="test-generic">
+      <param name="test.platform" value="local"/>
+      <param name="test.platform.classname" value="cascading.test.LocalPlatform"/>
+    </antcall>
+  </target>
+
+  <target name="test-hadoop" depends="init, compile">
+    <antcall target="test-generic">
+      <param name="test.platform" value="hadoop"/>
+      <param name="test.platform.classname" value="cascading.test.HadoopPlatform"/>
+    </antcall>
+  </target>
+
+  <target name="test-none" depends="init, compile">
+    <antcall target="test-generic">
+      <param name="test.platform" value="none"/>
+      <param name="test.platform.classname" value=""/>
+    </antcall>
+  </target>
+
+  <target name="test-compare" depends="init, compile, test-local, test-hadoop">
+    <antcall target="test-generic">
+      <param name="test.platform" value="compare"/>
+      <param name="test.platform.classname" value=""/>
+    </antcall>
+  </target>
+
+  <target name="test-generic" depends="init, compile">
+    <echo message="running all cascading tests for ${test.platform} ..."/>
 
     <mkdir dir="build/test/log"/>
+
+    <property name="test.platform" value="local"/>
 
     <junit printsummary="true" showoutput="${test.showoutput}" fork="yes" haltonerror="no" haltonfailure="no" dir="."
            maxmemory="756m">
 
+      <sysproperty key="test.platform.classname" value="${test.platform.classname}"/>
+      <sysproperty key="test.output.root" value="${test.output.root}"/>
       <sysproperty key="test.cluster.enabled" value="${test.cluster.enabled}"/>
       <sysproperty key="test.build.data" value="data"/>
-      <sysproperty key="hadoop.log.dir" value="build/test/log"/>
+      <sysproperty key="hadoop.log.dir" value="build/test/log/${test.platform}"/>
 
       <!--<jvmarg value="-Xdebug"/>--><!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
 
       <classpath>
-        <path refid="project.class.path"/>
+        <path refid="project.classpath"/>
         <pathelement path="${java.class.path}"/>
       </classpath>
       <formatter type="plain" usefile="true"/>
 
-      <test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/>
-      <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
+      <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>
+          <containsregexp expression="@PlatformTest.*${test.platform}"/>
         </fileset>
       </batchtest>
     </junit>
@@ -298,7 +430,7 @@
       <!--<jvmarg value="-Xdebug"/>--><!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>-->
 
       <classpath>
-        <path refid="package.class.path"/>
+        <path refid="package.classpath"/>
         <pathelement path="${java.class.path}"/>
       </classpath>
       <formatter type="plain" usefile="true"/>
@@ -346,6 +478,8 @@
     <delete file="${build}/${jar.cascading}"/>
     <delete file="${build}/${jar.cascading-core}"/>
     <delete file="${build}/${jar.cascading-xml}"/>
+    <delete file="${build}/${jar.cascading-local}"/>
+    <delete file="${build}/${jar.cascading-hadoop}"/>
     <delete file="${build}/${jar.cascading-test}"/>
     <delete dir="${build.core}/lib"/>
 
@@ -358,6 +492,14 @@
     </jar>
 
     <jar jarfile="${build}/${jar.cascading-xml}" manifest="${build}/MANIFEST.MF" compress="yes">
+      <fileset dir="${build.xml}"/>
+    </jar>
+
+    <jar jarfile="${build}/${jar.cascading-local}" manifest="${build}/MANIFEST.MF" compress="yes">
+      <fileset dir="${build.xml}"/>
+    </jar>
+
+    <jar jarfile="${build}/${jar.cascading-hadoop}" manifest="${build}/MANIFEST.MF" compress="yes">
       <fileset dir="${build.xml}"/>
     </jar>
 
@@ -433,6 +575,8 @@
     <copy file="${build}/${jar.cascading}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-core}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-xml}" todir="${dist}"/>
+    <copy file="${build}/${jar.cascading-local}" todir="${dist}"/>
+    <copy file="${build}/${jar.cascading-hadoop}" todir="${dist}"/>
     <copy file="${build}/${jar.cascading-test}" todir="${dist}"/>
 
   </target>
@@ -445,6 +589,12 @@
       </tarfileset>
     </tar>
   </target>
+
+  <property name="package.aws.accessId" value=""/>
+  <property name="package.aws.secretKey" value=""/>
+  <property name="build.vcs.number" value=""/>
+  <property name="package.remote.path" value=""/>
+  <property name="package.remote.keyfile" value=""/>
 
   <target name="s3-package" if="package.remote.bucket">
 
@@ -475,19 +625,9 @@
   <target name="retrieve">
     <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
 
-    <ivy:retrieve settingsRef="ivy.conjars.settings" conf="core"
-                  pattern="${lib}/[artifact]-[revision].[ext]" sync="false"/>
-
-    <ivy:retrieve settingsRef="ivy.conjars.settings" conf="test,xml"
-                  pattern="${lib}/[conf]/[artifact]-[revision].[ext]" sync="false"/>
+    <ivy:retrieve settingsRef="ivy.conjars.settings" conf="core,xml,local,hadoop,test"
+                  pattern="${lib}/[conf]/[artifact]-[revision].[ext]" sync="true"/>
   </target>
-
-  <!--<target name="retrieve-hadoop">-->
-  <!--<ivy:settings id="ivy.conjars.settings" file="../repo/ivysettings.xml"/>-->
-  <!---->
-  <!--<ivy:retrieve settingsRef="ivy.conjars.settings" conf="compile"-->
-  <!--pattern="${build}/[conf]/[artifact]-[revision].[ext]" sync="true"/>-->
-  <!--</target>-->
 
   <target name="publish" depends="jar">
 
@@ -529,6 +669,20 @@
       <fileset dir="${build}">
         <include name="cascading-xml-${cascading.release.full}.pom"/>
         <include name="${jar.cascading-xml}"/>
+      </fileset>
+    </scp>
+
+    <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
+      <fileset dir="${build}">
+        <include name="cascading-local-${cascading.release.full}.pom"/>
+        <include name="${jar.cascading-local}"/>
+      </fileset>
+    </scp>
+
+    <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
+      <fileset dir="${build}">
+        <include name="cascading-hadoop-${cascading.release.full}.pom"/>
+        <include name="${jar.cascading-hadoop}"/>
       </fileset>
     </scp>
 

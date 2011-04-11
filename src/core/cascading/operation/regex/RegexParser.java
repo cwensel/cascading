@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -37,7 +37,7 @@ import cascading.tuple.Tuple;
  * Class RegexParser is used to extract a matched regex from an incoming argument value.
  * <p/>
  * Sometimes its useful to parse out a value from a key/value pair in a string, if the key exists. If the key does
- * not exist, returning an empty string insted of failing is typically expected.
+ * not exist, returning an empty string instead of failing is typically expected.
  * <p/>
  * The following regex can extract a value from {@code key1=value1&key2=value2} if key1 exists, otherwise an
  * empty string is returned:<br/>
@@ -128,7 +128,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     operationCall.setContext( getPattern().matcher( "" ) );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );

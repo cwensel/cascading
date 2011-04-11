@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -121,7 +121,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   static enum Kind
     {
-      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP;
+      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP
     }
 
   /** Field fields */
@@ -334,7 +334,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     notFound.removeAll( found );
 
     if( !notFound.isEmpty() )
-      throw new FieldsResolverException( new Fields( join( size, fields ) ), new Fields( notFound.toArray( new Comparable[ 0 ] ) ) );
+      throw new FieldsResolverException( new Fields( join( size, fields ) ), new Fields( notFound.toArray( new Comparable[ notFound.size() ] ) ) );
 
     if( hasUnknowns )
       return selector;
@@ -454,7 +454,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method isOrdered returns true if this instance is orderd. That is, all numeric field positions are absolute.
+   * Method isOrdered returns true if this instance is ordered. That is, all numeric field positions are absolute.
    * For example; [0,"a",2,3]
    *
    * @return the ordered (type boolean) of this Fields object.
@@ -957,7 +957,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public Fields rename( Fields from, Fields to )
     {
     if( this.isSubstitution() || this.isUnknown() )
-      throw new TupleException( "cannot rename fields in a substitution or unkown Fields instance: " + this.print() );
+      throw new TupleException( "cannot rename fields in a substitution or unknown Fields instance: " + this.print() );
 
     if( from.size() != to.size() )
       throw new TupleException( "from and to fields must be the same size" );
@@ -1272,7 +1272,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     this.comparators = comparators;
     }
 
-  private Comparable asFieldName( Comparable fieldName )
+  protected static Comparable asFieldName( Comparable fieldName )
     {
     if( fieldName instanceof Fields )
       {
@@ -1296,7 +1296,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     {
     Comparator[] copy = new Comparator[ size() ];
 
-    System.arraycopy( comparators, 0, copy, 0, size() );
+    if( comparators != null )
+      System.arraycopy( comparators, 0, copy, 0, size() );
 
     return copy;
     }

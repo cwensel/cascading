@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,6 @@ package cascading.pipe;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
 import cascading.operation.Filter;
 import cascading.operation.Function;
@@ -35,7 +34,7 @@ import cascading.tuple.Tuple;
  * The GroupBy pipe groups the {@link Tuple} stream by the given groupFields.
  * </p>
  * If more than one {@link Pipe} instance is provided on the constructor, all branches will be merged. It is required
- * that all Pipe instances output the same field names, otherwise the {@link FlowConnector} will fail to create a
+ * that all Pipe instances output the same field names, otherwise the {@link cascading.flow.FlowConnector} will fail to create a
  * {@link Flow} instance. Again, the Pipe instances are merged together as if one Tuple stream and not joined.
  * See {@link CoGroup} for joining by common fields.
  * </p>
@@ -194,7 +193,7 @@ public class GroupBy extends Group
    * as merging assumes all incoming streams have the same fields in the same order.
    * <p/>
    * To get the best performance, choose a field(s) that has many unique values, by using the constructor that takes
-   * a groupFields argument. If the first field has few unqiue values, data will only be sent to that number of reducers,
+   * a groupFields argument. If the first field has few unique values, data will only be sent to that number of reducers,
    * or less, in the cluster, making the reduce phase a larger bottleneck.
    *
    * @param pipes of type Pipe

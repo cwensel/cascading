@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -73,7 +73,7 @@ public abstract class SubAssembly extends Pipe
     if( tails == null )
       throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
 
-    String[] names = new String[tails.length];
+    String[] names = new String[ tails.length ];
 
     for( int i = 0; i < tails.length; i++ )
       names[ i ] = tails[ i ].getName();
@@ -114,7 +114,7 @@ public abstract class SubAssembly extends Pipe
         previous.add( pipe );
       }
 
-    return previous.toArray( new Pipe[previous.size()] );
+    return previous.toArray( new Pipe[ previous.size() ] );
     }
 
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,14 +21,13 @@
 
 package cascading;
 
-import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import cascading.assembly.EuclideanDistance;
 import cascading.assembly.PearsonDistance;
 import cascading.assembly.SortElements;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
 import cascading.operation.AggregatorCall;
 import cascading.operation.Function;
@@ -44,24 +43,21 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
 
-public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
+import static data.InputData.inputFileCritics;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class DistanceUseCaseTest extends PlatformTestCase implements Serializable
   {
-  String inputFileCritics = "build/test/data/critics.txt";
-
-  String outputPathEuclidean = "build/test/output/euclidean/";
-  String outputPathPearson = "build/test/output/pearson/";
-
   public DistanceUseCaseTest()
     {
-    super( "distance", false );
+    super( false );
     }
 
   /**
@@ -71,13 +67,10 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
    */
   public void testEuclideanDistance() throws Exception
     {
-    if( !new File( inputFileCritics ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileCritics );
 
-    copyFromLocal( inputFileCritics );
-
-    Tap source = new Hfs( new TextLine(), inputFileCritics );
-    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/long", true );
+    Tap source = getPlatform().getTextFile( inputFileCritics );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "euclidean/long" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "euclidean" );
 
@@ -131,27 +124,15 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "graph.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 21 );
 
-    TupleEntryIterator iterator = flow.openSink();
-    boolean found = false;
+    List<Tuple> results = getSinkAsList( flow );
 
-    while( iterator.hasNext() )
-      {
-      if( iterator.next().get( 1 ).equals( "GeneSeymour\tLisaRose\t0.14814814814814814" ) )
-        {
-        found = true;
-        break;
-        }
-      }
-
-    assertTrue( "did not calculate score", found );
+    assertTrue( results.contains( new Tuple( "GeneSeymour\tLisaRose\t0.14814814814814814" ) ) );
     }
 
   /**
@@ -161,13 +142,10 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
    */
   public void testEuclideanDistanceShort() throws Exception
     {
-    if( !new File( inputFileCritics ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileCritics );
 
-    copyFromLocal( inputFileCritics );
-
-    Tap source = new Hfs( new TextLine(), inputFileCritics );
-    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/short", true );
+    Tap source = getPlatform().getTextFile( inputFileCritics );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "euclidean/short" ), SinkMode.REPLACE );
 
     // unknown number of elements
     Pipe pipe = new Each( "euclidean", new Fields( "line" ), new RegexSplitter( "\t" ) );
@@ -220,38 +198,23 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "graph.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 21 );
 
-    TupleEntryIterator iterator = flow.openSink();
-    boolean found = false;
+    List<Tuple> results = getSinkAsList( flow );
 
-    while( iterator.hasNext() )
-      {
-      if( iterator.next().get( 1 ).equals( "GeneSeymour\tLisaRose\t0.14814814814814814" ) )
-        {
-        found = true;
-        break;
-        }
-      }
-
-    assertTrue( "did not calculate score", found );
+    assertTrue( results.contains( new Tuple( "GeneSeymour\tLisaRose\t0.14814814814814814" ) ) );
     }
 
   public void testEuclideanDistanceComposite() throws Exception
     {
-    if( !new File( inputFileCritics ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileCritics );
 
-    copyFromLocal( inputFileCritics );
-
-    Tap source = new Hfs( new TextLine(), inputFileCritics );
-    Tap sink = new Hfs( new TextLine(), outputPathEuclidean + "/composite", true );
+    Tap source = getPlatform().getTextFile( inputFileCritics );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "euclidean/composite" ), SinkMode.REPLACE );
 
     // unknown number of elements
     Pipe pipe = new Each( "euclidean", new Fields( "line" ), new RegexSplitter( "\t" ) );
@@ -262,38 +225,23 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new EuclideanDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "eucdist.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 21 );
 
-    TupleEntryIterator iterator = flow.openSink();
-    boolean found = false;
+    List<Tuple> results = getSinkAsList( flow );
 
-    while( iterator.hasNext() )
-      {
-      if( iterator.next().get( 1 ).equals( "GeneSeymour\tLisaRose\t0.14814814814814814" ) )
-        {
-        found = true;
-        break;
-        }
-      }
-
-    assertTrue( "did not calculate score", found );
+    assertTrue( results.contains( new Tuple( "GeneSeymour\tLisaRose\t0.14814814814814814" ) ) );
     }
 
   public void testPearsonDistanceComposite() throws Exception
     {
-    if( !new File( inputFileCritics ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileCritics );
 
-    copyFromLocal( inputFileCritics );
-
-    Tap source = new Hfs( new TextLine(), inputFileCritics );
-    Tap sink = new Hfs( new TextLine(), outputPathPearson + "/composite", true );
+    Tap source = getPlatform().getTextFile( inputFileCritics );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "pearson/composite" ), SinkMode.REPLACE );
 
     // unknown number of elements
     Pipe pipe = new Each( "pearson", new Fields( "line" ), new RegexSplitter( "\t" ) );
@@ -304,26 +252,14 @@ public class DistanceUseCaseTest extends ClusterTestCase implements Serializable
     // name and rate against others of same movie
     pipe = new PearsonDistance( pipe, new Fields( "name", "movie", "rate" ), new Fields( "name1", "name2", "distance" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "peardist.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 21 );
 
-    TupleEntryIterator iterator = flow.openSink();
-    boolean found = false;
+    List<Tuple> results = getSinkAsList( flow );
 
-    while( iterator.hasNext() )
-      {
-      if( iterator.next().get( 1 ).equals( "GeneSeymour\tLisaRose\t0.39605901719066977" ) )
-        {
-        found = true;
-        break;
-        }
-      }
-
-    assertTrue( "did not calculate score", found );
+    assertTrue( results.contains( new Tuple( "GeneSeymour\tLisaRose\t0.39605901719066977" ) ) );
     }
   }

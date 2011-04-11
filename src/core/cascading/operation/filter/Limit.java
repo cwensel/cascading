@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,6 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -76,16 +75,8 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
 
     operationCall.setContext( context );
 
-    HadoopFlowProcess process = (HadoopFlowProcess) flowProcess;
-
-    int numTasks = 0;
-
-    if( process.isMapper() )
-      numTasks = process.getCurrentNumMappers();
-    else
-      numTasks = process.getCurrentNumReducers();
-
-    int taskNum = process.getCurrentTaskNum();
+    int numTasks = flowProcess.getNumConcurrentTasks();
+    int taskNum = flowProcess.getCurrentTaskNum();
 
     context.limit = (long) Math.floor( (double) limit / (double) numTasks );
 
@@ -122,7 +113,7 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
   public int hashCode()
     {
     int result = super.hashCode();
-    result = 31 * result + (int) ( limit ^ ( limit >>> 32 ) );
+    result = 31 * result + (int) ( limit ^ limit >>> 32 );
     return result;
     }
   }

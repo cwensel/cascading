@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,14 +28,16 @@ import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** Class GroupClosure is used internally to represent groups of tuples during grouping. */
-public class GroupClosure
+/**
+ *
+ */
+public abstract class GroupClosure
   {
-  final Fields[] groupingFields;
-  final Fields[] valueFields;
-  Tuple grouping;
-  Iterator values;
-  private FlowProcess flowProcess;
+  protected final FlowProcess flowProcess;
+
+  protected final Fields[] groupingFields;
+  protected final Fields[] valueFields;
+  protected Tuple grouping;
 
   public GroupClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -49,55 +51,24 @@ public class GroupClosure
     return flowProcess;
     }
 
-  public int size()
+  public Fields[] getGroupingFields()
     {
-    return 1;
+    return groupingFields;
     }
+
+  public Fields[] getValueFields()
+    {
+    return valueFields;
+    }
+
+  public abstract int size();
 
   public Tuple getGrouping()
     {
     return grouping;
     }
 
-  public Iterator getIterator( int pos )
-    {
-    if( pos != 0 )
-      throw new IllegalArgumentException( "invalid group position: " + pos );
+  public abstract Iterator getIterator( int pos );
 
-    return makeIterator( 0, values );
-    }
-
-  protected Iterator<Tuple> makeIterator( final int pos, final Iterator values )
-    {
-    return new Iterator<Tuple>()
-    {
-    final int cleanPos = valueFields.length == 1 ? 0 : pos; // support repeated pipes
-
-    public boolean hasNext()
-      {
-      return values.hasNext();
-      }
-
-    public Tuple next()
-      {
-      Tuple tuple = (Tuple) values.next();
-
-      // todo: cache pos
-      tuple.set( valueFields[ cleanPos ], groupingFields[ cleanPos ], grouping );
-
-      return tuple;
-      }
-
-    public void remove()
-      {
-      throw new UnsupportedOperationException( "remove not supported" );
-      }
-    };
-    }
-
-  public void reset( Joiner joiner, Tuple grouping, Iterator values )
-    {
-    this.grouping = grouping;
-    this.values = values;
-    }
+  public abstract boolean isEmpty( int pos );
   }

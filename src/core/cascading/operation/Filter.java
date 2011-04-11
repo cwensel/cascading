@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,7 @@ package cascading.operation;
 import cascading.flow.FlowProcess;
 
 /** Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}. */
-public interface Filter<C> extends Operation<C>
+public interface Filter<Context> extends Operation<Context>
   {
   /**
    * Method isRemove returns true if input should be removed from the tuple stream.
@@ -33,6 +33,5 @@ public interface Filter<C> extends Operation<C>
    * @param filterCall  of type FilterCall
    * @return boolean
    */
-  boolean isRemove( FlowProcess flowProcess, FilterCall<C> filterCall );
+  boolean isRemove( FlowProcess flowProcess, FilterCall<Context> filterCall );
   }
-  

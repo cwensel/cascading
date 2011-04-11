@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,8 +26,9 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import cascading.tuple.StreamComparator;
-import cascading.tuple.TupleInputStream;
 import cascading.tuple.hadoop.BufferedInputStream;
+import cascading.tuple.hadoop.HadoopTupleInputStream;
+import cascading.tuple.hadoop.TupleSerialization;
 
 /**
  *
@@ -54,8 +55,8 @@ public class TestLongComparator implements StreamComparator<BufferedInputStream>
   @Override
   public int compare( BufferedInputStream lhsStream, BufferedInputStream rhsStream )
     {
-    TupleInputStream lhsInput = new TupleInputStream( lhsStream );
-    TupleInputStream rhsInput = new TupleInputStream( rhsStream );
+    HadoopTupleInputStream lhsInput = new HadoopTupleInputStream( lhsStream, new TupleSerialization().getElementReader() );
+    HadoopTupleInputStream rhsInput = new HadoopTupleInputStream( rhsStream, new TupleSerialization().getElementReader() );
 
     try
       {

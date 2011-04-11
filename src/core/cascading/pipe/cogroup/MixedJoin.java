@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,7 +39,7 @@ public class MixedJoin implements Joiner
   /** Field OUTER */
   public static boolean OUTER = false;
 
-  boolean asInner[];
+  final boolean[] asInner;
 
   /**
    * Constructor MixedJoin creates a new MixedJoin instance.

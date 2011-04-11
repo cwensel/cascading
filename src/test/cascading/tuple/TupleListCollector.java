@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -74,12 +74,12 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
       add( tuple );
     }
 
-  protected void collect( Tuple tuple )
+  protected void collect( TupleEntry tupleEntry )
     {
     if( copyTupleOnCollect )
-      tuple = new Tuple( tuple );
+      tuples.add( tupleEntry.getTupleCopy() );
 
-    tuples.add( tuple );
+    tuples.add( tupleEntry.getTuple() );
     }
 
   /**
@@ -127,6 +127,6 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
    */
   public Iterator<TupleEntry> entryIterator()
     {
-    return new TupleEntryIterator( declared, tuples.iterator() );
+    return new TupleEntryChainIterator( tupleEntry.getFields(), tuples.iterator() );
     }
   }

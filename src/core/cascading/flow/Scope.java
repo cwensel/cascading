@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -35,7 +35,7 @@ public class Scope implements Serializable
   /** Enum Kind */
   static public enum Kind
     {
-      TAP, EACH, EVERY, GROUP;
+      TAP, EACH, EVERY, GROUP
     }
 
   /** Field name */
@@ -260,7 +260,7 @@ public class Scope implements Serializable
    *
    * @return the argumentSelector (type Fields) of this Scope object.
    */
-  public Fields getArgumentFields()
+  public Fields getArgumentsSelector()
     {
     return argumentFields;
     }
@@ -270,7 +270,7 @@ public class Scope implements Serializable
    *
    * @return the arguments (type Fields) of this Scope object.
    */
-  public Fields getArguments()
+  public Fields getArgumentsDeclarator()
     {
     return Fields.asDeclaration( argumentFields );
     }
@@ -285,7 +285,7 @@ public class Scope implements Serializable
     if( argumentsEntry != null )
       return argumentsEntry;
 
-    argumentsEntry = new TupleEntry( getArguments(), true );
+    argumentsEntry = new TupleEntry( getArgumentsDeclarator(), true );
 
     return argumentsEntry;
     }
@@ -300,7 +300,7 @@ public class Scope implements Serializable
     {
     TupleEntry entry = getArgumentsEntry();
 
-    entry.setTuple( input.selectTuple( getArgumentFields() ) );
+    entry.setTuple( input.selectTuple( getArgumentsSelector() ) );
 
     return entry;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -38,7 +38,7 @@ import cascading.tuple.Fields;
  * @see Buffer
  * @see Assertion
  */
-public interface Operation<C>
+public interface Operation<Context>
   {
   /** Field ANY denotes that a given Operation will take any number of argument values */
   int ANY = Integer.MAX_VALUE;
@@ -57,7 +57,15 @@ public interface Operation<C>
    * @param flowProcess
    * @param operationCall
    */
-  void prepare( FlowProcess flowProcess, OperationCall<C> operationCall );
+  void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall );
+
+  /**
+   * The flush method is called...
+   *
+   * @param flowProcess
+   * @param operationCall
+   */
+  void flush( FlowProcess flowProcess, OperationCall<Context> operationCall );
 
   /**
    * The cleanup method is called immediately after the current Operation instance is taken out of play processing Tuples.
@@ -73,7 +81,7 @@ public interface Operation<C>
    * @param flowProcess
    * @param operationCall
    */
-  void cleanup( FlowProcess flowProcess, OperationCall<C> operationCall );
+  void cleanup( FlowProcess flowProcess, OperationCall<Context> operationCall );
 
   /**
    * Returns the fields created by this Operation instance. If this instance is a {@link Filter}, it should always

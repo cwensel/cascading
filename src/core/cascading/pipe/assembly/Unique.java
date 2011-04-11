@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -250,7 +250,7 @@ public class Unique extends SubAssembly
   @ConstructorProperties({"name", "pipes", "groupingFields", "threshold"})
   public Unique( String name, Pipe[] pipes, Fields groupingFields, int threshold )
     {
-    Pipe[] filters = new Pipe[pipes.length];
+    Pipe[] filters = new Pipe[ pipes.length ];
     FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( threshold );
 
     for( int i = 0; i < filters.length; i++ )

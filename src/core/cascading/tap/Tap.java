@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,19 +28,17 @@ import java.util.Set;
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.util.Util;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  * A Tap represents the physical data source or sink in a connected {@link Flow}.
@@ -59,18 +57,16 @@ import org.apache.hadoop.mapred.OutputCollector;
  * used for the tap identity? If the name, then two Tap instances with different names but the same path could
  * interfere with one another.
  */
-public abstract class Tap implements FlowElement, Serializable
+public abstract class Tap<Process extends FlowProcess, Config, Input, Output> implements FlowElement, Serializable
   {
   /** Field scheme */
   private Scheme scheme;
 
-  /** Field writeDirect */
-  boolean writeDirect = false;
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
 
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private final String trace = Util.captureDebugTrace( getClass() );
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -124,36 +120,16 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method isWriteDirect returns true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
-   *
-   * @return the writeDirect (type boolean) of this Tap object.
-   */
-  public boolean isWriteDirect()
-    {
-    return writeDirect || getScheme().isWriteDirect();
-    }
-
-  /**
-   * Method setWriteDirect should be set to true if this instances {@link cascading.tuple.TupleEntryCollector} should be used to sink values.
-   *
-   * @param writeDirect the writeDirect of this Tap object.
-   */
-  public void setWriteDirect( boolean writeDirect )
-    {
-    this.writeDirect = writeDirect;
-    }
-
-  /**
-   * Method flowInit allows this Tap instance to initalize itself in context of the given {@link Flow} instance.
+   * Method flowInit allows this Tap instance to initialize itself in context of the given {@link Flow} instance.
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
    * <p/>
-   * This method will be called once per Flow, and before {@link #sourceInit(org.apache.hadoop.mapred.JobConf)} and
-   * {@link #sinkInit(org.apache.hadoop.mapred.JobConf)} methods.
+   * This method will be called once per Flow, and before {@link #sourceConfInit(Process, Config)} and
+   * {@link #sinkConfInit(Process, Config)} methods.
    *
    * @param flow of type Flow
    */
-  public void flowInit( Flow flow )
+  public void flowConfInit( Flow flow )
     {
 
     }
@@ -168,12 +144,12 @@ public abstract class Tap implements FlowElement, Serializable
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param conf of type JobConf
-   * @throws IOException on resource initialization failure.
+   * @param process
+   * @param conf    of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceConfInit( Process process, Config conf ) throws IOException
     {
-    getScheme().sourceInit( this, conf );
+    getScheme().sourceConfInit( process, this, conf );
     }
 
   /**
@@ -188,20 +164,20 @@ public abstract class Tap implements FlowElement, Serializable
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param conf of type JobConf
-   * @throws IOException on resource initialization failure.
+   * @param process
+   * @param conf    of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sinkInit( JobConf conf ) throws IOException
+  public void sinkConfInit( Process process, Config conf ) throws IOException
     {
-    getScheme().sinkInit( this, conf );
+    getScheme().sinkConfInit( process, this, conf );
     }
 
   /**
-   * Method getPath returns the Hadoop path to the resource represented by this Tap instance.
+   * Method getPath returns the path to the resource represented by this Tap instance.
    *
    * @return Path
    */
-  public abstract Path getPath();
+  public abstract String getPath();
 
   /**
    * Method getIdentifier returns a String representing the resource identifier this Tap instance represents.
@@ -215,7 +191,7 @@ public abstract class Tap implements FlowElement, Serializable
     if( getPath() == null )
       return null;
 
-    return getPath().toString();
+    return getPath();
     }
 
   /**
@@ -241,43 +217,34 @@ public abstract class Tap implements FlowElement, Serializable
   /**
    * Method openForRead opens the resource represented by this Tap instance.
    *
-   * @param conf of type JobConf
-   * @return TupleEntryIterator
-   * @throws java.io.IOException when the resource cannot be opened
+   * @param flowProcess
+   * @param input       @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( JobConf conf ) throws IOException;
+  public abstract TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException;
+
+  public TupleEntryIterator openForRead( Process flowProcess ) throws IOException
+    {
+    return openForRead( flowProcess, null );
+    }
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
-   * @param conf of type JobConf
-   * @return TupleEntryCollector
+   * @param flowProcess
+   * @param output      @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleEntryCollector openForWrite( JobConf conf ) throws IOException;
-
-  /**
-   * Method source returns the source value as an instance of {@link Tuple}
-   *
-   * @param key   of type WritableComparable
-   * @param value of type Writable
-   * @return Tuple
-   */
-  public Tuple source( Object key, Object value )
+  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
-    return getScheme().source( key, value );
+    if( output == null )
+      throw new IllegalArgumentException( "output may not be null" );
+
+    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
     }
 
-  /**
-   * Method sink emits the sink value(s) to the OutputCollector
-   *
-   * @param tupleEntry      of type TupleEntry
-   * @param outputCollector of type OutputCollector
-   * @throws java.io.IOException when the resource cannot be written to
-   */
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
+  public TupleEntryCollector openForWrite( Process flowProcess ) throws IOException
     {
-    getScheme().sink( tupleEntry, outputCollector );
+    return openForWrite( flowProcess, null );
     }
 
   /** @see FlowElement#outgoingScopeFor(Set) */
@@ -336,13 +303,13 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method getQualifiedPath returns a FileSystem fully qualified Hadoop Path.
+   * Method getQualifiedPath returns a FileSystem fully qualified Path.
    *
    * @param conf of type JobConf
    * @return Path
    * @throws IOException when
    */
-  public Path getQualifiedPath( JobConf conf ) throws IOException
+  public String getQualifiedPath( Config conf ) throws IOException
     {
     return getPath();
     }
@@ -354,7 +321,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return boolean
    * @throws IOException when there is an error making directories
    */
-  public abstract boolean makeDirs( JobConf conf ) throws IOException;
+  public abstract boolean makeDirs( Config conf ) throws IOException;
 
   /**
    * Method deletePath deletes the resource represented by this instance.
@@ -363,7 +330,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return boolean
    * @throws IOException when the resource cannot be deleted
    */
-  public abstract boolean deletePath( JobConf conf ) throws IOException;
+  public abstract boolean deletePath( Config conf ) throws IOException;
 
   /**
    * Method pathExists return true if the path represented by this instance exists.
@@ -372,7 +339,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return boolean
    * @throws IOException when the status cannot be determined
    */
-  public abstract boolean pathExists( JobConf conf ) throws IOException;
+  public abstract boolean pathExists( Config conf ) throws IOException;
 
   /**
    * Method getPathModified returns the date this resource was last modified.
@@ -381,7 +348,7 @@ public abstract class Tap implements FlowElement, Serializable
    * @return long
    * @throws IOException when the modified date cannot be determined
    */
-  public abstract long getPathModified( JobConf conf ) throws IOException;
+  public abstract long getPathModified( Config conf ) throws IOException;
 
   /**
    * Method getSinkMode returns the {@link SinkMode} }of this Tap object.
@@ -416,7 +383,7 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method isAppend indicates whether the resrouce represented by this instance should be appended to if it already
+   * Method isAppend indicates whether the resource represented by this instance should be appended to if it already
    * exists. Otherwise a new resource will be created when the Flow is started..
    *
    * @return boolean
@@ -428,7 +395,7 @@ public abstract class Tap implements FlowElement, Serializable
     }
 
   /**
-   * Method isUpdate indicates whether the resrouce represented by this instance should be updated if it already
+   * Method isUpdate indicates whether the resource represented by this instance should be updated if it already
    * exists. Otherwise a new resource will be created when the Flow is started..
    *
    * @return boolean
@@ -456,6 +423,16 @@ public abstract class Tap implements FlowElement, Serializable
   public boolean isSource()
     {
     return getScheme().isSource();
+    }
+
+  /**
+   * Method isTemporary returns true if this Tap is temporary (used for intermediate results).
+   *
+   * @return the temporary (type boolean) of this Tap object.
+   */
+  public boolean isTemporary()
+    {
+    return false;
     }
 
   @Override

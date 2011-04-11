@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -29,7 +29,7 @@ import cascading.tuple.Tuple;
  * Class LeftJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * a left inner, right outer join of the CoGrouper internal grouped tuple collections.
  * <p/>
- * Note only the farthest right tuple stream will be used as the outer join. All preceeding joins to the left will
+ * Note only the farthest right tuple stream will be used as the outer join. All preceding joins to the left will
  * be inner joins. See {@link cascading.pipe.cogroup.MixedJoin} for more flexibility.
  *
  * @see cascading.pipe.cogroup.MixedJoin

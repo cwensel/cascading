@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,42 +23,40 @@ package cascading.cascade;
 
 import java.io.IOException;
 
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.scheme.SequenceFile;
-import cascading.scheme.TextLine;
-import cascading.tap.Dfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
-public class ParallelCascadeTest extends ClusterTestCase
-  {
-  String inputFile = "build/test/data/ips.20.txt";
-  String outputPath = "build/test/output/parallelcascade/";
+import static data.InputData.inputFileIps;
 
+@PlatformTest(platforms = {"local", "hadoop"})
+public class ParallelCascadeTest extends PlatformTestCase
+  {
   public ParallelCascadeTest()
     {
-    super( "parallel cascade tests", true );
+    super( true );
     }
 
   private Flow firstFlow( String name )
     {
-    Tap source = new Dfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
+    Tap source = getPlatform().getTextFile( inputFileIps );
 
     Pipe pipe = new Pipe( name );
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "ip" ) ), outputPath + "/" + name, true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( name ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow secondFlow( String name, Tap source )
@@ -68,9 +66,9 @@ public class ParallelCascadeTest extends ClusterTestCase
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = new Dfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + "/" + name, true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( name ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow thirdFlow( Tap lhs, Tap rhs )
@@ -80,14 +78,14 @@ public class ParallelCascadeTest extends ClusterTestCase
 
     Pipe pipe = new CoGroup( lhsPipe, new Fields( 0 ), rhsPipe, new Fields( 0 ), Fields.size( 2 ) );
 
-    Tap sink = new Dfs( new TextLine(), outputPath + "/fourth", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "fourth" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) ), sink, pipe );
+    return getPlatform().getFlowConnector().connect( Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) ), sink, pipe );
     }
 
   public void testCascade() throws IOException
     {
-    copyFromLocal( inputFile );
+    getPlatform().copyFromLocal( inputFileIps );
 
     Flow first1 = firstFlow( "first1" );
     Flow second1 = secondFlow( "second1", first1.getSink() );

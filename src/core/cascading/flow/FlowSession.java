@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -34,7 +34,7 @@ public class FlowSession
   /** Field currentProcess */
   private FlowProcess currentProcess;
 
-  /** Field NULL is a noop implemenation of FlowSession. */
+  /** Field NULL is a noop implementation of FlowSession. */
   public static final FlowSession NULL = new FlowSession();
 
 

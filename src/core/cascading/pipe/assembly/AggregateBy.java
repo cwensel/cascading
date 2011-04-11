@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -147,10 +147,10 @@ public class AggregateBy extends SubAssembly
     public static final int DEFAULT_THRESHOLD = 10000;
 
     private int threshold = DEFAULT_THRESHOLD;
-    private Fields groupingFields;
-    private Fields[] argumentFields;
-    private Fields[] functorFields;
-    private Functor[] functors;
+    private final Fields groupingFields;
+    private final Fields[] argumentFields;
+    private final Fields[] functorFields;
+    private final Functor[] functors;
 
     /**
      * Constructor CompositeFunction creates a new CompositeFunction instance.
@@ -181,7 +181,7 @@ public class AggregateBy extends SubAssembly
       this.functors = functors;
       this.threshold = threshold;
 
-      functorFields = new Fields[functors.length];
+      functorFields = new Fields[ functors.length ];
 
       for( int i = 0; i < functors.length; i++ )
         functorFields[ i ] = functors[ i ].getDeclaredFields();
@@ -224,7 +224,7 @@ public class AggregateBy extends SubAssembly
 
       if( context == null )
         {
-        context = new Tuple[functors.length];
+        context = new Tuple[ functors.length ];
         functionCall.getContext().put( key, context );
         }
 
@@ -233,7 +233,7 @@ public class AggregateBy extends SubAssembly
       }
 
     @Override
-    public void cleanup( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Tuple[]>> operationCall )
+    public void flush( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Tuple[]>> operationCall )
       {
       // need to drain context
       TupleEntryCollector collector = ( (FunctionCall) operationCall ).getOutputCollector();
@@ -384,7 +384,7 @@ public class AggregateBy extends SubAssembly
       Collections.addAll( aggregators, assembly.getAggregators() );
       }
 
-    initialize( groupingFields, pipes, arguments.toArray( new Fields[0] ), functors.toArray( new Functor[0] ), aggregators.toArray( new Aggregator[0] ) );
+    initialize( groupingFields, pipes, arguments.toArray( new Fields[ arguments.size() ] ), functors.toArray( new Functor[ functors.size() ] ), aggregators.toArray( new Aggregator[ aggregators.size() ] ) );
     }
 
   protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argument, Functor functor, Aggregator aggregator, int threshold )
@@ -410,7 +410,7 @@ public class AggregateBy extends SubAssembly
 
     Fields argumentSelector = Fields.merge( groupingFields, Fields.merge( argumentFields ) );
 
-    Pipe[] functions = new Pipe[pipes.length];
+    Pipe[] functions = new Pipe[ pipes.length ];
 
     CompositeFunction function = new CompositeFunction( groupingFields, argumentFields, functors, threshold );
 

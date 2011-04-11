@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -33,8 +33,8 @@ import cascading.flow.Flow;
 /** Class FlowStats collects {@link Flow} specific statistics. */
 public class FlowStats extends CascadingStats
   {
-  String flowID;
-  List<StepStats> stepStatsList = new ArrayList<StepStats>();
+  final String flowID;
+  final List<StepStats> stepStatsList = new ArrayList<StepStats>();
 
   public FlowStats( String flowName, String flowID )
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -66,7 +66,7 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
   public void start( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( aggregatorCall.getContext() == null )
-      aggregatorCall.setContext( new Tuple[1] );
+      aggregatorCall.setContext( new Tuple[ 1 ] );
     else
       aggregatorCall.getContext()[ 0 ] = null;
     }

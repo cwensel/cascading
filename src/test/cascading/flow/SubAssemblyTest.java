@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
+import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.PlannerException;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexParser;
@@ -35,17 +37,18 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
 /** A planner test only, does not execute */
-public class SubAssemblyTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class SubAssemblyTest extends PlatformTestCase
   {
   public SubAssemblyTest()
     {
-    super( "pipe assembly tests" );
     }
 
   private static class TestAssembly extends SubAssembly
@@ -64,7 +67,6 @@ public class SubAssemblyTest extends CascadingTestCase
       if( !bad )
         setTails( pipe );
       }
-
     }
 
   /** Tests that proper pipe graph is assembled without throwing an internal error */
@@ -73,10 +75,10 @@ public class SubAssemblyTest extends CascadingTestCase
     Pipe pipe = new TestAssembly( "test" );
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink = new Hfs( new TextLine(), "foo/split1", true );
+    Tap source = getPlatform().getTextFile( "foo" );
+    Tap sink = getPlatform().getTextFile( "foo/split1", SinkMode.REPLACE );
 
-    List<FlowStep> steps = new FlowConnector().connect( source, sink, pipe ).getSteps();
+    List<FlowStep> steps = getPlatform().getFlowConnector().connect( source, sink, pipe ).getSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -85,12 +87,12 @@ public class SubAssemblyTest extends CascadingTestCase
     {
     Pipe pipe = new TestAssembly( "test", true );
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink = new Hfs( new TextLine(), "foo/split1", true );
+    Tap source = getPlatform().getTextFile( "foo" );
+    Tap sink = getPlatform().getTextFile( "foo/split1", SinkMode.REPLACE );
 
     try
       {
-      new FlowConnector().connect( source, sink, pipe );
+      getPlatform().getFlowConnector().connect( source, sink, pipe );
       fail( "did not throw exception" );
       }
     catch( Exception exception )
@@ -105,9 +107,9 @@ public class SubAssemblyTest extends CascadingTestCase
     Pipe pipe1 = new GroupBy( "left", pipe, new Fields( "ip" ) );
     Pipe pipe2 = new GroupBy( "right", pipe, new Fields( "ip" ) );
 
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap source = getPlatform().getTextFile( "foo" );
+    Tap sink1 = getPlatform().getTextFile( "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( "foo/split2", SinkMode.REPLACE );
 
     Map sources = new HashMap();
     sources.put( "test", source );
@@ -116,9 +118,10 @@ public class SubAssemblyTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    List<FlowStep> steps = new FlowConnector().connect( sources, sinks, pipe1, pipe2 ).getSteps();
+    List<FlowStep> steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe1, pipe2 ).getSteps();
 
-    assertEquals( "not equal: steps.size()", 2, steps.size() );
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
 
   private static class FirstAssembly extends SubAssembly
@@ -175,8 +178,8 @@ public class SubAssemblyTest extends CascadingTestCase
 
   public void testNestedAssemblies() throws IOException
     {
-    Tap source = new Hfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap source = getPlatform().getTextFile( "foo" );
+    Tap sink = getPlatform().getTextFile( "foo/split1", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -186,13 +189,12 @@ public class SubAssemblyTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//      flow.writeDOT( "nestedassembly.dot" );
+      Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
       List<FlowStep> steps = flow.getSteps();
 
-      assertEquals( "wrong size", 2, steps.size() );
+      if( getPlatform() instanceof HadoopPlatform )
+        assertEquals( "wrong size", 2, steps.size() );
       }
     catch( PlannerException exception )
       {

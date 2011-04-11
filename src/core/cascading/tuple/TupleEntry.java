@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,7 @@ package cascading.tuple;
 import java.beans.ConstructorProperties;
 
 /**
- * Class TupleEntry allows a {@link Tuple} instance and its declarating {@link Fields} instance to be used as a single object.
+ * Class TupleEntry allows a {@link Tuple} instance and its declaring {@link Fields} instance to be used as a single object.
  * <p/>
  * Once a TupleEntry is created, its Fields cannot be changed, but the Tuple instance it holds can be replaced or
  * modified. The managed Tuple should not have elements added or removed, as this will break the relationship with
@@ -113,7 +113,7 @@ public class TupleEntry
   /** Constructor TupleEntry creates a new TupleEntry instance. */
   public TupleEntry()
     {
-    setFields( new Fields() );
+    this.fields = new Fields();
     }
 
   /**
@@ -124,7 +124,7 @@ public class TupleEntry
   @ConstructorProperties({"isUnmodifiable"})
   public TupleEntry( boolean isUnmodifiable )
     {
-    setFields( new Fields() );
+    this.fields = new Fields();
     this.isUnmodifiable = isUnmodifiable;
     }
 
@@ -136,7 +136,7 @@ public class TupleEntry
   @ConstructorProperties({"fields"})
   public TupleEntry( Fields fields )
     {
-    setFields( fields );
+    this.fields = fields;
     }
 
   /**
@@ -148,7 +148,7 @@ public class TupleEntry
   @ConstructorProperties({"fields", "isUnmodifiable"})
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
-    setFields( fields );
+    this.fields = fields;
     this.isUnmodifiable = isUnmodifiable;
     }
 
@@ -161,8 +161,8 @@ public class TupleEntry
   @ConstructorProperties({"fields", "tuple"})
   public TupleEntry( Fields fields, Tuple tuple )
     {
-    setFields( fields );
-    setTuple( tuple );
+    this.fields = fields;
+    this.tuple = tuple;
     }
 
   /**
@@ -173,8 +173,8 @@ public class TupleEntry
   @ConstructorProperties({"tupleEntry"})
   public TupleEntry( TupleEntry tupleEntry )
     {
-    setFields( tupleEntry.fields );
-    setTuple( tupleEntry.getTupleCopy() );
+    this.fields = tupleEntry.fields;
+    this.tuple = new Tuple( tupleEntry.getTuple() );
     }
 
   /**
@@ -185,8 +185,8 @@ public class TupleEntry
   @ConstructorProperties({"tuple"})
   public TupleEntry( Tuple tuple )
     {
-    setFields( Fields.size( tuple.size() ) );
-    setTuple( tuple );
+    this.fields = Fields.size( tuple.size() );
+    this.tuple = tuple;
     }
 
   /**
@@ -197,14 +197,6 @@ public class TupleEntry
   public boolean isUnmodifiable()
     {
     return isUnmodifiable;
-    }
-
-  private void setFields( Fields fields )
-    {
-    if( fields == null )
-      throw new IllegalArgumentException( "fields many not be null" );
-
-    this.fields = fields;
     }
 
   /**
@@ -244,9 +236,6 @@ public class TupleEntry
    */
   public void setTuple( Tuple tuple )
     {
-    if( tuple == null )
-      throw new IllegalArgumentException( "tuple may not be null" );
-
     if( isUnmodifiable )
       this.tuple = Tuples.asUnmodifiable( tuple );
     else
@@ -414,17 +403,7 @@ public class TupleEntry
 
   private Comparable asFieldName( Comparable fieldName )
     {
-    if( fieldName instanceof Fields )
-      {
-      Fields fields = (Fields) fieldName;
-
-      if( !fields.isDefined() )
-        throw new TupleException( "given Fields instance must explicitly declare one field name or position: " + fields.printVerbose() );
-
-      fieldName = fields.get( 0 );
-      }
-
-    return fieldName;
+    return Fields.asFieldName( fieldName );
     }
 
   /**

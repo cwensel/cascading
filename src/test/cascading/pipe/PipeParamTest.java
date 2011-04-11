@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,10 +24,11 @@ package cascading.pipe;
 import cascading.CascadingTestCase;
 import cascading.TestFunction;
 import cascading.operation.Identity;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
+@PlatformTest(platforms = {"none"})
 public class PipeParamTest extends CascadingTestCase
   {
   Fields[] ARGS_PASS = new Fields[]{new Fields( "x" ), Fields.ALL, Fields.GROUP, Fields.VALUES};
@@ -41,7 +42,7 @@ public class PipeParamTest extends CascadingTestCase
 
   public PipeParamTest()
     {
-    super( "pipe parameters test" );
+    super();
     }
 
   public void testEachPassCtor()
@@ -180,8 +181,5 @@ public class PipeParamTest extends CascadingTestCase
     String[] names = Pipe.names( pipe1, pipe2 );
 
     assertEquals( 6, names.length );
-
-//    System.out.println( Arrays.toString( names ) );
     }
-
   }

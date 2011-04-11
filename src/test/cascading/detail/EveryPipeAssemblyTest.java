@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,10 +24,11 @@ package cascading.detail;
 import java.util.Properties;
 
 import cascading.pipe.Pipe;
+import cascading.test.PlatformTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
+@PlatformTest(platforms = {"local", "hadoop"})
 public class EveryPipeAssemblyTest extends PipeAssemblyTestBase
   {
 

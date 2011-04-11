@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,13 +21,12 @@
 
 package cascading.function;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Function;
 import cascading.operation.Insert;
 import cascading.operation.function.SetValue;
@@ -40,37 +39,33 @@ import cascading.pipe.Pipe;
 import cascading.pipe.assembly.AggregateBy;
 import cascading.pipe.assembly.CountBy;
 import cascading.pipe.assembly.SumBy;
-import cascading.scheme.TextLine;
-import cascading.tap.Lfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleListCollector;
+
+import static data.InputData.inputFileApache200;
+import static data.InputData.inputFileUpper;
 
 /**
  *
  */
-public class FunctionTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class FunctionTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.200.txt";
-  String inputFileUpper = "build/test/data/upper.txt";
-
-  String outputPath = "build/test/output/function/";
-
   public FunctionTest()
     {
-    super( "function tests" );
     }
 
   public void testInsert() throws IOException
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache200 );
 
-    Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath + "insert", true );
+    Tap source = getPlatform().getTextFile( inputFileApache200 );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "insert" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "apache" );
 
@@ -78,50 +73,48 @@ public class FunctionTest extends CascadingTestCase
 
     pipe = new GroupBy( pipe, new Fields( "A" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 200 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "a\tb", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "a\tb", iterator.next().get( 1 ) );
+    assertTrue( results.contains( new Tuple( "a\tb" ) ) );
+    assertTrue( results.contains( new Tuple( "a\tb" ) ) );
     }
 
   public void testFieldFormatter() throws IOException
     {
-    if( !new File( inputFileUpper ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    Tap source = new Lfs( new TextLine(), inputFileUpper );
-    Tap sink = new Lfs( new TextLine(), outputPath + "formatter", true );
+    Tap source = getPlatform().getTextFile( inputFileUpper );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "formatter" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "formatter" );
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "a", "b" ), "\\s" ) );
     pipe = new Each( pipe, new FieldFormatter( new Fields( "result" ), "%s and %s" ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 5 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1 and A", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2 and B", iterator.next().get( 1 ) );
+    assertTrue( results.contains( new Tuple( "1 and A" ) ) );
+    assertTrue( results.contains( new Tuple( "2 and B" ) ) );
     }
 
   public void testSetValue() throws IOException
     {
-    if( !new File( inputFileUpper ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    Tap source = new Lfs( new TextLine(), inputFileUpper );
-    Tap sink = new Lfs( new TextLine(), outputPath + "setvalue", true );
+    Tap source = getPlatform().getTextFile( inputFileUpper );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "setvalue" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "setvalue" );
 
@@ -129,19 +122,19 @@ public class FunctionTest extends CascadingTestCase
 
     pipe = new Each( pipe, new SetValue( new Fields( "result" ), new RegexFilter( "[A-C]" ) ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 5 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> results = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "true", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "false", iterator.next().get( 1 ) );
+    assertTrue( results.contains( new Tuple( "true" ) ) );
+    assertTrue( results.contains( new Tuple( "true" ) ) );
+    assertTrue( results.contains( new Tuple( "true" ) ) );
+    assertTrue( results.contains( new Tuple( "false" ) ) );
+    assertTrue( results.contains( new Tuple( "false" ) ) );
     }
 
   public void testPartialCounts()

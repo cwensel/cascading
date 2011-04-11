@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,29 +28,23 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
+import data.InputData;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
-public abstract class PipeAssemblyTestBase extends CascadingTestCase
+public abstract class PipeAssemblyTestBase extends PlatformTestCase
   {
   private static final Logger LOG = Logger.getLogger( PipeAssemblyTestBase.class );
-
-  static String inputFile = "build/test/data/nums.20.txt";
-
-  static String outputPath = "build/test/output/detail/";
 
   static Fields[] OP_ARGS_FIELDS = new Fields[]{new Fields( -1 ), new Fields( 0 ), Fields.ALL};
   static Fields[] OP_DECL_FIELDS = new Fields[]{new Fields( "field" ), Fields.UNKNOWN, Fields.VALUES, Fields.ARGS};
@@ -147,7 +141,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   public PipeAssemblyTestBase( Properties properties, String name, Pipe pipe )
     {
-    super( name );
+    setName( name );
     this.properties = properties;
     this.pipe = pipe;
     this.resultTuple = getResultTuple();
@@ -176,14 +170,14 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
 
   public void runTest() throws Exception
     {
-    Tap source = new Hfs( new TextLine(), inputFile );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/" + getName(), true );
+    Tap source = getPlatform().getTextFile( InputData.inputFileNums20 );
+    Tap sink = getPlatform().getTextFile( getOutputPath( getName() ), SinkMode.REPLACE );
 
     Flow flow = null;
 
     try
       {
-      flow = new FlowConnector().connect( source, sink, pipe );
+      flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
       if( isWriteDOT() )
         flow.writeDOT( getName() + ".dot" );
@@ -202,7 +196,7 @@ public abstract class PipeAssemblyTestBase extends CascadingTestCase
       }
 
     if( resultLength != -1 )
-      validateLength( flow, resultLength, null );
+      validateLength( flow, resultLength );
 
     TupleEntryIterator iterator = flow.openSink();
     Comparable result = iterator.next().get( 1 );

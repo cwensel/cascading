@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,7 +27,7 @@ import cascading.tuple.TupleEntry;
 /**
  * Class GroupAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Every} pipe Operator.
  * <p/>
- * Implementors should also extend {@link BaseOperation}.
+ * Implementers should also extend {@link BaseOperation}.
  *
  * @see Aggregator
  */

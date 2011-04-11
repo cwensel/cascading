@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,10 +21,11 @@
 
 package cascading.tuple;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /** Interface TupleIterator is used to allow for iteration across {@link Tuple} instances. */
-public interface TupleIterator extends Iterator<Tuple>
+public interface TupleIterator extends Iterator<Tuple>, Closeable
   {
   void close();
   }

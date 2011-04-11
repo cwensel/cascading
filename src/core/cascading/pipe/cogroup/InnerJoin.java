@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -63,7 +63,7 @@ public class InnerJoin implements Joiner
 
     protected void init()
       {
-      iterators = new Iterator[closure.size()];
+      iterators = new Iterator[ closure.size() ];
 
       for( int i = 0; i < closure.size(); i++ )
         iterators[ i ] = getIterator( i );
@@ -76,7 +76,7 @@ public class InnerJoin implements Joiner
 
     private Comparable[] initLastValues()
       {
-      lastValues = new Comparable[iterators.length];
+      lastValues = new Comparable[ iterators.length ];
 
       for( int i = 0; i < iterators.length; i++ )
         lastValues[ i ] = (Comparable) iterators[ i ].next();

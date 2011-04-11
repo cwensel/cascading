@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,7 +39,7 @@ import cascading.util.Util;
  * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer},
  * and {@link Assertion}.
  */
-public abstract class BaseOperation<C> implements Serializable, Operation<C>
+public abstract class BaseOperation<Context> implements Serializable, Operation<Context>
   {
 
   /** Field fieldDeclaration */
@@ -47,7 +47,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   /** Field numArgs */
   protected int numArgs = ANY;
   /** Field trace */
-  protected String trace = Util.captureDebugTrace( getClass() );
+  protected final String trace = Util.captureDebugTrace( getClass() );
 
   // initialize this operation based on its subclass
 
@@ -59,7 +59,7 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
   }
 
   /**
-   * Constructs a new instance that retuns an {@link Fields#UNKNOWN} {@link Tuple} and accepts any number of arguments.
+   * Constructs a new instance that returns an {@link Fields#UNKNOWN} {@link Tuple} and accepts any number of arguments.
    * </p>
    * It is a best practice to always declare the field names and number of arguments via one of the other constructors.
    */
@@ -119,13 +119,18 @@ public abstract class BaseOperation<C> implements Serializable, Operation<C>
     }
 
   /** Method prepare does nothing, and may safely be overridden. */
-  public void prepare( FlowProcess flowProcess, OperationCall<C> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
     // do nothing
     }
 
+  @Override
+  public void flush( FlowProcess flowProcess, OperationCall<Context> contextOperationCall )
+    {
+    }
+
   /** Method cleanup does nothing, and may safely be overridden. */
-  public void cleanup( FlowProcess flowProcess, OperationCall<C> operationCall )
+  public void cleanup( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
     // do nothing
     }

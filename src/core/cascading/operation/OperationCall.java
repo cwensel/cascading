@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,21 +26,21 @@ import cascading.tuple.Fields;
 /**
  *
  */
-public interface OperationCall<C>
+public interface OperationCall<Context>
   {
   /**
    * Returns the user set context object, C.
    *
    * @return user defined object
    */
-  C getContext();
+  Context getContext();
 
   /**
    * Sets the user defined 'context' object.
    *
    * @param context user defined object
    */
-  void setContext( C context );
+  void setContext( Context context );
 
   /**
    * Returns the {@link Fields} of the expected arguments {@link cascading.tuple.TupleEntry}.

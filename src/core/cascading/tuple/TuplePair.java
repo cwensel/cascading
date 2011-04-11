@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,7 +31,7 @@ import java.util.List;
 public class TuplePair extends Tuple
   {
   /** Field tuples */
-  private Tuple[] tuples = new Tuple[2];
+  private final Tuple[] tuples = new Tuple[ 2 ];
 
   /**
    * Returns a reference to the private tuples of the given TuplePark

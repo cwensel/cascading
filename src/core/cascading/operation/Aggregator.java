@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
  * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowProcess, AggregatorCall)}
- * method provides a mechanism for maintaining a 'context' object to hold intermedite values.
+ * method provides a mechanism for maintaining a 'context' object to hold intermediate values.
  * <p/>
  * Note {@link TupleEntry} instances are reused internally so should not be stored. Instead use the TupleEntry or Tuple
  * copy constructors to make safe copies.
@@ -46,7 +46,7 @@ import cascading.tuple.TupleEntry;
  * @see AggregatorCall
  * @see OperationCall
  */
-public interface Aggregator<C> extends Operation<C>
+public interface Aggregator<Context> extends Operation<Context>
   {
   /**
    * Method start initializes the aggregation procedure and is called for every unique grouping.
@@ -67,7 +67,7 @@ public interface Aggregator<C> extends Operation<C>
    * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void start( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
+  void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall );
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
@@ -78,7 +78,7 @@ public interface Aggregator<C> extends Operation<C>
    * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void aggregate( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
+  void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall );
 
   /**
    * Method complete will be issued last after every {@link TupleEntry} has been passed to the
@@ -88,5 +88,5 @@ public interface Aggregator<C> extends Operation<C>
    * @param flowProcess    of type FlowProcess
    * @param aggregatorCall of type AggregatorCall
    */
-  void complete( FlowProcess flowProcess, AggregatorCall<C> aggregatorCall );
+  void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall );
   }

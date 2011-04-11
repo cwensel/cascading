@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,9 +21,11 @@
 
 package cascading.operation.regex;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleListCollector;
@@ -31,20 +33,15 @@ import cascading.tuple.TupleListCollector;
 /**
  *
  */
+
+@PlatformTest(platforms = {"none"})
 public class RegexesTest extends CascadingTestCase
   {
   public RegexesTest()
     {
-    super( "regex test" );
     }
 
-  @Override
-  protected void setUp() throws Exception
-    {
-    super.setUp();
-    }
-
-  public void testSplitter()
+  public void testSplitter() throws IOException
     {
     RegexSplitter splitter = new RegexSplitter( "\t" );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -62,7 +59,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
-  public void testSplitterGenerator()
+  public void testSplitterGenerator() throws IOException
     {
     RegexSplitGenerator splitter = new RegexSplitGenerator( new Fields( "word" ), "\\s+" );
     Tuple arguments = new Tuple( "foo\t  bar" );
@@ -79,7 +76,7 @@ public class RegexesTest extends CascadingTestCase
     }
 
 
-  public void testReplace()
+  public void testReplace() throws IOException
     {
     RegexReplace splitter = new RegexReplace( new Fields( "words" ), "\\s+", "-", true );
     Tuple arguments = new Tuple( "foo\t bar" );
@@ -96,7 +93,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "foo-bar", tuple.get( 0 ) );
     }
 
-  public void testParserDeclared()
+  public void testParserDeclared() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -114,7 +111,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
-  public void testParserDeclared2()
+  public void testParserDeclared2() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ), "(\\S+)\\s+(\\S+)" );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -132,7 +129,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
-  public void testParserDeclared3()
+  public void testParserDeclared3() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+" );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -150,7 +147,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
     }
 
-  public void testParserDeclared4()
+  public void testParserDeclared4() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "\\S+\\s+\\S+" );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -169,7 +166,7 @@ public class RegexesTest extends CascadingTestCase
     }
 
   /** Contributed by gicode */
-  public void testParserDeclared5()
+  public void testParserDeclared5() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "bar" ), "^GET /foo\\?bar=([^\\&]+)&" );
     Tuple arguments = new Tuple( "GET /foo?bar=z123&baz=2" );
@@ -187,7 +184,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "z123", tuple.get( 0 ) );
     }
 
-  public void testParserDeclared6()
+  public void testParserDeclared6() throws IOException
     {
     RegexParser splitter = new RegexParser( new Fields( "lhs" ), "(\\S+)\\s+\\S+", new int[]{1} );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -206,7 +203,7 @@ public class RegexesTest extends CascadingTestCase
     }
 
 
-  public void testParserUnknown()
+  public void testParserUnknown() throws IOException
     {
     RegexParser splitter = new RegexParser( Fields.UNKNOWN, "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -224,7 +221,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
-  public void testParserUnknown2()
+  public void testParserUnknown2() throws IOException
     {
     RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)", new int[]{1, 2} );
     Tuple arguments = new Tuple( "foo\tbar" );
@@ -242,7 +239,7 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
     }
 
-  public void testParserUnknown3()
+  public void testParserUnknown3() throws IOException
     {
     RegexParser splitter = new RegexParser( "(\\S+)\\s+(\\S+)" );
     Tuple arguments = new Tuple( "foo\tbar" );

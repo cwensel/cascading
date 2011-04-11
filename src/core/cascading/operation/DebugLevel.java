@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,8 +22,8 @@
 package cascading.operation;
 
 /**
- * Enum DebugLevel designates the level of a given {@link cascading.operation.Debug} instance. This is used in conjuction with the
- * {@link cascading.flow.FlowConnector} to plan dubug operations out of a particular {@link cascading.flow.Flow} instance.
+ * Enum DebugLevel designates the level of a given {@link cascading.operation.Debug} instance. This is used in conjunction with the
+ * {@link cascading.flow.FlowConnector} to plan debug operations out of a particular {@link cascading.flow.Flow} instance.
  * </p>
  * Currently Debug can be denote either DEFAULT or VERBOSE. It is up to the developer to determine if a Debug operation
  * should be at any given level.
@@ -34,7 +34,7 @@ public enum DebugLevel implements PlannerLevel
     DEFAULT( 1 ),
     VERBOSE( 2 );
 
-  private int rank;
+  private final int rank;
 
   DebugLevel( int rank )
     {

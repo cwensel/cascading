@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,29 +25,26 @@ import java.io.File;
 import java.io.IOException;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
 
-public class RegressionMiscTest extends CascadingTestCase
+import static data.InputData.inputFileNums10;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class RegressionMiscTest extends PlatformTestCase
   {
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-
-  String outputPath = "build/test/output/regressionmisc/";
-
   public RegressionMiscTest()
     {
-    super( "regression misc" );
     }
 
   /**
@@ -57,8 +54,8 @@ public class RegressionMiscTest extends CascadingTestCase
    */
   public void testWriteDot() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "/input" );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/unknown", true );
+    Tap source = getPlatform().getTextFile( "input" );
+    Tap sink = getPlatform().getTextFile( "unknown" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -74,11 +71,13 @@ public class RegressionMiscTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Debug() );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-    new File( outputPath ).mkdirs();
+    String outputPath = getOutputPath( "writedot.dot" );
 
-    flow.writeDOT( outputPath + "/writedot.dot" );
+    flow.writeDOT( outputPath );
+
+    assertTrue( new File( outputPath ).exists() );
     }
 
   /**
@@ -88,30 +87,30 @@ public class RegressionMiscTest extends CascadingTestCase
    */
   public void testSinkDeclaredFieldsFails() throws IOException
     {
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), "/input" );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), "input" );
 
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.ALL );
 
-    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "first", "second", "fifth" ) ), "output", true );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), new Fields( "first", "second", "fifth" ), getOutputPath( "output" ), SinkMode.REPLACE );
 
     try
       {
-      Flow flow = new FlowConnector().connect( source, sink, pipe );
+      new HadoopFlowConnector().connect( source, sink, pipe );
       fail( "did not fail on bad sink field names" );
       }
     catch( Exception exception )
       {
-      // ignore
+      // test passed
       }
     }
 
   public void testTupleEntryNextTwice() throws IOException
     {
-    Tap tap = new Hfs( new TextLine(), inputFileNums10 );
+    Tap tap = getPlatform().getTextFile( inputFileNums10 );
 
-    TupleEntryIterator iterator = tap.openForRead( new JobConf() );
+    TupleEntryIterator iterator = tap.openForRead( getPlatform().getFlowProcess() );
 
     int count = 0;
     while( iterator.hasNext() )
@@ -123,5 +122,4 @@ public class RegressionMiscTest extends CascadingTestCase
     assertFalse( iterator.hasNext() );
     assertEquals( 10, count );
     }
-
   }

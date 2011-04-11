@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,7 +45,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
   protected String patternString;
 
   /** Field size */
-  protected long size;
+  protected final long size;
 
   public static class Context
     {
@@ -185,7 +185,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     {
     int result = super.hashCode();
     result = 31 * result + ( patternString != null ? patternString.hashCode() : 0 );
-    result = 31 * result + (int) ( size ^ ( size >>> 32 ) );
+    result = 31 * result + (int) ( size ^ size >>> 32 );
     return result;
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -40,7 +40,7 @@ public class Count extends BaseOperation<Long[]> implements Aggregator<Long[]>
   /** Field COUNT */
   public static final String FIELD_NAME = "count";
 
-  /** Constructor Count creates a new Count instance using the defalt field declaration of name 'count'. */
+  /** Constructor Count creates a new Count instance using the default field declaration of name 'count'. */
   public Count()
     {
     super( new Fields( FIELD_NAME ) );

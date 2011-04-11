@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,95 +23,121 @@ package cascading.tuple;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.Flushable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
-import cascading.tuple.hadoop.TupleSerialization;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 
 /**
- * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link Tuple} instances by spilling
- * excess to a temporary disk file.
+ *
  */
-public class SpillableTupleList implements Iterable<Tuple>
+public abstract class SpillableTupleList implements Iterable<Tuple>
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( SpillableTupleList.class );
-
-  enum Spill
-    {
-      Num_Spills_Written, Num_Spills_Read
-    }
-
   /** Field threshold */
-  private long threshold = 10000;
-  /** Field codec */
-  private CompressionCodec codec = null;
+  protected long threshold = 10000;
   /** Field flowProcess */
-  private FlowProcess flowProcess;
+  protected FlowProcess flowProcess;
   /** Field files */
-  private List<File> files = new LinkedList<File>();
+  private final List<File> files = new LinkedList<File>();
   /** Field current */
-  private List<Tuple> current = new LinkedList<Tuple>();
+  private final List<Tuple> current = new LinkedList<Tuple>();
   /** Field overrideIterator */
   private Iterator<Tuple> overrideIterator;
   /** Field size */
   private long size = 0;
   /** Field fields */
   private Fields fields;
-  /** Field serializationElementWriter */
-  private TupleSerialization tupleSerialization;
 
-  /** Constructor SpillableTupleList creates a new SpillableTupleList instance. */
-  public SpillableTupleList()
+  enum Spill
+    {
+      Num_Spills_Written, Num_Spills_Read
+    }
+
+  protected SpillableTupleList()
     {
     }
 
-  /**
-   * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value.
-   *
-   * @param threshold of type long
-   */
-  public SpillableTupleList( long threshold )
+  protected SpillableTupleList( long threshold, FlowProcess flowProcess )
     {
     this.threshold = threshold;
-    }
-
-  /**
-   * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value, and
-   * the first available compression codec, if any.
-   *
-   * @param threshold of type long
-   * @param conf
-   * @param codec     of type CompressionCodec
-   */
-  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
-    {
-    this( threshold, conf, codec, null );
-    }
-
-  public SpillableTupleList( long threshold, JobConf conf, CompressionCodec codec, FlowProcess flowProcess )
-    {
-    this.threshold = threshold;
-    this.codec = codec;
     this.flowProcess = flowProcess;
+    }
 
-    if( conf != null )
-      tupleSerialization = new TupleSerialization( conf );
+  private class SpilledListIterator implements Iterator<Tuple>
+    {
+    int fileIndex = 0;
+    List<Tuple> currentList;
+    private Iterator<Tuple> iterator;
+
+    private SpilledListIterator()
+      {
+      getNextList();
+      }
+
+    private void getNextList()
+      {
+      if( fileIndex < files.size() )
+        currentList = getListFor( files.get( fileIndex++ ) );
+      else
+        currentList = current;
+
+      iterator = currentList.iterator();
+      }
+
+    private List<Tuple> getListFor( File file )
+      {
+      if( flowProcess != null )
+        flowProcess.increment( Spill.Num_Spills_Read, 1 );
+
+      TupleInputStream dataInputStream = createTupleInputStream( file );
+
+      try
+        {
+        return readList( dataInputStream );
+        }
+      finally
+        {
+        closeSilent( dataInputStream );
+        }
+      }
+
+    public boolean hasNext()
+      {
+      if( currentList == current )
+        return iterator.hasNext();
+
+      if( iterator.hasNext() )
+        return true;
+
+      getNextList();
+
+      return hasNext();
+      }
+
+    public Tuple next()
+      {
+      if( currentList == current || iterator.hasNext() )
+        return iterator.next();
+
+      getNextList();
+
+      return next();
+      }
+
+    public void remove()
+      {
+      throw new UnsupportedOperationException( "remove is not supported" );
+      }
     }
 
   /**
-   * Method add will add the given {@link Tuple} to this list.
+   * Method add will add the given {@link cascading.tuple.Tuple} to this list.
    *
    * @param tuple of type Tuple
    */
@@ -124,7 +150,7 @@ public class SpillableTupleList implements Iterable<Tuple>
     }
 
   /**
-   * Method add the given {@link TupleEntry} to this list. All TupleEntry instances added must declare the same {@link Fields}.
+   * Method add the given {@link cascading.tuple.TupleEntry} to this list. All TupleEntry instances added must declare the same {@link cascading.tuple.Fields}.
    *
    * @param tupleEntry of type TupleEntry
    */
@@ -236,27 +262,7 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private TupleOutputStream createTupleOutputStream( File file )
-    {
-    OutputStream outputStream;
-
-    try
-      {
-      if( codec == null )
-        outputStream = new FileOutputStream( file );
-      else
-        outputStream = codec.createOutputStream( new FileOutputStream( file ) );
-
-      if( tupleSerialization == null )
-        return new TupleOutputStream( outputStream );
-      else
-        return new TupleOutputStream( outputStream, tupleSerialization.getElementWriter() );
-      }
-    catch( IOException exception )
-      {
-      throw new TupleException( "unable to create temporary file input stream", exception );
-      }
-    }
+  protected abstract TupleOutputStream createTupleOutputStream( File file );
 
   private List<Tuple> readList( TupleInputStream tupleInputStream )
     {
@@ -276,27 +282,7 @@ public class SpillableTupleList implements Iterable<Tuple>
       }
     }
 
-  private TupleInputStream createTupleInputStream( File file )
-    {
-    try
-      {
-      InputStream inputStream;
-
-      if( codec == null )
-        inputStream = new FileInputStream( file );
-      else
-        inputStream = codec.createInputStream( new FileInputStream( file ) );
-
-      if( tupleSerialization == null )
-        return new TupleInputStream( inputStream );
-      else
-        return new TupleInputStream( inputStream, tupleSerialization.getElementReader() );
-      }
-    catch( IOException exception )
-      {
-      throw new TupleException( "unable to create temporary file output stream", exception );
-      }
-    }
+  protected abstract TupleInputStream createTupleInputStream( File file );
 
   private File createTempFile()
     {
@@ -372,79 +358,12 @@ public class SpillableTupleList implements Iterable<Tuple>
     }
 
   /**
-   * Method entryIterator returns a TupleEntry Iterator of all the alues in this collection.
+   * Method entryIterator returns a TupleEntry Iterator of all the values in this collection.
    *
    * @return Iterator<TupleEntry>
    */
   public Iterator<TupleEntry> entryIterator()
     {
-    return new TupleEntryIterator( fields, iterator() );
-    }
-
-  private class SpilledListIterator implements Iterator<Tuple>
-    {
-    int fileIndex = 0;
-    List<Tuple> currentList;
-    private Iterator<Tuple> iterator;
-
-    private SpilledListIterator()
-      {
-      getNextList();
-      }
-
-    private void getNextList()
-      {
-      if( fileIndex < files.size() )
-        currentList = getListFor( files.get( fileIndex++ ) );
-      else
-        currentList = current;
-
-      iterator = currentList.iterator();
-      }
-
-    private List<Tuple> getListFor( File file )
-      {
-      if( flowProcess != null )
-        flowProcess.increment( Spill.Num_Spills_Read, 1 );
-
-      TupleInputStream dataInputStream = createTupleInputStream( file );
-
-      try
-        {
-        return readList( dataInputStream );
-        }
-      finally
-        {
-        closeSilent( dataInputStream );
-        }
-      }
-
-    public boolean hasNext()
-      {
-      if( currentList == current )
-        return iterator.hasNext();
-
-      if( iterator.hasNext() )
-        return true;
-
-      getNextList();
-
-      return hasNext();
-      }
-
-    public Tuple next()
-      {
-      if( currentList == current || iterator.hasNext() )
-        return iterator.next();
-
-      getNextList();
-
-      return next();
-      }
-
-    public void remove()
-      {
-      throw new UnsupportedOperationException( "remove is not supported" );
-      }
+    return new TupleEntryChainIterator( fields, iterator() );
     }
   }

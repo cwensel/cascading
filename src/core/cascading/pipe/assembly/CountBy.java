@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -60,7 +60,7 @@ public class CountBy extends AggregateBy
    */
   public static class CountPartials implements Functor
     {
-    private Fields declaredFields;
+    private final Fields declaredFields;
 
     /**
      * Constructor CountPartials creates a new CountPartials instance.

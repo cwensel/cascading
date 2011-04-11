@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,18 +22,13 @@
 package cascading.tuple;
 
 import cascading.CascadingTestCase;
+import cascading.test.PlatformTest;
 
+@PlatformTest(platforms = {"none"})
 public class FieldsTest extends CascadingTestCase
   {
   public FieldsTest()
     {
-    super( "field tests" );
-    }
-
-  @Override
-  protected void setUp() throws Exception
-    {
-    super.setUp();
     }
 
   public void testDuplicate()

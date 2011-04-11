@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,25 +21,27 @@
 
 package cascading.operation.xml;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
 import cascading.operation.Filter;
 import cascading.operation.Function;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class XPathTest extends CascadingTestCase
   {
   public XPathTest()
     {
-    super( "xpath parser test" );
     }
 
-  public void testParserMultipleXPaths()
+  public void testParserMultipleXPaths() throws IOException
     {
     String[][] namespaces = {new String[]{"a", "http://foo.com/a"},
                              new String[]{"b", "http://bar.com/b"}};
@@ -63,7 +65,7 @@ public class XPathTest extends CascadingTestCase
     assertEquals( "nested-top-second", tuple.getString( 1 ) );
     }
 
-  public void testGeneratorMultipleXPaths()
+  public void testGeneratorMultipleXPaths() throws IOException
     {
     String[][] namespaces = {new String[]{"a", "http://foo.com/a"},
                              new String[]{"b", "http://bar.com/b"}};

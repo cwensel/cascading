@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,13 +22,14 @@
 package cascading.tuple;
 
 import cascading.CascadingTestCase;
+import cascading.test.PlatformTest;
 
-/** @version : IntelliJGuide,v 1.13 2001/03/22 22:35:22 SYSTEM Exp $ */
+@PlatformTest(platforms = {"none"})
 public class TupleEntryTest extends CascadingTestCase
   {
   public TupleEntryTest()
     {
-    super( "tuple entry tests" );
+    super();
     }
 
   public void testSelect()

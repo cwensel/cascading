@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,25 +24,16 @@ package cascading.pipe;
 import java.beans.ConstructorProperties;
 import java.util.Set;
 
-import cascading.CascadingException;
-import cascading.flow.FlowCollector;
-import cascading.flow.FlowElement;
-import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
-import cascading.operation.ConcreteCall;
 import cascading.operation.Debug;
 import cascading.operation.DebugLevel;
 import cascading.operation.Filter;
-import cascading.operation.FilterCall;
 import cascading.operation.Function;
-import cascading.operation.FunctionCall;
 import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,8 +43,6 @@ import org.apache.log4j.Logger;
  */
 public class Each extends Operator
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( Each.class );
   /** Field FUNCTION_SELECTOR */
@@ -136,7 +125,7 @@ public class Each extends Operator
    * @param argumentSelector field selector that selects Function arguments from the input Tuple
    * @param function         Function to be applied to each input Tuple
    */
-  @ConstructorProperties({"previoud", "argumentSelector", "function"})
+  @ConstructorProperties({"previous", "argumentSelector", "function"})
   public Each( Pipe previous, Fields argumentSelector, Function function )
     {
     super( previous, argumentSelector, function, FUNCTION_SELECTOR );
@@ -296,7 +285,7 @@ public class Each extends Operator
    * @param debugLevel DebugLevel to associate with the Debug
    * @param debug      Debug to be applied to each input Tuple
    */
-  @ConstructorProperties({"previous", "debuglevel", "debug"})
+  @ConstructorProperties({"previous", "debugLevel", "debug"})
   public Each( Pipe previous, DebugLevel debugLevel, Debug debug )
     {
     super( previous, debugLevel, debug, FILTER_SELECTOR );
@@ -333,51 +322,34 @@ public class Each extends Operator
       throw new IllegalArgumentException( "invalid output selector: " + outputSelector );
     }
 
-  private Function getFunction()
+  public Function getFunction()
     {
     return (Function) operation;
     }
 
-  private Filter getFilter()
+  public Filter getFilter()
     {
     return (Filter) operation;
     }
 
-  private ValueAssertion getValueAssertion()
+  public ValueAssertion getValueAssertion()
     {
     return (ValueAssertion) operation;
     }
 
-  private boolean isFunction()
+  public boolean isFunction()
     {
     return operation instanceof Function;
     }
 
-  private boolean isFilter()
+  public boolean isFilter()
     {
     return operation instanceof Filter;
     }
 
-  private void applyAssertion( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, ConcreteCall operationCall )
+  public boolean isValueAssertion()
     {
-    getValueAssertion().doAssert( flowProcess, operationCall );
-
-    flowCollector.collect( input.getTuple() );
-    }
-
-  private void applyFilter( FlowProcess flowProcess, FlowCollector flowCollector, TupleEntry input, FilterCall filterCall )
-    {
-    boolean isRemove = false;
-
-    isRemove = getFilter().isRemove( flowProcess, filterCall );
-
-    if( !isRemove )
-      flowCollector.collect( input.getTuple() );
-    }
-
-  private void applyFunction( FlowProcess flowProcess, FunctionCall functionCall )
-    {
-    getFunction().operate( flowProcess, functionCall ); // adds results to collector
+    return operation instanceof ValueAssertion;
     }
 
   // FIELDS
@@ -436,140 +408,6 @@ public class Each extends Operator
         throw (OperatorException) exception;
 
       throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
-      }
-    }
-
-  public EachHandler getHandler( FlowCollector flowCollector, Scope scope )
-    {
-    if( isFunction() )
-      return new EachFunctionHandler( flowCollector, scope );
-    else if( isFilter() )
-      return new EachFilterHandler( flowCollector, scope );
-    else
-      return new EachAssertionHandler( flowCollector, scope );
-    }
-
-  /** Class EachHandler is a helper class that wraps Each instances. */
-  public abstract class EachHandler
-    {
-    FlowCollector flowCollector;
-    final Scope scope;
-    protected ConcreteCall operationCall;
-
-    protected EachHandler( FlowCollector flowCollector, Scope scope )
-      {
-      this.flowCollector = flowCollector;
-      this.scope = scope;
-      operationCall = new ConcreteCall( scope.getArguments() );
-      }
-
-    public void operate( FlowProcess flowProcess, TupleEntry input )
-      {
-      try
-        {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( operation + " incoming entry: " + input );
-
-        TupleEntry arguments = scope.getArgumentsEntry( input );
-
-        if( LOG.isDebugEnabled() )
-          LOG.debug( operation + " arg entry: " + arguments );
-
-        handle( flowProcess, input, arguments );
-        }
-      catch( CascadingException exception )
-        {
-        throw exception;
-        }
-      catch( Throwable exception )
-        {
-        throw new OperatorException( Each.this, "operator Each failed executing operation", exception );
-        }
-      }
-
-    abstract void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments );
-
-    public FlowElement getEach()
-      {
-      return Each.this;
-      }
-
-    public void prepare( FlowProcess flowProcess )
-      {
-      getOperation().prepare( flowProcess, operationCall );
-      }
-
-    public void cleanup( FlowProcess flowProcess )
-      {
-      getOperation().cleanup( flowProcess, operationCall );
-      }
-    }
-
-  public class EachFunctionHandler extends EachHandler
-    {
-    EachTupleCollector tupleCollector;
-
-    private abstract class EachTupleCollector extends TupleEntryCollector
-      {
-      Scope scope;
-      TupleEntry input;
-
-      private EachTupleCollector( Fields fields, Scope scope )
-        {
-        super( fields );
-        this.scope = scope;
-        }
-      }
-
-    public EachFunctionHandler( final FlowCollector flowCollector, Scope scope )
-      {
-      super( flowCollector, scope );
-
-      tupleCollector = new EachTupleCollector( scope.getDeclaredEntry().getFields(), scope )
-      {
-      protected void collect( Tuple tuple )
-        {
-        flowCollector.collect( makeResult( scope.getOutValuesSelector(), input, scope.getRemainderFields(), scope.getDeclaredEntry(), tuple ) );
-        }
-      };
-
-      operationCall.setOutputCollector( tupleCollector );
-      }
-
-    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
-      {
-      tupleCollector.input = input;
-      operationCall.setArguments( arguments );
-      applyFunction( flowProcess, operationCall );
-      }
-    }
-
-  public class EachFilterHandler extends EachHandler
-    {
-
-    public EachFilterHandler( FlowCollector flowCollector, Scope scope )
-      {
-      super( flowCollector, scope );
-      }
-
-    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
-      {
-      operationCall.setArguments( arguments );
-      applyFilter( flowProcess, flowCollector, input, operationCall );
-      }
-    }
-
-  public class EachAssertionHandler extends EachHandler
-    {
-    public EachAssertionHandler( FlowCollector flowCollector, Scope scope )
-      {
-      super( flowCollector, scope );
-      }
-
-    void handle( FlowProcess flowProcess, TupleEntry input, TupleEntry arguments )
-      {
-      operationCall.setArguments( arguments );
-      applyAssertion( flowProcess, flowCollector, input, operationCall );
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -52,20 +52,15 @@ public class OuterJoin implements Joiner
       super( closure );
       }
 
-    protected final CoGroupClosure getCoGroupClosure()
-      {
-      return (CoGroupClosure) closure;
-      }
-
     @Override
     protected void init()
       {
-      singletons = new List[closure.size()];
+      singletons = new List[ closure.size() ];
 
       for( int i = 0; i < singletons.length; i++ )
         {
         if( isOuter( i ) )
-          singletons[ i ] = Collections.singletonList( Tuple.size( closure.valueFields[ i ].size() ) );
+          singletons[ i ] = Collections.singletonList( Tuple.size( closure.getValueFields()[ i ].size() ) );
         }
 
       super.init();
@@ -73,7 +68,7 @@ public class OuterJoin implements Joiner
 
     protected boolean isOuter( int i )
       {
-      return getCoGroupClosure().isEmpty( i );
+      return closure.isEmpty( i );
       }
 
     @Override

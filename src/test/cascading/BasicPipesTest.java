@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,16 +21,14 @@
 
 package cascading;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Aggregator;
-import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -45,34 +43,24 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleListCollector;
+
+import static data.InputData.*;
 
 /**
  * These tests execute basic function using field positions, not names. so there will be duplicates with
- * FieldedPipestest
+ * FieldedPipesTest
  */
-public class BasicPipesTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class BasicPipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums = "build/test/data/nums.20.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-  String inputFileJoined = "build/test/data/lower+upper.txt";
-
-  String outputPath = "build/test/output/results";
 
   public BasicPipesTest()
     {
-    super( "build pipes" );
     }
 
   /**
@@ -82,75 +70,42 @@ public class BasicPipesTest extends CascadingTestCase
    */
   public void testCount() throws Exception
     {
-    runTestCount( new Fields( 1 ), new Fields( 0 ), new Fields( 0, 1 ) );
+    runTestCount( "count", new Fields( 1 ), new Fields( 0 ), new Fields( 0, 1 ) );
     }
 
   public void testCount2() throws Exception
     {
-    runTestCount( new Fields( 1 ), new Fields( "count" ), new Fields( 0, "count" ) );
+    runTestCount( "count2", new Fields( 1 ), new Fields( "count" ), new Fields( 0, "count" ) );
     }
 
   public void testCount3() throws Exception
     {
-    runTestCount( new Fields( 1 ), new Fields( "count" ), Fields.ALL );
+    runTestCount( "count3", new Fields( 1 ), new Fields( "count" ), Fields.ALL );
     }
 
   public void testCount4() throws Exception
     {
-    runTestCount( Fields.ALL, new Fields( "count" ), Fields.ALL );
+    runTestCount( "count4", Fields.ALL, new Fields( "count" ), Fields.ALL );
     }
 
-  void runTestCount( Fields argumentSelector, Fields fieldDeclaration, Fields outputSelector ) throws Exception
+  void runTestCount( String name, Fields argumentSelector, Fields fieldDeclaration, Fields outputSelector ) throws Exception
     {
-    if( !new File( inputFileIps ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileIps );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileIps );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/count", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileIps );
+    Tap sink = getPlatform().getTextFile( Fields.size( 1 ), getOutputPath( name ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, argumentSelector, new Count( fieldDeclaration ), outputSelector );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-//    flow.writeDOT( "basic.dot" );
-
-    flow.start();
+    flow.start(); // simple test for start
     flow.complete();
 
-    TupleEntryIterator iterator = flow.openSink();
-    Function splitter = new RegexSplitter( Fields.size( 2 ) );
-
-    boolean found = false;
-
-    while( iterator.hasNext() )
-      {
-      Tuple tuple = iterator.next().getTuple();
-
-//      System.out.println( "tuple = " + tuple );
-
-      TupleListCollector tupleEntryCollector = new TupleListCollector( Fields.size( 2 ) );
-      Tuple tuple1 = tuple.get( new int[]{1} );
-      ConcreteCall operationCall = new ConcreteCall( new TupleEntry( tuple1 ), tupleEntryCollector );
-      splitter.prepare( null, operationCall );
-      splitter.operate( null, operationCall );
-
-      Tuple tupleEntry = tupleEntryCollector.iterator().next();
-
-      if( tupleEntry.get( 0 ).equals( "63.123.238.8" ) )
-        {
-        found = true;
-        assertEquals( "wrong count", "2", tupleEntry.get( 1 ) );
-        }
-      }
-
-    iterator.close();
-
-    if( !found )
-      fail( "never found ip" );
-
     validateLength( flow, 17 );
+    assertTrue( getSinkAsList( flow ).contains( new Tuple( "63.123.238.8\t2" ) ) );
     }
 
   /**
@@ -160,11 +115,10 @@ public class BasicPipesTest extends CascadingTestCase
    */
   public void testSimple() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine( Fields.size( 1 ) ), outputPath + "/simple", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( Fields.size( 1 ), getOutputPath( "simple" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -181,9 +135,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Every( pipe, new Fields( 0 ), counter, new Fields( 0, 1 ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -197,14 +149,14 @@ public class BasicPipesTest extends CascadingTestCase
    */
   public void testSimpleResult() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileLower );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileLower );
-    Tap sink = new Hfs( new TextLine( Fields.size( 1 ) ), outputPath + "/simpleresult", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileLower );
+    Tap sink = getPlatform().getTextFile( Fields.size( 1 ), getOutputPath( "simpleresult" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
+    // skip the first line
     pipe = new Each( pipe, new Fields( 0 ), new ExpressionFilter( "$0 == 0", Long.class ) );
 
     pipe = new Each( pipe, new Fields( 1 ), new Identity() );
@@ -217,9 +169,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Every( pipe, new Fields( 0 ), counter, new Fields( 0, 1 ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -228,11 +178,10 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testSimpleRelative() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simplerelative", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simplerelative" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -246,9 +195,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Every( pipe, new Fields( 0 ), counter, new Fields( 0, 1 ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -257,11 +204,10 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testCoGroup() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileLower );
 
-    Tap sourceLower = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine(), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( Fields.size( 2 ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( Fields.size( 2 ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -269,7 +215,7 @@ public class BasicPipesTest extends CascadingTestCase
     sources.put( "upper", sourceUpper );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Tap sink = getPlatform().getTextFile( Fields.size( 1 ), getOutputPath( "complexcogroup" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( Fields.size( 2 ), " " );
 
@@ -278,30 +224,24 @@ public class BasicPipesTest extends CascadingTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ) );
 
-    Flow countFlow = new FlowConnector().connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    System.out.println( "countFlow =\n" + countFlow );
-//    countFlow.writeDOT( "cogroup.dot" );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5 );
+    List<Tuple> results = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( results.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( results.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
   public void testUnGroup() throws Exception
     {
-    if( !new File( inputFileJoined ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileJoined );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileJoined );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/ungrouped", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileJoined );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "ungrouped" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -309,9 +249,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "ungroup.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -320,11 +258,10 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testFilterAll() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/filterall", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "filterall" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -332,7 +269,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( 1 ), filter );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -341,11 +278,10 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testFilter() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/filter", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "filter" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -353,7 +289,7 @@ public class BasicPipesTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( 1 ), filter );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -362,11 +298,10 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testSimpleChain() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simplechain" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -381,9 +316,7 @@ public class BasicPipesTest extends CascadingTestCase
     // add a second group to force a new map/red
     pipe = new GroupBy( pipe, new Fields( 0 ) );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simplechain.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -392,20 +325,17 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testReplace() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/replace", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "replace" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
     Function parser = new RegexParser( Fields.ARGS, "^[^ ]*" );
     pipe = new Each( pipe, new Fields( 1 ), parser, Fields.REPLACE );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -414,20 +344,17 @@ public class BasicPipesTest extends CascadingTestCase
 
   public void testSwap() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    copyFromLocal( inputFileApache );
 
-    Tap source = new Hfs( new TextLine( Fields.size( 2 ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/swap", true );
+    Tap source = getPlatform().getTextFile( Fields.size( 2 ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "swap" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
     Function parser = new RegexParser( new Fields( 0 ), "^[^ ]*" );
     pipe = new Each( pipe, new Fields( 1 ), parser, Fields.SWAP );
 
-    Flow flow = new FlowConnector().connect( source, sink, pipe );
-
-//    flow.writeDOT( "simple.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 

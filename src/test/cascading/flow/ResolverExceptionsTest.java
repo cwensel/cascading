@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,16 +21,17 @@
 
 package cascading.flow;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
+import cascading.flow.planner.PlannerException;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.SequenceFile;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 
@@ -39,18 +40,18 @@ import cascading.tuple.FieldsResolverException;
  * <p/>
  * add new resolver usecases to the test suite.
  */
-public class ResolverExceptionsTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class ResolverExceptionsTest extends PlatformTestCase
   {
   public ResolverExceptionsTest()
     {
-    super( "resolver exceptions tests" );
     }
 
   private void verify( Tap source, Tap sink, Pipe pipe )
     {
     try
       {
-      new FlowConnector().connect( source, sink, pipe );
+      getPlatform().getFlowConnector().connect( source, sink, pipe );
       fail( "no exception thrown" );
       }
     catch( Exception exception )
@@ -63,10 +64,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testSchemeResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -76,10 +77,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testEachArgResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new Each( pipe, new Fields( "third" ), new Identity() );
@@ -90,10 +91,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testEachOutResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new Each( pipe, new Fields( "first" ), new Identity( new Fields( "none" ) ), new Fields( "third" ) );
@@ -104,10 +105,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testGroupByResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "third" ) );
@@ -118,10 +119,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testGroupBySortResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ), new Fields( "third" ) );
@@ -132,10 +133,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testEveryArgResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ) );
@@ -148,10 +149,10 @@ public class ResolverExceptionsTest extends CascadingTestCase
   public void testEveryOutResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = new Hfs( new SequenceFile( sourceFields ), "input/path" );
+    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = new Hfs( new SequenceFile( sinkFields ), "output/path", true );
+    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ) );

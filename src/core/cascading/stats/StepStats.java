@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,7 +21,7 @@
 
 package cascading.stats;
 
-/** Class StepStats collects {@link cascading.flow.FlowStep} specific statistics. */
+/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
 public abstract class StepStats extends CascadingStats
   {
   /** Constructor CascadingStats creates a new CascadingStats instance. */
@@ -35,4 +35,6 @@ public abstract class StepStats extends CascadingStats
     {
     return "Step{" + getStatsString() + '}';
     }
+
+  public abstract void captureJobStats();
   }

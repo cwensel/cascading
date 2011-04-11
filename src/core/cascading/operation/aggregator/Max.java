@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,14 +32,14 @@ public class Max extends ExtremaBase
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "max";
 
-  /** Constructs a new instance that returns the maximum value encoutered in the field name "max". */
+  /** Constructs a new instance that returns the maximum value encountered in the field name "max". */
   public Max()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
   /**
-   * Constructs a new instance that returns the maximum value encoutered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the maximum value encountered in the given fieldDeclaration field name.
    *
    * @param fieldDeclaration of type Fields
    */
@@ -50,7 +50,7 @@ public class Max extends ExtremaBase
     }
 
   /**
-   * Constructs a new instance that returns the maximum value encoutered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the maximum value encountered in the given fieldDeclaration field name.
    * Any argument matching an ignoredValue won't be compared.
    *
    * @param fieldDeclaration of type Fields

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,17 +27,18 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.pipe.assembly.Unique;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class FilterTest extends CascadingTestCase
   {
   public FilterTest()
     {
-    super( "filter test" );
     }
 
   @Override

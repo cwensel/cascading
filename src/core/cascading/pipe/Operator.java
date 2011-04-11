@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -38,7 +38,7 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleException;
 
 /**
- * An Opererator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
+ * An Operator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
  * </p>
  * The argFields value select the input fields used by the operation. By default the whole input Tuple is passes as arguments.
  * The outFields value select the fields in the result Tuple returned by this Pipe. By default, the operation results
@@ -246,17 +246,6 @@ public abstract class Operator extends Pipe
     }
 
   /**
-   * Method isAssertion returns true if this Operation represents an {@link Assertion} operation.
-   *
-   * @return the assertion (type boolean) of this Operator object.
-   */
-  @Deprecated
-  public boolean isAssertion()
-    {
-    return plannerLevel instanceof AssertionLevel;
-    }
-
-  /**
    * Method hasPlannerLevel returns true if this Operator object holds a {@link PlannedOperation} object with an associated
    * {@link PlannerLevel} level.
    *
@@ -267,7 +256,7 @@ public abstract class Operator extends Pipe
     return plannerLevel != null;
     }
 
-  protected Tuple makeResult( Fields outgoingSelector, TupleEntry inputEntry, Fields remainderFields, TupleEntry declaredEntry, Tuple output )
+  public Tuple makeResult( Fields outgoingSelector, TupleEntry inputEntry, Fields remainderFields, TupleEntry declaredEntry, Tuple output )
     {
     if( getOutputSelector().isResults() )
       return output;
@@ -279,7 +268,11 @@ public abstract class Operator extends Pipe
       {
       Tuple result = new Tuple( inputEntry.getTuple() );
 
-      result.set( inputEntry.getFields(), declaredEntry.getFields(), output );
+      // handle case where operation is declaring the argument fields, and they are positional
+      if( getFieldDeclaration().isArguments() )
+        result.set( inputEntry.getFields(), getArgumentSelector(), output );
+      else
+        result.set( inputEntry.getFields(), declaredEntry.getFields(), output );
 
       return result;
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -47,11 +47,11 @@ public abstract class CascadingStats implements Serializable
   {
   public enum Status
     {
-      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED, SKIPPED;
+      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED, SKIPPED
     }
 
   /** Field name */
-  String name;
+  final String name;
   /** Field status */
   Status status = Status.PENDING;
   /** Field startTime */
@@ -148,7 +148,7 @@ public abstract class CascadingStats implements Serializable
   /**
    * Method isSkipped returns true when the works was skipped.
    * <p/>
-   * Flows are skipped if the apporpriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
+   * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
    * returns {@code true};
    *
    * @return the skipped (type boolean) of this CascadingStats object.
@@ -307,7 +307,7 @@ public abstract class CascadingStats implements Serializable
   public abstract Collection<String> getCountersFor( String group );
 
   /**
-   * Method getCountersFor returns all the counter names for the counter enums.
+   * Method getCountersFor returns all the counter names for the counter Enum.
    *
    * @param group
    * @return Collection<String>

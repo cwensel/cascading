@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,7 +21,7 @@
 
 package cascading.operation;
 
-/** Interface Assertion is the base interface for all stream assertions. Implementors must also extend {@link BaseOperation}. */
+/** Interface Assertion is the base interface for all stream assertions. Implementers must also extend {@link BaseOperation}. */
 public interface Assertion<PC> extends PlannedOperation<PC>
   {
   }

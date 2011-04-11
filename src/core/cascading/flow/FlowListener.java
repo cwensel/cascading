@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -47,7 +47,7 @@ public interface FlowListener
   void onCompleted( Flow flow );
 
   /**
-   * The onThrowable event is fired if any child {@link FlowStep} throws a Throwable type. This throwable is passed
+   * The onThrowable event is fired if any child {@link cascading.flow.planner.FlowStep} throws a Throwable type. This throwable is passed
    * as an argument to the event. This event method should return true if the given throwable was handled and should
    * not be rethrown from the {@link Flow#complete()} method.
    *

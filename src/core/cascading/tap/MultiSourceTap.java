@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,29 +26,29 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
+import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class MultiSourceTap is used to tie multiple {@link Tap} instances into a single resource. Effectively this will allow
+ * Class MultiSourceTap is used to tie multiple {@link cascading.tap.Tap} instances into a single resource. Effectively this will allow
  * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
  * <p/>
  * Note that order is not maintained by virtue of the underlying model. If order is necessary, use a unique sequence key
  * to span the resources, like a line number.
  * </p>
- * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.TextLine}), they may not contain
- * the same semi-structure internally. For example, one file might be an Apache log file, and anoter might be a Log4J
+ * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.hadoop.TextLine}), they may not contain
+ * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
-public class MultiSourceTap extends SourceTap implements CompositeTap
+public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> extends SourceTap<Process, Config, Input, Output> implements CompositeTap
   {
   protected Tap[] taps;
 
   private class TupleIterator implements Iterator
     {
-    TupleEntryIterator iterator;
+    final TupleEntryIterator iterator;
 
     private TupleIterator( TupleEntryIterator iterator )
       {
@@ -124,7 +124,7 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
 
 
   /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
-  public Path getPath()
+  public String getPath()
     {
     return null;
     }
@@ -147,13 +147,13 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     }
 
   @Override
-  public void sourceInit( JobConf conf ) throws IOException
+  public void sourceConfInit( Process process, Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
-      tap.sourceInit( conf );
+      tap.sourceConfInit( process, conf );
     }
 
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean pathExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
@@ -165,7 +165,7 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     }
 
   /** Returns the most current modified time. */
-  public long getPathModified( JobConf conf ) throws IOException
+  public long getPathModified( Config conf ) throws IOException
     {
     Tap[] taps = getTaps();
 
@@ -181,14 +181,17 @@ public class MultiSourceTap extends SourceTap implements CompositeTap
     }
 
   @Override
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
+    if( input != null )
+      return taps[ 0 ].openForRead( flowProcess, input );
+
     Iterator iterators[] = new Iterator[ getTaps().length ];
 
     for( int i = 0; i < getTaps().length; i++ )
-      iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( conf ) );
+      iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( flowProcess ) );
 
-    return new TupleEntryIterator( getSourceFields(), iterators );
+    return new TupleEntryChainIterator( getSourceFields(), iterators );
     }
 
   public boolean equals( Object object )

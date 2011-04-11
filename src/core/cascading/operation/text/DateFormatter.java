@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -95,7 +95,7 @@ public class DateFormatter extends DateOperation implements Function<SimpleDateF
     super( 1, fieldDeclaration, dateFormatString, zone, locale );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall<SimpleDateFormat> functionCall )
     {
     Tuple output = new Tuple();

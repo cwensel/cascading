@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,8 +61,8 @@ public class SumBy extends AggregateBy
    */
   public static class SumPartials implements Functor
     {
-    private Fields declaredFields;
-    private Class sumType;
+    private final Fields declaredFields;
+    private final Class sumType;
 
     /** Constructor SumPartials creates a new SumPartials instance. */
     public SumPartials( Fields declaredFields, Class sumType )

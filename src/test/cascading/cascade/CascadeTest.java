@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,47 +26,44 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowSkipStrategy;
-import cascading.flow.FlowStepJob;
 import cascading.flow.LockingFlowListener;
-import cascading.flow.ProcessFlow;
+import cascading.flow.planner.FlowStepJob;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.scheme.SequenceFile;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
 import cascading.tap.MultiSourceTap;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
-import riffle.process.scheduler.ProcessChain;
 
-public class CascadeTest extends ClusterTestCase
+import static data.InputData.inputFileIps;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class CascadeTest extends PlatformTestCase
   {
-  String inputFile = "build/test/data/ips.20.txt";
-  String outputPath = "build/test/output/cascade/";
-
   public CascadeTest()
     {
-    super( "cascade tests", true );
+    super( true );
     }
 
   private Flow firstFlow( String path )
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
+    Tap source = getPlatform().getTextFile( inputFileIps );
 
     Pipe pipe = new Pipe( "first" );
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/first", true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow secondFlow( Tap source, String path )
@@ -75,9 +72,9 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = new Hfs( new SequenceFile( new Fields( "first", "second", "third", "fourth" ) ), outputPath + path + "/second", true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path + "/second" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow thirdFlow( Tap source, String path )
@@ -86,9 +83,9 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = new Hfs( new SequenceFile( new Fields( "mangled" ) ), outputPath + path + "/third", true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path + "/third" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow fourthFlow( Tap source, String path )
@@ -97,24 +94,23 @@ public class CascadeTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + path + "/fourth", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/fourth" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   private Flow previousMultiTapFlow( String path, String ordinal )
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFile );
+    Tap source = getPlatform().getTextFile( inputFileIps );
 
     Pipe pipe = new Pipe( ordinal );
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = new Hfs( new SequenceFile( new Fields( "ip" ) ), outputPath + path + "/" + ordinal, true );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/" + ordinal ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
-
 
   private Flow multiTapFlow( Tap[] sources, String path )
     {
@@ -123,14 +119,14 @@ public class CascadeTest extends ClusterTestCase
     pipe = new Each( pipe, new Identity() );
 
     Tap source = new MultiSourceTap( sources );
-    Tap sink = new Hfs( new TextLine(), outputPath + path + "/multitap", true );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/multitap" ), SinkMode.REPLACE );
 
-    return new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
 
   public void testSimpleCascade() throws IOException
     {
-    copyFromLocal( inputFile );
+    getPlatform().copyFromLocal( inputFileIps );
 
     String path = "simple";
 
@@ -150,7 +146,7 @@ public class CascadeTest extends ClusterTestCase
 
   public void testMultiTapCascade() throws IOException
     {
-    copyFromLocal( inputFile );
+    getPlatform().copyFromLocal( inputFileIps );
 
     String path = "multitap";
 
@@ -169,7 +165,7 @@ public class CascadeTest extends ClusterTestCase
 
   public void testSkippedCascade() throws IOException
     {
-    copyFromLocal( inputFile );
+    getPlatform().copyFromLocal( inputFileIps );
 
     String path = "skipped";
 
@@ -193,12 +189,12 @@ public class CascadeTest extends ClusterTestCase
 
     cascade.complete();
 
-    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getJobConf() ) );
+    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getConfig() ) );
     }
 
   public void testSimpleCascadeStop() throws IOException, InterruptedException
     {
-    copyFromLocal( inputFile );
+    getPlatform().copyFromLocal( inputFileIps );
 
     String path = "stopped";
 
@@ -221,14 +217,18 @@ public class CascadeTest extends ClusterTestCase
     while( true )
       {
       System.out.println( "testing if running" );
-      Thread.sleep( 1000 );
+
+      if( getPlatform() instanceof HadoopPlatform )
+        Thread.sleep( 1000 );
 
       Map<String, Callable<Throwable>> map = LockingFlowListener.getJobsMap( first );
 
       if( map == null || map.values().size() == 0 )
         continue;
 
-      if( ( (FlowStepJob) map.values().iterator().next() ).wasStarted() )
+      FlowStepJob flowStepJob = (FlowStepJob) map.values().iterator().next();
+
+      if( flowStepJob.isStarted() )
         break;
       }
 
@@ -242,7 +242,7 @@ public class CascadeTest extends ClusterTestCase
 
   public void testCascadeID() throws IOException
     {
-    String path = "simple";
+    String path = "idtest";
 
     Flow first = firstFlow( path );
     Flow second = secondFlow( first.getSink(), path );
@@ -259,50 +259,4 @@ public class CascadeTest extends ClusterTestCase
     assertEquals( third.getProperty( "cascading.cascade.id" ), id );
     assertEquals( fourth.getProperty( "cascading.cascade.id" ), id );
     }
-
-  public void testSimplePerpetual() throws IOException
-    {
-    copyFromLocal( inputFile );
-
-    String path = "perpetual";
-
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
-
-    ProcessChain chain = new ProcessChain( true, fourth, second, first, third );
-
-    chain.start();
-
-    chain.complete();
-
-    validateLength( fourth, 20 );
-    }
-
-  public void testSimplePerpetualCascade() throws IOException
-    {
-    copyFromLocal( inputFile );
-
-    String path = "perpetualcascade";
-
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
-
-    ProcessFlow firstProcess = new ProcessFlow( "first", first );
-    ProcessFlow secondProcess = new ProcessFlow( "second", second );
-    ProcessFlow thirdProcess = new ProcessFlow( "third", third );
-    ProcessFlow fourthProcess = new ProcessFlow( "fourth", fourth );
-
-    Cascade cascade = new CascadeConnector().connect( fourthProcess, secondProcess, firstProcess, thirdProcess );
-
-    cascade.start();
-
-    cascade.complete();
-
-    validateLength( fourth, 20 );
-    }
-
   }

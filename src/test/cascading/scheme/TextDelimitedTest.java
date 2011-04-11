@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,52 +22,48 @@
 package cascading.scheme;
 
 import java.io.IOException;
-import java.util.Properties;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
-import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
+import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 
+import static data.InputData.testDelimited;
+import static data.InputData.testDelimitedSpecialCharData;
+
 /**
  *
  */
-public class TextDelimitedTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class TextDelimitedTest extends PlatformTestCase
   {
-  String testData = "build/test/data/delimited.txt";
-  String testSpecialCharData = "build/test/data/delimited-spec-char.txt";
-
-  String outputPath = "build/test/output/delim";
-
-
   public TextDelimitedTest()
     {
-    super( "delimited text tests" );
     }
 
   public void testQuotedText() throws IOException
     {
-    runQuotedText( "normchar", testData, ",", false );
+    runQuotedText( "normchar", testDelimited, ",", false );
     }
 
   public void testQuotedTextAll() throws IOException
     {
-    runQuotedText( "normchar", testData, ",", true );
+    runQuotedText( "normchar", testDelimited, ",", true );
     }
 
   public void testQuotedTextSpecChar() throws IOException
     {
-    runQuotedText( "specchar", testSpecialCharData, "|", false );
+    runQuotedText( "specchar", testDelimitedSpecialCharData, "|", false );
     }
 
   public void testQuotedTextSpecCharAll() throws IOException
     {
-    runQuotedText( "specchar", testSpecialCharData, "|", true );
+    runQuotedText( "specchar", testDelimitedSpecialCharData, "|", true );
     }
 
   public void runQuotedText( String path, String inputData, String delimiter, boolean useAll ) throws IOException
@@ -97,12 +93,10 @@ public class TextDelimitedTest extends CascadingTestCase
         }
       }
 
-    Tuple[] tuples = new Tuple[results.length];
+    Tuple[] tuples = new Tuple[ results.length ];
 
     for( int i = 0; i < results.length; i++ )
       tuples[ i ] = new Tuple( results[ i ] );
-
-    Properties properties = new Properties();
 
     Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
@@ -113,21 +107,18 @@ public class TextDelimitedTest extends CascadingTestCase
       fields = Fields.ALL;
       }
 
-    TextDelimited scheme = new TextDelimited( fields, delimiter, "\"", types );
-
-    Hfs input = new Hfs( scheme, inputData );
-    Hfs output = new Hfs( scheme, outputPath + "/quoted/" + path, SinkMode.REPLACE );
+    Tap input = getPlatform().getDelimitedFile( fields, false, delimiter, "\"", types, inputData, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( fields, false, delimiter, "\"", types, getOutputPath( "quoted/" + path + "" + useAll ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "pipe" );
 
-    Flow flow = new FlowConnector( properties ).connect( input, output, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
 
     flow.complete();
 
     validateLength( flow, results.length, 5 );
 
     // validate input parsing compares to expected, and results compare to expected
-
     TupleEntryIterator iterator = flow.openSource();
 
     int count = 0;
@@ -149,17 +140,15 @@ public class TextDelimitedTest extends CascadingTestCase
 
   public void testHeader() throws IOException
     {
-    Properties properties = new Properties();
-
     Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
 
-    Hfs input = new Hfs( new TextDelimited( fields, true, ",", "\"", types ), testData );
-    Hfs output = new Hfs( new TextDelimited( fields, ",", "\"", types ), outputPath + "/header", SinkMode.REPLACE );
+    Tap input = getPlatform().getDelimitedFile( fields, true, ",", "\"", types, testDelimited, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( fields, false, ",", "\"", types, getOutputPath( "header" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "pipe" );
 
-    Flow flow = new FlowConnector( properties ).connect( input, output, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
 
     flow.complete();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,38 +21,37 @@
 
 package cascading.scheme;
 
-import java.io.File;
-
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.tap.Hfs;
+import cascading.scheme.hadoop.TextLine;
+import cascading.scheme.hadoop.WritableSequenceFile;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.Hfs;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 
-public class WritableSequenceFileTest extends ClusterTestCase
-  {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String outputPath = "build/test/output/writablesequence/";
+import static data.InputData.inputFileApache;
 
+@PlatformTest(platforms = {"hadoop"})
+public class WritableSequenceFileTest extends PlatformTestCase
+  {
   public WritableSequenceFileTest()
     {
-    super( "use tap collector tests", true );
+    super( true );
     }
 
   public void testWritable() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
+    getPlatform().copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
 
@@ -61,13 +60,13 @@ public class WritableSequenceFileTest extends ClusterTestCase
     pipe = new Each( pipe, new Fields( "offset" ), new ExpressionFunction( Fields.ARGS, "new org.apache.hadoop.io.LongWritable($0)", long.class ), Fields.REPLACE );
     pipe = new Each( pipe, new Fields( "line" ), new ExpressionFunction( Fields.ARGS, "new org.apache.hadoop.io.Text($0)", String.class ), Fields.REPLACE );
 
-    Tap tapKeyValue = new Hfs( new WritableSequenceFile( new Fields( "offset", "line" ), LongWritable.class, Text.class ), outputPath + "/keyvalue", true );
-    Tap tapKey = new Hfs( new WritableSequenceFile( new Fields( "offset" ), LongWritable.class, null ), outputPath + "/key", true );
-    Tap tapValue = new Hfs( new WritableSequenceFile( new Fields( "line" ), Text.class ), outputPath + "/value", true );
+    Tap tapKeyValue = new Hfs( new WritableSequenceFile( new Fields( "offset", "line" ), LongWritable.class, Text.class ), getOutputPath( "keyvalue" ), SinkMode.REPLACE );
+    Tap tapKey = new Hfs( new WritableSequenceFile( new Fields( "offset" ), LongWritable.class, null ), getOutputPath( "key" ), SinkMode.REPLACE );
+    Tap tapValue = new Hfs( new WritableSequenceFile( new Fields( "line" ), Text.class ), getOutputPath( "value" ), SinkMode.REPLACE );
 
-    Flow flowKeyValue = new FlowConnector( getProperties() ).connect( source, tapKeyValue, pipe );
-    Flow flowKey = new FlowConnector( getProperties() ).connect( tapKeyValue, tapKey, new Pipe( "key" ) );
-    Flow flowValue = new FlowConnector( getProperties() ).connect( tapKeyValue, tapValue, new Pipe( "value" ) );
+    Flow flowKeyValue = new HadoopFlowConnector( getProperties() ).connect( source, tapKeyValue, pipe );
+    Flow flowKey = new HadoopFlowConnector( getProperties() ).connect( tapKeyValue, tapKey, new Pipe( "key" ) );
+    Flow flowValue = new HadoopFlowConnector( getProperties() ).connect( tapKeyValue, tapValue, new Pipe( "value" ) );
 
     Cascade cascade = new CascadeConnector().connect( "keyvalues", flowKeyValue, flowKey, flowValue );
 

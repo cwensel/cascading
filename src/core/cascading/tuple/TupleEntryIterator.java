@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,31 +21,27 @@
 
 package cascading.tuple;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /**
  * Class TupleEntryIterator provides an efficient Iterator for returning {@link TupleEntry} elements in an
  * underlying {@link Tuple} collection.
  */
-public class TupleEntryIterator implements Iterator<TupleEntry>
+public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closeable
   {
   /** Field entry */
   final TupleEntry entry = new TupleEntry( true );
-  /** Field iterator */
-  final Iterator[] iterators;
-  /** Field currentIterator */
-  int currentIterator = 0;
 
   /**
    * Constructor TupleEntryIterator creates a new TupleEntryIterator instance.
    *
-   * @param fields    of type Fields
-   * @param iterators of type Iterator
+   * @param fields of type Fields
    */
-  public TupleEntryIterator( Fields fields, Iterator... iterators )
+  public TupleEntryIterator( Fields fields )
     {
     this.entry.fields = fields;
-    this.iterators = iterators;
+    this.entry.tuple = Tuple.size( fields.size() );
     }
 
   /**
@@ -69,53 +65,5 @@ public class TupleEntryIterator implements Iterator<TupleEntry>
   public TupleEntry getTupleEntry()
     {
     return entry;
-    }
-
-  /**
-   * Method hasNext returns true if there is a next TupleEntry
-   *
-   * @return boolean
-   */
-  public boolean hasNext()
-    {
-    if( iterators.length == currentIterator )
-      return false;
-
-    if( iterators[ currentIterator ].hasNext() )
-      return true;
-
-    currentIterator++;
-
-    return hasNext();
-    }
-
-  /**
-   * Method next returns the next TupleEntry.
-   *
-   * @return TupleEntry
-   */
-  public TupleEntry next()
-    {
-    hasNext(); // force roll to next iterator
-
-    entry.setTuple( (Tuple) iterators[ currentIterator ].next() );
-
-    return entry;
-    }
-
-  /** Method remove removes the current TypleEntry from the underlying collection. */
-  public void remove()
-    {
-    iterators[ currentIterator ].remove();
-    }
-
-  /** Method close closes all underlying resources. */
-  public void close()
-    {
-    for( Iterator iterator : iterators )
-      {
-      if( iterator instanceof TupleIterator )
-        ( (TupleIterator) iterator ).close();
-      }
     }
   }

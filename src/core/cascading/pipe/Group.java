@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,7 +21,6 @@
 
 package cascading.pipe;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,23 +32,13 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.pipe.cogroup.CoGroupClosure;
-import cascading.pipe.cogroup.GroupClosure;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.Joiner;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
-import cascading.tuple.IndexTuple;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleException;
-import cascading.tuple.TuplePair;
-import cascading.tuple.Tuples;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.log4j.Logger;
 
 /**
  * The base class for {@link GroupBy} and {@link CoGroup}. This class should not be used directly.
@@ -59,8 +48,6 @@ import org.apache.log4j.Logger;
  */
 public class Group extends Pipe
   {
-  /** Field LOG */
-  private static final Logger LOG = Logger.getLogger( Group.class );
 
   /** Field pipes */
   private final List<Pipe> pipes = new ArrayList<Pipe>();
@@ -85,8 +72,6 @@ public class Group extends Pipe
 
   /** Field pipePos */
   private transient Map<String, Integer> pipePos;
-  /** Field closure */
-  private GroupClosure closure;
 
   /**
    * Constructor Group creates a new Group instance.
@@ -872,7 +857,7 @@ public class Group extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
-    return pipes.toArray( new Pipe[pipes.size()] );
+    return pipes.toArray( new Pipe[ pipes.size() ] );
     }
 
   /**
@@ -915,7 +900,7 @@ public class Group extends Pipe
     return reverseOrder;
     }
 
-  private Map<String, Integer> getPipePos()
+  public synchronized Map<String, Integer> getPipePos()
     {
     if( pipePos != null )
       return pipePos;
@@ -929,97 +914,9 @@ public class Group extends Pipe
     return pipePos;
     }
 
-  /**
-   * Method makeReduceGrouping makes a group Tuple[] of the form [ ['grpValue', ...] [ sourceName, [ 'value', ...] ] ]
-   * <p/>
-   * Since this is a join, we must track from which source a given tuple is sourced from so we can
-   * cogroup properly at the reduce stage.
-   *
-   * @param incomingScope of type Scope
-   * @param outgoingScope of type Scope
-   * @param entry         of type TupleEntry
-   * @param output        of type OutputCollector
-   * @throws IOException thrown by OutputCollector on collect
-   */
-  public void collectReduceGrouping( Scope incomingScope, Scope outgoingScope, TupleEntry entry, OutputCollector output ) throws IOException
+  public Joiner getJoiner()
     {
-    Fields groupFields = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
-    Fields sortFields = outgoingScope.getSortingSelectors() == null ? null : outgoingScope.getSortingSelectors().get( incomingScope.getName() );
-
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "cogroup: [" + incomingScope + "] key pos: [" + groupFields + "]" );
-
-    // todo: would be nice to delegate this back to the GroupClosure
-    Tuple groupTuple = Tuples.extractTuple( entry, groupFields ); // we are nulling dupe values here to reduce bandwidth usage
-    Tuple sortTuple = sortFields == null ? null : entry.selectTuple( sortFields );
-    Tuple valuesTuple = entry.getTuple();
-
-    Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
-
-    if( isGroupBy() )
-      {
-      output.collect( groupKey, valuesTuple );
-      return;
-      }
-
-    Integer pos = getPipePos().get( incomingScope.getName() );
-
-    output.collect( new IndexTuple( pos, groupKey ), new IndexTuple( pos, valuesTuple ) );
-    }
-
-  /**
-   * Method unwrapGrouping tests if the given grouping key Tuple should be unwrapped if this Group instance is sorting.
-   *
-   * @param tuple of type Tuple
-   * @return Tuple
-   */
-  public Tuple unwrapGrouping( Tuple tuple )
-    {
-    if( !isGroupBy )
-      return ( (IndexTuple) tuple ).getTuple();
-
-    return !isSorted() ? (Tuple) tuple : ( (TuplePair) tuple ).getLhs();
-    }
-
-  /**
-   * Method makeReduceValues wrapps the incoming Hadoop value stream as an iterator over {@link Tuple} instance.
-   *
-   * @param key    of type WritableComparable
-   * @param values of type Iterator @return Iterator<Tuple>
-   * @return a Tuple Iterator
-   */
-  public Iterator<Tuple> iterateReduceValues( Tuple key, Iterator values )
-    {
-    closure.reset( joiner, key, values );
-
-    return joiner.getIterator( closure );
-    }
-
-  public void initializeReduce( FlowProcess flowProcess, Set<Scope> incomingScopes, Scope outgoingScope )
-    {
-    if( isGroupBy() )
-      {
-      Scope incomingScope = incomingScopes.iterator().next();
-      Fields[] groupFields = Fields.fields( outgoingScope.getGroupingSelectors().get( incomingScope.getName() ) );
-      Fields[] valuesFields = Fields.fields( incomingScope.getOutValuesFields() );
-
-      closure = new GroupClosure( flowProcess, groupFields, valuesFields );
-      }
-    else
-      {
-      Fields[] groupFields = new Fields[pipes.size()];
-      Fields[] valuesFields = new Fields[pipes.size()];
-
-      for( Scope incomingScope : incomingScopes )
-        {
-        int pos = getPipePos().get( incomingScope.getName() );
-
-        groupFields[ pos ] = outgoingScope.getGroupingSelectors().get( incomingScope.getName() );
-        valuesFields[ pos ] = incomingScope.getOutValuesFields();
-        }
-
-      closure = new CoGroupClosure( flowProcess, numSelfJoins, groupFields, valuesFields );
-      }
+    return joiner;
     }
 
   /**
@@ -1030,6 +927,11 @@ public class Group extends Pipe
   public boolean isGroupBy()
     {
     return isGroupBy;
+    }
+
+  public int getNumSelfJoins()
+    {
+    return numSelfJoins;
     }
 
   boolean isSelfJoin()
@@ -1100,9 +1002,9 @@ public class Group extends Pipe
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
-          incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
-        else
-          incomingFields = resolveFields( incomingScope ).select( selector );
+        incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
+      else
+        incomingFields = resolveFields( incomingScope ).select( selector );
 
       resolvedFields.put( incomingScope.getName(), incomingFields );
       }
@@ -1234,11 +1136,6 @@ public class Group extends Pipe
       {
       throw new OperatorException( this, "could not resolve declared fields in: " + this, exception );
       }
-    }
-
-  Fields resolveOutgoingSelector( Fields declared )
-    {
-    return declared;
     }
 
   @Override

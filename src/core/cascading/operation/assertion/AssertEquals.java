@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -57,7 +57,7 @@ public class AssertEquals extends BaseAssertion implements ValueAssertion
     this.values = new Tuple( values );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {
     Tuple tuple = assertionCall.getArguments().getTuple();

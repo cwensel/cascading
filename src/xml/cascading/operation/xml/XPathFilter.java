@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -69,7 +69,7 @@ public class XPathFilter extends XPathOperation implements Filter<DocumentBuilde
     this.removeMatch = removeMatch;
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall<DocumentBuilder> filterCall )
     {
     String argument = (String) filterCall.getArguments().getString( 0 );

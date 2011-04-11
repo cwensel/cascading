@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,16 +21,15 @@
 
 package cascading;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.flow.PlannerException;
+import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
@@ -42,128 +41,125 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.cogroup.InnerJoin;
+import cascading.pipe.cogroup.Joiner;
 import cascading.pipe.cogroup.LeftJoin;
 import cascading.pipe.cogroup.MixedJoin;
 import cascading.pipe.cogroup.OuterJoin;
 import cascading.pipe.cogroup.RightJoin;
-import cascading.scheme.TextDelimited;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.scheme.hadoop.TextDelimited;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.Tuple;
 
-public class CoGroupFieldedPipesTest extends ClusterTestCase
+import static data.InputData.*;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class CoGroupFieldedPipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums20 = "build/test/data/nums.20.txt";
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-  String inputFileCritics = "build/test/data/critics.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-  String inputFileLowerOffset = "build/test/data/lower-offset.txt";
-  String inputFileJoined = "build/test/data/lower+upper.txt";
-
-  String inputFileLhs = "build/test/data/lhs.txt";
-  String inputFileRhs = "build/test/data/rhs.txt";
-  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
-
-  String inputFileLhsSparse = "build/test/data/lhs-sparse.txt";
-  String inputFileRhsSparse = "build/test/data/rhs-sparse.txt";
-
-  String outputPath = "build/test/output/fields/";
-
   public CoGroupFieldedPipesTest()
     {
-    super( "fielded pipes", true, 4, 1 ); // leave cluster testing enabled
+    super( true, 4, 1 ); // leave cluster testing enabled
+    }
+
+  public void testCross() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileRhs );
+
+    Map sources = new HashMap();
+
+    sources.put( "lhs", getPlatform().getTextFile( inputFileLhs ) );
+    sources.put( "rhs", getPlatform().getTextFile( inputFileRhs ) );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cross" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+
+    Pipe cross = new CoGroup( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cross );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tB" ) ) );
     }
 
   public void testCoGroup() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroup" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> values = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
   public void testCoGroupWithUnknowns() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( Fields.UNKNOWN, " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "unknown" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Function splitter = new RegexSplitter( Fields.UNKNOWN, " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> values = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
   /**
@@ -174,24 +170,20 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupFilteredBranch() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupfilteredbranch" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupfilteredbranch/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
@@ -200,62 +192,49 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> values = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\tnull\tnull", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\tnull\tnull", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( values.contains( new Tuple( "1\ta\tnull\tnull" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\tnull\tnull" ) ) );
     }
 
   public void testCoGroupSelf() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
 
-    copyFromLocal( inputFileLower );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupself" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupself/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroupself.dot" );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5 );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> values = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
 
   /**
@@ -265,24 +244,20 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupAfterEvery() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "afterevery" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
@@ -294,33 +269,57 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow countFlow = null;
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-    try
-      {
-      countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
-      }
-    catch( PlannerException exception )
-      {
-//      exception.writeDOT( "cogroupedevery.dot" );
-      throw exception;
-      }
+    flow.complete();
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    validateLength( flow, 5, null );
 
-    countFlow.complete();
+    List<Tuple> values = getSinkAsList( flow );
 
-    validateLength( countFlow, 5, null );
-
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
+  public void testCoGroupInnerSingleField() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLowerOffset );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupinnersingle" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char" ), " " ), new Fields( "num1" ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char" ), " " ), new Fields( "num2" ) );
+
+    Pipe join = new CoGroup( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
+
+    join = new Every( join, new Count() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, join );
+
+    flow.complete();
+
+    validateLength( flow, 2, null );
+
+    Set<Tuple> results = new HashSet<Tuple>();
+
+    results.add( new Tuple( "1\t1" ) );
+    results.add( new Tuple( "5\t2" ) );
+
+    List<Tuple> actual = getSinkAsList( flow );
+
+    results.removeAll( actual );
+
+    assertEquals( 0, results.size() );
+    }
 
   /**
    * 1 a1
@@ -370,115 +369,25 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupInner() throws Exception
     {
-    if( !new File( inputFileLhsSparse ).exists() )
-      fail( "data file not found" );
+    HashSet<Tuple> results = new HashSet<Tuple>();
 
-    copyFromLocal( inputFileLhsSparse );
-    copyFromLocal( inputFileRhsSparse );
+    results.add( new Tuple( "1\ta1\t1\tA1" ) );
+    results.add( new Tuple( "1\ta1\t1\tA2" ) );
+    results.add( new Tuple( "1\ta1\t1\tA3" ) );
+    results.add( new Tuple( "1\ta2\t1\tA1" ) );
+    results.add( new Tuple( "1\ta2\t1\tA2" ) );
+    results.add( new Tuple( "1\ta2\t1\tA3" ) );
+    results.add( new Tuple( "1\ta3\t1\tA1" ) );
+    results.add( new Tuple( "1\ta3\t1\tA2" ) );
+    results.add( new Tuple( "1\ta3\t1\tA3" ) );
+    results.add( new Tuple( "2\tb1\t2\tB1" ) );
+    results.add( new Tuple( "2\tb1\t2\tB2" ) );
+    results.add( new Tuple( "2\tb1\t2\tB3" ) );
+    results.add( new Tuple( "4\td1\t4\tD1" ) );
+    results.add( new Tuple( "4\td2\t4\tD1" ) );
+    results.add( new Tuple( "4\td3\t4\tD1" ) );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
-
-    Map sources = new HashMap();
-
-    sources.put( "lower", sourceLower );
-    sources.put( "upper", sourceUpper );
-
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupinner/", true );
-
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
-
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
-
-    countFlow.complete();
-
-    validateLength( countFlow, 15, null );
-
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    Set<String> results = new HashSet<String>();
-
-    results.add( "1\ta1\t1\tA1" );
-    results.add( "1\ta1\t1\tA2" );
-    results.add( "1\ta1\t1\tA3" );
-    results.add( "1\ta2\t1\tA1" );
-    results.add( "1\ta2\t1\tA2" );
-    results.add( "1\ta2\t1\tA3" );
-    results.add( "1\ta3\t1\tA1" );
-    results.add( "1\ta3\t1\tA2" );
-    results.add( "1\ta3\t1\tA3" );
-    results.add( "2\tb1\t2\tB1" );
-    results.add( "2\tb1\t2\tB2" );
-    results.add( "2\tb1\t2\tB3" );
-    results.add( "4\td1\t4\tD1" );
-    results.add( "4\td2\t4\tD1" );
-    results.add( "4\td3\t4\tD1" );
-
-    int size = results.size();
-    for( int i = 0; i < size; i++ )
-      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-
-    assertEquals( 0, results.size() );
-
-    iterator.close();
-    }
-
-
-  public void testCoGroupInnerSingleField() throws Exception
-    {
-    if( !new File( inputFileLowerOffset ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
-
-    Map sources = new HashMap();
-
-    sources.put( "lower", sourceLower );
-    sources.put( "upper", sourceUpper );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupinnersingle/", true );
-
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char" ), " " ), new Fields( "num1" ) );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char" ), " " ), new Fields( "num2" ) );
-
-    Pipe join = new CoGroup( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
-
-    join = new Every( join, new Count() );
-
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, join );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
-
-    countFlow.complete();
-
-    validateLength( countFlow, 2, null );
-
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    Set<String> results = new HashSet<String>();
-
-    results.add( "1\t1" );
-    results.add( "5\t2" );
-
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-
-    iterator.close();
+    handleJoins( "cogroupinner", new InnerJoin(), results, 7 );
     }
 
   /**
@@ -540,77 +449,36 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupOuter() throws Exception
     {
-    if( !new File( inputFileLhsSparse ).exists() )
-      fail( "data file not found" );
+    Set<Tuple> results = new HashSet<Tuple>();
 
-    copyFromLocal( inputFileLhsSparse );
-    copyFromLocal( inputFileRhsSparse );
+    results.add( new Tuple( "1\ta1\t1\tA1" ) );
+    results.add( new Tuple( "1\ta1\t1\tA2" ) );
+    results.add( new Tuple( "1\ta1\t1\tA3" ) );
+    results.add( new Tuple( "1\ta2\t1\tA1" ) );
+    results.add( new Tuple( "1\ta2\t1\tA2" ) );
+    results.add( new Tuple( "1\ta2\t1\tA3" ) );
+    results.add( new Tuple( "1\ta3\t1\tA1" ) );
+    results.add( new Tuple( "1\ta3\t1\tA2" ) );
+    results.add( new Tuple( "1\ta3\t1\tA3" ) );
+    results.add( new Tuple( "2\tb1\t2\tB1" ) );
+    results.add( new Tuple( "2\tb1\t2\tB2" ) );
+    results.add( new Tuple( "2\tb1\t2\tB3" ) );
+    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
+    results.add( new Tuple( "4\td1\t4\tD1" ) );
+    results.add( new Tuple( "4\td2\t4\tD1" ) );
+    results.add( new Tuple( "4\td3\t4\tD1" ) );
+    results.add( new Tuple( "5\te1\tnull\tnull" ) );
+    results.add( new Tuple( "5\te2\tnull\tnull" ) );
+    results.add( new Tuple( "5\te3\tnull\tnull" ) );
+    results.add( new Tuple( "null\tnull\t6\tF1" ) );
+    results.add( new Tuple( "null\tnull\t6\tF2" ) );
+    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
-
-    Map sources = new HashMap();
-
-    sources.put( "lower", sourceLower );
-    sources.put( "upper", sourceUpper );
-
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupouter/", true );
-
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
-
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
-
-    countFlow.complete();
-
-    validateLength( countFlow, 26, null );
-
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    Set<String> results = new HashSet<String>();
-
-    results.add( "1\ta1\t1\tA1" );
-    results.add( "1\ta1\t1\tA2" );
-    results.add( "1\ta1\t1\tA3" );
-    results.add( "1\ta2\t1\tA1" );
-    results.add( "1\ta2\t1\tA2" );
-    results.add( "1\ta2\t1\tA3" );
-    results.add( "1\ta3\t1\tA1" );
-    results.add( "1\ta3\t1\tA2" );
-    results.add( "1\ta3\t1\tA3" );
-    results.add( "2\tb1\t2\tB1" );
-    results.add( "2\tb1\t2\tB2" );
-    results.add( "2\tb1\t2\tB3" );
-    results.add( "3\tc1\tnull\tnull" );
-    results.add( "4\td1\t4\tD1" );
-    results.add( "4\td2\t4\tD1" );
-    results.add( "4\td3\t4\tD1" );
-    results.add( "5\te1\tnull\tnull" );
-    results.add( "5\te2\tnull\tnull" );
-    results.add( "5\te3\tnull\tnull" );
-    results.add( "null\tnull\t6\tF1" );
-    results.add( "null\tnull\t6\tF2" );
-    results.add( "7\tg1\tnull\tnull" );
-    results.add( "7\tg2\tnull\tnull" );
-    results.add( "7\tg3\tnull\tnull" );
-    results.add( "7\tg4\tnull\tnull" );
-    results.add( "7\tg5\tnull\tnull" );
-
-    int size = results.size();
-    for( int i = 0; i < size; i++ )
-      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-
-    assertEquals( 0, results.size() );
-
-    iterator.close();
+    handleJoins( "cogroupouter", new OuterJoin(), results, 7 );
     }
 
   /**
@@ -670,78 +538,34 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupInnerOuter() throws Exception
     {
-    if( !new File( inputFileLhsSparse ).exists() )
-      fail( "data file not found" );
+    Set<Tuple> results = new HashSet<Tuple>();
 
-    copyFromLocal( inputFileLhsSparse );
-    copyFromLocal( inputFileRhsSparse );
+    results.add( new Tuple( "1\ta1\t1\tA1" ) );
+    results.add( new Tuple( "1\ta1\t1\tA2" ) );
+    results.add( new Tuple( "1\ta1\t1\tA3" ) );
+    results.add( new Tuple( "1\ta2\t1\tA1" ) );
+    results.add( new Tuple( "1\ta2\t1\tA2" ) );
+    results.add( new Tuple( "1\ta2\t1\tA3" ) );
+    results.add( new Tuple( "1\ta3\t1\tA1" ) );
+    results.add( new Tuple( "1\ta3\t1\tA2" ) );
+    results.add( new Tuple( "1\ta3\t1\tA3" ) );
+    results.add( new Tuple( "2\tb1\t2\tB1" ) );
+    results.add( new Tuple( "2\tb1\t2\tB2" ) );
+    results.add( new Tuple( "2\tb1\t2\tB3" ) );
+    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
+    results.add( new Tuple( "4\td1\t4\tD1" ) );
+    results.add( new Tuple( "4\td2\t4\tD1" ) );
+    results.add( new Tuple( "4\td3\t4\tD1" ) );
+    results.add( new Tuple( "5\te1\tnull\tnull" ) );
+    results.add( new Tuple( "5\te2\tnull\tnull" ) );
+    results.add( new Tuple( "5\te3\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
+    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
-
-    Map sources = new HashMap();
-
-    sources.put( "lower", sourceLower );
-    sources.put( "upper", sourceUpper );
-
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupinnerouter/", true );
-
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-
-    Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), new LeftJoin() );
-
-    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), 7 ), Fields.RESULTS );
-
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
-
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
-
-    countFlow.complete();
-
-    validateLength( countFlow, 24, null );
-
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    Set<String> results = new HashSet<String>();
-
-    results.add( "1\ta1\t1\tA1" );
-    results.add( "1\ta1\t1\tA2" );
-    results.add( "1\ta1\t1\tA3" );
-    results.add( "1\ta2\t1\tA1" );
-    results.add( "1\ta2\t1\tA2" );
-    results.add( "1\ta2\t1\tA3" );
-    results.add( "1\ta3\t1\tA1" );
-    results.add( "1\ta3\t1\tA2" );
-    results.add( "1\ta3\t1\tA3" );
-    results.add( "2\tb1\t2\tB1" );
-    results.add( "2\tb1\t2\tB2" );
-    results.add( "2\tb1\t2\tB3" );
-    results.add( "3\tc1\tnull\tnull" );
-    results.add( "4\td1\t4\tD1" );
-    results.add( "4\td2\t4\tD1" );
-    results.add( "4\td3\t4\tD1" );
-    results.add( "5\te1\tnull\tnull" );
-    results.add( "5\te2\tnull\tnull" );
-    results.add( "5\te3\tnull\tnull" );
-    results.add( "7\tg1\tnull\tnull" );
-    results.add( "7\tg2\tnull\tnull" );
-    results.add( "7\tg3\tnull\tnull" );
-    results.add( "7\tg4\tnull\tnull" );
-    results.add( "7\tg5\tnull\tnull" );
-
-    int size = results.size();
-    for( int i = 0; i < size; i++ )
-      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-
-    assertEquals( 0, results.size() );
-
-    iterator.close();
+    handleJoins( "cogroupinnerouter", new LeftJoin(), results, 7 );
     }
 
   /**
@@ -794,71 +618,65 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupOuterInner() throws Exception
     {
-    if( !new File( inputFileLhsSparse ).exists() )
-      fail( "data file not found" );
+    Set<Tuple> results = new HashSet<Tuple>();
 
-    copyFromLocal( inputFileLhsSparse );
-    copyFromLocal( inputFileRhsSparse );
+    results.add( new Tuple( "1\ta1\t1\tA1" ) );
+    results.add( new Tuple( "1\ta1\t1\tA2" ) );
+    results.add( new Tuple( "1\ta1\t1\tA3" ) );
+    results.add( new Tuple( "1\ta2\t1\tA1" ) );
+    results.add( new Tuple( "1\ta2\t1\tA2" ) );
+    results.add( new Tuple( "1\ta2\t1\tA3" ) );
+    results.add( new Tuple( "1\ta3\t1\tA1" ) );
+    results.add( new Tuple( "1\ta3\t1\tA2" ) );
+    results.add( new Tuple( "1\ta3\t1\tA3" ) );
+    results.add( new Tuple( "2\tb1\t2\tB1" ) );
+    results.add( new Tuple( "2\tb1\t2\tB2" ) );
+    results.add( new Tuple( "2\tb1\t2\tB3" ) );
+    results.add( new Tuple( "4\td1\t4\tD1" ) );
+    results.add( new Tuple( "4\td2\t4\tD1" ) );
+    results.add( new Tuple( "4\td3\t4\tD1" ) );
+    results.add( new Tuple( "null\tnull\t6\tF1" ) );
+    results.add( new Tuple( "null\tnull\t6\tF2" ) );
 
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhsSparse );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileRhsSparse );
+    handleJoins( "cogroupouterinner", new RightJoin(), results, 7 );
+    }
+
+  private void handleJoins( String path, Joiner joiner, Set<Tuple> results, int numGroups ) throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhsSparse );
+    getPlatform().copyFromLocal( inputFileRhsSparse );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLhsSparse );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileRhsSparse );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( path ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupouterinner/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), new RightJoin() );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), joiner );
 
-    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), 7 ), Fields.RESULTS );
+    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), numGroups ), Fields.RESULTS );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, results.size() );
 
-    validateLength( countFlow, 17, null );
+    List<Tuple> actual = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    Set<String> results = new HashSet<String>();
-
-    results.add( "1\ta1\t1\tA1" );
-    results.add( "1\ta1\t1\tA2" );
-    results.add( "1\ta1\t1\tA3" );
-    results.add( "1\ta2\t1\tA1" );
-    results.add( "1\ta2\t1\tA2" );
-    results.add( "1\ta2\t1\tA3" );
-    results.add( "1\ta3\t1\tA1" );
-    results.add( "1\ta3\t1\tA2" );
-    results.add( "1\ta3\t1\tA3" );
-    results.add( "2\tb1\t2\tB1" );
-    results.add( "2\tb1\t2\tB2" );
-    results.add( "2\tb1\t2\tB3" );
-    results.add( "4\td1\t4\tD1" );
-    results.add( "4\td2\t4\tD1" );
-    results.add( "4\td3\t4\tD1" );
-    results.add( "null\tnull\t6\tF1" );
-    results.add( "null\tnull\t6\tF2" );
-
-    int size = results.size();
-    for( int i = 0; i < size; i++ )
-      assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    results.removeAll( actual );
 
     assertEquals( 0, results.size() );
-
-    iterator.close();
     }
 
   /**
@@ -891,16 +709,13 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
    */
   public void testCoGroupMixed() throws Exception
     {
-    if( !new File( inputFileLowerOffset ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLowerOffset );
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLowerOffset = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLowerOffset );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap sourceLowerOffset = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLowerOffset );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
 
     Map sources = new HashMap();
 
@@ -908,10 +723,9 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupmixed" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupmixed/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLowerOffset = new Each( new Pipe( "loweroffset" ), new Fields( "line" ), splitter );
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
@@ -924,217 +738,172 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     MixedJoin join = new MixedJoin( new boolean[]{MixedJoin.OUTER, MixedJoin.INNER, MixedJoin.OUTER} );
     Pipe splice = new CoGroup( pipes, fields, Fields.size( 6 ), join );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
-//    countFlow.writeDOT( "cogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 6 );
 
-    validateLength( countFlow, 6, null );
 
-    TupleEntryIterator iterator = countFlow.openSink();
+    Set<Tuple> results = new HashSet<Tuple>();
 
-    Set<String> results = new HashSet<String>();
+    results.add( new Tuple( "1\ta\t1\tA\t1\ta" ) );
+    results.add( new Tuple( "null\tnull\t2\tB\t2\tb" ) );
+    results.add( new Tuple( "null\tnull\t3\tC\t3\tc" ) );
+    results.add( new Tuple( "null\tnull\t4\tD\t4\td" ) );
+    results.add( new Tuple( "5\tb\t5\tE\t5\te" ) );
+    results.add( new Tuple( "5\te\t5\tE\t5\te" ) );
 
-    results.add( "1\ta\t1\tA\t1\ta" );
-    results.add( "null\tnull\t2\tB\t2\tb" );
-    results.add( "null\tnull\t3\tC\t3\tc" );
-    results.add( "null\tnull\t4\tD\t4\td" );
-    results.add( "5\tb\t5\tE\t5\te" );
-    results.add( "5\te\t5\tE\t5\te" );
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
-    assertTrue( "not equal: tuple.get(1)", results.remove( iterator.next().get( 1 ) ) );
+    results.removeAll( actual );
 
-    iterator.close();
+    assertEquals( 0, results.size() );
     }
 
   public void testCoGroupDiffFields() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "difffields" ), SinkMode.REPLACE );
+
     Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ), " " );
     Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
-
-//    System.out.println( "flow =\n" + flow );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogroup );
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    validateLength( flow, 5 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
   public void testCoGroupGroupBy() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupgroupby" ), SinkMode.REPLACE );
+
     Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ), " " );
     Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
-
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupgroupby/", true );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
-    //cogroup = new Each( cogroup, new Identity() );
-
     Pipe groupby = new GroupBy( cogroup, new Fields( "numA" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, groupby );
-
-//    System.out.println( "flow =\n" + flow );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, groupby );
 
     flow.complete();
 
     validateLength( flow, 5, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
 
   public void testCoGroupSamePipe() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
 
-    copyFromLocal( inputFileLower );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
 
     Map sources = new HashMap();
 
     sources.put( "lower", source );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "samepipe" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
-
-//    System.out.println( "flow =\n" + flow );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogroup );
 
     flow.complete();
 
     validateLength( flow, 5, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
 
   public void testCoGroupSamePipe2() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
 
-    copyFromLocal( inputFileLower );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
 
     Map sources = new HashMap();
 
     sources.put( "lower", source );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "samepipe2" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same2", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
     Pipe cogroup = new CoGroup( pipeLower, new Fields( "num" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
-
-//    System.out.println( "flow =\n" + flow );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogroup );
 
     flow.complete();
 
     validateLength( flow, 5, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
 
   public void testCoGroupSamePipe3() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
 
-    copyFromLocal( inputFileLower );
-
-    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLower );
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
 
     Map sources = new HashMap();
 
     sources.put( "lower", source );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroup/same3", true );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "samepipe3" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "lower" );
 
@@ -1143,32 +912,25 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     Pipe cogroup = new CoGroup( lhs, new Fields( "num" ), rhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, cogroup );
-
-//    System.out.println( "flow =\n" + flow );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogroup );
 
     flow.complete();
 
     validateLength( flow, 5, null );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\ta", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tb", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
 
   public void testCoGroupAroundCoGroup() throws Exception
     {
-    if( !new File( inputFileLower ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
 
-    copyFromLocal( inputFileLower );
-    copyFromLocal( inputFileUpper );
-
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -1176,10 +938,9 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     sources.put( "upper1", sourceUpper );
     sources.put( "upper2", sourceUpper );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupacogroup" ), SinkMode.REPLACE );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), outputPath + "/complex/cogroupacogroup/", true );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
@@ -1191,43 +952,35 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
-    Flow countFlow = new FlowConnector( getProperties() ).connect( sources, sink, splice2 );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
-//    countFlow.writeDOT( "cogroupcogroup.dot" );
-//    System.out.println( "countFlow =\n" + countFlow );
+    flow.complete();
 
-    countFlow.complete();
+    validateLength( flow, 5, null );
 
-    validateLength( countFlow, 5, null );
+    List<Tuple> actual = getSinkAsList( flow );
 
-    TupleEntryIterator iterator = countFlow.openSink();
-
-    assertEquals( "not equal: tuple.get(1)", "1\ta\t1\tA\t1\tA", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "2\tb\t2\tB\t2\tB", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\tA\t1\tA" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tB\t2\tB" ) ) );
     }
 
   public void testCoGroupAroundCoGroupWithout() throws Exception
     {
-    runCoGroupAroundCoGroup( null, outputPath + "/complex/cogroupacogroupopt1/" );
+    runCoGroupAroundCoGroup( null, "cogroupacogroupopt1" );
     }
 
   public void testCoGroupAroundCoGroupWith() throws Exception
     {
-    runCoGroupAroundCoGroup( TestTextLine.class, outputPath + "/complex/cogroupacogroupopt2/" );
+    runCoGroupAroundCoGroup( TextDelimited.class, "cogroupacogroupopt2" );
     }
 
   private void runCoGroupAroundCoGroup( Class schemeClass, String stringPath ) throws IOException
     {
-    if( !new File( inputFileNums10 ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileNums20 );
+    getPlatform().copyFromLocal( inputFileNums10 );
 
-    copyFromLocal( inputFileNums20 );
-    copyFromLocal( inputFileNums10 );
-
-    Tap source10 = new Hfs( new TestTextLine( new Fields( "num" ) ), inputFileNums10 );
-    Tap source20 = new Hfs( new TestTextLine( new Fields( "num" ) ), inputFileNums20 );
+    Tap source10 = getPlatform().getDelimitedFile( new Fields( "num" ), "\t", inputFileNums10 );
+    Tap source20 = getPlatform().getDelimitedFile( new Fields( "num" ), "\t", inputFileNums20 );
 
     Map sources = new HashMap();
 
@@ -1235,8 +988,7 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
     sources.put( "source101", source10 );
     sources.put( "source102", source10 );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), stringPath, true );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( stringPath ), SinkMode.REPLACE );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
@@ -1248,28 +1000,23 @@ public class CoGroupFieldedPipesTest extends ClusterTestCase
 
     splice2 = new Each( splice2, new Identity() );
 
-    Map<Object, Object> properties = getProperties();
+    Map<Object, Object> properties = getPlatform().getProperties();
 
-    FlowConnector.setIntermediateSchemeClass( properties, schemeClass );
+    if( getPlatform() instanceof HadoopPlatform )
+      HadoopFlowConnector.setIntermediateSchemeClass( properties, schemeClass );
 
-    FlowConnector flowConnector = new FlowConnector( properties );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "cogroupopt", sources, sink, splice2 );
 
-    Flow flow = flowConnector.connect( "cogroupopt", sources, sink, splice2 );
-
-    assertEquals( "wrong number of steps", 2, flow.getSteps().size() );
-
-//    flow.writeDOT( "cogroupcogroupwout.dot" );
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong number of steps", 2, flow.getSteps().size() );
 
     flow.complete();
 
-    validateLength( flow, 10, null );
+    validateLength( flow, 10 );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Tuple> actual = getSinkAsList( flow );
 
-    assertEquals( "not equal: tuple.get(1)", "1\t1\t1", iterator.next().get( 1 ) );
-    assertEquals( "not equal: tuple.get(1)", "10\t10\t10", iterator.next().get( 1 ) );
-
-    iterator.close();
+    assertTrue( actual.contains( new Tuple( "1\t1\t1" ) ) );
+    assertTrue( actual.contains( new Tuple( "10\t10\t10" ) ) );
     }
-
   }

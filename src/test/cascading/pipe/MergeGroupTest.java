@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,30 +24,29 @@ package cascading.pipe;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.operation.Function;
 import cascading.operation.regex.RegexSplitter;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class MergeGroupTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class MergeGroupTest extends PlatformTestCase
   {
   public MergeGroupTest()
     {
-    super( "test merge in group" );
     }
 
   public void testBuildMerge()
     {
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "file1" );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "file2" );
+    Tap sourceLower = getPlatform().getTextFile( "file1" );
+    Tap sourceUpper = getPlatform().getTextFile( "file2" );
 
     Map sources = new HashMap();
 
@@ -56,22 +55,20 @@ public class MergeGroupTest extends CascadingTestCase
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "outpath", true );
+    Tap sink = getPlatform().getTextFile( "outpath", SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
-    Flow flow = new FlowConnector().connect( sources, sink, splice );
-
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
     }
 
   public void testBuildMergeFail()
     {
-    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "file1" );
-    Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "file2" );
+    Tap sourceLower = getPlatform().getTextFile( "file1" );
+    Tap sourceUpper = getPlatform().getTextFile( "file2" );
 
     Map sources = new HashMap();
 
@@ -81,8 +78,7 @@ public class MergeGroupTest extends CascadingTestCase
     Function splitter1 = new RegexSplitter( new Fields( "num", "foo" ), " " );
     Function splitter2 = new RegexSplitter( new Fields( "num", "bar" ), " " );
 
-    // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "outpath", true );
+    Tap sink = getPlatform().getTextFile( "outpath", SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter1 );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter2 );
@@ -91,13 +87,12 @@ public class MergeGroupTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new FlowConnector().connect( sources, sink, splice );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
       fail( "did not fail on mismatched field names" );
       }
     catch( Exception exception )
       {
-
+      // test passes
       }
-
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,6 +24,8 @@ package cascading.tuple;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
+import cascading.flow.hadoop.HadoopSpillableTupleList;
+import cascading.test.PlatformTest;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -33,11 +35,12 @@ import org.apache.hadoop.util.ReflectionUtils;
 /**
  *
  */
+@PlatformTest(platforms = {"hadoop"})
 public class SpillableTupleTest extends CascadingTestCase
   {
   public SpillableTupleTest()
     {
-    super( "spillable tuple list test" );
+    super();
     }
 
   public void testSpill()
@@ -74,7 +77,7 @@ public class SpillableTupleTest extends CascadingTestCase
 
   private void performSpillTest( int size, int threshold, CompressionCodec codec )
     {
-    SpillableTupleList list = new SpillableTupleList( threshold, null, codec );
+    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, null, codec );
 
     for( int i = 0; i < size; i++ )
       {

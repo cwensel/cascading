@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package cascading.flow.stream;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
+import cascading.tap.Tap;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ */
+public class TrapHandler
+  {
+  private static final Logger LOG = LoggerFactory.getLogger( TrapHandler.class );
+
+  static final Map<Tap, TupleEntryCollector> trapCollectors = new HashMap<Tap, TupleEntryCollector>();
+
+  final FlowProcess flowProcess;
+  final Tap trap;
+  final String trapName;
+
+  static TupleEntryCollector getTrapCollector( Tap trap, FlowProcess flowProcess )
+    {
+    TupleEntryCollector trapCollector = trapCollectors.get( trap );
+
+    if( trapCollector == null )
+      {
+      try
+        {
+        trapCollector = flowProcess.openTrapForWrite( trap );
+        trapCollectors.put( trap, trapCollector );
+        }
+      catch( IOException exception )
+        {
+        throw new DuctException( exception );
+        }
+      }
+
+    return trapCollector;
+    }
+
+  static synchronized void closeTraps()
+    {
+    for( TupleEntryCollector trapCollector : trapCollectors.values() )
+      {
+      try
+        {
+        trapCollector.close();
+        }
+      catch( Exception exception )
+        {
+        // do nothing
+        }
+      }
+
+    trapCollectors.clear();
+    }
+
+  public TrapHandler( FlowProcess flowProcess, Tap trap, String trapName )
+    {
+    this.flowProcess = flowProcess;
+    this.trap = trap;
+    this.trapName = trapName;
+    }
+
+  protected void handleReThrowableException( String message, Throwable throwable )
+    {
+    LOG.error( message, throwable );
+
+    if( throwable instanceof Error )
+      throw (Error) throwable;
+    else if( throwable instanceof RuntimeException )
+      throw (RuntimeException) throwable;
+    else
+      throw new DuctException( message, throwable );
+    }
+
+  protected void handleException( Throwable exception, TupleEntry tupleEntry )
+    {
+    handleException( trapName, trap, exception, tupleEntry );
+    }
+
+  protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
+    {
+    if( trap == null )
+      throw new DuctException( throwable );
+
+    if( tupleEntry == null )
+      {
+      LOG.error( "failure resolving tuple entry", throwable );
+      throw new DuctException( "failure resolving tuple entry", throwable );
+      }
+
+    getTrapCollector( trap, flowProcess ).add( tupleEntry );
+
+    flowProcess.increment( StepCounters.Tuples_Trapped, 1 );
+
+    LOG.warn( "exception trap on branch: '" + trapName + "', for " + Util.truncate( print( tupleEntry ), 75 ), throwable );
+    }
+
+  private String print( TupleEntry tupleEntry )
+    {
+    if( tupleEntry == null || tupleEntry.getFields() == null )
+      return "[uninitialized]";
+    else if( tupleEntry.getTuple() == null )
+      return "fields: " + tupleEntry.getFields().printVerbose();
+    else
+      return "fields: " + tupleEntry.getFields().printVerbose() + " tuple: " + tupleEntry.getTuple().print();
+    }
+  }
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,18 +27,16 @@ import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 
-import cascading.tuple.hadoop.TupleSerialization;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.log4j.Logger;
 
 /** Class TupleInputStream is used internally to read Tuples from storage. */
-public class TupleInputStream extends DataInputStream
+public abstract class TupleInputStream extends DataInputStream
   {
   /** Field LOG */
   private static final Logger LOG = Logger.getLogger( TupleInputStream.class );
 
-  InputStream inputStream;
-  ElementReader elementReader;
+  protected final InputStream inputStream;
+  protected final ElementReader elementReader;
 
   public interface ElementReader
     {
@@ -54,13 +52,6 @@ public class TupleInputStream extends DataInputStream
     super( inputStream );
     this.inputStream = inputStream;
     this.elementReader = elementReader;
-    }
-
-  public TupleInputStream( InputStream inputStream )
-    {
-    super( inputStream );
-    this.inputStream = inputStream;
-    this.elementReader = new TupleSerialization().getElementReader();
     }
 
   public InputStream getInputStream()
@@ -86,20 +77,11 @@ public class TupleInputStream extends DataInputStream
     return tuple;
     }
 
-  public int getNumElements() throws IOException
-    {
-    return readVInt();
-    }
+  public abstract int getNumElements() throws IOException;
 
-  public int readToken() throws IOException
-    {
-    return readVInt();
-    }
+  public abstract int readToken() throws IOException;
 
-  public Object getNextElement() throws IOException
-    {
-    return readType( readToken() );
-    }
+  public abstract Object getNextElement() throws IOException;
 
   public TuplePair readTuplePair() throws IOException
     {
@@ -121,59 +103,9 @@ public class TupleInputStream extends DataInputStream
     return readIndexTuple( new IndexTuple() );
     }
 
-  public IndexTuple readIndexTuple( IndexTuple indexTuple ) throws IOException
-    {
-    indexTuple.setIndex( readVInt() );
-    indexTuple.setTuple( readTuple() );
+  public abstract IndexTuple readIndexTuple( IndexTuple indexTuple ) throws IOException;
 
-    return indexTuple;
-    }
-
-  public long readVLong() throws IOException
-    {
-    return WritableUtils.readVLong( this );
-    }
-
-  public int readVInt() throws IOException
-    {
-    return WritableUtils.readVInt( this );
-    }
-
-  public String readString() throws IOException
-    {
-    return WritableUtils.readString( this );
-    }
-
-  private final Object readType( int type ) throws IOException
-    {
-    switch( type )
-      {
-      case 0:
-        return null;
-      case 1:
-        return readString();
-      case 2:
-        return readFloat();
-      case 3:
-        return readDouble();
-      case 4:
-        return readVInt();
-      case 5:
-        return readVLong();
-      case 6:
-        return readBoolean();
-      case 7:
-        return readShort();
-      case 8:
-        return readTuple();
-      case 9:
-        return readTuplePair();
-      case 10:
-        return readIndexTuple();
-      default:
-        return elementReader.read( type, this );
-      }
-    }
+  protected abstract Object readType( int type ) throws IOException;
 
   public Comparator getComparatorFor( int type ) throws IOException
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -103,9 +103,9 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     {
     int result = super.hashCode();
     long temp;
-    result = 31 * result + (int) ( seed ^ ( seed >>> 32 ) );
+    result = 31 * result + (int) ( seed ^ seed >>> 32 );
     temp = fraction != +0.0d ? Double.doubleToLongBits( fraction ) : 0L;
-    result = 31 * result + (int) ( temp ^ ( temp >>> 32 ) );
+    result = 31 * result + (int) ( temp ^ temp >>> 32 );
     return result;
     }
   }

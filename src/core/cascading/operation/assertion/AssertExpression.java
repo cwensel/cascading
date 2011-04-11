@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -37,7 +37,7 @@ import cascading.tuple.TupleEntry;
  * returns true for the given expression pass the assertion. This {@link cascading.operation.Assertion}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifially this filter uses the {@link org.codehaus.janino.ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifically this filter uses the {@link org.codehaus.janino.ExpressionEvaluator}, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
@@ -82,7 +82,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
     return plannerLevel instanceof AssertionLevel;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess,cascading.operation.ValueAssertionCall) */
+  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Context> assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

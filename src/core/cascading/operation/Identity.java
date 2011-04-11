@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,7 +32,7 @@ import cascading.tuple.Tuples;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
- * coerced into specfic types.
+ * coerced into specific types.
  */
 public class Identity extends BaseOperation implements Function
   {
@@ -96,7 +96,7 @@ public class Identity extends BaseOperation implements Function
     TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 
     if( types == null || types.length == 0 )
-      outputCollector.add( input );
+      outputCollector.add( input.getTuple() );
     else
       outputCollector.add( Tuples.coerce( input.getTuple(), types ) );
     }

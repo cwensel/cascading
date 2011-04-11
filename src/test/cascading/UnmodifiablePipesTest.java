@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,11 +21,9 @@
 
 package cascading;
 
-import java.io.File;
 import java.util.Iterator;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
@@ -40,35 +38,21 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class UnmodifiablePipesTest extends ClusterTestCase
+import static data.InputData.inputFileLhs;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class UnmodifiablePipesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileNums20 = "build/test/data/nums.20.txt";
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-  String inputFileCritics = "build/test/data/critics.txt";
-
-  String inputFileUpper = "build/test/data/upper.txt";
-  String inputFileLower = "build/test/data/lower.txt";
-  String inputFileLowerOffset = "build/test/data/lower-offset.txt";
-  String inputFileJoined = "build/test/data/lower+upper.txt";
-
-  String inputFileLhs = "build/test/data/lhs.txt";
-  String inputFileRhs = "build/test/data/rhs.txt";
-  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
-
-  String outputPath = "build/test/output/unmodifiable/";
-
   public UnmodifiablePipesTest()
     {
-    super( "buffer pipes", false ); // no need for clustering
+    super( false ); // no need for clustering
     }
 
   public static class TestFunction extends BaseOperation implements Function
@@ -172,13 +156,10 @@ public class UnmodifiablePipesTest extends ClusterTestCase
 
   public void testUnmodifiable() throws Exception
     {
-    if( !new File( inputFileLhs ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileLhs );
 
-    copyFromLocal( inputFileLhs );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLhs );
-    Tap sink = new Hfs( new TextLine(), outputPath + "/simple", true );
+    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simple" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -194,9 +175,7 @@ public class UnmodifiablePipesTest extends ClusterTestCase
     pipe = new Every( pipe, new TestBuffer(), Fields.RESULTS );
     pipe = new Each( pipe, new Fields( "line" ), new TestFunction() );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
-
-//    flow.writeDOT( "unknownselect.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,11 +21,10 @@
 
 package cascading.operation.assertion;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -37,36 +36,33 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
+
+import static data.InputData.inputFileApache;
 
 /**
  *
  */
-public class AppliedAssertionsTest extends ClusterTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class AppliedAssertionsTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String outputPath = "build/test/output/assertions/";
   private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
-  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{
-    1, 2, 3, 4, 5, 6} );
+  private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex,
+    new int[]{1, 2, 3, 4, 5, 6} );
 
   public AppliedAssertionsTest()
     {
-    super( "applied assertions", false );
     }
 
   public void testValueAssertionsPass() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "value/pass", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "value/pass" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -84,7 +80,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), AssertionLevel.STRICT, new AssertEquals( 7L ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -93,13 +89,10 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
   public void testValueAssertionsFail() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "value/fail", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "value/fail" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -117,7 +110,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), AssertionLevel.STRICT, new AssertEquals( 0L ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     try
       {
@@ -142,13 +135,10 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
   private void runValueAssertions( AssertionLevel planLevel, AssertionLevel setLevel, boolean pass ) throws IOException
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "value/" + planLevel + "/" + setLevel, true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "value/" + planLevel + "/" + setLevel ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -166,13 +156,11 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Fields( "count" ), setLevel, new AssertEquals( 0L ) );
 
-    Map<Object, Object> properties = getProperties();
+    Map<Object, Object> properties = getPlatform().getProperties();
 
     FlowConnector.setAssertionLevel( properties, planLevel );
 
-    FlowConnector flowConnector = new FlowConnector( properties );
-
-    Flow flow = flowConnector.connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
     try
       {
@@ -193,13 +181,10 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
   public void testGroupAssertionsPass() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "pass", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "pass" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -217,7 +202,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 7L ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -226,13 +211,10 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
   public void testGroupAssertionsFail() throws Exception
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "fail", true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "fail" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -250,7 +232,7 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, AssertionLevel.STRICT, new AssertGroupSizeEquals( 0L ) );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     try
       {
@@ -275,13 +257,10 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
   private void runGroupAssertions( AssertionLevel planLevel, AssertionLevel setLevel, boolean pass ) throws IOException
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache );
 
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap sink = new Hfs( new TextLine(), outputPath + "value/" + planLevel + "/" + setLevel, true );
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "group/" + planLevel + "/" + setLevel ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -299,13 +278,11 @@ public class AppliedAssertionsTest extends ClusterTestCase
 
     pipe = new Every( pipe, setLevel, new AssertGroupSizeEquals( 0L ) );
 
-    Map<Object, Object> properties = getProperties();
+    Map<Object, Object> properties = getPlatform().getProperties();
 
     FlowConnector.setAssertionLevel( properties, planLevel );
 
-    FlowConnector flowConnector = new FlowConnector( properties );
-
-    Flow flow = flowConnector.connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
     try
       {
@@ -323,6 +300,4 @@ public class AppliedAssertionsTest extends ClusterTestCase
     if( pass )
       validateLength( flow, 1, null );
     }
-
-
   }

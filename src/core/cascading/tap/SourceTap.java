@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,19 +23,17 @@ package cascading.tap;
 
 import java.io.IOException;
 
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 
 /**
- * Class SourceTap is the base class for {@link MultiSourceTap}. Some {@link Tap} instances may only be sources (as opposed
+ * Class SourceTap is the base class for source only Taps. Some {@link Tap} instances may only be sources (as opposed
  * to being a sink). These types should subclass SourceTap for convenience.
  */
-public abstract class SourceTap extends Tap
+public abstract class SourceTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
   {
   protected SourceTap()
     {
@@ -53,35 +51,29 @@ public abstract class SourceTap extends Tap
     }
 
   @Override
-  public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
-    {
-    throw new UnsupportedOperationException( "unable to sink tuple streams via a SourceTap instance" );
-    }
-
-  @Override
   public final boolean isSink()
     {
     return false;
     }
 
-  /** @see Tap#deletePath(JobConf) */
-  public boolean deletePath( JobConf conf ) throws IOException
+  /** @see Tap#deletePath(Object) */
+  public boolean deletePath( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
     }
 
-  /** @see Tap#makeDirs(JobConf) */
-  public boolean makeDirs( JobConf conf ) throws IOException
+  /** @see Tap#makeDirs(Object) */
+  public boolean makeDirs( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
 
-  public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
     }
 
-  public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

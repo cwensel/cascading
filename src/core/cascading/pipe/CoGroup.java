@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -53,10 +53,10 @@ import cascading.tuple.Fields;
  * <p/>
  * The first is to join streams with more data on the left hand side to streams with more sparse data on the right
  * hand side. That is, always attempt to effect M x N joins where M is large and N is small, instead of where M is
- * small and N is large. This typically will allow Cascading to forgo spilling a group via the {@link cascading.tuple.SpillableTupleList }
+ * small and N is large. This typically will allow Cascading to forgo spilling a group via the {@link cascading.flow.hadoop.HadoopSpillableTupleList }
  * internally.
  * <p/>
- * If spills are happening, consider increasing the spill threshold ({@link cascading.pipe.cogroup.CoGroupClosure#SPILL_THRESHOLD}
+ * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopFlowProcess#SPILL_THRESHOLD}
  * via the properties handed to {@link cascading.flow.FlowConnector}.
  *
  * @see cascading.pipe.cogroup.InnerJoin
@@ -65,7 +65,7 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.cogroup.RightJoin
  * @see cascading.pipe.cogroup.MixedJoin
  * @see cascading.tuple.Fields
- * @see cascading.tuple.SpillableTupleList
+ * @see cascading.flow.hadoop.HadoopSpillableTupleList
  * @see cascading.pipe.cogroup.CoGroupClosure
  */
 public class CoGroup extends Group

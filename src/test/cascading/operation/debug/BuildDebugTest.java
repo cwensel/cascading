@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,13 +22,13 @@
 package cascading.operation.debug;
 
 import java.util.Collection;
-import java.util.Properties;
+import java.util.Map;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.flow.FlowStep;
+import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.planner.FlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
 import cascading.operation.DebugLevel;
@@ -40,19 +40,18 @@ import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class BuildDebugTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class BuildDebugTest extends PlatformTestCase
   {
   public BuildDebugTest()
     {
-    super( "build deubg" );
     }
 
   /**
@@ -62,8 +61,8 @@ public class BuildDebugTest extends CascadingTestCase
    */
   public void testDebugLevels() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "input" );
-    Tap sink = new Hfs( new TextLine(), "output", true );
+    Tap source = getPlatform().getTextFile( "input" );
+    Tap sink = getPlatform().getTextFile( "output" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -83,24 +82,24 @@ public class BuildDebugTest extends CascadingTestCase
 
     pipe = new GroupBy( pipe, new Fields( "method" ) );
 
-    Properties properties = new Properties();
+    Map<Object, Object> properties = getProperties();
 
     // test default config case
-    assertEquals( getDebugCount( new FlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
+    assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
 
-    FlowConnector.setDebugLevel( properties, DebugLevel.DEFAULT );
-    assertEquals( getDebugCount( new FlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
+    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.DEFAULT );
+    assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
 
-    FlowConnector.setDebugLevel( properties, DebugLevel.VERBOSE );
-    assertEquals( getDebugCount( new FlowConnector( properties ).connect( source, sink, pipe ) ), 2 );
+    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.VERBOSE );
+    assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 2 );
 
-    FlowConnector.setDebugLevel( properties, DebugLevel.NONE );
-    assertEquals( getDebugCount( new FlowConnector( properties ).connect( source, sink, pipe ) ), 0 );
+    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.NONE );
+    assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 0 );
     }
 
   private int getDebugCount( Flow flow )
     {
-    FlowStep step = flow.getSteps().get( 0 );
+    FlowStep step = (FlowStep) flow.getSteps().get( 0 );
 
     Collection<Operation> operations = step.getAllOperations();
     int count = 0;

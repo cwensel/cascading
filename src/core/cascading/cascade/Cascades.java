@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,13 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
 /**
  * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link Flow}
- * instances via the {@link CascadeConnector} and {@link FlowConnector}, respectively.
+ * instances via the {@link CascadeConnector} and {@link cascading.flow.FlowConnector}, respectively.
  */
 public class Cascades
   {

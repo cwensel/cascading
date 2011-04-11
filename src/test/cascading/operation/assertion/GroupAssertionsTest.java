@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,6 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
 import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -33,11 +34,11 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class GroupAssertionsTest extends CascadingTestCase
   {
   public GroupAssertionsTest()
     {
-    super( "group assertions test" );
     }
 
   private TupleEntry getEntry( Tuple tuple )

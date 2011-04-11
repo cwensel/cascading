@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,34 +24,31 @@ package cascading;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class BasicTrapTest extends CascadingTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class BasicTrapTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.10.txt";
-  String outputPath = "build/test/output/traps/";
-
   public BasicTrapTest()
     {
-    super( "trap tests" );
     }
 
   public void testTrapNamesFail() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( "foosource" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -63,8 +60,8 @@ public class BasicTrapTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+    Tap sink = getPlatform().getTextFile( "footap", SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( "footrap", SinkMode.REPLACE );
 
     Map<String, Tap> sources = new HashMap<String, Tap>();
     Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -76,18 +73,19 @@ public class BasicTrapTest extends CascadingTestCase
 
     try
       {
-      new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+      getPlatform().getFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
       fail( "did not fail on missing pipe name" );
       }
     catch( Exception exception )
       {
-
+      // tests passed
       }
     }
 
   public void testTrapNamesPass() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Tap source = getPlatform().getTextFile( "foosource" );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -99,8 +97,8 @@ public class BasicTrapTest extends CascadingTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+    Tap sink = getPlatform().getTextFile( "foosink" );
+    Tap trap = getPlatform().getTextFile( "footrap" );
 
     Map<String, Tap> sources = new HashMap<String, Tap>();
     Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -110,12 +108,12 @@ public class BasicTrapTest extends CascadingTestCase
     sinks.put( "reduce", sink );
     traps.put( "map", trap );
 
-    new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+    getPlatform().getFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
 
   public void testTrapNamesPass2() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( "foosource" );
 
     Pipe pipe = new Pipe( "map" );
 
@@ -127,8 +125,8 @@ public class BasicTrapTest extends CascadingTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+    Tap sink = getPlatform().getTextFile( "foosink" );
+    Tap trap = getPlatform().getTextFile( "footrap" );
 
     Map<String, Tap> sources = new HashMap<String, Tap>();
     Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -138,12 +136,12 @@ public class BasicTrapTest extends CascadingTestCase
     sinks.put( "reduce", sink );
     traps.put( "middle", trap );
 
-    new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+    new HadoopFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
 
   public void testTrapNamesPass3() throws Exception
     {
-    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+    Tap source = getPlatform().getTextFile( "foosource" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -157,8 +155,8 @@ public class BasicTrapTest extends CascadingTestCase
     pipe = new Pipe( "second", pipe );
     pipe = new Every( pipe, new Count( new Fields( "count2" ) ), new Fields( "ip", "count", "count2" ) );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "all/tap", true );
-    Tap trap = new Hfs( new TextLine(), outputPath + "all/trap", true );
+    Tap sink = getPlatform().getTextFile( "foosink" );
+    Tap trap = getPlatform().getTextFile( "footrap" );
 
     Map<String, Tap> sources = new HashMap<String, Tap>();
     Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -168,7 +166,6 @@ public class BasicTrapTest extends CascadingTestCase
     sinks.put( "second", sink );
     traps.put( "first", trap );
 
-    new FlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+    getPlatform().getFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
-
   }

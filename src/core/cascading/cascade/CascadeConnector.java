@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,14 +32,12 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowProcess;
 import cascading.tap.CompositeTap;
-import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -48,7 +46,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
  * <p/>
- * Note order is not significant when adding passing Flow instances to the {@link #connect(String, Flow...)}
+ * Note order is not significant when adding passing Flow instances to the {@code connect}
  * method. This connector will order them based on their dependencies, if any.
  */
 public class CascadeConnector
@@ -84,7 +82,7 @@ public class CascadeConnector
    */
   public Cascade connect( Collection<Flow> flows )
     {
-    return connect( null, flows.toArray( new Flow[flows.size()] ) );
+    return connect( null, flows.toArray( new Flow[ flows.size() ] ) );
     }
 
   /**
@@ -96,7 +94,7 @@ public class CascadeConnector
    */
   public Cascade connect( String name, Collection<Flow> flows )
     {
-    return connect( name, flows.toArray( new Flow[flows.size()] ) );
+    return connect( name, flows.toArray( new Flow[ flows.size() ] ) );
     }
 
   /**
@@ -149,7 +147,7 @@ public class CascadeConnector
 
   private String makeName( Flow[] flows )
     {
-    String[] names = new String[flows.length];
+    String[] names = new String[ flows.length ];
 
     for( int i = 0; i < flows.length; i++ )
       names[ i ] = flows[ i ].getName();
@@ -210,11 +208,11 @@ public class CascadeConnector
     {
     String identifier = tap.getIdentifier();
 
-    if( tap instanceof Hfs )
+    if( tap instanceof Tap )
       {
       try
         {
-        identifier = ( (Hfs) tap ).getQualifiedPath( flow.getJobConf() ).toString();
+        identifier = tap.getQualifiedPath( flow.getConfig() ).toString();
         }
       catch( IOException exception )
         {
@@ -288,41 +286,37 @@ public class CascadeConnector
     private static final long serialVersionUID = 1L;
 
     /** @see Tap#getPath() */
-    public Path getPath()
+    public String getPath()
       {
       return null;
       }
 
-    /** @see Tap#makeDirs(JobConf) */
-    public boolean makeDirs( JobConf conf ) throws IOException
+    public boolean makeDirs( Object conf ) throws IOException
       {
       return false;
       }
 
-    /** @see Tap#deletePath(JobConf) */
-    public boolean deletePath( JobConf conf ) throws IOException
+    public boolean deletePath( Object conf ) throws IOException
       {
       return false;
       }
 
-    /** @see Tap#pathExists(JobConf) */
-    public boolean pathExists( JobConf conf ) throws IOException
+    public boolean pathExists( Object conf ) throws IOException
       {
       return false;
       }
 
-    /** @see Tap#getPathModified(JobConf) */
-    public long getPathModified( JobConf conf ) throws IOException
+    public long getPathModified( Object conf ) throws IOException
       {
       return 0;
       }
 
-    public TupleEntryIterator openForRead( JobConf conf ) throws IOException
+    public TupleEntryIterator openForRead( FlowProcess flowProcess, Object input ) throws IOException
       {
       return null;
       }
 
-    public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
+    public TupleEntryCollector openForWrite( FlowProcess flowProcess, Object output ) throws IOException
       {
       return null;
       }

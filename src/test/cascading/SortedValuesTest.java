@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,7 +21,6 @@
 
 package cascading;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -35,8 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.flow.MultiMapReducePlanner;
+import cascading.flow.hadoop.HadoopPlanner;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.regex.RegexParser;
@@ -46,30 +44,27 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
-import cascading.tap.Lfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
 
-public class SortedValuesTest extends ClusterTestCase
+import static data.InputData.*;
+
+@PlatformTest(platforms = {"local", "hadoop"})
+public class SortedValuesTest extends PlatformTestCase
   {
-  String inputFileApache = "build/test/data/apache.200.txt";
-  String inputFileIps = "build/test/data/ips.20.txt";
-  String inputFileCross = "build/test/data/lhs+rhs-cross.txt";
-
-  String outputPath = "build/test/output/sorting/";
   private String apacheCommonRegex = TestConstants.APACHE_COMMON_REGEX;
   private RegexParser apacheCommonParser = new RegexParser( new Fields( "ip", "time", "method", "event", "status", "size" ), apacheCommonRegex, new int[]{
     1, 2, 3, 4, 5, 6} );
 
   public SortedValuesTest()
     {
-    super( "sorted values", false ); // disable cluster
+    super( false ); // disable cluster
     }
 
   public void testCoGroupComparatorValues() throws Exception
@@ -84,15 +79,12 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void runCoGroupComparatorTest( String path, boolean reverseSort ) throws IOException, ParseException
     {
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileApache200 );
+    getPlatform().copyFromLocal( inputFileIps );
 
-    copyFromLocal( inputFileApache );
-    copyFromLocal( inputFileIps );
-
-    Tap sourceApache = new Hfs( new TextLine(), inputFileApache );
-    Tap sourceIP = new Hfs( new TextLine(), inputFileIps );
-    Tap sink = new Hfs( new TextLine(), outputPath + path, true );
+    Tap sourceApache = getPlatform().getTextFile( inputFileApache200 );
+    Tap sourceIP = getPlatform().getTextFile( inputFileIps );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
 
     Pipe apachePipe = new Pipe( "apache" );
 
@@ -119,15 +111,15 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( getPlatform() instanceof HadoopPlatform && HadoopPlanner.getJobConf( properties ) != null )
+      HadoopPlanner.getJobConf( properties ).setNumMapTasks( 13 );
 
     Map sources = new HashMap();
 
     sources.put( "apache", sourceApache );
     sources.put( "ip", sourceIP );
 
-    Flow flow = new FlowConnector( properties ).connect( sources, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, pipe );
 
     flow.complete();
 
@@ -167,16 +159,15 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void runComprehensiveCase( Boolean[] testCase, boolean useCollectionsComparator ) throws IOException
     {
-    if( !new File( inputFileCross ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileCross );
 
-    copyFromLocal( inputFileCross );
-
-    String test = Util.join( testCase, "_", true );
+    String test = Util.join( testCase, "_", true ) + "_" + useCollectionsComparator;
     String path = "comprehensive/" + test;
 
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileCross );
-    Tap sink = new Hfs( new TextLine( new Fields( "line" ), new Fields( "num", "lower", "upper" ), 1 ), outputPath + path, true );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileCross );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), new Fields( "num", "lower", "upper" ), getOutputPath( path ), SinkMode.REPLACE );
+
+    sink.getScheme().setNumSinkParts( 1 );
 
     Pipe pipe = new Pipe( "comprehensivesort" );
 
@@ -203,10 +194,10 @@ public class SortedValuesTest extends ClusterTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( MultiMapReducePlanner.getJobConf( properties ) != null )
-      MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( getPlatform() instanceof HadoopPlatform && HadoopPlanner.getJobConf( properties ) != null )
+      HadoopPlanner.getJobConf( properties ).setNumMapTasks( 13 );
 
-    Flow flow = new FlowConnector( properties ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
@@ -215,7 +206,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void validateCase( String test, Boolean[] testCase, Tap sink ) throws IOException
     {
-    TupleEntryIterator iterator = sink.openForRead( new JobConf() );
+    TupleEntryIterator iterator = sink.openForRead( getPlatform().getFlowProcess() );
     LinkedHashMap<Long, List<String>> group = new LinkedHashMap<Long, List<String>>();
 
     while( iterator.hasNext() )
@@ -263,15 +254,8 @@ public class SortedValuesTest extends ClusterTestCase
 
   public void testSortFails() throws Exception
     {
-    String path = "fails";
-
-    if( !new File( inputFileApache ).exists() )
-      fail( "data file not found" );
-
-    copyFromLocal( inputFileApache );
-
-    Tap source = new Lfs( new TextLine(), inputFileApache );
-    Tap sink = new Lfs( new TextLine(), outputPath + path, true );
+    Tap source = getPlatform().getTextFile( "foosource" );
+    Tap sink = getPlatform().getTextFile( "foosink" );
 
     Pipe pipe = new Pipe( "apache" );
 
@@ -287,13 +271,9 @@ public class SortedValuesTest extends ClusterTestCase
 
     pipe = new Each( pipe, new Identity() ); // let's force the stack to be exercised
 
-    Map<Object, Object> properties = getProperties();
-
-    MultiMapReducePlanner.getJobConf( properties ).setNumMapTasks( 13 );
-
     try
       {
-      new FlowConnector( properties ).connect( source, sink, pipe );
+      getPlatform().getFlowConnector().connect( source, sink, pipe );
       fail( "did not throw exception" );
       }
     catch( Exception exception )
@@ -304,7 +284,7 @@ public class SortedValuesTest extends ClusterTestCase
 
   private void validateFile( Tap tap, int length, int uniqueValues, boolean isReversed, int comparePosition ) throws IOException, ParseException
     {
-    TupleEntryIterator iterator = tap.openForRead( new JobConf() );
+    TupleEntryIterator iterator = tap.openForRead( getPlatform().getFlowProcess() );
 
     Set<Long> values = new HashSet<Long>();
 

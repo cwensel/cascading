@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,42 +21,39 @@
 
 package cascading.flow;
 
-import java.io.File;
 import java.io.IOException;
 
-import cascading.ClusterTestCase;
+import cascading.PlatformTestCase;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-import cascading.scheme.TextLine;
-import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 
+import static data.InputData.inputFileNums10;
+import static data.InputData.inputFileNums20;
+
 /**
  *
  */
-public class FlowProcessTest extends ClusterTestCase
+@PlatformTest(platforms = {"local", "hadoop"})
+public class FlowProcessTest extends PlatformTestCase
   {
-
-  String inputFileNums20 = "build/test/data/nums.20.txt";
-  String inputFileNums10 = "build/test/data/nums.10.txt";
-
-  String outputPath = "build/test/output/flowprocess/";
-
   public static class IterateInsert extends BaseOperation implements Function
     {
-    private String path;
+    private Tap tap;
 
-    public IterateInsert( Fields fieldDeclaration, String path )
+    public IterateInsert( Fields fieldDeclaration, Tap tap )
       {
       super( fieldDeclaration );
-      this.path = path;
+      this.tap = tap;
       }
 
     @Override
@@ -74,7 +71,7 @@ public class FlowProcessTest extends ClusterTestCase
       {
       try
         {
-        TupleEntryIterator iterator = flowProcess.openTapForRead( new Hfs( new TextLine( new Fields( "value" ) ), path ) );
+        TupleEntryIterator iterator = flowProcess.openTapForRead( tap );
 
         while( iterator.hasNext() )
           functionCall.getOutputCollector().add( new Tuple( iterator.next().getTuple() ) );
@@ -90,31 +87,28 @@ public class FlowProcessTest extends ClusterTestCase
 
   public FlowProcessTest()
     {
-    super( "flow process test", true );
+    super( true );
     }
 
   public void testOpenForRead() throws IOException
     {
-    if( !new File( inputFileNums20 ).exists() )
-      fail( "data file not found" );
+    getPlatform().copyFromLocal( inputFileNums20 );
+    getPlatform().copyFromLocal( inputFileNums10 );
 
-    copyFromLocal( inputFileNums20 );
-    copyFromLocal( inputFileNums10 );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileNums20 );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileNums20 );
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new IterateInsert( new Fields( "value" ), inputFileNums10 ), Fields.ALL );
+    Tap tap = getPlatform().getTextFile( new Fields( "value" ), inputFileNums10 );
 
-    Tap sink = new Hfs( new TextLine(), outputPath + "/openforread", true );
+    pipe = new Each( pipe, new IterateInsert( new Fields( "value" ), tap ), Fields.ALL );
 
-    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "openforread" ), SinkMode.REPLACE );
 
-//    flow.writeDOT( "groupcount.dot" );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 200, null );
+    validateLength( flow, 200 );
     }
   }

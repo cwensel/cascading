@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -33,7 +33,7 @@ import cascading.tuple.TupleEntry;
  * Class Xor is a {@link Filter} class that will logically 'xor' (exclusive or) the results of the
  * constructor provided Filter instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for all given instances,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for all given instances,
  * or returns {@code false} for all given instances, this filter will return {@code true}.
  * <p/>
  * Note that Xor can only be applied to two values.
@@ -69,7 +69,7 @@ public class Xor extends Logic
     super( lhsArgumentSelector, lhsFilter, rhsArgumentSelector, rhsFilter );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     Context context = (Logic.Context) filterCall.getContext();

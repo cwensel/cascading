@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -40,13 +40,13 @@ import cascading.flow.FlowProcess;
  * <p/>
  * There may be only one Buffer after a {@link cascading.pipe.GroupBy} or {@link cascading.pipe.CoGroup}. And there
  * may not be any additional {@link cascading.pipe.Every} pipes before or after the buffers Every pipe instance. A
- * {@link cascading.flow.PlannerException} will be thrown if these rules are violated.
+ * {@link cascading.flow.planner.PlannerException} will be thrown if these rules are violated.
  * <p/>
  * Buffer implementations should be re-entrant. There is no guarantee a Buffer instance will be executed in a
  * unique vm, or by a single thread. Also, note the Iterator will return the same {@link cascading.tuple.TupleEntry}
  * instance, but with new values in its child {@link cascading.tuple.Tuple}.
  */
-public interface Buffer<C> extends Operation<C>
+public interface Buffer<Context> extends Operation<Context>
   {
   /**
    * Method operate is called once for each grouping. {@link BufferCall} passes in an {@link java.util.Iterator}
@@ -61,5 +61,5 @@ public interface Buffer<C> extends Operation<C>
    * @param flowProcess of type FlowProcess
    * @param bufferCall  of type BufferCall
    */
-  void operate( FlowProcess flowProcess, BufferCall<C> bufferCall );
+  void operate( FlowProcess flowProcess, BufferCall<Context> bufferCall );
   }

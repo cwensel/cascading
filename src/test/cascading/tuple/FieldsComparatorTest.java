@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,17 +25,19 @@ import java.util.Comparator;
 
 import cascading.CascadingTestCase;
 import cascading.TestStringComparator;
+import cascading.test.PlatformTest;
 
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class FieldsComparatorTest extends CascadingTestCase
   {
   Comparator comparator = new TestStringComparator( false );
 
   public FieldsComparatorTest()
     {
-    super( "fields comparator test" );
+    super();
     }
 
   public void testCompare()

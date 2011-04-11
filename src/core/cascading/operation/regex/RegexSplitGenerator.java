@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -70,7 +70,7 @@ public class RegexSplitGenerator extends RegexOperation<Pattern> implements Func
     operationCall.setContext( getPattern() );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess,cascading.operation.FunctionCall) */
+  /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall<Pattern> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );

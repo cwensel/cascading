@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,26 +21,33 @@
 
 package cascading.operation.filter;
 
+import java.io.IOException;
+import java.util.Map;
+
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
+import cascading.tap.Tap;
+import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
+import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  *
  */
+@PlatformTest(platforms = {"none"})
 public class LimitFilterTest extends CascadingTestCase
   {
   private ConcreteCall operationCall;
 
   public LimitFilterTest()
     {
-    super( "limit filter test" );
     }
 
   @Override
@@ -56,36 +63,120 @@ public class LimitFilterTest extends CascadingTestCase
     return new TupleEntry( Fields.size( tuple.size() ), tuple );
     }
 
-  private class TestFlowProcess extends HadoopFlowProcess
+  private class TestFlowProcess extends FlowProcess<Object>
     {
-    private int numMappers;
-    private int numReducers;
+    private int numTasks;
     private int taskNum;
 
-    public TestFlowProcess( boolean isMapper, int numMappers, int numReducers, int taskNum )
+    public TestFlowProcess( int numTasks, int taskNum )
       {
-      super( new FlowSession(), null, isMapper );
-      this.numMappers = numMappers;
-      this.numReducers = numReducers;
+      super( new FlowSession() );
+      this.numTasks = numTasks;
       this.taskNum = taskNum;
       }
 
     @Override
-    public int getCurrentNumMappers()
+    public FlowProcess copyWith( Object object )
       {
-      return numMappers;
+      return null;
       }
 
     @Override
-    public int getCurrentNumReducers()
+    public int getNumConcurrentTasks()
       {
-      return numReducers;
+      return numTasks;
       }
 
     @Override
     public int getCurrentTaskNum()
       {
       return taskNum;
+      }
+
+    @Override
+    public Object getProperty( String key )
+      {
+      return null;
+      }
+
+    @Override
+    public void keepAlive()
+      {
+      }
+
+    @Override
+    public void increment( Enum counter, int amount )
+      {
+      }
+
+    @Override
+    public void increment( String group, String counter, int amount )
+      {
+      }
+
+    @Override
+    public void setStatus( String status )
+      {
+      }
+
+    @Override
+    public boolean isCounterStatusInitialized()
+      {
+      return true;
+      }
+
+    @Override
+    public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
+      {
+      return null;
+      }
+
+    @Override
+    public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
+      {
+      return null;
+      }
+
+    @Override
+    public TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException
+      {
+      return null;
+      }
+
+    @Override
+    public TupleEntryCollector openSystemIntermediateForWrite() throws IOException
+      {
+      return null;
+      }
+
+    @Override
+    public SpillableTupleList createSpillableTupleList()
+      {
+      return null;
+      }
+
+    @Override
+    public Object getConfigCopy()
+      {
+      return null;
+      }
+
+    @Override
+    public Object copyConfig( Object jobConf )
+      {
+      return null;
+      }
+
+    @Override
+    public Map<String, String> diffConfigIntoMap( Object defaultConfig, Object updatedConfig )
+      {
+      return null;
+      }
+
+    @Override
+    public Object mergeMapIntoConfig( Object defaultConfig, Map<String, String> map )
+      {
+      return null;
       }
     }
 
@@ -120,7 +211,7 @@ public class LimitFilterTest extends CascadingTestCase
 
     for( int i = 0; i < tasks; i++ )
       {
-      FlowProcess process = new TestFlowProcess( true, tasks, tasks, i );
+      FlowProcess process = new TestFlowProcess( tasks, i );
 
       filter.prepare( process, operationCall );
 
@@ -137,6 +228,4 @@ public class LimitFilterTest extends CascadingTestCase
 
     assertEquals( message, Math.min( limit, values * tasks ), count );
     }
-
-
   }
