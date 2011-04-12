@@ -629,14 +629,24 @@
                   pattern="${lib}/[conf]/[artifact]-[revision].[ext]" sync="true"/>
   </target>
 
-  <target name="publish" depends="jar">
-
-    <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
-
-    <ivy:resolve settingsRef="ivy.conjars.settings" file="ivy.xml"/>
+  <target name="make-pom" depends="jar">
 
     <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-core"
                  pomfile="${build}/cascading-core-${cascading.release.full}.pom"
+                 conf="core,default.provided">
+      <ivy:mapping conf="core" scope="compile"/>
+      <ivy:mapping conf="default.provided" scope="provided"/>
+    </ivy:makepom>
+
+    <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-local"
+                 pomfile="${build}/cascading-local-${cascading.release.full}.pom"
+                 conf="core,default.provided">
+      <ivy:mapping conf="core" scope="compile"/>
+      <ivy:mapping conf="default.provided" scope="provided"/>
+    </ivy:makepom>
+
+    <ivy:makepom ivyfile="ivy.xml" artifactName="cascading-hadoop"
+                 pomfile="${build}/cascading-hadoop-${cascading.release.full}.pom"
                  conf="core,default.provided">
       <ivy:mapping conf="core" scope="compile"/>
       <ivy:mapping conf="default.provided" scope="provided"/>
@@ -654,9 +664,29 @@
                  conf="test,test.provided">
       <dependency group="cascading" artifact="cascading-core" version="${cascading.release.full}" scope="test"/>
       <dependency group="cascading" artifact="cascading-xml" version="${cascading.release.full}" scope="test"/>
+      <dependency group="cascading" artifact="cascading-local" version="${cascading.release.full}" scope="test"/>
+      <dependency group="cascading" artifact="cascading-hadoop" version="${cascading.release.full}" scope="test"/>
       <ivy:mapping conf="test.provided" scope="provided"/>
       <ivy:mapping conf="test" scope="compile"/>
     </ivy:makepom>
+
+  </target>
+
+  <target name="publish-local" depends="jar,make-pom"
+          description="publish jar/source to maven repo mounted at ~/.m2/repository">
+
+    <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
+
+    <ivy:resolve settingsRef="ivy.conjars.settings" file="ivy.xml"/>
+
+    <ivy:publish settingsRef="ivy.conjars.settings"
+                 resolver="local-m2-publish" forcedeliver="true" overwrite="true" publishivy="false">
+      <artifacts pattern="${build}/[artifact]-${cascading.release.full}.[ext]"/>
+    </ivy:publish>
+
+  </target>
+
+  <target name="publish" depends="jar,make-pom">
 
     <scp todir="repo@conjars.org:" keyfile="${repo.keyfile}" passphrase="" trust="true">
       <fileset dir="${build}">
