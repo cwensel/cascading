@@ -33,7 +33,6 @@ import cascading.flow.local.LocalFlowProcess;
 import cascading.scheme.local.LocalScheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.tap.TapException;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -81,13 +80,13 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     return new TupleEntrySchemeIterator( flowProcess, getScheme(), reader );
     }
 
+  @SuppressWarnings({"ResultOfMethodCallIgnored"})
   @Override
   public TupleEntryCollector openForWrite( LocalFlowProcess flowProcess, FileOutputStream output ) throws IOException
     {
-    File parentFile = new File( path ).getParentFile();
-
-    if( !parentFile.exists() && !parentFile.mkdirs() )
-      throw new TapException( "unable to mkdirs for: " + path );
+    // ignore the output. will catch the failure downstream if any.
+    // not ignoring the output causes race conditions with other systems writing to the same directory.
+    new File( path ).getParentFile().mkdirs();
 
     if( output == null )
       output = new FileOutputStream( path );
@@ -100,7 +99,9 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
   @Override
   public boolean makeDirs( Properties conf ) throws IOException
     {
-    return new File( path ).getParentFile().mkdirs();
+    File parentFile = new File( path ).getParentFile();
+
+    return parentFile.exists() || parentFile.mkdirs();
     }
 
   @Override
