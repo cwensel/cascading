@@ -21,7 +21,6 @@
 
 package cascading.flow.hadoop;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,7 +38,6 @@ import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.StepGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Every;
@@ -425,28 +423,13 @@ public class HadoopPlanner extends FlowPlanner
 
   private URI getDefaultURIScheme( Tap tap )
     {
-    try
-      {
-      return ( (Hfs) tap ).getDefaultFileSystemURIScheme( jobConf );
-      }
-    catch( IOException exception )
-      {
-      throw new PlannerException( "unable to get default URI scheme from tap: " + tap );
-      }
+    return ( (Hfs) tap ).getDefaultFileSystemURIScheme( jobConf );
     }
 
   private URI getURIScheme( Tap tap )
     {
-    try
-      {
-      return ( (Hfs) tap ).getURIScheme( jobConf );
-      }
-    catch( IOException exception )
-      {
-      throw new PlannerException( "unable to get URI scheme from tap: " + tap );
-      }
+    return ( (Hfs) tap ).getURIScheme( jobConf );
     }
-
 
   private void handleHeterogeneousSources( ElementGraph elementGraph )
     {

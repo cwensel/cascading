@@ -40,12 +40,12 @@ public class JDBCScheme extends Scheme
     }
 
   @Override
-  public void sourceConfInit( FlowProcess flowProcess, Tap tap, Object conf ) throws IOException
+  public void sourceConfInit( FlowProcess flowProcess, Tap tap, Object conf )
     {
     }
 
   @Override
-  public void sinkConfInit( FlowProcess flowProcess, Tap tap, Object conf ) throws IOException
+  public void sinkConfInit( FlowProcess flowProcess, Tap tap, Object conf )
     {
     }
 

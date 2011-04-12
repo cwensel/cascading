@@ -261,7 +261,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf ) throws IOException
+  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
     {
     if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );

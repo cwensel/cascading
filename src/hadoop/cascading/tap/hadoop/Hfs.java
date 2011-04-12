@@ -211,7 +211,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     this.uriScheme = uriScheme;
     }
 
-  public URI getURIScheme( JobConf jobConf ) throws IOException
+  public URI getURIScheme( JobConf jobConf )
     {
     if( uriScheme != null )
       return uriScheme;
@@ -221,7 +221,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return uriScheme;
     }
 
-  protected URI makeURIScheme( JobConf jobConf ) throws IOException
+  protected URI makeURIScheme( JobConf jobConf )
     {
     try
       {
@@ -261,21 +261,36 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
    *
    * @param jobConf of type JobConf
    * @return URI
-   * @throws IOException when
    */
-  public URI getDefaultFileSystemURIScheme( JobConf jobConf ) throws IOException
+  public URI getDefaultFileSystemURIScheme( JobConf jobConf )
     {
     return getDefaultFileSystem( jobConf ).getUri();
     }
 
-  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getDefaultFileSystem( JobConf jobConf )
     {
-    return FileSystem.get( jobConf );
+    try
+      {
+      return FileSystem.get( jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to get handle to underlying filesystem", exception );
+      }
     }
 
-  protected FileSystem getFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getFileSystem( JobConf jobConf )
     {
-    return FileSystem.get( getURIScheme( jobConf ), jobConf );
+    URI scheme = getURIScheme( jobConf );
+
+    try
+      {
+      return FileSystem.get( scheme, jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to get handle to get filesystem for: " + scheme.getScheme(), exception );
+      }
     }
 
   /** @see Tap#getPath() */
@@ -294,13 +309,13 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     }
 
   @Override
-  public String getQualifiedPath( JobConf conf ) throws IOException
+  public String getQualifiedPath( JobConf conf )
     {
     return new Path( getPath() ).makeQualified( getFileSystem( conf ) ).toString();
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess process, JobConf conf ) throws IOException
+  public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
     {
     Path qualifiedPath = new Path( getQualifiedPath( conf ) );
 
@@ -320,14 +335,8 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess process, JobConf conf ) throws IOException
+  public void sinkConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    // need to delete from outside of Tap - so now disabled
-
-    // do not delete if initialized from within a task
-//    if( isReplace() && conf.get( "mapred.task.partition" ) == null )
-//      deletePath( conf );
-
     Path qualifiedPath = new Path( getQualifiedPath( conf ) );
 
     FileOutputFormat.setOutputPath( conf, qualifiedPath );
@@ -448,7 +457,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return new Path( tempDir );
     }
 
-  protected String makeTemporaryPathDir( String name )
+  protected String makeTemporaryPathDirString( String name )
     {
     // _ is treated as a hidden file, so wipe them out
     name = name.replaceAll( "^[_\\W\\s]+", "" );

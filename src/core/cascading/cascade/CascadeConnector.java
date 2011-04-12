@@ -22,7 +22,6 @@
 package cascading.cascade;
 
 import java.beans.ConstructorProperties;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,11 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowProcess;
 import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -207,21 +203,7 @@ public class CascadeConnector
 
   private String getFullPath( Flow flow, Tap tap )
     {
-    String identifier = tap.getIdentifier();
-
-    if( tap instanceof Tap )
-      {
-      try
-        {
-        identifier = tap.getQualifiedPath( flow.getConfig() ).toString();
-        }
-      catch( IOException exception )
-        {
-        throw new CascadeException( "could not get fully qualified path for: " + tap );
-        }
-      }
-
-    return identifier;
+    return tap.getQualifiedPath( flow.getConfig() );
     }
 
   private void unwrapCompositeTaps( LinkedList<Tap> taps )
@@ -279,48 +261,4 @@ public class CascadeConnector
         }
       }
     }
-
-  /** Specialized type of {@link Tap} that is the root. */
-  static class RootTap extends Tap
-    {
-    /** Field serialVersionUID */
-    private static final long serialVersionUID = 1L;
-
-    /** @see Tap#getPath() */
-    public String getPath()
-      {
-      return null;
-      }
-
-    public boolean makeDirs( Object conf ) throws IOException
-      {
-      return false;
-      }
-
-    public boolean deletePath( Object conf ) throws IOException
-      {
-      return false;
-      }
-
-    public boolean pathExists( Object conf ) throws IOException
-      {
-      return false;
-      }
-
-    public long getPathModified( Object conf ) throws IOException
-      {
-      return 0;
-      }
-
-    public TupleEntryIterator openForRead( FlowProcess flowProcess, Object input ) throws IOException
-      {
-      return null;
-      }
-
-    public TupleEntryCollector openForWrite( FlowProcess flowProcess, Object output ) throws IOException
-      {
-      return null;
-      }
-    }
-
   }

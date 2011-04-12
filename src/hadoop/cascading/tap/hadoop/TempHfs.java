@@ -54,13 +54,13 @@ public class TempHfs extends Hfs
     {
 
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf ) throws IOException
+    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
       {
       // do nothing
       }
 
     @Override
-    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf ) throws IOException
+    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
       {
       conf.setOutputKeyClass( Tuple.class );
       conf.setOutputValueClass( Tuple.class );
@@ -127,20 +127,20 @@ public class TempHfs extends Hfs
     return schemeClass;
     }
 
-  private void makeTemporaryFile( JobConf conf )
+  private void initTemporaryPath( JobConf conf )
     {
     // init stringPath as path is transient
     if( stringPath != null )
       return;
 
-    temporaryPath = makeTemporaryPathDir( name );
+    temporaryPath = makeTemporaryPathDirString( name );
     stringPath = new Path( getTempPath( conf ), temporaryPath ).toString();
     }
 
   @Override
-  public URI getURIScheme( JobConf jobConf ) throws IOException
+  public URI getURIScheme( JobConf jobConf )
     {
-    makeTemporaryFile( jobConf );
+    initTemporaryPath( jobConf );
     return super.getURIScheme( jobConf );
     }
 
@@ -171,16 +171,16 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess process, JobConf conf ) throws IOException
+  public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    makeTemporaryFile( conf );
+    initTemporaryPath( conf );
     super.sourceConfInit( process, conf );
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess process, JobConf conf ) throws IOException
+  public void sinkConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    makeTemporaryFile( conf );
+    initTemporaryPath( conf );
     super.sinkConfInit( process, conf );
     }
 

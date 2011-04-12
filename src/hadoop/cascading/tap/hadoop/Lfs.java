@@ -27,6 +27,7 @@ import java.io.IOException;
 import cascading.flow.Flow;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
+import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
@@ -119,8 +120,15 @@ public class Lfs extends Hfs
     super.setStringPath( stringPath );
     }
 
-  protected FileSystem getFileSystem( JobConf conf ) throws IOException
+  protected FileSystem getFileSystem( JobConf conf )
     {
-    return FileSystem.getLocal( conf );
+    try
+      {
+      return FileSystem.getLocal( conf );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to get handle to get local filesystem", exception );
+      }
     }
   }

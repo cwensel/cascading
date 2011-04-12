@@ -146,7 +146,7 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public void sinkConfInit( Process process, Config conf ) throws IOException
+  public void sinkConfInit( Process process, Config conf )
     {
     childConfigs = new ArrayList<Map<String, String>>();
 

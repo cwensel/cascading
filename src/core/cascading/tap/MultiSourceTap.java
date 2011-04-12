@@ -147,7 +147,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
     }
 
   @Override
-  public void sourceConfInit( Process process, Config conf ) throws IOException
+  public void sourceConfInit( Process process, Config conf )
     {
     for( Tap tap : getTaps() )
       tap.sourceConfInit( process, conf );

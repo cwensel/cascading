@@ -62,6 +62,12 @@ public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output
     }
 
   @Override
+  public void sourceConfInit( Process flowProcess, Config conf )
+    {
+    throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
+    }
+
+  @Override
   public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
@@ -71,11 +77,5 @@ public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output
   public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SinkTap instance" );
-    }
-
-  @Override
-  public void sourceConfInit( Process flowProcess, Config conf ) throws IOException
-    {
-    throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }
   }

@@ -95,12 +95,17 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
   @Override
   protected Tap[] getTaps()
     {
+    return initTapsInternal( new JobConf() );
+    }
+
+  private Tap[] initTapsInternal( JobConf conf )
+    {
     if( taps != null )
       return taps;
 
     try
       {
-      taps = makeTaps( new JobConf() );
+      taps = makeTaps( conf );
       }
     catch( IOException exception )
       {
@@ -138,9 +143,9 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess process, JobConf conf ) throws IOException
+  public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    taps = makeTaps( conf );
+    initTapsInternal( conf );
     super.sourceConfInit( null, conf );
     }
 

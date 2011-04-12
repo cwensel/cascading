@@ -147,7 +147,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @param process
    * @param conf    of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sourceConfInit( Process process, Config conf ) throws IOException
+  public void sourceConfInit( Process process, Config conf )
     {
     getScheme().sourceConfInit( process, this, conf );
     }
@@ -167,7 +167,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @param process
    * @param conf    of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sinkConfInit( Process process, Config conf ) throws IOException
+  public void sinkConfInit( Process process, Config conf )
     {
     getScheme().sinkConfInit( process, this, conf );
     }
@@ -307,9 +307,8 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    *
    * @param conf of type JobConf
    * @return Path
-   * @throws IOException when
    */
-  public String getQualifiedPath( Config conf ) throws IOException
+  public String getQualifiedPath( Config conf )
     {
     return getPath();
     }

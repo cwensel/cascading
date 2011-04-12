@@ -27,6 +27,7 @@ import java.net.URI;
 
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
+import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
@@ -226,7 +227,7 @@ public class Dfs extends Hfs
     }
 
   @Override
-  protected FileSystem getDefaultFileSystem( JobConf jobConf ) throws IOException
+  protected FileSystem getDefaultFileSystem( JobConf jobConf )
     {
     String name = jobConf.get( "fs.default.name", "hdfs://localhost:5001/" );
 
@@ -235,6 +236,13 @@ public class Dfs extends Hfs
     else if( name.indexOf( '/' ) == -1 )
       name = "hdfs://" + name;
 
-    return FileSystem.get( URI.create( name ), jobConf );
+    try
+      {
+      return FileSystem.get( URI.create( name ), jobConf );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to get handle to get filesystem for: " + name, exception );
+      }
     }
   }

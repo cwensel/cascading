@@ -227,7 +227,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param tap     of type Tap
    * @param conf    of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sourceConfInit( Process process, Tap tap, Config conf ) throws IOException;
+  public abstract void sourceConfInit( Process process, Tap tap, Config conf );
 
   /**
    * Method sinkInit initializes this instance as a sink.
@@ -236,7 +236,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param tap     of type Tap
    * @param conf    of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sinkConfInit( Process process, Tap tap, Config conf ) throws IOException;
+  public abstract void sinkConfInit( Process process, Tap tap, Config conf );
 
   public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
     {
