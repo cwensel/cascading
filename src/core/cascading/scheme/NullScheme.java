@@ -30,7 +30,7 @@ import cascading.tuple.Fields;
 /**
  *
  */
-public class NullScheme<Process extends FlowProcess, Config, Input, Output, Context> extends Scheme<Process, Config, Input, Output, Context>
+public class NullScheme<Process extends FlowProcess, Config, Input, Output, SourceContext, SinkContext> extends Scheme<Process, Config, Input, Output, SourceContext, SinkContext>
   {
   public NullScheme()
     {
@@ -49,12 +49,12 @@ public class NullScheme<Process extends FlowProcess, Config, Input, Output, Cont
     {
     }
 
-  public boolean source( Process flowProcess, SourceCall<Context, Input> sourceCall ) throws IOException
+  public boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     throw new UnsupportedOperationException( "sourcing is not supported in the scheme" );
     }
 
-  public void sink( Process flowProcess, SinkCall<Context, Output> sinkCall ) throws IOException
+  public void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
     throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
     }

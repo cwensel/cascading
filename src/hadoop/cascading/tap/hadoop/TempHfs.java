@@ -50,7 +50,7 @@ public class TempHfs extends Hfs
   private String temporaryPath;
 
   /** Class NullScheme is a noop scheme used as a placeholder */
-  private static class NullScheme extends Scheme<HadoopFlowProcess, JobConf, Object, Object, Object>
+  private static class NullScheme extends Scheme<HadoopFlowProcess, JobConf, Object, Object, Object, Object>
     {
 
     @Override

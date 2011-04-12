@@ -133,7 +133,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( HadoopFlowProcess flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 

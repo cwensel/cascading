@@ -42,7 +42,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
  * A SequenceFile is a type of {@link cascading.scheme.Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
-public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[]>
+public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[], Void>
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
@@ -113,20 +113,8 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall )
-    {
-
-    }
-
-  @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( HadoopFlowProcess flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.getOutput().collect( Tuples.NULL, sinkCall.getOutgoingEntry().getTuple() );
-    }
-
-  @Override
-  public void sinkCleanup( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall )
-    {
-
     }
   }

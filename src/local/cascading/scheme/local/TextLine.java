@@ -37,13 +37,12 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Tuple>
+public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, Void>
   {
   public TextLine()
     {
@@ -97,12 +96,7 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Tuple>
     }
 
   @Override
-  public void sourcePrepare( LocalFlowProcess flowProcess, SourceCall<Tuple, LineNumberReader> sourceCall )
-    {
-    }
-
-  @Override
-  public boolean source( LocalFlowProcess flowProcess, SourceCall<Tuple, LineNumberReader> sourceCall ) throws IOException
+  public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
     {
     // first line is 0, this matches offset being zero, so when throwing out the first line for comments
     int lineNumber = sourceCall.getInput().getLineNumber();
@@ -111,42 +105,24 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Tuple>
     if( line == null )
       return false;
 
-    TupleEntry context = sourceCall.getIncomingEntry();
+    TupleEntry incomingEntry = sourceCall.getIncomingEntry();
 
     if( getSourceFields().size() == 1 )
       {
-      context.set( 0, line );
+      incomingEntry.set( 0, line );
       }
     else
       {
-      context.set( 0, lineNumber );
-      context.set( 1, line );
+      incomingEntry.set( 0, lineNumber );
+      incomingEntry.set( 1, line );
       }
 
     return true;
     }
 
   @Override
-  public void sourceCleanup( LocalFlowProcess flowProcess, SourceCall<Tuple, LineNumberReader> sourceCall )
+  public void sink( LocalFlowProcess flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
     {
-    }
-
-  @Override
-  public void sinkPrepare( LocalFlowProcess flowProcess, SinkCall<Tuple, PrintWriter> sinkCall )
-    {
-    }
-
-  @Override
-  public void sink( LocalFlowProcess flowProcess, SinkCall<Tuple, PrintWriter> sinkCall ) throws IOException
-    {
-    // todo: make this equiv to hadoop TextLine
-    String result = sinkCall.getOutgoingEntry().getTuple().toString();
-
-    sinkCall.getOutput().println( result );
-    }
-
-  @Override
-  public void sinkCleanup( LocalFlowProcess flowProcess, SinkCall<Tuple, PrintWriter> sinkCall )
-    {
+    sinkCall.getOutput().println( sinkCall.getOutgoingEntry().getTuple().toString() );
     }
   }

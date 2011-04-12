@@ -32,23 +32,23 @@ import cascading.util.SingleCloseableInputIterator;
 /**
  *
  */
-public class TupleEntrySchemeIterator<Context, Input> extends TupleEntryIterator
+public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends TupleEntryIterator
   {
   private final FlowProcess flowProcess;
-  private final Scheme<FlowProcess, Object, Input, Object, Context> scheme;
+  private final Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme;
   private final CloseableIterator<Input> inputIterator;
-  private SourceCall<Context, Input> sourceCall;
+  private SourceCall<SourceContext, Input> sourceCall;
 
   private boolean isComplete = false;
   private boolean hasWaiting = false;
   private TupleException currentException;
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, Context> scheme, Input input )
+  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, Input input )
     {
     this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ) );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, Context> scheme, CloseableIterator<Input> inputIterator )
+  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
@@ -61,7 +61,7 @@ public class TupleEntrySchemeIterator<Context, Input> extends TupleEntryIterator
       return;
       }
 
-    this.sourceCall = new SourceCall<Context, Input>();
+    this.sourceCall = new SourceCall<SourceContext, Input>();
 
     this.sourceCall.setIncomingEntry( getTupleEntry() );
     this.sourceCall.setInput( inputIterator.next() );

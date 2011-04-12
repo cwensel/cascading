@@ -251,20 +251,32 @@ public class DelimitedParser implements Serializable
     return split;
     }
 
-  // todo: use StringBuffer instead
-  public String joinLine( Tuple tuple, Object[] array )
+  public String joinLine( Tuple tuple, StringBuilder buffer )
     {
-    Object[] buffer = Tuples.asArray( tuple, array );
-
-    if( quote != null )
+    try
       {
-      for( int i = 0; i < buffer.length; i++ )
+      if( quote != null )
+        return joinWithQuote( tuple, buffer );
+
+      return joinNoQuote( tuple, buffer );
+      }
+    finally
+      {
+      buffer.setLength( 0 );
+      }
+    }
+
+  private String joinWithQuote( Tuple tuple, StringBuilder buffer )
+    {
+    int count = 0;
+
+    for( Object value : tuple )
+      {
+      if( count != 0 )
+        buffer.append( delimiter );
+
+      if( value != null )
         {
-        Object value = buffer[ i ];
-
-        if( value == null )
-          continue;
-
         String valueString = value.toString();
 
         if( valueString.contains( quote ) )
@@ -273,11 +285,31 @@ public class DelimitedParser implements Serializable
         if( valueString.contains( delimiter ) )
           valueString = quote + valueString + quote;
 
-        buffer[ i ] = valueString;
+        buffer.append( valueString );
         }
+
+      count++;
       }
 
-    return Util.join( buffer, delimiter, false );
+    return buffer.toString();
+    }
+
+  private String joinNoQuote( Tuple tuple, StringBuilder buffer )
+    {
+    int count = 0;
+
+    for( Object value : tuple )
+      {
+      if( count != 0 )
+        buffer.append( delimiter );
+
+      if( value != null )
+        buffer.append( value );
+
+      count++;
+      }
+
+    return buffer.toString();
     }
 
   }

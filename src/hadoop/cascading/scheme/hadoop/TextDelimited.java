@@ -75,12 +75,6 @@ public class TextDelimited extends TextLine
   /** Field skipHeader */
   private final boolean skipHeader;
 
-  /** Field decoratorTuple */
-  private DecoratorTuple decoratorTuple;
-  /** Field buffer */
-  private Object[] buffer;
-
-
   /** Class DecoratorTuple just wraps a Tuple. */
   private static class DecoratorTuple extends Tuple
     {
@@ -474,32 +468,30 @@ public class TextDelimited extends TextLine
       }
 
     Object[] split = delimitedParser.parseLine( context[ 1 ].toString() );
+    Tuple tuple = sourceCall.getIncomingEntry().getTuple();
 
-    sourceCall.getIncomingEntry().setTuple( new Tuple( split ) );
+    tuple.clear();
+
+    tuple.addAll( split );
 
     return true;
     }
 
-  private Object[] getBuffer( Tuple tuple )
+  @Override
+  public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall )
     {
-    if( buffer == null )
-      buffer = new Object[ tuple.size() ];
-
-    return buffer;
+    sinkCall.setContext( new Object[]{new DecoratorTuple(), new StringBuilder( 4 * 1024 )} );
     }
 
   @Override
   public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
+    String line = delimitedParser.joinLine( tuple, (StringBuilder) sinkCall.getContext()[ 1 ] );
 
-    String line = delimitedParser.joinLine( tuple, getBuffer( tuple ) );
+    DecoratorTuple decoratorTuple = (DecoratorTuple) sinkCall.getContext()[ 0 ];
 
-    // todo: reevaluate use of decorator tuple
-    if( decoratorTuple == null )
-      decoratorTuple = new DecoratorTuple();
-
-    decoratorTuple.set( sinkCall.getOutgoingEntry().getTuple(), line );
+    decoratorTuple.set( tuple, line );
 
     sinkCall.getOutput().collect( null, decoratorTuple );
     }

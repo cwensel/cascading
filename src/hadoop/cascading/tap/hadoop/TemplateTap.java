@@ -201,7 +201,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
       }
     }
 
-  public static class TemplateScheme extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object>
+  public static class TemplateScheme extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object, Object>
     {
     private final Scheme scheme;
     private final Fields pathFields;

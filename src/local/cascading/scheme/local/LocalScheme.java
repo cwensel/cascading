@@ -32,7 +32,7 @@ import cascading.tuple.Fields;
 /**
  *
  */
-public abstract class LocalScheme<Input, Output, Context> extends Scheme<LocalFlowProcess, Properties, Input, Output, Context>
+public abstract class LocalScheme<Input, Output, SourceContext, SinkContext> extends Scheme<LocalFlowProcess, Properties, Input, Output, SourceContext, SinkContext>
   {
   protected LocalScheme( Fields sourceFields )
     {

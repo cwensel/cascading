@@ -49,7 +49,7 @@ import cascading.util.Util;
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
-public abstract class Scheme<Process extends FlowProcess, Config, Input, Output, Context> implements Serializable
+public abstract class Scheme<Process extends FlowProcess, Config, Input, Output, SourceContext, SinkContext> implements Serializable
   {
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;
@@ -238,7 +238,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    */
   public abstract void sinkConfInit( Process process, Tap tap, Config conf ) throws IOException;
 
-  public void sourcePrepare( Process flowProcess, SourceCall<Context, Input> sourceCall )
+  public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
     {
     }
 
@@ -248,13 +248,13 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess
    * @param sourceCall
    */
-  public abstract boolean source( Process flowProcess, SourceCall<Context, Input> sourceCall ) throws IOException;
+  public abstract boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
 
-  public void sourceCleanup( Process flowProcess, SourceCall<Context, Input> sourceCall )
+  public void sourceCleanup( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
     {
     }
 
-  public void sinkPrepare( Process flowProcess, SinkCall<Context, Output> sinkCall )
+  public void sinkPrepare( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
     {
     }
 
@@ -264,9 +264,9 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess
    * @param sinkCall
    */
-  public abstract void sink( Process flowProcess, SinkCall<Context, Output> sinkCall ) throws IOException;
+  public abstract void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
 
-  public void sinkCleanup( Process flowProcess, SinkCall<Context, Output> sinkCall )
+  public void sinkCleanup( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
     {
     }
 

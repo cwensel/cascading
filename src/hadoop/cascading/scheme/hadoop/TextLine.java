@@ -64,7 +64,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * <p/>
  * If any of the input files end with ".zip", an error will be thrown.
  */
-public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[]>
+public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[], Object[]>
   {
   public enum Compress
     {

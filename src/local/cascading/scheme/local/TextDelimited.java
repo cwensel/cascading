@@ -44,7 +44,7 @@ import cascading.tuple.Tuple;
 /**
  *
  */
-public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Tuple>
+public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Void, StringBuilder>
   {
   private final boolean skipHeader;
   private final DelimitedParser delimitedParser;
@@ -226,14 +226,6 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Tu
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, getSourceFields(), getSinkFields() );
     }
 
-  private Object[] getBuffer( Tuple tuple )
-    {
-    if( buffer == null )
-      buffer = new Object[ tuple.size() ];
-
-    return buffer;
-    }
-
   @Override
   public LineNumberReader createInput( FileInputStream inputStream )
     {
@@ -266,7 +258,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Tu
     }
 
   @Override
-  public boolean source( LocalFlowProcess flowProcess, SourceCall<Tuple, LineNumberReader> sourceCall ) throws IOException
+  public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
     {
     String line = sourceCall.getInput().readLine();
 
@@ -278,7 +270,11 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Tu
 
     Object[] split = delimitedParser.parseLine( line );
 
-    sourceCall.getIncomingEntry().setTuple( new Tuple( split ) );
+    // assumption it is better to re-use than to construct new
+    Tuple tuple = sourceCall.getIncomingEntry().getTuple();
+
+    tuple.clear();
+    tuple.addAll( split );
 
     return true;
     }
@@ -289,12 +285,24 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Tu
     }
 
   @Override
-  public void sink( LocalFlowProcess flowProcess, SinkCall<Tuple, PrintWriter> sinkCall ) throws IOException
+  public void sinkPrepare( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+    {
+    sinkCall.setContext( new StringBuilder( 4 * 1024 ) );
+    }
+
+  @Override
+  public void sink( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
 
-    String line = delimitedParser.joinLine( tuple, getBuffer( tuple ) );
+    String line = delimitedParser.joinLine( tuple, sinkCall.getContext() );
 
     sinkCall.getOutput().println( line );
+    }
+
+  @Override
+  public void sinkCleanup( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+    {
+    sinkCall.setContext( null );
     }
   }
