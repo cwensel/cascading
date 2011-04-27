@@ -402,6 +402,41 @@ public class TapTest extends ClusterTestCase implements Serializable
     validateLength( concatFlow, 10, null );
     }
 
+  public void testNestedMultiSource() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+    copyFromLocal( inputFileUpper );
+
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{owe?}.txt" );
+
+    MultiSourceTap source = new MultiSourceTap( source1, source2 );
+
+    assertEquals( 2, source.getTaps().length );
+
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/glob/", true );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
+    Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
+
+    Flow concatFlow = new FlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
+
+    Tap nextSink = new Hfs( new TextLine(), outputPath + "/glob2/", true );
+
+    Flow nextFlow = new FlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
+
+    Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
+
+    cascade.complete();
+
+    validateLength( concatFlow, 10, null );
+    }
+
   public void testMultiSourceIterator() throws Exception
     {
     if( !new File( inputFileLower ).exists() )
@@ -414,6 +449,19 @@ public class TapTest extends ClusterTestCase implements Serializable
     Tap sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileUpper );
 
     Tap source = new MultiSourceTap( sourceLower, sourceUpper );
+
+    validateLength( source.openForRead( new JobConf() ), 10, null );
+
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{owe?}.txt" );
+
+    source = new MultiSourceTap( source1, source2 );
+
+    validateLength( source.openForRead( new JobConf() ), 10, null );
+
+    GlobHfs sourceMulti = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/data/?{ppe[_r],owe?}.txt" );
+
+    source = new MultiSourceTap( sourceMulti );
 
     validateLength( source.openForRead( new JobConf() ), 10, null );
     }

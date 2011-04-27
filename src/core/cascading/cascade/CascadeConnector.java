@@ -84,7 +84,7 @@ public class CascadeConnector
    */
   public Cascade connect( Collection<Flow> flows )
     {
-    return connect( null, flows.toArray( new Flow[flows.size()] ) );
+    return connect( null, flows.toArray( new Flow[ flows.size() ] ) );
     }
 
   /**
@@ -96,7 +96,7 @@ public class CascadeConnector
    */
   public Cascade connect( String name, Collection<Flow> flows )
     {
-    return connect( name, flows.toArray( new Flow[flows.size()] ) );
+    return connect( name, flows.toArray( new Flow[ flows.size() ] ) );
     }
 
   /**
@@ -149,7 +149,7 @@ public class CascadeConnector
 
   private String makeName( Flow[] flows )
     {
-    String[] names = new String[flows.length];
+    String[] names = new String[ flows.length ];
 
     for( int i = 0; i < flows.length; i++ )
       names[ i ] = flows[ i ].getName();
@@ -238,7 +238,10 @@ public class CascadeConnector
         iterator.remove();
 
         for( Tap childTap : ( (CompositeTap) tap ).getChildTaps() )
+          {
           iterator.add( childTap );
+          iterator.previous(); // force cursor backward
+          }
         }
       }
     }
