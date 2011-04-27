@@ -872,7 +872,7 @@ public class Group extends Pipe
   @Override
   public Pipe[] getPrevious()
     {
-    return pipes.toArray( new Pipe[pipes.size()] );
+    return pipes.toArray( new Pipe[ pipes.size() ] );
     }
 
   /**
@@ -1007,8 +1007,8 @@ public class Group extends Pipe
       }
     else
       {
-      Fields[] groupFields = new Fields[pipes.size()];
-      Fields[] valuesFields = new Fields[pipes.size()];
+      Fields[] groupFields = new Fields[ pipes.size() ];
+      Fields[] valuesFields = new Fields[ pipes.size() ];
 
       for( Scope incomingScope : incomingScopes )
         {
@@ -1100,9 +1100,9 @@ public class Group extends Pipe
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
-          incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
-        else
-          incomingFields = resolveFields( incomingScope ).select( selector );
+        incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
+      else
+        incomingFields = resolveFields( incomingScope ).select( selector );
 
       resolvedFields.put( incomingScope.getName(), incomingFields );
       }
@@ -1322,12 +1322,12 @@ public class Group extends Pipe
   protected void printInternal( StringBuffer buffer, Scope scope )
     {
     super.printInternal( buffer, scope );
-    buffer.append( "[by:" );
-
     Map<String, Fields> map = scope.getGroupingSelectors();
 
     if( map != null )
       {
+      buffer.append( "[by:" );
+
       for( String name : map.keySet() )
         {
         if( map.size() > 1 )
@@ -1338,8 +1338,8 @@ public class Group extends Pipe
 
       if( isSelfJoin() )
         buffer.append( "[numSelfJoins:" ).append( numSelfJoins ).append( "]" );
-      }
 
-    buffer.append( "]" );
+      buffer.append( "]" );
+      }
     }
   }
