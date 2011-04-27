@@ -15,7 +15,7 @@ Cascading Change Log
   to a Class serialized field not implementing #hashCode() or #equals() and relying in the object identity.
 
   Added error message explaining the Hadoop mapred.jobtracker.completeuserjobs.maximum property needs to be increased
-  when dealing with large numbers of jobs.
+  when dealing with large numbers of jobs. Also caching success value to lower chance of failure.
 
   Fixed bug in c.t.GlobHfs where #equals() and #hashCode() were not consistent between calls.
 

@@ -53,6 +53,8 @@ public class FlowStepJob implements Callable<Throwable>
   protected List<FlowStepJob> predecessors;
   /** Field latch */
   private final CountDownLatch latch = new CountDownLatch( 1 );
+  /** Field wasSuccessful */
+  private Boolean wasSuccessful = null;
   /** Field stop */
   private boolean stop = false;
   /** Field flowStep */
@@ -248,7 +250,8 @@ public class FlowStepJob implements Callable<Throwable>
       {
       latch.await();
 
-      return runningJob != null && runningJob.isSuccessful();
+      if( wasSuccessful == null )
+        wasSuccessful = runningJob != null && runningJob.isSuccessful();
       }
     catch( InterruptedException exception )
       {
@@ -263,7 +266,10 @@ public class FlowStepJob implements Callable<Throwable>
       throw new FlowException( "Hadoop is not keeping a large enough job history, please increase the \'mapred.jobtracker.completeuserjobs.maximum\' property", exception );
       }
 
-    return false;
+    if( wasSuccessful != null )
+      return wasSuccessful;
+    else
+      return false;
     }
 
   /**
