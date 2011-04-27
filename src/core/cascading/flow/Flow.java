@@ -216,6 +216,25 @@ public class Flow implements Runnable
     return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
     }
 
+  /**
+   * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
+   * <p/>
+   * By default a Flow will attempt to run all give steps at the same time. But there are occasions
+   * where limiting the number of steps helps manages resources.
+   *
+   * @param properties         of type Map<Object, Object>
+   * @param numConcurrentSteps of type int
+   */
+  public static void setMaxConcurrentSteps( Map<Object, Object> properties, int numConcurrentSteps )
+    {
+    properties.put( "cascading.flow.maxconcurrentsteps", Integer.toString( numConcurrentSteps ) );
+    }
+
+  public static int getMaxConcurrentSteps( JobConf jobConf )
+    {
+    return jobConf.getInt( "cascading.flow.maxconcurrentsteps", 0 );
+    }
+
   /** Used for testing. */
   protected Flow()
     {
@@ -1022,7 +1041,10 @@ public class Flow implements Runnable
       initializeNewJobsMap();
 
       // if jobs are run local, then only use one thread to force execution serially
-      int numThreads = jobsAreLocal() ? 1 : jobsMap.size();
+      int numThreads = jobsAreLocal() ? 1 : getMaxConcurrentSteps( getJobConf() );
+
+      if( numThreads == 0 )
+        numThreads = jobsMap.size();
 
       if( numThreads == 0 )
         throw new IllegalStateException( "no jobs rendered for flow: " + getName() );

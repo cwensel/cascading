@@ -129,11 +129,10 @@ public class Cascade implements Runnable
     properties.put( "cascading.cascade.maxconcurrentflows", Integer.toString( numConcurrentFlows ) );
     }
 
-  public int getMaxConcurrentFlows( Map<Object, Object> properties )
+  public static int getMaxConcurrentFlows( Map<Object, Object> properties )
     {
     return Integer.parseInt( Util.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
     }
-
 
   Cascade( String name, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {

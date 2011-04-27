@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.3 [unreleased]
 
+  Added c.f.Flow#setMaxConcurrentSteps to set the maximum number of steps that can be submitted concurrently.
+
   Fixed bug where NPE was thrown when c.c.CascadeConnector tried to unwind nested c.t.MultiSourceTap instances.
 
   Fixed bug where c.t.Fields#append() would fail when appending unordered selectors.
