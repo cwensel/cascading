@@ -20,7 +20,7 @@
   -->
 
 <ivy-module version="2.0">
-  <info organisation="cascading" module="cascading-core" revision="${cascading.release.full}">
+  <info organisation="cascading" module="cascading" revision="${cascading.release.full}">
 
     <license name="GNU General Public License version 3" url="http://www.gnu.org/licenses/"/>
 

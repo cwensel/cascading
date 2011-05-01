@@ -672,7 +672,7 @@
 
   </target>
 
-  <target name="publish-local" depends="jar,make-pom"
+  <target name="publish-m2-local" depends="jar,make-pom"
           description="publish jar/source to maven repo mounted at ~/.m2/repository">
 
     <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
@@ -681,6 +681,20 @@
 
     <ivy:publish settingsRef="ivy.conjars.settings"
                  resolver="local-m2-publish" forcedeliver="true" overwrite="true" publishivy="false">
+      <artifacts pattern="${build}/[artifact]-${cascading.release.full}.[ext]"/>
+    </ivy:publish>
+
+  </target>
+
+  <target name="publish-local" depends="jar,make-pom"
+          description="publish jar/source to local ivy repo">
+
+    <ivy:settings id="ivy.conjars.settings" url="http://conjars.org/repo/ivysettings.xml"/>
+
+    <ivy:resolve settingsRef="ivy.conjars.settings" file="ivy.xml"/>
+
+    <ivy:publish settingsRef="ivy.conjars.settings"
+                 resolver="local" forcedeliver="true" overwrite="true" publishivy="true">
       <artifacts pattern="${build}/[artifact]-${cascading.release.full}.[ext]"/>
     </ivy:publish>
 
