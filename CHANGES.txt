@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2.3 [unreleased]
+1.2.3
 
   Added c.f.Flow#setMaxConcurrentSteps to set the maximum number of steps that can be submitted concurrently.
 
