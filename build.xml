@@ -496,11 +496,11 @@
     </jar>
 
     <jar jarfile="${build}/${jar.cascading-local}" manifest="${build}/MANIFEST.MF" compress="yes">
-      <fileset dir="${build.xml}"/>
+      <fileset dir="${build.local}"/>
     </jar>
 
     <jar jarfile="${build}/${jar.cascading-hadoop}" manifest="${build}/MANIFEST.MF" compress="yes">
-      <fileset dir="${build.xml}"/>
+      <fileset dir="${build.hadoop}"/>
     </jar>
 
     <jar jarfile="${build}/${jar.cascading-test}" manifest="${build}/MANIFEST.MF" compress="yes">
