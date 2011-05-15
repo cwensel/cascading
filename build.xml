@@ -448,6 +448,8 @@
 
   <target name="s3-package" if="package.remote.bucket">
 
+    <property file="${package.aws.properties}"/>
+
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
 
     <S3Upload verbose="true"
