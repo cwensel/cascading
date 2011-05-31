@@ -22,6 +22,8 @@
 package cascading.flow;
 
 import cascading.pipe.Pipe;
+import cascading.tap.Tap;
+import cascading.util.Util;
 
 /**
  * Class ElementGraphException is thrown during rendering of a pipe assembly to
@@ -35,6 +37,16 @@ public class ElementGraphException extends FlowException
   /** Constructor ElementGraphException creates a new ElementGraphException instance. */
   public ElementGraphException()
     {
+    }
+
+  public ElementGraphException( Pipe pipe, String message )
+    {
+    this( (FlowElement) pipe, Util.formatTrace( pipe, message ) );
+    }
+
+  public ElementGraphException( Tap tap, String message )
+    {
+    this( (FlowElement) tap, Util.formatTrace( tap, message ) );
     }
 
   /**

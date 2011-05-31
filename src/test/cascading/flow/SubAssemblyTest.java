@@ -35,8 +35,14 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
+import cascading.pipe.assembly.AggregateBy;
+import cascading.pipe.assembly.CountBy;
+import cascading.pipe.assembly.SumBy;
+import cascading.scheme.Scheme;
+import cascading.scheme.TextDelimited;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
@@ -199,6 +205,58 @@ public class SubAssemblyTest extends CascadingTestCase
 //      exception.writeDOT( "nestedassembly.dot" );
 
       throw exception;
+      }
+    }
+
+  public void testAssemblyPlanFailure()
+    {
+    Scheme sourceScheme = new TextDelimited( new Fields( "date", "size" ), "\t" );
+    Tap source = new Hfs( sourceScheme, "input" );
+
+    Tap sink = new Hfs( new TextLine(), "outputPath", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "outputPath2", SinkMode.REPLACE );
+
+    Pipe assembly = new Pipe( "assembly" );
+
+    Pipe assembly2 = new Pipe( "assembly2", assembly );
+
+    Fields groupingFields = new Fields( "date" );
+
+    assembly = new AggregateBy(
+      assembly,
+      groupingFields,
+      new SumBy( new Fields( "size" ), new Fields( "size" ), double.class ),
+      new SumBy( new Fields( "size" ), new Fields( "size2" ), double.class ),
+      new CountBy( new Fields( "sizes" ) ), new CountBy( new Fields(
+      "sizes2" ) )
+
+    );
+
+    assembly2 = new AggregateBy(
+      assembly2,
+      groupingFields,
+      new SumBy( new Fields( "size" ), new Fields( "size" ), double.class ),
+      new SumBy( new Fields( "size" ), new Fields( "size2" ), double.class ),
+      new CountBy( new Fields( "sizes" ) ), new CountBy( new Fields(
+      "sizes2" ) )
+
+    );
+
+    Map<String, Tap> sinks = new HashMap<String, Tap>();
+    sinks.put( "assembly", sink );
+    sinks.put( "assembly2", sink2 );
+
+    FlowConnector flowConnector = new FlowConnector();
+    // if you reverse assembly and assembly2 it works:
+    //Flow flow = flowConnector.connect("test", source, sinks, assembly, assembly2);
+    try
+      {
+      Flow flow = flowConnector.connect( "test", source, sinks, assembly2, assembly );
+      fail();
+      }
+    catch( Exception exception )
+      {
+      // do nothing - test passes
       }
     }
   }
