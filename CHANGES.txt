@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2.4 [unreleased]
 
+  Fixed bug where if all paths that match a glob pattern are empty, an exception is not thrown causing Hadoop to throw
+  a java.lang.ArrayIndexOutOfBoundsException.
+
   Updated planner to issue an error message if a tail c.p.Pipe instance doesn't not properly bind to a c.t.Tap instance.
 
 1.2.3

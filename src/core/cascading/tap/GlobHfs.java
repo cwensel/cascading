@@ -24,9 +24,7 @@ package cascading.tap;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import cascading.scheme.Scheme;
 import org.apache.hadoop.fs.FileStatus;
@@ -129,6 +127,9 @@ public class GlobHfs extends MultiSourceTap
       if( statusList[ i ].getLen() != 0 )
         notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
       }
+
+    if( notEmpty.isEmpty() )
+      throw new TapException( "all paths matching path pattern are zero length: " + pathPattern );
 
     return notEmpty.toArray( new Tap[ notEmpty.size() ] );
     }
