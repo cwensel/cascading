@@ -124,7 +124,7 @@ public class GlobHfs extends MultiSourceTap
 
     for( int i = 0; i < statusList.length; i++ )
       {
-      if( statusList[ i ].getLen() != 0 )
+      if( statusList[ i ].isDir() || statusList[ i ].getLen() != 0 )
         notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
       }
 
