@@ -2,8 +2,6 @@ Cascading Change Log
 
 1.2.4 [unreleased]
 
-  Fixed bug where c.t.GlobHfs did not include directories found with the given glob pattern.
-
   Fixed bug where if all paths that match a glob pattern are empty, an exception is not thrown causing Hadoop to throw
   a java.lang.ArrayIndexOutOfBoundsException.
 

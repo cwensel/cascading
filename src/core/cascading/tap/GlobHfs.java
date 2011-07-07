@@ -124,7 +124,8 @@ public class GlobHfs extends MultiSourceTap
 
     for( int i = 0; i < statusList.length; i++ )
       {
-      if( statusList[ i ].isDir() || statusList[ i ].getLen() != 0 )
+      // remove empty files and directories, intermingling directories and files is likely error prone
+      if( statusList[ i ].getLen() != 0 )
         notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
       }
 
