@@ -24,6 +24,7 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
@@ -33,7 +34,7 @@ import cascading.tuple.TupleEntry;
  * Class Or is a {@link Filter} class that will logically 'or' the results of the constructor provided Filter
  * instances.
  * <p/>
- * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall)} returns {@code true} for any of the given instances,
+ * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for any of the given instances,
  * this filter will return {@code true}.
  *
  * @see And
@@ -79,10 +80,12 @@ public class Or extends Logic
     super( argumentSelectors, filters );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess,cascading.operation.FilterCall) */
+  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    Context context = (Logic.Context) filterCall.getContext();
+    TupleEntry arguments = filterCall.getArguments();
+    Context context = (Context) filterCall.getContext();
+
     TupleEntry[] argumentEntries = context.argumentEntries;
     Object[] contexts = context.contexts;
 
@@ -92,8 +95,9 @@ public class Or extends Logic
         {
         TupleEntry entry = argumentEntries[ i ];
 
-        entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
+        entry.setTuple( arguments.selectTuple( argumentSelectors[ i ] ) );
 
+        ( (ConcreteCall) filterCall ).setArguments( entry );
         filterCall.setContext( contexts[ i ] );
 
         if( filters[ i ].isRemove( flowProcess, filterCall ) )
@@ -104,6 +108,7 @@ public class Or extends Logic
       }
     finally
       {
+      ( (ConcreteCall) filterCall ).setArguments( arguments );
       filterCall.setContext( context );
       }
     }

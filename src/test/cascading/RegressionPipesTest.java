@@ -23,15 +23,21 @@ package cascading;
 
 import java.io.File;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
+import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.assertion.AssertSizeMoreThan;
+import cascading.operation.filter.And;
+import cascading.operation.filter.Not;
+import cascading.operation.filter.Or;
+import cascading.operation.filter.Xor;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
@@ -40,6 +46,7 @@ import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.SequenceFile;
+import cascading.scheme.TextDelimited;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.SinkMode;
@@ -432,5 +439,77 @@ public class RegressionPipesTest extends ClusterTestCase
     flow.complete();
 
     validateLength( flow, 10, null );
+    }
+
+  public void testComplexLogicAnd() throws Exception
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new And( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicand", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 2, Pattern.compile( "1\ta" ) );
+    }
+
+  public void testComplexLogicOr() throws Exception
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new Or( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicor", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 4, 2, Pattern.compile( "(1\t.)|(.\ta)" ) );
+    }
+
+  public void testComplexLogicXor() throws Exception
+    {
+    if( !new File( inputFileLhs ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLhs );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "num", "char" ), " " ), inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new Xor( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicxor", true );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 3, 2, Pattern.compile( "(1\t.)|(.\ta)" ) );
     }
   }
