@@ -2,6 +2,9 @@ Cascading Change Log
 
 1.2.4 [unreleased]
 
+  Added info log message when writing "direct" to a filesystem, bypassing the temporary folder removing the need to
+  rename the output file to its target location.
+
   Fixed bug where if all paths that match a glob pattern are empty, an exception is not thrown causing Hadoop to throw
   a java.lang.ArrayIndexOutOfBoundsException.
 
