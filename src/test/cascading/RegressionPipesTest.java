@@ -454,6 +454,8 @@ public class RegressionPipesTest extends ClusterTestCase
 
     Filter filter = new Not( new And( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
 
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
     pipe = new Each( pipe, new Fields( "num", "char" ), filter );
 
     Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicand", true );
@@ -478,6 +480,8 @@ public class RegressionPipesTest extends ClusterTestCase
 
     Filter filter = new Not( new Or( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
 
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
     pipe = new Each( pipe, new Fields( "num", "char" ), filter );
 
     Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicor", true );
@@ -502,6 +506,8 @@ public class RegressionPipesTest extends ClusterTestCase
 
     Filter filter = new Not( new Xor( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
 
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
     pipe = new Each( pipe, new Fields( "num", "char" ), filter );
 
     Tap sink = new Hfs( new TextDelimited( Fields.ALL, " " ), outputPath + "/regression/complexlogicxor", true );
