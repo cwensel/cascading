@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.4 [unreleased]
 
+  Added info logging of current split input path with a task, if any.
+
   Fixed bug in c.o.f.And, c.o.f.Or, and c.o.f.Xor where the sub-select of arguments was not honored.
 
   Added info log message when writing "direct" to a filesystem, bypassing the temporary folder removing the need to

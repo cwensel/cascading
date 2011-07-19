@@ -34,10 +34,14 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
+  private static final Logger LOG = LoggerFactory.getLogger( MultiInputSplit.class );
+
   /** Field jobConf */
   private transient JobConf jobConf;
   /** Field inputSplit */
@@ -87,8 +91,8 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     {
     out.writeUTF( inputSplit.getClass().getName() );
 
-    String[] keys = config.keySet().toArray( new String[config.size()] );
-    String[] values = new String[keys.length];
+    String[] keys = config.keySet().toArray( new String[ config.size() ] );
+    String[] values = new String[ keys.length ];
 
     for( int i = 0; i < keys.length; i++ )
       values[ i ] = config.get( keys[ i ] );
@@ -118,7 +122,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
       }
     catch( ClassNotFoundException exp )
       {
-      throw new IOException( "Split class " + splitType + " not found" );
+      throw new IOException( "split class " + splitType + " not found" );
       }
 
     inputSplit.readFields( in );
@@ -128,7 +132,10 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
       Path path = ( (FileSplit) inputSplit ).getPath();
 
       if( path != null )
+        {
         jobConf.set( "cascading.source.path", path.toString() );
+        LOG.info( "current split input path: {}", path.toString() );
+        }
       }
     }
   }
