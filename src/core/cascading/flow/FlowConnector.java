@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import cascading.CascadingException;
@@ -42,6 +43,9 @@ import cascading.util.Util;
  */
 public abstract class FlowConnector
   {
+  // need a global unique value here
+  private static String appID;
+
   /** Field properties */
   protected Map<Object, Object> properties;
 
@@ -198,6 +202,59 @@ public abstract class FlowConnector
   public static String getApplicationJarPath( Map<Object, Object> properties )
     {
     return Util.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );
+    }
+
+  public static void setApplicationID( Map<Object, Object> properties )
+    {
+    if( appID == null )
+      {
+      String appName = getApplicationName( properties );
+      appID = Util.createUniqueID( appName == null ? "appnameseed" : appName );
+      }
+
+    properties.put( "cascading.app.id", appID );
+    }
+
+  public static String getApplicationID( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.app.id", (String) appID );
+    }
+
+  public static void setApplicationName( Map<Object, Object> properties, String name )
+    {
+    if( name != null )
+      properties.put( "cascading.app.name", name );
+    }
+
+  public static String getApplicationName( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.app.name", (String) null );
+    }
+
+  public static void setApplicationVersion( Map<Object, Object> properties, String version )
+    {
+    if( version != null )
+      properties.put( "cascading.app.version", version );
+    }
+
+  public static String getApplicationVersion( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.app.version", (String) null );
+    }
+
+  protected FlowConnector()
+    {
+    this.properties = new HashMap<Object, Object>();
+    }
+
+  protected FlowConnector( Map<Object, Object> properties )
+    {
+    if( properties == null )
+      this.properties = new HashMap<Object, Object>();
+    else if( properties instanceof Properties )
+      this.properties = new Properties( (Properties) properties );
+    else
+      this.properties = new HashMap<Object, Object>( properties );
     }
 
   /**

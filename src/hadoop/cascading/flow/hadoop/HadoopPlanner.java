@@ -153,6 +153,8 @@ public class HadoopPlanner extends FlowPlanner
     if( jobConf.getJar() == null )
       jobConf.setJarByClass( HadoopUtil.findMainClass( HadoopPlanner.class ) );
 
+    HadoopFlowConnector.setApplicationJarPath( properties, jobConf.getJar() );
+
     LOG.info( "using application jar: {}", jobConf.getJar() );
     }
 

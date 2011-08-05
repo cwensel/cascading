@@ -26,10 +26,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +45,9 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.StepGraph;
+import cascading.management.CascadingServices;
+import cascading.management.ClientState;
+import cascading.management.ClientType;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
@@ -49,6 +55,7 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleIterator;
 import cascading.util.Util;
+import cascading.util.Version;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -92,6 +99,12 @@ public abstract class Flow<Config> implements Runnable
   private String id;
   /** Field name */
   private String name;
+  /** Field appID */
+  private String appID;
+  /** Field appName */
+  private String appName;
+  /** Field appVersion */
+  private String appVersion;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field skipStrategy */
@@ -121,12 +134,15 @@ public abstract class Flow<Config> implements Runnable
   /** Field pipeGraph */
   private ElementGraph pipeGraph; // only used for documentation purposes
 
+  private transient CascadingServices cascadingServices;
+
   /** Field steps */
   private transient List<FlowStep> steps;
   /** Field jobsMap */
   private transient Map<String, Callable<Throwable>> jobsMap;
   /** Field executor */
   private transient ExecutorService executor;
+
 
   /**
    * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
@@ -155,42 +171,148 @@ public abstract class Flow<Config> implements Runnable
   protected Flow()
     {
     this.name = "NA";
-    this.flowStats = new FlowStats( name, getID() );
+    this.flowStats = createPrepareFlowStats();
     }
 
-  protected Flow( Map<Object, Object> properties, Config config, String name )
+  protected Flow( Map<Object, Object> properties, Config defaultConfig, String name )
     {
     this.name = name;
-    this.flowStats = new FlowStats( name, getID() );
-    setConfig( properties, config );
+    this.appID = makeAppID( properties );
+    this.appName = makeAppName( properties );
+    this.appVersion = makeAppVersion( properties );
+    addSessionProperties( properties );
+    initConfig( properties, defaultConfig );
+    initSteps();
     initFromProperties( properties );
+
+    this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected Flow( Map<Object, Object> properties, Config config, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
+    this.appID = makeAppID( properties );
+    this.appName = makeAppName( properties );
+    this.appVersion = makeAppVersion( properties );
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
-    this.flowStats = new FlowStats( name, getID() );
-    setConfig( properties, config );
+    addSessionProperties( properties );
+    initConfig( properties, defaultConfig );
+    initSteps();
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
     initFromProperties( properties );
     initFromTaps();
+
+    this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected Flow( Map<Object, Object> properties, Config config, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
+    this.appID = makeAppID( properties );
+    this.appName = makeAppName( properties );
+    this.appVersion = makeAppVersion( properties );
     this.stepGraph = stepGraph;
-    this.flowStats = new FlowStats( name, getID() );
-    setConfig( properties, config );
+    addSessionProperties( properties );
+    initConfig( properties, defaultConfig );
+    initSteps();
     setSources( sources );
     setSinks( sinks );
     setTraps( traps );
     initFromProperties( properties );
     initFromTaps();
+
+    this.flowStats = createPrepareFlowStats(); // must be last
+    }
+
+  private void addSessionProperties( Map<Object, Object> properties )
+    {
+    properties.put( "cascading.flow.id", getID() );
+    properties.put( "cascading.app.id", getAppID() );
+    properties.put( "cascading.app.name", getAppName() );
+    properties.put( "cascading.app.version", getAppVersion() );
+    }
+
+  private String makeAppID( Map<Object, Object> properties )
+    {
+    return FlowConnector.getApplicationID( properties );
+    }
+
+  private String makeAppName( Map<Object, Object> properties )
+    {
+    String name = FlowConnector.getApplicationName( properties );
+
+    if( name != null )
+      return name;
+
+    String path = FlowConnector.getApplicationJarPath( properties );
+
+    if( path == null )
+      return null;
+
+    String[] split = path.split( "/" );
+
+    path = split[ split.length - 1 ];
+
+    return path.substring( 0, path.lastIndexOf( '.' ) );
+    }
+
+  private String makeAppVersion( Map<Object, Object> properties )
+    {
+    String name = FlowConnector.getApplicationVersion( properties );
+
+    if( name != null )
+      return name;
+
+    String path = FlowConnector.getApplicationJarPath( properties );
+
+    if( path == null )
+      return null;
+
+    String[] split = path.split( "/" );
+
+    path = split[ split.length - 1 ];
+
+    path = path.substring( 0, path.lastIndexOf( '.' ) );
+
+    return path.replace( "^\\D*(.*)$", "$1" );
+    }
+
+  private FlowStats createPrepareFlowStats()
+    {
+    FlowStats flowStats = new FlowStats( this, getClientState() );
+
+    flowStats.prepare();
+    flowStats.markPending();
+
+    return flowStats;
+    }
+
+  public CascadingServices getCascadingServices()
+    {
+    if( cascadingServices == null )
+      cascadingServices = new CascadingServices( getConfigAsProperties() );
+
+    return cascadingServices;
+    }
+
+  public void setCascadingServices( CascadingServices cascadingServices )
+    {
+    this.cascadingServices = cascadingServices;
+    }
+
+  private ClientState getClientState()
+    {
+    CascadingServices services = getFlowSession().getCascadingServices();
+    return new ClientState( services, ClientType.session, getID() );
+    }
+
+  private void initSteps()
+    {
+    for( FlowStep flowStep : stepGraph.vertexSet() )
+      flowStep.setParentFlowID( getID() );
     }
 
   private void initFromTaps()
@@ -237,6 +359,21 @@ public abstract class Flow<Config> implements Runnable
     return id;
     }
 
+  public String getAppID()
+    {
+    return appID;
+    }
+
+  public String getAppName()
+    {
+    return appName;
+    }
+
+  public String getAppVersion()
+    {
+    return appVersion;
+    }
+
   /**
    * Method getSubmitPriority returns the submitPriority of this Flow object.
    * <p/>
@@ -258,7 +395,15 @@ public abstract class Flow<Config> implements Runnable
    */
   public void setSubmitPriority( int submitPriority )
     {
+    if( submitPriority < 1 || submitPriority > 10 )
+      throw new IllegalArgumentException( "submitPriority must be between 1 and 10 inclusive, was: " + submitPriority );
+
     this.submitPriority = submitPriority;
+    }
+
+  public ElementGraph getPipeGraph()
+    {
+    return pipeGraph;
     }
 
   protected void setSources( Map<String, Tap> sources )
@@ -284,19 +429,69 @@ public abstract class Flow<Config> implements Runnable
     this.stepGraph = stepGraph;
     }
 
-  protected abstract void setConfig( Map<Object, Object> properties, Config parentConfig );
+  /**
+   * This method creates a new internal Config with the parentConfig as defaults using the properties to override
+   * the defaults.
+   *
+   * @param properties
+   * @param parentConfig
+   */
+  protected abstract void initConfig( Map<Object, Object> properties, Config parentConfig );
+
+  public Config createConfig( Map<Object, Object> properties, Config defaultConfig )
+    {
+    Config config = newConfig( defaultConfig );
+
+    if( properties == null )
+      return config;
+
+    Set<Object> keys = new HashSet<Object>( properties.keySet() );
+
+    // keys will only be grabbed if both key/value are String, so keep orig keys
+    if( properties instanceof Properties )
+      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
+
+    for( Object key : keys )
+      {
+      Object value = properties.get( key );
+
+      if( value == null && properties instanceof Properties && key instanceof String )
+        value = ( (Properties) properties ).getProperty( (String) key );
+
+      if( value == null ) // don't stuff null values
+        continue;
+
+      setConfigProperty( config, key, value );
+      }
+
+    return config;
+    }
+
+  protected abstract void setConfigProperty( Config config, Object key, Object value );
+
+  protected abstract Config newConfig( Config defaultConfig );
 
   public abstract Config getConfig();
 
   public abstract Config getConfigCopy();
 
-  public abstract void setProperty( String key, String value );
+  protected abstract Map<Object, Object> getConfigAsProperties();
+
+  public void setProperty( String key, String value )
+    {
+    setConfigProperty( getConfig(), key, value );
+    }
 
   public abstract String getProperty( String key );
 
   protected void initFromProperties( Map<Object, Object> properties )
     {
     stopJobsOnExit = getStopJobsOnExit( properties );
+    }
+
+  public FlowSession getFlowSession()
+    {
+    return new FlowSession( getCascadingServices() );
     }
 
   public abstract FlowProcess getFlowProcess();
@@ -661,16 +856,23 @@ public abstract class Flow<Config> implements Runnable
 
     stop = true;
 
-    fireOnStopping();
+    try
+      {
+      fireOnStopping();
 
-    if( !flowStats.isFinished() )
-      flowStats.markStopped();
+      if( !flowStats.isFinished() )
+        flowStats.markStopped();
 
-    internalStopAllJobs();
+      internalStopAllJobs();
 
-    handleExecutorShutdown();
+      handleExecutorShutdown();
 
-    internalClean( true );
+      internalClean( true );
+      }
+    finally
+      {
+      flowStats.cleanup();
+      }
     }
 
   protected abstract void internalClean( boolean force );
@@ -715,10 +917,17 @@ public abstract class Flow<Config> implements Runnable
       thread = null;
       throwable = null;
 
-      if( hasListeners() )
+      try
         {
-        for( SafeFlowListener safeFlowListener : getListeners() )
-          safeFlowListener.throwable = null;
+        if( hasListeners() )
+          {
+          for( SafeFlowListener safeFlowListener : getListeners() )
+            safeFlowListener.throwable = null;
+          }
+        }
+      finally
+        {
+        flowStats.cleanup();
         }
       }
     }
@@ -888,7 +1097,7 @@ public abstract class Flow<Config> implements Runnable
     if( thread == null )
       throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
 
-    Cascade.printBanner();
+    Version.printBanner();
 
     try
       {
@@ -1176,6 +1385,11 @@ public abstract class Flow<Config> implements Runnable
   public FlowHolder getHolder()
     {
     return new FlowHolder( this );
+    }
+
+  public void setCascade( Cascade cascade )
+    {
+    setConfigProperty( getConfig(), "cascading.cascade.id", cascade.getID() );
     }
 
   /** Class FlowHolder is a helper class for wrapping Flow instances. */

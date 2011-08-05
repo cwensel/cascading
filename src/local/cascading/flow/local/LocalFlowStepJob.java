@@ -22,35 +22,33 @@
 package cascading.flow.local;
 
 import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import cascading.flow.planner.FlowStepJob;
+import cascading.management.ClientState;
+import cascading.stats.StepStats;
 
 /**
  *
  */
 public class LocalFlowStepJob extends FlowStepJob
   {
-  private final Properties config;
   private final LocalStepRunner stackRunner;
   private Future<Throwable> future;
 
-  public LocalFlowStepJob( LocalFlowStep flowStep, String name, Properties config )
+  public LocalFlowStepJob( ClientState clientState, LocalFlowProcess flowProcess, LocalFlowStep flowStep )
     {
-    super( flowStep, name, 1000 );
-    this.config = config;
-    this.stackRunner = new LocalStepRunner( config, flowStep );
-    this.stepStats = new LocalStepStats();
-
-    this.stackRunner.getFlowProcess().setStepStats( (LocalStepStats) this.stepStats );
+    super( clientState, flowStep, 1000 );
+    flowProcess.setStepStats( (LocalStepStats) this.stepStats );
+    this.stackRunner = new LocalStepRunner( flowProcess, flowStep );
     }
 
-  private LocalFlowStep getLocalFlowStep()
+  @Override
+  protected StepStats createStepStats( ClientState clientState )
     {
-    return (LocalFlowStep) flowStep;
+    return new LocalStepStats( flowStep, clientState );
     }
 
   @Override

@@ -99,7 +99,7 @@ public class HadoopFlowConnector extends FlowConnector
   @ConstructorProperties({"properties"})
   public HadoopFlowConnector( Map<Object, Object> properties )
     {
-    this.properties = properties;
+    super( properties );
     }
 
   protected Class<? extends Scheme> getDefaultIntermediateSchemeClass()

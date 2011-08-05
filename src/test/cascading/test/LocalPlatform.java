@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowSession;
 import cascading.flow.local.LocalFlowConnector;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.scheme.local.TextDelimited;
@@ -72,17 +73,13 @@ public class LocalPlatform extends TestPlatform
   @Override
   public FlowProcess getFlowProcess()
     {
-    return new LocalFlowProcess( (Properties) getProperties() );
+    return new LocalFlowProcess( FlowSession.NULL, (Properties) getProperties() );
     }
 
   @Override
   public FlowConnector getFlowConnector( Map<Object, Object> properties )
     {
-    Properties local = new Properties();
-
-    local.putAll( properties );
-
-    return new LocalFlowConnector( local );
+    return new LocalFlowConnector( properties );
     }
 
   @Override

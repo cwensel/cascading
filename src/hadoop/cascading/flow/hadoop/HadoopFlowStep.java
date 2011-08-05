@@ -32,6 +32,9 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.management.CascadingServices;
+import cascading.management.ClientState;
+import cascading.management.ClientType;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
@@ -155,7 +158,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       }
 
     // perform last so init above will pass to tasks
-    conf.setInt( "cascading.flow.step.id", getID() );
+    conf.set( "cascading.flow.step.id", getID() );
     conf.set( "cascading.flow.step", HadoopUtil.serializeBase64( this ) );
 
     return conf;
@@ -163,7 +166,8 @@ public class HadoopFlowStep extends FlowStep<JobConf>
 
   public FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
     {
-    return new HadoopFlowStepJob( this, getName(), getInitializedConfig( flowProcess, parentConfig ) );
+    CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
+    return new HadoopFlowStepJob( new ClientState( services, ClientType.process, getID() ), this, getInitializedConfig( flowProcess, parentConfig ) );
     }
 
   /**

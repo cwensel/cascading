@@ -37,7 +37,6 @@ import cascading.tap.Tap;
  */
 public class LocalFlow extends Flow<Properties>
   {
-  private Map<Object, Object> properties;
   private Properties config;
   private Thread shutdownHook;
 
@@ -47,10 +46,21 @@ public class LocalFlow extends Flow<Properties>
     }
 
   @Override
-  protected void setConfig( Map<Object, Object> properties, Properties parentConfig )
+  protected void initConfig( Map<Object, Object> properties, Properties parentConfig )
     {
-    this.properties = properties;
-    this.config = parentConfig;
+    this.config = createConfig( properties, parentConfig );
+    }
+
+  @Override
+  protected void setConfigProperty( Properties properties, Object key, Object value )
+    {
+    properties.setProperty( key.toString(), value.toString() );
+    }
+
+  @Override
+  protected Properties newConfig( Properties defaultConfig )
+    {
+    return defaultConfig == null ? new Properties() : new Properties( defaultConfig );
     }
 
   @Override
@@ -66,9 +76,9 @@ public class LocalFlow extends Flow<Properties>
     }
 
   @Override
-  public void setProperty( String key, String value )
+  protected Map<Object, Object> getConfigAsProperties()
     {
-    config.setProperty( key, value );
+    return config;
     }
 
   @Override
@@ -86,7 +96,7 @@ public class LocalFlow extends Flow<Properties>
   @Override
   public FlowProcess getFlowProcess()
     {
-    return new LocalFlowProcess( config );
+    return new LocalFlowProcess( getFlowSession(), config );
     }
 
   @Override

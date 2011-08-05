@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowException;
+import cascading.flow.planner.FlowStep;
+import cascading.management.ClientState;
 import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
@@ -142,9 +144,9 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
-  protected HadoopStepStats( String stepName )
+  protected HadoopStepStats( FlowStep flowStep, ClientState clientState )
     {
-    super( stepName );
+    super( flowStep, clientState );
     }
 
   public ArrayList<HadoopTaskStats> getTaskStats()

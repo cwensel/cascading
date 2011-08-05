@@ -21,6 +21,10 @@
 
 package cascading.flow;
 
+import java.util.Map;
+
+import cascading.management.CascadingServices;
+
 /**
  * FlowSession implementations provide a call-back interface into the current flow management system, if any.
  * <p/>
@@ -36,20 +40,23 @@ public class FlowSession
 
   /** Field NULL is a noop implementation of FlowSession. */
   public static final FlowSession NULL = new FlowSession();
+  private Map<Object, Object> properties;
+  private String id;
 
+  protected CascadingServices cascadingServices;
 
-  /** Constructor FlowSession creates a new FlowSession instance. */
   public FlowSession()
     {
     }
 
-  /**
-   * Constructor FlowSession creates a new FlowSession instance.
-   *
-   * @param currentProcess of type FlowProcess
-   */
-  public FlowSession( FlowProcess currentProcess )
+  public FlowSession( CascadingServices cascadingServices )
     {
+    this.cascadingServices = cascadingServices;
+    }
+
+  public FlowSession( CascadingServices cascadingServices, FlowProcess currentProcess )
+    {
+    this.cascadingServices = cascadingServices;
     this.currentProcess = currentProcess;
     }
 
@@ -73,4 +80,18 @@ public class FlowSession
     return currentProcess;
     }
 
+  public CascadingServices getCascadingServices()
+    {
+    return cascadingServices;
+    }
+
+  public Map<Object, Object> getProperties()
+    {
+    return properties;
+    }
+
+  public String getID()
+    {
+    return id;
+    }
   }

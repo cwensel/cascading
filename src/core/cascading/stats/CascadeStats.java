@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import cascading.cascade.Cascade;
+import cascading.management.ClientState;
 
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats
@@ -39,7 +40,7 @@ public class CascadeStats extends CascadingStats
 
   public CascadeStats( String name, String cascadeID )
     {
-    super( name );
+    super( name, ClientState.NULL );
     this.cascadeID = cascadeID;
     }
 

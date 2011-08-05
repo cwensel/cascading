@@ -147,11 +147,22 @@ public class Util
 
   public static String join( Object[] list, String delim, boolean printNull )
     {
+    return join( list, delim, printNull, 0 );
+    }
+
+  public static String join( Object[] list, String delim, boolean printNull, int beginAt )
+    {
+    return join( list, delim, printNull, beginAt, list.length - beginAt );
+    }
+
+  public static String join( Object[] list, String delim, boolean printNull, int beginAt, int length )
+    {
     StringBuffer buffer = new StringBuffer();
     int count = 0;
 
-    for( Object s : list )
+    for( int i = beginAt; i < beginAt + length; i++ )
       {
+      Object s = list[ i ];
       if( count != 0 )
         buffer.append( delim );
 
@@ -404,7 +415,8 @@ public class Util
 
       return object.toString().replaceAll( "\"", "\'" );
       }
-    } );
+    }
+    );
 
     dot.export( writer, graph );
     }

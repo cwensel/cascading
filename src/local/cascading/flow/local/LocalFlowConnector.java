@@ -21,7 +21,7 @@
 
 package cascading.flow.local;
 
-import java.util.Properties;
+import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.planner.FlowPlanner;
@@ -36,9 +36,9 @@ public class LocalFlowConnector extends FlowConnector
     {
     }
 
-  public LocalFlowConnector( Properties properties )
+  public LocalFlowConnector( Map<Object, Object> properties )
     {
-    this.properties = properties;
+    super( properties );
     }
 
 
@@ -51,6 +51,6 @@ public class LocalFlowConnector extends FlowConnector
   @Override
   protected FlowPlanner createFlowPlanner()
     {
-    return new LocalPlanner( (Properties) properties );
+    return new LocalPlanner();
     }
   }

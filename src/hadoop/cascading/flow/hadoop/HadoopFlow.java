@@ -130,10 +130,10 @@ public class HadoopFlow extends Flow<JobConf>
     preserveTemporaryFiles = getPreserveTemporaryFiles( properties );
     }
 
-  protected void setConfig( Map<Object, Object> properties, JobConf parentConfig )
+  protected void initConfig( Map<Object, Object> properties, JobConf parentConfig )
     {
     if( parentConfig == null && properties != null )
-      parentConfig = HadoopUtil.createJobConf( properties, HadoopPlanner.getJobConf( properties ) );
+      parentConfig = createConfig( properties, HadoopPlanner.getJobConf( properties ) );
 
     if( parentConfig == null ) // this is ok, getJobConf will pass a default parent in
       return;
@@ -141,9 +141,22 @@ public class HadoopFlow extends Flow<JobConf>
     this.jobConf = new JobConf( parentConfig ); // prevent local values from being shared
     this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
     this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
+    }
 
-    // set the ID for future reference
-    this.jobConf.set( "cascading.flow.id", getID() );
+  @Override
+  protected void setConfigProperty( JobConf config, Object key, Object value )
+    {
+    // don't let these objects pass, even though toString is called below.
+    if( value instanceof Class || value instanceof JobConf )
+      return;
+
+    config.set( key.toString(), value.toString() );
+    }
+
+  @Override
+  protected JobConf newConfig( JobConf defaultConfig )
+    {
+    return defaultConfig == null ? new JobConf() : new JobConf( defaultConfig );
     }
 
   /**
@@ -154,7 +167,7 @@ public class HadoopFlow extends Flow<JobConf>
   public JobConf getConfig()
     {
     if( jobConf == null )
-      setConfig( null, new JobConf() );
+      initConfig( null, new JobConf() );
 
     return jobConf;
     }
@@ -165,15 +178,10 @@ public class HadoopFlow extends Flow<JobConf>
     return new JobConf( getConfig() );
     }
 
-  /**
-   * Method setProperty sets the given key and value on the underlying properites system.
-   *
-   * @param key   of type String
-   * @param value of type String
-   */
-  public void setProperty( String key, String value )
+  @Override
+  protected Map<Object, Object> getConfigAsProperties()
     {
-    getConfig().set( key, value );
+    return HadoopUtil.createProperties( getConfig() );
     }
 
   /**
@@ -190,7 +198,7 @@ public class HadoopFlow extends Flow<JobConf>
   @Override
   public FlowProcess getFlowProcess()
     {
-    return new HadoopFlowProcess( getConfig() );
+    return new HadoopFlowProcess( getFlowSession(), getConfig() );
     }
 
   /**
@@ -247,7 +255,7 @@ public class HadoopFlow extends Flow<JobConf>
       {
       HadoopFlow.this.stop();
 
-      HadoopFlow.callHdfsShutdownHook();
+      callHdfsShutdownHook();
       }
     };
 

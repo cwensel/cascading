@@ -25,6 +25,8 @@ import java.io.IOException;
 
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.management.ClientState;
+import cascading.stats.StepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
@@ -42,23 +44,20 @@ public class HadoopFlowStepJob extends FlowStepJob
   /** Field runningJob */
   private RunningJob runningJob;
 
-  public HadoopFlowStepJob( final FlowStep flowStep, String stepName, JobConf currentConf )
+  public HadoopFlowStepJob( ClientState clientState, FlowStep flowStep, JobConf currentConf )
     {
-    super( flowStep, stepName, HadoopFlow.getJobPollingInterval( currentConf ) );
+    super( clientState, flowStep, HadoopFlow.getJobPollingInterval( currentConf ) );
     this.currentConf = currentConf;
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
+    }
 
-    stepStats = new HadoopStepStats( stepName )
+  @Override
+  protected StepStats createStepStats( ClientState clientState )
     {
-
-    @Override
-    public Object getID()
-      {
-      return flowStep.getID();
-      }
-
+    return new HadoopStepStats( flowStep, clientState )
+    {
     @Override
     protected JobClient getJobClient()
       {

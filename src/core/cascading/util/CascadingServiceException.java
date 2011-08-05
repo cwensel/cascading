@@ -19,35 +19,31 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.stats;
+package cascading.util;
 
-import cascading.flow.planner.FlowStep;
-import cascading.management.ClientState;
+import cascading.CascadingException;
 
-/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class StepStats extends CascadingStats
+/**
+ *
+ */
+public class CascadingServiceException extends CascadingException
   {
-  String stepID;
-
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected StepStats( FlowStep flowStep, ClientState clientState )
+  public CascadingServiceException()
     {
-    super( flowStep.getName(), clientState );
-
-    this.stepID = flowStep.getID();
     }
 
-  @Override
-  public Object getID()
+  public CascadingServiceException( String string )
     {
-    return stepID;
+    super( string );
     }
 
-  @Override
-  public String toString()
+  public CascadingServiceException( String string, Throwable throwable )
     {
-    return "Step{" + getStatsString() + '}';
+    super( string, throwable );
     }
 
-  public abstract void captureJobStats();
+  public CascadingServiceException( Throwable throwable )
+    {
+    super( throwable );
+    }
   }

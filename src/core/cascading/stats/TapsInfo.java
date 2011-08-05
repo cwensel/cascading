@@ -21,33 +21,49 @@
 
 package cascading.stats;
 
-import cascading.flow.planner.FlowStep;
-import cascading.management.ClientState;
+import java.util.ArrayList;
+import java.util.Collection;
 
-/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class StepStats extends CascadingStats
+import cascading.tap.CompositeTap;
+import cascading.tap.Tap;
+
+/**
+ *
+ */
+public class TapsInfo
   {
-  String stepID;
+  private Collection<Tap> taps;
 
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected StepStats( FlowStep flowStep, ClientState clientState )
+  public TapsInfo( Collection<Tap> taps )
     {
-    super( flowStep.getName(), clientState );
-
-    this.stepID = flowStep.getID();
+    this.taps = taps;
     }
 
-  @Override
-  public Object getID()
+  public Collection<Tap> getParentTaps()
     {
-    return stepID;
+    return new ArrayList<Tap>( taps );
     }
 
-  @Override
-  public String toString()
+  public Collection<Tap> getChildTaps()
     {
-    return "Step{" + getStatsString() + '}';
+    ArrayList<Tap> children = new ArrayList<Tap>();
+
+    for( Tap tap : taps )
+      addTap( children, tap );
+
+    return children;
     }
 
-  public abstract void captureJobStats();
+  private void addTap( ArrayList<Tap> children, Tap tap )
+    {
+    if( tap instanceof CompositeTap )
+      {
+      for( Tap child : children )
+        addTap( children, child );
+      }
+    else
+      {
+      children.add( tap );
+      }
+    }
   }

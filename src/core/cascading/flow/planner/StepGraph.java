@@ -164,39 +164,39 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
       Writer writer = new FileWriter( filename );
 
       Util.writeDOT( writer, this, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
-      {
-      public String getVertexName( FlowStep flowStep )
         {
-        String sourceName = "";
-
-        for( Object object : flowStep.getSources() )
+        public String getVertexName( FlowStep flowStep )
           {
-          Tap source = (Tap) object;
+          String sourceName = "";
 
-          if( source.isTemporary() )
-            continue;
+          for( Object object : flowStep.getSources() )
+            {
+            Tap source = (Tap) object;
 
-          sourceName += "[" + source.getPath() + "]";
+            if( source.isTemporary() )
+              continue;
+
+            sourceName += "[" + source.getPath() + "]";
+            }
+
+          String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getPath() + "]";
+
+          String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
+
+          String name = "[" + flowStep.getName() + "]";
+
+          if( sourceName.length() != 0 )
+            name += "\\nsrc:" + sourceName;
+
+          if( groupName.length() != 0 )
+            name += "\\ngrp:" + groupName;
+
+          if( sinkName.length() != 0 )
+            name += "\\nsnk:" + sinkName;
+
+          return name.replaceAll( "\"", "\'" );
           }
-
-        String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getPath() + "]";
-
-        String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
-
-        String name = "[" + flowStep.getName() + "]";
-
-        if( sourceName.length() != 0 )
-          name += "\\nsrc:" + sourceName;
-
-        if( groupName.length() != 0 )
-          name += "\\ngrp:" + groupName;
-
-        if( sinkName.length() != 0 )
-          name += "\\nsnk:" + sinkName;
-
-        return name.replaceAll( "\"", "\'" );
-        }
-      }, null );
+        }, null );
 
       writer.close();
       }

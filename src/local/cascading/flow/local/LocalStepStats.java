@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.planner.FlowStep;
+import cascading.management.ClientState;
 import cascading.stats.StepStats;
 
 /**
@@ -38,20 +40,14 @@ public class LocalStepStats extends StepStats
   final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected LocalStepStats()
+  protected LocalStepStats( FlowStep flowStep, ClientState clientState )
     {
-    super( "local" );
+    super( flowStep, clientState );
     }
 
   @Override
   public void captureJobStats()
     {
-    }
-
-  @Override
-  public Object getID()
-    {
-    return "local";
     }
 
   @Override

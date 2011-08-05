@@ -24,6 +24,8 @@ package cascading.stats;
 import java.io.Serializable;
 import java.util.Collection;
 
+import cascading.management.ClientState;
+
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
  * core elements that have state.
@@ -47,11 +49,13 @@ public abstract class CascadingStats implements Serializable
   {
   public enum Status
     {
-      PENDING, RUNNING, SUCCESSFUL, FAILED, STOPPED, SKIPPED
+      PENDING, SKIPPED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, FAILED
     }
 
   /** Field name */
   final String name;
+  final ClientState clientState;
+
   /** Field status */
   Status status = Status.PENDING;
   /** Field startTime */
@@ -62,9 +66,20 @@ public abstract class CascadingStats implements Serializable
   Throwable throwable;
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  CascadingStats( String name )
+  CascadingStats( String name, ClientState clientState )
     {
     this.name = name;
+    this.clientState = clientState;
+    }
+
+  public void prepare()
+    {
+    clientState.startService();
+    }
+
+  public void cleanup()
+    {
+    clientState.stopService();
     }
 
   /**
@@ -168,6 +183,11 @@ public abstract class CascadingStats implements Serializable
     return status;
     }
 
+  public void markPending()
+    {
+    this.clientState.record( this );
+    }
+
   /** Method markRunning sets the status to running. */
   public void markRunning()
     {
@@ -176,6 +196,10 @@ public abstract class CascadingStats implements Serializable
 
     status = Status.RUNNING;
     markStartTime();
+
+    clientState.start( startTime );
+    clientState.setStatus( status, startTime );
+    clientState.record( this );
     }
 
   protected void markStartTime()
@@ -191,6 +215,10 @@ public abstract class CascadingStats implements Serializable
 
     status = Status.SUCCESSFUL;
     markFinishedTime();
+
+    clientState.setStatus( status, finishedTime );
+    clientState.stop( finishedTime );
+    clientState.record( this );
     }
 
   private void markFinishedTime()
@@ -211,6 +239,10 @@ public abstract class CascadingStats implements Serializable
     status = Status.FAILED;
     markFinishedTime();
     this.throwable = throwable;
+
+    clientState.setStatus( status, finishedTime );
+    clientState.stop( finishedTime );
+    clientState.record( this );
     }
 
   /** Method markStopped sets the status to stopped. */
@@ -221,6 +253,10 @@ public abstract class CascadingStats implements Serializable
 
     status = Status.STOPPED;
     markFinishedTime();
+
+    clientState.setStatus( status, finishedTime );
+    clientState.record( this );
+    clientState.stop( finishedTime );
     }
 
   /** Method markSkipped sets the status to skipped. */
@@ -230,6 +266,9 @@ public abstract class CascadingStats implements Serializable
       throw new IllegalStateException( "may not mark flow as " + Status.SKIPPED + ", is already " + status );
 
     status = Status.SKIPPED;
+
+    clientState.setStatus( status, System.currentTimeMillis() );
+    clientState.record( this );
     }
 
   /**

@@ -68,6 +68,7 @@ public abstract class FlowStep<Config> implements Serializable
   private Map<Object, Object> properties = null;
   /** Field parentFlowName */
   private String parentFlowName;
+  private String parentFlowID;
 
   /** Field submitPriority */
   private int submitPriority = 5;
@@ -75,7 +76,8 @@ public abstract class FlowStep<Config> implements Serializable
   /** Field name */
   String name;
   /** Field id */
-  private final int id;
+  private String id;
+  private final int stepNum;
 
   /** Field graph */
   private final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
@@ -89,10 +91,10 @@ public abstract class FlowStep<Config> implements Serializable
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
-  protected FlowStep( String name, int id )
+  protected FlowStep( String name, int stepNum )
     {
     this.name = name;
-    this.id = id;
+    this.stepNum = stepNum;
     }
 
   /**
@@ -100,9 +102,17 @@ public abstract class FlowStep<Config> implements Serializable
    *
    * @return the id (type int) of this FlowStep object.
    */
-  public int getID()
+  public String getID()
     {
+    if( id == null )
+      id = Util.createUniqueID( getName() );
+
     return id;
+    }
+
+  public int getStepNum()
+    {
+    return stepNum;
     }
 
   /**
@@ -121,6 +131,16 @@ public abstract class FlowStep<Config> implements Serializable
       throw new IllegalArgumentException( "step name may not be null or empty" );
 
     this.name = name;
+    }
+
+  public String getParentFlowID()
+    {
+    return parentFlowID;
+    }
+
+  public void setParentFlowID( String parentFlowID )
+    {
+    this.parentFlowID = parentFlowID;
     }
 
   /**
@@ -174,6 +194,9 @@ public abstract class FlowStep<Config> implements Serializable
    */
   public void setSubmitPriority( int submitPriority )
     {
+    if( submitPriority < 1 || submitPriority > 10 )
+      throw new IllegalArgumentException( "submitPriority must be between 1 and 10 inclusive, was: " + submitPriority );
+
     this.submitPriority = submitPriority;
     }
 
@@ -272,6 +295,9 @@ public abstract class FlowStep<Config> implements Serializable
 
   /**
    * Method getProperties returns the properties of this FlowStep object.
+   * </br>
+   * These properties are local only to this step, use this method to set additional properties and configuration
+   * for the underlying platform.
    *
    * @return the properties (type Map<Object, Object>) of this FlowStep object.
    */

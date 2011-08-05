@@ -22,8 +22,10 @@
 package cascading.flow.local;
 
 import java.util.List;
+import java.util.Properties;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.SourceStage;
@@ -37,7 +39,7 @@ import cascading.tap.Tap;
 public class LocalStepStreamGraph extends StepStreamGraph
   {
 
-  public LocalStepStreamGraph( LocalFlowProcess flowProcess, LocalFlowStep step )
+  public LocalStepStreamGraph( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
     super( flowProcess, step );
 

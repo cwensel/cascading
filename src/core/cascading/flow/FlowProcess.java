@@ -48,11 +48,12 @@ public abstract class FlowProcess<Config>
   /** Field NULL is a noop implementation of FlowSession. */
   public static FlowProcess NULL = new BaseFlowProcess();
 
+  private String id;
+
   public static class BaseFlowProcess extends FlowProcess<Object>
     {
     public BaseFlowProcess()
       {
-      super( FlowSession.NULL );
       }
 
     @Override
@@ -166,6 +167,11 @@ public abstract class FlowProcess<Config>
     }
 
   public abstract FlowProcess copyWith( Config config );
+
+  public String getID()
+    {
+    return id;
+    }
 
   /**
    * Method getCurrentSession returns the currentSession of this FlowProcess object.

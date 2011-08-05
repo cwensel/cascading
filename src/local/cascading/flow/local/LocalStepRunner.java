@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import cascading.flow.FlowSession;
+import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.StreamGraph;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class LocalStepRunner implements Callable<Throwable>
   {
   private static final Logger LOG = LoggerFactory.getLogger( LocalStepRunner.class );
 
-  private final LocalFlowProcess flowProcess;
+  private final FlowProcess<Properties> flowProcess;
 
   private boolean complete = false;
   private boolean successful = false;
@@ -51,16 +51,14 @@ public class LocalStepRunner implements Callable<Throwable>
   private final StreamGraph graph;
   private final Collection<Duct> heads;
 
-  public LocalStepRunner( Properties properties, LocalFlowStep step )
+  public LocalStepRunner( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
-    this.flowProcess = new LocalFlowProcess( new FlowSession(), properties );
-
-    graph = new LocalStepStreamGraph( flowProcess, step );
-
-    heads = graph.getHeads();
+    this.flowProcess = flowProcess;
+    this.graph = new LocalStepStreamGraph( this.flowProcess, step );
+    this.heads = graph.getHeads();
     }
 
-  public LocalFlowProcess getFlowProcess()
+  public FlowProcess<Properties> getFlowProcess()
     {
     return flowProcess;
     }

@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.FlowException;
+import cascading.management.ClientState;
 import cascading.stats.StepStats;
 
 /**
@@ -51,12 +52,18 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( FlowStep flowStep, String stepName, long pollingInterval )
+  public FlowStepJob( ClientState clientState, FlowStep flowStep, long pollingInterval )
     {
     this.flowStep = flowStep;
-    this.stepName = stepName;
+    this.stepName = flowStep.getName();
     this.pollingInterval = pollingInterval;
+    this.stepStats = createStepStats( clientState );
+
+    this.stepStats.prepare();
+    this.stepStats.markPending();
     }
+
+  protected abstract StepStats createStepStats( ClientState clientState );
 
   public void stop()
     {
@@ -75,6 +82,10 @@ public abstract class FlowStepJob implements Callable<Throwable>
     catch( IOException exception )
       {
       flowStep.logWarn( "unable to kill job: " + stepName, exception );
+      }
+    finally
+      {
+      stepStats.cleanup();
       }
     }
 
@@ -108,6 +119,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
     finally
       {
       latch.countDown();
+      stepStats.cleanup();
       }
     }
 

@@ -32,6 +32,7 @@ import cascading.operation.DebugLevel;
 import cascading.test.HadoopPlatform;
 import cascading.test.LocalPlatform;
 import cascading.test.TestPlatform;
+import cascading.util.Util;
 import org.junit.AfterClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,29 +54,8 @@ public class PlatformTestCase extends CascadingTestCase
     {
     String classname = System.getProperty( TestPlatform.TEST_PLATFORM_CLASSNAME, LocalPlatform.class.getCanonicalName() );
 
-    try
-      {
-      platform = (TestPlatform) getClass().getClassLoader().loadClass( classname ).newInstance();
-      }
-    catch( InstantiationException exception )
-      {
-      exception.printStackTrace();
-      }
-    catch( IllegalAccessException exception )
-      {
-      exception.printStackTrace();
-      }
-    catch( ClassNotFoundException exception )
-      {
-      exception.printStackTrace();
-      }
-
+    platform = (TestPlatform) loadClassInstance( classname );
     platform.setUseCluster( useCluster );
-
-    rootPath = getTestRoot();
-    rootPath += "/" + getPlatformName();
-    rootPath += "/" + getTestCaseName();
-
 //    platform.setProperty( StreamGraph.ERROR_DOT_FILE_PATH, getOutputPath( "streamgraph.dot" )  );
     }
 
@@ -95,6 +75,41 @@ public class PlatformTestCase extends CascadingTestCase
     this( false );
     }
 
+  protected Object loadClassInstance( String classname )
+    {
+    try
+      {
+      return getClass().getClassLoader().loadClass( classname ).newInstance();
+      }
+    catch( InstantiationException exception )
+      {
+      exception.printStackTrace();
+      }
+    catch( IllegalAccessException exception )
+      {
+      exception.printStackTrace();
+      }
+    catch( ClassNotFoundException exception )
+      {
+      exception.printStackTrace();
+      }
+
+    return null;
+    }
+
+  protected String getRootPath()
+    {
+    if( rootPath == null )
+      rootPath = Util.join( getPathElements(), "/" );
+
+    return rootPath;
+    }
+
+  protected String[] getPathElements()
+    {
+    return new String[]{getTestRoot(), getPlatformName(), getTestCaseName()};
+    }
+
   public String getOutputPath( String path )
     {
     String result = makeOutputPath( path );
@@ -110,9 +125,9 @@ public class PlatformTestCase extends CascadingTestCase
   private String makeOutputPath( String path )
     {
     if( path.startsWith( "/" ) )
-      return rootPath + path;
+      return getRootPath() + path;
 
-    return rootPath + "/" + path;
+    return getRootPath() + "/" + path;
     }
 
   public String getTestCaseName()

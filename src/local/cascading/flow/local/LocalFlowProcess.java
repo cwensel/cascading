@@ -40,14 +40,9 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   private final Properties config;
   private LocalStepStats stepStats;
 
-  public LocalFlowProcess( Properties config )
+  public LocalFlowProcess( FlowSession flowSession, Properties config )
     {
-    this.config = config;
-    }
-
-  public LocalFlowProcess( FlowSession currentSession, Properties config )
-    {
-    super( currentSession );
+    super( flowSession );
     this.config = config;
     }
 

@@ -23,7 +23,6 @@ package cascading.cascade;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -51,6 +49,7 @@ import cascading.flow.FlowSkipStrategy;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
+import cascading.util.Version;
 import org.jgrapht.Graphs;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
@@ -88,9 +87,6 @@ public class Cascade implements Runnable
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Cascade.class );
-
-  /** Field versionProperties */
-  private static Properties versionProperties;
 
   /** Field id */
   private String id;
@@ -186,7 +182,7 @@ public class Cascade implements Runnable
   private void setIDOnFlow()
     {
     for( Flow flow : getFlows() )
-      flow.setProperty( "cascading.cascade.id", getID() );
+      flow.setCascade( this );
     }
 
   /**
@@ -382,7 +378,7 @@ public class Cascade implements Runnable
   /** Method run implements the Runnable run method. */
   public void run()
     {
-    printBanner();
+    Version.printBanner();
 
     if( LOG.isInfoEnabled() )
       logInfo( "starting" );
@@ -563,18 +559,19 @@ public class Cascade implements Runnable
       Writer writer = new FileWriter( filename );
 
       Util.writeDOT( writer, graph, new IntegerNameProvider<String>(), new VertexNameProvider<String>()
-      {
-      public String getVertexName( String object )
         {
-        return object.toString().replaceAll( "\"", "\'" );
-        }
-      }, new EdgeNameProvider<Flow.FlowHolder>()
+        public String getVertexName( String object )
+          {
+          return object.toString().replaceAll( "\"", "\'" );
+          }
+        }, new EdgeNameProvider<Flow.FlowHolder>()
       {
       public String getEdgeName( Flow.FlowHolder object )
         {
         return object.flow.getName().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
         }
-      } );
+      }
+      );
 
       writer.close();
       }
@@ -603,53 +600,6 @@ public class Cascade implements Runnable
   private void logWarn( String message, Throwable throwable )
     {
     LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
-    }
-
-  public static synchronized void printBanner()
-    {
-    if( versionProperties != null )
-      return;
-
-    versionProperties = new Properties();
-
-    try
-      {
-      InputStream stream = Cascade.class.getClassLoader().getResourceAsStream( "cascading/version.properties" );
-
-      if( stream == null )
-        return;
-
-      versionProperties.load( stream );
-
-      stream = Cascade.class.getClassLoader().getResourceAsStream( "cascading/build.number.properties" );
-
-      if( stream != null )
-        versionProperties.load( stream );
-
-      String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
-      String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
-      String releaseBuild = versionProperties.getProperty( "build.number", null );
-      String hadoopVersion = versionProperties.getProperty( "cascading.hadoop.compatible.version" );
-      String releaseFull = null;
-
-      if( releaseMinor == null )
-        releaseFull = releaseMajor;
-      else
-        releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
-
-      String message = null;
-
-      if( releaseBuild == null )
-        message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, hadoopVersion );
-      else
-        message = String.format( "Concurrent, Inc - Cascading %s%s [%s]", releaseFull, releaseBuild, hadoopVersion );
-
-      LOG.info( message );
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "unable to load version information", exception );
-      }
     }
 
   /** Class CascadeJob manages Flow execution in the current Cascade instance. */
@@ -766,5 +716,4 @@ public class Cascade implements Runnable
       return false;
       }
     }
-
   }

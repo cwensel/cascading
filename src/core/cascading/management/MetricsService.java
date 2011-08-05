@@ -19,35 +19,34 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.stats;
+package cascading.management;
 
-import cascading.flow.planner.FlowStep;
-import cascading.management.ClientState;
+import cascading.util.CascadingService;
 
-/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class StepStats extends CascadingStats
+/**
+ *
+ */
+public interface MetricsService extends CascadingService
   {
-  String stepID;
+  String METRICS_SERVICE_CLASS_PROPERTY = "cascading.management.metrics.service.classname";
 
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected StepStats( FlowStep flowStep, ClientState clientState )
-    {
-    super( flowStep.getName(), clientState );
+  void increment( String[] context, int amount );
 
-    this.stepID = flowStep.getID();
-    }
+  void set( String[] context, String value );
 
-  @Override
-  public Object getID()
-    {
-    return stepID;
-    }
+  void set( String[] context, int value );
 
-  @Override
-  public String toString()
-    {
-    return "Step{" + getStatsString() + '}';
-    }
+  void set( String[] context, long value );
 
-  public abstract void captureJobStats();
+  String getString( String[] context );
+
+  int getInt( String[] context );
+
+  long getLong( String[] context );
+
+  boolean compareSet( String[] context, String isValue, String toValue );
+
+  boolean compareSet( String[] context, int isValue, int toValue );
+
+  boolean compareSet( String[] context, long isValue, long toValue );
   }

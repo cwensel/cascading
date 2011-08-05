@@ -19,35 +19,19 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.stats;
+package cascading.management.hadoop;
 
-import cascading.flow.planner.FlowStep;
-import cascading.management.ClientState;
+import cascading.flow.FlowProcess;
+import cascading.management.SliceState;
 
-/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class StepStats extends CascadingStats
+/**
+ *
+ */
+public class ReducerSliceState extends SliceState
   {
-  String stepID;
-
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected StepStats( FlowStep flowStep, ClientState clientState )
+  public ReducerSliceState( FlowProcess currentProcess )
     {
-    super( flowStep.getName(), clientState );
-
-    this.stepID = flowStep.getID();
+    super( currentProcess );
+    this.stage = "reducer";
     }
-
-  @Override
-  public Object getID()
-    {
-    return stepID;
-    }
-
-  @Override
-  public String toString()
-    {
-    return "Step{" + getStatsString() + '}';
-    }
-
-  public abstract void captureJobStats();
   }

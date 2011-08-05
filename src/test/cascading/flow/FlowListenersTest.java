@@ -42,8 +42,19 @@ public class FlowListenersTest extends CascadingTestCase
     {
 
     @Override
-    protected void setConfig( Map<Object, Object> properties, Object parentConfig )
+    protected void initConfig( Map<Object, Object> properties, Object parentConfig )
       {
+      }
+
+    @Override
+    protected void setConfigProperty( Object object, Object key, Object value )
+      {
+      }
+
+    @Override
+    protected Object newConfig( Object defaultConfig )
+      {
+      return null;
       }
 
     @Override
@@ -54,6 +65,12 @@ public class FlowListenersTest extends CascadingTestCase
 
     @Override
     public Object getConfigCopy()
+      {
+      return null;
+      }
+
+    @Override
+    protected Map<Object, Object> getConfigAsProperties()
       {
       return null;
       }

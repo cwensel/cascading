@@ -23,7 +23,6 @@ package cascading.flow.local;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -38,12 +37,8 @@ import cascading.tap.Tap;
  */
 public class LocalPlanner extends FlowPlanner
   {
-  /** Field jobConf */
-  private final Properties config;
-
-  public LocalPlanner( Properties config )
+  public LocalPlanner()
     {
-    this.config = config;
     }
 
   @Override
@@ -90,7 +85,7 @@ public class LocalPlanner extends FlowPlanner
       sinks = new HashMap<String, Tap>( sinks );
       traps = new HashMap<String, Tap>( traps );
 
-      return new LocalFlow( properties, config, flowName, elementGraph, stepGraph, sources, sinks, traps );
+      return new LocalFlow( properties, null, flowName, elementGraph, stepGraph, sources, sinks, traps );
       }
     catch( Exception exception )
       {

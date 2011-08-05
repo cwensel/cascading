@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added management interfaces for capturing detailed statistics.
+
   Decoupled core from Apache Hadoop, removed stack based streaming model. Use c.f.h.HadoopFlowConnector to plan
   Hadoop specific flows.
 
