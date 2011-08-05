@@ -21,19 +21,47 @@
 
 package cascading.management;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.util.ServiceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class CascadingServices
   {
+  private static final Logger LOG = LoggerFactory.getLogger( CascadingServices.class );
+
+  public static final String DEFAULT_PROPERTIES = "cascading/management/service.properties";
+
+  static Properties defaultProperties;
+
   Map<Object, Object> properties;
 
   MetricsService metricsService;
   DocumentService objectService;
+
+  static
+    {
+    defaultProperties = new Properties();
+
+    InputStream input = CascadingServices.class.getClassLoader().getResourceAsStream( DEFAULT_PROPERTIES );
+
+    try
+      {
+      if( input != null )
+        defaultProperties.load( input );
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to load properties from {}", DEFAULT_PROPERTIES, exception );
+      }
+    }
 
   public CascadingServices( Map<Object, Object> properties )
     {
@@ -61,9 +89,23 @@ public class CascadingServices
     return objectService;
     }
 
+  public ClientState createClientState( ClientType clientType, String id )
+    {
+    ClientState clientState = (ClientState) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY );
+
+    if( clientState != null )
+      {
+      clientState.initialize( this, clientType, id );
+
+      return clientState;
+      }
+
+    return ClientState.NULL;
+    }
+
   protected MetricsService createMetricsService()
     {
-    MetricsService service = (MetricsService) ServiceUtil.loadServiceFrom( getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
+    MetricsService service = (MetricsService) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       return service;
@@ -73,7 +115,7 @@ public class CascadingServices
 
   protected DocumentService createObjectService()
     {
-    DocumentService service = (DocumentService) ServiceUtil.loadServiceFrom( getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
+    DocumentService service = (DocumentService) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       return service;

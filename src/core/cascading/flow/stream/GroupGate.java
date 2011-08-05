@@ -96,6 +96,12 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     this.trapHandler = trapHandler;
     }
 
+  @Override
+  public boolean hasTrapHandler()
+    {
+    return trapHandler != null;
+    }
+
   protected void handleReThrowableException( String message, Throwable throwable )
     {
     trapHandler.handleReThrowableException( message, throwable );

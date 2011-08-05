@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -351,7 +352,12 @@ public class Util
     if( properties == null )
       return defaultValue;
 
-    A value = (A) properties.get( key );
+    A value = null;
+
+    if( properties instanceof Properties )
+      value = (A) ( (Properties) properties ).getProperty( key );
+    else
+      value = (A) properties.get( key );
 
     return value == null ? defaultValue : value;
     }

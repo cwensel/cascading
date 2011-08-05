@@ -206,18 +206,26 @@ public abstract class FlowConnector
 
   public static void setApplicationID( Map<Object, Object> properties )
     {
-    if( appID == null )
-      {
-      String appName = getApplicationName( properties );
-      appID = Util.createUniqueID( appName == null ? "appnameseed" : appName );
-      }
-
-    properties.put( "cascading.app.id", appID );
+    properties.put( "cascading.app.id", getAppID( properties ) );
     }
 
   public static String getApplicationID( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.app.id", (String) appID );
+    if( properties == null )
+      return getAppID( null );
+
+    return Util.getProperty( properties, "cascading.app.id", getAppID( properties ) );
+    }
+
+  private static String getAppID( Map<Object, Object> properties )
+    {
+    if( appID == null )
+      {
+      String appName = properties == null ? "appnameseed" : getApplicationName( properties );
+      appID = Util.createUniqueID( appName );
+      }
+
+    return appID;
     }
 
   public static void setApplicationName( Map<Object, Object> properties, String name )
@@ -240,6 +248,26 @@ public abstract class FlowConnector
   public static String getApplicationVersion( Map<Object, Object> properties )
     {
     return Util.getProperty( properties, "cascading.app.version", (String) null );
+    }
+
+  public static void addApplicationTag( Map<Object, Object> properties, String tag )
+    {
+    if( tag == null )
+      return;
+
+    String tags = Util.getProperty( properties, "cascading.app.tags", (String) null );
+
+    if( tags != null )
+      tags = Util.join( ",", tag.trim(), tags );
+    else
+      tags = tag;
+
+    properties.put( "cascading.app.tags", tags );
+    }
+
+  public static String getApplicationTags( Map<Object, Object> properties )
+    {
+    return Util.getProperty( properties, "cascading.app.tags", (String) null );
     }
 
   protected FlowConnector()

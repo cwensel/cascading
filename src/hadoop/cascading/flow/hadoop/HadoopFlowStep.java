@@ -33,7 +33,6 @@ import cascading.flow.Scope;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.CascadingServices;
-import cascading.management.ClientState;
 import cascading.management.ClientType;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hadoop18TapUtil;
@@ -167,7 +166,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
   public FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
-    return new HadoopFlowStepJob( new ClientState( services, ClientType.process, getID() ), this, getInitializedConfig( flowProcess, parentConfig ) );
+    return new HadoopFlowStepJob( services.createClientState( ClientType.process, getID() ), this, getInitializedConfig( flowProcess, parentConfig ) );
     }
 
   /**

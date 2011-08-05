@@ -70,7 +70,7 @@ public class FlowListenersTest extends CascadingTestCase
       }
 
     @Override
-    protected Map<Object, Object> getConfigAsProperties()
+    public Map<Object, Object> getConfigAsProperties()
       {
       return null;
       }

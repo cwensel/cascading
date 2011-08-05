@@ -71,7 +71,7 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
 
       for( int i = 0; i < taps.length; i++ )
         {
-        Config mergedConf = flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
+        Config mergedConf = childConfigs == null ? conf : flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
         Tap tap = taps[ i ];
         LOG.info( "opening for write: {}", tap.toString() );
 

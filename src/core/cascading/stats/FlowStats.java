@@ -28,91 +28,38 @@ import java.util.List;
 import java.util.Set;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.management.ClientState;
 
 
 /** Class FlowStats collects {@link Flow} specific statistics. */
 public class FlowStats extends CascadingStats
   {
-  final String appID;
-  final String appName;
-  final String appVersion;
-  final String flowID;
+  final Flow flow;
   final List<StepStats> stepStatsList = new ArrayList<StepStats>();
-  private FlowInfo flowInfo;
 
   public FlowStats( Flow flow, ClientState clientState )
     {
     super( flow.getName(), clientState );
-
-    this.appID = flow.getAppID();
-    this.appName = flow.getAppName();
-    this.appVersion = flow.getAppVersion();
-    this.flowID = flow.getID();
-    this.flowInfo = new FlowInfo( flow );
+    this.flow = flow;
     }
 
   public String getAppID()
     {
-    return appID;
-    }
-
-  public String getAppName()
-    {
-    return appName;
-    }
-
-  public String getAppVersion()
-    {
-    return appVersion;
+    return FlowConnector.getApplicationID( flow.getConfigAsProperties() );
     }
 
   @Override
-  public Object getID()
+  public String getID()
     {
-    return flowID;
+    return flow.getID();
     }
 
   @Override
   public void markPending()
     {
     super.markPending();
-    clientState.record( flowInfo );
-    }
-
-  @Override
-  public void markRunning()
-    {
-    super.markRunning();
-    clientState.record( flowInfo );
-    }
-
-  @Override
-  public void markSuccessful()
-    {
-    super.markSuccessful();
-    clientState.record( flowInfo );
-    }
-
-  @Override
-  public void markSkipped()
-    {
-    super.markSkipped();
-    clientState.record( flowInfo );
-    }
-
-  @Override
-  public void markStopped()
-    {
-    super.markStopped();
-    clientState.record( flowInfo );
-    }
-
-  @Override
-  public void markFailed( Throwable throwable )
-    {
-    super.markFailed( throwable );
-    clientState.record( flowInfo );
+    clientState.recordFlow( flow );
     }
 
   public void addStepStats( StepStats stepStats )

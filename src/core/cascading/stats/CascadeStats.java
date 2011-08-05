@@ -45,7 +45,7 @@ public class CascadeStats extends CascadingStats
     }
 
   @Override
-  public Object getID()
+  public String getID()
     {
     return cascadeID;
     }

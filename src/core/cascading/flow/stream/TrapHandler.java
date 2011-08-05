@@ -84,6 +84,13 @@ public class TrapHandler
     trapCollectors.clear();
     }
 
+  public TrapHandler( FlowProcess flowProcess )
+    {
+    this.flowProcess = flowProcess;
+    this.trap = null;
+    this.trapName = null;
+    }
+
   public TrapHandler( FlowProcess flowProcess, Tap trap, String trapName )
     {
     this.flowProcess = flowProcess;
@@ -111,7 +118,7 @@ public class TrapHandler
   protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
     {
     if( trap == null )
-      throw new DuctException( throwable );
+      handleReThrowableException( "no trap available", throwable );
 
     if( tupleEntry == null )
       {

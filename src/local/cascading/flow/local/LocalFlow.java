@@ -76,7 +76,7 @@ public class LocalFlow extends Flow<Properties>
     }
 
   @Override
-  protected Map<Object, Object> getConfigAsProperties()
+  public Map<Object, Object> getConfigAsProperties()
     {
     return config;
     }

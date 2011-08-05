@@ -21,11 +21,16 @@
 
 package cascading.management;
 
+import cascading.flow.Flow;
+import cascading.stats.CascadingStats;
+
 /**
  *
  */
-public class ClientState extends BaseState
+public abstract class ClientState extends BaseState
   {
+  public static final String STATE_SERVICE_CLASS_PROPERTY = "cascading.management.state.service.classname";
+
   public static ClientState NULL = new ClientState()
   {
   @Override
@@ -43,15 +48,20 @@ public class ClientState extends BaseState
     {
     return new String[ 0 ];
     }
-  };
 
-  protected ClientState()
+  @Override
+  public void recordStats( CascadingStats stats )
     {
     }
 
-  public ClientState( CascadingServices cascadingServices, ClientType clientType, String id )
+  @Override
+  public void recordFlow( Flow flow )
     {
-    super( cascadingServices, clientType, id );
+    }
+  };
+
+  public ClientState()
+    {
     }
 
   @Override
@@ -65,11 +75,19 @@ public class ClientState extends BaseState
     setMetric( status, time );
     }
 
-  public void record( Object object )
+  public abstract void recordStats( CascadingStats stats );
+
+  public abstract void recordFlow( Flow flow );
+
+  public void record( String id, Object object )
     {
-    store( getClientType().toString(), object.getClass().getSimpleName(), object );
+    store( id, object );
     }
 
+  public void submit( long time )
+    {
+    setMetric( "state", "submit", time );
+    }
 
   public void start( long time )
     {

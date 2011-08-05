@@ -58,6 +58,9 @@ public abstract class CascadingStats implements Serializable
 
   /** Field status */
   Status status = Status.PENDING;
+
+  /** Field submitTime */
+  long submitTime;
   /** Field startTime */
   long startTime;
   /** Field finishedTime */
@@ -87,7 +90,7 @@ public abstract class CascadingStats implements Serializable
    *
    * @return the ID (type Object) of this CascadingStats object.
    */
-  public abstract Object getID();
+  public abstract String getID();
 
   /**
    * Method getName returns the name of this CascadingStats object.
@@ -111,13 +114,23 @@ public abstract class CascadingStats implements Serializable
     }
 
   /**
-   * Method isPending returns true if no work has started.
+   * Method isPending returns true if no work has been submitted.
    *
    * @return the pending (type boolean) of this CascadingStats object.
    */
   public boolean isPending()
     {
     return status == Status.PENDING;
+    }
+
+  /**
+   * Method isSubmitted returns true if no work has started.
+   *
+   * @return the submitted (type boolean) of this CascadingStats object.
+   */
+  public boolean isSubmitted()
+    {
+    return status == Status.SUBMITTED;
     }
 
   /**
@@ -185,13 +198,31 @@ public abstract class CascadingStats implements Serializable
 
   public void markPending()
     {
-    this.clientState.record( this );
+    this.clientState.recordStats( this );
+    }
+
+  public void markSubmitted()
+    {
+    if( status != Status.PENDING )
+      throw new IllegalStateException( "may not mark flow as " + Status.SUBMITTED + ", is already " + status );
+
+    status = Status.SUBMITTED;
+    markSubmitTime();
+
+    clientState.submit( submitTime );
+    clientState.setStatus( status, submitTime );
+    clientState.recordStats( this );
+    }
+
+  protected void markSubmitTime()
+    {
+    submitTime = System.currentTimeMillis();
     }
 
   /** Method markRunning sets the status to running. */
   public void markRunning()
     {
-    if( status != Status.PENDING )
+    if( status != Status.PENDING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.RUNNING + ", is already " + status );
 
     status = Status.RUNNING;
@@ -199,7 +230,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.start( startTime );
     clientState.setStatus( status, startTime );
-    clientState.record( this );
+    clientState.recordStats( this );
     }
 
   protected void markStartTime()
@@ -210,7 +241,7 @@ public abstract class CascadingStats implements Serializable
   /** Method markSuccessful sets the status to successful. */
   public void markSuccessful()
     {
-    if( status != Status.RUNNING )
+    if( status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.SUCCESSFUL + ", is already " + status );
 
     status = Status.SUCCESSFUL;
@@ -218,7 +249,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
-    clientState.record( this );
+    clientState.recordStats( this );
     }
 
   private void markFinishedTime()
@@ -233,7 +264,7 @@ public abstract class CascadingStats implements Serializable
    */
   public void markFailed( Throwable throwable )
     {
-    if( status != Status.RUNNING )
+    if( status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.FAILED + ", is already " + status );
 
     status = Status.FAILED;
@@ -242,20 +273,20 @@ public abstract class CascadingStats implements Serializable
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
-    clientState.record( this );
+    clientState.recordStats( this );
     }
 
   /** Method markStopped sets the status to stopped. */
   public void markStopped()
     {
-    if( status != Status.RUNNING )
+    if( status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.STOPPED + ", is already " + status );
 
     status = Status.STOPPED;
     markFinishedTime();
 
     clientState.setStatus( status, finishedTime );
-    clientState.record( this );
+    clientState.recordStats( this );
     clientState.stop( finishedTime );
     }
 
@@ -268,7 +299,17 @@ public abstract class CascadingStats implements Serializable
     status = Status.SKIPPED;
 
     clientState.setStatus( status, System.currentTimeMillis() );
-    clientState.record( this );
+    clientState.recordStats( this );
+    }
+
+  /**
+   * Method getSubmitTime returns the submitTime of this CascadingStats object.
+   *
+   * @return the submitTime (type long) of this CascadingStats object.
+   */
+  public long getSubmitTime()
+    {
+    return submitTime;
     }
 
   /**

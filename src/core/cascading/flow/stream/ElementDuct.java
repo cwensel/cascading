@@ -40,6 +40,8 @@ public interface ElementDuct
 
   void setTrapHandler( TrapHandler trapHandler );
 
+  boolean hasTrapHandler();
+
   void addIncomingScope( Scope incomingScope );
 
   void addOutgoingScope( Scope outgoingScope );

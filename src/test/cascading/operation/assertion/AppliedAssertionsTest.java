@@ -167,12 +167,12 @@ public class AppliedAssertionsTest extends PlatformTestCase
       flow.complete();
 
       if( !pass )
-        fail( "no assertions thrown" );
+        fail( String.format( "no assertions thrown %s %s %s", planLevel, setLevel, pass ) );
       }
     catch( Exception exception )
       {
       if( pass )
-        fail( "assertion thrown" );
+        fail( String.format( "assertion thrown %s %s %s", planLevel, setLevel, pass ) );
       }
 
     if( pass )
@@ -289,12 +289,12 @@ public class AppliedAssertionsTest extends PlatformTestCase
       flow.complete();
 
       if( !pass )
-        fail( "no assertions thrown" );
+        fail( String.format( "no assertions thrown %s %s %s", planLevel, setLevel, pass ) );
       }
     catch( Exception exception )
       {
       if( pass )
-        fail( "assertion thrown" );
+        fail( String.format( "assertion thrown %s %s %s", planLevel, setLevel, pass ) );
       }
 
     if( pass )

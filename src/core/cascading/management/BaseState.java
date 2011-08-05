@@ -21,22 +21,31 @@
 
 package cascading.management;
 
+import java.util.Map;
+
+import cascading.util.CascadingService;
+
 /**
  *
  */
-public abstract class BaseState
+public abstract class BaseState implements CascadingService
   {
-  private ClientType clientType;
+  private ClientType clientType = ClientType.session;
   private String id;
 
   MetricsService metricsService = new NullMetricsService();
   DocumentService objectService = new NullDocumentService();
 
-  protected BaseState()
+  public BaseState()
     {
     }
 
-  public BaseState( CascadingServices cascadingServices, ClientType clientType, String id )
+  @Override
+  public void setProperties( Map<Object, Object> properties )
+    {
+    }
+
+  public void initialize( CascadingServices cascadingServices, ClientType clientType, String id )
     {
     this.clientType = clientType;
     this.id = id;
@@ -82,14 +91,9 @@ public abstract class BaseState
     return id;
     }
 
-  protected void store( Enum metric, Object value )
+  protected void store( String id, Object value )
     {
-    objectService.put( getID(), value );
-    }
-
-  protected void store( String group, String metric, Object value )
-    {
-    objectService.put( getID(), value );
+    objectService.put( id, value );
     }
 
   protected void setMetric( Enum metric, long value )

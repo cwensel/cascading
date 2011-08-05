@@ -180,6 +180,9 @@ public abstract class StepStreamGraph extends StreamGraph
           break;
           }
         }
+
+      if( !elementDuct.hasTrapHandler() )
+        elementDuct.setTrapHandler( new TrapHandler( flowProcess ) );
       }
     }
 

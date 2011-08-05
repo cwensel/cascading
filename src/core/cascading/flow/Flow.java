@@ -99,12 +99,8 @@ public abstract class Flow<Config> implements Runnable
   private String id;
   /** Field name */
   private String name;
-  /** Field appID */
-  private String appID;
-  /** Field appName */
-  private String appName;
-  /** Field appVersion */
-  private String appVersion;
+  /** Field tags */
+  private String tags;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field skipStrategy */
@@ -112,11 +108,11 @@ public abstract class Flow<Config> implements Runnable
   /** Field flowStats */
   protected final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
-  protected Map<String, Tap> sources;
+  protected Map<String, Tap> sources = Collections.EMPTY_MAP;
   /** Field sinks */
-  protected Map<String, Tap> sinks;
+  protected Map<String, Tap> sinks = Collections.EMPTY_MAP;
   /** Field traps */
-  private Map<String, Tap> traps;
+  private Map<String, Tap> traps = Collections.EMPTY_MAP;
   /** Field stopJobsOnExit */
   protected boolean stopJobsOnExit = true;
   /** Field submitPriority */
@@ -177,9 +173,6 @@ public abstract class Flow<Config> implements Runnable
   protected Flow( Map<Object, Object> properties, Config defaultConfig, String name )
     {
     this.name = name;
-    this.appID = makeAppID( properties );
-    this.appName = makeAppName( properties );
-    this.appVersion = makeAppVersion( properties );
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
     initSteps();
@@ -191,9 +184,6 @@ public abstract class Flow<Config> implements Runnable
   protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
-    this.appID = makeAppID( properties );
-    this.appName = makeAppName( properties );
-    this.appVersion = makeAppVersion( properties );
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
     addSessionProperties( properties );
@@ -211,9 +201,6 @@ public abstract class Flow<Config> implements Runnable
   protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
     {
     this.name = name;
-    this.appID = makeAppID( properties );
-    this.appName = makeAppName( properties );
-    this.appVersion = makeAppVersion( properties );
     this.stepGraph = stepGraph;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -230,14 +217,10 @@ public abstract class Flow<Config> implements Runnable
   private void addSessionProperties( Map<Object, Object> properties )
     {
     properties.put( "cascading.flow.id", getID() );
-    properties.put( "cascading.app.id", getAppID() );
-    properties.put( "cascading.app.name", getAppName() );
-    properties.put( "cascading.app.version", getAppVersion() );
-    }
-
-  private String makeAppID( Map<Object, Object> properties )
-    {
-    return FlowConnector.getApplicationID( properties );
+    properties.put( "cascading.flow.tags", getTags() );
+    FlowConnector.setApplicationID( properties );
+    properties.put( "cascading.app.name", makeAppName( properties ) );
+    properties.put( "cascading.app.version", makeAppVersion( properties ) );
     }
 
   private String makeAppName( Map<Object, Object> properties )
@@ -305,12 +288,14 @@ public abstract class Flow<Config> implements Runnable
 
   private ClientState getClientState()
     {
-    CascadingServices services = getFlowSession().getCascadingServices();
-    return new ClientState( services, ClientType.session, getID() );
+    return getFlowSession().getCascadingServices().createClientState( ClientType.session, getID() );
     }
 
   private void initSteps()
     {
+    if( stepGraph == null )
+      return;
+
     for( FlowStep flowStep : stepGraph.vertexSet() )
       flowStep.setParentFlowID( getID() );
     }
@@ -359,19 +344,9 @@ public abstract class Flow<Config> implements Runnable
     return id;
     }
 
-  public String getAppID()
+  public String getTags()
     {
-    return appID;
-    }
-
-  public String getAppName()
-    {
-    return appName;
-    }
-
-  public String getAppVersion()
-    {
-    return appVersion;
+    return tags;
     }
 
   /**
@@ -475,7 +450,7 @@ public abstract class Flow<Config> implements Runnable
 
   public abstract Config getConfigCopy();
 
-  protected abstract Map<Object, Object> getConfigAsProperties();
+  public abstract Map<Object, Object> getConfigAsProperties();
 
   public void setProperty( String key, String value )
     {
@@ -791,6 +766,9 @@ public abstract class Flow<Config> implements Runnable
     if( steps != null )
       return steps;
 
+    if( stepGraph == null )
+      return Collections.EMPTY_LIST;
+
     TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( stepGraph );
 
     steps = new ArrayList<FlowStep>();
@@ -1101,6 +1079,7 @@ public abstract class Flow<Config> implements Runnable
 
     try
       {
+      // mark only running, not submitted
       flowStats.markRunning();
 
       fireOnStarting();

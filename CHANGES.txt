@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added SUBMITTED status to c.s.CascadingStats to properly track when a job is submitted vs when it actually begins
+  processing after being queued.
+
   Added management interfaces for capturing detailed statistics.
 
   Decoupled core from Apache Hadoop, removed stack based streaming model. Use c.f.h.HadoopFlowConnector to plan

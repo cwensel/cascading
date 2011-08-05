@@ -38,7 +38,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field stepName */
   protected final String stepName;
   /** Field pollingInterval */
-  protected long pollingInterval = 5000;
+  protected long pollingInterval = 1000;
   /** Field predecessors */
   protected List<FlowStepJob> predecessors;
   /** Field latch */
@@ -131,7 +131,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
     if( flowStep.isInfoEnabled() )
       flowStep.logInfo( "starting step: " + stepName );
 
-    stepStats.markRunning();
+    stepStats.markSubmitted();
 
     internalNonBlockingStart();
 
@@ -165,6 +165,9 @@ public abstract class FlowStepJob implements Callable<Throwable>
     {
     while( true )
       {
+      if( stepStats.isSubmitted() && isStarted() )
+        stepStats.markRunning();
+
       if( stop || internalNonBlockingIsComplete() )
         break;
 

@@ -132,8 +132,8 @@ public class HadoopFlow extends Flow<JobConf>
 
   protected void initConfig( Map<Object, Object> properties, JobConf parentConfig )
     {
-    if( parentConfig == null && properties != null )
-      parentConfig = createConfig( properties, HadoopPlanner.getJobConf( properties ) );
+    if( properties != null )
+      parentConfig = createConfig( properties, parentConfig );
 
     if( parentConfig == null ) // this is ok, getJobConf will pass a default parent in
       return;
@@ -179,7 +179,7 @@ public class HadoopFlow extends Flow<JobConf>
     }
 
   @Override
-  protected Map<Object, Object> getConfigAsProperties()
+  public Map<Object, Object> getConfigAsProperties()
     {
     return HadoopUtil.createProperties( getConfig() );
     }

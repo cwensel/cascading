@@ -22,6 +22,7 @@
 package cascading.util;
 
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.CascadingException;
 
@@ -38,37 +39,42 @@ public class ServiceUtil
     return null;
     }
 
-  public static CascadingService loadServiceFrom( Map<Object, Object> properties, String property )
+  public static CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
-    return createService( properties, (String) properties.get( property ) );
+    String className = (String) defaultProperties.getProperty( property );
+
+    if( ( className == null || className.isEmpty() ) && properties != null )
+      className = (String) properties.get( property );
+
+    return createService( properties, className );
     }
 
   public static CascadingService createService( Map<Object, Object> properties, String className )
     {
-    if( className == null )
+    if( className == null || className.isEmpty() )
       return null;
 
     try
       {
       Class type = Thread.currentThread().getContextClassLoader().loadClass( className );
 
-      CascadingService cluster = (CascadingService) type.newInstance();
+      CascadingService service = (CascadingService) type.newInstance();
 
-      cluster.setProperties( properties );
+      service.setProperties( properties );
 
-      return cluster;
+      return service;
       }
     catch( ClassNotFoundException exception )
       {
-      throw new CascadingException( "unable to find cluster class: " + className, exception );
+      throw new CascadingException( "unable to find service class: " + className, exception );
       }
     catch( IllegalAccessException exception )
       {
-      throw new CascadingException( "unable to instantiate cluster class: " + className, exception );
+      throw new CascadingException( "unable to instantiate service class: " + className, exception );
       }
     catch( InstantiationException exception )
       {
-      throw new CascadingException( "unable to instantiate cluster class: " + className, exception );
+      throw new CascadingException( "unable to instantiate service class: " + className, exception );
       }
 
     }

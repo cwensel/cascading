@@ -38,7 +38,7 @@ public abstract class StepStats extends CascadingStats
     }
 
   @Override
-  public Object getID()
+  public String getID()
     {
     return stepID;
     }

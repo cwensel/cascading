@@ -76,6 +76,12 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
     this.trapHandler = trapHandler;
     }
 
+  @Override
+  public boolean hasTrapHandler()
+    {
+    return trapHandler != null;
+    }
+
   public void addIncomingScope( Scope incomingScope )
     {
     incomingScopes.add( incomingScope );

@@ -35,7 +35,7 @@ public abstract class SliceState extends BaseState
 
   protected SliceState( FlowProcess currentProcess )
     {
-    super( currentProcess.getCurrentSession().getCascadingServices(), ClientType.slice, String.valueOf( currentProcess.getCurrentTaskNum() ) );
+    initialize( currentProcess.getCurrentSession().getCascadingServices(), ClientType.slice, String.valueOf( currentProcess.getCurrentTaskNum() ) );
     this.sessionID = currentProcess.getCurrentSession().getID();
     this.processID = currentProcess.getID();
     this.sliceID = String.valueOf( currentProcess.getCurrentTaskNum() );

@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
@@ -62,7 +63,7 @@ public class ProcessFlow<P> extends HadoopFlow
   @ConstructorProperties({"name", "process"})
   public ProcessFlow( String name, P process )
     {
-    this( null, name, process );
+    this( new Properties(), name, process );
     }
 
   /**

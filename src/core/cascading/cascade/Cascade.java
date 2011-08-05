@@ -385,6 +385,7 @@ public class Cascade implements Runnable
 
     try
       {
+      // mark running, not submitted
       cascadeStats.markRunning();
 
       initializeNewJobsMap();
