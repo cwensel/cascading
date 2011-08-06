@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2.4 [unreleased]
+1.2.4
 
   Added info logging of current split input path with a task, if any.
 
