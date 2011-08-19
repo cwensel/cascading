@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply from: '../testing.gradle'
+
+pomDirName = 'poms/core'
+archivesBaseName = 'cascading-core'
+
+sourceSets {
+  main {
+    classesDir = new File("${buildDir}/classes/core")
+
+    java {
+      srcDir 'cascading'
+    }
+
+    resources {
+      srcDir 'cascading'
+    }
+  }
+}
+
+dependencies {
+  compile group: 'thirdparty', name: 'jgrapht-jdk1.6', version: '0.8.1'
+  compile group: 'riffle', name: 'riffle', version: '0.1-dev'
+  compile group: 'org.codehaus.janino', name: 'janino', version: '2.5.16'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
+  compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
+  compile group: 'log4j', name: 'log4j', version: '1.2.16'
+}
+
+jar {
+  from '../../version.properties'
+}
+
+assemble << {
+  def distDir = mkdir("${buildDir}/dist")
+
+  copy {
+    into "${distDir}/lib/cascading-core"
+    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains('cascading')
+    }.collect { dep ->
+      dep.moduleArtifacts.collect { it.file }
+    })
+  }
+
+  copy {
+    into distDir
+    from configurations.default.allArtifactFiles
+  }
+}
+
+test {
+  doFirst {
+    include getTestIncludes(/@PlatformTest.*none/)
+    systemProperties = setTestingProperties('none')
+  }
+
+  testReportDir = new File(testReportDir, 'none')
+  testResultsDir = new File(testResultsDir, 'none')
+}

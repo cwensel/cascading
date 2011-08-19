@@ -40,6 +40,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
+import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -89,9 +90,14 @@ public class HadoopPlatform extends TestPlatform
       }
     else
       {
-      System.setProperty( "test.build.data", "build" );
-      new File( "build/test/log" ).mkdirs();
-      System.setProperty( "hadoop.log.dir", "build/test/log" );
+      if( Util.isEmpty( System.getProperty( "hadoop.log.dir" ) ) )
+        System.setProperty( "hadoop.log.dir", "build/test/log" );
+
+      if( Util.isEmpty( System.getProperty( "hadoop.tmp.dir" ) ) )
+        System.setProperty( "hadoop.tmp.dir", "build/test/tmp" );
+
+      new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs();
+
       Configuration conf = new Configuration();
 
       dfs = new MiniDFSCluster( conf, 4, true, null );

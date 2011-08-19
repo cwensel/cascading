@@ -33,6 +33,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/xml" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="groovy-1.8.2" level="application" />
   </component>
 </module>
 

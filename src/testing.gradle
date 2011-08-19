@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+project.getTestIncludes = { matcher ->
+  def includes = []
+  new File("${sourceSets.test.classesDir}").eachFileRecurse { file ->
+    if( file.absolutePath =~ /.*Test\.class/ )
+    {
+      def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
+      if( text =~ matcher )
+      {
+        includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
+      }
+    }
+  }
+  includes
+}
+
+project.setTestingProperties = { platform, platformClassName = '' ->
+  System.properties[ 'test.platform' ] = platform
+  System.properties[ 'test.platform.classname' ] = platformClassName
+  System.properties[ 'test.cluster.enabled' ] = 'true'
+  // hadoop hard codes 'build/test' into its test harness, so might as well play along
+  System.properties[ 'test.output.root' ] = new String("${buildDir}/test/output/")
+  System.properties[ 'test.data.path' ] = new String("${projectDir}/../test/data/")
+  System.properties[ 'hadoop.log.dir' ] = new String("${buildDir}/test/log")
+  System.properties[ 'hadoop.tmp.dir' ] = new String("${buildDir}/test/tmp")
+  System.properties
+}

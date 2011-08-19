@@ -16,22 +16,10 @@ General Information:
 
 Building:
 
-  To retrieve all immediate dependencies, excluding Hadoop (see below)
+  To build Cascading (without running the hadoop tests),
 
   > cd <path to cascading>
-  > ant retrieve
-
-  To build Cascading,
-
-  > ant compile
-
-  To make all jars:
-
-  > ant  jar
-
-  To run all tests:
-
-  > ant test
+  > gradle build -x testHadoop
 
   where <path to cascading> is the directory created after cloning or uncompressing the Cascading
   distribution.

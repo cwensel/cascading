@@ -254,7 +254,9 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    GlobHfs source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "src/test/data/?{ppe[_r],owe?}.txt" );
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
+
+    GlobHfs source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r],owe?}.txt" );
 
     assertEquals( 2, source.getTaps().length );
 

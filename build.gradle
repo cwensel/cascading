@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply from: 'version.gradle'
+
+subprojects { subproject ->
+  if( subproject.name != 'src' && subproject.name != 'cascading2' )
+  {
+    apply plugin: 'java'
+
+    buildDir = "${rootDir}/build"
+    group = 'cascading'
+    version = releaseVersion
+    hadoopVersion = releaseHadoopVersion
+
+    repositories {
+      mavenLocal()
+      mavenRepo name: 'central', urls: 'http://repo1.maven.org/maven2'
+      mavenRepo name: 'conjars', urls: 'http://conjars.org/repo/'
+      mavenRepo name: 'apache', urls: 'https://repository.apache.org/content/repositories/releases/'
+    }
+
+    javadoc.onlyIf { false }
+  }
+}
+
+task javadoc(type: Javadoc, dependsOn: ['src:core:assemble', 'src:local:assemble', 'src:hadoop:assemble', 'src:xml:assemble', 'src:test:assemble']) {
+  def nonSrcSubprojects = subprojects.findAll { !['src', 'test'].contains(it.name) }
+
+  source nonSrcSubprojects.collect { it.sourceSets.main.allJava }
+
+  copyright = '<i>Copyright &#169; 2007-2011 Concurrent, Inc. All Rights Reserved.</i>'
+  title = "Cascading ${releaseVersion}"
+
+  classpath = files(nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath })
+  destinationDir = new File(rootDir, 'build/docs/cascading')
+
+  configure(options) {
+    bottom = project.hasProperty('javadocBottom') ? javadocBottom + copyright : copyright
+    links = [
+            'http://java.sun.com/javase/6/docs/api/',
+            'http://dist.codehaus.org/janino/javadoc/',
+            'http://hadoop.apache.org/common/docs/r0.20.2/api/'
+    ]
+  }
+}
+
+task dist(dependsOn: javadoc) << {
+  def distDir = mkdir("${rootDir}/build/dist")
+
+  copy {
+    from 'CHANGES.txt'
+    from 'README.txt'
+    from 'gpl.txt'
+    from 'LICENSE.txt'
+    into distDir
+  }
+
+  copy {
+    from javadoc.destinationDir
+    into "${distDir}/javadoc"
+  }
+}
+
+task publish(type: Zip, dependsOn: dist) {
+  def distDir = mkdir("${rootDir}/build/dist")
+
+  destinationDir = rootDir
+  baseName = "cascading-${releaseVersion}-${releaseHadoopVersion}"
+  extension = 'tgz'
+
+  into(baseName) {
+    from distDir
+  }
+}
+
+publish << {
+  def tmpDir = mkdir("${rootDir}/build/tmp")
+  new File(tmpDir, 'cascading-current.txt').write(baseName)
+}

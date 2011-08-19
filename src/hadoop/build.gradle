@@ -1,0 +1,73 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Cascading is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Cascading is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply from: '../testing.gradle'
+
+pomDirName = 'poms/hadoop'
+archivesBaseName = 'cascading-hadoop'
+
+sourceSets {
+  main {
+    classesDir = new File("${buildDir}/classes/hadoop")
+
+    java {
+      srcDir 'cascading'
+    }
+
+    resources {
+      srcDir 'cascading'
+    }
+  }
+}
+
+dependencies {
+  compile(group: 'org.apache.hadoop', name: 'hadoop-core', version: '0.20.2') {
+    exclude group: 'ant'
+  }
+}
+
+assemble << {
+  def distDir = mkdir("${buildDir}/dist")
+
+  copy {
+    into "${distDir}/lib/cascading-hadoop"
+    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains('cascading') && !dep.name.contains('hadoop')
+    }.collect { dep ->
+      dep.moduleArtifacts.collect { it.file }
+    })
+  }
+
+  copy {
+    into distDir
+    from configurations.default.allArtifactFiles
+  }
+}
+
+test {
+  doFirst {
+    include getTestIncludes(/@PlatformTest.*hadoop/)
+    systemProperties = setTestingProperties('hadoop', 'cascading.test.HadoopPlatform')
+  }
+
+  testReportDir = new File(testReportDir, 'hadoop')
+  testResultsDir = new File(testResultsDir, 'hadoop')
+}

@@ -23,7 +23,9 @@ package data;
 
 public interface InputData
   {
-  String inputPath = "src/test/data/";
+  public static final String TEST_DATA_PATH = "test.data.path";
+
+  String inputPath = System.getProperty( TEST_DATA_PATH, "src/test/data/" );
 
   String inputFileApache = inputPath + "apache.10.txt";
   String inputFileApache200 = inputPath + "apache.200.txt";
