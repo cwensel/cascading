@@ -40,6 +40,8 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.cascade.CascadeDef.cascadeDef;
+
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
  * <p/>
@@ -115,31 +117,26 @@ public class CascadeConnector
    */
   public Cascade connect( String name, Flow... flows )
     {
-    verifyUniqueFlowNames( flows );
     name = name == null ? makeName( flows ) : name;
 
+    CascadeDef cascadeDef = cascadeDef()
+      .setName( name )
+      .addFlows( flows );
+
+    return connect( cascadeDef );
+    }
+
+  public Cascade connect( CascadeDef cascadeDef )
+    {
     SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<String, Flow.FlowHolder>( Flow.FlowHolder.class );
     SimpleDirectedGraph<Flow, Integer> flowGraph = new SimpleDirectedGraph<Flow, Integer>( Integer.class );
 
-    makeTapGraph( tapGraph, flows );
+    makeTapGraph( tapGraph, cascadeDef.getFlowsArray() );
     makeFlowGraph( flowGraph, tapGraph );
 
     verifyNoCycles( flowGraph );
 
-    return new Cascade( name, properties, flowGraph, tapGraph );
-    }
-
-  private void verifyUniqueFlowNames( Flow[] flows )
-    {
-    Set<String> set = new HashSet<String>();
-
-    for( Flow flow : flows )
-      {
-      if( set.contains( flow.getName() ) )
-        throw new CascadeException( "all flow names must be unique, found duplicate: " + flow.getName() );
-
-      set.add( flow.getName() );
-      }
+    return new Cascade( cascadeDef, properties, flowGraph, tapGraph );
     }
 
   private String makeName( Flow[] flows )

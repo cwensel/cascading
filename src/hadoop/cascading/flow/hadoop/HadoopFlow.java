@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.StepGraph;
-import cascading.tap.Tap;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
@@ -114,14 +114,9 @@ public class HadoopFlow extends Flow<JobConf>
     super( properties, jobConf, name );
     }
 
-  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )
     {
-    super( properties, jobConf, name, pipeGraph, stepGraph, sources, sinks, traps );
-    }
-
-  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
-    {
-    super( properties, jobConf, name, stepGraph, sources, sinks, traps );
+    super( properties, jobConf, flowDef, pipeGraph, stepGraph );
     }
 
   protected void initFromProperties( Map<Object, Object> properties )

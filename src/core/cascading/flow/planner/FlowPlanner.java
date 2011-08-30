@@ -32,6 +32,7 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.operation.AssertionLevel;
@@ -74,26 +75,21 @@ public abstract class FlowPlanner
   /**
    * Method buildFlow renders the actual Flow instance.
    *
-   * @param flowName of type String
-   * @param pipes    of type Pipe[]
-   * @param sources  of type Map<String, Tap>
-   * @param sinks    of type Map<String, Tap>
-   * @param traps    of type Map<String, Tap>
-   * @return Flow
+   * @param flowDef@return Flow
    */
-  public abstract Flow buildFlow( String flowName, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps );
+  public abstract Flow buildFlow( FlowDef flowDef );
 
   /** Must be called to determine if all elements of the base pipe assembly are available */
-  protected void verifyAssembly( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected void verifyAssembly( FlowDef flowDef )
     {
-    verifySourceNotSinks( sources, sinks );
+    verifySourceNotSinks( flowDef.getSources(), flowDef.getSinks() );
 
-    verifyTaps( sources, true, true );
-    verifyTaps( sinks, false, true );
-    verifyTaps( traps, false, false );
+    verifyTaps( flowDef.getSources(), true, true );
+    verifyTaps( flowDef.getSinks(), false, true );
+    verifyTaps( flowDef.getTraps(), false, false );
 
-    verifyPipeAssemblyEndPoints( sources, sinks, pipes );
-    verifyTraps( traps, pipes, sources, sinks );
+    verifyPipeAssemblyEndPoints( flowDef );
+    verifyTraps( flowDef );
     }
 
   /** Creates a new ElementGraph instance. */
@@ -139,24 +135,20 @@ public abstract class FlowPlanner
    * <p/>
    * there aren't dupe names in heads or tails.
    * all the sink and source tap names match up with tail and head pipes
-   *
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
-   * @param pipes   of type Pipe[]
    */
   // todo: force dupe names to throw exceptions
-  protected void verifyPipeAssemblyEndPoints( Map<String, Tap> sources, Map<String, Tap> sinks, Pipe[] pipes )
+  protected void verifyPipeAssemblyEndPoints( FlowDef flowDef )
     {
     Set<String> tapNames = new HashSet<String>();
 
-    tapNames.addAll( sources.keySet() );
-    tapNames.addAll( sinks.keySet() );
+    tapNames.addAll( flowDef.getSources().keySet() );
+    tapNames.addAll( flowDef.getSinks().keySet() );
 
     // handle tails
     Set<Pipe> tails = new HashSet<Pipe>();
     Set<String> tailNames = new HashSet<String>();
 
-    for( Pipe pipe : pipes )
+    for( Pipe pipe : flowDef.getTails() )
       {
       if( pipe instanceof SubAssembly )
         {
@@ -192,8 +184,8 @@ public abstract class FlowPlanner
       }
 
 //    Set<String> allTailNames = new HashSet<String>( tailNames );
-    tailNames.removeAll( sinks.keySet() );
-    Set<String> remainingSinks = new HashSet<String>( sinks.keySet() );
+    tailNames.removeAll( flowDef.getSinks().keySet() );
+    Set<String> remainingSinks = new HashSet<String>( flowDef.getSinks().keySet() );
     remainingSinks.removeAll( tailNames );
 
     if( tailNames.size() != 0 )
@@ -201,8 +193,8 @@ public abstract class FlowPlanner
 
     // unlike heads, pipes can input to another pipe and simultaneously be a sink
     // so there is no way to know all the intentional tails, so they aren't listed below in the exception
-    remainingSinks = new HashSet<String>( sinks.keySet() );
-    remainingSinks.removeAll( Arrays.asList( Pipe.names( pipes ) ) );
+    remainingSinks = new HashSet<String>( flowDef.getSinks().keySet() );
+    remainingSinks.removeAll( Arrays.asList( Pipe.names( flowDef.getTailsArray() ) ) );
 
     if( remainingSinks.size() != 0 )
       throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
@@ -211,7 +203,7 @@ public abstract class FlowPlanner
     Set<Pipe> heads = new HashSet<Pipe>();
     Set<String> headNames = new HashSet<String>();
 
-    for( Pipe pipe : pipes )
+    for( Pipe pipe : flowDef.getTails() )
       {
       for( Pipe head : pipe.getHeads() )
         {
@@ -230,14 +222,14 @@ public abstract class FlowPlanner
       }
 
     Set<String> allHeadNames = new HashSet<String>( headNames );
-    headNames.removeAll( sources.keySet() );
-    Set<String> remainingSources = new HashSet<String>( sources.keySet() );
+    headNames.removeAll( flowDef.getSources().keySet() );
+    Set<String> remainingSources = new HashSet<String>( flowDef.getSources().keySet() );
     remainingSources.removeAll( headNames );
 
     if( headNames.size() != 0 )
       throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "], remaining source tap names: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "]" );
 
-    remainingSources = new HashSet<String>( sources.keySet() );
+    remainingSources = new HashSet<String>( flowDef.getSources().keySet() );
     remainingSources.removeAll( allHeadNames );
 
     if( remainingSources.size() != 0 )
@@ -245,15 +237,15 @@ public abstract class FlowPlanner
 
     }
 
-  protected void verifyTraps( Map<String, Tap> traps, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
+  protected void verifyTraps( FlowDef flowDef )
     {
-    verifyTrapsNotSourcesSinks( traps, sources, sinks );
+    verifyTrapsNotSourcesSinks( flowDef.getTraps(), flowDef.getSources(), flowDef.getSinks() );
 
     Set<String> names = new HashSet<String>();
 
-    Collections.addAll( names, Pipe.names( pipes ) );
+    Collections.addAll( names, Pipe.names( flowDef.getTailsArray() ) );
 
-    for( String name : traps.keySet() )
+    for( String name : flowDef.getTraps().keySet() )
       {
       if( !names.contains( name ) )
         throw new PlannerException( "trap name not found in assembly: '" + name + "'" );

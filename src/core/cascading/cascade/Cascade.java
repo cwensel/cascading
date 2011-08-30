@@ -92,6 +92,8 @@ public class Cascade implements Runnable
   private String id;
   /** Field name */
   private final String name;
+  /** Field tags */
+  private String tags;
   /** Field properties */
   private final Map<Object, Object> properties;
   /** Field jobGraph */
@@ -133,13 +135,14 @@ public class Cascade implements Runnable
     }
 
 
-  Cascade( String name, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
+  Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
     {
-    this.name = name;
+    this.name = cascadeDef.getName();
+    this.tags = cascadeDef.getTags();
     this.properties = properties;
     this.jobGraph = jobGraph;
     this.tapGraph = tapGraph;
-    this.cascadeStats = new CascadeStats( name, getID() );
+    this.cascadeStats = new CascadeStats( cascadeDef.getName(), getID() );
     setIDOnFlow();
     }
 
@@ -167,6 +170,11 @@ public class Cascade implements Runnable
       id = Util.createUniqueID( getName() );
 
     return id;
+    }
+
+  public String getTags()
+    {
+    return tags;
     }
 
   /**

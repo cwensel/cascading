@@ -38,6 +38,8 @@ import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.util.Util;
 
+import static cascading.flow.FlowDef.flowDef;
+
 /**
  *
  */
@@ -547,12 +549,23 @@ public abstract class FlowConnector
     {
     name = name == null ? makeName( tails ) : name;
 
-    // choose appropriate planner (when there is more than one)
+    FlowDef flowDef = flowDef()
+      .setName( name )
+      .addSources( sources )
+      .addSinks( sinks )
+      .addTraps( traps )
+      .addTails( tails );
+
+    return connect( flowDef );
+    }
+
+  public Flow connect( FlowDef flowDef )
+    {
     FlowPlanner flowPlanner = createFlowPlanner();
 
     flowPlanner.initialize( this, properties );
 
-    return flowPlanner.buildFlow( name, tails, sources, sinks, traps );
+    return flowPlanner.buildFlow( flowDef );
     }
 
   protected abstract FlowPlanner createFlowPlanner();

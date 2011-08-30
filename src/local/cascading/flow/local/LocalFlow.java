@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.StepGraph;
-import cascading.tap.Tap;
 
 /**
  *
@@ -40,9 +40,9 @@ public class LocalFlow extends Flow<Properties>
   private Properties config;
   private Thread shutdownHook;
 
-  public LocalFlow( Map<Object, Object> properties, Properties config, String flowName, ElementGraph elementGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  public LocalFlow( Map<Object, Object> properties, Properties config, FlowDef flowDef, ElementGraph elementGraph, StepGraph stepGraph )
     {
-    super( properties, config, flowName, elementGraph, stepGraph, sources, sinks, traps );
+    super( properties, config, flowDef, elementGraph, stepGraph );
     }
 
   @Override

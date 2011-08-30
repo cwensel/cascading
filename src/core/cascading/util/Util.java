@@ -33,9 +33,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -539,6 +541,44 @@ public class Util
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
+    }
+
+  public static Properties createProperties( Map<Object, Object> properties, Properties defaultProperties )
+    {
+    Properties results = defaultProperties == null ? new Properties() : new Properties( defaultProperties );
+
+    if( properties == null )
+      return results;
+
+    Set<Object> keys = new HashSet<Object>( properties.keySet() );
+
+    // keys will only be grabbed if both key/value are String, so keep orig keys
+    if( properties instanceof Properties )
+      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
+
+    for( Object key : keys )
+      {
+      Object value = properties.get( key );
+
+      if( value == null && properties instanceof Properties && key instanceof String )
+        value = ( (Properties) properties ).getProperty( (String) key );
+
+      if( value == null ) // don't stuff null values
+        continue;
+
+      // don't let these objects pass, even though toString is called below.
+      if( value instanceof Class )
+        continue;
+
+      results.setProperty( key.toString(), value.toString() );
+      }
+
+    return results;
+    }
+
+  public static boolean isEmpty( String string )
+    {
+    return string == null || string.isEmpty();
     }
 
   public interface RetryOperator<T>

@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added support for c.f.Flow tags via the c.f.FlowDef class.
+
+  Added c.f.FlowDef to allow for creating flow definitions via a fluent builder interface.
+
   Added SUBMITTED status to c.s.CascadingStats to properly track when a job is submitted vs when it actually begins
   processing after being queued.
 

@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
@@ -159,16 +160,16 @@ public class HadoopPlanner extends FlowPlanner
     }
 
   @Override
-  public Flow buildFlow( String flowName, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  public Flow buildFlow( FlowDef flowDef )
     {
     ElementGraph elementGraph = null;
 
     try
       {
       // generic
-      verifyAssembly( pipes, sources, sinks, traps );
+      verifyAssembly( flowDef );
 
-      elementGraph = createElementGraph( pipes, sources, sinks, traps );
+      elementGraph = createElementGraph( flowDef.getTailsArray(), flowDef.getSources(), flowDef.getSinks(), flowDef.getTraps() );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );
@@ -192,14 +193,9 @@ public class HadoopPlanner extends FlowPlanner
       // m/r specific
       handleAdjacentTaps( elementGraph );
 
-      StepGraph stepGraph = new HadoopStepGraph( flowName, elementGraph, traps );
+      StepGraph stepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph, flowDef.getTrapsCopy() );
 
-      // clone data
-      sources = new HashMap<String, Tap>( sources );
-      sinks = new HashMap<String, Tap>( sinks );
-      traps = new HashMap<String, Tap>( traps );
-
-      return new HadoopFlow( properties, jobConf, flowName, elementGraph, stepGraph, sources, sinks, traps );
+      return new HadoopFlow( properties, jobConf, flowDef, elementGraph, stepGraph );
       }
     catch( Exception exception )
       {

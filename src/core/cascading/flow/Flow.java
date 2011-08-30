@@ -181,33 +181,18 @@ public abstract class Flow<Config> implements Runnable
     this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, ElementGraph pipeGraph, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected Flow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )
     {
-    this.name = name;
+    this.name = flowDef.getName();
+    this.tags = flowDef.getTags();
     this.pipeGraph = pipeGraph;
     this.stepGraph = stepGraph;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
     initSteps();
-    setSources( sources );
-    setSinks( sinks );
-    setTraps( traps );
-    initFromProperties( properties );
-    initFromTaps();
-
-    this.flowStats = createPrepareFlowStats(); // must be last
-    }
-
-  protected Flow( Map<Object, Object> properties, Config defaultConfig, String name, StepGraph stepGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
-    {
-    this.name = name;
-    this.stepGraph = stepGraph;
-    addSessionProperties( properties );
-    initConfig( properties, defaultConfig );
-    initSteps();
-    setSources( sources );
-    setSinks( sinks );
-    setTraps( traps );
+    setSources( flowDef.getSourcesCopy() );
+    setSinks( flowDef.getSinksCopy() );
+    setTraps( flowDef.getTrapsCopy() );
     initFromProperties( properties );
     initFromTaps();
 
