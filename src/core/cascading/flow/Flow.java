@@ -54,6 +54,7 @@ import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleIterator;
+import cascading.util.PropertyUtil;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.Graphs;
@@ -160,7 +161,7 @@ public abstract class Flow<Config> implements Runnable
    */
   public static boolean getStopJobsOnExit( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.stopjobsonexit", "true" ) );
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.flow.stopjobsonexit", "true" ) );
     }
 
   /** Used for testing. */
@@ -204,11 +205,11 @@ public abstract class Flow<Config> implements Runnable
     if( properties == null )
       return;
 
-    Util.setProperty( properties, "cascading.flow.id", getID() );
-    Util.setProperty( properties, "cascading.flow.tags", getTags() );
+    PropertyUtil.setProperty( properties, "cascading.flow.id", getID() );
+    PropertyUtil.setProperty( properties, "cascading.flow.tags", getTags() );
     FlowConnector.setApplicationID( properties );
-    Util.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
-    Util.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
+    PropertyUtil.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
+    PropertyUtil.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
     }
 
   private String makeAppName( Map<Object, Object> properties )

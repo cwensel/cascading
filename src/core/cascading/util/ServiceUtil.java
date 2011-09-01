@@ -41,10 +41,7 @@ public class ServiceUtil
 
   public static CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
-    String className = (String) defaultProperties.getProperty( property );
-
-    if( ( className == null || className.isEmpty() ) && properties != null )
-      className = (String) properties.get( property );
+    String className = PropertyUtil.getProperty( properties, property, defaultProperties.getProperty( property ) );
 
     return createService( properties, className );
     }

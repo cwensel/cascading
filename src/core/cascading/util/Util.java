@@ -33,11 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -349,29 +345,6 @@ public class Util
     return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
     }
 
-  public static <A> A getProperty( Map<Object, Object> properties, String key, A defaultValue )
-    {
-    if( properties == null )
-      return defaultValue;
-
-    A value = null;
-
-    if( properties instanceof Properties )
-      value = (A) ( (Properties) properties ).getProperty( key );
-    else
-      value = (A) properties.get( key );
-
-    return value == null ? defaultValue : value;
-    }
-
-  public static void setProperty(Map<Object, Object> properties, String key, String value)
-    {
-    if(properties == null || value == null || value.isEmpty())
-      return;
-
-    properties.put( key, value );
-    }
-
   public static String printGraph( SimpleDirectedGraph graph )
     {
     StringWriter writer = new StringWriter();
@@ -548,39 +521,6 @@ public class Util
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
-    }
-
-  public static Properties createProperties( Map<Object, Object> properties, Properties defaultProperties )
-    {
-    Properties results = defaultProperties == null ? new Properties() : new Properties( defaultProperties );
-
-    if( properties == null )
-      return results;
-
-    Set<Object> keys = new HashSet<Object>( properties.keySet() );
-
-    // keys will only be grabbed if both key/value are String, so keep orig keys
-    if( properties instanceof Properties )
-      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
-
-    for( Object key : keys )
-      {
-      Object value = properties.get( key );
-
-      if( value == null && properties instanceof Properties && key instanceof String )
-        value = ( (Properties) properties ).getProperty( (String) key );
-
-      if( value == null ) // don't stuff null values
-        continue;
-
-      // don't let these objects pass, even though toString is called below.
-      if( value instanceof Class )
-        continue;
-
-      results.setProperty( key.toString(), value.toString() );
-      }
-
-    return results;
     }
 
   public static boolean isEmpty( String string )

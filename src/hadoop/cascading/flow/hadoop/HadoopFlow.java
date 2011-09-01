@@ -32,7 +32,7 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.StepGraph;
 import cascading.tap.hadoop.HttpFileSystem;
-import cascading.util.Util;
+import cascading.util.PropertyUtil;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -78,7 +78,7 @@ public class HadoopFlow extends Flow<JobConf>
    */
   public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.flow.preservetemporaryfiles", "false" ) );
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.flow.preservetemporaryfiles", "false" ) );
     }
 
   /**
@@ -101,7 +101,7 @@ public class HadoopFlow extends Flow<JobConf>
    */
   public static long getJobPollingInterval( Map<Object, Object> properties )
     {
-    return Long.parseLong( Util.getProperty( properties, "cascading.flow.job.pollinginterval", "500" ) );
+    return Long.parseLong( PropertyUtil.getProperty( properties, "cascading.flow.job.pollinginterval", "500" ) );
     }
 
   public static long getJobPollingInterval( JobConf jobConf )

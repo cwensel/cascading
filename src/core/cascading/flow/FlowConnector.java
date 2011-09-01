@@ -36,6 +36,7 @@ import cascading.operation.DebugLevel;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
+import cascading.util.PropertyUtil;
 import cascading.util.Util;
 
 import static cascading.flow.FlowDef.flowDef;
@@ -71,7 +72,7 @@ public abstract class FlowConnector
    */
   public static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
     {
-    String assertionLevel = Util.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
+    String assertionLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
 
     return AssertionLevel.valueOf( assertionLevel );
     }
@@ -96,7 +97,7 @@ public abstract class FlowConnector
    */
   public static DebugLevel getDebugLevel( Map<Object, Object> properties )
     {
-    String debugLevel = Util.getProperty( properties, "cascading.flowconnector.debuglevel", DebugLevel.DEFAULT.name() );
+    String debugLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.debuglevel", DebugLevel.DEFAULT.name() );
 
     return DebugLevel.valueOf( debugLevel );
     }
@@ -132,7 +133,7 @@ public abstract class FlowConnector
   public Class getIntermediateSchemeClass( Map<Object, Object> properties )
     {
     // supporting stuffed classes to overcome classloading issue
-    Object type = Util.getProperty( properties, "cascading.flowconnector.intermediateschemeclass", (Object) null );
+    Object type = PropertyUtil.getProperty( properties, "cascading.flowconnector.intermediateschemeclass", (Object) null );
 
     if( type == null )
       return getDefaultIntermediateSchemeClass();
@@ -176,7 +177,7 @@ public abstract class FlowConnector
    */
   public static Class getApplicationJarClass( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.flowconnector.appjar.class", (Class) null );
+    return PropertyUtil.getProperty( properties, "cascading.flowconnector.appjar.class", (Class) null );
     }
 
   /**
@@ -203,7 +204,7 @@ public abstract class FlowConnector
    */
   public static String getApplicationJarPath( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );
+    return PropertyUtil.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );
     }
 
   public static void setApplicationID( Map<Object, Object> properties )
@@ -216,7 +217,7 @@ public abstract class FlowConnector
     if( properties == null )
       return getAppID( null );
 
-    return Util.getProperty( properties, "cascading.app.id", getAppID( properties ) );
+    return PropertyUtil.getProperty( properties, "cascading.app.id", getAppID( properties ) );
     }
 
   private static String getAppID( Map<Object, Object> properties )
@@ -238,7 +239,7 @@ public abstract class FlowConnector
 
   public static String getApplicationName( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.app.name", (String) null );
+    return PropertyUtil.getProperty( properties, "cascading.app.name", (String) null );
     }
 
   public static void setApplicationVersion( Map<Object, Object> properties, String version )
@@ -249,7 +250,7 @@ public abstract class FlowConnector
 
   public static String getApplicationVersion( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.app.version", (String) null );
+    return PropertyUtil.getProperty( properties, "cascading.app.version", (String) null );
     }
 
   public static void addApplicationTag( Map<Object, Object> properties, String tag )
@@ -257,7 +258,7 @@ public abstract class FlowConnector
     if( tag == null )
       return;
 
-    String tags = Util.getProperty( properties, "cascading.app.tags", (String) null );
+    String tags = PropertyUtil.getProperty( properties, "cascading.app.tags", (String) null );
 
     if( tags != null )
       tags = Util.join( ",", tag.trim(), tags );
@@ -269,7 +270,7 @@ public abstract class FlowConnector
 
   public static String getApplicationTags( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.app.tags", (String) null );
+    return PropertyUtil.getProperty( properties, "cascading.app.tags", (String) null );
     }
 
   protected FlowConnector()

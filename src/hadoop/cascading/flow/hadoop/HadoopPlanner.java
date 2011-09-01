@@ -47,6 +47,7 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.TempHfs;
+import cascading.util.PropertyUtil;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.jgrapht.GraphPath;
@@ -106,7 +107,7 @@ public class HadoopPlanner extends FlowPlanner
    */
   public static JobConf getJobConf( Map<Object, Object> properties )
     {
-    return Util.getProperty( properties, "cascading.hadoop.jobconf", (JobConf) null );
+    return PropertyUtil.getProperty( properties, "cascading.hadoop.jobconf", (JobConf) null );
     }
 
   /**
@@ -132,7 +133,7 @@ public class HadoopPlanner extends FlowPlanner
    */
   public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( Util.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
     }
 
   @Override

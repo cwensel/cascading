@@ -51,6 +51,7 @@ import cascading.management.ClientState;
 import cascading.management.ClientType;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
+import cascading.util.PropertyUtil;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.Graphs;
@@ -105,6 +106,7 @@ public class Cascade implements Runnable
   private final SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
+  /** Field cascadingServices */
   private CascadingServices cascadingServices;
   /** Field thread */
   private Thread thread;
@@ -135,7 +137,7 @@ public class Cascade implements Runnable
 
   public int getMaxConcurrentFlows( Map<Object, Object> properties )
     {
-    return Integer.parseInt( Util.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
+    return Integer.parseInt( PropertyUtil.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
     }
 
 
