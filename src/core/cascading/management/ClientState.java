@@ -21,6 +21,7 @@
 
 package cascading.management;
 
+import cascading.cascade.Cascade;
 import cascading.flow.Flow;
 import cascading.stats.CascadingStats;
 
@@ -58,6 +59,11 @@ public abstract class ClientState extends BaseState
   public void recordFlow( Flow flow )
     {
     }
+
+  @Override
+  public void recordCascade( Cascade cascade )
+    {
+    }
   };
 
   public ClientState()
@@ -79,6 +85,8 @@ public abstract class ClientState extends BaseState
 
   public abstract void recordFlow( Flow flow );
 
+  public abstract void recordCascade( Cascade cascade );
+
   public void record( String id, Object object )
     {
     store( id, object );
@@ -98,4 +106,5 @@ public abstract class ClientState extends BaseState
     {
     setMetric( "state", "stop", time );
     }
+
   }

@@ -46,6 +46,9 @@ import cascading.CascadingException;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
+import cascading.management.CascadingServices;
+import cascading.management.ClientState;
+import cascading.management.ClientType;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -102,6 +105,7 @@ public class Cascade implements Runnable
   private final SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
+  private CascadingServices cascadingServices;
   /** Field thread */
   private Thread thread;
   /** Field throwable */
@@ -142,8 +146,18 @@ public class Cascade implements Runnable
     this.properties = properties;
     this.jobGraph = jobGraph;
     this.tapGraph = tapGraph;
-    this.cascadeStats = new CascadeStats( cascadeDef.getName(), getID() );
+    this.cascadeStats = createPrepareCascadeStats();
     setIDOnFlow();
+    }
+
+  private CascadeStats createPrepareCascadeStats()
+    {
+    CascadeStats cascadeStats = new CascadeStats( this, getClientState() );
+
+    cascadeStats.prepare();
+    cascadeStats.markPending();
+
+    return cascadeStats;
     }
 
   /**
@@ -175,6 +189,19 @@ public class Cascade implements Runnable
   public String getTags()
     {
     return tags;
+    }
+
+  public CascadingServices getCascadingServices()
+    {
+    if( cascadingServices == null )
+      cascadingServices = new CascadingServices( properties );
+
+    return cascadingServices;
+    }
+
+  private ClientState getClientState()
+    {
+    return getCascadingServices().createClientState( ClientType.session, getID() );
     }
 
   /**
@@ -380,6 +407,7 @@ public class Cascade implements Runnable
       {
       thread = null;
       throwable = null;
+      cascadeStats.cleanup();
       }
     }
 
@@ -516,6 +544,8 @@ public class Cascade implements Runnable
 
     internalStopAllFlows();
     handleExecutorShutdown();
+
+    cascadeStats.cleanup();
     }
 
   private void handleExecutorShutdown()

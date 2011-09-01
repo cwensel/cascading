@@ -266,11 +266,6 @@ public abstract class Flow<Config> implements Runnable
     return cascadingServices;
     }
 
-  public void setCascadingServices( CascadingServices cascadingServices )
-    {
-    this.cascadingServices = cascadingServices;
-    }
-
   private ClientState getClientState()
     {
     return getFlowSession().getCascadingServices().createClientState( ClientType.session, getID() );

@@ -33,21 +33,27 @@ import cascading.management.ClientState;
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats
   {
-  /** Field cascadeId */
-  final String cascadeID;
+  private Cascade cascade;
   /** Field flowStatsList */
   final List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
 
-  public CascadeStats( String name, String cascadeID )
+  public CascadeStats( Cascade cascade, ClientState clientState )
     {
-    super( name, ClientState.NULL );
-    this.cascadeID = cascadeID;
+    super( cascade.getName(), clientState );
+    this.cascade = cascade;
     }
 
   @Override
   public String getID()
     {
-    return cascadeID;
+    return cascade.getID();
+    }
+
+  @Override
+  public void markPending()
+    {
+    super.markPending();
+    clientState.recordCascade( cascade );
     }
 
   /**
