@@ -201,15 +201,21 @@ public abstract class Flow<Config> implements Runnable
 
   private void addSessionProperties( Map<Object, Object> properties )
     {
-    properties.put( "cascading.flow.id", getID() );
-    properties.put( "cascading.flow.tags", getTags() );
+    if( properties == null )
+      return;
+
+    Util.setProperty( properties, "cascading.flow.id", getID() );
+    Util.setProperty( properties, "cascading.flow.tags", getTags() );
     FlowConnector.setApplicationID( properties );
-    properties.put( "cascading.app.name", makeAppName( properties ) );
-    properties.put( "cascading.app.version", makeAppVersion( properties ) );
+    Util.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
+    Util.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
     }
 
   private String makeAppName( Map<Object, Object> properties )
     {
+    if( properties == null )
+      return null;
+
     String name = FlowConnector.getApplicationName( properties );
 
     if( name != null )
@@ -229,6 +235,9 @@ public abstract class Flow<Config> implements Runnable
 
   private String makeAppVersion( Map<Object, Object> properties )
     {
+    if( properties == null )
+      return null;
+
     String name = FlowConnector.getApplicationVersion( properties );
 
     if( name != null )

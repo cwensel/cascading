@@ -364,6 +364,13 @@ public class Util
     return value == null ? defaultValue : value;
     }
 
+  public static void setProperty(Map<Object, Object> properties, String key, String value)
+    {
+    if(properties == null || value == null || value.isEmpty())
+      return;
+
+    properties.put( key, value );
+    }
 
   public static String printGraph( SimpleDirectedGraph graph )
     {
