@@ -45,6 +45,11 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     config = new Properties();
     }
 
+  public LocalFlowProcess( Properties config )
+    {
+    this.config = config;
+    }
+
   public LocalFlowProcess( FlowSession flowSession, Properties config )
     {
     super( flowSession );

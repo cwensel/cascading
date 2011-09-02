@@ -79,6 +79,13 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     this.codec = getCompressionCodec();
     }
 
+  public HadoopFlowProcess( JobConf jobConf )
+    {
+    this.jobConf = jobConf;
+    this.isMapper = true;
+    this.codec = getCompressionCodec();
+    }
+
   public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf )
     {
     super( flowSession );
