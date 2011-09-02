@@ -40,6 +40,11 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   private final Properties config;
   private LocalStepStats stepStats;
 
+  public LocalFlowProcess()
+    {
+    config = new Properties();
+    }
+
   public LocalFlowProcess( FlowSession flowSession, Properties config )
     {
     super( flowSession );
