@@ -4,8 +4,10 @@ build.properties
 lib
 build
 dist
+out
 javadoc
-*.iml
 *.iws
-*.ipr
-.idea
+workspace.xml
+tasks.xml
+runConfigurations
+*.tmproj
