@@ -57,6 +57,11 @@ public class CascadingTestCase extends TestCase
     {
     }
 
+  public CascadingTestCase( String name )
+    {
+    super( name );
+    }
+
   protected void validateLength( Flow flow, int length ) throws IOException
     {
     validateLength( flow, length, -1 );
