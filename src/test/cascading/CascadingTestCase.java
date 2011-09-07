@@ -22,6 +22,7 @@
 package cascading;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,7 +51,7 @@ import junit.framework.TestCase;
  * <p/>
  * It included a few helpful utility methods for testing Cascading applications.
  */
-public class CascadingTestCase extends TestCase
+public class CascadingTestCase extends TestCase implements Serializable
   {
 
   public CascadingTestCase()

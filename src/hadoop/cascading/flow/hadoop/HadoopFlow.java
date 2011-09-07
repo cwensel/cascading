@@ -54,7 +54,7 @@ public class HadoopFlow extends Flow<JobConf>
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
 
-  public HadoopFlow()
+  protected HadoopFlow()
     {
     }
 

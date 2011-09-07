@@ -230,25 +230,16 @@ public class FlowTest extends PlatformTestCase
 
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
-
-//    countFlow.writeDOT( "stopped.dot" );
-
-    LockingFlowListener listener = new LockingFlowListener();
-
-    flow.addListener( listener );
-
     try
       {
-      flow.complete();
+      // assembly serialization now happens during Flow construction, no chance to use a listener to catch
+      Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
       fail( "did not throw serialization exception" );
       }
     catch( Exception exception )
       {
       // ignore
       }
-
-    assertTrue( "not marked failed", flow.getFlowStats().isFailed() );
     }
 
   public void testFailingListenerStarting() throws Exception

@@ -48,7 +48,7 @@ public class PlatformTestCase extends CascadingTestCase
   static Set<String> allPaths = new HashSet<String>();
 
   private String rootPath;
-  private TestPlatform platform = null;
+  private transient TestPlatform platform = null;
 
   public PlatformTestCase( boolean useCluster )
     {

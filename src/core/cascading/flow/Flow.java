@@ -169,8 +169,6 @@ public abstract class Flow<Config> implements Runnable
     {
     this.name = "NA";
     this.flowStats = createPrepareFlowStats();
-
-    initializeNewJobsMap();
     }
 
   protected Flow( Map<Object, Object> properties, Config defaultConfig, String name )
@@ -182,8 +180,6 @@ public abstract class Flow<Config> implements Runnable
     initFromProperties( properties );
 
     this.flowStats = createPrepareFlowStats(); // must be last
-
-    initializeNewJobsMap();
     }
 
   protected Flow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )

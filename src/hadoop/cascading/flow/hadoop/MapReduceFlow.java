@@ -118,6 +118,8 @@ public class MapReduceFlow extends HadoopFlow
     setSinks( createSinks( jobConf ) );
     setTraps( createTraps( jobConf ) );
     setStepGraph( makeStepGraph( jobConf ) );
+
+    initializeNewJobsMap();
     }
 
   private StepGraph makeStepGraph( JobConf jobConf )
