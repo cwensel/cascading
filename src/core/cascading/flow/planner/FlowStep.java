@@ -36,6 +36,9 @@ import java.util.TreeMap;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.management.CascadingServices;
+import cascading.management.ClientState;
+import cascading.management.ClientType;
 import cascading.operation.Operation;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -66,9 +69,10 @@ public abstract class FlowStep<Config> implements Serializable
 
   /** Field properties */
   private Map<Object, Object> properties = null;
-  /** Field parentFlowName */
-  private String parentFlowName;
-  private String parentFlowID;
+  /** Field flowName */
+  private String flowName;
+  /** Field flowID */
+  private String flowID;
 
   /** Field submitPriority */
   private int submitPriority = 5;
@@ -133,14 +137,14 @@ public abstract class FlowStep<Config> implements Serializable
     this.name = name;
     }
 
-  public String getParentFlowID()
+  public String getFlowID()
     {
-    return parentFlowID;
+    return flowID;
     }
 
-  public void setParentFlowID( String parentFlowID )
+  public void setFlowID( String flowID )
     {
-    this.parentFlowID = parentFlowID;
+    this.flowID = flowID;
     }
 
   /**
@@ -148,29 +152,29 @@ public abstract class FlowStep<Config> implements Serializable
    *
    * @return the parentFlowName (type Flow) of this FlowStep object.
    */
-  public String getParentFlowName()
+  public String getFlowName()
     {
-    return parentFlowName;
+    return flowName;
     }
 
   /**
    * Method setParentFlowName sets the parentFlowName of this FlowStep object.
    *
-   * @param parentFlowName the parentFlowName of this FlowStep object.
+   * @param flowName the parentFlowName of this FlowStep object.
    */
-  public void setParentFlowName( String parentFlowName )
+  public void setFlowName( String flowName )
     {
-    this.parentFlowName = parentFlowName;
+    this.flowName = flowName;
     }
 
   /**
-   * Method getStepName returns the stepName of this FlowStep object.
+   * Method getStepDisplayName returns the stepDisplayName of this FlowStep object.
    *
    * @return the stepName (type String) of this FlowStep object.
    */
-  public String getStepName()
+  public String getStepDisplayName()
     {
-    return String.format( "%s[%s]", getParentFlowName(), getName() );
+    return String.format( "%s[%s]", getFlowName(), getName() );
     }
 
   /**
@@ -457,6 +461,14 @@ public abstract class FlowStep<Config> implements Serializable
     return true;
     }
 
+  protected ClientState createClientState( FlowProcess flowProcess )
+    {
+    CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
+    return services.createClientState( ClientType.process, getID() );
+    }
+
+  public abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
+
   @Override
   public int hashCode()
     {
@@ -474,8 +486,6 @@ public abstract class FlowStep<Config> implements Serializable
     return buffer.toString();
     }
 
-  public abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig ) throws IOException;
-
   public final boolean isInfoEnabled()
     {
     return LOG.isInfoEnabled();
@@ -488,26 +498,26 @@ public abstract class FlowStep<Config> implements Serializable
 
   public void logDebug( String message )
     {
-    LOG.debug( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    LOG.debug( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
     }
 
   public void logInfo( String message )
     {
-    LOG.info( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    LOG.info( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
     }
 
   public void logWarn( String message )
     {
-    LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message );
+    LOG.warn( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
     }
 
   public void logWarn( String message, Throwable throwable )
     {
-    LOG.warn( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
+    LOG.warn( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
     }
 
   public void logError( String message, Throwable throwable )
     {
-    LOG.error( "[" + Util.truncate( getParentFlowName(), 25 ) + "] " + message, throwable );
+    LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
     }
   }

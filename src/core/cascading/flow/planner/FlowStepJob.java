@@ -91,7 +91,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   protected abstract void internalStop() throws IOException;
 
-  public void setPredecessors( List<FlowStepJob> predecessors ) throws IOException
+  public void setPredecessors( List<FlowStepJob> predecessors )
     {
     this.predecessors = predecessors;
     }

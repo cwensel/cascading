@@ -27,20 +27,26 @@ import cascading.management.ClientState;
 /** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
 public abstract class StepStats extends CascadingStats
   {
-  String stepID;
+  private FlowStep flowStep;
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
   protected StepStats( FlowStep flowStep, ClientState clientState )
     {
     super( flowStep.getName(), clientState );
-
-    this.stepID = flowStep.getID();
+    this.flowStep = flowStep;
     }
 
   @Override
   public String getID()
     {
-    return stepID;
+    return flowStep.getID();
+    }
+
+  @Override
+  public void markPending()
+    {
+    super.markPending();
+    clientState.recordFlowStep( flowStep );
     }
 
   @Override

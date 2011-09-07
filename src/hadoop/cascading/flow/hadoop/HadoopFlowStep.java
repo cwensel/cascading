@@ -28,12 +28,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
-import cascading.management.CascadingServices;
-import cascading.management.ClientType;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
@@ -85,7 +84,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
 
-    conf.setJobName( getStepName() );
+    conf.setJobName( getStepDisplayName() );
 
     conf.setOutputKeyClass( Tuple.class );
     conf.setOutputValueClass( Tuple.class );
@@ -163,10 +162,16 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     return conf;
     }
 
-  public FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
+  public FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
-    return new HadoopFlowStepJob( services.createClientState( ClientType.process, getID() ), this, getInitializedConfig( flowProcess, parentConfig ) );
+    try
+      {
+      return new HadoopFlowStepJob( createClientState( flowProcess ), this, getInitializedConfig( flowProcess, parentConfig ) );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to create job", exception );
+      }
     }
 
   /**

@@ -127,7 +127,7 @@ public class MapReduceFlow extends HadoopFlow
     Tap sink = getSinksCollection().iterator().next();
     FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );
 
-    step.setParentFlowName( getName() );
+    step.setFlowName( getName() );
 
     stepGraph.addVertex( step );
 

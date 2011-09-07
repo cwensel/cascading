@@ -34,7 +34,7 @@ public abstract class BaseState implements CascadingService
   private String id;
 
   MetricsService metricsService = new NullMetricsService();
-  DocumentService objectService = new NullDocumentService();
+  DocumentService documentService = new NullDocumentService();
 
   public BaseState()
     {
@@ -54,19 +54,19 @@ public abstract class BaseState implements CascadingService
       return;
 
     metricsService = cascadingServices.getMetricsService();
-    objectService = cascadingServices.getObjectService();
+    documentService = cascadingServices.getObjectService();
     }
 
   public void startService()
     {
     metricsService.startService();
-    objectService.startService();
+    documentService.startService();
     }
 
   public void stopService()
     {
     metricsService.stopService();
-    objectService.stopService();
+    documentService.stopService();
     }
 
   public ClientType getClientType()
@@ -93,7 +93,7 @@ public abstract class BaseState implements CascadingService
 
   protected void store( String id, Object value )
     {
-    objectService.put( id, value );
+    documentService.put( id, value );
     }
 
   protected void setMetric( Enum metric, long value )

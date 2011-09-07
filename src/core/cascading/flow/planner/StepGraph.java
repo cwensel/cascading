@@ -99,7 +99,7 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     int stepNum = steps.size() + 1;
     FlowStep step = createFlowStep( stepName, stepNum );
 
-    step.setParentFlowName( flowName );
+    step.setFlowName( flowName );
 
     steps.put( sinkName, step );
 
@@ -164,39 +164,39 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
       Writer writer = new FileWriter( filename );
 
       Util.writeDOT( writer, this, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
+      {
+      public String getVertexName( FlowStep flowStep )
         {
-        public String getVertexName( FlowStep flowStep )
+        String sourceName = "";
+
+        for( Object object : flowStep.getSources() )
           {
-          String sourceName = "";
+          Tap source = (Tap) object;
 
-          for( Object object : flowStep.getSources() )
-            {
-            Tap source = (Tap) object;
+          if( source.isTemporary() )
+            continue;
 
-            if( source.isTemporary() )
-              continue;
-
-            sourceName += "[" + source.getPath() + "]";
-            }
-
-          String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getPath() + "]";
-
-          String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
-
-          String name = "[" + flowStep.getName() + "]";
-
-          if( sourceName.length() != 0 )
-            name += "\\nsrc:" + sourceName;
-
-          if( groupName.length() != 0 )
-            name += "\\ngrp:" + groupName;
-
-          if( sinkName.length() != 0 )
-            name += "\\nsnk:" + sinkName;
-
-          return name.replaceAll( "\"", "\'" );
+          sourceName += "[" + source.getPath() + "]";
           }
-        }, null );
+
+        String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getPath() + "]";
+
+        String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
+
+        String name = "[" + flowStep.getName() + "]";
+
+        if( sourceName.length() != 0 )
+          name += "\\nsrc:" + sourceName;
+
+        if( groupName.length() != 0 )
+          name += "\\ngrp:" + groupName;
+
+        if( sinkName.length() != 0 )
+          name += "\\nsnk:" + sinkName;
+
+        return name.replaceAll( "\"", "\'" );
+        }
+      }, null );
 
       writer.close();
       }

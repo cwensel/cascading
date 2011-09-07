@@ -169,6 +169,8 @@ public abstract class Flow<Config> implements Runnable
     {
     this.name = "NA";
     this.flowStats = createPrepareFlowStats();
+
+    initializeNewJobsMap();
     }
 
   protected Flow( Map<Object, Object> properties, Config defaultConfig, String name )
@@ -180,6 +182,8 @@ public abstract class Flow<Config> implements Runnable
     initFromProperties( properties );
 
     this.flowStats = createPrepareFlowStats(); // must be last
+
+    initializeNewJobsMap();
     }
 
   protected Flow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )
@@ -198,6 +202,8 @@ public abstract class Flow<Config> implements Runnable
     initFromTaps();
 
     this.flowStats = createPrepareFlowStats(); // must be last
+
+    initializeNewJobsMap();
     }
 
   private void addSessionProperties( Map<Object, Object> properties )
@@ -287,7 +293,7 @@ public abstract class Flow<Config> implements Runnable
       return;
 
     for( FlowStep flowStep : stepGraph.vertexSet() )
-      flowStep.setParentFlowID( getID() );
+      flowStep.setFlowID( getID() );
     }
 
   private void initFromTaps()
@@ -1084,8 +1090,6 @@ public abstract class Flow<Config> implements Runnable
           logInfo( " sink: " + sink );
         }
 
-      initializeNewJobsMap();
-
       // if jobs are run local, then only use one thread to force execution serially
       int numThreads = allowParallelExecution() ? 1 : jobsMap.size();
 
@@ -1172,7 +1176,7 @@ public abstract class Flow<Config> implements Runnable
     return jobsMap;
     }
 
-  protected synchronized void initializeNewJobsMap() throws IOException
+  protected synchronized void initializeNewJobsMap()
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
@@ -1359,6 +1363,11 @@ public abstract class Flow<Config> implements Runnable
   public void setCascade( Cascade cascade )
     {
     setConfigProperty( getConfig(), "cascading.cascade.id", cascade.getID() );
+    }
+
+  public String getCascadeID()
+    {
+    return getProperty( "cascading.cascade.id" );
     }
 
   /** Class FlowHolder is a helper class for wrapping Flow instances. */

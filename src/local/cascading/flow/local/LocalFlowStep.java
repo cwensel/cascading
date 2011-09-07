@@ -29,8 +29,6 @@ import java.util.Properties;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
-import cascading.management.CascadingServices;
-import cascading.management.ClientType;
 import cascading.tap.Tap;
 
 /**
@@ -82,10 +80,9 @@ public class LocalFlowStep extends FlowStep<Properties>
     }
 
   @Override
-  public FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig ) throws IOException
+  public FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
-    CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
-    return new LocalFlowStepJob( services.createClientState( ClientType.process, getID() ), (LocalFlowProcess) flowProcess, this );
+    return new LocalFlowStepJob( createClientState( flowProcess ), (LocalFlowProcess) flowProcess, this );
     }
 
   public Map<String, Tap> getTrapMap()
