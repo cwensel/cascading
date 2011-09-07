@@ -24,7 +24,6 @@ package cascading;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
@@ -136,7 +135,7 @@ public class BasicTrapTest extends PlatformTestCase
     sinks.put( "reduce", sink );
     traps.put( "middle", trap );
 
-    new HadoopFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
+    getPlatform().getFlowConnector().connect( "trap test", sources, sinks, traps, pipe );
     }
 
   public void testTrapNamesPass3() throws Exception
