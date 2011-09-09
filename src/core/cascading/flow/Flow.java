@@ -1359,6 +1359,7 @@ public abstract class Flow<Config> implements Runnable
   public void setCascade( Cascade cascade )
     {
     setConfigProperty( getConfig(), "cascading.cascade.id", cascade.getID() );
+    flowStats.recordInfo();
     }
 
   public String getCascadeID()

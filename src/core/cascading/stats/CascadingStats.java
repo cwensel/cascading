@@ -198,8 +198,16 @@ public abstract class CascadingStats implements Serializable
 
   public void markPending()
     {
+    recordStats();
+    recordInfo();
+    }
+
+  public void recordStats()
+    {
     this.clientState.recordStats( this );
     }
+
+  public abstract void recordInfo();
 
   public void markSubmitted()
     {
@@ -211,7 +219,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.submit( submitTime );
     clientState.setStatus( status, submitTime );
-    clientState.recordStats( this );
+    recordStats();
     }
 
   protected void markSubmitTime()
@@ -230,7 +238,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.start( startTime );
     clientState.setStatus( status, startTime );
-    clientState.recordStats( this );
+    recordStats();
     }
 
   protected void markStartTime()
@@ -249,7 +257,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
-    clientState.recordStats( this );
+    recordStats();
     }
 
   private void markFinishedTime()
@@ -273,7 +281,7 @@ public abstract class CascadingStats implements Serializable
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
-    clientState.recordStats( this );
+    recordStats();
     }
 
   /** Method markStopped sets the status to stopped. */
@@ -286,7 +294,7 @@ public abstract class CascadingStats implements Serializable
     markFinishedTime();
 
     clientState.setStatus( status, finishedTime );
-    clientState.recordStats( this );
+    recordStats();
     clientState.stop( finishedTime );
     }
 
@@ -299,7 +307,7 @@ public abstract class CascadingStats implements Serializable
     status = Status.SKIPPED;
 
     clientState.setStatus( status, System.currentTimeMillis() );
-    clientState.recordStats( this );
+    recordStats();
     }
 
   /**

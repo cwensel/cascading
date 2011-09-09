@@ -43,9 +43,8 @@ public abstract class StepStats extends CascadingStats
     }
 
   @Override
-  public void markPending()
+  public void recordInfo()
     {
-    super.markPending();
     clientState.recordFlowStep( flowStep );
     }
 

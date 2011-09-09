@@ -56,9 +56,8 @@ public class FlowStats extends CascadingStats
     }
 
   @Override
-  public void markPending()
+  public void recordInfo()
     {
-    super.markPending();
     clientState.recordFlow( flow );
     }
 
