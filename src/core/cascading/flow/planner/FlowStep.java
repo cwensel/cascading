@@ -96,6 +96,8 @@ public abstract class FlowStep<Config> implements Serializable
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
+  private transient FlowStepJob flowStepJob;
+
   protected FlowStep( String name, int stepNum )
     {
     this.name = name;
@@ -478,7 +480,20 @@ public abstract class FlowStep<Config> implements Serializable
     return services.createClientState( ClientType.process, getID() );
     }
 
-  public abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
+  public FlowStepJob getFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )
+    {
+    if( flowStepJob != null )
+      return flowStepJob;
+
+    if( flowProcess == null )
+      return null;
+
+    flowStepJob = createFlowStepJob( flowProcess, parentConfig );
+
+    return flowStepJob;
+    }
+
+  protected abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
 
   @Override
   public int hashCode()

@@ -80,7 +80,7 @@ public class LocalFlowStep extends FlowStep<Properties>
     }
 
   @Override
-  public FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
+  protected FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
     setConf( flowProcess.getConfigCopy() );
 

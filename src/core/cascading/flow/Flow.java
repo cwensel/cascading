@@ -1181,7 +1181,7 @@ public abstract class Flow<Config> implements Runnable
     while( topoIterator.hasNext() )
       {
       FlowStep step = (FlowStep) topoIterator.next();
-      FlowStepJob flowStepJob = step.createFlowStepJob( getFlowProcess(), getConfig() );
+      FlowStepJob flowStepJob = step.getFlowStepJob( getFlowProcess(), getConfig() );
 
       jobsMap.put( step.getName(), flowStepJob );
 

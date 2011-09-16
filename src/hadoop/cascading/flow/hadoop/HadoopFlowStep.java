@@ -162,7 +162,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     return conf;
     }
 
-  public FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  protected FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     try
       {
