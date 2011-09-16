@@ -73,7 +73,8 @@ public abstract class FlowStep<Config> implements Serializable
   private String flowName;
   /** Field flowID */
   private String flowID;
-  private Config conf;
+
+  private transient Config conf;
 
   /** Field submitPriority */
   private int submitPriority = 5;
