@@ -165,6 +165,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
     }
 
   /** Returns the most current modified time. */
+  @Override
   public long getModifiedTime( Config conf ) throws IOException
     {
     Tap[] taps = getTaps();

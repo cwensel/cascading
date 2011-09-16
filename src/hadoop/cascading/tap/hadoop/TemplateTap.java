@@ -573,6 +573,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     }
 
   /** @see Tap#getModifiedTime(Object) */
+  @Override
   public long getModifiedTime( JobConf conf ) throws IOException
     {
     return parent.getModifiedTime( conf );
