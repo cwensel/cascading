@@ -258,6 +258,7 @@ public abstract class CascadingStats<Config> implements Serializable
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
     recordStats();
+    recordInfo();
     }
 
   private void markFinishedTime()
@@ -282,6 +283,7 @@ public abstract class CascadingStats<Config> implements Serializable
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
     recordStats();
+    recordInfo();
     }
 
   /** Method markStopped sets the status to stopped. */
@@ -295,6 +297,7 @@ public abstract class CascadingStats<Config> implements Serializable
 
     clientState.setStatus( status, finishedTime );
     recordStats();
+    recordInfo();
     clientState.stop( finishedTime );
     }
 
