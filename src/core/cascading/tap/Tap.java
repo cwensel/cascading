@@ -347,7 +347,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @return long
    * @throws IOException when the modified date cannot be determined
    */
-  public abstract long getPathModified( Config conf ) throws IOException;
+  public abstract long getModifiedTime( Config conf ) throws IOException;
 
   /**
    * Method getSinkMode returns the {@link SinkMode} }of this Tap object.
