@@ -73,6 +73,7 @@ public abstract class FlowStep<Config> implements Serializable
   private String flowName;
   /** Field flowID */
   private String flowID;
+  private Config conf;
 
   /** Field submitPriority */
   private int submitPriority = 5;
@@ -165,6 +166,16 @@ public abstract class FlowStep<Config> implements Serializable
   public void setFlowName( String flowName )
     {
     this.flowName = flowName;
+    }
+
+  public Config getConf()
+    {
+    return conf;
+    }
+
+  public void setConf( Config conf )
+    {
+    this.conf = conf;
     }
 
   /**

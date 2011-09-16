@@ -144,7 +144,7 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
-  protected HadoopStepStats( FlowStep flowStep, ClientState clientState )
+  protected HadoopStepStats( JobConf currentConf, FlowStep flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }

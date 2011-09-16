@@ -96,6 +96,16 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     return new LocalTupleEntryCollector( flowProcess, getScheme(), writer );
     }
 
+  public long getSize( Properties conf ) throws IOException
+    {
+    File file = new File( path );
+
+    if( file.isDirectory() )
+      return 0;
+
+    return file.length();
+    }
+
   @Override
   public boolean makeDirs( Properties conf ) throws IOException
     {
@@ -117,7 +127,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public long getPathModified( Properties conf ) throws IOException
+  public long getModifiedTime( Properties conf ) throws IOException
     {
     return new File( path ).lastModified();
     }

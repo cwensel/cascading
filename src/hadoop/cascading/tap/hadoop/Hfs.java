@@ -418,11 +418,58 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   @Override
   public boolean pathExists( JobConf conf ) throws IOException
     {
-    return getFileSystem( conf ).exists( new Path( getPath() ) );
+    return getFileSystem( conf ).exists( new Path( getIdentifier() ) );
+    }
+
+  public boolean isDirectory( JobConf conf ) throws IOException
+    {
+    return getFileSystem( conf ).getFileStatus( new Path( getPath() ) ).isDir();
+    }
+
+  public long getSize( JobConf conf ) throws IOException
+    {
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getPath() ) );
+
+    if( fileStatus.isDir() )
+      return 0;
+
+    return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).getLen();
+    }
+
+  public long getBlockSize( JobConf conf ) throws IOException
+    {
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+
+    if( fileStatus.isDir() )
+      return 0;
+
+    return fileStatus.getBlockSize();
+    }
+
+  public int getReplication( JobConf conf ) throws IOException
+    {
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+
+    if( fileStatus.isDir() )
+      return 0;
+
+    return fileStatus.getReplication();
+    }
+
+  public String[] getChildIdentifiers( JobConf conf ) throws IOException
+    {
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getPath() ) );
+
+    String[] children = new String[ statuses.length ];
+
+    for( int i = 0; i < statuses.length; i++ )
+      children[ i ] = statuses[ i ].getPath().getName();
+
+    return children;
     }
 
   @Override
-  public long getPathModified( JobConf conf ) throws IOException
+  public long getModifiedTime( JobConf conf ) throws IOException
     {
     FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getPath() ) );
 

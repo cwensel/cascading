@@ -572,10 +572,10 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     return parent.pathExists( conf );
     }
 
-  /** @see Tap#getPathModified(Object) */
-  public long getPathModified( JobConf conf ) throws IOException
+  /** @see Tap#getModifiedTime(Object) */
+  public long getModifiedTime( JobConf conf ) throws IOException
     {
-    return parent.getPathModified( conf );
+    return parent.getModifiedTime( conf );
     }
 
   @Override

@@ -166,7 +166,11 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     {
     try
       {
-      return new HadoopFlowStepJob( createClientState( flowProcess ), this, getInitializedConfig( flowProcess, parentConfig ) );
+      JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
+
+      setConf( initializedConfig );
+
+      return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
       }
     catch( IOException exception )
       {

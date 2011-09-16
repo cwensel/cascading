@@ -165,17 +165,17 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
     }
 
   /** Returns the most current modified time. */
-  public long getPathModified( Config conf ) throws IOException
+  public long getModifiedTime( Config conf ) throws IOException
     {
     Tap[] taps = getTaps();
 
     if( taps == null || taps.length == 0 )
       return 0;
 
-    long modified = taps[ 0 ].getPathModified( conf );
+    long modified = taps[ 0 ].getModifiedTime( conf );
 
     for( int i = 1; i < getTaps().length; i++ )
-      modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
+      modified = Math.max( getTaps()[ i ].getModifiedTime( conf ), modified );
 
     return modified;
     }

@@ -45,7 +45,7 @@ import cascading.management.ClientState;
  * @see FlowStats
  * @see StepStats
  */
-public abstract class CascadingStats implements Serializable
+public abstract class CascadingStats<Config> implements Serializable
   {
   public enum Status
     {

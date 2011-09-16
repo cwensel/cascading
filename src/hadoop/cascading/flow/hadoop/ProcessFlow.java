@@ -331,7 +331,7 @@ public class ProcessFlow<P> extends HadoopFlow
       }
 
     @Override
-    public long getPathModified( Object conf ) throws IOException
+    public long getModifiedTime( Object conf ) throws IOException
       {
       return 0;
       }

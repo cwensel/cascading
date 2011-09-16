@@ -198,12 +198,12 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public long getPathModified( Config conf ) throws IOException
+  public long getModifiedTime( Config conf ) throws IOException
     {
-    long modified = getTaps()[ 0 ].getPathModified( conf );
+    long modified = getTaps()[ 0 ].getModifiedTime( conf );
 
     for( int i = 1; i < getTaps().length; i++ )
-      modified = Math.max( getTaps()[ i ].getPathModified( conf ), modified );
+      modified = Math.max( getTaps()[ i ].getModifiedTime( conf ), modified );
 
     return modified;
     }

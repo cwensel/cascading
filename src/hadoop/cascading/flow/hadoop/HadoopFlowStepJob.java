@@ -60,7 +60,7 @@ public class HadoopFlowStepJob extends FlowStepJob
   @Override
   protected StepStats createStepStats( ClientState clientState )
     {
-    return new HadoopStepStats( flowStep, clientState )
+    return new HadoopStepStats( currentConf, flowStep, clientState )
     {
     @Override
     protected JobClient getJobClient()

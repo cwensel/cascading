@@ -693,7 +693,7 @@ public abstract class Flow<Config> implements Runnable
         if( !source.pathExists( confCopy ) )
           throw new FlowException( "source does not exist: " + source );
 
-        sourceMod = source.getPathModified( confCopy );
+        sourceMod = source.getModifiedTime( confCopy );
 
         if( sinkModified < sourceMod )
           return true;
@@ -731,7 +731,7 @@ public abstract class Flow<Config> implements Runnable
         if( !sink.pathExists( confCopy ) )
           sinkModified = 0L;
         else
-          sinkModified = Math.min( sinkModified, sink.getPathModified( confCopy ) ); // return youngest mod date
+          sinkModified = Math.min( sinkModified, sink.getModifiedTime( confCopy ) ); // return youngest mod date
         }
       }
 
