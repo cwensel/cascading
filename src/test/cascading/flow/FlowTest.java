@@ -253,6 +253,34 @@ public class FlowTest extends ClusterTestCase
     assertTrue( "not marked failed", flow.getFlowStats().isFailed() );
     }
 
+  public void testStartStopRace() throws Exception
+    {
+    if( !new File( inputFileLower ).exists() )
+      fail( "data file not found" );
+
+    copyFromLocal( inputFileLower );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), outputPath + "/startstop/", true );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+
+    Flow flow = new FlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+
+    flow.start();
+    flow.stop(); // should not fail
+    }
+
   public void testFailingListenerStarting() throws Exception
     {
     failingListenerTest( FailingFlowListener.OnFail.STARTING );

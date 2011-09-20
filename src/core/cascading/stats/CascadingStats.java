@@ -216,7 +216,7 @@ public abstract class CascadingStats implements Serializable
   /** Method markStopped sets the status to stopped. */
   public void markStopped()
     {
-    if( status != Status.RUNNING )
+    if( status != Status.PENDING && status != Status.RUNNING )
       throw new IllegalStateException( "may not mark flow as " + Status.STOPPED + ", is already " + status );
 
     status = Status.STOPPED;
