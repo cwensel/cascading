@@ -105,7 +105,7 @@ public abstract class Flow<Config> implements Runnable
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field skipStrategy */
-  private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkStale();
+  private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
   /** Field flowStats */
   protected final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
@@ -626,7 +626,7 @@ public abstract class Flow<Config> implements Runnable
   /**
    * Method setFlowSkipStrategy sets a new {@link cascading.flow.FlowSkipStrategy}, the current strategy is returned.
    * <p/>
-   * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link cascading.flow.FlowSkipIfSinkStale}.
+   * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link FlowSkipIfSinkNotStale}.
    * An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
    * <p/>
    * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()} or {@link #complete()}. Only

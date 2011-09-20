@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Renamed c.f.FlowSkipIfSinkStale to FlowSkipIfSinkNotStale to match the semantics.
+
   Added support for c.f.Flow tags via the c.f.FlowDef class.
 
   Added c.f.FlowDef to allow for creating flow definitions via a fluent builder interface.
