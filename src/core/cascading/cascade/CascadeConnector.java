@@ -200,7 +200,7 @@ public class CascadeConnector
 
   private String getFullPath( Flow flow, Tap tap )
     {
-    return tap.getQualifiedPath( flow.getConfig() );
+    return tap.getFullIdentifier( flow.getConfig() );
     }
 
   private void unwrapCompositeTaps( LinkedList<Tap> taps )

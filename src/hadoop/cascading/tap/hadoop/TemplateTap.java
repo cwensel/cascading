@@ -102,7 +102,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
 
       try
         {
-        Path fullPath = new Path( parent.getQualifiedPath( conf ), path );
+        Path fullPath = new Path( parent.getFullIdentifier( conf ), path );
         Tap tap = new Hfs( parent.getScheme(), fullPath.toString() );
 
         LOG.debug( "creating collector for path: {}", fullPath );
@@ -205,20 +205,17 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     {
     private final Scheme scheme;
     private final Fields pathFields;
-    private final String pathTemplate;
 
     public TemplateScheme( Scheme scheme )
       {
       this.scheme = scheme;
       this.pathFields = null;
-      this.pathTemplate = null;
       }
 
-    public TemplateScheme( Scheme scheme, String pathTemplate, Fields pathFields )
+    public TemplateScheme( Scheme scheme, Fields pathFields )
       {
       this.scheme = scheme;
       this.pathFields = pathFields;
-      this.pathTemplate = pathTemplate;
       }
 
     public Fields getSinkFields()
@@ -355,7 +352,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(org.apache.hadoop.mapred.JobConf)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
    * @param parent             of type Tap
@@ -373,7 +370,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the pathTemplate as the {@link java.util.Formatter} format String.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(org.apache.hadoop.mapred.JobConf)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    * <p/>
    * openTapsThreshold limits the number of open files to be output to.
@@ -430,7 +427,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
   @ConstructorProperties({"parent", "pathTemplate", "pathFields", "openTapsThreshold"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, int openTapsThreshold )
     {
-    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ) );
+    super( new TemplateScheme( parent.getScheme(), pathFields ) );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     this.openTapsThreshold = openTapsThreshold;
@@ -452,7 +449,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
   @ConstructorProperties({"parent", "pathTemplate", "pathFields", "sinkMode"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode )
     {
-    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
+    super( new TemplateScheme( parent.getScheme(), pathFields ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     }
@@ -465,7 +462,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
    * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
    * data not in the result file to be used in the template path name.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(org.apache.hadoop.mapred.JobConf)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
    * @param parent             of type Tap
@@ -489,7 +486,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
    * This constructor also allows the sinkFields of the parent Tap to be independent of the pathFields. Thus allowing
    * data not in the result file to be used in the template path name.
    * <p/>
-   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deletePath(org.apache.hadoop.mapred.JobConf)}
+   * keepParentOnDelete, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(org.apache.hadoop.mapred.JobConf)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    * <p/>
    * openTapsThreshold limits the number of open files to be output to.
@@ -505,7 +502,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
                           "openTapsThreshold"})
   public TemplateTap( Hfs parent, String pathTemplate, Fields pathFields, SinkMode sinkMode, boolean keepParentOnDelete, int openTapsThreshold )
     {
-    super( new TemplateScheme( parent.getScheme(), pathTemplate, pathFields ), sinkMode );
+    super( new TemplateScheme( parent.getScheme(), pathFields ), sinkMode );
     this.parent = parent;
     this.pathTemplate = pathTemplate;
     this.keepParentOnDelete = keepParentOnDelete;
@@ -532,10 +529,10 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     return pathTemplate;
     }
 
-  /** @see Tap#getPath() */
-  public String getPath()
+  /** @see Tap#getIdentifier() */
+  public String getIdentifier()
     {
-    return parent.getPath();
+    return parent.getIdentifier();
     }
 
   /**
@@ -554,22 +551,22 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     return new TemplateCollector( flowProcess );
     }
 
-  /** @see Tap#makeDirs(Object) */
-  public boolean makeDirs( JobConf conf ) throws IOException
+  /** @see Tap#createResource(Object) */
+  public boolean createResource( JobConf conf ) throws IOException
     {
-    return parent.makeDirs( conf );
+    return parent.createResource( conf );
     }
 
-  /** @see Tap#deletePath(Object) */
-  public boolean deletePath( JobConf conf ) throws IOException
+  /** @see Tap#deleteResource(Object) */
+  public boolean deleteResource( JobConf conf ) throws IOException
     {
-    return keepParentOnDelete || parent.deletePath( conf );
+    return keepParentOnDelete || parent.deleteResource( conf );
     }
 
-  /** @see Tap#pathExists(Object) */
-  public boolean pathExists( JobConf conf ) throws IOException
+  /** @see Tap#resourceExists(Object) */
+  public boolean resourceExists( JobConf conf ) throws IOException
     {
-    return parent.pathExists( conf );
+    return parent.resourceExists( conf );
     }
 
   /** @see Tap#getModifiedTime(Object) */

@@ -295,7 +295,7 @@ public class ProcessFlow<P> extends HadoopFlow
       }
 
     @Override
-    public String getPath()
+    public String getIdentifier()
       {
       return token;
       }
@@ -313,19 +313,19 @@ public class ProcessFlow<P> extends HadoopFlow
       }
 
     @Override
-    public boolean makeDirs( Object conf ) throws IOException
+    public boolean createResource( Object conf ) throws IOException
       {
       return false;
       }
 
     @Override
-    public boolean deletePath( Object conf ) throws IOException
+    public boolean deleteResource( Object conf ) throws IOException
       {
       return false;
       }
 
     @Override
-    public boolean pathExists( Object conf ) throws IOException
+    public boolean resourceExists( Object conf ) throws IOException
       {
       return false;
       }

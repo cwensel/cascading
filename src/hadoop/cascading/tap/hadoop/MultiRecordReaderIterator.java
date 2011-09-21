@@ -82,7 +82,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     {
     tap.sourceConfInit( null, conf );
 
-    if( !tap.pathExists( conf ) )
+    if( !tap.resourceExists( conf ) )
       {
       complete = true;
       return;

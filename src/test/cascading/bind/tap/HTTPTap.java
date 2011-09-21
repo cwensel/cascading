@@ -42,7 +42,7 @@ public class HTTPTap extends Tap
     }
 
   @Override
-  public String getPath()
+  public String getIdentifier()
     {
     return url;
     }
@@ -54,19 +54,19 @@ public class HTTPTap extends Tap
     }
 
   @Override
-  public boolean pathExists( Object conf ) throws IOException
+  public boolean resourceExists( Object conf ) throws IOException
     {
     return true;
     }
 
   @Override
-  public boolean deletePath( Object conf ) throws IOException
+  public boolean deleteResource( Object conf ) throws IOException
     {
     return true;
     }
 
   @Override
-  public boolean makeDirs( Object conf ) throws IOException
+  public boolean createResource( Object conf ) throws IOException
     {
     return true;
     }

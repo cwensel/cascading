@@ -124,7 +124,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
 
 
   /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
-  public String getPath()
+  public String getIdentifier()
     {
     return null;
     }
@@ -153,11 +153,11 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
       tap.sourceConfInit( process, conf );
     }
 
-  public boolean pathExists( Config conf ) throws IOException
+  public boolean resourceExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
-      if( !tap.pathExists( conf ) )
+      if( !tap.resourceExists( conf ) )
         return false;
       }
 

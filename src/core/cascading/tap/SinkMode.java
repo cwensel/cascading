@@ -35,6 +35,5 @@ public enum SinkMode
   {
     KEEP,
     REPLACE,
-    UPDATE,
-    @Deprecated APPEND
+    UPDATE
   }

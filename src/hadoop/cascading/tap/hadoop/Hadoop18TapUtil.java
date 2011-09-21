@@ -182,7 +182,7 @@ public class Hadoop18TapUtil
    */
   public static void cleanupTap( JobConf conf, Tap tap ) throws IOException
     {
-    cleanTempPath( conf, new Path( tap.getPath() ) );
+    cleanTempPath( conf, new Path( tap.getIdentifier() ) );
     }
 
   /**

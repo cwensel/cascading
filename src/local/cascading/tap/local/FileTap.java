@@ -58,7 +58,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public String getPath()
+  public String getIdentifier()
     {
     return path;
     }
@@ -93,7 +93,11 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
 
     Closeable writer = (Closeable) ( (LocalScheme) getScheme() ).createOutput( output );
 
-    return new LocalTupleEntryCollector( flowProcess, getScheme(), writer );
+    LocalTupleEntryCollector schemeCollector = new LocalTupleEntryCollector( flowProcess, getScheme(), writer );
+
+    schemeCollector.prepare();
+
+    return schemeCollector;
     }
 
   public long getSize( Properties conf ) throws IOException
@@ -107,7 +111,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public boolean makeDirs( Properties conf ) throws IOException
+  public boolean createResource( Properties conf ) throws IOException
     {
     File parentFile = new File( path ).getParentFile();
 
@@ -115,13 +119,13 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public boolean deletePath( Properties conf ) throws IOException
+  public boolean deleteResource( Properties conf ) throws IOException
     {
     return new File( path ).delete();
     }
 
   @Override
-  public boolean pathExists( Properties conf ) throws IOException
+  public boolean resourceExists( Properties conf ) throws IOException
     {
     return new File( path ).exists();
     }

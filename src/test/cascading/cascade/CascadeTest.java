@@ -189,7 +189,7 @@ public class CascadeTest extends PlatformTestCase
 
     cascade.complete();
 
-    assertFalse( "file exists", fourth.getSink().pathExists( fourth.getConfig() ) );
+    assertFalse( "file exists", fourth.getSink().resourceExists( fourth.getConfig() ) );
     }
 
   public void testSimpleCascadeStop() throws IOException, InterruptedException

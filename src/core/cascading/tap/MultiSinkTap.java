@@ -134,7 +134,7 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public String getPath()
+  public String getIdentifier()
     {
     return tempPath;
     }
@@ -162,11 +162,11 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public boolean makeDirs( Config conf ) throws IOException
+  public boolean createResource( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
-      if( !tap.makeDirs( conf ) )
+      if( !tap.createResource( conf ) )
         return false;
       }
 
@@ -174,11 +174,11 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public boolean deletePath( Config conf ) throws IOException
+  public boolean deleteResource( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
-      if( !tap.deletePath( conf ) )
+      if( !tap.deleteResource( conf ) )
         return false;
       }
 
@@ -186,11 +186,11 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public boolean pathExists( Config conf ) throws IOException
+  public boolean resourceExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )
       {
-      if( !tap.pathExists( conf ) )
+      if( !tap.resourceExists( conf ) )
         return false;
       }
 

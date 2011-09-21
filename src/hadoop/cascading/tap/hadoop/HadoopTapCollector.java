@@ -72,7 +72,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
    * @param hadoopFlowProcess
    * @param tap               of type Tap  @throws IOException when fails to initialize
    */
-  public HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
     this( hadoopFlowProcess, tap, null );
     }
@@ -85,7 +85,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
    * @param prefix            of type String
    * @throws IOException when fails to initialize
    */
-  public HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
     super( hadoopFlowProcess, tap.getScheme() );
     this.hadoopFlowProcess = hadoopFlowProcess;
@@ -96,13 +96,19 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
     this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 
     this.setOutput( this );
+    }
 
+  @Override
+  public void prepare() throws IOException
+    {
     initialize();
+
+    super.prepare();
     }
 
   private void initialize() throws IOException
     {
-    tap.sinkConfInit( null, conf ); // tap should not delete if called within a task
+    tap.sinkConfInit( hadoopFlowProcess, conf );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
@@ -131,7 +137,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
     try
       {
       if( isFileOutputFormat )
-        LOG.info( "closing tap collector for: {}", new Path( tap.getPath(), filename ) );
+        LOG.info( "closing tap collector for: {}", new Path( tap.getIdentifier(), filename ) );
       else
         LOG.info( "closing tap collector for: {}", tap );
 

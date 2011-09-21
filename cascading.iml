@@ -14,8 +14,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Hadoop 0.20" level="application" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="library" exported="" name="Hadoop 0.20" level="application" />
+    <orderEntry type="module-library">
       <library name="cascading">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/test" />

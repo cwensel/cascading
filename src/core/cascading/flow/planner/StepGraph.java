@@ -176,10 +176,10 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
           if( source.isTemporary() )
             continue;
 
-          sourceName += "[" + source.getPath() + "]";
+          sourceName += "[" + source.getIdentifier() + "]";
           }
 
-        String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getPath() + "]";
+        String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getIdentifier() + "]";
 
         String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
 

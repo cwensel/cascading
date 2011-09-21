@@ -690,7 +690,7 @@ public abstract class Flow<Config> implements Runnable
       {
       for( Tap source : sources.values() )
         {
-        if( !source.pathExists( confCopy ) )
+        if( !source.resourceExists( confCopy ) )
           throw new FlowException( "source does not exist: " + source );
 
         sourceMod = source.getModifiedTime( confCopy );
@@ -728,7 +728,7 @@ public abstract class Flow<Config> implements Runnable
         sinkModified = -1L;
       else
         {
-        if( !sink.pathExists( confCopy ) )
+        if( !sink.resourceExists( confCopy ) )
           sinkModified = 0L;
         else
           sinkModified = Math.min( sinkModified, sink.getModifiedTime( confCopy ) ); // return youngest mod date
@@ -988,7 +988,7 @@ public abstract class Flow<Config> implements Runnable
   public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
-      tap.deletePath( getConfig() );
+      tap.deleteResource( getConfig() );
     }
 
   /**
@@ -1005,7 +1005,7 @@ public abstract class Flow<Config> implements Runnable
     for( Tap tap : sinks.values() )
       {
       if( !tap.isUpdate() )
-        tap.deletePath( getConfig() );
+        tap.deleteResource( getConfig() );
       }
     }
 
@@ -1014,7 +1014,7 @@ public abstract class Flow<Config> implements Runnable
     for( Tap tap : sinks.values() )
       {
       if( tap.isReplace() )
-        tap.deletePath( getConfig() );
+        tap.deleteResource( getConfig() );
       }
     }
 
@@ -1027,7 +1027,7 @@ public abstract class Flow<Config> implements Runnable
    */
   public boolean tapPathExists( Tap tap ) throws IOException
     {
-    return tap.pathExists( getConfig() );
+    return tap.resourceExists( getConfig() );
     }
 
   /**

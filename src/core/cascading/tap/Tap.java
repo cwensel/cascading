@@ -173,26 +173,11 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     }
 
   /**
-   * Method getPath returns the path to the resource represented by this Tap instance.
-   *
-   * @return Path
-   */
-  public abstract String getPath();
-
-  /**
    * Method getIdentifier returns a String representing the resource identifier this Tap instance represents.
-   * <p/>
-   * By default, simply calls {@code getPath().toString()}.
    *
-   * @return the resource (type String) of this Tap object.
+   * @return String
    */
-  public String getIdentifier()
-    {
-    if( getPath() == null )
-      return null;
-
-    return getPath();
-    }
+  public abstract String getIdentifier();
 
   /**
    * Method getSourceFields returns the sourceFields of this Tap object.
@@ -239,7 +224,11 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     if( output == null )
       throw new IllegalArgumentException( "output may not be null" );
 
-    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
+    TupleEntrySchemeCollector schemeCollector = new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
+
+    schemeCollector.prepare();
+
+    return schemeCollector;
     }
 
   public TupleEntryCollector openForWrite( Process flowProcess ) throws IOException
@@ -303,14 +292,14 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     }
 
   /**
-   * Method getQualifiedPath returns a FileSystem fully qualified Path.
+   * Method getFullIdentifier returns a fully qualified resource identifier.
    *
-   * @param conf of type JobConf
+   * @param conf of type Config
    * @return Path
    */
-  public String getQualifiedPath( Config conf )
+  public String getFullIdentifier( Config conf )
     {
-    return getPath();
+    return getIdentifier();
     }
 
   /**
@@ -320,7 +309,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @return boolean
    * @throws IOException when there is an error making directories
    */
-  public abstract boolean makeDirs( Config conf ) throws IOException;
+  public abstract boolean createResource( Config conf ) throws IOException;
 
   /**
    * Method deletePath deletes the resource represented by this instance.
@@ -329,7 +318,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @return boolean
    * @throws IOException when the resource cannot be deleted
    */
-  public abstract boolean deletePath( Config conf ) throws IOException;
+  public abstract boolean deleteResource( Config conf ) throws IOException;
 
   /**
    * Method pathExists return true if the path represented by this instance exists.
@@ -338,7 +327,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * @return boolean
    * @throws IOException when the status cannot be determined
    */
-  public abstract boolean pathExists( Config conf ) throws IOException;
+  public abstract boolean resourceExists( Config conf ) throws IOException;
 
   /**
    * Method getPathModified returns the date this resource was last modified.
@@ -382,18 +371,6 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     }
 
   /**
-   * Method isAppend indicates whether the resource represented by this instance should be appended to if it already
-   * exists. Otherwise a new resource will be created when the Flow is started..
-   *
-   * @return boolean
-   */
-  @Deprecated
-  public boolean isAppend()
-    {
-    return sinkMode == SinkMode.APPEND;
-    }
-
-  /**
    * Method isUpdate indicates whether the resource represented by this instance should be updated if it already
    * exists. Otherwise a new resource will be created when the Flow is started..
    *
@@ -401,7 +378,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    */
   public boolean isUpdate()
     {
-    return isAppend() || sinkMode == SinkMode.UPDATE;
+    return sinkMode == SinkMode.UPDATE;
     }
 
   /**

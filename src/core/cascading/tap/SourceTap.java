@@ -56,14 +56,14 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     return false;
     }
 
-  /** @see Tap#deletePath(Object) */
-  public boolean deletePath( Config conf ) throws IOException
+  /** @see Tap#deleteResource(Object) */
+  public boolean deleteResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
     }
 
-  /** @see Tap#makeDirs(Object) */
-  public boolean makeDirs( Config conf ) throws IOException
+  /** @see Tap#createResource(Object) */
+  public boolean createResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }

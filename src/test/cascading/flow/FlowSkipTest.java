@@ -55,7 +55,7 @@ public class FlowSkipTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-    sink.deletePath( flow.getConfig() );
+    sink.deleteResource( flow.getConfig() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );
@@ -90,7 +90,7 @@ public class FlowSkipTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-    sink.deletePath( flow.getConfig() );
+    sink.deleteResource( flow.getConfig() );
 
     assertTrue( "default skip", !flow.getFlowSkipStrategy().skipFlow( flow ) );
     assertTrue( "exist skip", !new FlowSkipIfSinkExists().skipFlow( flow ) );

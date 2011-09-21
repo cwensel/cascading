@@ -263,7 +263,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
   @Override
   public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
     {
-    if( tap.getQualifiedPath( conf ).toString().endsWith( ".zip" ) )
+    if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
 
     if( getSinkCompression() == Compress.DISABLE )
@@ -328,5 +328,4 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     // it's ok to use NULL here so the collector does not write anything
     sinkCall.getOutput().collect( null, sinkCall.getOutgoingEntry().getTuple().toString() );
     }
-
   }

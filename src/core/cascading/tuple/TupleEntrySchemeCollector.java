@@ -39,25 +39,35 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme )
     {
-    this( flowProcess, scheme, null );
-    }
-
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output )
-    {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
     this.scheme = scheme;
 
     this.sinkCall = new SinkCall();
+    }
+
+  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output )
+    {
+    this( flowProcess, scheme );
 
     setOutput( output );
-
-    scheme.sinkPrepare( flowProcess, sinkCall );
     }
 
   protected void setOutput( O output )
     {
     sinkCall.setOutput( output );
+    }
+
+  /**
+   * Must be called within {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess, Object)}.
+   * <p/>
+   * Allows for an Output instance to be set before #sinkPrepare is called on the Scheme.
+   *
+   * @throws IOException
+   */
+  public void prepare() throws IOException
+    {
+    scheme.sinkPrepare( flowProcess, sinkCall );
     }
 
   @Override

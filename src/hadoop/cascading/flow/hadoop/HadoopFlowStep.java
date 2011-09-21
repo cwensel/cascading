@@ -189,7 +189,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       {
       try
         {
-        tempSink.deletePath( config );
+        tempSink.deleteResource( config );
         }
       catch( Exception exception )
         {
@@ -202,7 +202,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       {
       try
         {
-        getSink().deletePath( config );
+        getSink().deleteResource( config );
         }
       catch( Exception exception )
         {
@@ -299,7 +299,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       getSink().sinkConfInit( flowProcess, conf );
 
     if( FileOutputFormat.getOutputPath( conf ) == null )
-      tempSink = new TempHfs( "tmp:/" + new Path( getSink().getPath() ).toUri().getPath(), true );
+      tempSink = new TempHfs( "tmp:/" + new Path( getSink().getIdentifier() ).toUri().getPath(), true );
 
     // tempSink exists because sink is writeDirect
     if( tempSink != null )

@@ -252,7 +252,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       }
     catch( URISyntaxException exception )
       {
-      throw new TapException( "could not determine scheme from path: " + getPath(), exception );
+      throw new TapException( "could not determine scheme from path: " + getIdentifier(), exception );
       }
     }
 
@@ -293,31 +293,36 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       }
     }
 
-  /** @see Tap#getPath() */
+  /** @see Tap#getIdentifier() */
   @Override
-  public String getPath()
+  public String getIdentifier()
+    {
+    return getPath().toString();
+    }
+
+  public Path getPath()
     {
     if( path != null )
-      return path.toString();
+      return path;
 
     if( stringPath == null )
       throw new IllegalStateException( "path not initialized" );
 
     path = new Path( stringPath );
 
-    return path.toString();
+    return path;
     }
 
   @Override
-  public String getQualifiedPath( JobConf conf )
+  public String getFullIdentifier( JobConf conf )
     {
-    return new Path( getPath() ).makeQualified( getFileSystem( conf ) ).toString();
+    return getPath().makeQualified( getFileSystem( conf ) ).toString();
     }
 
   @Override
   public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    Path qualifiedPath = new Path( getQualifiedPath( conf ) );
+    Path qualifiedPath = new Path( getFullIdentifier( conf ) );
 
     for( Path exitingPath : FileInputFormat.getInputPaths( conf ) )
       {
@@ -337,7 +342,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   @Override
   public void sinkConfInit( HadoopFlowProcess process, JobConf conf )
     {
-    Path qualifiedPath = new Path( getQualifiedPath( conf ) );
+    Path qualifiedPath = new Path( getFullIdentifier( conf ) );
 
     FileOutputFormat.setOutputPath( conf, qualifiedPath );
     super.sinkConfInit( null, conf );
@@ -377,33 +382,37 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     if( output != null )
       return super.openForWrite( flowProcess, output );
 
-    return new HadoopTapCollector( flowProcess, this );
+    HadoopTapCollector schemeCollector = new HadoopTapCollector( flowProcess, this );
+
+    schemeCollector.prepare();
+
+    return schemeCollector;
     }
 
   @Override
-  public boolean makeDirs( JobConf conf ) throws IOException
+  public boolean createResource( JobConf conf ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "making dirs: " + getQualifiedPath( conf ) );
+      LOG.debug( "making dirs: " + getFullIdentifier( conf ) );
 
-    return getFileSystem( conf ).mkdirs( new Path( getPath() ) );
+    return getFileSystem( conf ).mkdirs( new Path( getIdentifier() ) );
     }
 
   @Override
-  public boolean deletePath( JobConf conf ) throws IOException
+  public boolean deleteResource( JobConf conf ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "deleting: {}", getQualifiedPath( conf ) );
+      LOG.debug( "deleting: {}", getFullIdentifier( conf ) );
 
     // do not delete the root directory
-    if( new Path( getQualifiedPath( conf ) ).depth() == 0 )
+    if( new Path( getFullIdentifier( conf ) ).depth() == 0 )
       return true;
 
     FileSystem fileSystem = getFileSystem( conf );
 
     try
       {
-      return fileSystem.delete( new Path( getPath() ), true );
+      return fileSystem.delete( new Path( getIdentifier() ), true );
       }
     catch( NullPointerException exception )
       {
@@ -416,19 +425,19 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     }
 
   @Override
-  public boolean pathExists( JobConf conf ) throws IOException
+  public boolean resourceExists( JobConf conf ) throws IOException
     {
     return getFileSystem( conf ).exists( new Path( getIdentifier() ) );
     }
 
   public boolean isDirectory( JobConf conf ) throws IOException
     {
-    return getFileSystem( conf ).getFileStatus( new Path( getPath() ) ).isDir();
+    return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).isDir();
     }
 
   public long getSize( JobConf conf ) throws IOException
     {
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getPath() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( fileStatus.isDir() )
       return 0;
@@ -458,7 +467,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getPath() ) );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
 
     String[] children = new String[ statuses.length ];
 
@@ -471,7 +480,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   @Override
   public long getModifiedTime( JobConf conf ) throws IOException
     {
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getPath() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( !fileStatus.isDir() )
       return fileStatus.getModificationTime();
@@ -526,7 +535,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     if( statuses != null )
       return;
 
-    statuses = getFileSystem( conf ).listStatus( new Path( getPath() ) );
+    statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
     }
 
   /** @see Object#toString() */

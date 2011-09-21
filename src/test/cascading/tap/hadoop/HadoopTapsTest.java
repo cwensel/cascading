@@ -68,7 +68,7 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
     {
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 
-    String path = tap.getQualifiedPath( HadoopPlanner.getJobConf( getProperties() ) );
+    String path = tap.getFullIdentifier( HadoopPlanner.getJobConf( getProperties() ) );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
     new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
@@ -97,7 +97,7 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
     {
     Tap tap = new Lfs( new Fields( "foo" ), "some/path" );
 
-    String path = tap.getQualifiedPath( HadoopPlanner.getJobConf( getProperties() ) );
+    String path = tap.getFullIdentifier( HadoopPlanner.getJobConf( getProperties() ) );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Lfs( new Fields( "foo" ), "file:///some/path" );
@@ -186,10 +186,10 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
 
     flow.complete();
 
-    Tap test = new Hfs( new TextLine( 1 ), sink.getPath().toString() + "/1-a" );
+    Tap test = new Hfs( new TextLine( 1 ), sink.getIdentifier().toString() + "/1-a" );
     validateLength( flow.openTapForRead( test ), 1 );
 
-    test = new Hfs( new TextLine( 1 ), sink.getPath().toString() + "/2-b" );
+    test = new Hfs( new TextLine( 1 ), sink.getIdentifier().toString() + "/2-b" );
     validateLength( flow.openTapForRead( test ), 1 );
     }
 
@@ -211,10 +211,10 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
 
     flow.complete();
 
-    Tap test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getPath().toString() + "/1-a" );
+    Tap test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getIdentifier().toString() + "/1-a" );
     validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
 
-    test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getPath().toString() + "/2-b" );
+    test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getIdentifier().toString() + "/2-b" );
     validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
     }
 
@@ -236,10 +236,10 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
 
     flow.complete();
 
-    Tap test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getPath().toString() + "/1-a" );
+    Tap test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getIdentifier().toString() + "/1-a" );
     validateLength( flow.openTapForRead( test ), 1, 1 );
 
-    test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getPath().toString() + "/2-b" );
+    test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getIdentifier().toString() + "/2-b" );
     validateLength( flow.openTapForRead( test ), 1, 1 );
 
     TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b
