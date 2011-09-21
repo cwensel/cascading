@@ -6,9 +6,7 @@ build
 dist
 out
 javadoc
-*.iws
-workspace.xml
-tasks.xml
-runConfigurations
 *.tmproj
+.idea
+*.iml
 .gradle
