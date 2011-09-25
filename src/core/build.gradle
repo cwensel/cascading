@@ -19,6 +19,10 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
+
+
 apply from: '../testing.gradle'
 
 pomDirName = 'poms/core'
@@ -71,7 +75,7 @@ assemble << {
 
 test {
   doFirst {
-    include getTestIncludes(/@PlatformTest.*none/)
+    include getTestIncludes(includes, /@PlatformTest.*none/)
     systemProperties = setTestingProperties('none')
   }
 

@@ -21,18 +21,24 @@
 
 
 
-project.getTestIncludes = { matcher ->
+
+
+project.getTestIncludes = { priorIncludes, matcher ->
+
+  if( priorIncludes.isEmpty() )
+  priorIncludes.add('**/*Test.class')
+
   def includes = []
-  new File("${sourceSets.test.classesDir}").eachFileRecurse { file ->
-    if( file.absolutePath =~ /.*Test\.class/ )
+
+  fileTree(dir: sourceSets.test.classesDir, includes: priorIncludes).each { File file ->
+
+    def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
+    if( text =~ matcher )
     {
-      def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
-      if( text =~ matcher )
-      {
-        includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
-      }
+      includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
     }
   }
+
   includes
 }
 
