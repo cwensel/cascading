@@ -58,9 +58,9 @@ import static data.InputData.*;
  *
  */
 @PlatformTest(platforms = {"hadoop"})
-public class HadoopTapsTest extends PlatformTestCase implements Serializable
+public class HadoopTapTest extends PlatformTestCase implements Serializable
   {
-  public HadoopTapsTest()
+  public HadoopTapTest()
     {
     super( true );
     }
