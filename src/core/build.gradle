@@ -19,10 +19,6 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-
-
 apply from: '../testing.gradle'
 
 pomDirName = 'poms/core'
@@ -47,12 +43,14 @@ dependencies {
   compile group: 'riffle', name: 'riffle', version: '0.1-dev'
   compile group: 'org.codehaus.janino', name: 'janino', version: '2.5.16'
   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
-  compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
-  compile group: 'log4j', name: 'log4j', version: '1.2.16'
+  runtime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
+  runtime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
 jar {
-  from '../../version.properties'
+  into('cascading') {
+    from '../../version.properties'
+  }
 }
 
 assemble << {
@@ -75,7 +73,7 @@ assemble << {
 
 test {
   doFirst {
-    include getTestIncludes(includes, /@PlatformTest.*none/)
+    includes = getTestIncludes(includes, /@PlatformTest.*none/)
     systemProperties = setTestingProperties('none')
   }
 

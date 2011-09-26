@@ -19,8 +19,6 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 apply from: '../testing.gradle'
 
 pomDirName = 'poms/test'
@@ -68,9 +66,10 @@ assemble << {
 
 test {
   doFirst {
-    include getTestIncludes(includes, /@PlatformTest.*compare/)
+    includes = getTestIncludes(includes, /@PlatformTest.*compare/)
     systemProperties = setTestingProperties('compare')
   }
+
   testReportDir = new File(testReportDir, 'compare')
   testResultsDir = new File(testResultsDir, 'compare')
 }

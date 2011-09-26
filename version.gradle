@@ -19,12 +19,45 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+if( project.properties['teamcity'] ) // make them system properties
+System.properties.putAll(project.properties['teamcity'])
+
+if( System.properties[ 'aws.properties' ] )
+{
+  file(System.properties[ 'aws.properties' ]).withReader { reader ->
+    def awsProperties = new Properties()
+    awsProperties.load(reader)
+    System.properties.putAll(awsProperties)
+  }
+}
+
+currentCommit = System.properties[ 'build.vcs.number' ];
+
+if( !currentCommit )
+{
+  def commitPath = "${buildDir}/commit.txt"
+
+  ant.exec(dir: '.', executable: "git", output: commitPath) {
+    arg(line: 'rev-parse HEAD')
+  }
+
+  currentCommit = new File(commitPath).readLines().get(0)
+}
+
 def versionProperties = new Properties()
 file('version.properties').withInputStream { versionProperties.load(it) }
 
-releaseHadoopVersion = versionProperties[ 'cascading.hadoop.compatible.version' ]
-releaseVersion = versionProperties[ 'cascading.release.major' ]
+releasePlatformVersion = versionProperties[ 'cascading.platform.compatible.version' ]
+majorVersion = versionProperties[ 'cascading.release.major' ]
 minorVersion = versionProperties[ 'cascading.release.minor' ]
+
+releaseVersion = majorVersion
+buildNumber = System.getProperty('build.number', 'dev')
+
+if( !System.properties[ 'cascading.release.final' ] )
+{
+  buildNumber = "wip-${buildNumber}"
+}
 
 if( minorVersion )
 {
@@ -33,5 +66,5 @@ if( minorVersion )
 
 if( !System.properties[ 'cascading.release.final' ] )
 {
-  releaseVersion = "${releaseVersion}-wip-${System.getProperty('build.number', 'dev')}"
+  releaseVersion = "${releaseVersion}-${buildNumber}"
 }

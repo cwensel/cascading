@@ -56,7 +56,7 @@ public class Version
       String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
       String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
       String releaseBuild = versionProperties.getProperty( "build.number", null );
-      String hadoopVersion = versionProperties.getProperty( "cascading.hadoop.compatible.version" );
+      String platformVersion = versionProperties.getProperty( "cascading.platform.compatible.version" );
       String releaseFull = null;
 
       if( releaseMinor == null )
@@ -67,9 +67,9 @@ public class Version
       String message = null;
 
       if( releaseBuild == null )
-        message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, hadoopVersion );
+        message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, platformVersion );
       else
-        message = String.format( "Concurrent, Inc - Cascading %s%s [%s]", releaseFull, releaseBuild, hadoopVersion );
+        message = String.format( "Concurrent, Inc - Cascading %s%s [%s]", releaseFull, releaseBuild, platformVersion );
 
       LOG.info( message );
       }

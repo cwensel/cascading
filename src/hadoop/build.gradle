@@ -19,8 +19,6 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 apply from: '../testing.gradle'
 
 pomDirName = 'poms/hadoop'
@@ -66,9 +64,10 @@ assemble << {
 
 test {
   doFirst {
-    include getTestIncludes(includes, /@PlatformTest.*hadoop/)
+    includes = getTestIncludes(includes, /@PlatformTest.*hadoop/)
     systemProperties = setTestingProperties('hadoop', 'cascading.test.HadoopPlatform')
   }
+
   testReportDir = new File(testReportDir, 'hadoop')
   testResultsDir = new File(testResultsDir, 'hadoop')
 }

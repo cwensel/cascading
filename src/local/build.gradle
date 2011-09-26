@@ -19,10 +19,6 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-
-
 apply from: '../testing.gradle'
 
 pomDirName = 'poms/local'
@@ -66,7 +62,7 @@ assemble << {
 
 test {
   doFirst {
-    include getTestIncludes(includes, /@PlatformTest.*local/)
+    includes = getTestIncludes(includes, /@PlatformTest.*local/)
     systemProperties = setTestingProperties('local', 'cascading.test.LocalPlatform')
   }
 
