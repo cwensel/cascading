@@ -189,24 +189,6 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
       TrapHandler.closeTraps();
     }
 
-//  protected synchronized void orderDucts()
-//    {
-//    orderedPrevious = new Duct[ incomingScopes.size() ];
-//
-//    for( int i = 0; i < allPrevious.length; i++ )
-//      {
-//      Set<String> branchNames = ( (ElementDuct) allPrevious[ i ] ).getBranchNames();
-//
-//      for( String branchName : branchNames )
-//        {
-//        if( !group.getPipePos().containsKey( branchName ) )
-//          continue;
-//
-//        orderedPrevious[ group.getPipePos().get( branchName ) ] = allPrevious[ i ];
-//        }
-//      }
-//    }
-
   protected synchronized void orderDucts()
     {
     orderedPrevious = new Duct[ incomingScopes.size() ];

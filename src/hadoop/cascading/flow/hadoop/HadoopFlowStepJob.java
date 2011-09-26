@@ -93,6 +93,18 @@ public class HadoopFlowStepJob extends FlowStepJob
     return runningJob != null && runningJob.isSuccessful();
     }
 
+  @Override
+  protected boolean isRemoteExecution()
+    {
+    return true;
+    }
+
+  @Override
+  protected Throwable getThrowable()
+    {
+    return null;
+    }
+
   protected String internalJobId()
     {
     return runningJob.getJobID();

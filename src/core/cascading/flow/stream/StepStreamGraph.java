@@ -70,13 +70,13 @@ public abstract class StepStreamGraph extends StreamGraph
     {
     for( FlowElement rhsElement : successors )
       {
-      Duct rhsDuct = createDuctFor( rhsElement );
-      Duct newRhsDuct = findExisting( rhsDuct );
+      Duct newRhsDuct = createDuctFor( rhsElement );
+      Duct rhsDuct = findExisting( newRhsDuct );
 
-      addPath( lhsDuct, newRhsDuct );
+      addPath( lhsDuct, rhsDuct );
 
       if( rhsDuct != newRhsDuct ) // don't keep going if we have already seen rhs
-        return;
+        continue;
 
       handleDuct( rhsElement, rhsDuct );
       }
@@ -134,7 +134,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   protected abstract Gate createGroupByGate( Group element );
 
-  private Duct findExisting( Duct current )
+  protected Duct findExisting( Duct current )
     {
     Collection<Duct> allDucts = getAllDucts();
 
@@ -201,16 +201,6 @@ public abstract class StepStreamGraph extends StreamGraph
     else
       throw new IllegalStateException( "duct does not wrap a Tap: " + duct.getClass().getCanonicalName() );
     }
-
-//  private Set<String> makeNames( Set<Scope> nextScopes )
-//    {
-//    Set<String> names = new HashSet<String>();
-//
-//    for( Scope scope : nextScopes )
-//      names.add( scope.getName() );
-//
-//    return names;
-//    }
 
   protected void setScopes()
     {

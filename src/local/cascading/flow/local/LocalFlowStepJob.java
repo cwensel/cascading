@@ -29,12 +29,16 @@ import java.util.concurrent.Future;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.ClientState;
 import cascading.stats.StepStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class LocalFlowStepJob extends FlowStepJob
   {
+  private static final Logger LOG = LoggerFactory.getLogger( LocalFlowStepJob.class );
+
   private final LocalStepRunner stackRunner;
   private Future<Throwable> future;
 
@@ -49,6 +53,12 @@ public class LocalFlowStepJob extends FlowStepJob
   protected StepStats createStepStats( ClientState clientState )
     {
     return new LocalStepStats( flowStep, clientState );
+    }
+
+  @Override
+  protected boolean isRemoteExecution()
+    {
+    return false;
     }
 
   @Override
@@ -77,6 +87,22 @@ public class LocalFlowStepJob extends FlowStepJob
   protected boolean internalNonBlockingIsComplete() throws IOException
     {
     return stackRunner.isComplete();
+    }
+
+  @Override
+  protected Throwable getThrowable()
+    {
+    try
+      {
+      if( future != null && future.isDone() )
+        return future.get();
+      }
+    catch( Exception exception )
+      {
+      LOG.warn( "unable to get result", exception );
+      }
+
+    return null;
     }
 
   @Override

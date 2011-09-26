@@ -142,11 +142,14 @@ public abstract class FlowStepJob implements Callable<Throwable>
     if( !stop && !internalNonBlockingIsSuccessful() )
       {
       if( !stepStats.isFinished() )
-        stepStats.markFailed( null );
+        stepStats.markFailed( getThrowable() );
 
       dumpDebugInfo();
 
-      throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
+      if( !isRemoteExecution() )
+        throwable = new FlowException( "local step failed", getThrowable() );
+      else
+        throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
       }
     else
       {
@@ -157,9 +160,13 @@ public abstract class FlowStepJob implements Callable<Throwable>
     stepStats.captureJobStats();
     }
 
+  protected abstract boolean isRemoteExecution();
+
   protected abstract String internalJobId();
 
   protected abstract boolean internalNonBlockingIsSuccessful() throws IOException;
+
+  protected abstract Throwable getThrowable();
 
   protected abstract void internalNonBlockingStart() throws IOException;
 
