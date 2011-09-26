@@ -341,7 +341,12 @@ public class Hadoop18TapUtil
     if( fs == null )
       return false;
 
-    return conf.getBoolean( "mapred.output.direct." + fs.getClass().getSimpleName(), false );
+    boolean result = conf.getBoolean( "mapred.output.direct." + fs.getClass().getSimpleName(), false );
+
+    if( result )
+      LOG.info( "output direct is enabled for this fs: " + fs.getName() );
+
+    return result;
     }
 
   }

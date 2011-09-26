@@ -43,6 +43,7 @@ import cascading.scheme.SourceCall;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.test.PlatformTest;
@@ -278,6 +279,60 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
 
     cascade.complete();
 
-    validateLength( concatFlow, 10, null );
+    validateLength( concatFlow, 10 );
+    }
+
+  public void testNestedMultiSourceGlobHfs() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
+
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{owe?}.txt" );
+
+    MultiSourceTap source = new MultiSourceTap( source1, source2 );
+
+    assertEquals( 2, source.getChildTaps().length );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "glob" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
+    Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
+
+    Flow concatFlow = new HadoopFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
+
+    Tap nextSink = new Hfs( new TextLine(), getOutputPath( "glob2" ), SinkMode.REPLACE );
+
+    Flow nextFlow = new HadoopFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
+
+    Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
+
+    cascade.complete();
+
+    validateLength( concatFlow, 10 );
+    }
+
+  public void testMultiSourceIterator() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
+
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{owe?}.txt" );
+
+    MultiSourceTap source = new MultiSourceTap( source1, source2 );
+
+    validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10 );
+
+    GlobHfs sourceMulti = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r],owe?}.txt" );
+
+    source = new MultiSourceTap( sourceMulti );
+
+    validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10, null );
     }
   }

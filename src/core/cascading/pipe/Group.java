@@ -1219,12 +1219,12 @@ public class Group extends Pipe
   protected void printInternal( StringBuffer buffer, Scope scope )
     {
     super.printInternal( buffer, scope );
-    buffer.append( "[by:" );
-
     Map<String, Fields> map = scope.getGroupingSelectors();
 
     if( map != null )
       {
+      buffer.append( "[by:" );
+
       for( String name : map.keySet() )
         {
         if( map.size() > 1 )
@@ -1235,8 +1235,8 @@ public class Group extends Pipe
 
       if( isSelfJoin() )
         buffer.append( "[numSelfJoins:" ).append( numSelfJoins ).append( "]" );
-      }
 
-    buffer.append( "]" );
+      buffer.append( "]" );
+      }
     }
   }

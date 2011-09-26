@@ -167,16 +167,16 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         throw new ElementGraphException( flowElement, "unable to traverse to the next element after " + flowElement );
         }
 
-      if( incomingEdgesOf( flowElement ).size() != 0 )
-        break;
+      if( incomingEdgesOf( flowElement ).size() != 0 && outgoingEdgesOf( flowElement ).size() != 0 )
+        continue;
 
       if( flowElement instanceof Extent )
         continue;
 
       if( flowElement instanceof Pipe )
-        throw new ElementGraphException( flowElement, "no Tap instance given to connect Pipe " + flowElement );
+        throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to Pipe, possible ambiguous branching, try explicitly naming tails" );
       else if( flowElement instanceof Tap )
-        throw new ElementGraphException( flowElement, "no Pipe instance given to connect Tap " + flowElement );
+        throw new ElementGraphException( (Tap) flowElement, "no Pipe connected to Tap" );
       else
         throw new ElementGraphException( flowElement, "unknown element type: " + flowElement );
       }
@@ -472,7 +472,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         {
         return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
         }
-      } );
+      }
+      );
 
       writer.close();
       }

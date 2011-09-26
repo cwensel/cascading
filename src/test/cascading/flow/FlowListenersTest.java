@@ -109,9 +109,9 @@ public class FlowListenersTest extends CascadingTestCase
       }
 
     @Override
-    protected boolean allowParallelExecution()
+    protected int getMaxNumParallelSteps()
       {
-      return false;
+      return 0;
       }
 
     @Override

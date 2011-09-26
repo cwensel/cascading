@@ -135,7 +135,7 @@ public class Cascade implements Runnable
     properties.put( "cascading.cascade.maxconcurrentflows", Integer.toString( numConcurrentFlows ) );
     }
 
-  public int getMaxConcurrentFlows( Map<Object, Object> properties )
+  public static int getMaxConcurrentFlows( Map<Object, Object> properties )
     {
     return Integer.parseInt( PropertyUtil.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
     }

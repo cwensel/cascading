@@ -109,6 +109,26 @@ public class HadoopFlow extends Flow<JobConf>
     return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
     }
 
+  /**
+   * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
+   * <p/>
+   * By default a Flow will attempt to run all give steps at the same time. But there are occasions
+   * where limiting the number of steps helps manages resources.
+   *
+   * @param properties         of type Map<Object, Object>
+   * @param numConcurrentSteps of type int
+   */
+  public static void setMaxConcurrentSteps( Map<Object, Object> properties, int numConcurrentSteps )
+    {
+    properties.put( "cascading.flow.maxconcurrentsteps", Integer.toString( numConcurrentSteps ) );
+    }
+
+  public static int getMaxConcurrentSteps( JobConf jobConf )
+    {
+    return jobConf.getInt( "cascading.flow.maxconcurrentsteps", 0 );
+    }
+
+
   protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, String name )
     {
     super( properties, jobConf, name );
@@ -293,8 +313,8 @@ public class HadoopFlow extends Flow<JobConf>
     deregisterShutdownHook();
     }
 
-  protected boolean allowParallelExecution()
+  protected int getMaxNumParallelSteps()
     {
-    return stepsAreLocal();
+    return stepsAreLocal() ? 1 : getMaxConcurrentSteps( getConfig() );
     }
   }

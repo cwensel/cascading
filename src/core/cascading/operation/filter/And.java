@@ -24,6 +24,7 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
@@ -82,7 +83,9 @@ public class And extends Logic
   /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
+    TupleEntry arguments = filterCall.getArguments();
     Context context = (Context) filterCall.getContext();
+
     TupleEntry[] argumentEntries = context.argumentEntries;
     Object[] contexts = context.contexts;
 
@@ -92,8 +95,9 @@ public class And extends Logic
         {
         TupleEntry entry = argumentEntries[ i ];
 
-        entry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ i ] ) );
+        entry.setTuple( arguments.selectTuple( argumentSelectors[ i ] ) );
 
+        ( (ConcreteCall) filterCall ).setArguments( entry );
         filterCall.setContext( contexts[ i ] );
 
         if( !filters[ i ].isRemove( flowProcess, filterCall ) )
@@ -104,6 +108,7 @@ public class And extends Logic
       }
     finally
       {
+      ( (ConcreteCall) filterCall ).setArguments( arguments );
       filterCall.setContext( context );
       }
     }

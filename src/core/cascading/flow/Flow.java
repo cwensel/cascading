@@ -1087,14 +1087,18 @@ public abstract class Flow<Config> implements Runnable
         }
 
       // if jobs are run local, then only use one thread to force execution serially
-      int numThreads = allowParallelExecution() ? 1 : jobsMap.size();
+      //int numThreads = jobsAreLocal() ? 1 : getMaxConcurrentSteps( getJobConf() );
+      int numThreads = getMaxNumParallelSteps();
+
+      if( numThreads == 0 )
+        numThreads = jobsMap.size();
 
       if( numThreads == 0 )
         throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
 
       if( LOG.isInfoEnabled() )
         {
-        logInfo( " parallel execution is enabled: " + !allowParallelExecution() );
+        logInfo( " parallel execution is enabled: " + ( getMaxNumParallelSteps() != 1 ) );
         logInfo( " starting jobs: " + jobsMap.size() );
         logInfo( " allocating threads: " + numThreads );
         }
@@ -1139,7 +1143,7 @@ public abstract class Flow<Config> implements Runnable
       }
     }
 
-  protected abstract boolean allowParallelExecution();
+  protected abstract int getMaxNumParallelSteps();
 
   protected abstract void internalShutdown();
 

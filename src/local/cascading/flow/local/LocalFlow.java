@@ -143,9 +143,9 @@ public class LocalFlow extends Flow<Properties>
     }
 
   @Override
-  protected boolean allowParallelExecution()
+  protected int getMaxNumParallelSteps()
     {
-    return true;
+    return 0;
     }
 
   @Override

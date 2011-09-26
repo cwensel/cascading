@@ -44,6 +44,7 @@ import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.hadoop.TextLine;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
@@ -240,6 +241,31 @@ public class FlowTest extends PlatformTestCase
       {
       // ignore
       }
+    }
+
+  public void testStartStopRace() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "startstop" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+
+    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+
+    flow.start();
+    flow.stop(); // should not fail
     }
 
   public void testFailingListenerStarting() throws Exception

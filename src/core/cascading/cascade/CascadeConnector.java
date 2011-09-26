@@ -216,7 +216,10 @@ public class CascadeConnector
         iterator.remove();
 
         for( Tap childTap : ( (CompositeTap) tap ).getChildTaps() )
+          {
           iterator.add( childTap );
+          iterator.previous(); // force cursor backward
+          }
         }
       }
     }

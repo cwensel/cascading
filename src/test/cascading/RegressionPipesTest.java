@@ -24,6 +24,7 @@ package cascading;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
@@ -31,9 +32,14 @@ import cascading.flow.FlowConnector;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
 import cascading.operation.DebugLevel;
+import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.assertion.AssertSizeMoreThan;
+import cascading.operation.filter.And;
+import cascading.operation.filter.Not;
+import cascading.operation.filter.Or;
+import cascading.operation.filter.Xor;
 import cascading.operation.function.UnGroup;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
@@ -382,5 +388,74 @@ public class RegressionPipesTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 10, null );
+    }
+
+  public void testComplexLogicAnd() throws Exception
+    {
+    copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new And( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, " ", getOutputPath( "/regression/complexlogicand" ), SinkMode.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 2, Pattern.compile( "1\ta" ) );
+    }
+
+  public void testComplexLogicOr() throws Exception
+    {
+    copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new Or( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, " ", getOutputPath( "/regression/complexlogicor" ), SinkMode.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 4, 2, Pattern.compile( "(1\t.)|(.\ta)" ) );
+    }
+
+  public void testComplexLogicXor() throws Exception
+    {
+    copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Filter filter = new Not( new Xor( new Fields( "num" ), new RegexFilter( "1", true, true ), new Fields( "char" ), new RegexFilter( "a", true, true ) ) );
+
+    // compounding the filter for the Fields.ALL case.
+    pipe = new Each( pipe, filter );
+    pipe = new Each( pipe, new Fields( "num", "char" ), filter );
+
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, " ", getOutputPath( "/regression/complexlogicxor" ), SinkMode.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 3, 2, Pattern.compile( "(1\t.)|(.\ta)" ) );
     }
   }
