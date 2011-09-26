@@ -262,7 +262,7 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
     assertEquals( 2, source.getTaps().length );
 
     // show globhfs will just match a directory if ended with a /
-    assertEquals( 1, new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), "build/test/?ata/" ).getTaps().length );
+    assertEquals( 1, new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "../?ata/" ).getTaps().length );
 
     Tap sink = new Hfs( new TextLine(), getOutputPath( "glob" ), SinkMode.REPLACE );
 
@@ -297,14 +297,14 @@ public class HadoopTapsTest extends PlatformTestCase implements Serializable
     assertEquals( 2, source.getChildTaps().length );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), getOutputPath( "glob" ), SinkMode.REPLACE );
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "globmultisource" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
     Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 
     Flow concatFlow = new HadoopFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
 
-    Tap nextSink = new Hfs( new TextLine(), getOutputPath( "glob2" ), SinkMode.REPLACE );
+    Tap nextSink = new Hfs( new TextLine(), getOutputPath( "globmultiource2" ), SinkMode.REPLACE );
 
     Flow nextFlow = new HadoopFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
 
