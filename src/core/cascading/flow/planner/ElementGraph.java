@@ -450,23 +450,23 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       File parentFile = new File( filename ).getParentFile();
 
-      if( !parentFile.exists() )
+      if( parentFile != null && !parentFile.exists() )
         parentFile.mkdirs();
 
       Writer writer = new FileWriter( filename );
 
       Util.writeDOT( writer, graph, new IntegerNameProvider<FlowElement>(), new VertexNameProvider<FlowElement>()
-      {
-      public String getVertexName( FlowElement object )
         {
-        if( object instanceof Tap || object instanceof Extent )
-          return object.toString().replaceAll( "\"", "\'" );
+        public String getVertexName( FlowElement object )
+          {
+          if( object instanceof Tap || object instanceof Extent )
+            return object.toString().replaceAll( "\"", "\'" );
 
-        Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
+          Scope scope = graph.outgoingEdgesOf( object ).iterator().next();
 
-        return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
-        }
-      }, new EdgeNameProvider<Scope>()
+          return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
+          }
+        }, new EdgeNameProvider<Scope>()
       {
       public String getEdgeName( Scope object )
         {
