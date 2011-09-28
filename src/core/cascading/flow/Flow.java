@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
@@ -140,6 +141,7 @@ public abstract class Flow<Config> implements Runnable
   /** Field executor */
   private transient ExecutorService executor;
 
+  private transient ReentrantLock stopLock = new ReentrantLock( true );
 
   /**
    * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
@@ -818,30 +820,39 @@ public abstract class Flow<Config> implements Runnable
   @ProcessStop
   public synchronized void stop()
     {
-    if( stop )
-      return;
-
-    if( thread == null )
-      return;
-
-    stop = true;
+    stopLock.lock();
 
     try
       {
-      fireOnStopping();
+      if( stop )
+        return;
 
-      if( !flowStats.isFinished() )
-        flowStats.markStopped();
+      if( thread == null )
+        return;
 
-      internalStopAllJobs();
+      stop = true;
 
-      handleExecutorShutdown();
+      try
+        {
+        fireOnStopping();
 
-      internalClean( true );
+        if( !flowStats.isFinished() )
+          flowStats.markStopped();
+
+        internalStopAllJobs();
+
+        handleExecutorShutdown();
+
+        internalClean( true );
+        }
+      finally
+        {
+        flowStats.cleanup();
+        }
       }
     finally
       {
-      flowStats.cleanup();
+      stopLock.unlock();
       }
     }
 
@@ -862,6 +873,16 @@ public abstract class Flow<Config> implements Runnable
       catch( InterruptedException exception )
         {
         throw new FlowException( getName(), "thread interrupted", exception );
+        }
+
+      // if in #stop and stopping, lets wait till its done in this thread
+      try
+        {
+        stopLock.lock();
+        }
+      finally
+        {
+        stopLock.unlock();
         }
 
       if( throwable instanceof FlowException )

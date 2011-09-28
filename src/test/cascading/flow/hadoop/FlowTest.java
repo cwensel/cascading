@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import cascading.PlatformTestCase;
@@ -53,6 +55,7 @@ import cascading.tuple.Fields;
 
 import static data.InputData.inputFileLower;
 import static data.InputData.inputFileUpper;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 /**
  *
@@ -165,11 +168,11 @@ public class FlowTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
+    final Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "stopped.dot" );
 
-    LockingFlowListener listener = new LockingFlowListener();
+    final LockingFlowListener listener = new LockingFlowListener();
 
     flow.addListener( listener );
 
@@ -181,7 +184,7 @@ public class FlowTest extends PlatformTestCase
     while( true )
       {
       System.out.println( "testing if running" );
-      Thread.sleep( 1000 );
+      Thread.sleep( 100 );
 
       Map<String, Callable<Throwable>> map = ( (Flow) flow ).getJobsMap();
 
@@ -192,9 +195,29 @@ public class FlowTest extends PlatformTestCase
         break;
       }
 
-    System.out.println( "calling stop" );
+    final Semaphore start = new Semaphore( 0 );
+    final long startTime = System.nanoTime();
 
+    Future<Long> future = newSingleThreadExecutor().submit( new Callable<Long>()
+    {
+    @Override
+    public Long call() throws Exception
+      {
+      start.release();
+      System.out.println( "calling complete" );
+      flow.complete();
+      return System.nanoTime() - startTime;
+      }
+    } );
+
+    start.acquire();
+    System.out.println( "calling stop" );
     flow.stop();
+
+    long stopTime = System.nanoTime() - startTime;
+    long completeTime = future.get();
+
+    assertTrue( String.format( "stop: %s complete: %s", stopTime, completeTime ), stopTime <= completeTime );
 
     assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
     assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
