@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed license from GPLv3 to APLv2.
+
   Changed c.f.Flow to prevent #complete() from returning while #stop() is executing. Should prevent certain kinds
   of race conditions when a shutdown hook is used, from a different thread, to stop running flows.
 
