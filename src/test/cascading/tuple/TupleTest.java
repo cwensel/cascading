@@ -26,12 +26,10 @@ import java.io.IOException;
 import java.util.Date;
 
 import cascading.CascadingTestCase;
-import cascading.test.PlatformTest;
 import cascading.tuple.hadoop.HadoopTupleInputStream;
 import cascading.tuple.hadoop.HadoopTupleOutputStream;
 import cascading.tuple.hadoop.TupleSerialization;
 
-@PlatformTest(platforms = {"none"})
 public class TupleTest extends CascadingTestCase
   {
   private Tuple tuple;

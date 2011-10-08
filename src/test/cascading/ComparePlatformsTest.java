@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import cascading.test.PlatformTest;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -39,11 +38,12 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.PlatformTestCase.getTestRoot;
+
 /**
  *
  */
-@PlatformTest(platforms = {"compare"})
-public class ComparePlatformsTest extends PlatformTestCase
+public class ComparePlatformsTest extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( ComparePlatformsTest.class );
 

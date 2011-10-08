@@ -23,7 +23,6 @@ package cascading.operation.filter;
 import cascading.CascadingTestCase;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -31,7 +30,6 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class SampleFilterTest extends CascadingTestCase
   {
   private ConcreteCall operationCall;
@@ -83,6 +81,4 @@ public class SampleFilterTest extends CascadingTestCase
 
     assertEquals( message, sample, (double) count / values, 1 );
     }
-
-
   }

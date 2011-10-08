@@ -23,13 +23,11 @@ package cascading.flow.stream;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.test.PlatformTest;
 import junit.framework.TestCase;
 
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class StreamTest extends TestCase
   {
   public StreamTest()

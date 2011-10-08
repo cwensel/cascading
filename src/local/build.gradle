@@ -60,10 +60,9 @@ assemble << {
 }
 
 test {
-  doFirst {
-    includes = getTestIncludes(includes, /@PlatformTest.*local/)
-    systemProperties = setTestingProperties('local', 'cascading.test.LocalPlatform')
-  }
+  include '**/*PlatformTest.class'
+
+  systemProperties = setTestingProperties('local')
 
   testReportDir = new File(testReportDir, 'local')
   testResultsDir = new File(testResultsDir, 'local')

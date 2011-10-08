@@ -23,7 +23,6 @@ package cascading.operation.expression;
 import cascading.CascadingTestCase;
 import cascading.flow.FlowProcess;
 import cascading.operation.ConcreteCall;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -31,7 +30,6 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class ExpressionTest extends CascadingTestCase
   {
   public ExpressionTest()

@@ -64,10 +64,9 @@ assemble << {
 }
 
 test {
-  doFirst {
-    includes = getTestIncludes(includes, /@PlatformTest.*compare/)
-    systemProperties = setTestingProperties('compare')
-  }
+  include '**/ComparePlatformsTest.class'
+
+  systemProperties = setTestingProperties('compare')
 
   testReportDir = new File(testReportDir, 'compare')
   testResultsDir = new File(testResultsDir, 'compare')

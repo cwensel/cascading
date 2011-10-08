@@ -26,14 +26,12 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.pipe.assembly.Unique;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class FilterTest extends CascadingTestCase
   {
   public FilterTest()

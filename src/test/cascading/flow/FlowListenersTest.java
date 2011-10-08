@@ -22,14 +22,12 @@ package cascading.flow;
 
 import java.util.Map;
 
-import cascading.CascadingTestCase;
-import cascading.test.PlatformTest;
+import junit.framework.TestCase;
 
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
-public class FlowListenersTest extends CascadingTestCase
+public class FlowListenersTest extends TestCase
   {
   public FlowListenersTest()
     {

@@ -40,6 +40,7 @@ sourceSets {
 dependencies {
   compile(group: 'org.apache.hadoop', name: 'hadoop-core', version: '0.20.2') {
     exclude group: 'ant'
+    exclude group: 'junit'
   }
 }
 
@@ -62,10 +63,10 @@ assemble << {
 }
 
 test {
-  doFirst {
-    includes = getTestIncludes(includes, /@PlatformTest.*hadoop/)
-    systemProperties = setTestingProperties('hadoop', 'cascading.test.HadoopPlatform')
-  }
+  include '**/*PlatformTest.class'
+  include '**/*HadoopTest.class'
+
+  systemProperties = setTestingProperties('hadoop')
 
   testReportDir = new File(testReportDir, 'hadoop')
   testResultsDir = new File(testResultsDir, 'hadoop')

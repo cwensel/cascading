@@ -23,11 +23,9 @@ package cascading.pipe;
 import cascading.CascadingTestCase;
 import cascading.TestFunction;
 import cascading.operation.Identity;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-@PlatformTest(platforms = {"none"})
 public class PipeParamTest extends CascadingTestCase
   {
   Fields[] ARGS_PASS = new Fields[]{new Fields( "x" ), Fields.ALL, Fields.GROUP, Fields.VALUES};

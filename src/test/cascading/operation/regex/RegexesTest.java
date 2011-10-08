@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleListCollector;
@@ -32,8 +31,6 @@ import cascading.tuple.TupleListCollector;
 /**
  *
  */
-
-@PlatformTest(platforms = {"none"})
 public class RegexesTest extends CascadingTestCase
   {
   public RegexesTest()

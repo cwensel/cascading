@@ -24,12 +24,10 @@ import java.util.Comparator;
 
 import cascading.CascadingTestCase;
 import cascading.TestStringComparator;
-import cascading.test.PlatformTest;
 
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class FieldsComparatorTest extends CascadingTestCase
   {
   Comparator comparator = new TestStringComparator( false );

@@ -26,12 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.test.PlatformRunner;
+import cascading.test.TestPlatform;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
@@ -39,9 +42,14 @@ import cascading.util.Util;
 import data.InputData;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.junit.internal.runners.SuiteMethod;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.test.PlatformRunner.*;
+
+@RunWith( SuiteMethod.class )
 public abstract class PipeAssemblyTestBase extends PlatformTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PipeAssemblyTestBase.class );
@@ -63,14 +71,40 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
                                                    Fields.RESULTS, Fields.ALL};
   static final String RHS_VALUE = "value2";
 
+  static Set<String> includes = getIncludes();
+  private String key;
+
   public static void makeSuites( Properties properties, Map<String, Pipe> pipes, TestSuite suite, Class type ) throws IllegalAccessException, InvocationTargetException, InstantiationException
     {
     for( String name : pipes.keySet() )
       {
       if( isUNDEFINED( properties, name ) )
+        {
         LOG.debug( "skipping: {}", name );
+        }
       else
-        suite.addTest( (Test) type.getConstructors()[ 0 ].newInstance( properties, name, pipes.get( name ) ) );
+        {
+        PlatformRunner.Platform platform = (PlatformRunner.Platform) type.getAnnotation( PlatformRunner.Platform.class );
+
+        for( Class<? extends TestPlatform> platformType : platform.value() )
+          {
+          TestPlatform testPlatform = makeInstance( platformType );
+          String platformName = testPlatform.getName();
+
+          LOG.info( "installing platform: {}", platformName );
+
+          if( isNotIncluded( includes, platformName ) )
+            continue;
+
+          String displayName = String.format( "%s[%s]", name, platformName );
+
+          PlatformTestCase platformTest = (PlatformTestCase) type.getConstructors()[ 0 ].newInstance( properties, displayName, name, pipes.get( name ) );
+
+          platformTest.installPlatform( testPlatform );
+
+          suite.addTest( (Test) platformTest );
+          }
+        }
       }
     }
 
@@ -139,9 +173,10 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
   Tuple resultTuple;
   int resultLength;
 
-  public PipeAssemblyTestBase( Properties properties, String name, Pipe pipe )
+  public PipeAssemblyTestBase( Properties properties, String displayName, String key, Pipe pipe )
     {
-    setName( name );
+    setName( displayName );
+    this.key = key;
     this.properties = properties;
     this.pipe = pipe;
     this.resultTuple = getResultTuple();
@@ -150,28 +185,29 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
 
   Tuple getResultTuple()
     {
-    return Tuple.parse( (String) properties.get( getName() + ".tuple" ) );
+    return Tuple.parse( (String) properties.get( key + ".tuple" ) );
     }
 
   boolean isWriteDOT()
     {
-    return properties.containsKey( getName() + ".writedot" );
+    return properties.containsKey( key + ".writedot" );
     }
 
   int getResultLength()
     {
-    return Integer.parseInt( properties.getProperty( getName() + ".length", properties.getProperty( "default.length" ) ) );
+    return Integer.parseInt( properties.getProperty( key + ".length", properties.getProperty( "default.length" ) ) );
     }
 
   boolean isError()
     {
-    return properties.containsKey( getName() + ".ERROR" );
+    return properties.containsKey( key + ".ERROR" );
     }
 
+  @org.junit.Test
   public void runTest() throws Exception
     {
     Tap source = getPlatform().getTextFile( InputData.inputFileNums20 );
-    Tap sink = getPlatform().getTextFile( getOutputPath( getName() ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( key ), SinkMode.REPLACE );
 
     Flow flow = null;
 
@@ -180,7 +216,7 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
       flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
       if( isWriteDOT() )
-        flow.writeDOT( getName() + ".dot" );
+        flow.writeDOT( getName() + ".dot" ); // use display name
 
       flow.complete();
 

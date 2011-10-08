@@ -2,6 +2,13 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added new JUnit runner for injecting platform dependencies into c.t.PlatformTestCase subclasses. Subclasses should
+  use c.t.PlatformRunner.Platform Annotation to specify relevant c.t.TestPlatform instances.
+
+  Changed test and assertion helper methods on c.t.CascadingTestCase static to remove subclassing requirement.
+
+  Upgraded to support JUnit 4.8.x.
+
   Changed license from GPLv3 to APLv2.
 
   Changed c.f.Flow to prevent #complete() from returning while #stop() is executing. Should prevent certain kinds

@@ -29,7 +29,6 @@ import cascading.flow.FlowSession;
 import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.tap.Tap;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
@@ -40,7 +39,6 @@ import cascading.tuple.TupleEntryIterator;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class LimitFilterTest extends CascadingTestCase
   {
   private ConcreteCall operationCall;

@@ -25,7 +25,6 @@ import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
 import cascading.operation.ConcreteCall;
 import cascading.operation.GroupAssertion;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -33,7 +32,6 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class GroupAssertionsTest extends CascadingTestCase
   {
   public GroupAssertionsTest()

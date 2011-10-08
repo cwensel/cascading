@@ -35,5 +35,4 @@ public class EveryAssemblyFactory extends AssemblyFactory
 
     return new Every( pipe, argFields, new TestAggregator( declFields, new Tuple( fieldValue ) ), selectFields );
     }
-
   }

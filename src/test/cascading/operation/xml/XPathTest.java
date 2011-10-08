@@ -26,14 +26,12 @@ import java.util.Iterator;
 import cascading.CascadingTestCase;
 import cascading.operation.Filter;
 import cascading.operation.Function;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class XPathTest extends CascadingTestCase
   {
   public XPathTest()

@@ -25,7 +25,6 @@ import cascading.flow.FlowProcess;
 import cascading.operation.AssertionException;
 import cascading.operation.ConcreteCall;
 import cascading.operation.ValueAssertion;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -33,7 +32,6 @@ import cascading.tuple.TupleEntry;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class ValueAssertionsTest extends CascadingTestCase
   {
   public ValueAssertionsTest()
@@ -269,6 +267,4 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", 1 ) ) );
     assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
     }
-
-
   }

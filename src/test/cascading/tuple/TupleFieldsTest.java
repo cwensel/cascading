@@ -21,9 +21,7 @@
 package cascading.tuple;
 
 import cascading.CascadingTestCase;
-import cascading.test.PlatformTest;
 
-@PlatformTest(platforms = {"none"})
 public class TupleFieldsTest extends CascadingTestCase
   {
   private Fields fields;
@@ -118,5 +116,4 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "name2", result.get( 3 ) );
     assertEquals( "not equal: ", "rate2", result.get( 4 ) );
     }
-
   }

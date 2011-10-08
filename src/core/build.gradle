@@ -71,11 +71,12 @@ assemble << {
 }
 
 test {
-  doFirst {
-    includes = getTestIncludes(includes, /@PlatformTest.*none/)
-    systemProperties = setTestingProperties('none')
-  }
+  include '**/*Test.class'
+  exclude '**/*PlatformTest.class'
+  exclude '**/ComparePlatformsTest.class'
 
-  testReportDir = new File(testReportDir, 'none')
-  testResultsDir = new File(testResultsDir, 'none')
+  systemProperties = setTestingProperties('core')
+
+  testReportDir = new File(testReportDir, 'core')
+  testResultsDir = new File(testResultsDir, 'core')
 }

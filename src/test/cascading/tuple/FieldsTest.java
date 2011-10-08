@@ -21,9 +21,7 @@
 package cascading.tuple;
 
 import cascading.CascadingTestCase;
-import cascading.test.PlatformTest;
 
-@PlatformTest(platforms = {"none"})
 public class FieldsTest extends CascadingTestCase
   {
   public FieldsTest()

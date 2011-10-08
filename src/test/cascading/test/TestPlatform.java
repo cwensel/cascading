@@ -45,6 +45,11 @@ public abstract class TestPlatform
     enableCluster = Boolean.parseBoolean( System.getProperty( CLUSTER_TESTING_PROPERTY, Boolean.toString( enableCluster ) ) );
     }
 
+  public String getName()
+    {
+    return getClass().getSimpleName().replaceAll( "^(.*)Platform$", "$1" ).toLowerCase();
+    }
+
   public abstract void setUp() throws IOException;
 
   public abstract Map<Object, Object> getProperties();

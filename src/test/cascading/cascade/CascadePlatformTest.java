@@ -1,0 +1,268 @@
+/*
+ * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cascading.cascade;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import cascading.PlatformTestCase;
+import cascading.flow.Flow;
+import cascading.flow.FlowSkipStrategy;
+import cascading.flow.LockingFlowListener;
+import cascading.flow.planner.FlowStepJob;
+import cascading.operation.Identity;
+import cascading.operation.regex.RegexSplitter;
+import cascading.operation.text.FieldJoiner;
+import cascading.pipe.Each;
+import cascading.pipe.Pipe;
+import cascading.tap.MultiSourceTap;
+import cascading.tap.SinkMode;
+import cascading.tap.Tap;
+import cascading.test.HadoopPlatform;
+import cascading.test.LocalPlatform;
+import cascading.test.PlatformRunner;
+import cascading.tuple.Fields;
+import org.junit.Test;
+
+import static data.InputData.inputFileIps;
+
+@PlatformRunner.Platform({LocalPlatform.class, HadoopPlatform.class})
+public class CascadePlatformTest extends PlatformTestCase
+  {
+  public CascadePlatformTest()
+    {
+    super( true );
+    }
+
+  private Flow firstFlow( String path )
+    {
+    Tap source = getPlatform().getTextFile( inputFileIps );
+
+    Pipe pipe = new Pipe( "first" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow secondFlow( Tap source, String path )
+    {
+    Pipe pipe = new Pipe( "second" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path + "/second" ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow thirdFlow( Tap source, String path )
+    {
+    Pipe pipe = new Pipe( "third" );
+
+    pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path + "/third" ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow fourthFlow( Tap source, String path )
+    {
+    Pipe pipe = new Pipe( "fourth" );
+
+    pipe = new Each( pipe, new Identity() );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/fourth" ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow previousMultiTapFlow( String path, String ordinal )
+    {
+    Tap source = getPlatform().getTextFile( inputFileIps );
+
+    Pipe pipe = new Pipe( ordinal );
+
+    pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/" + ordinal ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow multiTapFlow( Tap[] sources, String path )
+    {
+    Pipe pipe = new Pipe( "multitap" );
+
+    pipe = new Each( pipe, new Identity() );
+
+    Tap source = new MultiSourceTap( sources );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/multitap" ), SinkMode.REPLACE );
+
+    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  @Test
+  public void testSimpleCascade() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "simple";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
+
+    cascade.start();
+
+    cascade.complete();
+
+    validateLength( fourth, 20 );
+    }
+
+  @Test
+  public void testMultiTapCascade() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "multitap";
+
+    Flow first = previousMultiTapFlow( path, "first" );
+    Flow second = previousMultiTapFlow( path, "second" );
+    Flow multitap = multiTapFlow( Tap.taps( first.getSink(), second.getSink() ), path );
+
+    Cascade cascade = new CascadeConnector().connect( multitap, first, second );
+
+    cascade.start();
+
+    cascade.complete();
+
+    validateLength( multitap, 40 );
+    }
+
+  @Test
+  public void testSkippedCascade() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "skipped";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    cascade.setFlowSkipStrategy( new FlowSkipStrategy()
+    {
+
+    public boolean skipFlow( Flow flow ) throws IOException
+      {
+      return true;
+      }
+    } );
+
+    cascade.start();
+
+    cascade.complete();
+
+    assertFalse( "file exists", fourth.getSink().resourceExists( fourth.getConfig() ) );
+    }
+
+  @Test
+  public void testSimpleCascadeStop() throws IOException, InterruptedException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "stopped";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    LockingFlowListener listener = new LockingFlowListener();
+
+    first.addListener( listener );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    System.out.println( "calling start" );
+    cascade.start();
+
+    assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    while( true )
+      {
+      System.out.println( "testing if running" );
+
+      if( getPlatform() instanceof HadoopPlatform )
+        Thread.sleep( 1000 );
+
+      Map<String, Callable<Throwable>> map = LockingFlowListener.getJobsMap( first );
+
+      if( map == null || map.values().size() == 0 )
+        continue;
+
+      FlowStepJob flowStepJob = (FlowStepJob) map.values().iterator().next();
+
+      if( flowStepJob.isStarted() )
+        break;
+      }
+
+    System.out.println( "calling stop" );
+
+    cascade.stop();
+
+    assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+    }
+
+  @Test
+  public void testCascadeID() throws IOException
+    {
+    String path = "idtest";
+
+    Flow first = firstFlow( path );
+    Flow second = secondFlow( first.getSink(), path );
+    Flow third = thirdFlow( second.getSink(), path );
+    Flow fourth = fourthFlow( third.getSink(), path );
+
+    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    String id = cascade.getID();
+
+    assertNotNull( "id is null", id );
+    assertEquals( first.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( second.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( third.getProperty( "cascading.cascade.id" ), id );
+    assertEquals( fourth.getProperty( "cascading.cascade.id" ), id );
+    }
+  }

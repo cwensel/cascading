@@ -29,16 +29,19 @@ import java.util.Set;
 import cascading.flow.FlowConnector;
 import cascading.operation.DebugLevel;
 import cascading.test.HadoopPlatform;
-import cascading.test.LocalPlatform;
+import cascading.test.PlatformRunner;
 import cascading.test.TestPlatform;
 import cascading.util.Util;
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
+@RunWith(PlatformRunner.class)
 public class PlatformTestCase extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PlatformTestCase.class );
@@ -47,26 +50,24 @@ public class PlatformTestCase extends CascadingTestCase
   static Set<String> allPaths = new HashSet<String>();
 
   private String rootPath;
+  Set<String> currentPaths = new HashSet<String>();
+
   private transient TestPlatform platform = null;
+
+  private transient boolean useCluster;
+  private transient int numMapTasks;
+  private transient int numReduceTasks;
 
   public PlatformTestCase( boolean useCluster )
     {
-    String classname = System.getProperty( TestPlatform.TEST_PLATFORM_CLASSNAME, LocalPlatform.class.getCanonicalName() );
-
-    platform = (TestPlatform) loadClassInstance( classname );
-    platform.setUseCluster( useCluster );
-//    platform.setProperty( StreamGraph.ERROR_DOT_FILE_PATH, getOutputPath( "streamgraph.dot" )  );
+    this.useCluster = useCluster;
     }
 
   public PlatformTestCase( boolean useCluster, int numMapTasks, int numReduceTasks )
     {
     this( useCluster );
-
-    if( platform instanceof HadoopPlatform )
-      {
-      ( (HadoopPlatform) platform ).setNumMapTasks( numMapTasks );
-      ( (HadoopPlatform) platform ).setNumReduceTasks( numReduceTasks );
-      }
+    this.numMapTasks = numMapTasks;
+    this.numReduceTasks = numReduceTasks;
     }
 
   public PlatformTestCase()
@@ -74,26 +75,21 @@ public class PlatformTestCase extends CascadingTestCase
     this( false );
     }
 
-  protected Object loadClassInstance( String classname )
+  public void installPlatform( TestPlatform platform )
     {
-    try
-      {
-      return getClass().getClassLoader().loadClass( classname ).newInstance();
-      }
-    catch( InstantiationException exception )
-      {
-      exception.printStackTrace();
-      }
-    catch( IllegalAccessException exception )
-      {
-      exception.printStackTrace();
-      }
-    catch( ClassNotFoundException exception )
-      {
-      exception.printStackTrace();
-      }
+    this.platform = platform;
+    this.platform.setUseCluster( useCluster );
 
-    return null;
+    if( this.platform instanceof HadoopPlatform )
+      {
+      ( (HadoopPlatform) platform ).setNumMapTasks( numMapTasks );
+      ( (HadoopPlatform) platform ).setNumReduceTasks( numReduceTasks );
+      }
+    }
+
+  public TestPlatform getPlatform()
+    {
+    return platform;
     }
 
   protected String getRootPath()
@@ -136,7 +132,7 @@ public class PlatformTestCase extends CascadingTestCase
 
   public String getPlatformName()
     {
-    return platform.getClass().getSimpleName().replaceAll( "^(.*)Platform$", "$1" ).toLowerCase();
+    return platform.getName();
     }
 
   public static String getTestRoot()
@@ -144,6 +140,7 @@ public class PlatformTestCase extends CascadingTestCase
     return System.getProperty( ROOT_OUTPUT_PATH, "build/test/output" );
     }
 
+  @Before
   public void setUp() throws IOException
     {
     getPlatform().setUp();
@@ -167,23 +164,17 @@ public class PlatformTestCase extends CascadingTestCase
     return properties;
     }
 
+  @After
   public void tearDown() throws IOException
     {
-    getPlatform().tearDown();
-    }
-
-  @AfterClass
-  public void copyLocal() throws IOException
-    {
-    for( String path : allPaths )
+    for( String path : currentPaths )
       {
       LOG.info( "copying to local {}", path );
       getPlatform().copyToLocal( path );
       }
-    }
 
-  public TestPlatform getPlatform()
-    {
-    return platform;
+    currentPaths.clear();
+
+    getPlatform().tearDown();
     }
   }

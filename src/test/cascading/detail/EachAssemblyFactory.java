@@ -32,5 +32,4 @@ public class EachAssemblyFactory extends AssemblyFactory
     {
     return new Each( pipe, argFields, new TestFunction( declFields, new Tuple( fieldValue ) ), selectFields );
     }
-
   }

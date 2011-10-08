@@ -18,31 +18,32 @@
  * limitations under the License.
  */
 
-project.getTestIncludes = { priorIncludes, matcher ->
+//project.getTestIncludes = { priorIncludes, matcher ->
+//
+//  if( priorIncludes.isEmpty() )
+//  priorIncludes.add('**/*Test.class')
+//
+//  def includes = []
+//
+//  fileTree(dir: sourceSets.test.classesDir, includes: priorIncludes).each { File file ->
+//
+//    def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
+//    if( text =~ matcher )
+//    {
+//      includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
+//    }
+//  }
+//
+//  includes
+//}
 
-  if( priorIncludes.isEmpty() )
-  priorIncludes.add('**/*Test.class')
-
-  def includes = []
-
-  fileTree(dir: sourceSets.test.classesDir, includes: priorIncludes).each { File file ->
-
-    def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
-    if( text =~ matcher )
-    {
-      includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
-    }
-  }
-
-  includes
-}
-
-project.setTestingProperties = { platform, platformClassName = '' ->
-  System.properties[ 'test.platform' ] = platform
-  System.properties[ 'test.platform.classname' ] = platformClassName
+project.setTestingProperties = { platform = '' ->
+  System.properties[ 'test.platform.includes' ] = platform
 
   if( !System.properties[ 'test.cluster.enabled' ] )
-  System.properties[ 'test.cluster.enabled' ] = 'true'
+  {
+    System.properties[ 'test.cluster.enabled' ] = 'true'
+  }
 
   // hadoop hard codes 'build/test' into its test harness, so might as well play along
   System.properties[ 'test.output.root' ] = new String("${buildDir}/test/output/")

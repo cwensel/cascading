@@ -22,7 +22,6 @@ package cascading.operation.aggregator;
 
 import cascading.CascadingTestCase;
 import cascading.operation.Aggregator;
-import cascading.test.PlatformTest;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleListCollector;
@@ -30,12 +29,10 @@ import cascading.tuple.TupleListCollector;
 /**
  *
  */
-@PlatformTest(platforms = {"none"})
 public class AggregatorsTest extends CascadingTestCase
   {
   public AggregatorsTest()
     {
-    super();
     }
 
   public void testAverage()
@@ -156,5 +153,4 @@ public class AggregatorsTest extends CascadingTestCase
 
     assertEquals( "got expected value after aggregate", 5.0, tuple.getDouble( 0 ), 0.0d );
     }
-
   }

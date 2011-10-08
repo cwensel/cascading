@@ -62,53 +62,53 @@ public class CascadingTestCase extends TestCase implements Serializable
     super( name );
     }
 
-  protected void validateLength( Flow flow, int length ) throws IOException
+  public static void validateLength( Flow flow, int length ) throws IOException
     {
     validateLength( flow, length, -1 );
     }
 
-  protected void validateLength( Flow flow, int length, String name ) throws IOException
+  public static void validateLength( Flow flow, int length, String name ) throws IOException
     {
     validateLength( flow, length, -1, null, name );
     }
 
-  protected void validateLength( Flow flow, int length, int size ) throws IOException
+  public static void validateLength( Flow flow, int length, int size ) throws IOException
     {
     validateLength( flow, length, size, null, null );
     }
 
-  protected void validateLength( Flow flow, int length, int size, Pattern regex ) throws IOException
+  public static void validateLength( Flow flow, int length, int size, Pattern regex ) throws IOException
     {
     validateLength( flow, length, size, regex, null );
     }
 
-  protected void validateLength( Flow flow, int length, Pattern regex, String name ) throws IOException
+  public static void validateLength( Flow flow, int length, Pattern regex, String name ) throws IOException
     {
     validateLength( flow, length, -1, regex, name );
     }
 
-  protected void validateLength( Flow flow, int length, int size, Pattern regex, String name ) throws IOException
+  public static void validateLength( Flow flow, int length, int size, Pattern regex, String name ) throws IOException
     {
     TupleEntryIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
     validateLength( iterator, length, size, regex );
     }
 
-  protected void validateLength( TupleEntryIterator iterator, int length )
+  public static void validateLength( TupleEntryIterator iterator, int length )
     {
     validateLength( iterator, length, -1, null );
     }
 
-  protected void validateLength( TupleEntryIterator iterator, int length, int size )
+  public static void validateLength( TupleEntryIterator iterator, int length, int size )
     {
     validateLength( iterator, length, size, null );
     }
 
-  protected void validateLength( TupleEntryIterator iterator, int length, Pattern regex )
+  public static void validateLength( TupleEntryIterator iterator, int length, Pattern regex )
     {
     validateLength( iterator, length, -1, regex );
     }
 
-  protected void validateLength( TupleEntryIterator iterator, int length, int size, Pattern regex )
+  public static void validateLength( TupleEntryIterator iterator, int length, int size, Pattern regex )
     {
     int count = 0;
 
@@ -137,12 +137,12 @@ public class CascadingTestCase extends TestCase implements Serializable
     assertEquals( "wrong number of lines", length, count );
     }
 
-  protected TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )
+  public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )
     {
     return invokeFunction( function, new TupleEntry( arguments ), resultFields );
     }
 
-  protected TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
+  public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
     TupleListCollector collector = new TupleListCollector( resultFields );
@@ -157,14 +157,14 @@ public class CascadingTestCase extends TestCase implements Serializable
     return collector;
     }
 
-  protected TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields )
     {
     TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeFunction( function, entries, resultFields );
     }
 
-  protected TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
     TupleListCollector collector = new TupleListCollector( resultFields );
@@ -183,12 +183,12 @@ public class CascadingTestCase extends TestCase implements Serializable
     return collector;
     }
 
-  protected boolean invokeFilter( Filter filter, Tuple arguments )
+  public static boolean invokeFilter( Filter filter, Tuple arguments )
     {
     return invokeFilter( filter, new TupleEntry( arguments ) );
     }
 
-  protected boolean invokeFilter( Filter filter, TupleEntry arguments )
+  public static boolean invokeFilter( Filter filter, TupleEntry arguments )
     {
     ConcreteCall operationCall = new ConcreteCall();
 
@@ -203,14 +203,14 @@ public class CascadingTestCase extends TestCase implements Serializable
     return isRemove;
     }
 
-  protected boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
+  public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
     {
     TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeFilter( filter, entries );
     }
 
-  protected boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
+  public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
     {
     ConcreteCall operationCall = new ConcreteCall();
 
@@ -230,19 +230,19 @@ public class CascadingTestCase extends TestCase implements Serializable
     return results;
     }
 
-  protected TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
     {
     TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeAggregator( aggregator, entries, resultFields );
     }
 
-  protected TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
     {
     return invokeAggregator( aggregator, null, argumentsArray, resultFields );
     }
 
-  protected TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
 
@@ -268,19 +268,19 @@ public class CascadingTestCase extends TestCase implements Serializable
     return collector;
     }
 
-  protected TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields )
     {
     TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
     return invokeBuffer( buffer, entries, resultFields );
     }
 
-  protected TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
     {
     return invokeBuffer( buffer, null, argumentsArray, resultFields );
     }
 
-  protected TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
+  public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
 
@@ -299,7 +299,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return collector;
     }
 
-  private TupleEntry[] makeArgumentsArray( Tuple[] argumentsArray )
+  private static TupleEntry[] makeArgumentsArray( Tuple[] argumentsArray )
     {
     TupleEntry[] entries = new TupleEntry[ argumentsArray.length ];
 
@@ -309,7 +309,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return entries;
     }
 
-  protected List<Tuple> getSourceAsList( Flow flow ) throws IOException
+  public static List<Tuple> getSourceAsList( Flow flow ) throws IOException
     {
     TupleEntryIterator iterator = flow.openSource();
 
@@ -320,7 +320,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return result;
     }
 
-  protected List<Tuple> getSinkAsList( Flow flow ) throws IOException
+  public static List<Tuple> getSinkAsList( Flow flow ) throws IOException
     {
     TupleEntryIterator iterator = flow.openSink();
 
@@ -331,7 +331,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return result;
     }
 
-  protected List<Tuple> asList( Flow flow, Tap tap ) throws IOException
+  public static List<Tuple> asList( Flow flow, Tap tap ) throws IOException
     {
     TupleEntryIterator iterator = flow.openTapForRead( tap );
 
@@ -342,7 +342,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return result;
     }
 
-  protected Set<Tuple> asSet( Flow flow, Tap tap ) throws IOException
+  public static Set<Tuple> asSet( Flow flow, Tap tap ) throws IOException
     {
     TupleEntryIterator iterator = flow.openTapForRead( tap );
 
@@ -353,7 +353,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return result;
     }
 
-  protected <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, C collection ) throws IOException
+  public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, C collection ) throws IOException
     {
     TupleEntryIterator iterator = flow.openTapForRead( tap );
 
@@ -364,7 +364,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     return result;
     }
 
-  protected <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, C result )
+  public static <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, C result )
     {
     while( iterator.hasNext() )
       result.add( iterator.next().getTupleCopy() );

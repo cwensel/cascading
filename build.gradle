@@ -22,7 +22,7 @@
   Using:
 
   To run a single test:
-    > gradle -Dtest.single=CoGroupFieldedPipesTest :src:local:test
+    > gradle -Dtest.single=CoGroupFieldedPipesPlatformTest :src:local:test
 
   To remotely debug use
     -Dtest.debug
@@ -146,7 +146,6 @@ task javadocAll(type: Javadoc, dependsOn: ['src:core:assemble', 'src:local:assem
   source 'src/test/cascading/test/TestPlatform.java'
   source 'src/test/cascading/test/LocalPlatform.java'
   source 'src/test/cascading/test/HadoopPlatform.java'
-  source 'src/test/cascading/test/PlatformTest.java'
 
   copyright = '<i>Copyright &#169; 2007-2011 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"

@@ -50,7 +50,6 @@ import org.apache.hadoop.mapred.MiniMRCluster;
 
 public class HadoopPlatform extends TestPlatform
   {
-
   public transient static MiniDFSCluster dfs;
   public transient static FileSystem fileSys;
   public transient static MiniMRCluster mr;
@@ -69,12 +68,14 @@ public class HadoopPlatform extends TestPlatform
 
   public void setNumMapTasks( int numMapTasks )
     {
-    this.numMapTasks = numMapTasks;
+    if( numMapTasks > 0 )
+      this.numMapTasks = numMapTasks;
     }
 
   public void setNumReduceTasks( int numReduceTasks )
     {
-    this.numReduceTasks = numReduceTasks;
+    if( numReduceTasks > 0 )
+      this.numReduceTasks = numReduceTasks;
     }
 
   @Override

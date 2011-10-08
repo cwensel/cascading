@@ -40,11 +40,14 @@ import cascading.pipe.assembly.CountBy;
 import cascading.pipe.assembly.SumBy;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.test.PlatformTest;
+import cascading.test.HadoopPlatform;
+import cascading.test.LocalPlatform;
+import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
+import org.junit.Test;
 
 import static data.InputData.inputFileApache200;
 import static data.InputData.inputFileUpper;
@@ -52,13 +55,14 @@ import static data.InputData.inputFileUpper;
 /**
  *
  */
-@PlatformTest(platforms = {"local", "hadoop"})
+@PlatformRunner.Platform({LocalPlatform.class, HadoopPlatform.class})
 public class FunctionTest extends PlatformTestCase
   {
   public FunctionTest()
     {
     }
 
+  @Test
   public void testInsert() throws IOException
     {
     getPlatform().copyFromLocal( inputFileApache200 );
@@ -84,6 +88,7 @@ public class FunctionTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "a\tb" ) ) );
     }
 
+  @Test
   public void testFieldFormatter() throws IOException
     {
     getPlatform().copyFromLocal( inputFileUpper );
@@ -108,6 +113,7 @@ public class FunctionTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "2 and B" ) ) );
     }
 
+  @Test
   public void testSetValue() throws IOException
     {
     getPlatform().copyFromLocal( inputFileUpper );
@@ -136,6 +142,7 @@ public class FunctionTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "false" ) ) );
     }
 
+  @Test
   public void testPartialCounts()
     {
     Function function = new AggregateBy.CompositeFunction( new Fields( "value" ), Fields.ALL, new CountBy.CountPartials( new Fields( "count" ) ), 2 );
@@ -171,6 +178,7 @@ public class FunctionTest extends PlatformTestCase
       assertEquals( expected[ count++ ], iterator.next() );
     }
 
+  @Test
   public void testPartialSums()
     {
     Function function = new AggregateBy.CompositeFunction( new Fields( "key" ), new Fields( "value" ), new SumBy.SumPartials( new Fields( "sum" ), float.class ), 2 );
