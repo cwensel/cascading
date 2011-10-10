@@ -28,27 +28,61 @@ import cascading.flow.Flow;
 import cascading.util.Def;
 
 /**
+ * Class CascadeDef is a fluent interface for defining a {@link Cascade}.
+ * <p/>
+ * This allows for ad-hoc building of Cascade data and meta-data like tags.
+ * <p/>
+ * Instead of calling one of the {@link CascadeConnector} connect methods, {@link CascadeConnector#connect(CascadeDef)}
+ * can be called.
  *
+ * @see Def
+ * @see cascading.flow.FlowDef
  */
 public class CascadeDef extends Def<CascadeDef>
   {
   Map<String, Flow> flows = new HashMap<String, Flow>();
 
+  /**
+   * Creates a new instance of a CascadeDef.
+   *
+   * @return a CascadeDef
+   */
   public static CascadeDef cascadeDef()
     {
     return new CascadeDef();
     }
 
+  /** Constructor CascadeDef creates a new CascadeDef instance. */
+  public CascadeDef()
+    {
+    }
+
+  /**
+   * Method getFlows returns the flows of this CascadeDef object.
+   *
+   * @return the flows (type Collection<Flow>) of this CascadeDef object.
+   */
   public Collection<Flow> getFlows()
     {
     return flows.values();
     }
 
+  /**
+   * Method getFlowsArray returns the flows as an array of this CascadeDef object.
+   *
+   * @return the flowsArray (type Flow[]) of this CascadeDef object.
+   */
   public Flow[] getFlowsArray()
     {
     return getFlows().toArray( new Flow[ flows.size() ] );
     }
 
+  /**
+   * Method addFlow adds a new {@link Flow} instance that is intended to participate in a {@link Cascade}.
+   *
+   * @param flow of Flow
+   * @return CascadeDef
+   */
   public CascadeDef addFlow( Flow flow )
     {
     if( flow == null )
@@ -62,6 +96,12 @@ public class CascadeDef extends Def<CascadeDef>
     return this;
     }
 
+  /**
+   * Method addFlows adds many new {@link Flow} instances intended to participate in a {@link Cascade}.
+   *
+   * @param flows of Flow[]
+   * @return CascadeDef
+   */
   public CascadeDef addFlows( Flow... flows )
     {
     for( Flow flow : flows )
@@ -70,6 +110,12 @@ public class CascadeDef extends Def<CascadeDef>
     return this;
     }
 
+  /**
+   * Method addFlows adds many new {@link Flow} instances intended to participate in a {@link Cascade}.
+   *
+   * @param flows of Collection<Flow>
+   * @return CascadeDef
+   */
   public CascadeDef addFlows( Collection<Flow> flows )
     {
     for( Flow flow : flows )

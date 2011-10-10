@@ -32,6 +32,12 @@ import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class DelimitedParser is not to be used directly but by platform specific {@link Scheme} implementations.
+ *
+ * @see cascading.scheme.hadoop.TextDelimited
+ * @see cascading.scheme.local.TextDelimited
+ */
 public class DelimitedParser implements Serializable
   {
   /** Field LOG */

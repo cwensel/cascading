@@ -30,7 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Class CascadingServices is the base class for pluggable services Cascading can call out to for distributed
+ * monitoring and management systems.
  */
 public class CascadingServices
   {

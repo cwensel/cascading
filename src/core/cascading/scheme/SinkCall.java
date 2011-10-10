@@ -22,9 +22,6 @@ package cascading.scheme;
 
 import cascading.tuple.TupleEntry;
 
-/**
- *
- */
 public class SinkCall<C, O> extends SchemeCall<C>
   {
   TupleEntry outgoingEntry;

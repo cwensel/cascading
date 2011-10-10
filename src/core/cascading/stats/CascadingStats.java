@@ -23,6 +23,7 @@ package cascading.stats;
 import java.io.Serializable;
 import java.util.Collection;
 
+import cascading.flow.Flow;
 import cascading.management.ClientState;
 
 /**
@@ -33,9 +34,10 @@ import cascading.management.ClientState;
  * <ul>
  * <li>{@code pending} - when the Flow or Cascade has yet to start.</li>
  * <li>{@code skipped} - when the Flow was skipped by the parent Cascade.</li>
+ * <li>{@code started} - when {@link Flow#start()} was called.</li>
  * <li>{@code submitted} - when the Step was submitted to the underlying platform for work.</li>
  * <li>{@code running} - when the Flow or Cascade is executing a workload.</li>
- * <li>{@code stopped} - when the user calls stop() on the Flow or Cascade.</li>
+ * <li>{@code stopped} - when the user calls {@link Flow#stop()} on the Flow or Cascade.</li>
  * <li>{@code failed} - when the Flow or Cascade threw an error and failed to finish the workload.</li>
  * <li>{@code successful} - when the Flow or Cascade naturally completed its workload without failure.</li>
  * </ul>
@@ -72,18 +74,19 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Field throwable */
   Throwable throwable;
 
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
   CascadingStats( String name, ClientState clientState )
     {
     this.name = name;
     this.clientState = clientState;
     }
 
+  /** Method prepare initializes this instance. */
   public void prepare()
     {
     clientState.startService();
     }
 
+  /** Method cleanup destroys any resources allocated by this instance. */
   public void cleanup()
     {
     clientState.stopService();
@@ -119,7 +122,7 @@ public abstract class CascadingStats<Config> implements Serializable
   /**
    * Method isSkipped returns true when the works was skipped.
    * <p/>
-   * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
+   * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(Flow)}
    * returns {@code true};
    *
    * @return the skipped (type boolean) of this CascadingStats object.
@@ -190,7 +193,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method isFinished returns true if the current status show no work currently being executed. This method
+   * Method isFinished returns true if the current status shows no work currently being executed. This method
    * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *
    * @return the finished (type boolean) of this CascadingStats object.
@@ -201,7 +204,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method getStatus returns the status of this CascadingStats object.
+   * Method getStatus returns the {@link Status} of this CascadingStats object.
    *
    * @return the status (type Status) of this CascadingStats object.
    */
@@ -210,12 +213,14 @@ public abstract class CascadingStats<Config> implements Serializable
     return status;
     }
 
+  /** Method markPending sets the status to {@link Status#PENDING}. */
   public void markPending()
     {
     recordStats();
     recordInfo();
     }
 
+  /** Method recordStats forces recording of current status information. */
   public void recordStats()
     {
     this.clientState.recordStats( this );
@@ -223,6 +228,10 @@ public abstract class CascadingStats<Config> implements Serializable
 
   public abstract void recordInfo();
 
+  /**
+   * Method markStartedThenRunning consecutively marks the status as {@link Status#STARTED} then {@link Status#RUNNING}
+   * and forces the start and running time to be equals.
+   */
   public void markStartedThenRunning()
     {
     if( status != Status.PENDING )
@@ -238,6 +247,7 @@ public abstract class CascadingStats<Config> implements Serializable
     startTime = runTime = System.currentTimeMillis();
     }
 
+  /** Method markStarted sets the status to {@link Status#STARTED}. */
   public void markStarted()
     {
     if( status != Status.PENDING )
@@ -257,6 +267,7 @@ public abstract class CascadingStats<Config> implements Serializable
       startTime = System.currentTimeMillis();
     }
 
+  /** Method markSubmitted sets the status to {@link Status#SUBMITTED}. */
   public void markSubmitted()
     {
     if( status != Status.STARTED )
@@ -275,7 +286,7 @@ public abstract class CascadingStats<Config> implements Serializable
     submitTime = System.currentTimeMillis();
     }
 
-  /** Method markRunning sets the status to running. */
+  /** Method markRunning sets the status to {@link Status#RUNNING}. */
   public void markRunning()
     {
     if( status == Status.RUNNING )
@@ -298,7 +309,7 @@ public abstract class CascadingStats<Config> implements Serializable
       runTime = System.currentTimeMillis();
     }
 
-  /** Method markSuccessful sets the status to successful. */
+  /** Method markSuccessful sets the status to {@link Status#SUCCESSFUL}. */
   public void markSuccessful()
     {
     if( status != Status.RUNNING && status != Status.SUBMITTED )
@@ -319,7 +330,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method markFailed sets the status to failed.
+   * Method markFailed sets the status to {@link Status#FAILED}.
    *
    * @param throwable of type Throwable
    */
@@ -338,7 +349,7 @@ public abstract class CascadingStats<Config> implements Serializable
     recordInfo();
     }
 
-  /** Method markStopped sets the status to stopped. */
+  /** Method markStopped sets the status to {@link Status#STOPPED}. */
   public void markStopped()
     {
     if( status != Status.PENDING && status != Status.STARTED && status != Status.SUBMITTED && status != Status.RUNNING )
@@ -353,7 +364,7 @@ public abstract class CascadingStats<Config> implements Serializable
     clientState.stop( finishedTime );
     }
 
-  /** Method markSkipped sets the status to skipped. */
+  /** Method markSkipped sets the status to {@link Status#SKIPPED}. */
   public void markSkipped()
     {
     if( status != Status.PENDING )
@@ -506,6 +517,12 @@ public abstract class CascadingStats<Config> implements Serializable
    */
   public abstract void captureDetail();
 
+  /**
+   * Method getChildren returns any relevant child statistics instances. They may not be of type CascadingStats, but
+   * instead platform specific.
+   *
+   * @return a Collection of child statistics
+   */
   public abstract Collection getChildren();
 
   protected String getStatsString()

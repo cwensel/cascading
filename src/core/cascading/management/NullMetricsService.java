@@ -22,9 +22,7 @@ package cascading.management;
 
 import java.util.Map;
 
-/**
- *
- */
+/** Class NullMetricsService provides a null implementation. */
 class NullMetricsService implements MetricsService
   {
   @Override

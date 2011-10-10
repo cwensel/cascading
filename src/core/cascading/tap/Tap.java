@@ -173,6 +173,9 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
 
   /**
    * Method getIdentifier returns a String representing the resource identifier this Tap instance represents.
+   * <p/>
+   * Often, if the tap accesses a filesystem, the identifier is nothing more than the path to the file or directory.
+   * In other cases it may be a an URL or URI representing a connection string or remote resource.
    *
    * @return String
    */
@@ -202,7 +205,8 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * Method openForRead opens the resource represented by this Tap instance.
    *
    * @param flowProcess
-   * @param input       @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
+   * @param input
+   * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
    */
   public abstract TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException;
 
@@ -215,7 +219,8 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * Method openForWrite opens the resource represented by this Tap instance.
    *
    * @param flowProcess
-   * @param output      @return TupleEntryCollector
+   * @param output
+   * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
   public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
@@ -235,7 +240,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     return openForWrite( flowProcess, null );
     }
 
-  /** @see FlowElement#outgoingScopeFor(Set) */
+  @Override
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     // as a source Tap, we emit the scheme defined Fields
@@ -270,13 +275,13 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     return new Scope( getSourceFields() );
     }
 
-  /** @see FlowElement#resolveIncomingOperationFields(Scope) */
+  @Override
   public Fields resolveIncomingOperationFields( Scope incomingScope )
     {
     return getFieldsFor( incomingScope );
     }
 
-  /** @see FlowElement#resolveFields(Scope) */
+  @Override
   public Fields resolveFields( Scope scope )
     {
     return getFieldsFor( scope );
@@ -302,7 +307,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     }
 
   /**
-   * Method makeDirs makes all the directories this Tap instance represents.
+   * Method createResource creates the underlying resource.
    *
    * @param conf of type JobConf
    * @return boolean
@@ -311,7 +316,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   public abstract boolean createResource( Config conf ) throws IOException;
 
   /**
-   * Method deletePath deletes the resource represented by this instance.
+   * Method deleteResource deletes the resource represented by this instance.
    *
    * @param conf of type JobConf
    * @return boolean
@@ -320,20 +325,20 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   public abstract boolean deleteResource( Config conf ) throws IOException;
 
   /**
-   * Method pathExists return true if the path represented by this instance exists.
+   * Method resourceExists returns true if the path represented by this instance exists.
    *
    * @param conf of type JobConf
-   * @return boolean
+   * @return true if the underlying resource already exists
    * @throws IOException when the status cannot be determined
    */
   public abstract boolean resourceExists( Config conf ) throws IOException;
 
   /**
-   * Method getPathModified returns the date this resource was last modified.
+   * Method getModifiedTime returns the date this resource was last modified.
    *
-   * @param conf of type JobConf
-   * @return long
-   * @throws IOException when the modified date cannot be determined
+   * @param conf of type Config
+   * @return The date this resource was last modified.
+   * @throws IOException
    */
   public abstract long getModifiedTime( Config conf ) throws IOException;
 
@@ -448,5 +453,4 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     {
     return getScheme() != null ? getScheme().hashCode() : 0;
     }
-
   }

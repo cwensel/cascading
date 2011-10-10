@@ -20,18 +20,25 @@
 
 package cascading.scheme;
 
-/**
- *
- */
 public class SchemeCall<C>
   {
   C context;
 
+  /**
+   * Method getContext returns the context of this SchemeCall object.
+   *
+   * @return the context (type C) of this SchemeCall object.
+   */
   public C getContext()
     {
     return context;
     }
 
+  /**
+   * Method setContext sets the context of this SchemeCall object.
+   *
+   * @param context the context of this SchemeCall object.
+   */
   public void setContext( C context )
     {
     this.context = context;

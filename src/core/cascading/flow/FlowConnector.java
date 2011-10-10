@@ -41,7 +41,12 @@ import cascading.util.Util;
 import static cascading.flow.FlowDef.flowDef;
 
 /**
+ * Class FlowConnector is the base class for all platform planners.
+ * <p/>
+ * See the {@link FlowDef} class for a fluent way to define a new Flow.
  *
+ * @see cascading.flow.local.LocalFlowConnector
+ * @see cascading.flow.hadoop.HadoopFlowConnector
  */
 public abstract class FlowConnector
   {

@@ -34,8 +34,8 @@ import cascading.tuple.Fields;
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
  * to overcome field name collisions.
  * <p/>
- * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' values
- * are equal, that value will be used for resultGroupFields.
+ * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' names
+ * are equal, those names will be used for resultGroupFields.
  * <p/>
  * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
  * <p/>
@@ -52,8 +52,8 @@ import cascading.tuple.Fields;
  * <p/>
  * The first is to join streams with more data on the left hand side to streams with more sparse data on the right
  * hand side. That is, always attempt to effect M x N joins where M is large and N is small, instead of where M is
- * small and N is large. This typically will allow Cascading to forgo spilling a group via the {@link cascading.flow.hadoop.HadoopSpillableTupleList }
- * internally.
+ * small and N is large. This typically will allow Cascading to forgo spilling a group (in the case of Hadoop,
+ * via the {@link cascading.flow.hadoop.HadoopSpillableTupleList }) internally.
  * <p/>
  * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopFlowProcess#SPILL_THRESHOLD}
  * via the properties handed to {@link cascading.flow.FlowConnector}.

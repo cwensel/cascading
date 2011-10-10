@@ -40,9 +40,9 @@ import cascading.util.Util;
  * It does not necessarily filter the output since a given implementation may choose to
  * collapse values and ignore keys depending on the format.
  * <p/>
- * Setting the {@code numSinkParts} value to 1 (one) insures the output resource has only one part.
- * In the case of MapReduce, it does this by setting the number of reducers to the given value.
- * This may affect performance, so be cautioned.
+ * Setting the {@code numSinkParts} value to 1 (one) attempts to ensure the output resource has only one part.
+ * In the case of MapReduce, this is only a suggestion for the Map side, on the Reduce side it does this by
+ * setting the number of reducers to the given value. This may affect performance, so be cautioned.
  * </p>
  * Note that setting numSinkParts does not force the planner to insert a final Reduce operation in the job, so
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
@@ -221,6 +221,16 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
 
   /**
    * Method sourceInit initializes this instance as a source.
+   * <p/>
+   * This method is executed client side as a means to provide necessary configuration parameters
+   * used by the underlying platform.
+   * <p/>
+   * It is not intended to initialize resources that would be necessary during the execution of this
+   * class, like a "formatter" or "parser".
+   * <p/>
+   * See {@link #sourcePrepare(cascading.flow.FlowProcess, SourceCall)} if resources much be initialized
+   * before use. And {@link #sourceCleanup(cascading.flow.FlowProcess, SourceCall)} if resources must be
+   * destroyed after use.
    *
    * @param process
    * @param tap     of type Tap
@@ -230,6 +240,16 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
 
   /**
    * Method sinkInit initializes this instance as a sink.
+   * <p/>
+   * This method is executed client side as a means to provide necessary configuration parameters
+   * used by the underlying platform.
+   * <p/>
+   * It is not intended to initialize resources that would be necessary during the execution of this
+   * class, like a "formatter" or "parser".
+   * <p/>
+   * See {@link #sinkPrepare(cascading.flow.FlowProcess, SinkCall)} if resources much be initialized
+   * before use. And {@link #sinkCleanup(cascading.flow.FlowProcess, SinkCall)} if resources must be
+   * destroyed after use.
    *
    * @param process
    * @param tap     of type Tap
@@ -237,6 +257,16 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    */
   public abstract void sinkConfInit( Process process, Tap tap, Config conf );
 
+  /**
+   * Method sourcePrepare is used to initialize resources needed during each call of
+   * {@link #source(cascading.flow.FlowProcess, SourceCall)}.
+   * <p/>
+   * Be sure to place any initialized objects in the {@link SourceContext} so each instance
+   * will remain threadsafe.
+   *
+   * @param flowProcess of Process
+   * @param sourceCall  of SourceCall<SourceContext, Input>
+   */
   public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
     {
     }
@@ -249,10 +279,27 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    */
   public abstract boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
 
+  /**
+   * Method sourceCleanup is used to destroy resources created by
+   * {@link #sourcePrepare(cascading.flow.FlowProcess, SourceCall)}.
+   *
+   * @param flowProcess of Process
+   * @param sourceCall  of SourceCall<SourceContext, Input>
+   */
   public void sourceCleanup( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
     {
     }
 
+  /**
+   * Method sinkPrepare is used to initialize resources needed during each call of
+   * {@link #sink(cascading.flow.FlowProcess, SinkCall)}.
+   * <p/>
+   * Be sure to place any initialized objects in the {@link SinkContext} so each instance
+   * will remain threadsafe.
+   *
+   * @param flowProcess of Process
+   * @param sinkCall    of SinkCall<SinkContext, Output>
+   */
   public void sinkPrepare( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
     {
     }
@@ -265,6 +312,13 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    */
   public abstract void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
 
+  /**
+   * Method sinkCleanup is used to destroy resources created by
+   * {@link #sinkPrepare(cascading.flow.FlowProcess, SinkCall)}.
+   *
+   * @param flowProcess of Process
+   * @param sinkCall    of SinkCall<SinkContext, Output>
+   */
   public void sinkCleanup( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
     {
     }

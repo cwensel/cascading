@@ -23,9 +23,8 @@ package cascading.management;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
+
+/** Class NullDocumentService provides a null implementation. */
 public class NullDocumentService implements DocumentService
   {
   @Override

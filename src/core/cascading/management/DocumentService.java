@@ -25,9 +25,7 @@ import java.util.Map;
 
 import cascading.util.CascadingService;
 
-/**
- *
- */
+/** Interface DocumentService provides coars grained hooks for managing various statistics. */
 public interface DocumentService extends CascadingService
   {
   String DOCUMENT_SERVICE_CLASS_PROPERTY = "cascading.management.document.service.classname";

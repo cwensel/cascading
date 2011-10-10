@@ -187,12 +187,17 @@ public class Cascade implements Runnable
     return id;
     }
 
+  /**
+   * Method getTags returns the tags associated with this Cascade object.
+   *
+   * @return the tags (type String) of this Cascade object.
+   */
   public String getTags()
     {
     return tags;
     }
 
-  public CascadingServices getCascadingServices()
+  private CascadingServices getCascadingServices()
     {
     if( cascadingServices == null )
       cascadingServices = new CascadingServices( properties );

@@ -42,7 +42,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Class HadoopStepStats ... */
+/** Class HadoopStepStats provides Hadoop specific statistics and methods to underyling Hadoop facilities. */
 public abstract class HadoopStepStats extends StepStats
   {
   /** Field LOG */
@@ -55,7 +55,7 @@ public abstract class HadoopStepStats extends StepStats
   /** Field taskStats */
   ArrayList<HadoopTaskStats> taskStats;
 
-  /** Class HadoopTaskStats ... */
+  /** Class HadoopTaskStats tracks individual task stats. */
   public static class HadoopTaskStats
     {
     public enum TaskType
@@ -78,28 +78,33 @@ public abstract class HadoopStepStats extends StepStats
     /** Field counters */
     public Map<String, Long> counters;
 
-    public HadoopTaskStats( TaskType taskType, TaskReport taskReport )
+    HadoopTaskStats( TaskType taskType, TaskReport taskReport )
       {
       fill( taskType, taskReport );
       }
 
-    public HadoopTaskStats( TaskCompletionEvent taskCompletionEvent )
+    HadoopTaskStats( TaskCompletionEvent taskCompletionEvent )
       {
       fill( taskCompletionEvent );
       }
 
+    /**
+     * Method getId returns the Hadoop task id.
+     *
+     * @return the id (type String) of this HadoopTaskStats object.
+     */
     public String getId()
       {
       return id;
       }
 
-    public void fill( TaskCompletionEvent taskCompletionEvent )
+    void fill( TaskCompletionEvent taskCompletionEvent )
       {
       taskType = taskCompletionEvent.getTaskAttemptId().getTaskID().isMap() ? TaskType.MAPPER : TaskType.REDUCER;
       status = taskCompletionEvent.getTaskStatus().toString();
       }
 
-    public void fill( TaskType taskType, TaskReport taskReport )
+    void fill( TaskType taskType, TaskReport taskReport )
       {
       this.taskType = taskType;
       this.id = taskReport.getTaskID().toString();
@@ -124,11 +129,24 @@ public abstract class HadoopStepStats extends StepStats
         }
       }
 
+    /**
+     * Method getCounterValue returns the raw Hadoop counter value.
+     *
+     * @param counter of Enum
+     * @return long
+     */
     public long getCounterValue( Enum counter )
       {
       return getCounterValue( counter.getDeclaringClass().getName(), counter.name() );
       }
 
+    /**
+     * Method getCounterValue returns the raw Hadoop counter value.
+     *
+     * @param group of String
+     * @param name  of String
+     * @return long
+     */
     public long getCounterValue( String group, String name )
       {
       if( counters == null )
@@ -148,6 +166,11 @@ public abstract class HadoopStepStats extends StepStats
     super( flowStep, clientState );
     }
 
+  /**
+   * Method getTaskStats returns the taskStats of this HadoopStepStats object.
+   *
+   * @return the taskStats (type ArrayList<HadoopTaskStats>) of this HadoopStepStats object.
+   */
   public ArrayList<HadoopTaskStats> getTaskStats()
     {
     if( taskStats == null )
@@ -171,35 +194,65 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Method getNumMapTasks returns the numMapTasks from the Hadoop job file.
+   *
+   * @return the numMapTasks (type int) of this HadoopStepStats object.
+   */
   public int getNumMapTasks()
     {
     return numMapTasks;
     }
 
-  public void setNumMapTasks( int numMapTasks )
+  void setNumMapTasks( int numMapTasks )
     {
     this.numMapTasks = numMapTasks;
     }
 
+  /**
+   * Method getNumReducerTasks returns the numReducerTasks from the Hadoop job file.
+   *
+   * @return the numReducerTasks (type int) of this HadoopStepStats object.
+   */
   public int getNumReducerTasks()
     {
     return numReducerTasks;
     }
 
-  public void setNumReducerTasks( int numReducerTasks )
+  void setNumReducerTasks( int numReducerTasks )
     {
     this.numReducerTasks = numReducerTasks;
     }
 
+  /**
+   * Method getJobID returns the Hadoop running job JobID.
+   *
+   * @return the jobID (type String) of this HadoopStepStats object.
+   */
   public String getJobID()
     {
     return getRunningJob().getJobID();
     }
 
-  protected abstract JobClient getJobClient();
+  /**
+   * Method getJobClient returns the Hadoop {@link JobClient} managing this Hadoop job.
+   *
+   * @return the jobClient (type JobClient) of this HadoopStepStats object.
+   */
+  public abstract JobClient getJobClient();
 
-  protected abstract RunningJob getRunningJob();
+  /**
+   * Method getRunningJob returns the Hadoop {@link RunningJob} managing this Hadoop job.
+   *
+   * @return the runningJob (type RunningJob) of this HadoopStepStats object.
+   */
+  public abstract RunningJob getRunningJob();
 
+  /**
+   * Method getCounterGroups returns all of the Hadoop counter groups.
+   *
+   * @return the counterGroups (type Collection<String>) of this HadoopStepStats object.
+   */
   @Override
   public Collection<String> getCounterGroups()
     {
@@ -223,6 +276,12 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Method getCounterGroupsMatching returns all the Hadoop counter groups that match the give regex pattern.
+   *
+   * @param regex of String
+   * @return Collection<String>
+   */
   @Override
   public Collection<String> getCounterGroupsMatching( String regex )
     {
@@ -254,6 +313,12 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Method getCountersFor returns the Hadoop counters for the given group.
+   *
+   * @param group of String
+   * @return Collection<String>
+   */
   @Override
   public Collection<String> getCountersFor( String group )
     {
@@ -282,6 +347,12 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Method getCounterValue returns the Hadoop counter value for the given counter enum.
+   *
+   * @param counter of Enum
+   * @return long
+   */
   @Override
   public long getCounterValue( Enum counter )
     {
@@ -305,6 +376,13 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /**
+   * Method getCounterValue returns the Hadoop counter value for the given group and counter name.
+   *
+   * @param group   of String
+   * @param counter of String
+   * @return long
+   */
   @Override
   public long getCounterValue( String group, String counter )
     {
@@ -334,7 +412,7 @@ public abstract class HadoopStepStats extends StepStats
     }
 
   /**
-   * Returns the underlying Map tasks progress.
+   * Returns the underlying Map tasks progress percentage.
    * <p/>
    * This method is experimental.
    *
@@ -358,7 +436,7 @@ public abstract class HadoopStepStats extends StepStats
     }
 
   /**
-   * Returns the underlying Reduce tasks progress.
+   * Returns the underlying Reduce tasks progress percentage.
    * <p/>
    * This method is experimental.
    *
@@ -381,6 +459,7 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  /** Method captureJobStats forces capture of all Hadoop statistics. */
   public void captureJobStats()
     {
     RunningJob runningJob = getRunningJob();
@@ -394,12 +473,18 @@ public abstract class HadoopStepStats extends StepStats
     setNumReducerTasks( ranJob.getNumReduceTasks() );
     }
 
+  /**
+   * Method getChildren returns the children of this HadoopStepStats object.
+   *
+   * @return the children (type Collection) of this HadoopStepStats object.
+   */
   @Override
   public Collection getChildren()
     {
     return getTaskStats();
     }
 
+  /** Method captureDetail captures statistics task details and completion events. */
   @Override
   public void captureDetail()
     {
@@ -432,5 +517,4 @@ public abstract class HadoopStepStats extends StepStats
       LOG.warn( "unable to get task stats", exception );
       }
     }
-
   }

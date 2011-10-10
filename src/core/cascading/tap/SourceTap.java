@@ -29,7 +29,9 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
 /**
- * Class SourceTap is the base class for source only Taps. Some {@link Tap} instances may only be sources (as opposed
+ * Class SourceTap is the base class for source only Taps.
+ * <p/>
+ * Some {@link Tap} instances may only be sources (as opposed
  * to being a sink). These types should subclass SourceTap for convenience.
  */
 public abstract class SourceTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
@@ -55,23 +57,25 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     return false;
     }
 
-  /** @see Tap#deleteResource(Object) */
+  @Override
   public boolean deleteResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to delete files via a SourceTap instance" );
     }
 
-  /** @see Tap#createResource(Object) */
+  @Override
   public boolean createResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
     }
 
+  @Override
   public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
     }
 
+  @Override
   public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );

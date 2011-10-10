@@ -24,12 +24,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
 /**
  * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link Flow}
  * instances via the {@link CascadeConnector} and {@link cascading.flow.FlowConnector}, respectively.
+ * <p/>
+ * See the {@link FlowDef} for alternatives to dealing with Maps of Taps.
  */
 public class Cascades
   {
@@ -38,7 +41,7 @@ public class Cascades
    *
    * @param name of type String
    * @param tap  of type Tap
-   * @return Map<String, Tap>
+   * @return Map<String,Tap>
    */
   public static Map<String, Tap> tapsMap( String name, Tap tap )
     {

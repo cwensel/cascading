@@ -70,17 +70,20 @@ import riffle.process.ProcessStart;
 import riffle.process.ProcessStop;
 
 /**
- * A {@link Pipe} assembly is connected to the necessary number of {@link Tap} sinks and
- * sources into a Flow.  A Flow is then executed to push the incoming source data through
- * the assembly into one or more sinks.
+ * A Flow is a logical unit of work declared by an assembly of {@link Pipe} instances connected to source
+ * and sink {@link Tap} instances.
+ * <p/>
+ * A Flow is then executed to push the incoming source data through the assembly into one or more sinks.
+ * <p/>
+ * A Flow sub-class instance may not be instantiated directly in most cases, see sub-classes of {@link FlowConnector} class
+ * for supported platforms.
  * <p/>
  * Note that {@link Pipe} assemblies can be reused in multiple Flow instances. They maintain
  * no state regarding the Flow execution. Subsequently, {@link Pipe} assemblies can be given
  * parameters through its calling Flow so they can be built in a generic fashion.
  * <p/>
  * When a Flow is created, an optimized internal representation is created that is then executed
- * within the cluster. Thus any overhead inherent to a give {@link Pipe} assembly will be removed
- * once it's placed in context with the actual execution environment.
+ * on the underlying execution platform.
  * </p>
  * <strong>Properties</strong><br/>
  * <ul>

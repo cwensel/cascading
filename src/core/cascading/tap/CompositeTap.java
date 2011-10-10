@@ -21,7 +21,9 @@
 package cascading.tap;
 
 /**
- *
+ * Interface CompositeTap marks {@link Tap} classes as having child Tap instances.
+ * <p/>
+ * This information is required by the planner in order to properly configure the underlying platform.
  */
 public interface CompositeTap
   {

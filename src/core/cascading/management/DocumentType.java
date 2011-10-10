@@ -20,11 +20,6 @@
 
 package cascading.management;
 
-/**
- * $Author: $
- * $Date: $
- * $Revision: $
- */
 public enum DocumentType
   {
     cascade, flow, step, slice;

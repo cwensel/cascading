@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class TemplateTap can be used to write tuple streams out to subdirectories based on the values in the {@link Tuple}
+ * Class TemplateTap can be used to write tuple streams out to sub-directories based on the values in the {@link Tuple}
  * instance.
  * <p/>
  * The constructor takes a {@link Hfs} {@link cascading.tap.Tap} and a {@link java.util.Formatter} format syntax String. This allows

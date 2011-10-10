@@ -52,8 +52,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class Hfs is the base class for all Hadoop file system access. Use {@link cascading.tap.hadoop.Dfs}, or {@link Lfs}
- * for resources specific to Hadoop Distributed file system, the Local file system, or Amazon S3, respectively.
+ * Class Hfs is the base class for all Hadoop file system access. Hfs may only be used with the
+ * {@link cascading.flow.hadoop.HadoopFlowConnector} when creating Hadoop executable {@link cascading.flow.Flow}
+ * instances.
+ * <p/>
+ * Optionally use {@link Dfs} or {@link Lfs} for resources specific to Hadoop Distributed file system or
+ * the Local file system, respectively.
  * <p/>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
  * <code>hdfs://...</code> will denote Dfs, <code>file://...</code> will denote Lfs, and
@@ -292,7 +296,6 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       }
     }
 
-  /** @see Tap#getIdentifier() */
   @Override
   public String getIdentifier()
     {
@@ -362,6 +365,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       }
     }
 
+  @Override
   public TupleEntryIterator openForRead( HadoopFlowProcess flowProcess, RecordReader input ) throws IOException
     {
     if( input != null )
@@ -376,6 +380,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( this, conf ) );
     }
 
+  @Override
   public TupleEntryCollector openForWrite( HadoopFlowProcess flowProcess, OutputCollector output ) throws IOException
     {
     if( output != null )
@@ -429,6 +434,14 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return getFileSystem( conf ).exists( new Path( getIdentifier() ) );
     }
 
+  /**
+   * Method isDirectory returns true if the underlying resource represents a directory or folder instead
+   * of an individual file.
+   *
+   * @param conf of JobConf
+   * @return boolean
+   * @throws IOException when
+   */
   public boolean isDirectory( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -437,6 +450,13 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).isDir();
     }
 
+  /**
+   * Method getSize returns the size of the file referenced by this tap.
+   *
+   * @param conf of type Properties
+   * @return The size of the file reference by this tap.
+   * @throws IOException
+   */
   public long getSize( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -450,6 +470,13 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).getLen();
     }
 
+  /**
+   * Method getBlockSize returns the {@code blocksize} specified by the underlying file system for this resource.
+   *
+   * @param conf of JobConf
+   * @return long
+   * @throws IOException when
+   */
   public long getBlockSize( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -463,6 +490,14 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return fileStatus.getBlockSize();
     }
 
+  /**
+   * Method getReplication returns the {@code replication} specified by the underlying file system for
+   * this resource.
+   *
+   * @param conf of JobConf
+   * @return int
+   * @throws IOException when
+   */
   public int getReplication( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -476,6 +511,13 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return fileStatus.getReplication();
     }
 
+  /**
+   * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
+   *
+   * @param conf of JobConf
+   * @return String[]
+   * @throws IOException when
+   */
   public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -555,7 +597,6 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
     }
 
-  /** @see Object#toString() */
   @Override
   public String toString()
     {
@@ -565,7 +606,6 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
     }
 
-  /** @see Tap#equals(Object) */
   @Override
   public boolean equals( Object object )
     {
@@ -584,7 +624,6 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     return true;
     }
 
-  /** @see Tap#hashCode() */
   @Override
   public int hashCode()
     {

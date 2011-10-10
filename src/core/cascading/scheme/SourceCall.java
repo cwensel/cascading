@@ -22,9 +22,6 @@ package cascading.scheme;
 
 import cascading.tuple.TupleEntry;
 
-/**
- *
- */
 public class SourceCall<Context, Input> extends SchemeCall<Context>
   {
   TupleEntry incomingEntry;

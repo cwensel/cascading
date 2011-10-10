@@ -39,17 +39,34 @@ import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.Util;
 
 /**
- *
+ * Class FileTap is a {@link Tap} sub-class that allows for direct local file access.
+ * <p/>
+ * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
+ * {@link cascading.flow.Flow} instances that run in "local" mode.
  */
 public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, FileOutputStream>
   {
   private final String path;
 
+  /**
+   * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme} and file {@code path}.
+   *
+   * @param scheme of type LocalScheme
+   * @param path   of type String
+   */
   public FileTap( LocalScheme scheme, String path )
     {
     this( scheme, path, SinkMode.KEEP );
     }
 
+  /**
+   * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme},
+   * file {@code path}, and {@code SinkMode}.
+   *
+   * @param scheme   of type LocalScheme
+   * @param path     of type String
+   * @param sinkMode of type SinkMode
+   */
   public FileTap( LocalScheme scheme, String path, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
@@ -99,6 +116,13 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     return schemeCollector;
     }
 
+  /**
+   * Method getSize returns the size of the file referenced by this tap.
+   *
+   * @param conf of type Properties
+   * @return The size of the file reference by this tap.
+   * @throws IOException
+   */
   public long getSize( Properties conf ) throws IOException
     {
     File file = new File( path );
@@ -170,5 +194,4 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     else
       return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
     }
-
   }

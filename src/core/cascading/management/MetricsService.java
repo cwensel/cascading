@@ -22,9 +22,7 @@ package cascading.management;
 
 import cascading.util.CascadingService;
 
-/**
- *
- */
+/** Interface MetricsService provides fine grained hooks for managing various metrics. */
 public interface MetricsService extends CascadingService
   {
   String METRICS_SERVICE_CLASS_PROPERTY = "cascading.management.metrics.service.classname";

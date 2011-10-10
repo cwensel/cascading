@@ -28,7 +28,7 @@ package cascading.tap;
  * <p/>
  * Mode REPLACE will delete/remove the resource before any attempts to write.
  * <p/>
- * Mode UPDATE will attempt to re-use to the resource, if supported.
+ * Mode UPDATE will attempt to re-use to the resource, if supported, and update data in place.
  */
 public enum SinkMode
   {

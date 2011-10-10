@@ -22,9 +22,6 @@ package cascading.operation;
 
 import cascading.tuple.Fields;
 
-/**
- *
- */
 public interface OperationCall<Context>
   {
   /**

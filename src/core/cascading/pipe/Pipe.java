@@ -34,8 +34,8 @@ import cascading.util.Util;
 
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
- * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy}, and
- * {@link CoGroup}.
+ * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy},
+ * {@link CoGroup}, and {@link SubAssembly}.
  * <p/>
  * Pipes are chained together through their constructors.
  * <p/>
@@ -50,6 +50,7 @@ import cascading.util.Util;
  * @see Every
  * @see GroupBy
  * @see CoGroup
+ * @see SubAssembly
  */
 public class Pipe implements FlowElement, Serializable
   {
