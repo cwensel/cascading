@@ -40,6 +40,11 @@ public abstract class ClientState extends BaseState
     }
 
   @Override
+  public void run( long time )
+    {
+    }
+
+  @Override
   public void stop( long time )
     {
     }
@@ -99,14 +104,19 @@ public abstract class ClientState extends BaseState
     store( id, object );
     }
 
+  public void start( long time )
+    {
+    setMetric( "state", "start", time );
+    }
+
   public void submit( long time )
     {
     setMetric( "state", "submit", time );
     }
 
-  public void start( long time )
+  public void run( long time )
     {
-    setMetric( "state", "start", time );
+    setMetric( "state", "run", time );
     }
 
   public void stop( long time )

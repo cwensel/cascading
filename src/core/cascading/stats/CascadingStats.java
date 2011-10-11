@@ -29,16 +29,19 @@ import cascading.management.ClientState;
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
  * core elements that have state.
  * <p/>
- * There are five states the stats object reports; pending, running, completed, failed, stopped, and finished.
+ * There are eight states the stats object reports; PENDING, SKIPPED, STARTED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, and FAILED.
  * <ul>
- * <li><code>pending</code> - when the Flow or Cascade has yet to start.</li>
- * <li><code>running</code> - when the Flow or Cascade is executing a workload.</li>
- * <li><code>successful</code> - when the Flow or Cascade naturally completed its workload without failure.</li>
- * <li><code>failed</code> - when the Flow or Cascade threw an error and failed to finish the workload.</li>
- * <li><code>stopped</code> - when the user calls stop() on the Flow or Cascade.</li>
- * <li><code>finished</code> - when the Flow or Cascade is no longer processing a workload and <code>completed</code>,
- * <code>failed</code>, or <code>stopped</code> is true.</li>
+ * <li>{@code pending} - when the Flow or Cascade has yet to start.</li>
+ * <li>{@code skipped} - when the Flow was skipped by the parent Cascade.</li>
+ * <li>{@code submitted} - when the Step was submitted to the underlying platform for work.</li>
+ * <li>{@code running} - when the Flow or Cascade is executing a workload.</li>
+ * <li>{@code stopped} - when the user calls stop() on the Flow or Cascade.</li>
+ * <li>{@code failed} - when the Flow or Cascade threw an error and failed to finish the workload.</li>
+ * <li>{@code successful} - when the Flow or Cascade naturally completed its workload without failure.</li>
  * </ul>
+ * <p/>
+ * A unit of work is considered {@code finished} when the Flow or Cascade is no longer processing a workload and {@code successful},
+ * {@code failed}, or {@code stopped} is true.
  *
  * @see CascadeStats
  * @see FlowStats
@@ -48,7 +51,7 @@ public abstract class CascadingStats<Config> implements Serializable
   {
   public enum Status
     {
-      PENDING, SKIPPED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, FAILED
+      PENDING, SKIPPED, STARTED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, FAILED
     }
 
   /** Field name */
@@ -58,10 +61,12 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Field status */
   Status status = Status.PENDING;
 
-  /** Field submitTime */
-  long submitTime;
   /** Field startTime */
   long startTime;
+  /** Field submitTime */
+  long submitTime;
+  /** Field runTime */
+  long runTime;
   /** Field finishedTime */
   long finishedTime;
   /** Field throwable */
@@ -102,17 +107,6 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method isFinished returns true if the current status show no work currently being executed. This method
-   * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
-   *
-   * @return the finished (type boolean) of this CascadingStats object.
-   */
-  public boolean isFinished()
-    {
-    return status == Status.SUCCESSFUL || status == Status.FAILED || status == Status.STOPPED;
-    }
-
-  /**
    * Method isPending returns true if no work has been submitted.
    *
    * @return the pending (type boolean) of this CascadingStats object.
@@ -120,6 +114,29 @@ public abstract class CascadingStats<Config> implements Serializable
   public boolean isPending()
     {
     return status == Status.PENDING;
+    }
+
+  /**
+   * Method isSkipped returns true when the works was skipped.
+   * <p/>
+   * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
+   * returns {@code true};
+   *
+   * @return the skipped (type boolean) of this CascadingStats object.
+   */
+  public boolean isSkipped()
+    {
+    return status == Status.SKIPPED;
+    }
+
+  /**
+   * Method isStarted returns true when work has started.
+   *
+   * @return the started (type boolean) of this CascadingStats object.
+   */
+  public boolean isStarted()
+    {
+    return status == Status.STARTED;
     }
 
   /**
@@ -173,16 +190,14 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method isSkipped returns true when the works was skipped.
-   * <p/>
-   * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(cascading.flow.Flow)}
-   * returns {@code true};
+   * Method isFinished returns true if the current status show no work currently being executed. This method
+   * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *
-   * @return the skipped (type boolean) of this CascadingStats object.
+   * @return the finished (type boolean) of this CascadingStats object.
    */
-  public boolean isSkipped()
+  public boolean isFinished()
     {
-    return status == Status.SKIPPED;
+    return status == Status.SUCCESSFUL || status == Status.FAILED || status == Status.STOPPED;
     }
 
   /**
@@ -208,9 +223,43 @@ public abstract class CascadingStats<Config> implements Serializable
 
   public abstract void recordInfo();
 
-  public void markSubmitted()
+  public void markStartedThenRunning()
     {
     if( status != Status.PENDING )
+      throw new IllegalStateException( "may not mark flow as " + Status.STARTED + ", is already " + status );
+
+    markStartAndRunTime();
+    markStarted();
+    markRunning();
+    }
+
+  protected void markStartAndRunTime()
+    {
+    startTime = runTime = System.currentTimeMillis();
+    }
+
+  public void markStarted()
+    {
+    if( status != Status.PENDING )
+      throw new IllegalStateException( "may not mark flow as " + Status.STARTED + ", is already " + status );
+
+    status = Status.STARTED;
+    markStartTime();
+
+    clientState.start( startTime );
+    clientState.setStatus( status, startTime );
+    recordStats();
+    }
+
+  protected void markStartTime()
+    {
+    if( startTime == 0 )
+      startTime = System.currentTimeMillis();
+    }
+
+  public void markSubmitted()
+    {
+    if( status != Status.STARTED )
       throw new IllegalStateException( "may not mark flow as " + Status.SUBMITTED + ", is already " + status );
 
     status = Status.SUBMITTED;
@@ -229,20 +278,24 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Method markRunning sets the status to running. */
   public void markRunning()
     {
-    if( status != Status.PENDING && status != Status.SUBMITTED )
+    if( status == Status.RUNNING )
+      return;
+
+    if( status != Status.STARTED && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.RUNNING + ", is already " + status );
 
     status = Status.RUNNING;
-    markStartTime();
+    markRunTime();
 
-    clientState.start( startTime );
-    clientState.setStatus( status, startTime );
+    clientState.run( runTime );
+    clientState.setStatus( status, runTime );
     recordStats();
     }
 
-  protected void markStartTime()
+  protected void markRunTime()
     {
-    startTime = System.currentTimeMillis();
+    if( runTime == 0 )
+      runTime = System.currentTimeMillis();
     }
 
   /** Method markSuccessful sets the status to successful. */
@@ -272,7 +325,7 @@ public abstract class CascadingStats<Config> implements Serializable
    */
   public void markFailed( Throwable throwable )
     {
-    if( status != Status.RUNNING && status != Status.SUBMITTED )
+    if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark flow as " + Status.FAILED + ", is already " + status );
 
     status = Status.FAILED;
@@ -288,7 +341,7 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Method markStopped sets the status to stopped. */
   public void markStopped()
     {
-    if( status != Status.PENDING && status != Status.SUBMITTED && status != Status.RUNNING )
+    if( status != Status.PENDING && status != Status.STARTED && status != Status.SUBMITTED && status != Status.RUNNING )
       throw new IllegalStateException( "may not mark flow as " + Status.STOPPED + ", is already " + status );
 
     status = Status.STOPPED;
@@ -344,9 +397,11 @@ public abstract class CascadingStats<Config> implements Serializable
 
   /**
    * Method getDuration returns the duration the work executed before being finished.
-   * </p>
+   * <p/>
    * This method will return zero until the work is finished. See {@link #getCurrentDuration()}
    * if you wish to poll for the current duration value.
+   * <p/>
+   * Duration is calculated as {@code finishedTime - startTime}.
    *
    * @return the duration (type long) of this CascadingStats object.
    */
@@ -370,6 +425,25 @@ public abstract class CascadingStats<Config> implements Serializable
       return finishedTime - startTime;
     else
       return System.currentTimeMillis() - startTime;
+    }
+
+  /**
+   * Method getRunDuration returns the runtime duration the work executed before being finished. If this workload
+   * enters the {@link Status#SUBMITTED} state, it will represent the actual time executing the work on the underlying
+   * platform.
+   * <p/>
+   * This method will return zero until the work is finished or hasn't begun.
+   * <p/>
+   * Duration is calculated as {@code finishedTime - runTime}.
+   *
+   * @return the runDuration (type long) of this CascadingStats object.
+   */
+  public long getRunDuration()
+    {
+    if( finishedTime != 0 )
+      return finishedTime - runTime;
+    else
+      return 0;
     }
 
   /**

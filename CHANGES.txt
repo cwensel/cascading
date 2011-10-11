@@ -22,7 +22,7 @@ Cascading Change Log
 
   Added c.f.FlowDef to allow for creating flow definitions via a fluent builder interface.
 
-  Added SUBMITTED status to c.s.CascadingStats to properly track when a job is submitted vs when it actually begins
+  Added STARTED and SUBMITTED status to c.s.CascadingStats to properly track when a job is submitted vs when it actually begins
   processing after being queued.
 
   Added management interfaces for capturing detailed statistics.

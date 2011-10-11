@@ -108,6 +108,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
     {
     try
       {
+      stepStats.markStarted();
+
       blockOnPredecessors();
 
       blockOnJob();

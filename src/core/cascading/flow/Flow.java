@@ -1092,7 +1092,7 @@ public abstract class Flow<Config> implements Runnable
     try
       {
       // mark only running, not submitted
-      flowStats.markRunning();
+      flowStats.markStartedThenRunning();
 
       fireOnStarting();
 
