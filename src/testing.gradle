@@ -18,25 +18,6 @@
  * limitations under the License.
  */
 
-//project.getTestIncludes = { priorIncludes, matcher ->
-//
-//  if( priorIncludes.isEmpty() )
-//  priorIncludes.add('**/*Test.class')
-//
-//  def includes = []
-//
-//  fileTree(dir: sourceSets.test.classesDir, includes: priorIncludes).each { File file ->
-//
-//    def text = new File(file.absolutePath.replaceAll(/.*build\/classes/) { project.file('..') }.replaceAll(/\.class$/) { '.java' }).getText()
-//    if( text =~ matcher )
-//    {
-//      includes << file.absolutePath.replaceFirst("^${sourceSets.test.classesDir}") { '**' }
-//    }
-//  }
-//
-//  includes
-//}
-
 project.setTestingProperties = { platform = '' ->
   System.properties[ 'test.platform.includes' ] = platform
 
