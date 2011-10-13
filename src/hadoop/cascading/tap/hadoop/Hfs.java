@@ -431,11 +431,17 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   public boolean isDirectory( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return false;
+
     return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).isDir();
     }
 
   public long getSize( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return 0;
+
     FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( fileStatus.isDir() )
@@ -446,6 +452,9 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   public long getBlockSize( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return 0;
+
     FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( fileStatus.isDir() )
@@ -456,6 +465,9 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   public int getReplication( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return 0;
+
     FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( fileStatus.isDir() )
@@ -466,6 +478,9 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return new String[ 0 ];
+
     FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
 
     String[] children = new String[ statuses.length ];
@@ -479,6 +494,9 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   @Override
   public long getModifiedTime( JobConf conf ) throws IOException
     {
+    if( !resourceExists( conf ) )
+      return 0;
+
     FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
 
     if( !fileStatus.isDir() )
