@@ -355,7 +355,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 //    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
 //    System.out.println( "serializations = " + serializations );
 //    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations",serializations );
-    HadoopPlanner.getJobConf( properties ).set( "io.serializations", TestSerialization.class.getName() );
+    properties.put( "io.serializations", TestSerialization.class.getName() );
 
     Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
 
@@ -469,7 +469,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
       TupleSerialization.addSerialization( properties, NoTokenTestBytesSerialization.class.getName() );
       }
 
-    HadoopPlanner.getJobConf( properties ).setNumMapTasks( 1 );
+    properties.put( "mapred.map.tasks", 1 );
 
     Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
 

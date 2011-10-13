@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -60,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * Notes:
  * <p/>
  * <strong>Custom JobConf properties</strong><br/>
- * A custom JobConf instance can be passed to this planner by calling {@link #setJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
+ * A custom JobConf instance can be passed to this planner by calling {@link #copyJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
  * on a map properties object before constructing a new {@link HadoopFlowConnector}.
  * <p/>
  * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
@@ -87,26 +88,46 @@ public class HadoopPlanner extends FlowPlanner
   private Class intermediateSchemeClass;
 
   /**
-   * Method setJobConf adds the given JobConf object to the given properties object. Use this method to pass
+   * Method copyJobConf adds the given JobConf values to the given properties object. Use this method to pass
    * custom default Hadoop JobConf properties to Hadoop.
    *
    * @param properties of type Map
    * @param jobConf    of type JobConf
    */
-  public static void setJobConf( Map<Object, Object> properties, JobConf jobConf )
+  public static void copyJobConf( Map<Object, Object> properties, JobConf jobConf )
     {
-    properties.put( "cascading.hadoop.jobconf", jobConf );
+    for( Map.Entry<String, String> entry : jobConf )
+      properties.put( entry.getKey(), entry.getValue() );
     }
 
   /**
-   * Method getJobConf returns a stored JobConf instance, if any.
+   * Method createJobConf returns a new JobConf instance using the values in the given properties argument.
    *
    * @param properties of type Map
    * @return a JobConf instance
    */
-  public static JobConf getJobConf( Map<Object, Object> properties )
+  public static JobConf createJobConf( Map<Object, Object> properties )
     {
-    return PropertyUtil.getProperty( properties, "cascading.hadoop.jobconf", (JobConf) null );
+    JobConf conf = new JobConf();
+
+    if( properties instanceof Properties )
+      {
+      Properties props = (Properties) properties;
+      Set<String> keys = props.stringPropertyNames();
+
+      for( String key : keys )
+        conf.set( key, props.getProperty( key ) );
+      }
+    else
+      {
+      for( Map.Entry<Object, Object> entry : properties.entrySet() )
+        {
+        if( entry.getValue() != null )
+          conf.set( entry.getKey().toString(), entry.getValue().toString() );
+        }
+      }
+
+    return conf;
     }
 
   /**
@@ -140,7 +161,7 @@ public class HadoopPlanner extends FlowPlanner
     {
     super.initialize( flowConnector, properties );
 
-    jobConf = HadoopUtil.createJobConf( properties, getJobConf( properties ) );
+    jobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
     intermediateSchemeClass = flowConnector.getIntermediateSchemeClass( properties );
 
     Class type = HadoopFlowConnector.getApplicationJarClass( properties );

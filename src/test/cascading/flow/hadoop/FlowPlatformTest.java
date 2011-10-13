@@ -88,7 +88,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -113,7 +113,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is not local", isLocal );
@@ -138,7 +138,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = (FlowStep) steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.getJobConf( props ) ).get( "mapred.job.tracker" );
+    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
     boolean isLocal = tracker.equalsIgnoreCase( "local" );
 
     assertTrue( "is local", !isLocal );

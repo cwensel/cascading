@@ -96,7 +96,7 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
 
   private String remove( String path, boolean delete ) throws IOException
     {
-    FileSystem fs = FileSystem.get( URI.create( path ), HadoopPlanner.getJobConf( getProperties() ) );
+    FileSystem fs = FileSystem.get( URI.create( path ), HadoopPlanner.createJobConf( getProperties() ) );
 
     if( delete )
       fs.delete( new Path( path ), true );
@@ -119,7 +119,7 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
     Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( sinkPath5, true ), true );
     Flow secondFlow = new HadoopFlowConnector( getProperties() ).connect( sink1, sink2, new Pipe( "second-flow" ) );
 
-    JobConf defaultConf = HadoopPlanner.getJobConf( getProperties() );
+    JobConf defaultConf = HadoopPlanner.createJobConf( getProperties() );
 
     JobConf firstConf = new JobConf( defaultConf );
     firstConf.setJobName( "first-mr" );

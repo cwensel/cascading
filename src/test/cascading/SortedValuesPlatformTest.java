@@ -114,8 +114,8 @@ public class SortedValuesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( getPlatform() instanceof HadoopPlatform && HadoopPlanner.getJobConf( properties ) != null )
-      HadoopPlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( getPlatform() instanceof HadoopPlatform && properties.get( "mapred.map.tasks" ) != null )
+      properties.put( "mapred.map.tasks", 13 );
 
     Map sources = new HashMap();
 
@@ -198,8 +198,8 @@ public class SortedValuesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    if( getPlatform() instanceof HadoopPlatform && HadoopPlanner.getJobConf( properties ) != null )
-      HadoopPlanner.getJobConf( properties ).setNumMapTasks( 13 );
+    if( getPlatform() instanceof HadoopPlatform && properties.get( "mapred.map.tasks" ) != null )
+      properties.put( "mapred.map.tasks", 13 );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 

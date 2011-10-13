@@ -118,7 +118,7 @@ public class HadoopPlatform extends TestPlatform
       properties.put( "log4j.logger", logger );
 
     HadoopFlow.setJobPollingInterval( properties, 500 ); // should speed up tests
-    HadoopPlanner.setJobConf( properties, jobConf );
+    HadoopPlanner.copyJobConf( properties, jobConf );
     }
 
   @Override
