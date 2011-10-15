@@ -23,16 +23,17 @@ package cascading.util;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.CascadingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class ServiceUtil
   {
+  private static final Logger LOG = LoggerFactory.getLogger( ServiceUtil.class );
 
   // look in meta-inf/cascading-services for all classnames
-
   public static Map<String, String> findAllServices()
     {
     return null;
@@ -47,7 +48,8 @@ public class ServiceUtil
 
   public static CascadingService createService( Map<Object, Object> properties, String className )
     {
-    if( className == null || className.isEmpty() )
+    // test for ant style token escapes
+    if( className == null || className.isEmpty() || className.startsWith( "@" ) && className.endsWith( "@" ) )
       return null;
 
     try
@@ -62,16 +64,17 @@ public class ServiceUtil
       }
     catch( ClassNotFoundException exception )
       {
-      throw new CascadingException( "unable to find service class: " + className, exception );
+      LOG.error( "unable to find service class: {}", className, exception );
       }
     catch( IllegalAccessException exception )
       {
-      throw new CascadingException( "unable to instantiate service class: " + className, exception );
+      LOG.error( "unable to instantiate service class: {}", className, exception );
       }
     catch( InstantiationException exception )
       {
-      throw new CascadingException( "unable to instantiate service class: " + className, exception );
+      LOG.error( "unable to instantiate service class: {}", className, exception );
       }
 
+    return null;
     }
   }
