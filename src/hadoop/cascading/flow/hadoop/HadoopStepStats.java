@@ -492,6 +492,9 @@ public abstract class HadoopStepStats extends StepStats
 
     JobClient jobClient = getJobClient();
 
+    if( jobClient == null || getRunningJob() == null )
+      return;
+
     try
       {
       addTaskStats( HadoopTaskStats.TaskType.SETUP, jobClient.getSetupTaskReports( getRunningJob().getID() ), true );

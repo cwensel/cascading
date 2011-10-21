@@ -829,31 +829,22 @@ public abstract class Flow<Config> implements Runnable
       if( stop )
         return;
 
-      if( thread == null )
-        return;
-
       stop = true;
 
-      try
-        {
-        fireOnStopping();
+      fireOnStopping();
 
-        if( !flowStats.isFinished() )
-          flowStats.markStopped();
+      if( !flowStats.isFinished() )
+        flowStats.markStopped();
 
-        internalStopAllJobs();
+      internalStopAllJobs();
 
-        handleExecutorShutdown();
+      handleExecutorShutdown();
 
-        internalClean( true );
-        }
-      finally
-        {
-        flowStats.cleanup();
-        }
+      internalClean( true );
       }
     finally
       {
+      flowStats.cleanup();
       stopLock.unlock();
       }
     }
@@ -1161,6 +1152,7 @@ public abstract class Flow<Config> implements Runnable
         }
       finally
         {
+        flowStats.cleanup();
         internalShutdown();
         }
       }

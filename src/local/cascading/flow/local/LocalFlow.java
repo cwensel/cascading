@@ -150,5 +150,14 @@ public class LocalFlow extends Flow<Properties>
   @Override
   protected void internalShutdown()
     {
+    deregisterShutdownHook();
+    }
+
+  private void deregisterShutdownHook()
+    {
+    if( !isStopJobsOnExit() || stop )
+      return;
+
+    Runtime.getRuntime().removeShutdownHook( shutdownHook );
     }
   }

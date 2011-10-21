@@ -113,6 +113,8 @@ public class Cascade implements Runnable
   private Throwable throwable;
   /** Field executor */
   private ExecutorService executor;
+  /** Field shutdownHook */
+  private Thread shutdownHook;
   /** Field jobsMap */
   private Map<String, Callable<Throwable>> jobsMap;
   /** Field stop */
@@ -413,6 +415,7 @@ public class Cascade implements Runnable
       {
       thread = null;
       throwable = null;
+      shutdownHook = null;
       cascadeStats.cleanup();
       }
     }
@@ -424,6 +427,8 @@ public class Cascade implements Runnable
 
     if( LOG.isInfoEnabled() )
       logInfo( "starting" );
+
+    registerShutdownHook();
 
     try
       {
@@ -480,7 +485,39 @@ public class Cascade implements Runnable
       {
       if( !cascadeStats.isFinished() )
         cascadeStats.markSuccessful();
+
+      deregisterShutdownHook();
       }
+    }
+
+  private void registerShutdownHook()
+    {
+    if( !isStopJobsOnExit() )
+      return;
+
+    shutdownHook = new Thread()
+    {
+    @Override
+    public void run()
+      {
+      Cascade.this.stop();
+      }
+    };
+
+    Runtime.getRuntime().addShutdownHook( shutdownHook );
+    }
+
+  private void deregisterShutdownHook()
+    {
+    if( !isStopJobsOnExit() || stop )
+      return;
+
+    Runtime.getRuntime().removeShutdownHook( shutdownHook );
+    }
+
+  private boolean isStopJobsOnExit()
+    {
+    return getFlows().get( 0 ).isStopJobsOnExit();
     }
 
   /**

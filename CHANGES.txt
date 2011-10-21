@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added shutdown hook for the c.c.Cascade class so during jvm shutdown #stop() will be called forcing proper state
+  change.
+
+  Changed #stop() to push from c.c.Cascade down through c.f.Flow and c.f.p.FlowStep instances.
+
   Added new JUnit runner for injecting platform dependencies into c.t.PlatformTestCase subclasses. Subclasses should
   use c.t.PlatformRunner.Platform Annotation to specify relevant c.t.TestPlatform instances.
 

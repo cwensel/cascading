@@ -73,7 +73,9 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
     stop = true;
 
-    if( !stepStats.isPending() && !stepStats.isFinished() )
+    // allow pending -> stopped transition
+    // never want a hanging pending state
+    if( !stepStats.isFinished() )
       stepStats.markStopped();
 
     try
