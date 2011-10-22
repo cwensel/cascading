@@ -38,7 +38,7 @@ sourceSets {
 }
 
 dependencies {
-  compile group: 'com.google.guava', name: 'guava', version: 'r09'
+  compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
 }
 
 assemble << {
