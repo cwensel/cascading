@@ -42,6 +42,14 @@ import cascading.management.ClientState;
  * <li>{@code successful} - when the Flow or Cascade naturally completed its workload without failure.</li>
  * </ul>
  * <p/>
+ * CascadingStats also reports four unique timestamps.
+ * <ul>
+ * <li>{@code startTime} - when the {@code start()} method was called.</li>
+ * <li>{@code submitTime} - when the unit of work was actually submitted for execution. Not supported by all sub-classes.</li>
+ * <li>{@code runTime} - when the unit of work actually began to execute work. This value may be affected by any "polling interval" in place.</li>
+ * <li>{@code finishedTime} - when all work has completed successfully, failed, or stopped.</li>
+ * </ul>
+ * <p/>
  * A unit of work is considered {@code finished} when the Flow or Cascade is no longer processing a workload and {@code successful},
  * {@code failed}, or {@code stopped} is true.
  *
@@ -63,6 +71,8 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Field status */
   Status status = Status.PENDING;
 
+  /** Field pendingTime */
+  long pendingTime;
   /** Field startTime */
   long startTime;
   /** Field submitTime */
@@ -213,13 +223,6 @@ public abstract class CascadingStats<Config> implements Serializable
     return status;
     }
 
-  /** Method markPending sets the status to {@link Status#PENDING}. */
-  public void markPending()
-    {
-    recordStats();
-    recordInfo();
-    }
-
   /** Method recordStats forces recording of current status information. */
   public void recordStats()
     {
@@ -227,6 +230,21 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   public abstract void recordInfo();
+
+
+  /** Method markPending sets the status to {@link Status#PENDING}. */
+  public void markPending()
+    {
+    markPendingTime();
+    recordStats();
+    recordInfo();
+    }
+
+  protected void markPendingTime()
+    {
+    if( pendingTime == 0 )
+      pendingTime = System.currentTimeMillis();
+    }
 
   /**
    * Method markStartedThenRunning consecutively marks the status as {@link Status#STARTED} then {@link Status#RUNNING}
@@ -377,13 +395,13 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method getSubmitTime returns the submitTime of this CascadingStats object.
+   * Method getPendingTime returns the pendingTime of this CascadingStats object.
    *
-   * @return the submitTime (type long) of this CascadingStats object.
+   * @return the pendingTime (type long) of this CascadingStats object.
    */
-  public long getSubmitTime()
+  public long getPendingTime()
     {
-    return submitTime;
+    return pendingTime;
     }
 
   /**
@@ -394,6 +412,26 @@ public abstract class CascadingStats<Config> implements Serializable
   public long getStartTime()
     {
     return startTime;
+    }
+
+  /**
+   * Method getSubmitTime returns the submitTime of this CascadingStats object.
+   *
+   * @return the submitTime (type long) of this CascadingStats object.
+   */
+  public long getSubmitTime()
+    {
+    return submitTime;
+    }
+
+  /**
+   * Method getRunTime returns the runTime of this CascadingStats object.
+   *
+   * @return the runTime (type long) of this CascadingStats object.
+   */
+  public long getRunTime()
+    {
+    return runTime;
     }
 
   /**
@@ -427,6 +465,8 @@ public abstract class CascadingStats<Config> implements Serializable
   /**
    * Method getCurrentDuration returns the current duration of the current work whether or not
    * the work is finished. When finished, the return value will be the same as {@link #getDuration()}.
+   * <p/>
+   * Duration is calculated as {@code finishedTime - startTime}.
    *
    * @return the currentDuration (type long) of this CascadingStats object.
    */
@@ -436,25 +476,6 @@ public abstract class CascadingStats<Config> implements Serializable
       return finishedTime - startTime;
     else
       return System.currentTimeMillis() - startTime;
-    }
-
-  /**
-   * Method getRunDuration returns the runtime duration the work executed before being finished. If this workload
-   * enters the {@link Status#SUBMITTED} state, it will represent the actual time executing the work on the underlying
-   * platform.
-   * <p/>
-   * This method will return zero until the work is finished or hasn't begun.
-   * <p/>
-   * Duration is calculated as {@code finishedTime - runTime}.
-   *
-   * @return the runDuration (type long) of this CascadingStats object.
-   */
-  public long getRunDuration()
-    {
-    if( finishedTime != 0 )
-      return finishedTime - runTime;
-    else
-      return 0;
     }
 
   /**
