@@ -120,6 +120,16 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
+   * Method getThrowable returns the throwable of this CascadingStats object.
+   *
+   * @return the throwable (type Throwable) of this CascadingStats object.
+   */
+  public Throwable getThrowable()
+    {
+    return throwable;
+    }
+
+  /**
    * Method isPending returns true if no work has been submitted.
    *
    * @return the pending (type boolean) of this CascadingStats object.
