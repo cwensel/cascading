@@ -30,7 +30,6 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.Tuples;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -114,6 +113,6 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
   @Override
   public void sink( HadoopFlowProcess flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
-    sinkCall.getOutput().collect( Tuples.NULL, sinkCall.getOutgoingEntry().getTuple() );
+    sinkCall.getOutput().collect( Tuple.NULL, sinkCall.getOutgoingEntry().getTuple() );
     }
   }

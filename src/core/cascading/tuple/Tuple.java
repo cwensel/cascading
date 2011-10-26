@@ -59,6 +59,9 @@ import cascading.util.Util;
  */
 public class Tuple implements Comparable, Iterable, Serializable
   {
+  /** A constant empty Tuple instance. This instance is immutable. */
+  public static final Tuple NULL = Tuples.asUnmodifiable( new Tuple() );
+
   /** Field printDelim */
   private final static String printDelim = "\t";
 

@@ -60,8 +60,10 @@ import cascading.util.Util;
  * and last positions would be the same, and would throw an error on there being duplicate field names in the selected
  * Tuple instance.
  * <p/>
- * Additionally, there are eight predefined Fields sets used for different purposes; {@link #ALL}, {@link #GROUP},
+ * Additionally, there are eight predefined Fields sets used for different purposes; {@link #NONE}, {@link #ALL}, {@link #GROUP},
  * {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, {@link #UNKNOWN}, {@link #REPLACE}, and {@link #SWAP}.
+ * <p/>
+ * The {@code NONE} Fields set represents no fields.
  * <p/>
  * The {@code ALL} Fields set is a "wildcard" that represents all the current available fields.
  * <p/>
@@ -94,6 +96,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   {
   /** Field UNKNOWN */
   public static final Fields UNKNOWN = new Fields( Kind.UNKNOWN );
+  /** Field NONE represents a wildcard for no fields */
+  public static final Fields NONE = new Fields( Kind.NONE );
   /** Field ALL represents a wildcard for all fields */
   public static final Fields ALL = new Fields( Kind.ALL );
   /** Field KEYS represents all fields used as they key for the last grouping */
@@ -120,7 +124,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   static enum Kind
     {
-      ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP
+      NONE, ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP
     }
 
   /** Field fields */
@@ -326,6 +330,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     int offset = 0;
     for( Fields current : fields )
       {
+      if( current.isNone() )
+        continue;
+
       resolveInto( notFound, found, selector, current, result, offset, size );
       offset += current.size();
       }
@@ -394,6 +401,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public static Fields asDeclaration( Fields fields )
     {
+    if( fields.isNone() )
+      return fields;
+
     if( !fields.isDefined() )
       return UNKNOWN;
 
@@ -438,7 +448,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   @ConstructorProperties({"fields"})
   public Fields( Comparable... fields )
     {
-    this.fields = validate( fields );
+    if( fields.length == 0 )
+      this.kind = Kind.NONE;
+    else
+      this.fields = validate( fields );
     }
 
   /**
@@ -491,7 +504,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public boolean isArgSelector()
     {
-    return isAll() || isGroup() || isValues() || isDefined();
+    return isAll() || isNone() || isGroup() || isValues() || isDefined();
     }
 
   /**
@@ -502,7 +515,17 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public boolean isDeclarator()
     {
-    return isUnknown() || isAll() || isArguments() || isGroup() || isValues() || isDefined();
+    return isUnknown() || isNone() || isAll() || isArguments() || isGroup() || isValues() || isDefined();
+    }
+
+  /**
+   * Method isNone returns returns true if this instance is the {@link #NONE} field set.
+   *
+   * @return the none (type boolean) of this Fields object.
+   */
+  public boolean isNone()
+    {
+    return kind == Kind.NONE;
     }
 
   /**
@@ -839,6 +862,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( isUnknown() )
       return asSelector( selector );
 
+    if( selector.isNone() )
+      return NONE;
+
     Fields result = size( selector.size() );
 
     // todo: this can be cleaned up i think
@@ -926,6 +952,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     if( ( this.isUnknown() || this.size() == 0 ) && fields.isUnknown() )
       return UNKNOWN;
+
+    if( fields.isNone() )
+      return this;
 
     Set<String> names = new HashSet<String>();
 

@@ -30,10 +30,6 @@ import cascading.operation.OperationException;
  */
 public class Tuples
   {
-  /** A constant empty Tuple instance. This instance is immutable. */
-  public static final Tuple NULL = asUnmodifiable( new Tuple() );
-
-
   /**
    * Method asArray copies the elements of the given Tuple instance to the given Object array.
    *

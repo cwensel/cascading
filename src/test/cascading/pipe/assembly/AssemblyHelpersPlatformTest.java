@@ -77,19 +77,41 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testShapeNarrow() throws IOException
+  public void testRetainNarrow() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLower );
 
     Tap source = getPlatform().getTextFile( inputFileLower );
-    Tap sink = getPlatform().getTextFile( new Fields( "num" ), new Fields( "num" ), getOutputPath( "shapenarrow" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( new Fields( "num" ), new Fields( "num" ), getOutputPath( "retainnarrow" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "shape" );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
     pipe = new Each( pipe, new Fields( "line" ), splitter );
 
-    pipe = new Shape( pipe, new Fields( "num" ) );
+    pipe = new Retain( pipe, new Fields( "num" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+$" ) );
+    }
+
+  @Test
+  public void testDiscardNarrow() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( inputFileLower );
+    Tap sink = getPlatform().getTextFile( new Fields( "num" ), new Fields( "num" ), getOutputPath( "discardnarrow" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "shape" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    pipe = new Discard( pipe, new Fields( "char" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 

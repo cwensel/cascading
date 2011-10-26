@@ -28,12 +28,18 @@ import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 
-/** Class Shape is a {@link SubAssembly} that will modify the input Tuple stream to match the given fields. */
-public class Shape extends SubAssembly
+/**
+ * Class Retain is a {@link SubAssembly} that will discard all incoming fields except those given on the constructor.
+ * <p/>
+ * Use this pipe to narrow a stream of tuples, removing unused data.
+ *
+ * @see Discard
+ */
+public class Retain extends SubAssembly
   {
   @ConstructorProperties({"previous", "fields"})
-  public Shape( Pipe previous, Fields fields )
+  public Retain( Pipe previous, Fields fields )
     {
-    setTails( new Each( previous, fields, new Identity() ) );
+    setTails( new Each( previous, fields, new Identity(), Fields.RESULTS ) );
     }
   }

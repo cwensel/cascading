@@ -72,9 +72,6 @@ public abstract class TupleEntryCollector
    */
   public void add( Tuple tuple )
     {
-    if( tuple == null || tuple.isEmpty() )
-      throw new IllegalArgumentException( "tuple may not be null or empty" );
-
     if( !tupleEntry.getFields().isUnknown() && tupleEntry.getFields().size() != tuple.size() )
       throw new TupleException( "operation added the wrong number of fields, expected: " + tupleEntry.getFields().print() + ", got result size: " + tuple.size() );
 

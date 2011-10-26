@@ -34,6 +34,8 @@ import java.beans.ConstructorProperties;
  */
 public class TupleEntry
   {
+  public static final TupleEntry NULL = new TupleEntry( Fields.NONE, Tuple.NULL );
+
   /** Field fields */
   Fields fields;
   /** Field isUnmodifiable */
@@ -416,6 +418,9 @@ public class TupleEntry
     if( selector == null || selector.isAll() )
       return this;
 
+    if( selector.isNone() )
+      return TupleEntry.NULL;
+
     try
       {
       return new TupleEntry( Fields.asDeclaration( selector ), tuple.get( this.fields, selector ) );
@@ -436,6 +441,9 @@ public class TupleEntry
     {
     if( selector == null || selector.isAll() )
       return this.tuple;
+
+    if( selector.isNone() )
+      return Tuple.NULL;
 
     try
       {

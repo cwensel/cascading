@@ -2,6 +2,13 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Renamed c.p.a.Shape to c.p.a.Retain, as it retains given fields, and created c.p.a.Discard to perform the opposite
+  function or discarding given fields.
+
+  Added c.o.NoOp operation to allow fields to be dropped from a stream when used with c.t.Fields.SWAP.
+
+  Added c.T.Fields.NONE to denote no fields in a c.t.Tuple.
+
   Added shutdown hook for the c.c.Cascade class so during jvm shutdown #stop() will be called forcing proper state
   change.
 

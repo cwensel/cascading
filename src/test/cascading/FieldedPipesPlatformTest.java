@@ -32,6 +32,8 @@ import cascading.operation.Debug;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.Insert;
+import cascading.operation.NoOp;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
@@ -753,6 +755,28 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Fields( "ip" ), new Count( new Fields( "count" ) ) );
     pipe = new Each( pipe, new Fields( "ip" ), new Identity( new Fields( "ipaddress" ) ), Fields.SWAP );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 8, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
+    }
+
+  @Test
+  public void testNone() throws Exception
+    {
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( new Fields( "offset", "line" ), new Fields( "count", "ip" ), getOutputPath( "none" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function parser = new RegexParser( new Fields( "ip" ), "^[^ ]*" );
+    pipe = new Each( pipe, new Fields( "line" ), parser, Fields.ALL );
+    pipe = new Each( pipe, new Fields( "line" ), new NoOp(), Fields.SWAP ); // declares Fields.NONE
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Fields( "ip" ), new Count( new Fields( "count" ) ) );
+    pipe = new Each( pipe, Fields.NONE, new Insert( new Fields( "ipaddress" ), "1.2.3.4" ), Fields.ALL );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
