@@ -235,6 +235,12 @@ public abstract class FlowConnector
     return appID;
     }
 
+  /** Sets the static appID value to null. For debugging purposes. */
+  public static void resetAppID()
+    {
+    appID = null;
+    }
+
   public static void setApplicationName( Map<Object, Object> properties, String name )
     {
     if( name != null )
