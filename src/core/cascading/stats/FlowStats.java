@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
@@ -43,9 +44,19 @@ public class FlowStats extends CascadingStats
     this.flow = flow;
     }
 
+  public Map<Object, Object> getFlowProperties()
+    {
+    return flow.getConfigAsProperties();
+    }
+
   public String getAppID()
     {
-    return FlowConnector.getApplicationID( flow.getConfigAsProperties() );
+    return FlowConnector.getApplicationID( getFlowProperties() );
+    }
+
+  public String getAppName()
+    {
+    return FlowConnector.getApplicationName( getFlowProperties() );
     }
 
   @Override

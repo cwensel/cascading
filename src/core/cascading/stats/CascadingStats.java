@@ -84,7 +84,7 @@ public abstract class CascadingStats<Config> implements Serializable
   /** Field throwable */
   Throwable throwable;
 
-  CascadingStats( String name, ClientState clientState )
+  protected CascadingStats( String name, ClientState clientState )
     {
     this.name = name;
     this.clientState = clientState;
@@ -183,6 +183,17 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
+   * Method isEngaged returns true when there is work being executed, if
+   * {@link #isStarted()}, {@link #isSubmitted()}, or {@link #isRunning()} returns true;
+   *
+   * @return the engaged (type boolean) of this CascadingStats object.
+   */
+  public boolean isEngaged()
+    {
+    return isStarted() || isSubmitted() || isRunning();
+    }
+
+  /**
    * Method isSuccessful returns true when work has completed successfully.
    *
    * @return the completed (type boolean) of this CascadingStats object.
@@ -213,14 +224,14 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /**
-   * Method isFinished returns true if the current status shows no work currently being executed. This method
-   * returns true if {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
+   * Method isFinished returns true if the current status shows no work currently being executed,
+   * if {@link #isSkipped()}, {@link #isSuccessful()}, {@link #isFailed()}, or {@link #isStopped()} returns true.
    *
    * @return the finished (type boolean) of this CascadingStats object.
    */
   public boolean isFinished()
     {
-    return status == Status.SUCCESSFUL || status == Status.FAILED || status == Status.STOPPED;
+    return status == Status.SUCCESSFUL || status == Status.FAILED || status == Status.STOPPED || status == Status.SKIPPED;
     }
 
   /**
@@ -263,7 +274,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markStartedThenRunning()
     {
     if( status != Status.PENDING )
-      throw new IllegalStateException( "may not mark flow as " + Status.STARTED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.STARTED + ", is already " + status );
 
     markStartAndRunTime();
     markStarted();
@@ -279,7 +290,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markStarted()
     {
     if( status != Status.PENDING )
-      throw new IllegalStateException( "may not mark flow as " + Status.STARTED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.STARTED + ", is already " + status );
 
     status = Status.STARTED;
     markStartTime();
@@ -299,7 +310,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markSubmitted()
     {
     if( status != Status.STARTED )
-      throw new IllegalStateException( "may not mark flow as " + Status.SUBMITTED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.SUBMITTED + ", is already " + status );
 
     status = Status.SUBMITTED;
     markSubmitTime();
@@ -321,7 +332,7 @@ public abstract class CascadingStats<Config> implements Serializable
       return;
 
     if( status != Status.STARTED && status != Status.SUBMITTED )
-      throw new IllegalStateException( "may not mark flow as " + Status.RUNNING + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.RUNNING + ", is already " + status );
 
     status = Status.RUNNING;
     markRunTime();
@@ -341,7 +352,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markSuccessful()
     {
     if( status != Status.RUNNING && status != Status.SUBMITTED )
-      throw new IllegalStateException( "may not mark flow as " + Status.SUCCESSFUL + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.SUCCESSFUL + ", is already " + status );
 
     status = Status.SUCCESSFUL;
     markFinishedTime();
@@ -365,7 +376,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markFailed( Throwable throwable )
     {
     if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
-      throw new IllegalStateException( "may not mark flow as " + Status.FAILED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.FAILED + ", is already " + status );
 
     status = Status.FAILED;
     markFinishedTime();
@@ -381,7 +392,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markStopped()
     {
     if( status != Status.PENDING && status != Status.STARTED && status != Status.SUBMITTED && status != Status.RUNNING )
-      throw new IllegalStateException( "may not mark flow as " + Status.STOPPED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.STOPPED + ", is already " + status );
 
     status = Status.STOPPED;
     markFinishedTime();
@@ -396,7 +407,7 @@ public abstract class CascadingStats<Config> implements Serializable
   public void markSkipped()
     {
     if( status != Status.PENDING )
-      throw new IllegalStateException( "may not mark flow as " + Status.SKIPPED + ", is already " + status );
+      throw new IllegalStateException( "may not mark as " + Status.SKIPPED + ", is already " + status );
 
     status = Status.SKIPPED;
 

@@ -167,14 +167,19 @@ public class PlatformTestCase extends CascadingTestCase
   @After
   public void tearDown() throws IOException
     {
-    for( String path : currentPaths )
+    try
       {
-      LOG.info( "copying to local {}", path );
-      getPlatform().copyToLocal( path );
+      for( String path : currentPaths )
+        {
+        LOG.info( "copying to local {}", path );
+        getPlatform().copyToLocal( path );
+        }
+
+      currentPaths.clear();
       }
-
-    currentPaths.clear();
-
-    getPlatform().tearDown();
+    finally
+      {
+      getPlatform().tearDown();
+      }
     }
   }
