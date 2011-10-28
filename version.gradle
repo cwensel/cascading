@@ -55,17 +55,13 @@ minorVersion = versionProperties[ 'cascading.release.minor' ]
 releaseVersion = majorVersion
 buildNumber = System.getProperty('build.number', 'dev')
 
-if( !System.properties[ 'cascading.release.final' ] )
-{
-  buildNumber = "wip-${buildNumber}"
-}
+if( System.properties[ 'cascading.release.private' ] )
+buildNumber = "priv-${buildNumber}"
+else if( !System.properties[ 'cascading.release.final' ] )
+buildNumber = "wip-${buildNumber}"
 
 if( minorVersion )
-{
-  releaseVersion = "${releaseVersion}.${minorVersion}"
-}
+releaseVersion = "${releaseVersion}.${minorVersion}"
 
 if( !System.properties[ 'cascading.release.final' ] )
-{
-  releaseVersion = "${releaseVersion}-${buildNumber}"
-}
+releaseVersion = "${releaseVersion}-${buildNumber}"
