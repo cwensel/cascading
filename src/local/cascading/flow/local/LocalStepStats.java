@@ -45,6 +45,11 @@ public class LocalStepStats extends StepStats
     }
 
   @Override
+  public void recordChildStats()
+    {
+    }
+
+  @Override
   public void captureJobStats()
     {
     }

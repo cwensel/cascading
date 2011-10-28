@@ -89,13 +89,13 @@ public class CascadingServices
     return objectService;
     }
 
-  public ClientState createClientState( ClientType clientType, String id )
+  public ClientState createClientState( String id )
     {
     ClientState clientState = (ClientState) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY );
 
     if( clientState != null )
       {
-      clientState.initialize( this, clientType, id );
+      clientState.initialize( this, id );
 
       return clientState;
       }
@@ -105,7 +105,7 @@ public class CascadingServices
 
   protected MetricsService createMetricsService()
     {
-    MetricsService service = (MetricsService) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
+    MetricsService service = (MetricsService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       return service;
@@ -115,7 +115,7 @@ public class CascadingServices
 
   protected DocumentService createObjectService()
     {
-    DocumentService service = (DocumentService) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
+    DocumentService service = (DocumentService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       return service;

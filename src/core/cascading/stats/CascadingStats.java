@@ -66,7 +66,7 @@ public abstract class CascadingStats<Config> implements Serializable
 
   /** Field name */
   final String name;
-  final ClientState clientState;
+  protected final ClientState clientState;
 
   /** Field status */
   Status status = Status.PENDING;
@@ -318,6 +318,7 @@ public abstract class CascadingStats<Config> implements Serializable
     clientState.submit( submitTime );
     clientState.setStatus( status, submitTime );
     recordStats();
+    recordInfo();
     }
 
   protected void markSubmitTime()

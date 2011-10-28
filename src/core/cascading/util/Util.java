@@ -67,6 +67,11 @@ public class Util
     {
     String base = String.format( "%s%d%.10f", seed, System.currentTimeMillis(), Math.random() );
 
+    return createID( base );
+    }
+
+  public static String createID( String base )
+    {
     try
       {
       return getHex( MessageDigest.getInstance( "MD5" ).digest( base.getBytes() ) );

@@ -21,7 +21,6 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,11 +32,13 @@ import cascading.flow.FlowException;
 import cascading.flow.planner.FlowStep;
 import cascading.management.ClientState;
 import cascading.stats.StepStats;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
+import org.apache.hadoop.mapred.TaskID;
 import org.apache.hadoop.mapred.TaskReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,118 +49,14 @@ public abstract class HadoopStepStats extends StepStats
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
 
+  private Map<TaskID, String> idCache = new HashMap<TaskID, String>( 4999 ); // nearest prime, caching for ids
+
   /** Field numMapTasks */
   int numMapTasks;
   /** Field numReducerTasks */
   int numReducerTasks;
   /** Field taskStats */
-  ArrayList<HadoopTaskStats> taskStats;
-
-  /** Class HadoopTaskStats tracks individual task stats. */
-  public static class HadoopTaskStats
-    {
-    public enum TaskType
-      {
-        SETUP, MAPPER, REDUCER, CLEANUP
-      }
-
-    /** Field taskType */
-    public TaskType taskType;
-    /** Field id */
-    public String id;
-    /** Field startTime */
-    public long startTime;
-    /** Field finishTime */
-    public long finishTime;
-    /** Field status */
-    public String status;
-    /** Field state */
-    public String state;
-    /** Field counters */
-    public Map<String, Long> counters;
-
-    HadoopTaskStats( TaskType taskType, TaskReport taskReport )
-      {
-      fill( taskType, taskReport );
-      }
-
-    HadoopTaskStats( TaskCompletionEvent taskCompletionEvent )
-      {
-      fill( taskCompletionEvent );
-      }
-
-    /**
-     * Method getId returns the Hadoop task id.
-     *
-     * @return the id (type String) of this HadoopTaskStats object.
-     */
-    public String getId()
-      {
-      return id;
-      }
-
-    void fill( TaskCompletionEvent taskCompletionEvent )
-      {
-      taskType = taskCompletionEvent.getTaskAttemptId().getTaskID().isMap() ? TaskType.MAPPER : TaskType.REDUCER;
-      status = taskCompletionEvent.getTaskStatus().toString();
-      }
-
-    void fill( TaskType taskType, TaskReport taskReport )
-      {
-      this.taskType = taskType;
-      this.id = taskReport.getTaskID().toString();
-      this.startTime = taskReport.getStartTime();
-      this.finishTime = taskReport.getFinishTime();
-      this.state = taskReport.getState();
-      this.status = TaskCompletionEvent.Status.SUCCEEDED.toString();
-
-      setCounters( taskReport );
-      }
-
-    private void setCounters( TaskReport taskReport )
-      {
-      this.counters = new HashMap<String, Long>();
-
-      Counters hadoopCounters = taskReport.getCounters();
-
-      for( Counters.Group group : hadoopCounters )
-        {
-        for( Counters.Counter counter : group )
-          this.counters.put( group.getName() + "." + counter.getName(), counter.getCounter() );
-        }
-      }
-
-    /**
-     * Method getCounterValue returns the raw Hadoop counter value.
-     *
-     * @param counter of Enum
-     * @return long
-     */
-    public long getCounterValue( Enum counter )
-      {
-      return getCounterValue( counter.getDeclaringClass().getName(), counter.name() );
-      }
-
-    /**
-     * Method getCounterValue returns the raw Hadoop counter value.
-     *
-     * @param group of String
-     * @param name  of String
-     * @return long
-     */
-    public long getCounterValue( String group, String name )
-      {
-      if( counters == null )
-        return 0;
-
-      Long value = counters.get( group + "." + name );
-
-      if( value == null )
-        return 0;
-
-      return value;
-      }
-    }
+  Map<String, HadoopTaskStats> taskStats = (Map<String, HadoopTaskStats>) Collections.EMPTY_MAP;
 
   protected HadoopStepStats( JobConf currentConf, FlowStep flowStep, ClientState clientState )
     {
@@ -171,27 +68,14 @@ public abstract class HadoopStepStats extends StepStats
    *
    * @return the taskStats (type ArrayList<HadoopTaskStats>) of this HadoopStepStats object.
    */
-  public ArrayList<HadoopTaskStats> getTaskStats()
+  public Map<String, HadoopTaskStats> getTaskStats()
     {
-    if( taskStats == null )
-      taskStats = new ArrayList<HadoopTaskStats>();
-
     return taskStats;
     }
 
-  private void addTaskStats( HadoopTaskStats.TaskType taskType, TaskReport[] taskReports, boolean skipLast )
+  protected void setTaskStats( Map<String, HadoopTaskStats> taskStats )
     {
-    for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
-      getTaskStats().add( new HadoopTaskStats( taskType, taskReports[ i ] ) );
-    }
-
-  private void addTaskStats( TaskCompletionEvent[] events )
-    {
-    for( TaskCompletionEvent event : events )
-      {
-      if( event.getTaskStatus() != TaskCompletionEvent.Status.SUCCEEDED )
-        getTaskStats().add( new HadoopTaskStats( event ) );
-      }
+    this.taskStats = taskStats;
     }
 
   /**
@@ -231,6 +115,9 @@ public abstract class HadoopStepStats extends StepStats
    */
   public String getJobID()
     {
+    if( getRunningJob() == null )
+      return null;
+
     return getRunningJob().getJobID();
     }
 
@@ -459,6 +346,16 @@ public abstract class HadoopStepStats extends StepStats
       }
     }
 
+  public String getStatusURL()
+    {
+    RunningJob runningJob = getRunningJob();
+
+    if( runningJob == null )
+      return null;
+
+    return runningJob.getTrackingURL();
+    }
+
   /** Method captureJobStats forces capture of all Hadoop statistics. */
   public void captureJobStats()
     {
@@ -481,43 +378,126 @@ public abstract class HadoopStepStats extends StepStats
   @Override
   public Collection getChildren()
     {
-    return getTaskStats();
+    return getTaskStats().values();
+    }
+
+  public Set<String> getChildIDs()
+    {
+    return getTaskStats().keySet();
+    }
+
+  /** Synchronized to prevent state changes mid record, #stop may be called out of band */
+  @Override
+  public synchronized void recordChildStats()
+    {
+    captureDetail();
+
+    try
+      {
+      for( String id : taskStats.keySet() )
+        clientState.record( id, taskStats.get( id ) ); // todo: need a bulk record interface here
+      }
+    catch( Exception exception )
+      {
+      LOG.error( "unable to record slice stats", exception );
+      }
     }
 
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
-  public void captureDetail()
+  public synchronized void captureDetail()
     {
-    getTaskStats().clear();
+    captureJobStats();
+
+    captureDetail( true );
+    }
+
+  public void captureDetail( boolean captureAttempts )
+    {
+    HashMap<String, HadoopTaskStats> newStats = new HashMap<String, HadoopTaskStats>();
 
     JobClient jobClient = getJobClient();
+    RunningJob runningJob = getRunningJob();
 
-    if( jobClient == null || getRunningJob() == null )
+    if( jobClient == null || runningJob == null )
       return;
 
     try
       {
-      addTaskStats( HadoopTaskStats.TaskType.SETUP, jobClient.getSetupTaskReports( getRunningJob().getID() ), true );
-      addTaskStats( HadoopTaskStats.TaskType.MAPPER, jobClient.getMapTaskReports( getRunningJob().getID() ), false );
-      addTaskStats( HadoopTaskStats.TaskType.REDUCER, jobClient.getReduceTaskReports( getRunningJob().getID() ), false );
-      addTaskStats( HadoopTaskStats.TaskType.CLEANUP, jobClient.getCleanupTaskReports( getRunningJob().getID() ), true );
+      // cleanup/setup tasks have no useful info so far.
+//      addTaskStats( newStats, HadoopTaskStats.Kind.SETUP, jobClient.getSetupTaskReports( runningJob.getID() ), false );
+//      addTaskStats( newStats, HadoopTaskStats.Kind.CLEANUP, jobClient.getCleanupTaskReports( runningJob.getID() ), false );
+      addTaskStats( newStats, HadoopTaskStats.Kind.MAPPER, jobClient.getMapTaskReports( runningJob.getID() ), false );
+      addTaskStats( newStats, HadoopTaskStats.Kind.REDUCER, jobClient.getReduceTaskReports( runningJob.getID() ), false );
 
       int count = 0;
 
-      while( true )
+      while( captureAttempts )
         {
-        TaskCompletionEvent[] events = getRunningJob().getTaskCompletionEvents( count );
+        TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( count );
 
         if( events.length == 0 )
           break;
 
-        addTaskStats( events );
+        addAttemptsToTaskStats( newStats, events );
         count += 10;
         }
+
+      setTaskStats( newStats );
       }
     catch( IOException exception )
       {
       LOG.warn( "unable to get task stats", exception );
       }
+    }
+
+  private void addTaskStats( Map<String, HadoopTaskStats> taskStats, HadoopTaskStats.Kind kind, TaskReport[] taskReports, boolean skipLast )
+    {
+    for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
+      {
+      TaskReport taskReport = taskReports[ i ];
+
+      if( taskReport == null )
+        {
+        LOG.warn( "found empty task report" );
+        continue;
+        }
+
+      String id = getIDFor( taskReport.getTaskID() );
+      taskStats.put( id, new HadoopTaskStats( id, getStatus(), kind, taskReport ) );
+      }
+    }
+
+  private void addAttemptsToTaskStats( Map<String, HadoopTaskStats> taskStats, TaskCompletionEvent[] events )
+    {
+    for( TaskCompletionEvent event : events )
+      {
+      if( event == null )
+        {
+        LOG.warn( "found empty completion event" );
+        continue;
+        }
+
+      HadoopTaskStats stats = taskStats.get( getIDFor( event.getTaskAttemptId().getTaskID() ) );
+
+      if( stats == null )
+        LOG.warn( "could not find task for: " + event.getTaskAttemptId().getTaskID() );
+      else
+        stats.addAttempt( event );
+      }
+    }
+
+  private String getIDFor( TaskID taskID )
+    {
+    // using taskID instance as #toString is quite painful
+    String id = idCache.get( taskID );
+
+    if( id == null )
+      {
+      id = Util.createID( taskID.toString() );
+      idCache.put( taskID, id );
+      }
+
+    return id;
     }
   }

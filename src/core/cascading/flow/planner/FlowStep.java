@@ -37,7 +37,6 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
-import cascading.management.ClientType;
 import cascading.operation.Operation;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -308,6 +307,8 @@ public abstract class FlowStep<Config> implements Serializable
     return names;
     }
 
+  public abstract Set<Tap> getTraps();
+
   public abstract Tap getTrap( String name );
 
   /**
@@ -477,7 +478,7 @@ public abstract class FlowStep<Config> implements Serializable
   protected ClientState createClientState( FlowProcess flowProcess )
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
-    return services.createClientState( ClientType.process, getID() );
+    return services.createClientState( getID() );
     }
 
   public FlowStepJob getFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )

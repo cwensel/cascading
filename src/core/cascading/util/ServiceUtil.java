@@ -20,6 +20,9 @@
 
 package cascading.util;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,11 +35,34 @@ import org.slf4j.LoggerFactory;
 public class ServiceUtil
   {
   private static final Logger LOG = LoggerFactory.getLogger( ServiceUtil.class );
+  private static Map<String, CascadingService> singletons = new HashMap<String, CascadingService>();
 
   // look in meta-inf/cascading-services for all classnames
   public static Map<String, String> findAllServices()
     {
     return null;
+    }
+
+  public static CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
+    {
+    String className = PropertyUtil.getProperty( properties, property, defaultProperties.getProperty( property ) );
+
+    if( !singletons.containsKey( className ) )
+      singletons.put( className, createService( properties, className ) );
+
+    return singletons.get( className );
+    }
+
+  public static Collection<CascadingService> releaseSingletonServices()
+    {
+    try
+      {
+      return Collections.unmodifiableCollection( singletons.values() );
+      }
+    finally
+      {
+      singletons.clear();
+      }
     }
 
   public static CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )

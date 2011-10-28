@@ -25,6 +25,7 @@ import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.hadoop.HadoopStepStats;
+import cascading.flow.hadoop.HadoopTaskStats;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
@@ -130,9 +131,13 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
       if( getPlatform().isUseCluster() )
         {
-        assertEquals( 7, stats1.getTaskStats().size() );
-        assertNotNull( stats1.getTaskStats().get( 5 ) );
-        assertTrue( stats1.getTaskStats().get( 5 ).getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
+        assertEquals( 5, stats1.getTaskStats().size() );
+
+        for( HadoopTaskStats hadoopTaskStats : stats1.getTaskStats().values() )
+          {
+          if( hadoopTaskStats.getTaskIDNum() == 0 && hadoopTaskStats.getKind() == HadoopTaskStats.Kind.REDUCER )
+            assertTrue( hadoopTaskStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
+          }
         }
 
       HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getStepStats().get( 0 );
@@ -144,10 +149,7 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
       assertEquals( 1, stats2.getNumReducerTasks() );
 
       if( getPlatform().isUseCluster() )
-        {
-        assertEquals( 7, stats2.getTaskStats().size() );
-        assertNotNull( stats2.getTaskStats().get( 0 ) );
-        }
+        assertEquals( 5, stats2.getTaskStats().size() );
       }
     }
   }

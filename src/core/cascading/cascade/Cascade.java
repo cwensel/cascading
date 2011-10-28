@@ -47,7 +47,6 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
-import cascading.management.ClientType;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.PropertyUtil;
@@ -209,7 +208,7 @@ public class Cascade implements Runnable
 
   private ClientState getClientState()
     {
-    return getCascadingServices().createClientState( ClientType.session, getID() );
+    return getCascadingServices().createClientState( getID() );
     }
 
   /**

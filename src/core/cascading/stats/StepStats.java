@@ -53,5 +53,7 @@ public abstract class StepStats extends CascadingStats
     return "Step{" + getStatsString() + '}';
     }
 
+  public abstract void recordChildStats();
+
   public abstract void captureJobStats();
   }

@@ -47,7 +47,6 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.StepGraph;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
-import cascading.management.ClientType;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
@@ -284,7 +283,7 @@ public abstract class Flow<Config>
 
   private ClientState getClientState()
     {
-    return getFlowSession().getCascadingServices().createClientState( ClientType.session, getID() );
+    return getFlowSession().getCascadingServices().createClientState( getID() );
     }
 
   private void initSteps()

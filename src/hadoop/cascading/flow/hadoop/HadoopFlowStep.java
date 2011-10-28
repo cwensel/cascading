@@ -21,6 +21,7 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -313,6 +314,17 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     }
 
   @Override
+  public Set<Tap> getTraps()
+    {
+    Set<Tap> set = new HashSet<Tap>();
+
+    set.addAll( mapperTraps.values() );
+    set.addAll( reducerTraps.values() );
+
+    return Collections.unmodifiableSet( set );
+    }
+
+  @Override
   public Tap getTrap( String name )
     {
     Tap trap = getMapperTrap( name );
@@ -342,5 +354,4 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     {
     return getReducerTraps().get( name );
     }
-
   }

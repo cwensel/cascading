@@ -21,9 +21,12 @@
 package cascading.flow.local;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.FlowStep;
@@ -89,6 +92,12 @@ public class LocalFlowStep extends FlowStep<Properties>
   public Map<String, Tap> getTrapMap()
     {
     return traps;
+    }
+
+  @Override
+  public Set<Tap> getTraps()
+    {
+    return Collections.unmodifiableSet( new HashSet<Tap>( traps.values() ) );
     }
 
   public Tap getTrap( String name )

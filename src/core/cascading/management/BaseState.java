@@ -29,7 +29,6 @@ import cascading.util.CascadingService;
  */
 public abstract class BaseState implements CascadingService
   {
-  private ClientType clientType = ClientType.session;
   private String id;
 
   MetricsService metricsService = new NullMetricsService();
@@ -44,9 +43,8 @@ public abstract class BaseState implements CascadingService
     {
     }
 
-  public void initialize( CascadingServices cascadingServices, ClientType clientType, String id )
+  public void initialize( CascadingServices cascadingServices, String id )
     {
-    this.clientType = clientType;
     this.id = id;
 
     if( cascadingServices == null )
@@ -64,13 +62,8 @@ public abstract class BaseState implements CascadingService
 
   public void stopService()
     {
-    metricsService.stopService();
-    documentService.stopService();
-    }
-
-  public ClientType getClientType()
-    {
-    return clientType;
+    // not stopping services, they are singletons,
+    // and need to live beyond the shutdown hooks
     }
 
   String[] getContext( Enum context )
