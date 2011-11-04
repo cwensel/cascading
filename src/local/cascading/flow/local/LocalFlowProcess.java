@@ -92,7 +92,7 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public void increment( String group, String counter, int amount )
     {
-    increment( group, counter, amount );
+    stepStats.increment( group, counter, amount );
     }
 
   @Override
