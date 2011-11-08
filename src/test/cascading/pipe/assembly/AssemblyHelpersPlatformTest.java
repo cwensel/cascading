@@ -568,4 +568,39 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     iterator.close();
     }
+
+  @Test
+  public void testCountCount() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "count", "count2" ), "\t",
+      new Class[]{Integer.TYPE, Integer.TYPE}, getOutputPath( "countcount" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    pipe = new CountBy( pipe, new Fields( "char" ), new Fields( "count" ), 2 );
+    pipe = new CountBy( pipe, new Fields( "count" ), new Fields( "count2" ), 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 3, 2, Pattern.compile( "^\\d+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 1, 1 ),
+      new Tuple( 2, 2 ),
+      new Tuple( 4, 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
   }

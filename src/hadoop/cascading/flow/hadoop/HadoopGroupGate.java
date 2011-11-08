@@ -62,13 +62,15 @@ public abstract class HadoopGroupGate extends GroupGate
   @Override
   public void start( Duct previous )
     {
-
+    if( next != null )
+      super.start( previous );
     }
 
   @Override
   public void complete( Duct previous )
     {
-
+    if( next != null )
+      super.complete( previous );
     }
 
   public void run( Tuple key, Iterator values )

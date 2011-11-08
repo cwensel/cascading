@@ -83,6 +83,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
       streamGraph.prepare();
 
       calledPrepare = true;
+
+      group.start( group );
       }
 
     try
@@ -101,6 +103,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
   @Override
   public void close() throws IOException
     {
+    group.complete( group );
+
     streamGraph.cleanup();
 
     super.close();

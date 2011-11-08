@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Fixed issue where the c.p.a.AB.CompositeFunction was not getting flushed when planned into a reduce task.
+
   Renamed c.p.a.Shape to c.p.a.Retain, as it retains given fields, and created c.p.a.Discard to perform the opposite
   function or discarding given fields.
 
