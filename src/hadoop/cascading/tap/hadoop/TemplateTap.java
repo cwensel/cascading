@@ -214,7 +214,13 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     public TemplateScheme( Scheme scheme, Fields pathFields )
       {
       this.scheme = scheme;
-      this.pathFields = pathFields;
+
+      if( pathFields == null || pathFields.isAll() )
+        this.pathFields = null;
+      else if( pathFields.isDefined() )
+        this.pathFields = pathFields;
+      else
+        throw new IllegalArgumentException( "pathFields must be defined or the ALL substitution, got: " + pathFields.printVerbose() );
       }
 
     public Fields getSinkFields()
