@@ -117,11 +117,11 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
       }
     catch( CascadingException exception )
       {
-      handleException( exception, tupleEntry );
+      handleException( exception, argumentsEntry );
       }
     catch( Throwable throwable )
       {
-      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), tupleEntry );
+      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
 
     next.receive( this, tupleEntry );

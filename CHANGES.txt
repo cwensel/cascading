@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed the behavior of traps to capture operation argument values instead of all the incoming values so that it is
+  simpler to identify the values causing the failure and reduce the data stored in the trap and log files, which
+  record a truncated stringified version of the argument tuple.
+
   Updated c.f.h.MapReduceFlow to allow source/sink/trap create methods to be overridden by a sub-class in order
   to support path identifiers not compatible with the Hadoop FS.
 

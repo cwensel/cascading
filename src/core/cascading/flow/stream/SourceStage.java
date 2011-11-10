@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
@@ -77,6 +78,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
         try
           {
           tupleEntry = iterator.next();
+          flowProcess.increment( StepCounters.Tuples_Read, 1 );
           }
         catch( OutOfMemoryError error )
           {

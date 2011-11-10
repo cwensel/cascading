@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -78,6 +79,7 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     try
       {
       collector.add( tupleEntry );
+      flowProcess.increment( StepCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {

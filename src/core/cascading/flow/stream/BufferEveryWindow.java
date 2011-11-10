@@ -132,11 +132,11 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
       }
     catch( CascadingException exception )
       {
-      handleException( exception, incomingEntry );
+      handleException( exception, argumentsEntry );
       }
     catch( Throwable throwable )
       {
-      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), incomingEntry );
+      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
     }
 

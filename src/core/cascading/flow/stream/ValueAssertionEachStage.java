@@ -60,11 +60,11 @@ public class ValueAssertionEachStage extends EachStage
       }
     catch( CascadingException exception )
       {
-      handleException( exception, incomingEntry );
+      handleException( exception, argumentsEntry );
       }
     catch( Throwable throwable )
       {
-      handleException( new OperatorException( each, "operator Each failed executing operation", throwable ), incomingEntry );
+      handleException( new OperatorException( each, "operator Each failed executing operation", throwable ), argumentsEntry );
       }
     }
   }

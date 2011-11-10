@@ -70,11 +70,11 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
       }
     catch( CascadingException exception )
       {
-      handleException( exception, incomingEntry );
+      handleException( exception, groupEntry );
       }
     catch( Throwable throwable )
       {
-      handleException( new OperatorException( every, "operator Every failed starting operation: " + every.getOperation(), throwable ), incomingEntry );
+      handleException( new OperatorException( every, "operator Every failed starting operation: " + every.getOperation(), throwable ), groupEntry );
       }
 
     reducing.startGroup( this, groupEntry );
@@ -92,11 +92,11 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
       }
     catch( CascadingException exception )
       {
-      handleException( exception, incomingEntry );
+      handleException( exception, argumentsEntry );
       }
     catch( Throwable throwable )
       {
-      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), incomingEntry );
+      handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
 
     next.receive( this, tupleEntry );
