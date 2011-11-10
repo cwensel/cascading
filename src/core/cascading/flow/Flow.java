@@ -1033,13 +1033,13 @@ public abstract class Flow<Config> implements Runnable
     }
 
   /**
-   * Method tapExists returns true if the resource represented by the given Tap instance exists.
+   * Method resourceExists returns true if the resource represented by the given Tap instance exists.
    *
    * @param tap of type Tap
    * @return boolean
    * @throws IOException when
    */
-  public boolean tapPathExists( Tap tap ) throws IOException
+  public boolean resourceExists( Tap tap ) throws IOException
     {
     return tap.resourceExists( getConfig() );
     }

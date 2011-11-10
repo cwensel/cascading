@@ -197,6 +197,12 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     test = new Hfs( new TextLine( 1 ), sink.getIdentifier().toString() + "/2-b" );
     validateLength( flow.openTapForRead( test ), 1 );
+
+    String stringPath = sink.getIdentifier().toString() + "/1-a/" + Hadoop18TapUtil.TEMPORARY_PATH;
+    assertFalse( flow.resourceExists( new Hfs( new TextLine( 1 ), stringPath ) ) );
+
+    stringPath = sink.getIdentifier().toString() + "/2-b/" + Hadoop18TapUtil.TEMPORARY_PATH;
+    assertFalse( flow.resourceExists( new Hfs( new TextLine( 1 ), stringPath ) ) );
     }
 
   @Test

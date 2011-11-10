@@ -40,7 +40,8 @@ public class Hadoop18TapUtil
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop18TapUtil.class );
 
-  private static final String TEMPORARY_PATH = "_temporary";
+  /** The Hadoop temporary path used to prevent collisions */
+  public static final String TEMPORARY_PATH = "_temporary";
 
   private static final Map<String, AtomicInteger> pathCounts = new HashMap<String, AtomicInteger>();
 

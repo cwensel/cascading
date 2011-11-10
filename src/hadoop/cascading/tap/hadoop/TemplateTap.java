@@ -66,7 +66,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
   private static final int OPEN_TAPS_THRESHOLD_DEFAULT = 300;
 
   /** Field parent */
-  private final Tap parent;
+  private final Hfs parent;
   /** Field pathTemplate */
   private final String pathTemplate;
   /** Field keepParentOnDelete */
@@ -102,11 +102,12 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
       try
         {
         Path fullPath = new Path( parent.getFullIdentifier( conf ), path );
-        Tap tap = new Hfs( parent.getScheme(), fullPath.toString() );
 
         LOG.debug( "creating collector for path: {}", fullPath );
 
-        collector = tap.openForWrite( flowProcess );
+        collector = new HadoopTapCollector( flowProcess, parent, path );
+
+        ( (HadoopTapCollector) collector ).prepare();
         }
       catch( IOException exception )
         {
