@@ -36,19 +36,26 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs pre-configured via the {@link JobConf}
- * object.
+ * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs
+ * pre-configured via the {@link JobConf} object.
  * <p/>
  * Use this class to allow custom MapReduce jobs to participate in the {@link cascading.cascade.Cascade} scheduler. If
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
  * <p/>
  * Set the parameter {@code deleteSinkOnInit} to {@code true} if the outputPath in the jobConf should be deleted before executing the MapReduce job.
+ * <p/>
+ * MapReduceFlow assumes the underlying input and output paths are compatible with the {@link Hfs} Tap.
+ * <p/>
+ * If the configured JobConf instance uses some other identifier instead of Hadoop FS paths, you should override the
+ * {@link #createSources(org.apache.hadoop.mapred.JobConf)}, {@link #createSinks(org.apache.hadoop.mapred.JobConf)}, and
+ * {@link #createTraps(org.apache.hadoop.mapred.JobConf)} methods to properly resolve the configured paths into
+ * usable {@link Tap} instances. By default createTraps returns an empty collection and should probably be left alone.
  */
 public class MapReduceFlow extends HadoopFlow
   {
   /** Field deleteSinkOnInit */
-  private boolean deleteSinkOnInit = false;
+  protected boolean deleteSinkOnInit = false;
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
@@ -135,7 +142,7 @@ public class MapReduceFlow extends HadoopFlow
     return stepGraph;
     }
 
-  private Map<String, Tap> createSources( JobConf jobConf )
+  protected Map<String, Tap> createSources( JobConf jobConf )
     {
     Path[] paths = FileInputFormat.getInputPaths( jobConf );
 
@@ -147,7 +154,7 @@ public class MapReduceFlow extends HadoopFlow
     return taps;
     }
 
-  private Map<String, Tap> createSinks( JobConf jobConf )
+  protected Map<String, Tap> createSinks( JobConf jobConf )
     {
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
@@ -158,9 +165,8 @@ public class MapReduceFlow extends HadoopFlow
     return taps;
     }
 
-  private Map<String, Tap> createTraps( JobConf jobConf )
+  protected Map<String, Tap> createTraps( JobConf jobConf )
     {
     return new HashMap<String, Tap>();
     }
-
   }

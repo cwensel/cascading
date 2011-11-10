@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Updated c.f.h.MapReduceFlow to allow source/sink/trap create methods to be overridden by a sub-class in order
+  to support path identifiers not compatible with the Hadoop FS.
+
   Changed c.f.FlowProcess increment methods to take a long instead of int type.
 
   Fixed issue where the c.t.h.TemplateTap would not properly handle pathFields value if set to c.f.Fields.ALL.
