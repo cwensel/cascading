@@ -31,7 +31,7 @@ import cascading.operation.FilterCall;
  * Class Counter is a {@link Filter} that increments a given {@link Enum} counter by 1 or by the given {@code increment} value.
  * <p/>
  * Internally, the {@link #isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} method calls
- * {@link FlowProcess#increment(Enum, int)}.
+ * {@link FlowProcess#increment(Enum, long)}.
  * <p/>
  * No {@link cascading.tuple.Tuple} instances are ever discarded.
  *

@@ -34,7 +34,7 @@ import cascading.tuple.TupleEntryIterator;
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>
  * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link cascading.flow.Flow}.
- * Thus, a call to {@link #increment(Enum, int)} may start incrementing from zero if the operation making the call
+ * Thus, a call to {@link #increment(Enum, long)} may start incrementing from zero if the operation making the call
  * belongs to a subsequent 'job' or 'step' from any previous operations calling increment.
  * <p/>
  * A FlowProcess is roughly a child of {@link FlowSession}. FlowSession is roughly one to one with a particular {@link Flow}.
@@ -70,11 +70,11 @@ public abstract class FlowProcess<Config>
       {
       }
 
-    public void increment( Enum counter, int amount )
+    public void increment( Enum counter, long amount )
       {
       }
 
-    public void increment( String group, String counter, int amount )
+    public void increment( String group, String counter, long amount )
       {
       }
 
@@ -226,7 +226,7 @@ public abstract class FlowProcess<Config>
    * @param counter of type Enum
    * @param amount  of type int
    */
-  public abstract void increment( Enum counter, int amount );
+  public abstract void increment( Enum counter, long amount );
 
   /**
    * Method increment is used to increment a custom counter. The amount to increment must be a integer value.
@@ -237,7 +237,7 @@ public abstract class FlowProcess<Config>
    * @param counter of type String
    * @param amount  of type int
    */
-  public abstract void increment( String group, String counter, int amount );
+  public abstract void increment( String group, String counter, long amount );
 
   /**
    * Method setStatus is used to set the status of the current operation.

@@ -104,12 +104,12 @@ public class LocalStepStats extends StepStats
     return counterMap.get( counter );
     }
 
-  public void increment( Enum counter, int amount )
+  public void increment( Enum counter, long amount )
     {
     increment( counter.getDeclaringClass().getName(), counter.toString(), amount );
     }
 
-  public void increment( String group, String counter, int amount )
+  public void increment( String group, String counter, long amount )
     {
     Map<String, Long> groupMap = getCreateCounter( group );
 

@@ -228,14 +228,14 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     getReporterOrFail().progress();
     }
 
-  /** @see cascading.flow.FlowProcess#increment(Enum, int) */
-  public void increment( Enum counter, int amount )
+  /** @see cascading.flow.FlowProcess#increment(Enum, long) */
+  public void increment( Enum counter, long amount )
     {
     getReporterOrFail().incrCounter( counter, amount );
     }
 
-  /** @see cascading.flow.FlowProcess#increment(String, String, int) */
-  public void increment( String group, String counter, int amount )
+  /** @see cascading.flow.FlowProcess#increment(String, String, long) */
+  public void increment( String group, String counter, long amount )
     {
     getReporterOrFail().incrCounter( group, counter, amount );
     }

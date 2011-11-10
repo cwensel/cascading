@@ -84,13 +84,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     }
 
   @Override
-  public void increment( Enum counter, int amount )
+  public void increment( Enum counter, long amount )
     {
     stepStats.increment( counter, amount );
     }
 
   @Override
-  public void increment( String group, String counter, int amount )
+  public void increment( String group, String counter, long amount )
     {
     stepStats.increment( group, counter, amount );
     }

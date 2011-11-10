@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.f.FlowProcess increment methods to take a long instead of int type.
+
   Fixed issue where the c.t.h.TemplateTap would not properly handle pathFields value if set to c.f.Fields.ALL.
 
   Fixed issue where the c.p.a.AB.CompositeFunction was not getting flushed when planned into a reduce task.

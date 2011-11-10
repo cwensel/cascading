@@ -102,12 +102,12 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
-    public void increment( Enum counter, int amount )
+    public void increment( Enum counter, long amount )
       {
       }
 
     @Override
-    public void increment( String group, String counter, int amount )
+    public void increment( String group, String counter, long amount )
       {
       }
 
