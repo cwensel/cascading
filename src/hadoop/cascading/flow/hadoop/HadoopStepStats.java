@@ -478,11 +478,10 @@ public abstract class HadoopStepStats extends StepStats
         continue;
         }
 
+      // this will return a housekeeping task, which we are not tracking
       HadoopTaskStats stats = taskStats.get( getIDFor( event.getTaskAttemptId().getTaskID() ) );
 
-      if( stats == null )
-        LOG.warn( "could not find task for: " + event.getTaskAttemptId().getTaskID() );
-      else
+      if( stats != null )
         stats.addAttempt( event );
       }
     }

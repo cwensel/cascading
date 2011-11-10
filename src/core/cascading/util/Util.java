@@ -20,6 +20,7 @@
 
 package cascading.util;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -530,6 +531,43 @@ public class Util
   public static boolean isEmpty( String string )
     {
     return string == null || string.isEmpty();
+    }
+
+  private static String[] findSplitName( String path )
+    {
+    String[] split = path.split( File.separator );
+
+    path = split[ split.length - 1 ];
+
+    path = path.substring( 0, path.lastIndexOf( '.' ) ); // remove .jar
+
+    return path.split( "-(?=\\d)", 2 );
+    }
+
+  public static String findVersion( String path )
+    {
+    if( path == null || path.isEmpty() )
+      return null;
+
+    String[] split = findSplitName( path );
+
+    if( split.length == 2 )
+      return split[ 1 ];
+
+    return null;
+    }
+
+  public static String findName( String path )
+    {
+    if( path == null || path.isEmpty() )
+      return null;
+
+    String[] split = findSplitName( path );
+
+    if( split.length == 0 )
+      return null;
+
+    return split[ 0 ];
     }
 
   public interface RetryOperator<T>

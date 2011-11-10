@@ -143,7 +143,7 @@ public class HadoopUtil
       caughtException = exception;
       }
 
-    LOG.info( "unable to find and remove client hdfs shutdown hook, received exception: {}", caughtException.getClass().getName() );
+    LOG.debug( "unable to find and remove client hdfs shutdown hook, received exception: {}", caughtException.getClass().getName() );
 
     return null;
     }

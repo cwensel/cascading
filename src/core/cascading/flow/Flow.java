@@ -227,16 +227,7 @@ public abstract class Flow<Config>
     if( name != null )
       return name;
 
-    String path = FlowConnector.getApplicationJarPath( properties );
-
-    if( path == null )
-      return null;
-
-    String[] split = path.split( "/" );
-
-    path = split[ split.length - 1 ];
-
-    return path.substring( 0, path.lastIndexOf( '.' ) );
+    return Util.findName( FlowConnector.getApplicationJarPath( properties ) );
     }
 
   private String makeAppVersion( Map<Object, Object> properties )
@@ -249,18 +240,7 @@ public abstract class Flow<Config>
     if( name != null )
       return name;
 
-    String path = FlowConnector.getApplicationJarPath( properties );
-
-    if( path == null )
-      return null;
-
-    String[] split = path.split( "/" );
-
-    path = split[ split.length - 1 ];
-
-    path = path.substring( 0, path.lastIndexOf( '.' ) );
-
-    return path.replace( "^\\D*(.*)$", "$1" );
+    return Util.findVersion( FlowConnector.getApplicationJarPath( properties ) );
     }
 
   private FlowStats createPrepareFlowStats()
