@@ -2,6 +2,8 @@ Cascading Change Log
 
 1.2.5 (unreleased)
 
+  Removed accidental SLF4J dependencies.
+
   Fixed bug where ISE was thrown if c.f.Flow#stop() was called immediately after #start().
 
 1.2.4
