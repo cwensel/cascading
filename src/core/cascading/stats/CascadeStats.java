@@ -49,7 +49,7 @@ public class CascadeStats extends CascadingStats
     }
 
   @Override
-  public void recordInfo()
+  public synchronized void recordInfo()
     {
     clientState.recordCascade( cascade );
     }

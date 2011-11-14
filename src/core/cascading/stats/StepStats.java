@@ -42,7 +42,7 @@ public abstract class StepStats extends CascadingStats
     }
 
   @Override
-  public void recordInfo()
+  public synchronized void recordInfo()
     {
     clientState.recordFlowStep( flowStep );
     }

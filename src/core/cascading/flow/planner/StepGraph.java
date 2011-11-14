@@ -69,13 +69,12 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   /**
    * Method getCreateFlowStep ...
    *
-   * @param flowName of type String
    * @param steps    of type Map<String, FlowStep>
    * @param sinkName of type String
    * @param numJobs  of type int
    * @return FlowStep
    */
-  protected FlowStep getCreateFlowStep( String flowName, Map<String, FlowStep> steps, String sinkName, int numJobs )
+  protected FlowStep getCreateFlowStep( Map<String, FlowStep> steps, String sinkName, int numJobs )
     {
     if( steps.containsKey( sinkName ) )
       return steps.get( sinkName );
@@ -85,8 +84,6 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     String stepName = makeStepName( steps, numJobs, sinkName );
     int stepNum = steps.size() + 1;
     FlowStep step = createFlowStep( stepName, stepNum );
-
-    step.setFlowName( flowName );
 
     steps.put( sinkName, step );
 

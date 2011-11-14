@@ -25,15 +25,21 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
+import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.management.ClientState;
+import cascading.stats.FlowStats;
 import cascading.stats.StepStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class FlowStepJob implements Callable<Throwable>
   {
+  private static final Logger LOG = LoggerFactory.getLogger( FlowStepJob.class );
+
   /** Field stepName */
   protected final String stepName;
   /** Field pollingInterval */
@@ -140,7 +146,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
     internalNonBlockingStart();
 
-    stepStats.markSubmitted();
+    markSubmitted();
 
     blockTillCompleteOrStopped();
 
@@ -183,7 +189,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
     while( true )
       {
       if( stepStats.isSubmitted() && isStarted() )
-        stepStats.markRunning();
+        markRunning();
 
       if( stop || internalNonBlockingIsComplete() )
         break;
@@ -195,6 +201,48 @@ public abstract class FlowStepJob implements Callable<Throwable>
         count = 0;
         stepStats.recordChildStats();
         }
+      }
+    }
+
+  private void markSubmitted()
+    {
+    stepStats.markSubmitted();
+
+    Flow flow = flowStep.getFlow();
+
+    if( flow == null )
+      {
+      LOG.warn( "no parent flow set" );
+      return;
+      }
+
+    FlowStats flowStats = flow.getFlowStats();
+
+    synchronized( flowStats )
+      {
+      if( flowStats.isStarted() )
+        flowStats.markSubmitted();
+      }
+    }
+
+  private void markRunning()
+    {
+    stepStats.markRunning();
+
+    Flow flow = flowStep.getFlow();
+
+    if( flow == null )
+      {
+      LOG.warn( "no parent flow set" );
+      return;
+      }
+
+    FlowStats flowStats = flow.getFlowStats();
+
+    synchronized( flowStats )
+      {
+      if( flowStats.isStarted() || flowStats.isSubmitted() )
+        flowStats.markRunning();
       }
     }
 

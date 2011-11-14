@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
+import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
@@ -67,6 +68,9 @@ public abstract class FlowStep<Config> implements Serializable
 
   /** Field properties */
   private Map<Object, Object> properties = null;
+
+  /** Field flow */
+  private transient Flow flow;
   /** Field flowName */
   private String flowName;
   /** Field flowID */
@@ -139,14 +143,21 @@ public abstract class FlowStep<Config> implements Serializable
     this.name = name;
     }
 
+  public void setFlow( Flow flow )
+    {
+    this.flow = flow;
+    this.flowID = flow.getID();
+    this.flowName = flow.getName();
+    }
+
+  protected Flow getFlow()
+    {
+    return flow;
+    }
+
   public String getFlowID()
     {
     return flowID;
-    }
-
-  public void setFlowID( String flowID )
-    {
-    this.flowID = flowID;
     }
 
   /**

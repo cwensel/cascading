@@ -179,7 +179,6 @@ public abstract class Flow<Config>
     this.name = name;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
-    initSteps();
     initFromProperties( properties );
 
     this.flowStats = createPrepareFlowStats(); // must be last
@@ -266,13 +265,13 @@ public abstract class Flow<Config>
     return getFlowSession().getCascadingServices().createClientState( getID() );
     }
 
-  private void initSteps()
+  protected void initSteps()
     {
     if( stepGraph == null )
       return;
 
     for( FlowStep flowStep : stepGraph.vertexSet() )
-      flowStep.setFlowID( getID() );
+      flowStep.setFlow( this );
     }
 
   private void initFromTaps()
@@ -1116,8 +1115,7 @@ public abstract class Flow<Config>
 
     try
       {
-      // mark only running, not submitted
-      flowStats.markStartedThenRunning();
+      flowStats.markStarted();
 
       fireOnStarting();
 

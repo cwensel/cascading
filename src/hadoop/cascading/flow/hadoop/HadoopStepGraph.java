@@ -91,7 +91,7 @@ public class HadoopStepGraph extends StepGraph
         {
         LOG.debug( "handling path: {} -> {}", source, sink );
 
-        HadoopFlowStep step = (HadoopFlowStep) getCreateFlowStep( flowName, steps, sink.toString(), numJobs );
+        HadoopFlowStep step = (HadoopFlowStep) getCreateFlowStep( steps, sink.toString(), numJobs );
 
         addVertex( step );
 

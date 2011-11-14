@@ -48,7 +48,7 @@ public class LocalStepGraph extends StepGraph
   protected void makeStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
-    LocalFlowStep step = (LocalFlowStep) getCreateFlowStep( flowName, steps, "local", 1 );
+    LocalFlowStep step = (LocalFlowStep) getCreateFlowStep( steps, "local", 1 );
 
     addVertex( step );
 

@@ -252,9 +252,8 @@ public abstract class CascadingStats<Config> implements Serializable
 
   public abstract void recordInfo();
 
-
   /** Method markPending sets the status to {@link Status#PENDING}. */
-  public void markPending()
+  public synchronized void markPending()
     {
     markPendingTime();
     recordStats();
@@ -271,23 +270,23 @@ public abstract class CascadingStats<Config> implements Serializable
    * Method markStartedThenRunning consecutively marks the status as {@link Status#STARTED} then {@link Status#RUNNING}
    * and forces the start and running time to be equals.
    */
-  public void markStartedThenRunning()
+  public synchronized void markStartedThenRunning()
     {
     if( status != Status.PENDING )
       throw new IllegalStateException( "may not mark as " + Status.STARTED + ", is already " + status );
 
-    markStartAndRunTime();
+    markStartToRunTime();
     markStarted();
     markRunning();
     }
 
-  protected void markStartAndRunTime()
+  protected void markStartToRunTime()
     {
-    startTime = runTime = System.currentTimeMillis();
+    startTime = submitTime = runTime = System.currentTimeMillis();
     }
 
   /** Method markStarted sets the status to {@link Status#STARTED}. */
-  public void markStarted()
+  public synchronized void markStarted()
     {
     if( status != Status.PENDING )
       throw new IllegalStateException( "may not mark as " + Status.STARTED + ", is already " + status );
@@ -307,8 +306,11 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /** Method markSubmitted sets the status to {@link Status#SUBMITTED}. */
-  public void markSubmitted()
+  public synchronized void markSubmitted()
     {
+    if( status == Status.SUBMITTED )
+      return;
+
     if( status != Status.STARTED )
       throw new IllegalStateException( "may not mark as " + Status.SUBMITTED + ", is already " + status );
 
@@ -323,11 +325,12 @@ public abstract class CascadingStats<Config> implements Serializable
 
   protected void markSubmitTime()
     {
-    submitTime = System.currentTimeMillis();
+    if( submitTime == 0 )
+      submitTime = System.currentTimeMillis();
     }
 
   /** Method markRunning sets the status to {@link Status#RUNNING}. */
-  public void markRunning()
+  public synchronized void markRunning()
     {
     if( status == Status.RUNNING )
       return;
@@ -350,7 +353,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /** Method markSuccessful sets the status to {@link Status#SUCCESSFUL}. */
-  public void markSuccessful()
+  public synchronized void markSuccessful()
     {
     if( status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.SUCCESSFUL + ", is already " + status );
@@ -374,7 +377,7 @@ public abstract class CascadingStats<Config> implements Serializable
    *
    * @param throwable of type Throwable
    */
-  public void markFailed( Throwable throwable )
+  public synchronized void markFailed( Throwable throwable )
     {
     if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.FAILED + ", is already " + status );
@@ -390,7 +393,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /** Method markStopped sets the status to {@link Status#STOPPED}. */
-  public void markStopped()
+  public synchronized void markStopped()
     {
     if( status != Status.PENDING && status != Status.STARTED && status != Status.SUBMITTED && status != Status.RUNNING )
       throw new IllegalStateException( "may not mark as " + Status.STOPPED + ", is already " + status );
@@ -405,7 +408,7 @@ public abstract class CascadingStats<Config> implements Serializable
     }
 
   /** Method markSkipped sets the status to {@link Status#SKIPPED}. */
-  public void markSkipped()
+  public synchronized void markSkipped()
     {
     if( status != Status.PENDING )
       throw new IllegalStateException( "may not mark as " + Status.SKIPPED + ", is already " + status );
