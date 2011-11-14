@@ -29,10 +29,15 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 
 /**
- *
+ * Class LocalScheme is the abstract base class for all local mode {@link Scheme} classes. It is offered as a
+ * convenience for those implementing custom Scheme types.
  */
 public abstract class LocalScheme<Input, Output, SourceContext, SinkContext> extends Scheme<LocalFlowProcess, Properties, Input, Output, SourceContext, SinkContext>
   {
+  protected LocalScheme()
+    {
+    }
+
   protected LocalScheme( Fields sourceFields )
     {
     super( sourceFields );

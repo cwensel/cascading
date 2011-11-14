@@ -26,16 +26,23 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.stream.Duct;
+import cascading.flow.stream.ElementDuct;
+import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class FlowReducer is the Hadoop Reducer implementation. */
 public class FlowReducer extends MapReduceBase implements Reducer
   {
+  private static final Logger LOG = LoggerFactory.getLogger( FlowReducer.class );
+
   /** Field flowReducerStack */
   private HadoopReduceStreamGraph streamGraph;
   /** Field currentProcess */
@@ -63,6 +70,15 @@ public class FlowReducer extends MapReduceBase implements Reducer
       streamGraph = new HadoopReduceStreamGraph( currentProcess, step );
 
       group = (HadoopGroupGate) streamGraph.getHeads().iterator().next();
+
+      for( Duct head : streamGraph.getHeads() )
+        LOG.info( "sourcing from: " + ( (ElementDuct) head ).getFlowElement() );
+
+      for( Duct tail : streamGraph.getTails() )
+        LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
+
+      for( Tap trap : step.getReducerTraps().values() )
+        LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )
       {

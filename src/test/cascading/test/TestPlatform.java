@@ -70,6 +70,8 @@ public abstract class TestPlatform
 
   public abstract void copyToLocal( String outputFile ) throws IOException;
 
+  public abstract boolean remoteExists( String outputFile ) throws IOException;
+
   public abstract FlowProcess getFlowProcess();
 
   public abstract FlowConnector getFlowConnector( Map<Object, Object> properties );

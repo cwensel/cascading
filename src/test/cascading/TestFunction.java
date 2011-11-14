@@ -54,6 +54,14 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
     this.failon = failon;
     }
 
+  public TestFunction( Fields fieldDeclaration, Tuple value, int failon, boolean isSafe )
+    {
+    super( fieldDeclaration );
+    this.value = value;
+    this.failon = failon;
+    this.isSafe = isSafe;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Integer> operationCall )
     {

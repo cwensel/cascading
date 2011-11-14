@@ -231,6 +231,7 @@ public class HadoopFlow extends Flow<JobConf>
     try
       {
       deleteSinksIfReplace();
+      deleteTrapsIfReplace();
       }
     catch( IOException exception )
       {

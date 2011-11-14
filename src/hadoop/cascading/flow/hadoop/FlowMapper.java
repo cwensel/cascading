@@ -25,6 +25,8 @@ import java.io.IOException;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.stream.Duct;
+import cascading.flow.stream.ElementDuct;
 import cascading.flow.stream.SourceStage;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
@@ -32,10 +34,14 @@ import org.apache.hadoop.mapred.MapRunnable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
 public class FlowMapper implements MapRunnable
   {
+  private static final Logger LOG = LoggerFactory.getLogger( FlowMapper.class );
+
   private HadoopMapStreamGraph streamGraph;
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
@@ -59,6 +65,15 @@ public class FlowMapper implements MapRunnable
       Tap source = (Tap) HadoopUtil.deserializeBase64( jobConf.getRaw( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, step, source );
+
+      for( Duct head : streamGraph.getHeads() )
+        LOG.info( "sourcing from: " + ( (ElementDuct) head ).getFlowElement() );
+
+      for( Duct tail : streamGraph.getTails() )
+        LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
+
+      for( Tap trap : step.getMapperTraps().values() )
+        LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )
       {

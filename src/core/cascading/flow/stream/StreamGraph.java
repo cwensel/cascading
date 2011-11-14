@@ -161,6 +161,11 @@ public class StreamGraph
     return Graphs.successorListOf( graph, getHEAD() );
     }
 
+  public Collection<Duct> getTails()
+    {
+    return Graphs.predecessorListOf( graph, getTAIL() );
+    }
+
   public Duct[] findAllNextFor( Duct current )
     {
     LinkedList<Duct> successors = new LinkedList<Duct>( Graphs.successorListOf( graph, current ) );

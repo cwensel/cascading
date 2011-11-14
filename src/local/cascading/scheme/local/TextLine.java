@@ -39,23 +39,64 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
 /**
- *
+ * A TextLine is a type of {@link cascading.scheme.Scheme} for plain text files. Files are broken into
+ * lines. Either line-feed or carriage-return are used to signal end of line.
+ * <p/>
+ * By default, this scheme returns a {@link cascading.tuple.Tuple} with two fields, "num" and "line". Where "num"
+ * is the line number for "line".
+ * <p/>
+ * Many of the constructors take both "sourceFields" and "sinkFields". sourceFields denote the field names
+ * to be used instead of the names "num" and "line". sinkFields is a selector and is by default {@link Fields#ALL}.
+ * Any available field names can be given if only a subset of the incoming fields should be used.
+ * <p/>
+ * If a {@link Fields} instance is passed on the constructor as sourceFields having only one field, the return tuples
+ * will simply be the "line" value using the given field name.
+ * <p/>
+ * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
+ * writing out the line.
  */
 public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, Void>
   {
+  /**
+   * Creates a new TextLine instance that sources "num" and "line" fields, and sinks all incoming fields, where
+   * "num" is the line number of the line in the input file.
+   */
   public TextLine()
     {
     super( new Fields( "num", "line" ), Fields.ALL );
     }
 
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   */
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
+
+    verify( sourceFields );
     }
 
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param sinkFields   of Fields
+   */
   public TextLine( Fields sourceFields, Fields sinkFields )
     {
     super( sourceFields, sinkFields );
+
+    verify( sourceFields );
+    }
+
+  private void verify( Fields sourceFields )
+    {
+    if( sourceFields.size() < 1 || sourceFields.size() > 2 )
+      throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
     }
 
   @Override

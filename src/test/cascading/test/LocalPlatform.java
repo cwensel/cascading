@@ -20,6 +20,7 @@
 
 package cascading.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -67,6 +68,12 @@ public class LocalPlatform extends TestPlatform
   @Override
   public void copyToLocal( String outputFile ) throws IOException
     {
+    }
+
+  @Override
+  public boolean remoteExists( String outputFile ) throws IOException
+    {
+    return new File( outputFile ).exists();
     }
 
   @Override

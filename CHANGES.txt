@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed planner to allow traps to be re-used across any branches. Prior planner would throw an error.
+
+  Changed c.f.Flow to delete traps during the same conditions a sink will be deleted before execution.
+
   Fixed issue where the c.t.h.TemplateTap would not properly remove Hadoop temporary directories on completion.
 
   Changed the behavior of traps to capture operation argument values instead of all the incoming values so that it is

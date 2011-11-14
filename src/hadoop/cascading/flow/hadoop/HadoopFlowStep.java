@@ -64,9 +64,9 @@ public class HadoopFlowStep extends FlowStep<JobConf>
   /** Field reducerTraps */
   private final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
 
-  public HadoopFlowStep( String name, int id )
+  public HadoopFlowStep( String name, int stepNum )
     {
-    super( name, id );
+    super( name, stepNum );
     }
 
   public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
@@ -156,6 +156,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
 
     // perform last so init above will pass to tasks
     conf.set( "cascading.flow.step.id", getID() );
+    conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
     conf.set( "cascading.flow.step", HadoopUtil.serializeBase64( this ) );
 
     return conf;

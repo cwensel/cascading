@@ -32,6 +32,7 @@ import cascading.flow.local.LocalFlowProcess;
 import cascading.scheme.local.LocalScheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -102,10 +103,17 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     {
     // ignore the output. will catch the failure downstream if any.
     // not ignoring the output causes race conditions with other systems writing to the same directory.
-    new File( path ).getParentFile().mkdirs();
+    File parentFile = new File( path ).getParentFile();
+
+    if( parentFile.exists() && parentFile.isFile() )
+      throw new TapException( "cannot create parent directory, it already exists as a file: " + parentFile.getAbsolutePath() );
+
+    // don't test for success, just fighting a race condition otherwise
+    // will get caught downstream
+    parentFile.mkdirs();
 
     if( output == null )
-      output = new FileOutputStream( path );
+      output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
 
     Closeable writer = (Closeable) ( (LocalScheme) getScheme() ).createOutput( output );
 

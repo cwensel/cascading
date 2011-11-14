@@ -23,7 +23,6 @@ package cascading.flow.planner;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -65,17 +64,6 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     this();
 
     makeStepGraph( flowName, elementGraph, traps );
-
-    verifyTrapsAreUnique( traps );
-    }
-
-  private void verifyTrapsAreUnique( Map<String, Tap> traps )
-    {
-    for( Tap tap : traps.values() )
-      {
-      if( Collections.frequency( traps.values(), tap ) != 1 )
-        throw new PlannerException( "traps must be unique, cannot be reused on different branches: " + tap );
-      }
     }
 
   /**

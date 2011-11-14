@@ -779,7 +779,7 @@ public abstract class Flow<Config> implements Runnable
    * Method prepare is used by a {@link Cascade} to notify the given Flow it should initialize or clear any resources
    * necessary for {@link #start()} to be called successfully.
    * <p/>
-   * Specifically, this implementation calls {@link #deleteSinksIfNotUpdate()}.
+   * Specifically, this implementation calls {@link #deleteSinksIfNotUpdate()} && {@link #deleteTrapsIfNotUpdate()}.
    *
    * @throws IOException when
    */
@@ -789,6 +789,7 @@ public abstract class Flow<Config> implements Runnable
     try
       {
       deleteSinksIfNotUpdate();
+      deleteTrapsIfNotUpdate();
       }
     catch( IOException exception )
       {
@@ -930,7 +931,7 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openSource() throws IOException
     {
-    return sources.values().iterator().next().openForRead( getFlowProcess(), null );
+    return sources.values().iterator().next().openForRead( getFlowProcess() );
     }
 
   /**
@@ -942,7 +943,10 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openSource( String name ) throws IOException
     {
-    return sources.get( name ).openForRead( getFlowProcess(), null );
+    if( !sources.containsKey( name ) )
+      throw new IllegalArgumentException( "source does not exist: " + name );
+
+    return sources.get( name ).openForRead( getFlowProcess() );
     }
 
   /**
@@ -953,7 +957,7 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openSink() throws IOException
     {
-    return sinks.values().iterator().next().openForRead( getFlowProcess(), null );
+    return sinks.values().iterator().next().openForRead( getFlowProcess() );
     }
 
   /**
@@ -965,6 +969,9 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openSink( String name ) throws IOException
     {
+    if( !sinks.containsKey( name ) )
+      throw new IllegalArgumentException( "sink does not exist: " + name );
+
     return sinks.get( name ).openForRead( getFlowProcess(), null );
     }
 
@@ -976,7 +983,7 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openTrap() throws IOException
     {
-    return traps.values().iterator().next().openForRead( getFlowProcess(), null );
+    return traps.values().iterator().next().openForRead( getFlowProcess() );
     }
 
   /**
@@ -988,7 +995,10 @@ public abstract class Flow<Config> implements Runnable
    */
   public TupleEntryIterator openTrap( String name ) throws IOException
     {
-    return traps.get( name ).openForRead( getFlowProcess(), null );
+    if( !traps.containsKey( name ) )
+      throw new IllegalArgumentException( "trap does not exist: " + name );
+
+    return traps.get( name ).openForRead( getFlowProcess() );
     }
 
   /**
@@ -1026,6 +1036,24 @@ public abstract class Flow<Config> implements Runnable
   public void deleteSinksIfReplace() throws IOException
     {
     for( Tap tap : sinks.values() )
+      {
+      if( tap.isReplace() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteTrapsIfNotUpdate() throws IOException
+    {
+    for( Tap tap : traps.values() )
+      {
+      if( !tap.isUpdate() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteTrapsIfReplace() throws IOException
+    {
+    for( Tap tap : traps.values() )
       {
       if( tap.isReplace() )
         tap.deleteResource( getConfig() );

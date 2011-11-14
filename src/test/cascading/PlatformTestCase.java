@@ -113,6 +113,7 @@ public class PlatformTestCase extends CascadingTestCase
       throw new IllegalStateException( "path already has been used:" + result );
 
     allPaths.add( result );
+    currentPaths.add( result );
 
     return result;
     }
@@ -172,7 +173,9 @@ public class PlatformTestCase extends CascadingTestCase
       for( String path : currentPaths )
         {
         LOG.info( "copying to local {}", path );
-        getPlatform().copyToLocal( path );
+
+        if( getPlatform().isUseCluster() && getPlatform().remoteExists( path ) )
+          getPlatform().copyToLocal( path );
         }
 
       currentPaths.clear();

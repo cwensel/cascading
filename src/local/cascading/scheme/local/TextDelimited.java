@@ -41,13 +41,38 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- *
+ * Class TextDelimited provides direct support for delimited text files, like
+ * TAB (\t) or COMMA (,) delimited files. It also optionally allows for quoted values.
+ * <p/>
+ * TextDelimited may also be used to skip the "header" in a file, where the header is defined as the very first line
+ * in every input file. That is, if the byte offset of the current line from the input is zero (0), that line will
+ * be skipped.
+ * <p/>
+ * By default headers are not skipped.
+ * <p/>
+ * By default this {@link cascading.scheme.Scheme} is both {@code strict} and {@code safe}.
+ * <p/>
+ * Strict meaning if a line of text does not parse into the expected number of fields, this class will throw a
+ * {@link TapException}. If strict is {@code false}, then {@link Tuple} will be returned with {@code null} values
+ * for the missing fields.
+ * <p/>
+ * Safe meaning if a field cannot be coerced into an expected type, a {@code null} will be used for the value.
+ * If safe is {@code false}, a {@link TapException} will be thrown.
+ * <p/>
+ * Also by default, {@code quote} strings are not searched for to improve processing speed. If a file is
+ * COMMA delimited but may have COMMA's in a value, the whole value should be surrounded by the quote string, typically
+ * double quotes ({@literal "}).
+ * <p/>
+ * Note all empty fields in a line will be returned as {@code null} unless coerced into a new type.
+ * <p/>
+ * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
+ * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
+ * either, so all values will be returned as Strings.
  */
 public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Void, StringBuilder>
   {
   private final boolean skipHeader;
   private final DelimitedParser delimitedParser;
-  private Object[] buffer;
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance with TAB as the default delimiter.

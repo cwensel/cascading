@@ -182,6 +182,12 @@ public class HadoopPlatform extends TestPlatform
     }
 
   @Override
+  public boolean remoteExists( String outputFile ) throws IOException
+    {
+    return fileSys.exists( new Path( outputFile ) );
+    }
+
+  @Override
   public Tap getTextFile( Fields sourceFields, Fields sinkFields, String filename, SinkMode mode )
     {
     if( sourceFields == null )

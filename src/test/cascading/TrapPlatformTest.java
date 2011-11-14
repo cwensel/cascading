@@ -107,6 +107,56 @@ public class TrapPlatformTest extends PlatformTestCase
     validateLength( flow.openTrap(), 10 );
     }
 
+//  @Test
+//  public void testCoGroup() throws Exception
+//    {
+//    getPlatform().copyFromLocal( inputFileLhs );
+//    getPlatform().copyFromLocal( inputFileRhs );
+//
+//    FlowDef flowDef = flowDef();
+//
+//    flowDef.addSource( "lhs", getPlatform().getTextFile( inputFileLhs ) );
+//    flowDef.addSource( "rhs", getPlatform().getTextFile( inputFileRhs ) );
+//
+//    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+//    pipeLower = new Each( pipeLower, Fields.ALL, new Identity() ); // adding a little complexity
+//    pipeLower = new Each( pipeLower, Fields.ALL, new Identity() ); // adding a little complexity
+//
+//    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+//    pipeUpper = new Each( pipeUpper, Fields.ALL, new Identity() ); // adding a little complexity
+//    pipeUpper = new Each( pipeUpper, Fields.ALL, new Identity() ); // adding a little complexity
+//
+//    Pipe cross = new CoGroup( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+//
+//    cross = new Each( cross, new TestFunction( new Fields( "test" ), new Tuple( 4 ), 4 ), Fields.ALL );
+//    cross = new Discard( cross, new Fields( "test" ) );
+//    cross = new Each( cross, Fields.ALL, new Identity() ); // adding a little complexity
+//    cross = new Each( cross, Fields.ALL, new Identity() ); // adding a little complexity
+//
+//    flowDef.addTailSink( cross, getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroup/result" ), SinkMode.REPLACE ) );
+//
+//    String outputPath = getOutputPath( "cogroup/trap" );
+//    Tap trap = getPlatform().getTextFile( new Fields( "line" ), outputPath, SinkMode.REPLACE );
+//
+//    flowDef.addTrap( pipeLower, trap );
+//    flowDef.addTrap( pipeUpper, trap );
+//    flowDef.addTrap( cross, trap );
+//
+//    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+//
+//    flow.complete();
+//
+//    validateLength( flow, 34 );
+//
+//    List<Tuple> sinkValues = getSinkAsList( flow );
+//
+//    assertTrue( sinkValues.contains( new Tuple( "1\ta\t1\tA" ) ) );
+//    assertTrue( sinkValues.contains( new Tuple( "1\ta\t1\tB" ) ) );
+//
+//    List<Tuple> trapValues = asList( flow, trap );
+//    assertTrue( trapValues.contains( new Tuple( "1\tb\t1\tB" ) ) );
+//    }
+
   @Test
   public void testTrapEachAllSequence() throws Exception
     {
@@ -202,8 +252,8 @@ public class TrapPlatformTest extends PlatformTestCase
     pipe = new Each( pipe, new TestFunction( new Fields( "test3" ), new Tuple( 3 ), 3 ), Fields.ALL );
     pipe = new Each( pipe, new TestFunction( new Fields( "test4" ), new Tuple( 4 ), 4 ), Fields.ALL );
 
-    Tap sink = getPlatform().getTextFile( getOutputPath( "allchain/tap" ), SinkMode.REPLACE );
-    Tap trap = getPlatform().getTextFile( getOutputPath( "allchain/trap" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "allchain/tap-nondeterministic" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( "allchain/trap-nondeterministic" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 

@@ -269,13 +269,13 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     {
     JobConf jobConf = new JobConf( getJobConf() );
 
-    int id = jobConf.getInt( "cascading.flow.step.id", 0 );
+    int stepNum = jobConf.getInt( "cascading.flow.step.num", 0 );
     String partname;
 
     if( jobConf.getBoolean( "mapred.task.is.map", true ) )
-      partname = String.format( "-m-%05d-", id );
+      partname = String.format( "-m-%05d-", stepNum );
     else
-      partname = String.format( "-r-%05d-", id );
+      partname = String.format( "-r-%05d-", stepNum );
 
     jobConf.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 

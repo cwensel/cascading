@@ -80,7 +80,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
     Pipe pipe = new CoGroup( lhsPipe, new Fields( 0 ), rhsPipe, new Fields( 0 ), Fields.size( 2 ) );
 
-    Tap sink = getPlatform().getTextFile( getOutputPath( "fourth" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "third" ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) ), sink, pipe );
     }

@@ -104,6 +104,7 @@ public class LocalFlow extends Flow<Properties>
     try
       {
       deleteSinksIfReplace();
+      deleteTrapsIfReplace();
       }
     catch( IOException exception )
       {

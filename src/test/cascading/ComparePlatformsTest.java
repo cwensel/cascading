@@ -95,7 +95,6 @@ public class ComparePlatformsTest extends CascadingTestCase
     public CompareTestCase( File localFile, File hadoopFile )
       {
       super( "testFiles" );
-
       this.localFile = localFile;
       this.hadoopFile = hadoopFile;
       }
@@ -105,7 +104,7 @@ public class ComparePlatformsTest extends CascadingTestCase
       LinkedList<String> localLines = getLines( localFile );
       LinkedList<String> hadoopLines = getLines( hadoopFile );
 
-      assertEquals( localLines.size(), hadoopLines.size() );
+      assertEquals( localFile + " != " + hadoopFile, localLines.size(), hadoopLines.size() );
 
       if( localLines.size() == 0 )
         return;
@@ -133,7 +132,6 @@ public class ComparePlatformsTest extends CascadingTestCase
 
       while( iterator.hasNext() )
         iterator.set( iterator.next().replaceFirst( "^\\d+\\s(.*)$", "$1" ) );
-
       }
 
     private boolean hasLineNumbers( List<String> lines )
@@ -174,7 +172,7 @@ public class ComparePlatformsTest extends CascadingTestCase
       if( !localFile.isDirectory() )
         return populate( localFile, lines );
 
-      Collection<File> subFiles = FileUtils.listFiles( localFile, new RegexFileFilter( "^part-[\\d]+" ), null );
+      Collection<File> subFiles = FileUtils.listFiles( localFile, new RegexFileFilter( "^part-.*" ), null );
 
       for( File subFile : subFiles )
         populate( subFile, lines );
