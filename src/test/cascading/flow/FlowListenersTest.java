@@ -73,11 +73,6 @@ public class FlowListenersTest extends TestCase
       }
 
     @Override
-    public void setProperty( String key, String value )
-      {
-      }
-
-    @Override
     public String getProperty( String key )
       {
       return null;

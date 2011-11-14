@@ -442,16 +442,31 @@ public abstract class Flow<Config> implements Runnable
 
   protected abstract Config newConfig( Config defaultConfig );
 
+  /**
+   * Method getConfig returns the internal configuration object.
+   * <p/>
+   * Any changes to this object will not be reflected in child steps. See {@link FlowConnector} for setting
+   * default properties visible to children.
+   *
+   * @return the default configuration of this Flow
+   */
   public abstract Config getConfig();
 
+  /**
+   * Method getConfigCopy returns a copy of the internal configuration object. This object can be safely
+   * modified.
+   *
+   * @return a copy of the default configuration of this Flow
+   */
   public abstract Config getConfigCopy();
 
+  /**
+   * Method getConfiAsProperties converts the internal configuration object into a {@link Map} of
+   * key value pairs.
+   *
+   * @return a Map of key/value pairs
+   */
   public abstract Map<Object, Object> getConfigAsProperties();
-
-  public void setProperty( String key, String value )
-    {
-    setConfigProperty( getConfig(), key, value );
-    }
 
   public abstract String getProperty( String key );
 
