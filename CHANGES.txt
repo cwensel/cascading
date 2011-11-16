@@ -68,7 +68,9 @@ Cascading Change Log
 
   Implemented new pipelining infrastructure to support more complex streaming topologies.
 
-1.2.5 (unreleased)
+1.2.5
+
+  Removed accidental SLF4J dependencies.
 
   Fixed bug where ISE was thrown if c.f.Flow#stop() was called immediately after #start().
 
