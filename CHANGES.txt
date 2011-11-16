@@ -1,6 +1,6 @@
 Cascading Change Log
 
-1.2.5 (unreleased)
+1.2.5
 
   Removed accidental SLF4J dependencies.
 
