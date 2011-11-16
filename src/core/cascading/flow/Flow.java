@@ -94,7 +94,7 @@ import riffle.process.ProcessStop;
  * @see cascading.flow.FlowConnector
  */
 @riffle.process.Process
-public abstract class Flow<Config> implements Runnable
+public abstract class Flow<Config>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
@@ -827,7 +827,16 @@ public abstract class Flow<Config> implements Runnable
 
     internalStart();
 
-    thread = new Thread( this, ( "flow " + Util.toNull( getName() ) ).trim() );
+    String threadName = ( "flow " + Util.toNull( getName() ) ).trim();
+
+    thread = new Thread( new Runnable()
+    {
+    @Override
+    public void run()
+      {
+      Flow.this.run();
+      }
+    }, threadName );
 
     thread.start();
     }
@@ -1119,7 +1128,7 @@ public abstract class Flow<Config> implements Runnable
   public abstract boolean stepsAreLocal();
 
   /** Method run implements the Runnable run method and should not be called by users. */
-  public void run()
+  private void run()
     {
     if( thread == null )
       throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
