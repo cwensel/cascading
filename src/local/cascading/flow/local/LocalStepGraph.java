@@ -52,8 +52,12 @@ public class LocalStepGraph extends StepGraph
 
     addVertex( step );
 
-    step.getSourceMap().putAll( elementGraph.getSourceMap() );
-    step.getSinkMap().putAll( elementGraph.getSinkMap() );
+    for( Map.Entry<String, Tap> entry : elementGraph.getSourceMap().entrySet() )
+      step.addSource( entry.getKey(), entry.getValue() );
+
+    for( Map.Entry<String, Tap> entry : elementGraph.getSinkMap().entrySet() )
+      step.addSink( entry.getKey(), entry.getValue() );
+
     step.getTrapMap().putAll( traps );
 
     Graphs.addGraph( step.getGraph(), elementGraph );

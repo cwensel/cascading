@@ -25,12 +25,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
@@ -91,9 +91,9 @@ public abstract class FlowStep<Config> implements Serializable
   private final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
 
   /** Field sources */
-  protected final Map<String, Tap> sources = new TreeMap<String, Tap>();
+  protected final Map<Tap, Set<String>> sources = new HashMap<Tap, Set<String>>();
   /** Field sink */
-  protected final Map<String, Tap> sinks = new TreeMap<String, Tap>();
+  protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>();
   /** Field tempSink */
   protected Tap tempSink; // used if we need to bypass
   /** Field groups */
@@ -254,34 +254,30 @@ public abstract class FlowStep<Config> implements Serializable
       groups.add( group );
     }
 
-  public Map<String, Tap> getSourceMap()
-    {
-    return sources;
-    }
-
-  public Map<String, Tap> getSinkMap()
-    {
-    return sinks;
-    }
-
   public void addSource( String name, Tap source )
     {
-    sources.put( name, source );
+    if( !sources.containsKey( source ) )
+      sources.put( source, new HashSet<String>() );
+
+    sources.get( source ).add( name );
     }
 
   public void addSink( String name, Tap sink )
     {
-    sinks.put( name, sink );
+    if( !sinks.containsKey( sink ) )
+      sinks.put( sink, new HashSet<String>() );
+
+    sinks.get( sink ).add( name );
     }
 
   public Set<Tap> getSources()
     {
-    return Collections.unmodifiableSet( new HashSet<Tap>( sources.values() ) );
+    return Collections.unmodifiableSet( new HashSet<Tap>( sources.keySet() ) );
     }
 
   public Set<Tap> getSinks()
     {
-    return Collections.unmodifiableSet( new HashSet<Tap>( sinks.values() ) );
+    return Collections.unmodifiableSet( new HashSet<Tap>( sinks.keySet() ) );
     }
 
   public Tap getSink()
@@ -289,33 +285,17 @@ public abstract class FlowStep<Config> implements Serializable
     if( sinks.size() != 1 )
       throw new IllegalStateException( "more than one sink" );
 
-    return sinks.values().iterator().next();
+    return sinks.keySet().iterator().next();
     }
 
   public Set<String> getSourceName( Tap source )
     {
-    Set<String> names = new HashSet<String>();
-
-    for( Map.Entry<String, Tap> entry : sources.entrySet() )
-      {
-      if( entry.getValue().equals( source ) )
-        names.add( entry.getKey() );
-      }
-
-    return names;
+    return Collections.unmodifiableSet( sources.get( source ) );
     }
 
-  public Set<String> getSinkName( Tap source )
+  public Set<String> getSinkName( Tap sink )
     {
-    Set<String> names = new HashSet<String>();
-
-    for( Map.Entry<String, Tap> entry : sinks.entrySet() )
-      {
-      if( entry.getValue().equals( source ) )
-        names.add( entry.getKey() );
-      }
-
-    return names;
+    return Collections.unmodifiableSet( sinks.get( sink ) );
     }
 
   public abstract Set<Tap> getTraps();

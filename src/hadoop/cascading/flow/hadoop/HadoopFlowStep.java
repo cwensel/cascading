@@ -277,7 +277,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     {
     // handles case where same tap is used on multiple branches
     // we do not want to init the same tap multiple times
-    Set<Tap> uniqueSources = new HashSet<Tap>( sources.values() );
+    Set<Tap> uniqueSources = sources.keySet();
 
     JobConf[] fromJobs = new JobConf[ uniqueSources.size() ];
     int i = 0;

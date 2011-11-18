@@ -36,7 +36,7 @@ public class MapReduceFlowStep extends HadoopFlowStep
     {
     super( name, 1 );
     this.jobConf = jobConf;
-    this.sinks.put( "default", sink );
+    addSink( "default", sink );
     }
 
   @Override

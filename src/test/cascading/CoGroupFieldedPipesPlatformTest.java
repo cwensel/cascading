@@ -132,6 +132,61 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testCoGroupSamePipeName() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "renamedpipes" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
+
+    // these pipes will hide the source name, and could cause one to be lost
+    pipeLower = new Pipe( "same", pipeLower );
+    pipeUpper = new Pipe( "same", pipeUpper );
+
+    pipeLower = new Each( pipeLower, new Fields( "line" ), splitter );
+    pipeUpper = new Each( pipeUpper, new Fields( "line" ), splitter );
+
+//    pipeLower = new Each( pipeLower, new Fields( "num", "char" ), new Identity( new Fields( "num", "char" ) ) );
+//    pipeUpper = new Each( pipeUpper, new Fields( "num", "char" ), new Identity( new Fields( "num", "char" ) ) );
+
+    pipeLower = new Pipe( "left", pipeLower );
+    pipeUpper = new Pipe( "right", pipeUpper );
+
+//    pipeLower = new Each( pipeLower, new Debug( true ) );
+//    pipeUpper = new Each( pipeUpper, new Debug( true ) );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+//    splice = new Each( splice, new Debug( true ) );
+    splice = new Pipe( "splice", splice );
+    splice = new Pipe( "tail", splice );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
   public void testCoGroupWithUnknowns() throws Exception
     {
     getPlatform().copyFromLocal( inputFileLower );
