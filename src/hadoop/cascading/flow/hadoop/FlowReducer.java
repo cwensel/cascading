@@ -119,9 +119,12 @@ public class FlowReducer extends MapReduceBase implements Reducer
   @Override
   public void close() throws IOException
     {
-    group.complete( group );
+    if( calledPrepare )
+      {
+      group.complete( group );
 
-    streamGraph.cleanup();
+      streamGraph.cleanup();
+      }
 
     super.close();
     }
