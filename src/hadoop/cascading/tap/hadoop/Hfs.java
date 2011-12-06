@@ -527,7 +527,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     String[] children = new String[ statuses.length ];
 
     for( int i = 0; i < statuses.length; i++ )
-      children[ i ] = statuses[ i ].getPath().getName();
+      children[ i ] = statuses[ i ].getPath().toString();
 
     return children;
     }

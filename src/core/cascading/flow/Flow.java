@@ -350,9 +350,14 @@ public abstract class Flow<Config>
     this.submitPriority = submitPriority;
     }
 
-  public ElementGraph getPipeGraph()
+   ElementGraph getPipeGraph()
     {
     return pipeGraph;
+    }
+
+   StepGraph getStepGraph()
+    {
+    return stepGraph;
     }
 
   protected void setSources( Map<String, Tap> sources )
