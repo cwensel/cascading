@@ -29,12 +29,12 @@ import java.util.Set;
 
 import cascading.flow.planner.FlowStep;
 import cascading.management.ClientState;
-import cascading.stats.StepStats;
+import cascading.stats.FlowStepStats;
 
 /**
  *
  */
-public class LocalStepStats extends StepStats
+public class LocalStepStats extends FlowStepStats
   {
   final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
 

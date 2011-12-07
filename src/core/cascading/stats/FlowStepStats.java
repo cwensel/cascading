@@ -24,12 +24,12 @@ import cascading.flow.planner.FlowStep;
 import cascading.management.ClientState;
 
 /** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class StepStats extends CascadingStats
+public abstract class FlowStepStats extends CascadingStats
   {
   private FlowStep flowStep;
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected StepStats( FlowStep flowStep, ClientState clientState )
+  protected FlowStepStats( FlowStep flowStep, ClientState clientState )
     {
     super( flowStep.getName(), clientState );
     this.flowStep = flowStep;

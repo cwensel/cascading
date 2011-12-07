@@ -36,7 +36,7 @@ import cascading.management.ClientState;
 public class FlowStats extends CascadingStats
   {
   final Flow flow;
-  final List<StepStats> stepStatsList = new ArrayList<StepStats>();
+  final List<FlowStepStats> flowStepStatsList = new ArrayList<FlowStepStats>();
 
   public FlowStats( Flow flow, ClientState clientState )
     {
@@ -71,9 +71,9 @@ public class FlowStats extends CascadingStats
     clientState.recordFlow( flow );
     }
 
-  public void addStepStats( StepStats stepStats )
+  public void addStepStats( FlowStepStats flowStepStats )
     {
-    stepStatsList.add( stepStats );
+    flowStepStatsList.add( flowStepStats );
     }
 
   /**
@@ -81,9 +81,9 @@ public class FlowStats extends CascadingStats
    *
    * @return the stepStats (type List<StepStats>) of this FlowStats object.
    */
-  public List<StepStats> getStepStats()
+  public List<FlowStepStats> getStepStats()
     {
-    return stepStatsList;
+    return flowStepStatsList;
     }
 
   /**
@@ -93,7 +93,7 @@ public class FlowStats extends CascadingStats
    */
   public int getStepsCount()
     {
-    return stepStatsList.size();
+    return flowStepStatsList.size();
     }
 
   @Override
@@ -101,8 +101,8 @@ public class FlowStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( StepStats stepStats : stepStatsList )
-      results.addAll( stepStats.getCounterGroups() );
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      results.addAll( flowStepStats.getCounterGroups() );
 
     return results;
     }
@@ -112,8 +112,8 @@ public class FlowStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( StepStats stepStats : stepStatsList )
-      results.addAll( stepStats.getCounterGroupsMatching( regex ) );
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      results.addAll( flowStepStats.getCounterGroupsMatching( regex ) );
 
     return results;
     }
@@ -123,8 +123,8 @@ public class FlowStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( StepStats stepStats : stepStatsList )
-      results.addAll( stepStats.getCountersFor( group ) );
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      results.addAll( flowStepStats.getCountersFor( group ) );
 
     return results;
     }
@@ -134,8 +134,8 @@ public class FlowStats extends CascadingStats
     {
     long value = 0;
 
-    for( StepStats stepStats : stepStatsList )
-      value += stepStats.getCounterValue( counter );
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      value += flowStepStats.getCounterValue( counter );
 
     return value;
     }
@@ -145,8 +145,8 @@ public class FlowStats extends CascadingStats
     {
     long value = 0;
 
-    for( StepStats stepStats : stepStatsList )
-      value += stepStats.getCounterValue( group, counter );
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      value += flowStepStats.getCounterValue( group, counter );
 
     return value;
     }
@@ -154,8 +154,8 @@ public class FlowStats extends CascadingStats
   @Override
   public void captureDetail()
     {
-    for( StepStats stepStats : stepStatsList )
-      stepStats.captureDetail();
+    for( FlowStepStats flowStepStats : flowStepStatsList )
+      flowStepStats.captureDetail();
     }
 
   @Override

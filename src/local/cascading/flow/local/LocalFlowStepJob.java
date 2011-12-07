@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.ClientState;
-import cascading.stats.StepStats;
+import cascading.stats.FlowStepStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +44,12 @@ public class LocalFlowStepJob extends FlowStepJob
   public LocalFlowStepJob( ClientState clientState, LocalFlowProcess flowProcess, LocalFlowStep flowStep )
     {
     super( clientState, flowStep, 200 );
-    flowProcess.setStepStats( (LocalStepStats) this.stepStats );
+    flowProcess.setStepStats( (LocalStepStats) this.flowStepStats );
     this.stackRunner = new LocalStepRunner( flowProcess, flowStep );
     }
 
   @Override
-  protected StepStats createStepStats( ClientState clientState )
+  protected FlowStepStats createStepStats( ClientState clientState )
     {
     return new LocalStepStats( flowStep, clientState );
     }

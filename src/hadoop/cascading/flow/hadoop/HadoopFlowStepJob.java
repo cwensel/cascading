@@ -25,7 +25,7 @@ import java.io.IOException;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.ClientState;
-import cascading.stats.StepStats;
+import cascading.stats.FlowStepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
@@ -57,7 +57,7 @@ public class HadoopFlowStepJob extends FlowStepJob
     }
 
   @Override
-  protected StepStats createStepStats( ClientState clientState )
+  protected FlowStepStats createStepStats( ClientState clientState )
     {
     return new HadoopStepStats( currentConf, flowStep, clientState )
     {

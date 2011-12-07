@@ -20,46 +20,12 @@
 
 package cascading.flow.hadoop;
 
-import java.util.Iterator;
-
-import cascading.flow.FlowProcess;
-
 /**
- *
+ * $Author: $
+ * $Date: $
+ * $Revision: $
  */
-class IteratorWrapper implements Iterator
+public enum MapReduceCounters
   {
-  private final FlowProcess flowProcess;
-
-  Iterator iterator;
-
-  public IteratorWrapper( FlowProcess flowProcess )
-    {
-    this.flowProcess = flowProcess;
-    }
-
-  public void reset( Iterator iterator )
-    {
-    this.iterator = iterator;
-    }
-
-  @Override
-  public boolean hasNext()
-    {
-    return iterator.hasNext();
-    }
-
-  @Override
-  public Object next()
-    {
-    flowProcess.increment( MapReduceCounters.Reduce_Tuples_Read, 1 );
-
-    return iterator.next();
-    }
-
-  @Override
-  public void remove()
-    {
-    iterator.remove();
-    }
+    Map_Tuples_Read, Map_Tuples_Written, Reduce_Tuples_Read, Reduce_Tuples_Written
   }

@@ -29,7 +29,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.management.ClientState;
 import cascading.stats.FlowStats;
-import cascading.stats.StepStats;
+import cascading.stats.FlowStepStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field flowStep */
   protected final FlowStep flowStep;
   /** Field stepStats */
-  protected StepStats stepStats;
+  protected FlowStepStats flowStepStats;
   /** Field throwable */
   protected Throwable throwable;
 
@@ -66,13 +66,13 @@ public abstract class FlowStepJob implements Callable<Throwable>
     this.flowStep = flowStep;
     this.stepName = flowStep.getName();
     this.pollingInterval = pollingInterval;
-    this.stepStats = createStepStats( clientState );
+    this.flowStepStats = createStepStats( clientState );
 
-    this.stepStats.prepare();
-    this.stepStats.markPending();
+    this.flowStepStats.prepare();
+    this.flowStepStats.markPending();
     }
 
-  protected abstract StepStats createStepStats( ClientState clientState );
+  protected abstract FlowStepStats createStepStats( ClientState clientState );
 
   public void stop()
     {
@@ -83,8 +83,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
     // allow pending -> stopped transition
     // never want a hanging pending state
-    if( !stepStats.isFinished() )
-      stepStats.markStopped();
+    if( !flowStepStats.isFinished() )
+      flowStepStats.markStopped();
 
     try
       {
@@ -96,7 +96,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
       }
     finally
       {
-      stepStats.cleanup();
+      flowStepStats.cleanup();
       }
     }
 
@@ -118,7 +118,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
     {
     try
       {
-      stepStats.markStarted();
+      flowStepStats.markStarted();
 
       blockOnPredecessors();
 
@@ -132,7 +132,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
     finally
       {
       latch.countDown();
-      stepStats.cleanup();
+      flowStepStats.cleanup();
       }
     }
 
@@ -152,8 +152,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
     if( !stop && !internalNonBlockingIsSuccessful() )
       {
-      if( !stepStats.isFinished() )
-        stepStats.markFailed( getThrowable() );
+      if( !flowStepStats.isFinished() )
+        flowStepStats.markFailed( getThrowable() );
 
       dumpDebugInfo();
 
@@ -164,11 +164,11 @@ public abstract class FlowStepJob implements Callable<Throwable>
       }
     else
       {
-      if( internalNonBlockingIsSuccessful() && !stepStats.isFinished() )
-        stepStats.markSuccessful();
+      if( internalNonBlockingIsSuccessful() && !flowStepStats.isFinished() )
+        flowStepStats.markSuccessful();
       }
 
-    stepStats.captureJobStats();
+    flowStepStats.captureJobStats();
     }
 
   protected abstract boolean isRemoteExecution();
@@ -188,7 +188,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
     while( true )
       {
-      if( stepStats.isSubmitted() && isStarted() )
+      if( flowStepStats.isSubmitted() && isStarted() )
         markRunning();
 
       if( stop || internalNonBlockingIsComplete() )
@@ -199,14 +199,14 @@ public abstract class FlowStepJob implements Callable<Throwable>
       if( iterations == count++ )
         {
         count = 0;
-        stepStats.recordChildStats();
+        flowStepStats.recordChildStats();
         }
       }
     }
 
   private void markSubmitted()
     {
-    stepStats.markSubmitted();
+    flowStepStats.markSubmitted();
 
     Flow flow = flowStep.getFlow();
 
@@ -227,7 +227,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   private void markRunning()
     {
-    stepStats.markRunning();
+    flowStepStats.markRunning();
 
     Flow flow = flowStep.getFlow();
 
@@ -325,8 +325,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
    *
    * @return the stepStats (type StepStats) of this FlowStepJob object.
    */
-  public StepStats getStepStats()
+  public FlowStepStats getStepStats()
     {
-    return stepStats;
+    return flowStepStats;
     }
   }

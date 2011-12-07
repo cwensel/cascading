@@ -31,7 +31,7 @@ import java.util.Set;
 import cascading.flow.FlowException;
 import cascading.flow.planner.FlowStep;
 import cascading.management.ClientState;
-import cascading.stats.StepStats;
+import cascading.stats.FlowStepStats;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class HadoopStepStats provides Hadoop specific statistics and methods to underyling Hadoop facilities. */
-public abstract class HadoopStepStats extends StepStats
+public abstract class HadoopStepStats extends FlowStepStats
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
