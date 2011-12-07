@@ -256,7 +256,7 @@ public abstract class FlowProcess<Config>
   public abstract boolean isCounterStatusInitialized();
 
   /**
-   * Method openTapForRead return a {@link cascading.tuple.TupleIterator} for the given Tap instance.
+   * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
    *
    * @param tap of type Tap
    * @return TupleIterator

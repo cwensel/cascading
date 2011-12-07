@@ -25,6 +25,7 @@ import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.flow.stream.GroupGate;
@@ -82,6 +83,7 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     try
       {
       collector.collect( new IndexTuple( pos, groupKey ), new IndexTuple( pos, valuesTuple ) );
+      flowProcess.increment( StepCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {

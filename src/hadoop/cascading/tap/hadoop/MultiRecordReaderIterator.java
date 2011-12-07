@@ -26,7 +26,6 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.CloseableIterator;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleIterator;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class TapIterator is an implementation of {@link TupleIterator}. It is returned by {@link cascading.tap.Tap} instances when
+ * Class TapIterator is an implementation of {@link cascading.tuple.CloseableIterator}. It is returned by {@link cascading.tap.Tap} instances when
  * opening the taps resource for reading.
  */
 public class MultiRecordReaderIterator implements CloseableIterator<RecordReader>

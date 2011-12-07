@@ -18,13 +18,49 @@
  * limitations under the License.
  */
 
-package cascading.tuple;
+package cascading.flow.hadoop;
 
-import java.io.Closeable;
 import java.util.Iterator;
 
-/** Interface TupleIterator is used to allow for iteration across {@link Tuple} instances. */
-public interface TupleIterator extends Iterator<Tuple>, Closeable
+import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
+
+/**
+ *
+ */
+class IteratorWrapper implements Iterator
   {
-  void close();
+  private final FlowProcess flowProcess;
+
+  Iterator iterator;
+
+  public IteratorWrapper( FlowProcess flowProcess )
+    {
+    this.flowProcess = flowProcess;
+    }
+
+  public void reset( Iterator iterator )
+    {
+    this.iterator = iterator;
+    }
+
+  @Override
+  public boolean hasNext()
+    {
+    return iterator.hasNext();
+    }
+
+  @Override
+  public Object next()
+    {
+    flowProcess.increment( StepCounters.Tuples_Read, 1 );
+
+    return iterator.next();
+    }
+
+  @Override
+  public void remove()
+    {
+    iterator.remove();
+    }
   }

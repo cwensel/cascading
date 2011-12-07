@@ -52,7 +52,6 @@ import cascading.stats.FlowStats;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleIterator;
 import cascading.util.PropertyUtil;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -350,12 +349,12 @@ public abstract class Flow<Config>
     this.submitPriority = submitPriority;
     }
 
-   ElementGraph getPipeGraph()
+  ElementGraph getPipeGraph()
     {
     return pipeGraph;
     }
 
-   StepGraph getStepGraph()
+  StepGraph getStepGraph()
     {
     return stepGraph;
     }
@@ -1080,7 +1079,7 @@ public abstract class Flow<Config>
     }
 
   /**
-   * Method openTapForRead return a {@link TupleIterator} for the given Tap instance.
+   * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
    *
    * @param tap of type Tap
    * @return TupleIterator

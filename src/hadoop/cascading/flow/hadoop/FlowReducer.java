@@ -47,6 +47,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
   private HadoopReduceStreamGraph streamGraph;
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
+  private IteratorWrapper countingIterator;
 
   private boolean calledPrepare = false;
   private HadoopGroupGate group;
@@ -64,6 +65,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, false );
+
+      countingIterator = new IteratorWrapper( currentProcess );
 
       HadoopFlowStep step = (HadoopFlowStep) HadoopUtil.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
@@ -93,6 +96,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     {
     currentProcess.setReporter( reporter );
     currentProcess.setOutputCollector( output );
+    countingIterator.reset( values ); // allows us to count read tuples
 
     if( !calledPrepare )
       {
@@ -105,7 +109,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     try
       {
-      group.run( (Tuple) key, values );
+      group.run( (Tuple) key, countingIterator );
       }
     catch( Throwable throwable )
       {
