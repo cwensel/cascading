@@ -290,7 +290,14 @@ public abstract class HadoopStepStats extends FlowStepStats
       if( group == null )
         return 0;
 
-      return counterGroup.getCounter( counter );
+      // geCounter actually searches the display name, wtf
+      // in theory this is lazily created if does not exist, but don't rely on it
+      Counters.Counter counterValue = counterGroup.getCounterForName( counter );
+
+      if( counter == null )
+        return 0;
+
+      return counterValue.getValue();
       }
     catch( IOException exception )
       {
