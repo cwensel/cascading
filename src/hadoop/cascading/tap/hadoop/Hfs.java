@@ -47,6 +47,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.RecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -512,6 +513,8 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   /**
    * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
+   * <p/>
+   * This method will skip Hadoop log directories ({@code _log}).
    *
    * @param conf of JobConf
    * @return String[]
@@ -522,7 +525,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ), new OutputLogFilter() );
 
     String[] children = new String[ statuses.length ];
 
