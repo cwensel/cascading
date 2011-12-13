@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added "cascading.default.comparator" property to allow for a default j.u.Comparator class to be set and used
+  if no Comparator is returned by the c.t.Comparison interface or set on a c.t.Fields instance.
+  See c.t.h.TupleSerialization for the static accessor.
+
   Changed planner to allow traps to be re-used across any branches. Prior planner would throw an error.
 
   Changed c.f.Flow to delete traps during the same conditions a sink will be deleted before execution.

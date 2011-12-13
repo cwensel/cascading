@@ -38,6 +38,7 @@ import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +59,9 @@ public class TupleSerialization extends Configured implements Serialization
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TupleSerialization.class );
 
+
+  /** Field defaultComparator * */
+  private Comparator defaultComparator;
   /** Field classCache */
   private final Map<String, Class> classCache = new HashMap<String, Class>();
   /** Field serializationFactory */
@@ -134,6 +138,44 @@ public class TupleSerialization extends Configured implements Serialization
     return jobConf.get( "io.serializations", "" );
     }
 
+  /**
+   * Sets a default {@link Comparator} to be used if no Comparator can be found for the class via the {@link Comparison}
+   * interface.
+   * </p>
+   * If the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
+   * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
+   * will be called.
+   *
+   * @param properties
+   * @param className
+   */
+  public static void setDefaultComparator( Map<Object, Object> properties, String className )
+    {
+    if( className != null )
+      properties.put( "cascading.comparator.default", className );
+    }
+
+  static Comparator getDefaultComparator( Configuration jobConf )
+    {
+    String typeName = jobConf.get( "cascading.comparator.default" );
+
+    if( typeName == null || typeName.isEmpty() )
+      return null;
+
+    LOG.info( "using default comparator: {}", typeName );
+
+    try
+      {
+      Class<Comparator> type = (Class<Comparator>) TupleSerialization.class.getClassLoader().loadClass( typeName.toString() );
+
+      return ReflectionUtils.newInstance( type, jobConf );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + typeName.toString(), exception );
+      }
+    }
+
   /** Constructor TupleSerialization creates a new TupleSerialization instance. */
   public TupleSerialization()
     {
@@ -147,6 +189,15 @@ public class TupleSerialization extends Configured implements Serialization
   public TupleSerialization( Configuration conf )
     {
     super( conf );
+    }
+
+  @Override
+  public void setConf( Configuration conf )
+    {
+    super.setConf( conf );
+
+    if( conf != null )
+      defaultComparator = getDefaultComparator( conf );
     }
 
   @Override
@@ -278,14 +329,24 @@ public class TupleSerialization extends Configured implements Serialization
     return classesTokensMap.get( className );
     }
 
+  public Comparator getDefaultComparator()
+    {
+    return defaultComparator;
+    }
+
   public Comparator getComparator( Class type )
     {
     Serialization serialization = getSerialization( type );
 
-    if( serialization instanceof Comparison )
-      return ( (Comparison) serialization ).getComparator( type );
+    Comparator comparator = null;
 
-    return null;
+    if( serialization instanceof Comparison )
+      comparator = ( (Comparison) serialization ).getComparator( type );
+
+    if( comparator != null )
+      return comparator;
+
+    return defaultComparator;
     }
 
   Serialization getSerialization( String className )

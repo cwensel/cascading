@@ -81,6 +81,10 @@ public class DelegatingTupleElementComparator implements StreamComparator<TupleI
 
       Comparator foundComparator = lhsStream.getComparatorFor( lhsStream.readToken() );
 
+      // grab the configured default comparator, its ok if its null, just wasn't configured externally
+      if( foundComparator == null )
+        foundComparator = tupleSerialization.getDefaultComparator();
+
       if( foundComparator instanceof StreamComparator )
         return new TupleElementStreamComparator( (StreamComparator) foundComparator );
       else
