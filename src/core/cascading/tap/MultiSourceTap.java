@@ -30,6 +30,8 @@ import cascading.scheme.Scheme;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
 
+import static java.util.Arrays.copyOf;
+
 /**
  * Class MultiSourceTap is used to tie multiple {@link cascading.tap.Tap} instances into a single resource. Effectively this will allow
  * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
@@ -86,7 +88,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
   @ConstructorProperties({"taps"})
   public MultiSourceTap( Tap... taps )
     {
-    this.taps = Arrays.copyOf( taps, taps.length );
+    this.taps = copyOf( taps, taps.length );
 
     verifyTaps();
     }
@@ -118,7 +120,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
   @Override
   public Tap[] getChildTaps()
     {
-    return Arrays.copyOf( getTaps(), getTaps().length );
+    return copyOf( getTaps(), getTaps().length );
     }
 
 
@@ -220,6 +222,18 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
 
   public String toString()
     {
-    return "MultiSourceTap[" + ( getTaps() == null ? "none" : Arrays.asList( Arrays.copyOf( getTaps(), 10 ) ) ) + ']';
+    Tap[] printableTaps = getTaps();
+
+    if( printableTaps == null )
+      return "MultiSourceTap[none]";
+
+    String printedTaps;
+
+    if( printableTaps.length > 10 )
+      printedTaps = Arrays.toString( copyOf( printableTaps, 10 ) ) + ",...";
+    else
+      printedTaps = Arrays.toString( printableTaps );
+
+    return "MultiSourceTap[" + printableTaps.length + ':' + printedTaps + ']';
     }
   }
