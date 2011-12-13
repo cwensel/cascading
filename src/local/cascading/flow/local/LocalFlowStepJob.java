@@ -43,7 +43,7 @@ public class LocalFlowStepJob extends FlowStepJob
 
   public LocalFlowStepJob( ClientState clientState, LocalFlowProcess flowProcess, LocalFlowStep flowStep )
     {
-    super( clientState, flowStep, 1000 );
+    super( clientState, flowStep, 200 );
     flowProcess.setStepStats( (LocalStepStats) this.stepStats );
     this.stackRunner = new LocalStepRunner( flowProcess, flowStep );
     }
