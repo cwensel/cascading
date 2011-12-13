@@ -456,22 +456,6 @@ public class TupleEntry
     }
 
   /**
-   * Method selectInteger selects the first field Tuple value in the specified selector.
-   * <br/>
-   * All other fields in the selector are ignored.
-   *
-   * @param selector
-   * @return an int value
-   */
-  public int selectInteger( Fields selector )
-    {
-    if( selector.isDefined() )
-      throw new TupleException( "given selector must define a field name or position to select with" );
-
-    return tuple.getInteger( fields.getPos( selector.get( 0 ) ) );
-    }
-
-  /**
    * Method setTuple sets the values specified by the selector to the values given by the given tuple.
    *
    * @param selector of type Fields
