@@ -23,6 +23,7 @@ package cascading.tap;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
@@ -118,11 +119,21 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
     }
 
   @Override
-  public Tap[] getChildTaps()
+  public Iterator<Tap> getChildTaps()
     {
-    return copyOf( getTaps(), getTaps().length );
+    Tap[] taps = getTaps();
+
+    if( taps == null )
+      return Collections.EMPTY_LIST.iterator();
+
+    return Arrays.asList( taps ).iterator();
     }
 
+  @Override
+  public long getNumChildTaps()
+    {
+    return getTaps().length;
+    }
 
   /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
   public String getIdentifier()

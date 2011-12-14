@@ -23,6 +23,7 @@ package cascading.cascade;
 import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -214,9 +215,11 @@ public class CascadeConnector
         {
         iterator.remove();
 
-        for( Tap childTap : ( (CompositeTap) tap ).getChildTaps() )
+        Iterator<Tap> childTaps = ( (CompositeTap) tap ).getChildTaps();
+
+        while( childTaps.hasNext() )
           {
-          iterator.add( childTap );
+          iterator.add( childTaps.next() );
           iterator.previous(); // force cursor backward
           }
         }

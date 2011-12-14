@@ -309,7 +309,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     MultiSourceTap source = new MultiSourceTap( source1, source2 );
 
-    assertEquals( 2, source.getChildTaps().length );
+    assertEquals( 2, source.getNumChildTaps() );
 
     // using null pos so all fields are written
     Tap sink = new Hfs( new TextLine(), getOutputPath( "globmultisource" ), SinkMode.REPLACE );

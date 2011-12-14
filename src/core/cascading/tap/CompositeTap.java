@@ -20,6 +20,8 @@
 
 package cascading.tap;
 
+import java.util.Iterator;
+
 /**
  * Interface CompositeTap marks {@link Tap} classes as having child Tap instances.
  * <p/>
@@ -27,5 +29,7 @@ package cascading.tap;
  */
 public interface CompositeTap
   {
-  Tap[] getChildTaps();
+  Iterator<Tap> getChildTaps();
+
+  long getNumChildTaps();
   }

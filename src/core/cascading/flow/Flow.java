@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +50,7 @@ import cascading.management.CascadingServices;
 import cascading.management.ClientState;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -685,28 +687,49 @@ public abstract class Flow<Config>
   public boolean areSourcesNewer( long sinkModified ) throws IOException
     {
     Config confCopy = getConfigCopy();
-    long sourceMod = 0;
+    Iterator<Tap> values = sources.values().iterator();
+
+    long sourceModified = 0;
 
     try
       {
-      for( Tap source : sources.values() )
-        {
-        if( !source.resourceExists( confCopy ) )
-          throw new FlowException( "source does not exist: " + source );
+      sourceModified = getSourceModified( confCopy, values, sinkModified );
 
-        sourceMod = source.getModifiedTime( confCopy );
-
-        if( sinkModified < sourceMod )
-          return true;
-        }
+      if( sinkModified < sourceModified )
+        return true;
 
       return false;
       }
     finally
       {
       if( LOG.isInfoEnabled() )
-        logInfo( "source modification date at: " + new Date( sourceMod ) ); // not oldest, we didnt check them all
+        logInfo( "source modification date at: " + new Date( sourceModified ) ); // not oldest, we didnt check them all
       }
+    }
+
+  private long getSourceModified( Config confCopy, Iterator<Tap> values, long sinkModified ) throws IOException
+    {
+    long sourceModified = 0;
+
+    while( values.hasNext() )
+      {
+      Tap source = values.next();
+
+      if( source instanceof MultiSourceTap )
+        return getSourceModified( confCopy, ( (MultiSourceTap) source ).getChildTaps(), sinkModified );
+
+      sourceModified = source.getModifiedTime( confCopy );
+
+      // source modified returns zero if does not exist
+      // this should minimize number of times we touch any file meta-data server
+      if( sourceModified == 0 && !source.resourceExists( confCopy ) )
+        throw new FlowException( "source does not exist: " + source );
+
+      if( sinkModified < sourceModified )
+        return sourceModified;
+      }
+
+    return sourceModified;
     }
 
   /**

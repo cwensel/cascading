@@ -24,6 +24,7 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -127,9 +128,15 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
-  public Tap[] getChildTaps()
+  public Iterator<Tap> getChildTaps()
     {
-    return Arrays.copyOf( taps, taps.length );
+    return Arrays.asList( getTaps() ).iterator();
+    }
+
+  @Override
+  public long getNumChildTaps()
+    {
+    return getTaps().length;
     }
 
   @Override
