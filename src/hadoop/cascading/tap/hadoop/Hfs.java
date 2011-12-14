@@ -60,8 +60,7 @@ import org.slf4j.LoggerFactory;
  * the Local file system, respectively.
  * <p/>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
- * <code>hdfs://...</code> will denote Dfs, <code>file://...</code> will denote Lfs, and
- * <code>s3://aws_id:aws_secret@bucket/...</code> will denote S3fs.
+ * <code>hdfs://...</code> will denote Dfs, and <code>file://...</code> will denote Lfs.
  * <p/>
  * Call {@link #setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
