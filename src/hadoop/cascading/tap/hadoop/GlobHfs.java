@@ -134,14 +134,14 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
 
     for( int i = 0; i < statusList.length; i++ )
       {
-      // remove empty files. turns out a directory returns a length not zero
+      // remove empty files. some hadoop versions return non-zero for dirs
       // so this jives with the expectations set in the above javadoc
-      if( statusList[ i ].getLen() != 0 )
+      if( statusList[ i ].isDir() || statusList[ i ].getLen() != 0 )
         notEmpty.add( new Hfs( getScheme(), statusList[ i ].getPath().toString() ) );
       }
 
     if( notEmpty.isEmpty() )
-      throw new TapException( "all paths matching path pattern are zero length: " + pathPattern );
+      throw new TapException( "all paths matching path pattern are zero length and not directories: " + pathPattern );
 
     return notEmpty.toArray( new Tap[ notEmpty.size() ] );
     }
