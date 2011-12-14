@@ -124,6 +124,8 @@ public class Cascade implements Runnable
   /**
    * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
    * <p/>
+   * A value of one (1) will run one Flow at a time. A value of zero (0), the default, disables the restriction.
+   * <p/>
    * By default a Cascade will attempt to run all give Flow instances at the same time. But there are occasions
    * where limiting the number for flows helps manages resources.
    *
