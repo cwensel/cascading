@@ -22,19 +22,13 @@ package cascading.tuple.hadoop;
 
 import cascading.tuple.Tuple;
 import cascading.tuple.TuplePair;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 
 /** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
-public class GroupingPartitioner implements Partitioner<TuplePair, Tuple>
+public class GroupingPartitioner extends HasherPartitioner implements Partitioner<TuplePair, Tuple>
   {
   public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
     {
-    return ( key.getLhs().hashCode() & Integer.MAX_VALUE ) % numReduceTasks;
-    }
-
-  public void configure( JobConf jobConf )
-    {
-
+    return ( hash( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
     }
   }

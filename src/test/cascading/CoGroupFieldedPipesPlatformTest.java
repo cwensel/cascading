@@ -54,6 +54,7 @@ import cascading.test.LocalPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.hadoop.TupleSerialization;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -119,7 +120,12 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+    Map<Object, Object> properties = getProperties();
+
+    // make sure hasher is getting called, but does nothing special
+    TupleSerialization.setDefaultComparator( properties, TestStringComparator.class.getCanonicalName() );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();
 

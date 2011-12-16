@@ -18,17 +18,22 @@
  * limitations under the License.
  */
 
-package cascading.tuple.hadoop;
+package cascading.tuple;
 
-import cascading.tuple.IndexTuple;
-import cascading.tuple.Tuple;
-import org.apache.hadoop.mapred.Partitioner;
-
-/** Class GroupingPartitioner is an implementation of {@link org.apache.hadoop.mapred.Partitioner}. */
-public class CoGroupingPartitioner extends HasherPartitioner implements Partitioner<IndexTuple, Tuple>
+/**
+ * The Hasher allows a {@link java.util.Comparator} implementation to also be delegated to during hashCode generation
+ * during grouping partitioning.
+ * <p/>
+ * If a Comparator is used to compare two types during grouping, its likely the {@code hashCode} value between
+ * the two objects will not be consistent. This allows to objects being equal to hash to the same bucket (reducer)
+ * during partitioning.
+ */
+public interface Hasher<V>
   {
-  public int getPartition( IndexTuple key, Tuple value, int numReduceTasks )
-    {
-    return ( hash( key.getTuple() ) & Integer.MAX_VALUE ) % numReduceTasks;
-    }
+  /**
+   * Return the hashCode of the given value.
+   * @param value will never be null
+   * @return int hashCode of given value
+   */
+  int hashCode( V value );
   }

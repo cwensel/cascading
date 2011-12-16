@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import cascading.tuple.Hasher;
 import cascading.tuple.StreamComparator;
 import cascading.tuple.hadoop.BufferedInputStream;
 import cascading.tuple.hadoop.HadoopTupleInputStream;
@@ -32,7 +33,7 @@ import cascading.tuple.hadoop.TupleSerialization;
 /**
  *
  */
-public class TestStringComparator implements StreamComparator<BufferedInputStream>, Comparator<String>, Serializable
+public class TestStringComparator implements Hasher<String>, StreamComparator<BufferedInputStream>, Comparator<String>, Serializable
   {
   boolean reverse = true;
 
@@ -68,5 +69,11 @@ public class TestStringComparator implements StreamComparator<BufferedInputStrea
       {
       throw new CascadingException( exception );
       }
+    }
+
+  @Override
+  public int hashCode( String value )
+    {
+    return value.hashCode();
     }
   }

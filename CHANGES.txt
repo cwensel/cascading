@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.t.Hasher to allow any field level Comparators to have hashCode generation delegated to them for their
+  respective c.t.Tuple element/field value.
+
   Added c.f.FlowStepStrategy interface to allow customization of c.f.p.FlowStep configuration information.
 
   Changed c.f.Flow to lazily test child source taps for modified time to reduce file meta-data queries.

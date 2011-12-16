@@ -65,19 +65,24 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
   Comparator[] deserializeComparatorsFor( String name )
     {
+    Configuration conf = getConf();
+
+    if( conf == null )
+      throw new IllegalStateException( "no conf set" );
+
+    return getFieldComparatorsFrom( conf, name );
+    }
+
+  static Comparator[] getFieldComparatorsFrom( Configuration conf, String name )
+    {
+    String value = conf.get( name );
+
+    if( value == null )
+      return new Comparator[ conf.getInt( name + ".size", 1 ) ];
+
     try
       {
-      if( getConf() == null )
-        throw new IllegalStateException( "no conf set" );
-
-      String value = getConf().get( name );
-
-      if( value == null )
-        return new Comparator[ getConf().getInt( name + ".size", 1 ) ];
-
-      Fields fields = (Fields) HadoopUtil.deserializeBase64( value );
-
-      return fields.getComparators();
+      return ( (Fields) HadoopUtil.deserializeBase64( value ) ).getComparators();
       }
     catch( IOException exception )
       {
