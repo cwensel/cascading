@@ -25,16 +25,23 @@ import java.io.IOException;
 import cascading.tuple.CloseableIterator;
 
 /**
+ * SingleValueIterator is a utility class used for quickly presenting a single value to a consumer
+ * expecting both a {@link java.io.Closeable} and an {@link java.util.Iterator} interface. After returning the Value
+ * value via {@link #next}, {@link #hasNext()} will return {@code false}.
+ * <p/>
+ * This class is especially useful if you do not wish to create a {@link java.util.Collection} to hold a single value
+ * in which to create an Iterator.
  *
+ * @param <Value>
  */
-public abstract class SingleValueIterator<Input> implements CloseableIterator<Input>
+public abstract class SingleValueIterator<Value> implements CloseableIterator<Value>
   {
   private boolean hasValue = true;
-  private final Input input;
+  private final Value value;
 
-  public SingleValueIterator( Input input )
+  public SingleValueIterator( Value value )
     {
-    this.input = input;
+    this.value = value;
     }
 
   @Override
@@ -44,14 +51,14 @@ public abstract class SingleValueIterator<Input> implements CloseableIterator<In
     }
 
   @Override
-  public Input next()
+  public Value next()
     {
     if( !hasValue )
       throw new IllegalStateException( "no value available" );
 
     try
       {
-      return input;
+      return value;
       }
     finally
       {
@@ -65,9 +72,9 @@ public abstract class SingleValueIterator<Input> implements CloseableIterator<In
     throw new UnsupportedOperationException( "unimplimented" );
     }
 
-  protected Input getCloseableInput()
+  protected Value getCloseableInput()
     {
-    return input;
+    return value;
     }
 
   @Override

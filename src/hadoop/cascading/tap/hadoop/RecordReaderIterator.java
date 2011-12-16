@@ -26,13 +26,17 @@ import cascading.util.SingleValueIterator;
 import org.apache.hadoop.mapred.RecordReader;
 
 /**
- *
+ * RecordReaderIterator is a utility class for handing off a single {@link RecordReader} instance
+ * via the {@link java.util.Iterator}.
+ * <p/>
+ * This class is frequently used with the {@link cascading.tuple.TupleEntrySchemeIterator} where there is only
+ * one RecordReader to iterate values over.
  */
-class RecordReaderIterator extends SingleValueIterator<RecordReader>
+public class RecordReaderIterator extends SingleValueIterator<RecordReader>
   {
-  public RecordReaderIterator( RecordReader input )
+  public RecordReaderIterator( RecordReader reader )
     {
-    super( input );
+    super( reader );
     }
 
   @Override
