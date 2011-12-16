@@ -83,7 +83,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Map<Object, Object> props = getProperties();
     Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -108,7 +108,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Map<Object, Object> props = getProperties();
     Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -133,7 +133,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Map<Object, Object> props = getProperties();
     Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 

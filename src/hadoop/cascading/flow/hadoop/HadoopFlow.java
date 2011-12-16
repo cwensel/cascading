@@ -252,7 +252,7 @@ public class HadoopFlow extends Flow<JobConf>
     if( stop ) // unstable to call fs operations during shutdown
       return;
 
-    for( FlowStep step : getSteps() )
+    for( FlowStep step : getFlowSteps() )
       step.clean( getConfig() );
     }
 

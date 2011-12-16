@@ -1084,7 +1084,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Flow flow = getPlatform().getFlowConnector( properties ).connect( "cogroupopt", sources, sink, splice2 );
 
     if( getPlatform() instanceof HadoopPlatform )
-      assertEquals( "wrong number of steps", 2, flow.getSteps().size() );
+      assertEquals( "wrong number of steps", 2, flow.getFlowSteps().size() );
 
     flow.complete();
 

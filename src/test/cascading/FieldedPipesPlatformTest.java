@@ -713,7 +713,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     Flow flow = getPlatform().getFlowConnector().connect( source, sinks, pipe );
 
     if( getPlatform() instanceof HadoopPlatform )
-      assertEquals( "wrong number of steps", 3, flow.getSteps().size() );
+      assertEquals( "wrong number of steps", 3, flow.getFlowSteps().size() );
 
     flow.complete();
 

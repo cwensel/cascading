@@ -60,8 +60,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.TempHfs;
-import cascading.test.HadoopPlatform;
-import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -89,7 +87,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( source, sink, pipe );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -127,7 +125,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -159,7 +157,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 0 ) ); // in:_all out:_all
     pipe = new Every( pipe, new Fields( 0 ), new Count(), new Fields( 0, 1 ) ); // in:_all out:_all,count
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -192,7 +190,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( splice.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -230,7 +228,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( cogroup.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, cogroup ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, cogroup ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -265,7 +263,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( splice.getName(), new Hfs( new TextLine(), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -329,7 +327,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    List<FlowStep> steps = new HadoopFlowConnector().connect( sources, sinks, left, right ).getSteps();
+    List<FlowStep> steps = new HadoopFlowConnector().connect( sources, sinks, left, right ).getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
@@ -396,7 +394,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
@@ -437,7 +435,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
 
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 4, steps.size() );
 
@@ -481,7 +479,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
@@ -538,7 +536,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
@@ -582,7 +580,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -612,7 +610,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -636,7 +634,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -762,7 +760,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -786,7 +784,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( source, sink, merge );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
@@ -816,7 +814,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sink, splice2 );
 
-    assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 2, flow.getFlowSteps().size() );
     }
 
   @Test
@@ -849,7 +847,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
-    assertEquals( "not equal: steps.size()", 2, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 2, flow.getFlowSteps().size() );
     }
 
   @Test
@@ -898,7 +896,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getFlowSteps().size() );
     }
 
   @Test
@@ -999,7 +997,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getFlowSteps().size() );
     }
 
   /**
@@ -1049,7 +1047,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    assertEquals( "not equal: steps.size()", 5, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 5, flow.getFlowSteps().size() );
     }
 
   /**
@@ -1116,7 +1114,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    assertEquals( "not equal: steps.size()", 4, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 4, flow.getFlowSteps().size() );
     }
 
   /**
@@ -1159,7 +1157,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
     }
@@ -1234,7 +1232,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
       throw exception;
       }
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
@@ -1310,7 +1308,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 3, flow.getFlowSteps().size() );
     }
 
   /**
@@ -1340,7 +1338,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
 
-    assertEquals( "not equal: steps.size()", 3, flow.getSteps().size() );
+    assertEquals( "not equal: steps.size()", 3, flow.getFlowSteps().size() );
     }
 
   @Test
@@ -1499,7 +1497,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getSteps();
+    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -1690,7 +1688,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( "splitmiddle", sources, sinks, left, right );
 
-    List<FlowStep> steps = flow.getSteps();
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", testTempReplaced ? 2 : 3, steps.size() );
 
@@ -1783,6 +1781,6 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     HadoopFlow flow = (HadoopFlow) new HadoopFlowConnector( new Properties( defaultProperties ) ).connect( source, sink, pipe );
 
     assertEquals( "test flow", "test.value", flow.getProperty( "test.key" ) );
-    assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getSteps().get( 0 ) ).getInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
+    assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getFlowSteps().get( 0 ) ).getInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
     }
   }

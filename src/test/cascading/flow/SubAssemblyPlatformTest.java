@@ -83,7 +83,7 @@ public class SubAssemblyPlatformTest extends PlatformTestCase
     Tap source = getPlatform().getTextFile( "foo" );
     Tap sink = getPlatform().getTextFile( "foo/split1", SinkMode.REPLACE );
 
-    List<FlowStep> steps = getPlatform().getFlowConnector().connect( source, sink, pipe ).getSteps();
+    List<FlowStep> steps = getPlatform().getFlowConnector().connect( source, sink, pipe ).getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
@@ -125,7 +125,7 @@ public class SubAssemblyPlatformTest extends PlatformTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    List<FlowStep> steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe1, pipe2 ).getSteps();
+    List<FlowStep> steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe1, pipe2 ).getFlowSteps();
 
     if( getPlatform() instanceof HadoopPlatform )
       assertEquals( "not equal: steps.size()", 2, steps.size() );
@@ -200,7 +200,7 @@ public class SubAssemblyPlatformTest extends PlatformTestCase
       {
       Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
-      List<FlowStep> steps = flow.getSteps();
+      List<FlowStep> steps = flow.getFlowSteps();
 
       if( getPlatform() instanceof HadoopPlatform )
         assertEquals( "wrong size", 2, steps.size() );

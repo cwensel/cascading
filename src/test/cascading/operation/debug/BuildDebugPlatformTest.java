@@ -102,7 +102,7 @@ public class BuildDebugPlatformTest extends PlatformTestCase
 
   private int getDebugCount( Flow flow )
     {
-    FlowStep step = (FlowStep) flow.getSteps().get( 0 );
+    FlowStep step = (FlowStep) flow.getFlowSteps().get( 0 );
 
     Collection<Operation> operations = step.getAllOperations();
     int count = 0;

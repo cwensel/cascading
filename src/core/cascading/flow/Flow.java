@@ -773,11 +773,11 @@ public abstract class Flow<Config>
     }
 
   /**
-   * Method getSteps returns the steps of this Flow object. They will be in topological order.
+   * Method getFlowSteps returns the flowSteps of this Flow object. They will be in topological order.
    *
    * @return the steps (type List<FlowStep>) of this Flow object.
    */
-  public List<FlowStep> getSteps()
+  public List<FlowStep> getFlowSteps()
     {
     if( steps != null )
       return steps;
@@ -1373,7 +1373,7 @@ public abstract class Flow<Config>
     if( getName() != null )
       buffer.append( getName() ).append( ": " );
 
-    for( FlowStep step : getSteps() )
+    for( FlowStep step : getFlowSteps() )
       buffer.append( step );
 
     return buffer.toString();
