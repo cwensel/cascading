@@ -20,16 +20,22 @@
 
 package cascading.flow;
 
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.StepGraph;
 
-/**
- * Flows is a utility helper class.
- */
+/** Flows is a utility helper class. */
 public class Flows
   {
   private Flows()
     {
+    }
+
+  public static Map<String, Callable<Throwable>> getJobsMap( Flow flow )
+    {
+    return flow.getJobsMap();
     }
 
   public static ElementGraph getPipeGraphFrom( Flow flow )

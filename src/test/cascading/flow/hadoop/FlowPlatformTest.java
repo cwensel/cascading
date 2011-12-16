@@ -32,6 +32,7 @@ import cascading.PlatformTestCase;
 import cascading.flow.FailingFlowListener;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
+import cascading.flow.Flows;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.planner.FlowStep;
 import cascading.operation.BaseOperation;
@@ -191,7 +192,7 @@ public class FlowPlatformTest extends PlatformTestCase
       System.out.println( "testing if running" );
       Thread.sleep( 100 );
 
-      Map<String, Callable<Throwable>> map = ( (Flow) flow ).getJobsMap();
+      Map<String, Callable<Throwable>> map = Flows.getJobsMap( (Flow) flow );
 
       if( map == null || map.values().size() == 0 )
         continue;
@@ -382,7 +383,7 @@ public class FlowPlatformTest extends PlatformTestCase
         System.out.println( "testing if running" );
         Thread.sleep( 1000 );
 
-        Map<String, Callable<Throwable>> map = flow.getJobsMap();
+        Map<String, Callable<Throwable>> map = Flows.getJobsMap( flow );
 
         if( map == null || map.values().size() == 0 )
           continue;

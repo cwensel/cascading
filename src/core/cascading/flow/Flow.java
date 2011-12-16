@@ -1242,7 +1242,7 @@ public abstract class Flow<Config>
       }
     }
 
-  public synchronized Map<String, Callable<Throwable>> getJobsMap()
+  synchronized Map<String, Callable<Throwable>> getJobsMap()
     {
     return jobsMap;
     }
