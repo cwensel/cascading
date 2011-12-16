@@ -103,14 +103,15 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     {
     // ignore the output. will catch the failure downstream if any.
     // not ignoring the output causes race conditions with other systems writing to the same directory.
-    File parentFile = new File( path ).getParentFile();
+    File parentFile = new File( path ).getAbsoluteFile().getParentFile();
 
-    if( parentFile.exists() && parentFile.isFile() )
+    if( parentFile != null && parentFile.exists() && parentFile.isFile() )
       throw new TapException( "cannot create parent directory, it already exists as a file: " + parentFile.getAbsolutePath() );
 
     // don't test for success, just fighting a race condition otherwise
     // will get caught downstream
-    parentFile.mkdirs();
+    if( parentFile != null )
+      parentFile.mkdirs();
 
     if( output == null )
       output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
