@@ -21,12 +21,14 @@
 package cascading.flow.planner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
+import cascading.flow.FlowStepStrategy;
 import cascading.management.ClientState;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
@@ -122,6 +124,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
       blockOnPredecessors();
 
+      applyFlowStepConfStrategy();
+
       blockOnJob();
       }
     catch( Throwable throwable )
@@ -134,6 +138,21 @@ public abstract class FlowStepJob implements Callable<Throwable>
       latch.countDown();
       flowStepStats.cleanup();
       }
+    }
+
+  private void applyFlowStepConfStrategy()
+    {
+    FlowStepStrategy flowStepStrategy = flowStep.getFlow().getFlowStepStrategy();
+
+    if( flowStepStrategy == null )
+      return;
+
+    List<FlowStep> predecessorSteps = new ArrayList<FlowStep>();
+
+    for( FlowStepJob predecessor : predecessors )
+      predecessorSteps.add( predecessor.flowStep );
+
+    flowStepStrategy.apply( flowStep.getFlow(), predecessorSteps, flowStep );
     }
 
   protected void blockOnJob() throws IOException

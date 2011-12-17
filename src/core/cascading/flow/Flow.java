@@ -136,6 +136,7 @@ public abstract class Flow<Config>
 
   private transient CascadingServices cascadingServices;
 
+  private FlowStepStrategy flowStepStrategy = null;
   /** Field steps */
   private transient List<FlowStep> steps;
   /** Field jobsMap */
@@ -770,6 +771,30 @@ public abstract class Flow<Config>
       }
 
     return sinkModified;
+    }
+
+  /**
+   * Returns the current {@link FlowStepStrategy} instance.
+   *
+   * @return FlowStepStrategy
+   */
+  public FlowStepStrategy getFlowStepStrategy()
+    {
+    return flowStepStrategy;
+    }
+
+  /**
+   * Sets a default {@link FlowStepStrategy} instance.
+   * <p/>
+   * Use a FlowStepStrategy to change {@link FlowStep} configuration properties
+   * before the properties are submitted to the underlying platform for the step
+   * unit of work.
+   *
+   * @param flowStepStrategy The FlowStepStrategy to use.
+   */
+  public void setFlowStepStrategy( FlowStepStrategy flowStepStrategy )
+    {
+    this.flowStepStrategy = flowStepStrategy;
     }
 
   /**

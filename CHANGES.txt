@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.f.FlowStepStrategy interface to allow customization of c.f.p.FlowStep configuration information.
+
   Changed c.f.Flow to lazily test child source taps for modified time to reduce file meta-data queries.
 
   Changed c.t.CompositeTap#getChildTaps to return an j.u.Iterator to allow for lazy resolution of child tap instances.
