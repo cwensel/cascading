@@ -38,6 +38,7 @@ import java.util.zip.GZIPOutputStream;
 
 import cascading.flow.FlowException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
@@ -101,7 +102,7 @@ public class HadoopUtil
     return jobConf;
     }
 
-  public static Map<Object, Object> createProperties( JobConf jobConf )
+  public static Map<Object, Object> createProperties( Configuration jobConf )
     {
     Map<Object, Object> properties = new HashMap<Object, Object>();
 
