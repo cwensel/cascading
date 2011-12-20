@@ -325,6 +325,21 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   public abstract boolean deleteResource( Config conf ) throws IOException;
 
   /**
+   * Method commitResource allows the underlying resource to be notified when all write processing is completed
+   * so that any additional cleanup or processing may be completed.
+   * <p/>
+   * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
+   *
+   * @param conf
+   * @return
+   * @throws IOException
+   */
+  public boolean commitResource( Config conf ) throws IOException
+    {
+    return true;
+    }
+
+  /**
    * Method resourceExists returns true if the path represented by this instance exists.
    *
    * @param conf of type JobConf

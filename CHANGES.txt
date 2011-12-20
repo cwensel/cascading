@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.t.Tap#commitResource() to allow the underlying resource to be notified when all write processing is completed
+  so that any additional cleanup or processing may be completed.
+
   Added c.t.Hasher to allow any field level Comparators to have hashCode generation delegated to them for their
   respective c.t.Tuple element/field value.
 

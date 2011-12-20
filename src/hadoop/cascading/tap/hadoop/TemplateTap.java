@@ -569,6 +569,12 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     return keepParentOnDelete || parent.deleteResource( conf );
     }
 
+  @Override
+  public boolean commitResource( JobConf conf ) throws IOException
+    {
+    return parent.commitResource( conf );
+    }
+
   /** @see Tap#resourceExists(Object) */
   public boolean resourceExists( JobConf conf ) throws IOException
     {

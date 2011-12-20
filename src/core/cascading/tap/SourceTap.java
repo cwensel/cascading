@@ -70,6 +70,12 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     }
 
   @Override
+  public boolean commitResource( Config conf ) throws IOException
+    {
+    throw new UnsupportedOperationException( "unable to commit resource via a SourceTap instance" );
+    }
+
+  @Override
   public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );

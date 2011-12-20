@@ -157,6 +157,12 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
+  public boolean commitResource( Properties conf ) throws IOException
+    {
+    return true;
+    }
+
+  @Override
   public boolean resourceExists( Properties conf ) throws IOException
     {
     return new File( path ).exists();

@@ -180,7 +180,7 @@ public abstract class FlowStep<Config> implements Serializable
     this.flowName = flowName;
     }
 
-  public Config getConf()
+  public Config getConfig()
     {
     return conf;
     }
@@ -301,6 +301,12 @@ public abstract class FlowStep<Config> implements Serializable
   public abstract Set<Tap> getTraps();
 
   public abstract Tap getTrap( String name );
+
+
+  void commitSinks()
+    {
+    flow.commitTaps( sinks.keySet() );
+    }
 
   /**
    * Method getProperties returns the properties of this FlowStep object.

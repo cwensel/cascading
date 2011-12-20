@@ -35,8 +35,12 @@ import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopPlanner;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.Count;
+import cascading.operation.regex.RegexParser;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.SourceCall;
 import cascading.scheme.hadoop.SequenceFile;
@@ -50,6 +54,7 @@ import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
 
@@ -350,5 +355,39 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     source = new MultiSourceTap( sourceMulti );
 
     validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10, null );
+    }
+
+  @Test
+  public void testCommitResource() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    final int[] count = {0};
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "simple" ), SinkMode.REPLACE )
+    {
+    @Override
+    public boolean commitResource( JobConf conf ) throws IOException
+      {
+      count[ 0 ] = count[ 0 ] + 1;
+      return true;
+      }
+    };
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    assertEquals( 1, count[ 0 ] );
+    validateLength( flow, 8, null );
     }
   }

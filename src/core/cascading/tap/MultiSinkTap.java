@@ -192,6 +192,18 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
+  public boolean commitResource( Config conf ) throws IOException
+    {
+    for( Tap tap : getTaps() )
+      {
+      if( !tap.commitResource( conf ) )
+        return false;
+      }
+
+    return true;
+    }
+
+  @Override
   public boolean resourceExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )

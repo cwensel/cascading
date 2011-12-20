@@ -31,7 +31,7 @@ import cascading.flow.planner.FlowStep;
  * Use a strategy instance to change the display name for a job, or in the case of Hadoop, the number of
  * mapper or reducer instances.
  * <p/>
- * Note, to change the configuration information, {@link cascading.flow.planner.FlowStep#getConf()} must be
+ * Note, to change the configuration information, {@link cascading.flow.planner.FlowStep#getConfig()} must be
  * called to get access to the current configuration. Calling {@link FlowStep#setName(String)} would have no effect.
  * <p/>
  * If any, the completed predecessor steps are provided so that the predecessors can be inspected via the

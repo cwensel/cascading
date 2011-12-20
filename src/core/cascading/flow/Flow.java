@@ -958,6 +958,8 @@ public abstract class Flow<Config>
 
       try
         {
+        commitTraps();
+
         if( hasListeners() )
           {
           for( SafeFlowListener safeFlowListener : getListeners() )
@@ -967,6 +969,27 @@ public abstract class Flow<Config>
       finally
         {
         flowStats.cleanup();
+        }
+      }
+    }
+
+  private void commitTraps()
+    {
+    commitTaps( traps.values() );
+    }
+
+  public void commitTaps( Collection<Tap> taps )
+    {
+    for( Tap tap : taps )
+      {
+      try
+        {
+        if( !tap.commitResource( getConfig() ) )
+          throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ) );
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ), exception );
         }
       }
     }
