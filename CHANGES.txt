@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.p.Merge pipe to create a union of multiple tuple streams. This differs from c.p.GroupBy in that there
+  is no grouping or sorting, and on the MapReduce platform, no Reduce task.
+
   Added c.t.Tap#commitResource() to allow the underlying resource to be notified when all write processing is completed
   so that any additional cleanup or processing may be completed.
 

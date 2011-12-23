@@ -29,7 +29,9 @@ import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.SourceStage;
 import cascading.flow.stream.StepStreamGraph;
+import cascading.flow.stream.SyncMergeStage;
 import cascading.pipe.Group;
+import cascading.pipe.Merge;
 import cascading.tap.Tap;
 
 /**
@@ -70,6 +72,12 @@ public class LocalStepStreamGraph extends StepStreamGraph
   protected Gate createGroupByGate( Group element )
     {
     return new LocalGroupByGate( flowProcess, (Group) element );
+    }
+
+  @Override
+  protected Duct createMergeStage( Merge merge )
+    {
+    return new SyncMergeStage( flowProcess, merge );
     }
 
   protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )

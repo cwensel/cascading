@@ -31,6 +31,7 @@ import cascading.flow.planner.FlowStep;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
@@ -118,6 +119,10 @@ public abstract class StepStreamGraph extends StreamGraph
       {
       rhsDuct = createSinkStage( (Tap) element );
       }
+    else if( element instanceof Merge )
+      {
+      rhsDuct = createMergeStage( (Merge) element );
+      }
     else
       throw new IllegalStateException( "unknown element type: " + element.getClass().getName() );
 
@@ -132,6 +137,11 @@ public abstract class StepStreamGraph extends StreamGraph
   protected abstract Gate createCoGroupGate( Group element );
 
   protected abstract Gate createGroupByGate( Group element );
+
+  protected Duct createMergeStage( Merge merge )
+    {
+    return new MergeStage( flowProcess, merge );
+    }
 
   protected Duct findExisting( Duct current )
     {

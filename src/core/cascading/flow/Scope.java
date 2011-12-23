@@ -34,7 +34,7 @@ public class Scope implements Serializable
   /** Enum Kind */
   static public enum Kind
     {
-      TAP, EACH, EVERY, GROUP
+      TAP, EACH, EVERY, GROUP, SPLICE
     }
 
   /** Field name */
@@ -49,6 +49,8 @@ public class Scope implements Serializable
   private Fields declaredFields; // fields declared by the operation
   /** Field isGroupBy */
   private boolean isGroupBy;
+  /** Field isMerge */
+  private boolean isMerge;
   /** Field groupingSelectors */
   private Map<String, Fields> groupingSelectors;
   /** Field sortingSelectors */
@@ -172,6 +174,16 @@ public class Scope implements Serializable
     this.groupingSelectors = groupingSelectors;
     this.sortingSelectors = sortingSelectors; // null ok
     this.outValuesFields = outValuesFields;
+    }
+
+  public Scope( String name, Fields declaredFields, boolean isMerge )
+    {
+    this.name = name;
+    this.kind = Kind.SPLICE;
+    this.isMerge = isMerge;
+
+    this.declaredFields = declaredFields;
+    this.outValuesFields = declaredFields;
     }
 
   /**

@@ -223,6 +223,10 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     assertTrue( "missing value", results.contains( new Tuple( "1\ta" ) ) );
     assertTrue( "missing value", results.contains( new Tuple( "1\tA" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "2\tb" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "2\tB" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "3\tc" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "3\tC" ) ) );
     }
 
   /**

@@ -302,7 +302,6 @@ public abstract class FlowStep<Config> implements Serializable
 
   public abstract Tap getTrap( String name );
 
-
   void commitSinks()
     {
     flow.commitTaps( sinks.keySet() );
