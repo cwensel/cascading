@@ -94,8 +94,10 @@ public abstract class FlowStep<Config> implements Serializable
   protected final Map<Tap, Set<String>> sources = new HashMap<Tap, Set<String>>();
   /** Field sink */
   protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>();
+
   /** Field tempSink */
   protected Tap tempSink; // used if we need to bypass
+
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 

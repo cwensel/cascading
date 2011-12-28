@@ -91,11 +91,18 @@ public abstract class FlowPlanner
     verifyTraps( flowDef );
     }
 
-  /** Creates a new ElementGraph instance. */
-  protected ElementGraph createElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps )
+  protected ElementGraph createElementGraph( FlowDef flowDef )
     {
+    Pipe[] pipes = flowDef.getTailsArray();
+    Map<String, Tap> sources = flowDef.getSourcesCopy();
+    Map<String, Tap> sinks = flowDef.getSinksCopy();
+    Map<String, Tap> traps = flowDef.getTrapsCopy();
+    AssertionLevel assertionLevel = flowDef.getAssertionLevel() == null ? this.assertionLevel : flowDef.getAssertionLevel();
+    DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
+
     return new ElementGraph( pipes, sources, sinks, traps, assertionLevel, debugLevel );
     }
+
 
   protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
     {

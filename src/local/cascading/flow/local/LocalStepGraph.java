@@ -25,18 +25,18 @@ import java.util.Map;
 
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.Tap;
 import org.jgrapht.Graphs;
 
 /**
  *
  */
-public class LocalStepGraph extends StepGraph
+public class LocalStepGraph extends FlowStepGraph
   {
-  public LocalStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
+  public LocalStepGraph( String flowName, ElementGraph elementGraph )
     {
-    super( flowName, elementGraph, traps );
+    super( flowName, elementGraph );
     }
 
   @Override
@@ -45,7 +45,7 @@ public class LocalStepGraph extends StepGraph
     return new LocalFlowStep( stepName, stepNum );
     }
 
-  protected void makeStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
+  protected void makeStepGraph( String flowName, ElementGraph elementGraph )
     {
     Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
     LocalFlowStep step = (LocalFlowStep) getCreateFlowStep( steps, "local", 1 );
@@ -58,7 +58,7 @@ public class LocalStepGraph extends StepGraph
     for( Map.Entry<String, Tap> entry : elementGraph.getSinkMap().entrySet() )
       step.addSink( entry.getKey(), entry.getValue() );
 
-    step.getTrapMap().putAll( traps );
+    step.getTrapMap().putAll( elementGraph.getTrapMap() );
 
     Graphs.addGraph( step.getGraph(), elementGraph );
 

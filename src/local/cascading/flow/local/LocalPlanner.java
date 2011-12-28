@@ -27,7 +27,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.Tap;
 
 /**
@@ -55,7 +55,7 @@ public class LocalPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
-      elementGraph = createElementGraph( flowDef.getTailsArray(), flowDef.getSources(), flowDef.getSinks(), flowDef.getTraps() );
+      elementGraph = createElementGraph( flowDef );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );
@@ -76,9 +76,9 @@ public class LocalPlanner extends FlowPlanner
       // m/r specific
 //      handleAdjacentTaps( elementGraph );
 
-      StepGraph stepGraph = new LocalStepGraph( flowDef.getName(), elementGraph, flowDef.getTrapsCopy() );
+      FlowStepGraph flowStepGraph = new LocalStepGraph( flowDef.getName(), elementGraph );
 
-      return new LocalFlow( properties, null, flowDef, elementGraph, stepGraph );
+      return new LocalFlow( properties, null, flowDef, elementGraph, flowStepGraph );
       }
     catch( Exception exception )
       {

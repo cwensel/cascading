@@ -42,13 +42,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
-public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
+public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Integer>
   {
   /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( StepGraph.class );
+  private static final Logger LOG = LoggerFactory.getLogger( FlowStepGraph.class );
 
   /** Constructor StepGraph creates a new StepGraph instance. */
-  public StepGraph()
+  public FlowStepGraph()
     {
     super( Integer.class );
     }
@@ -57,13 +57,12 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
    * Constructor StepGraph creates a new StepGraph instance.
    *
    * @param elementGraph of type ElementGraph
-   * @param traps        of type Map<String, Tap>
    */
-  public StepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
+  public FlowStepGraph( String flowName, ElementGraph elementGraph )
     {
     this();
 
-    makeStepGraph( flowName, elementGraph, traps );
+    makeStepGraph( flowName, elementGraph );
     }
 
   /**
@@ -101,7 +100,7 @@ public abstract class StepGraph extends SimpleDirectedGraph<FlowStep, Integer>
     return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
     }
 
-  protected abstract void makeStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps );
+  protected abstract void makeStepGraph( String flowName, ElementGraph elementGraph );
 
   protected boolean pathContainsTap( GraphPath<FlowElement, Scope> path )
     {

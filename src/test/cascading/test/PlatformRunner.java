@@ -123,13 +123,13 @@ public class PlatformRunner extends ParentRunner<Runner>
       if( isNotIncluded( includes, platformName ) )
         continue;
 
-        runners.add( new BlockJUnit4ClassRunner( javaClass )
+      runners.add( new BlockJUnit4ClassRunner( javaClass )
+      {
+      @Override
+      protected String getName()
         {
-        @Override
-        protected String getName()
-          {
-          return String.format( "%s[%s]", super.getName(), platformName );
-          }
+        return String.format( "%s[%s]", super.getName(), platformName );
+        }
 
 //        @Override
 //        protected String testName( FrameworkMethod method )
@@ -137,16 +137,16 @@ public class PlatformRunner extends ParentRunner<Runner>
 //          return String.format( "%s[%s]", super.testName( method ), platformName );
 //          }
 
-        @Override
-        protected Object createTest() throws Exception
-          {
-          PlatformTestCase testCase = (PlatformTestCase) super.createTest();
+      @Override
+      protected Object createTest() throws Exception
+        {
+        PlatformTestCase testCase = (PlatformTestCase) super.createTest();
 
-          testCase.installPlatform( testPlatform );
+        testCase.installPlatform( testPlatform );
 
-          return testCase;
-          }
-        } );
+        return testCase;
+        }
+      } );
       }
 
     return runners;

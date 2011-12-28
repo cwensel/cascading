@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cascading.operation.AssertionLevel;
+import cascading.operation.DebugLevel;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Def;
@@ -46,6 +48,9 @@ public class FlowDef extends Def<FlowDef>
   protected Map<String, Tap> traps = new HashMap<String, Tap>();
 
   protected List<Pipe> tails = new ArrayList<Pipe>();
+
+  protected AssertionLevel assertionLevel;
+  protected DebugLevel debugLevel;
 
   /**
    * Creates a new instance of a FlowDef.
@@ -91,6 +96,9 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addSource( String name, Tap source )
     {
+    if( sources.containsKey( name ) )
+      throw new IllegalArgumentException( "cannot add duplicate source: " + name );
+
     sources.put( name, source );
     return this;
     }
@@ -104,7 +112,7 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addSource( Pipe head, Tap source )
     {
-    sources.put( head.getName(), source );
+    addSource( head.getName(), source );
     return this;
     }
 
@@ -117,7 +125,10 @@ public class FlowDef extends Def<FlowDef>
   public FlowDef addSources( Map<String, Tap> sources )
     {
     if( sources != null )
-      this.sources.putAll( sources );
+      {
+      for( Map.Entry<String, Tap> entry : sources.entrySet() )
+        addSource( entry.getKey(), entry.getValue() );
+      }
 
     return this;
     }
@@ -151,6 +162,9 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addSink( String name, Tap sink )
     {
+    if( sinks.containsKey( name ) )
+      throw new IllegalArgumentException( "cannot add duplicate sink: " + name );
+
     sinks.put( name, sink );
     return this;
     }
@@ -164,7 +178,7 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addSink( Pipe tail, Tap sink )
     {
-    sinks.put( tail.getName(), sink );
+    addSink( tail.getName(), sink );
     return this;
     }
 
@@ -180,7 +194,7 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addTailSink( Pipe tail, Tap sink )
     {
-    sinks.put( tail.getName(), sink );
+    addSink( tail.getName(), sink );
     addTail( tail );
     return this;
     }
@@ -194,7 +208,10 @@ public class FlowDef extends Def<FlowDef>
   public FlowDef addSinks( Map<String, Tap> sinks )
     {
     if( sinks != null )
-      this.sinks.putAll( sinks );
+      {
+      for( Map.Entry<String, Tap> entry : sinks.entrySet() )
+        addSink( entry.getKey(), entry.getValue() );
+      }
 
     return this;
     }
@@ -228,6 +245,9 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addTrap( String name, Tap trap )
     {
+    if( traps.containsKey( name ) )
+      throw new IllegalArgumentException( "cannot add duplicate trap: " + name );
+
     traps.put( name, trap );
     return this;
     }
@@ -241,7 +261,7 @@ public class FlowDef extends Def<FlowDef>
    */
   public FlowDef addTrap( Pipe head, Tap trap )
     {
-    traps.put( head.getName(), trap );
+    addTrap( head.getName(), trap );
     return this;
     }
 
@@ -254,7 +274,10 @@ public class FlowDef extends Def<FlowDef>
   public FlowDef addTraps( Map<String, Tap> traps )
     {
     if( traps != null )
-      this.traps.putAll( traps );
+      {
+      for( Map.Entry<String, Tap> entry : traps.entrySet() )
+        addTrap( entry.getKey(), entry.getValue() );
+      }
 
     return this;
     }
@@ -321,5 +344,29 @@ public class FlowDef extends Def<FlowDef>
       addTail( tail );
 
     return this;
+    }
+
+  public FlowDef setAssertionLevel( AssertionLevel assertionLevel )
+    {
+    this.assertionLevel = assertionLevel;
+
+    return this;
+    }
+
+  public AssertionLevel getAssertionLevel()
+    {
+    return assertionLevel;
+    }
+
+  public FlowDef setDebugLevel( DebugLevel debugLevel )
+    {
+    this.debugLevel = debugLevel;
+
+    return this;
+    }
+
+  public DebugLevel getDebugLevel()
+    {
+    return debugLevel;
     }
   }

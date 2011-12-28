@@ -29,7 +29,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.util.PropertyUtil;
 import org.apache.hadoop.mapred.JobConf;
@@ -133,9 +133,9 @@ public class HadoopFlow extends Flow<JobConf>
     super( properties, jobConf, name );
     }
 
-  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )
+  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph flowStepGraph )
     {
-    super( properties, jobConf, flowDef, pipeGraph, stepGraph );
+    super( properties, jobConf, flowDef, pipeGraph, flowStepGraph );
     }
 
   protected void initFromProperties( Map<Object, Object> properties )

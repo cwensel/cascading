@@ -88,32 +88,38 @@ public abstract class StepStreamGraph extends StreamGraph
 
     if( element instanceof Each )
       {
-      if( ( (Each) element ).isFunction() )
-        rhsDuct = new FunctionEachStage( flowProcess, (Each) element );
-      else if( ( (Each) element ).isFilter() )
-        rhsDuct = new FilterEachStage( flowProcess, (Each) element );
-      else if( ( (Each) element ).isValueAssertion() )
-        rhsDuct = new ValueAssertionEachStage( flowProcess, (Each) element );
+      Each eachElement = (Each) element;
+
+      if( eachElement.isFunction() )
+        rhsDuct = new FunctionEachStage( flowProcess, eachElement );
+      else if( eachElement.isFilter() )
+        rhsDuct = new FilterEachStage( flowProcess, eachElement );
+      else if( eachElement.isValueAssertion() )
+        rhsDuct = new ValueAssertionEachStage( flowProcess, eachElement );
       else
-        throw new IllegalStateException( "unknown operation: " + ( (Each) element ).getOperation().getClass().getCanonicalName() );
+        throw new IllegalStateException( "unknown operation: " + eachElement.getOperation().getClass().getCanonicalName() );
       }
     else if( element instanceof Every )
       {
-      if( ( (Every) element ).isBuffer() )
-        rhsDuct = new BufferEveryWindow( flowProcess, (Every) element );
-      else if( ( (Every) element ).isAggregator() )
-        rhsDuct = new AggregatorEveryStage( flowProcess, (Every) element );
-      else if( ( (Every) element ).isGroupAssertion() )
-        rhsDuct = new GroupAssertionEveryStage( flowProcess, (Every) element );
+      Every everyElement = (Every) element;
+
+      if( everyElement.isBuffer() )
+        rhsDuct = new BufferEveryWindow( flowProcess, everyElement );
+      else if( everyElement.isAggregator() )
+        rhsDuct = new AggregatorEveryStage( flowProcess, everyElement );
+      else if( everyElement.isGroupAssertion() )
+        rhsDuct = new GroupAssertionEveryStage( flowProcess, everyElement );
       else
-        throw new IllegalStateException( "unknown operation: " + ( (Every) element ).getOperation().getClass().getCanonicalName() );
+        throw new IllegalStateException( "unknown operation: " + everyElement.getOperation().getClass().getCanonicalName() );
       }
     else if( element instanceof Group )
       {
-      if( ( (Group) element ).isGroupBy() )
-        rhsDuct = createGroupByGate( (Group) element );
+      Group groupElement = (Group) element;
+
+      if( groupElement.isGroupBy() )
+        rhsDuct = createGroupByGate( groupElement );
       else
-        rhsDuct = createCoGroupGate( (Group) element );
+        rhsDuct = createCoGroupGate( groupElement );
       }
     else if( element instanceof Tap )
       {

@@ -44,8 +44,8 @@ import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
-import cascading.flow.planner.StepGraph;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
 import cascading.pipe.Pipe;
@@ -123,7 +123,7 @@ public abstract class Flow<Config>
   private int submitPriority = 5;
 
   /** Field stepGraph */
-  private StepGraph stepGraph;
+  private FlowStepGraph flowStepGraph;
   /** Field thread */
   protected transient Thread thread;
   /** Field throwable */
@@ -186,12 +186,12 @@ public abstract class Flow<Config>
     this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected Flow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, StepGraph stepGraph )
+  protected Flow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph flowStepGraph )
     {
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
     this.pipeGraph = pipeGraph;
-    this.stepGraph = stepGraph;
+    this.flowStepGraph = flowStepGraph;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
     initSteps();
@@ -269,10 +269,10 @@ public abstract class Flow<Config>
 
   protected void initSteps()
     {
-    if( stepGraph == null )
+    if( flowStepGraph == null )
       return;
 
-    for( FlowStep flowStep : stepGraph.vertexSet() )
+    for( FlowStep flowStep : flowStepGraph.vertexSet() )
       flowStep.setFlow( this );
     }
 
@@ -357,9 +357,9 @@ public abstract class Flow<Config>
     return pipeGraph;
     }
 
-  StepGraph getStepGraph()
+  FlowStepGraph getFlowStepGraph()
     {
-    return stepGraph;
+    return flowStepGraph;
     }
 
   protected void setSources( Map<String, Tap> sources )
@@ -380,9 +380,9 @@ public abstract class Flow<Config>
     this.traps = traps;
     }
 
-  protected void setStepGraph( StepGraph stepGraph )
+  protected void setFlowStepGraph( FlowStepGraph flowStepGraph )
     {
-    this.stepGraph = stepGraph;
+    this.flowStepGraph = flowStepGraph;
     }
 
   /**
@@ -807,10 +807,10 @@ public abstract class Flow<Config>
     if( steps != null )
       return steps;
 
-    if( stepGraph == null )
+    if( flowStepGraph == null )
       return Collections.EMPTY_LIST;
 
-    TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( stepGraph );
+    TopologicalOrderIterator topoIterator = new TopologicalOrderIterator<FlowStep, Integer>( flowStepGraph );
 
     steps = new ArrayList<FlowStep>();
 
@@ -1299,7 +1299,7 @@ public abstract class Flow<Config>
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-    TopologicalOrderIterator topoIterator = stepGraph.getTopologicalIterator();
+    TopologicalOrderIterator topoIterator = flowStepGraph.getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       {
@@ -1310,7 +1310,7 @@ public abstract class Flow<Config>
 
       List<FlowStepJob> predecessors = new ArrayList<FlowStepJob>();
 
-      for( FlowStep flowStep : Graphs.predecessorListOf( stepGraph, step ) )
+      for( FlowStep flowStep : Graphs.predecessorListOf( flowStepGraph, step ) )
         predecessors.add( (FlowStepJob) jobsMap.get( flowStep.getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
@@ -1462,10 +1462,10 @@ public abstract class Flow<Config>
    */
   public void writeStepsDOT( String filename )
     {
-    if( stepGraph == null )
+    if( flowStepGraph == null )
       throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
 
-    stepGraph.writeDOT( filename );
+    flowStepGraph.writeDOT( filename );
     }
 
   /**

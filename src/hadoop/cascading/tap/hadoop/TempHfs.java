@@ -163,7 +163,7 @@ public class TempHfs extends Hfs
       }
     catch( Exception exception )
       {
-      throw new CascadingException( "unable to create specified scheme: " + schemeClass.getName() );
+      throw new CascadingException( "unable to create specified scheme: " + schemeClass.getName(), exception );
       }
 
     return new Scope( outgoingFields );

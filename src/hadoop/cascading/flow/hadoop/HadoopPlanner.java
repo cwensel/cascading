@@ -39,7 +39,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -190,7 +190,7 @@ public class HadoopPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
-      elementGraph = createElementGraph( flowDef.getTailsArray(), flowDef.getSources(), flowDef.getSinks(), flowDef.getTraps() );
+      elementGraph = createElementGraph( flowDef );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );
@@ -214,9 +214,9 @@ public class HadoopPlanner extends FlowPlanner
       // m/r specific
       handleAdjacentTaps( elementGraph );
 
-      StepGraph stepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph, flowDef.getTrapsCopy() );
+      FlowStepGraph flowStepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph );
 
-      return new HadoopFlow( properties, jobConf, flowDef, elementGraph, stepGraph );
+      return new HadoopFlow( properties, jobConf, flowDef, elementGraph, flowStepGraph );
       }
     catch( Exception exception )
       {

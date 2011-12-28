@@ -29,7 +29,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class HadoopStepGraph extends StepGraph
+public class HadoopStepGraph extends FlowStepGraph
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepGraph.class );
@@ -52,9 +52,9 @@ public class HadoopStepGraph extends StepGraph
     {
     }
 
-  public HadoopStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
+  public HadoopStepGraph( String flowName, ElementGraph elementGraph )
     {
-    super( flowName, elementGraph, traps );
+    super( flowName, elementGraph );
     }
 
   protected FlowStep createFlowStep( String stepName, int stepNum )
@@ -67,9 +67,8 @@ public class HadoopStepGraph extends StepGraph
    *
    * @param flowName
    * @param elementGraph
-   * @param traps
    */
-  protected void makeStepGraph( String flowName, ElementGraph elementGraph, Map<String, Tap> traps )
+  protected void makeStepGraph( String flowName, ElementGraph elementGraph )
     {
     SimpleDirectedGraph<Tap, Integer> tapGraph = elementGraph.makeTapGraph();
 
@@ -98,58 +97,65 @@ public class HadoopStepGraph extends StepGraph
         if( steps.containsKey( source.toString() ) )
           addEdge( steps.get( source.toString() ), step, count++ );
 
-        // support multiple paths from source to sink
-        // this allows for self joins on groups, even with different operation stacks between them
-        // note we must ignore paths with intermediate taps
-        List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetween( source, sink );
+        populateStep( elementGraph, source, sink, step );
+        }
+      }
+    }
 
-        for( GraphPath<FlowElement, Scope> path : paths )
+  private void populateStep( ElementGraph elementGraph, Tap source, Tap sink, HadoopFlowStep step )
+    {
+    Map<String, Tap> traps = elementGraph.getTrapMap();
+
+    // support multiple paths from source to sink
+    // this allows for self joins on groups, even with different operation stacks between them
+    // note we must ignore paths with intermediate taps
+    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetween( source, sink );
+
+    for( GraphPath<FlowElement, Scope> path : paths )
+      {
+      if( pathContainsTap( path ) )
+        continue;
+
+      List<Scope> scopes = path.getEdgeList();
+      String sourceName = scopes.get( 0 ).getName(); // root node of the shortest path
+      String sinkName = scopes.get( scopes.size() - 1 ).getName();
+
+      step.addSource( sourceName, source );
+      step.addSink( sinkName, sink );
+
+      FlowElement lhs = source;
+
+      step.getGraph().addVertex( lhs );
+
+      boolean onMapSide = true;
+
+      for( Scope scope : scopes )
+        {
+        FlowElement rhs = elementGraph.getEdgeTarget( scope );
+
+        step.getGraph().addVertex( rhs );
+        step.getGraph().addEdge( lhs, rhs, scope );
+
+        if( rhs instanceof Group )
           {
-          if( pathContainsTap( path ) )
-            continue;
+          step.addGroup( (Group) rhs );
+          onMapSide = false;
+          }
+        else if( rhs instanceof Pipe ) // add relevant traps to step
+          {
+          String name = ( (Pipe) rhs ).getName();
 
-          List<Scope> scopes = path.getEdgeList();
-          String sourceName = scopes.get( 0 ).getName(); // root node of the shortest path
-          String sinkName = scopes.get( scopes.size() - 1 ).getName();
-
-          step.addSource( sourceName, source );
-          step.addSink( sinkName, sink );
-
-          FlowElement lhs = source;
-
-          step.getGraph().addVertex( lhs );
-
-          boolean onMapSide = true;
-
-          for( Scope scope : scopes )
+          // this is legacy, can probably now collapse into one collection safely
+          if( traps.containsKey( name ) )
             {
-            FlowElement rhs = elementGraph.getEdgeTarget( scope );
-
-            step.getGraph().addVertex( rhs );
-            step.getGraph().addEdge( lhs, rhs, scope );
-
-            if( rhs instanceof Group )
-              {
-              step.addGroup( (Group) rhs );
-              onMapSide = false;
-              }
-            else if( rhs instanceof Pipe ) // add relevant traps to step
-              {
-              String name = ( (Pipe) rhs ).getName();
-
-              // this is legacy, can probably now collapse into one collection safely
-              if( traps.containsKey( name ) )
-                {
-                if( onMapSide )
-                  step.getMapperTraps().put( name, traps.get( name ) );
-                else
-                  step.getReducerTraps().put( name, traps.get( name ) );
-                }
-              }
-
-            lhs = rhs;
+            if( onMapSide )
+              step.getMapperTraps().put( name, traps.get( name ) );
+            else
+              step.getReducerTraps().put( name, traps.get( name ) );
             }
           }
+
+        lhs = rhs;
         }
       }
     }

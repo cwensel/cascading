@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import static cascading.test.PlatformRunner.*;
 
-@RunWith( SuiteMethod.class )
+@RunWith(SuiteMethod.class)
 public abstract class PipeAssemblyTestBase extends PlatformTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PipeAssemblyTestBase.class );

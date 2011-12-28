@@ -35,9 +35,7 @@ import cascading.tuple.Tuple;
  */
 public class NoOp extends BaseOperation implements Function
   {
-  /**
-   * Constructor NoOp creates a new NoOp instance that will ignore the argument values and return no output.
-   */
+  /** Constructor NoOp creates a new NoOp instance that will ignore the argument values and return no output. */
   public NoOp()
     {
     super( ANY, Fields.NONE );

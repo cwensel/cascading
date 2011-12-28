@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 
 /** Flows is a utility helper class. */
 public class Flows
@@ -43,8 +43,8 @@ public class Flows
     return flow.getPipeGraph();
     }
 
-  public static StepGraph getStepGraphFrom( Flow flow )
+  public static FlowStepGraph getStepGraphFrom( Flow flow )
     {
-    return flow.getStepGraph();
+    return flow.getFlowStepGraph();
     }
   }

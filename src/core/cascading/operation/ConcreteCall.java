@@ -131,5 +131,4 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
     {
     this.outputCollector = outputCollector;
     }
-
   }

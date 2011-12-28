@@ -29,7 +29,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.StepGraph;
+import cascading.flow.planner.FlowStepGraph;
 
 /**
  *
@@ -39,9 +39,9 @@ public class LocalFlow extends Flow<Properties>
   private Properties config;
   private Thread shutdownHook;
 
-  public LocalFlow( Map<Object, Object> properties, Properties config, FlowDef flowDef, ElementGraph elementGraph, StepGraph stepGraph )
+  public LocalFlow( Map<Object, Object> properties, Properties config, FlowDef flowDef, ElementGraph elementGraph, FlowStepGraph flowStepGraph )
     {
-    super( properties, config, flowDef, elementGraph, stepGraph );
+    super( properties, config, flowDef, elementGraph, flowStepGraph );
     }
 
   @Override

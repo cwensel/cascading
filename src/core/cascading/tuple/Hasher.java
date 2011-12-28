@@ -32,6 +32,7 @@ public interface Hasher<V>
   {
   /**
    * Return the hashCode of the given value.
+   *
    * @param value will never be null
    * @return int hashCode of given value
    */

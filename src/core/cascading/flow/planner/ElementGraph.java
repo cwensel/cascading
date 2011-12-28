@@ -115,6 +115,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return sinks;
     }
 
+  public Map<String, Tap> getTrapMap()
+    {
+    return traps;
+    }
+
   public Collection<Tap> getSources()
     {
     return sources.values();
