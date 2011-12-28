@@ -200,6 +200,9 @@ public class SplicePipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
+
     flow.complete();
 
     validateLength( flow, 14 );
@@ -209,8 +212,6 @@ public class SplicePipesPlatformTest extends PlatformTestCase
   public void testSplitSameSourceMerged() throws Exception
     {
     getPlatform().copyFromLocal( inputFileApache );
-
-    // 46 192
 
     Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
     Tap sink = getPlatform().getTextFile( getOutputPath( "splitsourcemerged" ), SinkMode.REPLACE );
@@ -227,6 +228,47 @@ public class SplicePipesPlatformTest extends PlatformTestCase
     merged = new Each( merged, new Fields( "line" ), new Identity() );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, merged );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 3 );
+    }
+
+  @Test
+  public void testSplitSameSourceMergedComplex() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "splitsourcemergedcomplex" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
+
+    Pipe merged = new Merge( "merged", left, right );
+
+    merged = new Each( merged, new Fields( "line" ), new Identity() );
+
+    left = new Each( new Pipe( "left", merged ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    right = new Each( new Pipe( "right", merged ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
+
+    merged = new Merge( "merged", left, right );
+
+    merged = new Each( merged, new Fields( "line" ), new Identity() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, merged );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
+
+    flow.writeDOT( "merged.dot" );
 
     flow.complete();
 
