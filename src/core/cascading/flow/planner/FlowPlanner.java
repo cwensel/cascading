@@ -41,6 +41,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
@@ -507,7 +508,11 @@ public abstract class FlowPlanner
   /**
    * Inserts a temporary Tap between logical MR jobs.
    * <p/>
-   * Since all joins are at groups, depth first search is safe
+   * Since all joins are at groups or splices, depth first search is safe
+   * <p/>
+   * todo: refactor so that rules are applied to path segments bounded by taps
+   * todo: this would allow balancing of operations within paths instead of pushing
+   * todo: all operations up. may allow for consolidation of rules
    *
    * @param elementGraph of type PipeGraph
    */
@@ -537,11 +542,22 @@ public abstract class FlowPlanner
           continue;
 
         if( flowElement instanceof Group && !foundGroup )
+          {
           foundGroup = true;
+          }
         else if( flowElement instanceof Group && foundGroup ) // add tap between groups
+          {
           tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
-        else if( flowElement instanceof Tap )
+          }
+        else if( flowElement instanceof Splice && foundGroup ) // add tap between groups
+          {
+          tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
           foundGroup = false;
+          }
+        else if( flowElement instanceof Tap )
+          {
+          foundGroup = false;
+          }
         }
 
       for( Pipe pipe : tapInsertions )

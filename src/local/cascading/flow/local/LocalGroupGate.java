@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.flow.stream.GroupGate;
+import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Group;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -43,11 +44,20 @@ public abstract class LocalGroupGate extends GroupGate
   protected Comparator<Tuple>[] groupComparators;
   protected Comparator<Tuple>[] valueComparators;
 
+  protected int numIncomingPaths;
   protected final AtomicInteger count = new AtomicInteger( 0 );
 
   public LocalGroupGate( FlowProcess flowProcess, Group group )
     {
     super( flowProcess, group );
+    }
+
+  @Override
+  public void bind( StreamGraph streamGraph )
+    {
+    super.bind( streamGraph ); // finds allPrevious
+
+    numIncomingPaths = streamGraph.countAllIncomingPathsTo( this );
     }
 
   @Override
@@ -82,7 +92,7 @@ public abstract class LocalGroupGate extends GroupGate
         }
       }
 
-    count.set( allPrevious.length ); // the actual value
+    count.set( numIncomingPaths ); // the number of paths incoming
 
     keysSet = initNewKeySet();
     }

@@ -209,6 +209,47 @@ public class SplicePipesPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testSameSourceMergeThreeChainGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "split", sourceLower );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "samemergethreechaingroup" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipe = new Pipe( "split" );
+
+    Pipe pipeLower = new Each( new Pipe( "lower", pipe ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper", pipe ), new Fields( "line" ), splitter );
+    Pipe pipeOffset = new Each( new Pipe( "offset", pipe ), new Fields( "line" ), splitter );
+
+    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
+
+    //put group before merge to test path counts
+    splice = new GroupBy( splice, new Fields( "num" ) );
+
+    splice = new Merge( splice, pipeOffset );
+
+    // this group has its incoming paths counted, gated by the previous group
+    splice = new GroupBy( splice, new Fields( "num" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 2, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 15 );
+    }
+
+  @Test
   public void testSplitSameSourceMerged() throws Exception
     {
     getPlatform().copyFromLocal( inputFileApache );
@@ -267,8 +308,6 @@ public class SplicePipesPlatformTest extends PlatformTestCase
 
     if( getPlatform() instanceof HadoopPlatform )
       assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
-
-    flow.writeDOT( "merged.dot" );
 
     flow.complete();
 

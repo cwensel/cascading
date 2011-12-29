@@ -20,8 +20,9 @@
 
 package cascading.flow.stream;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +31,9 @@ import java.util.Set;
 
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -270,6 +273,68 @@ public class StreamGraph
     return new Fork( allNext );
     }
 
+  /**
+   * Returns all free paths to the current duct, usually a GroupGate.
+   * <p/>
+   * Paths all unique paths are counted, minus any immediate prior GroupGates as they
+   * block incoming paths into a single path
+   *
+   * @param duct
+   * @return
+   */
+  public int countAllIncomingPathsTo( Duct duct )
+    {
+    // find all immediate prior groups/gates
+    LinkedList<List<Duct>> paths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
+
+    Set<Duct> gates = new HashSet<Duct>();
+
+    for( List<Duct> path : paths )
+      {
+      Collections.reverse( path );
+
+      path.remove( 0 ); // remove the duct param
+
+      for( Duct element : path )
+        {
+        if( element instanceof Gate )
+          gates.add( element );
+        }
+      }
+
+    // find all paths
+    // remove all paths containing prior groups
+    ListIterator<List<Duct>> iterator = paths.listIterator();
+    while( iterator.hasNext() )
+      {
+      List<Duct> path = iterator.next();
+
+      if( !Collections.disjoint( path, gates ) )
+        iterator.remove();
+      }
+
+    // incoming == paths + prior groups
+    return paths.size() + gates.size();
+    }
+
+  private List<GraphPath<Duct, Integer>> allPathsBetweenInclusive( Duct from, Duct to )
+    {
+    return new KShortestPaths<Duct, Integer>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    }
+
+  public static LinkedList<List<Duct>> asPathList( List<GraphPath<Duct, Integer>> paths )
+    {
+    LinkedList<List<Duct>> results = new LinkedList<List<Duct>>();
+
+    if( paths == null )
+      return results;
+
+    for( GraphPath<Duct, Integer> path : paths )
+      results.add( Graphs.getPathVertexList( path ) );
+
+    return results;
+    }
+
   public TopologicalOrderIterator<Duct, Integer> getTopologicalOrderIterator()
     {
     try
@@ -307,18 +372,6 @@ public class StreamGraph
     Graphs.addGraphReversed( reversedGraph, graph );
 
     return reversedGraph;
-    }
-
-  public Collection<Duct[]> getAllPairs()
-    {
-    List<Duct[]> pairs = new ArrayList<Duct[]>();
-
-    Set<Integer> allEdges = graph.edgeSet();
-
-    for( Integer edge : allEdges )
-      pairs.add( new Duct[]{graph.getEdgeSource( edge ), graph.getEdgeTarget( edge )} );
-
-    return pairs;
     }
 
   public Collection<Duct> getAllDucts()
