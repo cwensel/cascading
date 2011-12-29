@@ -297,8 +297,11 @@ public class StreamGraph
 
       for( Duct element : path )
         {
-        if( element instanceof Gate )
-          gates.add( element );
+        if( !( element instanceof Gate ) )
+          continue;
+
+        gates.add( element );
+        break;
         }
       }
 
