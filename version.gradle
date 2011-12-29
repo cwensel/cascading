@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,7 +19,7 @@
  */
 
 if( project.properties[ 'teamcity' ] ) // make them system properties
-System.properties.putAll(project.properties[ 'teamcity' ])
+  System.properties.putAll(project.properties[ 'teamcity' ])
 
 if( System.properties[ 'aws.properties' ] )
 {
@@ -56,12 +56,12 @@ releaseVersion = majorVersion
 buildNumber = System.getProperty('build.number', 'dev')
 
 if( System.properties[ 'cascading.release.private' ] )
-buildNumber = "priv-${buildNumber}"
+  buildNumber = "priv-${buildNumber}"
 else if( !System.properties[ 'cascading.release.final' ] )
-buildNumber = "wip-${buildNumber}"
+  buildNumber = "wip-${buildNumber}"
 
 if( minorVersion )
-releaseVersion = "${releaseVersion}.${minorVersion}"
+  releaseVersion = "${releaseVersion}.${minorVersion}"
 
 if( !System.properties[ 'cascading.release.final' ] )
-releaseVersion = "${releaseVersion}-${buildNumber}"
+  releaseVersion = "${releaseVersion}-${buildNumber}"

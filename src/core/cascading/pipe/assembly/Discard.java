@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,7 +22,6 @@ package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
 
-import cascading.operation.Identity;
 import cascading.operation.NoOp;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;

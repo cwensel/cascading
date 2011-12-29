@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2011 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,8 +24,6 @@ import java.util.Iterator;
 
 import cascading.CascadingTestCase;
 import cascading.flow.hadoop.HadoopSpillableTupleList;
-import cascading.test.HadoopPlatform;
-import cascading.test.PlatformRunner;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
