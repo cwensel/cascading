@@ -37,6 +37,7 @@ import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
+import org.apache.hadoop.io.serializer.WritableSerialization;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -127,15 +128,24 @@ public class TupleSerialization extends Configured implements Serialization
     {
     String serializations = getSerializations( jobConf );
 
-    if( serializations.contains( TupleSerialization.class.getName() ) )
-      return;
+    // required by MultiInputSplit
+    String writable = null;
 
-    jobConf.set( "io.serializations", Util.join( ",", Util.removeNulls( serializations, TupleSerialization.class.getName() ) ) );
+    if( !serializations.contains( WritableSerialization.class.getName() ) )
+      writable = WritableSerialization.class.getName();
+
+    String tuple = null;
+
+    if( !serializations.contains( TupleSerialization.class.getName() ) )
+      tuple = TupleSerialization.class.getName();
+
+    // make writable last
+    jobConf.set( "io.serializations", Util.join( ",", Util.removeNulls( serializations, tuple, writable ) ) );
     }
 
   static String getSerializations( JobConf jobConf )
     {
-    return jobConf.get( "io.serializations", "" );
+    return jobConf.get( "io.serializations", null );
     }
 
   /**

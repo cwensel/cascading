@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.t.h.TupleSerialization#setSerializations() to always include o.a.h.i.s.WritableSerialization as some
+  Hadoop versions do not include it if omitted. WritableSerialization is required by c.t.h.MultiInputSplit.
+
   Added c.p.Merge pipe to create a union of multiple tuple streams. This differs from c.p.GroupBy in that there
   is no grouping or sorting, and on the MapReduce platform, no Reduce task.
 
