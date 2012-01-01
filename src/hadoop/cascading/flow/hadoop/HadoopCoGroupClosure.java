@@ -18,15 +18,17 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.flow.hadoop;
 
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.IndexTuple;
+import cascading.tuple.Spillable;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
+import cascading.tuple.hadoop.HadoopSpillableTupleList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,16 +38,16 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * "org.apache.hadoop.io.compress.LzoCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec"
  */
-public class CoGroupClosure extends GroupByClosure
+public class HadoopCoGroupClosure extends HadoopGroupByClosure
   {
   /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( CoGroupClosure.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopCoGroupClosure.class );
 
   /** Field groups */
   SpillableTupleList[] groups;
   private final int numSelfJoins;
 
-  public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
+  public HadoopCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
     super( flowProcess, groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
@@ -98,19 +100,7 @@ public class CoGroupClosure extends GroupByClosure
         break;
         }
 
-      boolean spilled = groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
-
-      if( spilled && ( groups[ pos ].getNumFiles() - 1 ) % 10 == 0 )
-        {
-        LOG.info( "spilled group: {}, on grouping: {}", groupingFields[ pos ].printVerbose(), getGrouping().print() );
-
-        Runtime runtime = Runtime.getRuntime();
-        long freeMem = runtime.freeMemory() / 1024 / 1024;
-        long maxMem = runtime.maxMemory() / 1024 / 1024;
-        long totalMem = runtime.totalMemory() / 1024 / 1024;
-
-        LOG.info( "mem on spill (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
-        }
+      groups[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
       }
     }
 
@@ -122,13 +112,53 @@ public class CoGroupClosure extends GroupByClosure
 
   private void initLists( FlowProcess flowProcess )
     {
-    int numPipes = groupingFields.length;
+    int numPipes = joinFields.length;
     groups = new SpillableTupleList[ Math.max( numPipes, numSelfJoins + 1 ) ];
 
+    long threshold = getLong( HadoopProperties.COGROUP_SPILL_THRESHOLD, HadoopProperties.defaultThreshold );
+
     for( int i = 0; i < numPipes; i++ ) // use numPipes not numSelfJoins, see below
-      groups[ i ] = flowProcess.createSpillableTupleList();
+      {
+      groups[ i ] = new HadoopSpillableTupleList( threshold, (HadoopFlowProcess) flowProcess );
+      groups[ i ].setListener( createListener( joinFields[ i ] ) );
+      }
 
     for( int i = 1; i < numSelfJoins + 1; i++ )
       groups[ i ] = groups[ 0 ];
+    }
+
+  private long getLong( String key, long defaultValue )
+    {
+    String value = (String) flowProcess.getProperty( key );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Long.parseLong( value );
+    }
+
+  private Spillable.Listener createListener( final Fields joinField )
+    {
+    return new Spillable.Listener()
+    {
+    @Override
+    public void notify( Spillable spillable )
+      {
+      int numFiles = ( (SpillableTupleList) spillable ).getNumFiles();
+
+      if( ( numFiles - 1 ) % 10 == 0 )
+        {
+        LOG.info( "spilled group: {}, on grouping: {}, num times: {}",
+          new Object[]{joinField.printVerbose(), getGrouping().print(), numFiles} );
+
+        Runtime runtime = Runtime.getRuntime();
+        long freeMem = runtime.freeMemory() / 1024 / 1024;
+        long maxMem = runtime.maxMemory() / 1024 / 1024;
+        long totalMem = runtime.totalMemory() / 1024 / 1024;
+
+        LOG.info( "mem on spill (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+        }
+      }
+    };
     }
   }

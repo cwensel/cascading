@@ -95,13 +95,13 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
       // we want to null out any 'values' before and after the iterator begins/ends
       // this allows buffers to emit tuples before next() and when hasNext() return false;
       final TupleEntry tupleEntry = grouping.iterator.getTupleEntry();
-      final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, grouping.group );
+      final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, grouping.key );
       tupleEntry.setTuple( valueNulledTuple );
 
       incomingEntry = tupleEntry;
 
       operationCall.setOutputCollector( outputCollector );
-      operationCall.setGroup( grouping.group );
+      operationCall.setGroup( grouping.key );
 
       operationCall.setArgumentsIterator( new Iterator<TupleEntry>()
       {

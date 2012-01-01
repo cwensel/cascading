@@ -38,6 +38,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.pipe.CoGroup;
@@ -54,6 +55,8 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 
 /**
  * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
@@ -202,6 +205,7 @@ public class HadoopPlanner extends FlowPlanner
       handleWarnEquivalentPaths( elementGraph );
       handleSplit( elementGraph );
       handleJobPartitioning( elementGraph );
+      handleJoins( elementGraph );
       handleNonSafeOperations( elementGraph );
 
       if( getNormalizeHeterogeneousSources( properties ) )
@@ -232,7 +236,7 @@ public class HadoopPlanner extends FlowPlanner
       {
       List<GraphPath<FlowElement, Scope>> graphPaths = elementGraph.getAllShortestPathsTo( coGroup );
 
-      List<List<FlowElement>> paths = ElementGraph.asPathList( graphPaths );
+      List<List<FlowElement>> paths = ElementGraphs.asPathList( graphPaths );
 
       if( !areEquivalentPaths( elementGraph, paths ) )
         continue;
@@ -466,7 +470,6 @@ public class HadoopPlanner extends FlowPlanner
 
     for( Group group : groups )
       {
-
       Set<Tap> taps = new HashSet<Tap>();
 
       // iterate each shortest path to current group finding each tap sourcing the merge/join
@@ -517,7 +520,7 @@ public class HadoopPlanner extends FlowPlanner
           continue;
 
         // handle case where there is a split on a pipe between the tap and group
-        for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetween( tap, group ) )
+        for( GraphPath<FlowElement, Scope> path : getAllShortestPathsBetween( elementGraph, tap, group ) )
           {
           List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // shortest path tap -> group
           Collections.reverse( flowElements ); // group -> tap

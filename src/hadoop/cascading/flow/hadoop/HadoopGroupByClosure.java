@@ -18,22 +18,29 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.flow.hadoop;
 
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /** Class GroupClosure is used internally to represent groups of tuples during grouping. */
-public class GroupByClosure extends GroupClosure
+public class HadoopGroupByClosure extends JoinerClosure
   {
-  Iterator values;
+  protected Tuple grouping;
+  protected Iterator values;
 
-  public GroupByClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
+  public HadoopGroupByClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
     {
     super( flowProcess, groupingFields, valueFields );
+    }
+
+  public Tuple getGrouping()
+    {
+    return grouping;
     }
 
   public int size()
@@ -72,7 +79,7 @@ public class GroupByClosure extends GroupClosure
       Tuple tuple = (Tuple) values.next();
 
       // todo: cache pos
-      tuple.set( valueFields[ cleanPos ], groupingFields[ cleanPos ], grouping );
+      tuple.set( valueFields[ cleanPos ], joinFields[ cleanPos ], grouping );
 
       return tuple;
       }

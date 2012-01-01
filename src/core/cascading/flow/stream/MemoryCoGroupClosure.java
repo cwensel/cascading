@@ -24,18 +24,18 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
-import cascading.pipe.cogroup.GroupClosure;
+import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 
 /**
  *
  */
-public class CoGroupClosure extends GroupClosure
+public class MemoryCoGroupClosure extends JoinerClosure
   {
   private Collection[] collections;
   private final int numSelfJoins;
 
-  public CoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
+  public MemoryCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
     super( flowProcess, groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
@@ -44,7 +44,7 @@ public class CoGroupClosure extends GroupClosure
   @Override
   public int size()
     {
-    return Math.max( groupingFields.length, numSelfJoins + 1 );
+    return Math.max( joinFields.length, numSelfJoins + 1 );
     }
 
   public void reset( Collection[] collections )

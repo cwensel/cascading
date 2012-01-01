@@ -18,25 +18,31 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.tuple.hadoop;
 
-import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.tuple.TupleEntry;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.tuple.SpillableTupleList;
+import cascading.tuple.SpillableTupleMap;
 
 /**
  *
  */
-public class SyncMergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class HadoopSpillableTupleMap extends SpillableTupleMap
   {
-  public SyncMergeStage( FlowProcess flowProcess, FlowElement flowElement )
+  public HadoopSpillableTupleMap( int initialCapacity, int threshold, FlowProcess flowProcess )
     {
-    super( flowProcess, flowElement );
+    super( initialCapacity, threshold, flowProcess );
+    }
+
+  public HadoopSpillableTupleMap( int initialCapacity, int threshold, float loadFactor, FlowProcess flowProcess )
+    {
+    super( initialCapacity, threshold, loadFactor, flowProcess );
     }
 
   @Override
-  public synchronized void receive( Duct previous, TupleEntry tupleEntry )
+  protected SpillableTupleList createSpillableTupleList()
     {
-    super.receive( previous, tupleEntry );
+    return new HadoopSpillableTupleList( getThreshold(), (HadoopFlowProcess) getFlowProcess() );
     }
   }

@@ -39,11 +39,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Class StreamGraph is the operation pipeline used during processing. This an internal use only class.
+ * <p/>
+ * Under some circumstances it may make sense to see the actual graph plan. To do so, enable one or both dot file
+ * properties, {@link #ERROR_DOT_FILE_NAME} and {@link #DOT_FILE_PATH}.
  */
 public class StreamGraph
   {
-  public final static String ERROR_DOT_FILE_PATH = "cascading.stream.error.dotfile";
+  /** Property denoting the path and filename to write the failed stream graph dot file. */
+  public final static String ERROR_DOT_FILE_NAME = "cascading.stream.error.dotfile";
+
+  /**
+   * Property denoting the path to write all stream graph dot files. The filename will be generated
+   * based on platform properties.
+   */
+  public final static String DOT_FILE_PATH = "cascading.stream.dotfile.path";
 
   private static final Logger LOG = LoggerFactory.getLogger( StreamGraph.class );
 
@@ -123,7 +133,7 @@ public class StreamGraph
     catch( RuntimeException exception )
       {
       LOG.error( "unable to add path", exception );
-      printGraph();
+      printGraphError();
       throw exception;
       }
     }
@@ -215,7 +225,7 @@ public class StreamGraph
     Set<Integer> edges = graph.outgoingEdgesOf( current );
 
     if( edges.size() == 0 )
-      throw new IllegalStateException( "ducts must have an outgoing edge" );
+      throw new IllegalStateException( "ducts must have an outgoing edge, current: " + current );
 
     Duct next = graph.getEdgeTarget( edges.iterator().next() );
 
@@ -347,7 +357,7 @@ public class StreamGraph
     catch( RuntimeException exception )
       {
       LOG.error( "failed creating topological iterator", exception );
-      printGraph();
+      printGraphError();
 
       throw exception;
       }
@@ -362,7 +372,7 @@ public class StreamGraph
     catch( RuntimeException exception )
       {
       LOG.error( "failed creating reversed topological iterator", exception );
-      printGraph();
+      printGraphError();
 
       throw exception;
       }
@@ -382,14 +392,26 @@ public class StreamGraph
     return graph.vertexSet();
     }
 
-  public void printGraph()
+  public void printGraphError()
     {
-    String filename = (String) getProperty( ERROR_DOT_FILE_PATH );
+    String filename = (String) getProperty( ERROR_DOT_FILE_NAME );
 
     if( filename == null )
       return;
 
     printGraph( filename );
+    }
+
+  public void printGraph( String id, String classifier, int discrimiator )
+    {
+    String path = (String) getProperty( DOT_FILE_PATH );
+
+    if( path == null )
+      return;
+
+    path = String.format( "%s/streamgraph-%s-%s-%s.dot", path, id, classifier, discrimiator );
+
+    printGraph( path );
     }
 
   public void printGraph( String filename )

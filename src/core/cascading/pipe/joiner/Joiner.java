@@ -18,19 +18,28 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.pipe.joiner;
 
-import cascading.flow.FlowProcess;
-import cascading.pipe.Merge;
-import cascading.tuple.TupleEntry;
+import java.io.Serializable;
+import java.util.Iterator;
 
-/**
- *
- */
-public class MergeStage extends ElementStage<TupleEntry, TupleEntry>
+import cascading.tuple.Tuple;
+
+/** Interface Joiner allows for custom join strategies against a {@link cascading.flow.hadoop.HadoopCoGroupClosure}. */
+public interface Joiner extends Serializable
   {
-  public MergeStage( FlowProcess flowProcess, Merge merge )
-    {
-    super( flowProcess, merge );
-    }
+  /**
+   * Returns an iterator that joins the given CoGroupClosure co-groups.
+   *
+   * @param closure of type GroupClosure
+   * @return an iterator
+   */
+  Iterator<Tuple> getIterator( JoinerClosure closure );
+
+  /**
+   * Returns the number of joins this instance can handle. A value of -1 denotes there is no limit.
+   *
+   * @return an int
+   */
+  int numJoins();
   }

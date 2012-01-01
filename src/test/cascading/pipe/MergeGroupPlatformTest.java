@@ -63,7 +63,7 @@ public class MergeGroupPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
     }
@@ -87,7 +87,7 @@ public class MergeGroupPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter1 );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter2 );
 
-    Pipe splice = new Group( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
 
     try
       {

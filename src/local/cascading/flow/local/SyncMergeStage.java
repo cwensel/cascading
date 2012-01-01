@@ -18,19 +18,27 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.flow.local;
 
+import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.pipe.Merge;
+import cascading.flow.stream.Duct;
+import cascading.flow.stream.ElementStage;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class MergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class SyncMergeStage extends ElementStage<TupleEntry, TupleEntry>
   {
-  public MergeStage( FlowProcess flowProcess, Merge merge )
+  public SyncMergeStage( FlowProcess flowProcess, FlowElement flowElement )
     {
-    super( flowProcess, merge );
+    super( flowProcess, flowElement );
+    }
+
+  @Override
+  public synchronized void receive( Duct previous, TupleEntry tupleEntry )
+    {
+    super.receive( previous, tupleEntry );
     }
   }

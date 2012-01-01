@@ -52,7 +52,7 @@ public class Scope implements Serializable
   /** Field isMerge */
   private boolean isMerge;
   /** Field groupingSelectors */
-  private Map<String, Fields> groupingSelectors;
+  private Map<String, Fields> keySelectors;
   /** Field sortingSelectors */
   private Map<String, Fields> sortingSelectors;
 
@@ -152,18 +152,18 @@ public class Scope implements Serializable
    * @param name              of type String
    * @param declaredFields    of type Fields
    * @param outGroupingFields of type Fields
-   * @param groupingSelectors of type Map<String, Fields>
+   * @param keySelectors      of type Map<String, Fields>
    * @param sortingSelectors  of type Fields
    * @param outValuesFields   of type Fields
    * @param isGroupBy         of type boolean
    */
-  public Scope( String name, Fields declaredFields, Fields outGroupingFields, Map<String, Fields> groupingSelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
+  public Scope( String name, Fields declaredFields, Fields outGroupingFields, Map<String, Fields> keySelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
     {
     this.name = name;
     this.kind = Kind.GROUP;
     this.isGroupBy = isGroupBy;
 
-    if( groupingSelectors == null )
+    if( keySelectors == null )
       throw new IllegalArgumentException( "grouping may not be null" );
 
     if( outValuesFields == null )
@@ -171,14 +171,15 @@ public class Scope implements Serializable
 
     this.declaredFields = declaredFields;
     this.outGroupingFields = outGroupingFields;
-    this.groupingSelectors = groupingSelectors;
+    this.keySelectors = keySelectors;
     this.sortingSelectors = sortingSelectors; // null ok
     this.outValuesFields = outValuesFields;
     }
 
-  public Scope( String name, Fields declaredFields, boolean isMerge )
+  public Scope( String name, Fields declaredFields, Map<String, Fields> keySelectors, boolean isMerge )
     {
     this.name = name;
+    this.keySelectors = keySelectors;
     this.kind = Kind.SPLICE;
     this.isMerge = isMerge;
 
@@ -346,9 +347,9 @@ public class Scope implements Serializable
    *
    * @return the groupingSelectors (type Map<String, Fields>) of this Scope object.
    */
-  public Map<String, Fields> getGroupingSelectors()
+  public Map<String, Fields> getKeySelectors()
     {
-    return groupingSelectors;
+    return keySelectors;
     }
 
   /**
@@ -381,9 +382,9 @@ public class Scope implements Serializable
     if( kind != Kind.GROUP )
       return outGroupingFields;
 
-    Fields first = groupingSelectors.values().iterator().next();
+    Fields first = keySelectors.values().iterator().next();
 
-    if( groupingSelectors.size() == 1 || isGroup() && isGroupBy )
+    if( keySelectors.size() == 1 || isGroup() && isGroupBy )
       return first;
 
     // if given by user
@@ -391,7 +392,7 @@ public class Scope implements Serializable
       return outGroupingFields;
 
     // if all have the same names, then use for grouping
-    Set<Fields> set = new HashSet<Fields>( groupingSelectors.values() );
+    Set<Fields> set = new HashSet<Fields>( keySelectors.values() );
 
     if( set.size() == 1 )
       return first;
@@ -431,7 +432,7 @@ public class Scope implements Serializable
     this.remainderFields = scope.remainderFields;
     this.argumentFields = scope.argumentFields;
     this.declaredFields = scope.declaredFields;
-    this.groupingSelectors = scope.groupingSelectors;
+    this.keySelectors = scope.keySelectors;
     this.sortingSelectors = scope.sortingSelectors;
     this.outGroupingSelector = scope.outGroupingSelector;
     this.outGroupingFields = scope.outGroupingFields;
@@ -447,13 +448,13 @@ public class Scope implements Serializable
 
     StringBuffer buffer = new StringBuffer();
 
-    if( groupingSelectors != null && !groupingSelectors.isEmpty() )
+    if( keySelectors != null && !keySelectors.isEmpty() )
       {
-      for( String name : groupingSelectors.keySet() )
+      for( String name : keySelectors.keySet() )
         {
         if( buffer.length() != 0 )
           buffer.append( "," );
-        buffer.append( name ).append( groupingSelectors.get( name ).printVerbose() );
+        buffer.append( name ).append( keySelectors.get( name ).printVerbose() );
         }
 
       buffer.append( "\n" );

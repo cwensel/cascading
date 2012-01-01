@@ -2,6 +2,19 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.t.SpillableTupleMap to allow durable groups during asymmetrical joins.
+
+  Changed c.t.SpillableTupleList to implement c.u.Collection and c.t.Spillable interfaces.
+
+  Renamed the c.p.Group class to c.p.Splice and created a c.p.Group interface. c.p.Groupby, CoGroup, Merge, and Join
+  are all c.p.Splice types. Only GroupBy and CoGroup are c.p.Group types.
+
+  Moved all "joiners" to c.p.joiner package from c.p.cogroup as they are now shared with the c.p.Join pipe.
+
+  Added c.p.Join pipe to join two or more streams by a common key value without blocking/accumulating the largest
+  data stream. This differs from c.p.CoGroup in that there is no grouping or sorting, and on the MapReduce platform,
+  no Reduce task. The is commonly known as an asymmetrical or replicated join.
+
   Changed c.t.h.TupleSerialization#setSerializations() to always include o.a.h.i.s.WritableSerialization as some
   Hadoop versions do not include it if omitted. WritableSerialization is required by c.t.h.MultiInputSplit.
 

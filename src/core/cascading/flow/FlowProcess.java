@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import cascading.tap.Tap;
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
@@ -118,12 +117,6 @@ public abstract class FlowProcess<Config>
 
     @Override
     public TupleEntryCollector openSystemIntermediateForWrite() throws IOException
-      {
-      return null;
-      }
-
-    @Override
-    public SpillableTupleList createSpillableTupleList()
       {
       return null;
       }
@@ -276,8 +269,6 @@ public abstract class FlowProcess<Config>
   public abstract TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException;
 
   public abstract TupleEntryCollector openSystemIntermediateForWrite() throws IOException;
-
-  public abstract SpillableTupleList createSpillableTupleList();
 
   public abstract Config getConfigCopy();
 

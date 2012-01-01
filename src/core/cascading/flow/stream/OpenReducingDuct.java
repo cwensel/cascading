@@ -43,11 +43,11 @@ public class OpenReducingDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming
     if( !grouping.iterator.hasNext() )
       return;
 
-    reducing.startGroup( previous, grouping.group );
+    reducing.startGroup( previous, grouping.key );
 
     while( grouping.iterator.hasNext() )
       next.receive( this, (Outgoing) grouping.iterator.next() );
 
-    reducing.completeGroup( previous, grouping.group );
+    reducing.completeGroup( previous, grouping.key );
     }
   }

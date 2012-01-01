@@ -24,6 +24,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,12 +34,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Class SpillableTupleList is a simple durable Collection that can spill its contents to disk when the
+ * {@code threshold} is met.
+ * <p/>
+ * Using a {@code threshold } of -1 will disable the spill.
  */
-public abstract class SpillableTupleList implements Iterable<Tuple>
+public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( SpillableTupleList.class );
+
+  static enum Spill
+    {
+      Num_Spills_Written, Num_Spills_Read
+    }
 
   /** Field threshold */
   protected long threshold = 10000;
@@ -51,14 +60,11 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
   /** Field overrideIterator */
   private Iterator<Tuple> overrideIterator;
   /** Field size */
-  private long size = 0;
+  private int size = 0;
   /** Field fields */
   private Fields fields;
-
-  enum Spill
-    {
-      Num_Spills_Written, Num_Spills_Read
-    }
+  /** Fields listener * */
+  private Listener listener;
 
   protected SpillableTupleList()
     {
@@ -68,6 +74,12 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
     {
     this.threshold = threshold;
     this.flowProcess = flowProcess;
+    }
+
+  @Override
+  public void setListener( Listener listener )
+    {
+    this.listener = listener;
     }
 
   private class SpilledListIterator implements Iterator<Tuple>
@@ -147,7 +159,10 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
     current.add( tuple );
     size++;
 
-    return doSpill();
+    if( doSpill() && listener != null )
+      listener.notify( this );
+
+    return true;
     }
 
   /**
@@ -170,7 +185,7 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
    *
    * @return long
    */
-  public long size()
+  public int size()
     {
     return size;
     }
@@ -182,7 +197,10 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
    */
   public boolean isEmpty()
     {
-    return overrideIterator == null && files.isEmpty() && current.size() == 0;
+    if( overrideIterator != null ) // a hack
+      return !overrideIterator.hasNext();
+
+    return files.isEmpty() && current.size() == 0;
     }
 
   /**
@@ -309,6 +327,11 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
     size = 0;
     }
 
+  public void setOverrideIterator( Iterator<Tuple> overrideIterator )
+    {
+    this.overrideIterator = overrideIterator;
+    }
+
   public void setIterator( final IndexTuple current, final Iterator values )
     {
     overrideIterator = new Iterator<Tuple>()
@@ -363,8 +386,58 @@ public abstract class SpillableTupleList implements Iterable<Tuple>
    *
    * @return Iterator<TupleEntry>
    */
-  public Iterator<TupleEntry> entryIterator()
+  public TupleEntryIterator entryIterator()
     {
     return new TupleEntryChainIterator( fields, iterator() );
+    }
+
+  // collection methods, this class cannot only be added to, so they aren't implemented
+
+  @Override
+  public boolean contains( Object object )
+    {
+    return false;
+    }
+
+  @Override
+  public Object[] toArray()
+    {
+    return new Object[ 0 ];
+    }
+
+  @Override
+  public <T> T[] toArray( T[] ts )
+    {
+    return null;
+    }
+
+  @Override
+  public boolean remove( Object object )
+    {
+    return false;
+    }
+
+  @Override
+  public boolean containsAll( Collection<?> objects )
+    {
+    return false;
+    }
+
+  @Override
+  public boolean addAll( Collection<? extends Tuple> tuples )
+    {
+    return false;
+    }
+
+  @Override
+  public boolean removeAll( Collection<?> objects )
+    {
+    return false;
+    }
+
+  @Override
+  public boolean retainAll( Collection<?> objects )
+    {
+    return false;
     }
   }

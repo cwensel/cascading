@@ -18,30 +18,28 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.pipe.joiner;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 
 /**
  *
  */
-public abstract class GroupClosure
+public abstract class JoinerClosure
   {
   protected final FlowProcess flowProcess;
 
-  protected final Fields[] groupingFields;
+  protected final Fields[] joinFields;
   protected final Fields[] valueFields;
-  protected Tuple grouping;
 
-  public GroupClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
+  public JoinerClosure( FlowProcess flowProcess, Fields[] joinFields, Fields[] valueFields )
     {
     this.flowProcess = flowProcess;
-    this.groupingFields = Arrays.copyOf( groupingFields, groupingFields.length );
+    this.joinFields = Arrays.copyOf( joinFields, joinFields.length );
     this.valueFields = Arrays.copyOf( valueFields, valueFields.length );
     }
 
@@ -50,9 +48,9 @@ public abstract class GroupClosure
     return flowProcess;
     }
 
-  public Fields[] getGroupingFields()
+  public Fields[] getJoinFields()
     {
-    return groupingFields;
+    return joinFields;
     }
 
   public Fields[] getValueFields()
@@ -61,11 +59,6 @@ public abstract class GroupClosure
     }
 
   public abstract int size();
-
-  public Tuple getGrouping()
-    {
-    return grouping;
-    }
 
   public abstract Iterator getIterator( int pos );
 

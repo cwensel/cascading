@@ -28,7 +28,6 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -56,12 +55,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopFlowProcess.class );
 
-  public static final String SPILL_THRESHOLD = "cascading.cogroup.spill.threshold";
-  public static final int defaultThreshold = 10 * 1000;
-  public static final String SPILL_COMPRESS = "cascading.cogroup.spill.compress";
-  public static final String SPILL_CODECS = "cascading.cogroup.spill.codecs";
-  public static final String defaultCodecs = "org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec";
-
   /** Field jobConf */
   final JobConf jobConf;
   /** Field isMapper */
@@ -69,20 +62,20 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   /** Field reporter */
   Reporter reporter = Reporter.NULL;
   private OutputCollector outputCollector;
-  private final CompressionCodec codec;
+  private CompressionCodec codec;
+  private String codecs;
+  private String compress;
 
   public HadoopFlowProcess()
     {
     this.jobConf = new JobConf();
     this.isMapper = true;
-    this.codec = getCompressionCodec();
     }
 
   public HadoopFlowProcess( JobConf jobConf )
     {
     this.jobConf = jobConf;
     this.isMapper = true;
-    this.codec = getCompressionCodec();
     }
 
   public HadoopFlowProcess( FlowSession flowSession, JobConf jobConf )
@@ -90,7 +83,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     super( flowSession );
     this.jobConf = jobConf;
     this.isMapper = true;
-    this.codec = getCompressionCodec();
     }
 
   /**
@@ -104,7 +96,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     super( flowSession );
     this.jobConf = jobConf;
     this.isMapper = isMapper;
-    this.codec = getCompressionCodec();
     }
 
   public HadoopFlowProcess( HadoopFlowProcess flowProcess, JobConf jobConf )
@@ -112,7 +103,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     super( flowProcess.getCurrentSession() );
     this.jobConf = jobConf;
     this.isMapper = flowProcess.isMapper();
-    this.codec = flowProcess.getCompressionCodec();
     this.reporter = flowProcess.getReporter();
     }
 
@@ -216,49 +206,49 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     return outputCollector;
     }
 
-  /** @see cascading.flow.FlowProcess#getProperty(String) */
+  @Override
   public Object getProperty( String key )
     {
     return jobConf.get( key );
     }
 
-  /** @see cascading.flow.FlowProcess#keepAlive() */
+  @Override
   public void keepAlive()
     {
     getReporterOrFail().progress();
     }
 
-  /** @see cascading.flow.FlowProcess#increment(Enum, long) */
+  @Override
   public void increment( Enum counter, long amount )
     {
     getReporterOrFail().incrCounter( counter, amount );
     }
 
-  /** @see cascading.flow.FlowProcess#increment(String, String, long) */
+  @Override
   public void increment( String group, String counter, long amount )
     {
     getReporterOrFail().incrCounter( group, counter, amount );
     }
 
-  /** @see cascading.flow.FlowProcess#setStatus(String) */
+  @Override
   public void setStatus( String status )
     {
     getReporterOrFail().setStatus( status );
     }
 
-  /** @see cascading.flow.FlowProcess#isCounterStatusInitialized() */
+  @Override
   public boolean isCounterStatusInitialized()
     {
     return getReporter() != null;
     }
 
-  /** @see cascading.flow.FlowProcess#openTapForRead(Tap) */
+  @Override
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
     return tap.openForRead( this );
     }
 
-  /** @see cascading.flow.FlowProcess#openTapForWrite(Tap) */
+  @Override
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
     return tap.openForWrite( this, outputCollector );
@@ -302,33 +292,20 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     };
     }
 
-  @Override
-  public SpillableTupleList createSpillableTupleList()
+  public synchronized CompressionCodec getCoGroupCompressionCodec()
     {
-    return new HadoopSpillableTupleList( getLong( SPILL_THRESHOLD, defaultThreshold ), jobConf, codec, this );
-    }
+    if( codec != null || compress != null )
+      return codec;
 
-  private long getLong( String key, long defaultValue )
-    {
-    String value = (String) getProperty( key );
-
-    if( value == null || value.length() == 0 )
-      return defaultValue;
-
-    return Long.parseLong( value );
-    }
-
-  public CompressionCodec getCompressionCodec()
-    {
-    String compress = (String) getProperty( SPILL_COMPRESS );
+    compress = (String) getProperty( HadoopProperties.COGROUP_SPILL_COMPRESS );
 
     if( compress != null && !Boolean.parseBoolean( compress ) )
       return null;
 
-    String codecs = (String) getProperty( SPILL_CODECS );
+    codecs = (String) getProperty( HadoopProperties.COGROUP_SPILL_CODECS );
 
     if( codecs == null || codecs.length() == 0 )
-      codecs = defaultCodecs;
+      codecs = HadoopProperties.defaultCodecs;
 
     Class<? extends CompressionCodec> codecClass = null;
 
@@ -358,7 +335,9 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
       return null;
       }
 
-    return ReflectionUtils.newInstance( codecClass, jobConf );
+    codec = ReflectionUtils.newInstance( codecClass, jobConf );
+
+    return codec;
     }
 
   @Override

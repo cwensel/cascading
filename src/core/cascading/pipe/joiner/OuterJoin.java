@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.pipe.joiner;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import cascading.tuple.Tuple;
  */
 public class OuterJoin implements Joiner
   {
-  public Iterator<Tuple> getIterator( GroupClosure closure )
+  public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );
     }
@@ -46,7 +46,7 @@ public class OuterJoin implements Joiner
     {
     List[] singletons;
 
-    public JoinIterator( GroupClosure closure )
+    public JoinIterator( JoinerClosure closure )
       {
       super( closure );
       }

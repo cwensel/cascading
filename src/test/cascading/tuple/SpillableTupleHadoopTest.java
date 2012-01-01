@@ -23,7 +23,7 @@ package cascading.tuple;
 import java.util.Iterator;
 
 import cascading.CascadingTestCase;
-import cascading.flow.hadoop.HadoopSpillableTupleList;
+import cascading.tuple.hadoop.HadoopSpillableTupleList;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -42,7 +42,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     }
 
   @Test
-  public void testSpill()
+  public void testSpillList()
     {
     long time = System.currentTimeMillis();
 
@@ -58,7 +58,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     }
 
   @Test
-  public void testSpillCompressed()
+  public void testSpillListCompressed()
     {
     GzipCodec codec = ReflectionUtils.newInstance( GzipCodec.class, new JobConf() );
 
@@ -77,7 +77,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
   private void performSpillTest( int size, int threshold, CompressionCodec codec )
     {
-    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, null, codec );
+    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec );
 
     for( int i = 0; i < size; i++ )
       {

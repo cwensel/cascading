@@ -24,24 +24,23 @@ import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
-import cascading.flow.stream.GroupGate;
+import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
-import cascading.pipe.Group;
-import cascading.pipe.cogroup.GroupByClosure;
+import cascading.pipe.Splice;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
  *
  */
-public abstract class HadoopGroupGate extends GroupGate
+public abstract class HadoopGroupGate extends SpliceGate
   {
-  protected GroupByClosure closure;
+  protected HadoopGroupByClosure closure;
   protected OutputCollector collector;
 
-  public HadoopGroupGate( FlowProcess flowProcess, Group group, Role role )
+  public HadoopGroupGate( FlowProcess flowProcess, Splice splice, Role role )
     {
-    super( flowProcess, group, role );
+    super( flowProcess, splice, role );
     }
 
   @Override
@@ -79,9 +78,9 @@ public abstract class HadoopGroupGate extends GroupGate
 
     closure.reset( key, values );
 
-    values = group.getJoiner().getIterator( closure );
+    values = splice.getJoiner().getIterator( closure );
 
-    groupingEntry.setTuple( key );
+    keyEntry.setTuple( key );
     tupleEntryIterator.reset( values );
 
     next.receive( this, grouping );

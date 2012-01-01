@@ -27,7 +27,6 @@ import java.util.Properties;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
@@ -132,15 +131,9 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     }
 
   @Override
-  public SpillableTupleList createSpillableTupleList()
-    {
-    return null;
-    }
-
-  @Override
   public FlowProcess copyWith( Properties object )
     {
-    return null;
+    return new LocalFlowProcess( object );
     }
 
   @Override

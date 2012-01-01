@@ -28,12 +28,17 @@ import java.util.TreeSet;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.FlowStep;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
-import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Join;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.tap.Tap;
+
+import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
 
 /**
  *
@@ -112,22 +117,22 @@ public abstract class StepStreamGraph extends StreamGraph
       else
         throw new IllegalStateException( "unknown operation: " + everyElement.getOperation().getClass().getCanonicalName() );
       }
-    else if( element instanceof Group )
+    else if( element instanceof Splice )
       {
-      Group groupElement = (Group) element;
+      Splice spliceElement = (Splice) element;
 
-      if( groupElement.isGroupBy() )
-        rhsDuct = createGroupByGate( groupElement );
+      if( spliceElement.isGroupBy() )
+        rhsDuct = createGroupByGate( (GroupBy) spliceElement );
+      else if( spliceElement.isCoGroup() )
+        rhsDuct = createCoGroupGate( (CoGroup) spliceElement );
+      else if( spliceElement.isMerge() )
+        rhsDuct = createMergeStage( (Merge) element );
       else
-        rhsDuct = createCoGroupGate( groupElement );
+        rhsDuct = createJoinGate( (Join) element );
       }
     else if( element instanceof Tap )
       {
       rhsDuct = createSinkStage( (Tap) element );
-      }
-    else if( element instanceof Merge )
-      {
-      rhsDuct = createMergeStage( (Merge) element );
       }
     else
       throw new IllegalStateException( "unknown element type: " + element.getClass().getName() );
@@ -140,13 +145,60 @@ public abstract class StepStreamGraph extends StreamGraph
     return new SinkStage( flowProcess, (Tap) element );
     }
 
-  protected abstract Gate createCoGroupGate( Group element );
+  protected abstract Gate createCoGroupGate( CoGroup element );
 
-  protected abstract Gate createGroupByGate( Group element );
+  protected abstract Gate createGroupByGate( GroupBy element );
 
   protected Duct createMergeStage( Merge merge )
     {
     return new MergeStage( flowProcess, merge );
+    }
+
+  protected Gate createJoinGate( Join join )
+    {
+    if( join.getNumSelfJoins() != 0 )
+      return createBlockingJoinGate( join );
+
+    // lets not block the streamed side unless it will cause a deadlock
+    if( joinHasSameStreamedSource( join ) )
+      return createBlockingJoinGate( join );
+
+    return createNonBlockingJoinGate( join );
+    }
+
+  protected MemoryJoinGate createNonBlockingJoinGate( Join join )
+    {
+    return new MemoryJoinGate( flowProcess, join );
+    }
+
+  protected MemoryCoGroupGate createBlockingJoinGate( Join join )
+    {
+    return new MemoryCoGroupGate( flowProcess, join );
+    }
+
+  private boolean joinHasSameStreamedSource( Join join )
+    {
+    if( !step.getJoins().isEmpty() )
+      {
+      // if streamed source is multi path
+      Object tap = step.getJoins().get( join );
+
+      return getNumImmediateBranches( (FlowElement) tap, join ) > 1;
+      }
+
+    // means we are in local mode if joins is empty
+    for( Object tap : step.getSources() )
+      {
+      if( getNumImmediateBranches( (FlowElement) tap, join ) > 1 )
+        return true;
+      }
+
+    return false;
+    }
+
+  private int getNumImmediateBranches( FlowElement tap, Join join )
+    {
+    return countOrderedDirectPathsBetween( step.getGraph(), (FlowElement) tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )

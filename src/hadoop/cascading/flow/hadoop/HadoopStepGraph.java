@@ -30,8 +30,11 @@ import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.PlannerException;
 import cascading.pipe.Group;
+import cascading.pipe.Join;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -39,6 +42,9 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
+import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 
 /**
  *
@@ -109,7 +115,7 @@ public class HadoopStepGraph extends FlowStepGraph
     // support multiple paths from source to sink
     // this allows for self joins on groups, even with different operation stacks between them
     // note we must ignore paths with intermediate taps
-    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetween( source, sink );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( elementGraph, source, sink );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -140,6 +146,16 @@ public class HadoopStepGraph extends FlowStepGraph
           {
           step.addGroup( (Group) rhs );
           onMapSide = false;
+          }
+        else if( rhs instanceof Join )
+          {
+          if( !onMapSide )
+            throw new PlannerException( "joins must not present Reduce side" );
+
+          Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( elementGraph, source, (Splice) rhs );
+
+          if( sourcePaths.containsKey( 0 ) )
+            step.addJoin( (Join) rhs, source );
           }
         else if( rhs instanceof Pipe ) // add relevant traps to step
           {

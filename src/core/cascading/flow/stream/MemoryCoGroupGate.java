@@ -18,29 +18,21 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.stream;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.stream.Duct;
-import cascading.flow.stream.MemorySpliceGate;
 import cascading.pipe.Splice;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
 
 /**
  *
  */
-public class LocalGroupByGate extends MemorySpliceGate
+public class MemoryCoGroupGate extends MemorySpliceGate
   {
-  private ListMultimap<Tuple, Tuple> valueMap;
-
-  public LocalGroupByGate( FlowProcess flowProcess, Splice splice )
+  public MemoryCoGroupGate( FlowProcess flowProcess, Splice splice )
     {
     super( flowProcess, splice );
     }
@@ -51,33 +43,21 @@ public class LocalGroupByGate extends MemorySpliceGate
     return true;
     }
 
-  private ListMultimap<Tuple, Tuple> initNewValueMap()
-    {
-    return (ListMultimap<Tuple, Tuple>) Multimaps.synchronizedListMultimap( ArrayListMultimap.<Tuple, Tuple>create() );
-    }
-
-  @Override
-  public void prepare()
-    {
-    super.prepare();
-
-    valueMap = initNewValueMap();
-    }
-
   @Override
   public void start( Duct previous )
     {
-    // chained below in #complete()
     }
 
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ 0 ] );
+    int pos = (int) posMap.get( previous );
+
+    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ pos ] );
     Tuple valuesTuple = incomingEntry.getTupleCopy();
 
     keys.add( groupTuple );
-    valueMap.put( groupTuple, valuesTuple );
+    keyValues[ pos ].get( groupTuple ).add( valuesTuple );
     }
 
   @Override
@@ -90,17 +70,19 @@ public class LocalGroupByGate extends MemorySpliceGate
 
     try
       {
-      // no need to synchronize here as we are guaranteed all writer threads are completed
+      Collection[] collections = new Collection[ orderedPrevious.length ];
+
       for( Tuple groupTuple : keys )
         {
+        for( int i = 0; i < keyValues.length; i++ )
+          collections[ i ] = keyValues[ i ].get( groupTuple );
+
+        closure.reset( collections );
+
         keyEntry.setTuple( groupTuple );
 
-        List<Tuple> tuples = valueMap.get( groupTuple );
-
-        if( valueComparators != null )
-          Collections.sort( tuples, valueComparators[ 0 ] );
-
-        tupleEntryIterator.reset( tuples.iterator() );
+        // create Closure type here
+        tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
 
         next.receive( this, grouping );
         }
@@ -108,7 +90,8 @@ public class LocalGroupByGate extends MemorySpliceGate
     finally
       {
       keys = createKeySet();
-      valueMap = initNewValueMap();
+      keyValues = createKeyValuesArray();
+
       count.set( allPrevious.length );
 
       next.complete( this );

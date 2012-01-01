@@ -21,16 +21,16 @@
 package cascading.flow.stream;
 
 import cascading.flow.FlowProcess;
-import cascading.pipe.Merge;
+import cascading.pipe.Join;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class MergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class JoinStage extends ElementStage<TupleEntry, TupleEntry>
   {
-  public MergeStage( FlowProcess flowProcess, Merge merge )
+  public JoinStage( FlowProcess flowProcess, Join join )
     {
-    super( flowProcess, merge );
+    super( flowProcess, join );
     }
   }

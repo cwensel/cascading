@@ -46,9 +46,9 @@ import org.junit.Test;
 import static data.InputData.*;
 
 @PlatformRunner.Platform({LocalPlatform.class, HadoopPlatform.class})
-public class SplicePipesPlatformTest extends PlatformTestCase
+public class MergePipesPlatformTest extends PlatformTestCase
   {
-  public SplicePipesPlatformTest()
+  public MergePipesPlatformTest()
     {
     super( true ); // leave cluster testing enabled
     }

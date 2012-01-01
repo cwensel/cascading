@@ -30,7 +30,7 @@ import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.hadoop.HadoopProperties;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -349,7 +349,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    properties.put( HadoopFlowProcess.SPILL_THRESHOLD, 1 );
+    properties.put( HadoopProperties.COGROUP_SPILL_THRESHOLD, 1 );
 //    String serializations = MultiMapReducePlanner.getJobConf( properties ).get( "io.serializations" );
 //    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
 //    System.out.println( "serializations = " + serializations );

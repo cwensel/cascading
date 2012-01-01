@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,13 +40,15 @@ import cascading.flow.Scope;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
 import cascading.operation.Operation;
-import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.Join;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
+import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -100,6 +103,8 @@ public abstract class FlowStep<Config> implements Serializable
 
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
+
+  protected final Map<Join, Tap> joins = new LinkedHashMap<Join, Tap>(); // leftmost sources
 
   private transient FlowStepJob flowStepJob;
 
@@ -256,6 +261,21 @@ public abstract class FlowStep<Config> implements Serializable
       groups.add( group );
     }
 
+  public Map<Join, Tap> getJoins()
+    {
+    return joins;
+    }
+
+  public void addJoin( Join join, Tap leftMostSource )
+    {
+    joins.put( join, leftMostSource );
+    }
+
+  public boolean hasJoins()
+    {
+    return !joins.isEmpty();
+    }
+
   public void addSource( String name, Tap source )
     {
     if( !sources.containsKey( source ) )
@@ -400,6 +420,49 @@ public abstract class FlowStep<Config> implements Serializable
     return Graphs.successorListOf( graph, element );
     }
 
+  public Set<Tap> getJoinTributariesBetween( FlowElement from, FlowElement to )
+    {
+    Set<Join> joins = new HashSet<Join>();
+    List<GraphPath<FlowElement, Scope>> paths = getPathsBetween( from, to );
+
+    for( GraphPath<FlowElement, Scope> path : paths )
+      {
+      for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
+        {
+        if( flowElement instanceof Join )
+          joins.add( (Join) flowElement );
+        }
+      }
+
+    Set<Tap> tributaries = new HashSet<Tap>();
+
+    for( Join join : joins )
+      {
+      for( Tap source : sources.keySet() )
+        {
+        if( !getPathsBetween( source, join ).isEmpty() )
+          tributaries.add( source );
+        }
+      }
+
+    return tributaries;
+    }
+
+  private List<GraphPath<FlowElement, Scope>> getPathsBetween( FlowElement from, FlowElement to )
+    {
+    KShortestPaths<FlowElement, Scope> paths = new KShortestPaths<FlowElement, Scope>( graph, from, Integer.MAX_VALUE );
+
+    if( paths == null )
+      return Collections.EMPTY_LIST;
+
+    List<GraphPath<FlowElement, Scope>> results = paths.getPaths( to );
+
+    if( results == null )
+      return Collections.EMPTY_LIST;
+
+    return results;
+    }
+
   public Collection<Operation> getAllOperations()
     {
     Set<FlowElement> vertices = getGraph().vertexSet();
@@ -414,34 +477,12 @@ public abstract class FlowStep<Config> implements Serializable
     return operations;
     }
 
-  public Every[] getAllNextEveryOf( Every every )
-    {
-    List<Every> elements = new ArrayList<Every>();
-
-    elements.add( every );
-
-    // should be no branching
-    handleNext( elements, every );
-
-    return elements.toArray( new Every[ elements.size() ] );
-    }
-
-  private void handleNext( List<Every> elements, Every element )
-    {
-    List<FlowElement> successors = getSuccessors( element );
-    FlowElement successor = successors.get( 0 );
-
-    if( !( successor instanceof Every ) )
-      return;
-
-    if( successors.size() != 1 )
-      throw new IllegalStateException( "no branching allowed after an Every" );
-
-    elements.add( (Every) successor );
-
-    handleNext( elements, (Every) successor );
-    }
-
+  /**
+   * Returns true if this FlowStep contains a pipe/branch with the given name.
+   *
+   * @param pipeName
+   * @return
+   */
   public boolean containsPipeNamed( String pipeName )
     {
     Set<FlowElement> vertices = getGraph().vertexSet();

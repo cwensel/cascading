@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.pipe.joiner;
 
 import java.util.Iterator;
 
@@ -29,13 +29,13 @@ import cascading.tuple.Tuple;
  * a left outer, right inner join of the CoGrouper internal grouped tuple collections.
  * <p/>
  * Note only the farthest left tuple stream will be used as the outer join. All following joins to the right will
- * be inner joins. See {@link cascading.pipe.cogroup.MixedJoin} for more flexibility.
+ * be inner joins. See {@link MixedJoin} for more flexibility.
  *
- * @see cascading.pipe.cogroup.MixedJoin
+ * @see MixedJoin
  */
 public class RightJoin implements Joiner
   {
-  public Iterator<Tuple> getIterator( GroupClosure closure )
+  public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );
     }
@@ -48,7 +48,7 @@ public class RightJoin implements Joiner
   protected static class JoinIterator extends OuterJoin.JoinIterator
     {
 
-    public JoinIterator( GroupClosure closure )
+    public JoinIterator( JoinerClosure closure )
       {
       super( closure );
       }

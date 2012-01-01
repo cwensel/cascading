@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.stream;
 
 import java.util.Comparator;
 

@@ -25,6 +25,14 @@ package cascading.pipe;
  * <p/>
  * The behavior is similar to the {@link GroupBy} merging features, but Merge does not perform any grouping or
  * sorting on keys. Thus, when using a MapReduce platform, no Reducer is required.
+ * <p/>
+ * Merge is non-blocking and performs no processing. Any number of branches and merges may be performed in a
+ * {@link cascading.flow.Flow} without triggering any additional MapReduce jobs on the Hadoop platform.
+ * <p/>
+ * Unlike {@link Join}, no preference need be made for left-hand or right-hand sided-ness of streams in relation
+ * to their sizes.
+ *
+ * @see GroupBy
  */
 public class Merge extends Splice
   {

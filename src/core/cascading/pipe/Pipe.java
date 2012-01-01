@@ -114,7 +114,7 @@ public class Pipe implements FlowElement, Serializable
 
   static Pipe resolvePrevious( Pipe pipe )
     {
-    if( pipe instanceof Group || pipe instanceof Operator )
+    if( pipe instanceof Splice || pipe instanceof Operator )
       return pipe;
 
     Pipe[] pipes = pipe.getPrevious();
@@ -124,7 +124,7 @@ public class Pipe implements FlowElement, Serializable
 
     for( Pipe previous : pipes )
       {
-      if( previous instanceof Group || previous instanceof Operator )
+      if( previous instanceof Splice || previous instanceof Operator )
         return previous;
 
       return resolvePrevious( previous );

@@ -56,7 +56,7 @@ import cascading.tuple.Tuple;
  * It should be noted for MapReduce systems, distributed group sorting is not 'total'. That is groups are sorted
  * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
  */
-public class GroupBy extends Group
+public class GroupBy extends Splice implements Group
   {
   /**
    * Creates a new GroupBy instance that will group on {@link Fields#ALL} fields.

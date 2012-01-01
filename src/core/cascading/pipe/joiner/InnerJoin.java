@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.pipe.joiner;
 
 import java.util.Iterator;
 
@@ -35,7 +35,7 @@ public class InnerJoin implements Joiner
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( InnerJoin.class );
 
-  public Iterator<Tuple> getIterator( GroupClosure closure )
+  public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );
     }
@@ -47,11 +47,11 @@ public class InnerJoin implements Joiner
 
   protected static class JoinIterator implements Iterator<Tuple>
     {
-    final GroupClosure closure;
+    final JoinerClosure closure;
     Iterator[] iterators;
     Comparable[] lastValues;
 
-    public JoinIterator( GroupClosure closure )
+    public JoinIterator( JoinerClosure closure )
       {
       this.closure = closure;
 

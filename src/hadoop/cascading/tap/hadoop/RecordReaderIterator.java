@@ -22,7 +22,7 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 
-import cascading.util.SingleValueIterator;
+import cascading.util.SingleValueCloseableIterator;
 import org.apache.hadoop.mapred.RecordReader;
 
 /**
@@ -32,7 +32,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * This class is frequently used with the {@link cascading.tuple.TupleEntrySchemeIterator} where there is only
  * one RecordReader to iterate values over.
  */
-public class RecordReaderIterator extends SingleValueIterator<RecordReader>
+public class RecordReaderIterator extends SingleValueCloseableIterator<RecordReader>
   {
   public RecordReaderIterator( RecordReader reader )
     {

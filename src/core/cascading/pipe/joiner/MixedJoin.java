@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.pipe.joiner;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -56,14 +56,14 @@ public class MixedJoin implements Joiner
     return asInner.length - 1;
     }
 
-  public Iterator<Tuple> getIterator( GroupClosure closure )
+  public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );
     }
 
   protected class JoinIterator extends OuterJoin.JoinIterator
     {
-    public JoinIterator( GroupClosure closure )
+    public JoinIterator( JoinerClosure closure )
       {
       super( closure );
       }

@@ -25,10 +25,13 @@ import java.util.List;
 import cascading.flow.FlowElement;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
-import cascading.flow.stream.GroupGate;
 import cascading.flow.stream.SinkStage;
+import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StepStreamGraph;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Join;
 import cascading.tap.Tap;
 
 /**
@@ -45,6 +48,8 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
+    printGraph( step.getID(), "reduce", flowProcess.getCurrentTaskNum() );
+
     bind();
     }
 
@@ -55,9 +60,9 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     Duct rhsDuct = null;
 
     if( group.isGroupBy() )
-      rhsDuct = new HadoopGroupByGate( flowProcess, group, GroupGate.Role.source );
+      rhsDuct = new HadoopGroupByGate( flowProcess, (GroupBy) group, SpliceGate.Role.source );
     else
-      rhsDuct = new HadoopCoGroupGate( flowProcess, group, GroupGate.Role.source );
+      rhsDuct = new HadoopCoGroupGate( flowProcess, (CoGroup) group, SpliceGate.Role.source );
 
     addHead( rhsDuct );
 
@@ -70,12 +75,18 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     return new HadoopSinkStage( flowProcess, element );
     }
 
-  protected Gate createCoGroupGate( Group element )
+  protected Gate createCoGroupGate( CoGroup element )
     {
     throw new IllegalStateException( "should not happen" );
     }
 
-  protected Gate createGroupByGate( Group element )
+  protected Gate createGroupByGate( GroupBy element )
+    {
+    throw new IllegalStateException( "should not happen" );
+    }
+
+  @Override
+  protected Gate createJoinGate( Join join )
     {
     throw new IllegalStateException( "should not happen" );
     }

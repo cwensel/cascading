@@ -29,7 +29,7 @@ public class OperatorException extends CascadingException
   {
   enum Kind
     {
-      argument, grouping, sorting
+      argument, grouping, sorting, joining
     }
 
   private Fields incomingFields;

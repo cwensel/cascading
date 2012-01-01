@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.tuple.hadoop;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,16 +27,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.TupleException;
 import cascading.tuple.TupleInputStream;
 import cascading.tuple.TupleOutputStream;
-import cascading.tuple.hadoop.HadoopTupleInputStream;
-import cascading.tuple.hadoop.HadoopTupleOutputStream;
-import cascading.tuple.hadoop.TupleSerialization;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link cascading.tuple.Tuple} instances by spilling
@@ -44,32 +40,34 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class HadoopSpillableTupleList extends SpillableTupleList
   {
-
   /** Field codec */
-  private CompressionCodec codec = null;
+  private final CompressionCodec codec;
   /** Field serializationElementWriter */
-  private TupleSerialization tupleSerialization;
+  private final TupleSerialization tupleSerialization;
 
   /**
    * Constructor SpillableTupleList creates a new SpillableTupleList instance using the given threshold value, and
    * the first available compression codec, if any.
    *
    * @param threshold of type long
-   * @param conf
    * @param codec     of type CompressionCodec
    */
-  public HadoopSpillableTupleList( long threshold, JobConf conf, CompressionCodec codec )
+  public HadoopSpillableTupleList( long threshold, CompressionCodec codec )
     {
-    this( threshold, conf, codec, null );
+    super( threshold, null );
+    this.codec = codec;
+    this.tupleSerialization = new TupleSerialization();
     }
 
-  public HadoopSpillableTupleList( long threshold, JobConf conf, CompressionCodec codec, FlowProcess flowProcess )
+  public HadoopSpillableTupleList( long threshold, HadoopFlowProcess flowProcess )
     {
     super( threshold, flowProcess );
-    this.codec = codec;
+    this.codec = flowProcess.getCoGroupCompressionCodec();
 
-    if( conf != null )
-      tupleSerialization = new TupleSerialization( conf );
+    if( flowProcess == null )
+      this.tupleSerialization = new TupleSerialization();
+    else
+      this.tupleSerialization = new TupleSerialization( flowProcess.getJobConf() );
     }
 
   @Override
@@ -84,10 +82,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       else
         outputStream = codec.createOutputStream( new FileOutputStream( file ) );
 
-      if( tupleSerialization == null )
-        return new HadoopTupleOutputStream( outputStream, new TupleSerialization().getElementWriter() );
-      else
-        return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() );
+      return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() );
       }
     catch( IOException exception )
       {
@@ -107,10 +102,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       else
         inputStream = codec.createInputStream( new FileInputStream( file ) );
 
-      if( tupleSerialization == null )
-        return new HadoopTupleInputStream( inputStream, new TupleSerialization().getElementReader() );
-      else
-        return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() );
+      return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() );
       }
     catch( IOException exception )
       {

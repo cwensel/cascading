@@ -28,8 +28,8 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.pipe.Group;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -39,7 +39,7 @@ import cascading.tuple.TupleEntryIterator;
 /**
  *
  */
-public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements ElementDuct
+public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements ElementDuct
   {
   protected Duct[] orderedPrevious;
 
@@ -54,27 +54,26 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
   private TrapHandler trapHandler;
   private Set<String> branchNames;
 
-  protected final Group group;
+  protected final Splice splice;
   protected final List<Scope> incomingScopes = new ArrayList<Scope>();
   protected final List<Scope> outgoingScopes = new ArrayList<Scope>();
-  protected Fields[] groupFields;
+  protected Fields[] keyFields;
   protected Fields[] sortFields;
   protected Fields[] valuesFields;
 
-
   protected Grouping<TupleEntry, TupleEntryIterator> grouping;
   protected TupleEntryChainIterator tupleEntryIterator;
-  protected TupleEntry groupingEntry;
+  protected TupleEntry keyEntry;
 
-  public GroupGate( FlowProcess flowProcess, Group group )
+  public SpliceGate( FlowProcess flowProcess, Splice splice )
     {
-    this.group = group;
+    this.splice = splice;
     this.flowProcess = flowProcess;
     }
 
-  public GroupGate( FlowProcess flowProcess, Group group, Role role )
+  public SpliceGate( FlowProcess flowProcess, Splice splice, Role role )
     {
-    this.group = group;
+    this.splice = splice;
     this.flowProcess = flowProcess;
     this.role = role;
     }
@@ -122,17 +121,17 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     if( outgoingScopes.size() == 0 )
       throw new IllegalStateException( "outgoing scope may not be empty" );
 
-    groupFields = new Fields[ incomingScopes.size() ];
+    keyFields = new Fields[ incomingScopes.size() ];
     valuesFields = new Fields[ incomingScopes.size() ];
 
-    if( group.isSorted() )
+    if( splice.isSorted() )
       sortFields = new Fields[ incomingScopes.size() ];
 
     for( Scope incomingScope : incomingScopes )
       {
-      int pos = group.getPipePos().get( incomingScope.getName() );
+      int pos = splice.getPipePos().get( incomingScope.getName() );
 
-      groupFields[ pos ] = outgoingScopes.get( 0 ).getGroupingSelectors().get( incomingScope.getName() );
+      keyFields[ pos ] = outgoingScopes.get( 0 ).getKeySelectors().get( incomingScope.getName() );
       valuesFields[ pos ] = incomingScope.getOutValuesFields();
 
       if( sortFields != null )
@@ -142,18 +141,18 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     if( role == Role.sink )
       return;
 
-    groupingEntry = new TupleEntry( outgoingScopes.get( 0 ).getOutGroupingFields(), true );
+    keyEntry = new TupleEntry( outgoingScopes.get( 0 ).getOutGroupingFields(), true );
     tupleEntryIterator = new TupleEntryChainIterator( outgoingScopes.get( 0 ).getOutValuesFields() );
 
     grouping = new Grouping<TupleEntry, TupleEntryIterator>();
-    grouping.group = groupingEntry;
+    grouping.key = keyEntry;
     grouping.iterator = tupleEntryIterator;
     }
 
   @Override
   public FlowElement getFlowElement()
     {
-    return group;
+    return splice;
     }
 
   @Override
@@ -192,9 +191,9 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     {
     orderedPrevious = new Duct[ incomingScopes.size() ];
 
-    for( int i = 0; i < group.getPrevious().length; i++ )
+    for( int i = 0; i < splice.getPrevious().length; i++ )
       {
-      Pipe next = group.getPrevious()[ i ];
+      Pipe next = splice.getPrevious()[ i ];
 
       int[] depth = new int[ allPrevious.length ];
 
@@ -249,12 +248,12 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     {
     if( this == object )
       return true;
-    if( !( object instanceof GroupGate ) )
+    if( !( object instanceof SpliceGate ) )
       return false;
 
-    GroupGate groupGate = (GroupGate) object;
+    SpliceGate spliceGate = (SpliceGate) object;
 
-    if( group != null ? group != groupGate.group : groupGate.group != null )
+    if( splice != null ? splice != spliceGate.splice : spliceGate.splice != null )
       return false;
 
     return true;
@@ -263,7 +262,7 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
   @Override
   public final int hashCode()
     {
-    return group != null ? System.identityHashCode( group ) : 0;
+    return splice != null ? System.identityHashCode( splice ) : 0;
     }
 
   @Override
@@ -271,7 +270,7 @@ public abstract class GroupGate extends Gate<TupleEntry, Grouping<TupleEntry, Tu
     {
     final StringBuilder sb = new StringBuilder();
     sb.append( getClass().getSimpleName() );
-    sb.append( "{group=" ).append( group );
+    sb.append( "{group=" ).append( splice );
     sb.append( '}' );
     return sb.toString();
     }

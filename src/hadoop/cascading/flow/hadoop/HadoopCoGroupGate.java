@@ -27,9 +27,8 @@ import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
-import cascading.flow.stream.GroupGate;
-import cascading.pipe.Group;
-import cascading.pipe.cogroup.CoGroupClosure;
+import cascading.flow.stream.SpliceGate;
+import cascading.pipe.CoGroup;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -43,10 +42,9 @@ public class HadoopCoGroupGate extends HadoopGroupGate
   {
   private final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
 
-
-  public HadoopCoGroupGate( FlowProcess flowProcess, Group group, GroupGate.Role role )
+  public HadoopCoGroupGate( FlowProcess flowProcess, CoGroup coGroup, SpliceGate.Role role )
     {
-    super( flowProcess, group, role );
+    super( flowProcess, coGroup, role );
     }
 
   @Override
@@ -65,7 +63,7 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     makePosMap( posMap );
 
     if( role != Role.sink )
-      closure = new CoGroupClosure( flowProcess, group.getNumSelfJoins(), groupFields, valuesFields );
+      closure = new HadoopCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
     }
 
   @Override
@@ -73,9 +71,9 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     {
     Integer pos = posMap.get( previous );
 
-    Tuple groupTuple = incomingEntry.selectTuple( groupFields[ pos ] );
+    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ pos ] );
     Tuple sortTuple = sortFields == null ? null : incomingEntry.selectTuple( sortFields[ pos ] );
-    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, groupFields[ pos ] );
+    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, keyFields[ pos ] );
 
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 

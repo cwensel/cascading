@@ -126,7 +126,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       if( getGroup().isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
 
-      addComparators( conf, "cascading.group.comparator", getGroup().getGroupingSelectors() );
+      addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors() );
 
       if( getGroup().isGroupBy() )
         addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors() );
@@ -277,7 +277,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     {
     // handles case where same tap is used on multiple branches
     // we do not want to init the same tap multiple times
-    Set<Tap> uniqueSources = sources.keySet();
+    Set<Tap> uniqueSources = getUniqueStreamedSources();
 
     JobConf[] fromJobs = new JobConf[ uniqueSources.size() ];
     int i = 0;
@@ -291,6 +291,14 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       }
 
     MultiInputFormat.addInputFormat( conf, fromJobs );
+    }
+
+  private Set<Tap> getUniqueStreamedSources()
+    {
+    if( !hasJoins() )
+      return sources.keySet();
+
+    return new HashSet<Tap>( getJoins().values() );
     }
 
   protected void initFromSink( FlowProcess<JobConf> flowProcess, JobConf conf ) throws IOException

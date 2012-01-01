@@ -24,8 +24,7 @@ import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
-import cascading.pipe.Group;
-import cascading.pipe.cogroup.GroupByClosure;
+import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TuplePair;
@@ -36,9 +35,9 @@ import cascading.tuple.Tuples;
  */
 public class HadoopGroupByGate extends HadoopGroupGate
   {
-  public HadoopGroupByGate( FlowProcess flowProcess, Group group, Role role )
+  public HadoopGroupByGate( FlowProcess flowProcess, GroupBy groupBy, Role role )
     {
-    super( flowProcess, group, role );
+    super( flowProcess, groupBy, role );
     }
 
   @Override
@@ -47,15 +46,15 @@ public class HadoopGroupByGate extends HadoopGroupGate
     super.prepare();
 
     if( role != Role.sink )
-      closure = new GroupByClosure( flowProcess, groupFields, valuesFields );
+      closure = new HadoopGroupByClosure( flowProcess, keyFields, valuesFields );
     }
 
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    Tuple groupTuple = incomingEntry.selectTuple( groupFields[ 0 ] );
+    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ 0 ] );
     Tuple sortTuple = sortFields == null ? null : incomingEntry.selectTuple( sortFields[ 0 ] );
-    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, groupFields[ 0 ] );
+    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, keyFields[ 0 ] );
 
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 

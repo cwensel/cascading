@@ -39,6 +39,7 @@ import cascading.operation.DebugLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.Join;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -50,6 +51,8 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public abstract class FlowPlanner
@@ -545,18 +548,87 @@ public abstract class FlowPlanner
           {
           foundGroup = true;
           }
-        else if( flowElement instanceof Group && foundGroup ) // add tap between groups
+        else if( flowElement instanceof Splice && foundGroup ) // add tap between groups, push joins/merge map side
           {
           tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
-          }
-        else if( flowElement instanceof Splice && foundGroup ) // add tap between groups
-          {
-          tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
-          foundGroup = false;
+
+          if( !( flowElement instanceof Group ) )
+            foundGroup = false;
           }
         else if( flowElement instanceof Tap )
           {
           foundGroup = false;
+          }
+        }
+
+      for( Pipe pipe : tapInsertions )
+        insertTempTapAfter( elementGraph, pipe );
+
+      if( !tapInsertions.isEmpty() )
+        return false;
+      }
+
+    return true;
+    }
+
+  /**
+   * Prevent leftmost sources from sourcing a downstream join on the rightmost side intra-task by inserting a
+   * temp tap between the left-sourced join and right-sourced join.
+   *
+   * @param elementGraph
+   */
+  protected void handleJoins( ElementGraph elementGraph )
+    {
+    while( !internalJoins( elementGraph ) )
+      ;
+    }
+
+  private boolean internalJoins( ElementGraph elementGraph )
+    {
+    for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetweenExtents() )
+      {
+      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+      List<Pipe> tapInsertions = new ArrayList<Pipe>();
+      List<Join> joins = new ArrayList<Join>();
+
+      FlowElement lastSourceElement = null;
+
+      for( int i = 0; i < flowElements.size(); i++ )
+        {
+        FlowElement flowElement = flowElements.get( i );
+
+        if( flowElement instanceof Join )
+          {
+          joins.add( (Join) flowElement );
+          }
+        else if( flowElement instanceof Tap || flowElement instanceof Group )
+          {
+          if( joins.size() < 2 )
+            {
+            lastSourceElement = flowElement;
+            joins.clear();
+            continue;
+            }
+
+          for( int j = 0; j < joins.size(); j++ )
+            {
+            Join join = joins.get( j );
+
+            Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );
+
+            boolean isLeftMost = pathCounts.containsKey( 0 );
+
+            if( isLeftMost )
+              continue;
+
+            if( j == 0 ) // is rightmost on first join
+              break;
+
+            tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
+            break;
+            }
+
+          lastSourceElement = flowElement;
           }
         }
 

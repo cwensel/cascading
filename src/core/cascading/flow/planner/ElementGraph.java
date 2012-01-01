@@ -331,7 +331,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<GraphPath<FlowElement, Scope>> getAllShortestPathsFrom( FlowElement flowElement )
     {
-    return getAllShortestPathsBetween( flowElement, tail );
+    return ElementGraphs.getAllShortestPathsBetween( this, flowElement, tail );
     }
 
   /**
@@ -342,7 +342,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    */
   public List<GraphPath<FlowElement, Scope>> getAllShortestPathsTo( FlowElement flowElement )
     {
-    return getAllShortestPathsBetween( head, flowElement );
+    return ElementGraphs.getAllShortestPathsBetween( this, head, flowElement );
     }
 
   /**
@@ -358,36 +358,6 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       return new ArrayList<GraphPath<FlowElement, Scope>>();
 
     return paths;
-    }
-
-  /**
-   * Method getAllShortestPathsBetween ...
-   *
-   * @param from of type FlowElement
-   * @param to   of type FlowElement
-   * @return List<GraphPath<FlowElement, Scope>>
-   */
-  public List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetween( FlowElement from, FlowElement to )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = new KShortestPaths<FlowElement, Scope>( this, from, Integer.MAX_VALUE ).getPaths( to );
-
-    if( paths == null )
-      return new ArrayList<GraphPath<FlowElement, Scope>>();
-
-    return paths;
-    }
-
-  public static List<List<FlowElement>> asPathList( List<GraphPath<FlowElement, Scope>> paths )
-    {
-    List<List<FlowElement>> results = new LinkedList<List<FlowElement>>();
-
-    if( paths == null )
-      return results;
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      results.add( Graphs.getPathVertexList( path ) );
-
-    return results;
     }
 
   /**
@@ -604,8 +574,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         LOG.debug( "setting outgoing arguments: " + outgoingScope.getArgumentsSelector() );
       if( outgoingScope.getDeclaredFields() != null )
         LOG.debug( "setting outgoing declared: " + outgoingScope.getDeclaredFields() );
-      if( outgoingScope.getGroupingSelectors() != null )
-        LOG.debug( "setting outgoing group: " + outgoingScope.getGroupingSelectors() );
+      if( outgoingScope.getKeySelectors() != null )
+        LOG.debug( "setting outgoing group: " + outgoingScope.getKeySelectors() );
       if( outgoingScope.getOutValuesSelector() != null )
         LOG.debug( "setting outgoing values: " + outgoingScope.getOutValuesSelector() );
       }
@@ -779,7 +749,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       if( flowElement != group )
         {
-        List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( flowElement, group );
+        List<GraphPath<FlowElement, Scope>> paths = ElementGraphs.getAllShortestPathsBetween( this, flowElement, group );
 
         if( paths != null )
           maxPaths = Math.max( maxPaths, paths.size() );

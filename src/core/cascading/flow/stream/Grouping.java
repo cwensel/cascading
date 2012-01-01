@@ -27,6 +27,6 @@ import java.util.Iterator;
  */
 public class Grouping<Group, ItemIterator extends Iterator>
   {
-  public Group group;
+  public Group key;
   public ItemIterator iterator;
   }

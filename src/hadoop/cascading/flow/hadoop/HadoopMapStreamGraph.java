@@ -21,15 +21,19 @@
 package cascading.flow.hadoop;
 
 import java.util.List;
+import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
-import cascading.flow.stream.GroupGate;
+import cascading.flow.stream.MemoryJoinGate;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
+import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StepStreamGraph;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
+import cascading.pipe.Join;
 import cascading.tap.Tap;
 
 /**
@@ -38,6 +42,7 @@ import cascading.tap.Tap;
 public class HadoopMapStreamGraph extends StepStreamGraph
   {
   private final Tap source;
+  private SourceStage streamedHead;
 
   public HadoopMapStreamGraph( HadoopFlowProcess flowProcess, HadoopFlowStep step, Tap source )
     {
@@ -49,16 +54,37 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
+    printGraph( step.getID(), "map", flowProcess.getCurrentTaskNum() );
     bind();
+    }
+
+  public SourceStage getStreamedHead()
+    {
+    return streamedHead;
     }
 
   protected void buildGraph()
     {
-    Duct rhsDuct = new SourceStage( flowProcess, source );
+    streamedHead = handleHead( this.source );
 
-    addHead( rhsDuct );
+    FlowElement tail = step.getGroup() != null ? step.getGroup() : step.getSink();
+    Set<Tap> tributaries = step.getJoinTributariesBetween( this.source, tail );
 
-    handleDuct( (FlowElement) source, rhsDuct );
+    tributaries.remove( this.source );
+
+    for( Object source : tributaries )
+      handleHead( (Tap) source );
+    }
+
+  private SourceStage handleHead( Tap source )
+    {
+    SourceStage sourceDuct = new SourceStage( flowProcess, source );
+
+    addHead( sourceDuct );
+
+    handleDuct( source, sourceDuct );
+
+    return sourceDuct;
     }
 
   @Override
@@ -67,14 +93,20 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     return new HadoopSinkStage( flowProcess, element );
     }
 
-  protected Gate createCoGroupGate( Group element )
+  protected Gate createCoGroupGate( CoGroup element )
     {
-    return new HadoopCoGroupGate( flowProcess, element, GroupGate.Role.sink );
+    return new HadoopCoGroupGate( flowProcess, (CoGroup) element, SpliceGate.Role.sink );
     }
 
-  protected Gate createGroupByGate( Group element )
+  protected Gate createGroupByGate( GroupBy element )
     {
-    return new HadoopGroupByGate( flowProcess, element, GroupGate.Role.sink );
+    return new HadoopGroupByGate( flowProcess, (GroupBy) element, SpliceGate.Role.sink );
+    }
+
+  @Override
+  protected MemoryJoinGate createNonBlockingJoinGate( Join join )
+    {
+    return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }
 
   protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )

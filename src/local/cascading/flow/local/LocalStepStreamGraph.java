@@ -27,11 +27,13 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
+import cascading.flow.stream.MemoryCoGroupGate;
 import cascading.flow.stream.SourceStage;
 import cascading.flow.stream.StepStreamGraph;
-import cascading.flow.stream.SyncMergeStage;
-import cascading.pipe.Group;
+import cascading.pipe.CoGroup;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
+import cascading.pipe.Splice;
 import cascading.tap.Tap;
 
 /**
@@ -48,7 +50,8 @@ public class LocalStepStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
-//    printGraph( "streamgraph.dot" );
+    printGraph( step.getID(), "local", 0 );
+
     bind();
     }
 
@@ -64,14 +67,14 @@ public class LocalStepStreamGraph extends StepStreamGraph
       }
     }
 
-  protected Gate createCoGroupGate( Group element )
+  protected Gate createCoGroupGate( CoGroup element )
     {
-    return new LocalCoGroupGate( flowProcess, (Group) element );
+    return new MemoryCoGroupGate( flowProcess, (Splice) element );
     }
 
-  protected Gate createGroupByGate( Group element )
+  protected Gate createGroupByGate( GroupBy element )
     {
-    return new LocalGroupByGate( flowProcess, (Group) element );
+    return new LocalGroupByGate( flowProcess, (Splice) element );
     }
 
   @Override
@@ -79,6 +82,7 @@ public class LocalStepStreamGraph extends StepStreamGraph
     {
     return new SyncMergeStage( flowProcess, merge );
     }
+
 
   protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )
     {

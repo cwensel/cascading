@@ -18,28 +18,17 @@
  * limitations under the License.
  */
 
-package cascading.pipe.cogroup;
+package cascading.tuple;
 
-import java.io.Serializable;
-import java.util.Iterator;
-
-import cascading.tuple.Tuple;
-
-/** Interface Joiner allows for custom join strategies against a {@link CoGroupClosure}. */
-public interface Joiner extends Serializable
+/**
+ *
+ */
+public interface Spillable
   {
-  /**
-   * Returns an iterator that joins the given CoGroupClosure co-groups.
-   *
-   * @param closure of type GroupClosure
-   * @return an iterator
-   */
-  Iterator<Tuple> getIterator( GroupClosure closure );
+  interface Listener
+    {
+    void notify( Spillable spillable );
+    }
 
-  /**
-   * Returns the number of joins this instance can handle. A value of -1 denotes there is no limit.
-   *
-   * @return an int
-   */
-  int numJoins();
+  void setListener( Listener listener );
   }

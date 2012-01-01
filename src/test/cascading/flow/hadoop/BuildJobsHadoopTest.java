@@ -52,7 +52,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.InnerJoin;
+import cascading.pipe.joiner.InnerJoin;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextLine;

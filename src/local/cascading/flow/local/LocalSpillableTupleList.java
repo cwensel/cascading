@@ -18,19 +18,34 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.flow.local;
+
+import java.io.File;
 
 import cascading.flow.FlowProcess;
-import cascading.pipe.Merge;
-import cascading.tuple.TupleEntry;
+import cascading.tuple.SpillableTupleList;
+import cascading.tuple.TupleInputStream;
+import cascading.tuple.TupleOutputStream;
 
 /**
  *
  */
-public class MergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class LocalSpillableTupleList extends SpillableTupleList
   {
-  public MergeStage( FlowProcess flowProcess, Merge merge )
+  public LocalSpillableTupleList( FlowProcess flowProcess )
     {
-    super( flowProcess, merge );
+    super( -1, flowProcess ); // disable spills for now
+    }
+
+  @Override
+  protected TupleOutputStream createTupleOutputStream( File file )
+    {
+    throw new UnsupportedOperationException( "does not actually support spills" );
+    }
+
+  @Override
+  protected TupleInputStream createTupleInputStream( File file )
+    {
+    throw new UnsupportedOperationException( "does not actually support spills" );
     }
   }

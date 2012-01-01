@@ -21,6 +21,7 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowException;
@@ -92,13 +93,22 @@ public class FlowMapper implements MapRunnable
 
     streamGraph.prepare();
 
-    SourceStage head = (SourceStage) streamGraph.getHeads().iterator().next();
+    SourceStage streamedHead = streamGraph.getStreamedHead();
+    Iterator<Duct> iterator = streamGraph.getHeads().iterator();
 
     try
       {
       try
         {
-        head.run( input );
+        while( iterator.hasNext() )
+          {
+          Duct next = iterator.next();
+
+          if( next != streamedHead )
+            ( (SourceStage) next ).run( null );
+          }
+
+        streamedHead.run( input );
         }
       catch( IOException exception )
         {

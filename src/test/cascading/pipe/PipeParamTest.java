@@ -146,7 +146,7 @@ public class PipeParamTest extends CascadingTestCase
     {
     Pipe pipeFirst = new Pipe( "first" );
     Pipe pipeSecond = new Pipe( "second" );
-    Pipe pipe = new Group( pipeFirst, pipeSecond );
+    Pipe pipe = new CoGroup( pipeFirst, pipeSecond );
     pipe = new Pipe( pipe );
     pipe = new Pipe( pipe );
     pipe = new Pipe( pipe );

@@ -20,22 +20,33 @@
 
 package cascading.util;
 
-import java.io.Closeable;
 import java.io.IOException;
 
+import cascading.tuple.CloseableIterator;
+
 /**
+ * SingleValueIterator is a utility class used for quickly presenting a single value to a consumer
+ * expecting both a {@link java.io.Closeable} and an {@link java.util.Iterator} interface. After returning the Value
+ * value via {@link #next}, {@link #hasNext()} will return {@code false}.
+ * <p/>
+ * This class is especially useful if you do not wish to create a {@link java.util.Collection} to hold a single value
+ * in which to create an Iterator.
  *
+ * @param <Value>
  */
-public class SingleCloseableInputIterator extends SingleValueCloseableIterator<Closeable>
+public abstract class SingleValueCloseableIterator<Value> extends SingleValueIterator<Value> implements CloseableIterator<Value>
   {
-  public SingleCloseableInputIterator( Closeable input )
+
+  public SingleValueCloseableIterator( Value value )
     {
-    super( input );
+    super( value );
+    }
+
+  protected Value getCloseableInput()
+    {
+    return value;
     }
 
   @Override
-  public void close() throws IOException
-    {
-    getCloseableInput().close();
-    }
+  public abstract void close() throws IOException;
   }

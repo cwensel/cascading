@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
 
@@ -67,7 +66,7 @@ import cascading.util.Util;
  * <p/>
  * The {@code ALL} Fields set is a "wildcard" that represents all the current available fields.
  * <p/>
- * The {@code GROUP} Fields set represents all the fields used as grouping values in a previous {@link Group}.
+ * The {@code GROUP} Fields set represents all the fields used as grouping values in a previous {@link cascading.pipe.Splice}.
  * If there is no previous Group in the pipe assembly, the GROUP represents all the current field names.
  * <p/>
  * The {@code VALUES} Fields set represent all the fields not used as grouping fields in a previous Group.

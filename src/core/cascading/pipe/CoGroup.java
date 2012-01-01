@@ -22,12 +22,19 @@ package cascading.pipe;
 
 import java.beans.ConstructorProperties;
 
-import cascading.pipe.cogroup.InnerJoin;
-import cascading.pipe.cogroup.Joiner;
+import cascading.pipe.joiner.Joiner;
 import cascading.tuple.Fields;
 
 /**
- * The CoGroup pipe allows for two or more tuple streams to join into a single stream.
+ * The CoGroup pipe allows for two or more tuple streams to join into a single stream via an optional {@link Joiner}.
+ * <p/>
+ * If followed by an assembly of {@link Every}s to execute one or more {@link cascading.operation.Aggregator}s,
+ * they will be guaranteed to receive all values associated with a
+ * unique grouping key. In the case of a MapReduce platform, this invokes a {@code Reduce} task to guarantee
+ * all values are associated with a given unique grouping key.
+ * <p/>
+ * If no aggregations are to be performed, and one or more streams of data are small (may fit in reasonable memory),
+ * see the {@link Join} Pipe for partially non-blocking joins.
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
@@ -37,7 +44,7 @@ import cascading.tuple.Fields;
  * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' names
  * are equal, those names will be used for resultGroupFields.
  * <p/>
- * By default CoGroup performs an inner join via the {@link InnerJoin} {@link cascading.pipe.cogroup.Joiner} class.
+ * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin} {@link cascading.pipe.joiner.Joiner} class.
  * <p/>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once.
@@ -47,27 +54,26 @@ import cascading.tuple.Fields;
  * {@link java.util.Comparator} instances for the appropriate fields.
  * This allows fine grained control of the sort grouping order.
  * <p/>
- * CoGrouping, specifically joins, do not scale well when implemented over MapReduce. In Cascading there are two
+ * CoGrouping does not scale well when implemented over MapReduce. In Cascading there are two
  * ways to optimize CoGrouping.
  * <p/>
- * The first is to join streams with more data on the left hand side to streams with more sparse data on the right
+ * The first is to join streams with more data on the left hand side to join with more sparse data on the right
  * hand side. That is, always attempt to effect M x N joins where M is large and N is small, instead of where M is
  * small and N is large. This typically will allow Cascading to forgo spilling a group (in the case of Hadoop,
- * via the {@link cascading.flow.hadoop.HadoopSpillableTupleList }) internally.
+ * via the {@link cascading.tuple.hadoop.HadoopSpillableTupleList }) internally.
  * <p/>
- * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopFlowProcess#SPILL_THRESHOLD}
+ * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopProperties#COGROUP_SPILL_THRESHOLD}
  * via the properties handed to {@link cascading.flow.FlowConnector}.
  *
- * @see cascading.pipe.cogroup.InnerJoin
- * @see cascading.pipe.cogroup.OuterJoin
- * @see cascading.pipe.cogroup.LeftJoin
- * @see cascading.pipe.cogroup.RightJoin
- * @see cascading.pipe.cogroup.MixedJoin
+ * @see cascading.pipe.joiner.InnerJoin
+ * @see cascading.pipe.joiner.OuterJoin
+ * @see cascading.pipe.joiner.LeftJoin
+ * @see cascading.pipe.joiner.RightJoin
+ * @see cascading.pipe.joiner.MixedJoin
  * @see cascading.tuple.Fields
- * @see cascading.flow.hadoop.HadoopSpillableTupleList
- * @see cascading.pipe.cogroup.CoGroupClosure
+ * @see cascading.tuple.SpillableTupleList
  */
-public class CoGroup extends Group
+public class CoGroup extends Splice implements Group
   {
   /**
    * Constructor CoGroup creates a new CoGroup instance.

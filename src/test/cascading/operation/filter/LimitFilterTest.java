@@ -30,7 +30,6 @@ import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -142,12 +141,6 @@ public class LimitFilterTest extends CascadingTestCase
 
     @Override
     public TupleEntryCollector openSystemIntermediateForWrite() throws IOException
-      {
-      return null;
-      }
-
-    @Override
-    public SpillableTupleList createSpillableTupleList()
       {
       return null;
       }
