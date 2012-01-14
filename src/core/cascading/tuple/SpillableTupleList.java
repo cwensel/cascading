@@ -37,22 +37,86 @@ import org.slf4j.LoggerFactory;
  * Class SpillableTupleList is a simple durable Collection that can spill its contents to disk when the
  * {@code threshold} is met.
  * <p/>
- * Using a {@code threshold } of -1 will disable the spill.
+ * Using a {@code threshold } of -1 will disable the spill, all values will remain in memory.
+ * <p.></p.>
+ * This class is used by the {@link cascading.pipe.CoGroup} pipe, to set properties specific to a given
+ * cogroup instance, see the {@link cascading.pipe.CoGroup#getConfigDef()} method.
+ *
+ * @see cascading.tuple.hadoop.HadoopSpillableTupleList
  */
 public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( SpillableTupleList.class );
 
-  static enum Spill
+  /** Number of tuples to hold in memory before spilling them to disk. */
+  public static final String SPILL_THRESHOLD = "cascading.spill.threshold";
+
+  /**
+   * Whether to enable compress of the spills or not, on by default.
+   *
+   * @see Boolean#parseBoolean(String)
+   */
+  public static final String SPILL_COMPRESS = "cascading.spill.compress";
+
+  /** A comma delimited list of possible codecs to try. This is platform dependent. */
+  public static final String SPILL_CODECS = "cascading.spill.codecs";
+
+  public static final int defaultThreshold = 10 * 1000;
+
+  public static int getThreshold( FlowProcess flowProcess, int defaultValue )
     {
-      Num_Spills_Written, Num_Spills_Read
+    String value = (String) flowProcess.getProperty( SPILL_THRESHOLD );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Integer.parseInt( value );
     }
 
-  /** Field threshold */
-  protected long threshold = 10000;
-  /** Field flowProcess */
-  protected FlowProcess flowProcess;
+  protected static Class getCodecClass( FlowProcess flowProcess, String defaultCodecs, Class subClass )
+    {
+    String compress = (String) flowProcess.getProperty( SPILL_COMPRESS );
+
+    if( compress != null && !Boolean.parseBoolean( compress ) )
+      return null;
+
+    String codecs = (String) flowProcess.getProperty( SPILL_CODECS );
+
+    if( codecs == null || codecs.length() == 0 )
+      codecs = defaultCodecs;
+
+    Class codecClass = null;
+
+    for( String codec : codecs.split( "[,\\s]+" ) )
+      {
+      try
+        {
+        LOG.info( "attempting to load codec: {}", codec );
+        codecClass = Thread.currentThread().getContextClassLoader().loadClass( codec ).asSubclass( subClass );
+
+        if( codecClass != null )
+          {
+          LOG.info( "found codec: {}", codec );
+          break;
+          }
+        }
+      catch( ClassNotFoundException exception )
+        {
+        // do nothing
+        }
+      }
+
+    if( codecClass == null )
+      {
+      LOG.warn( "codecs set, but unable to load any: {}", codecs );
+      return null;
+      }
+
+    return codecClass;
+    }
+
+  private Threshold threshold;
   /** Field files */
   private final List<File> files = new LinkedList<File>();
   /** Field current */
@@ -64,22 +128,46 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   /** Field fields */
   private Fields fields;
   /** Fields listener * */
-  private Listener listener;
+  private SpillListener spillListener = SpillListener.NULL;
 
-  protected SpillableTupleList()
+  public interface Threshold
     {
+    int current();
     }
 
-  protected SpillableTupleList( long threshold, FlowProcess flowProcess )
+  protected SpillableTupleList( final int threshold )
+    {
+    this( new Threshold()
+    {
+    @Override
+    public int current()
+      {
+      return threshold;
+      }
+    } );
+    }
+
+  protected SpillableTupleList( Threshold threshold )
     {
     this.threshold = threshold;
-    this.flowProcess = flowProcess;
+    }
+
+  /** Field threshold */
+  public long getThreshold()
+    {
+    return threshold.current();
     }
 
   @Override
-  public void setListener( Listener listener )
+  public void setSpillListener( SpillListener spillListener )
     {
-    this.listener = listener;
+    this.spillListener = spillListener;
+    }
+
+  @Override
+  public int spillCount()
+    {
+    return files.size();
     }
 
   private class SpilledListIterator implements Iterator<Tuple>
@@ -105,8 +193,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
     private List<Tuple> getListFor( File file )
       {
-      if( flowProcess != null )
-        flowProcess.increment( Spill.Num_Spills_Read, 1 );
+      spillListener.notifyRead( SpillableTupleList.this );
 
       TupleInputStream dataInputStream = createTupleInputStream( file );
 
@@ -159,8 +246,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     current.add( tuple );
     size++;
 
-    if( doSpill() && listener != null )
-      listener.notify( this );
+    doSpill();
 
     return true;
     }
@@ -215,13 +301,10 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
   private final boolean doSpill()
     {
-    if( current.size() != threshold )
+    if( current.size() < getThreshold() ) // may change over time
       return false;
 
-    LOG.info( "spilling tuple list to file number {}", getNumFiles() + 1 );
-
-    if( flowProcess != null )
-      flowProcess.increment( Spill.Num_Spills_Written, 1 );
+    spillListener.notifySpill( this, current );
 
     File file = createTempFile();
     TupleOutputStream dataOutputStream = createTupleOutputStream( file );

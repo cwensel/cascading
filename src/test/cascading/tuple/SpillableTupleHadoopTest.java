@@ -20,10 +20,14 @@
 
 package cascading.tuple;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.Set;
 
 import cascading.CascadingTestCase;
 import cascading.tuple.hadoop.HadoopSpillableTupleList;
+import cascading.tuple.hadoop.HadoopSpillableTupleMap;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -46,13 +50,13 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    performSpillTest( 5, 50, null );
-    performSpillTest( 49, 50, null );
-    performSpillTest( 50, 50, null );
-    performSpillTest( 51, 50, null );
-    performSpillTest( 499, 50, null );
-    performSpillTest( 500, 50, null );
-    performSpillTest( 501, 50, null );
+    performListTest( 5, 50, null );
+    performListTest( 49, 50, null );
+    performListTest( 50, 50, null );
+    performListTest( 51, 50, null );
+    performListTest( 499, 50, null );
+    performListTest( 500, 50, null );
+    performListTest( 501, 50, null );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
@@ -64,20 +68,20 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
     long time = System.currentTimeMillis();
 
-    performSpillTest( 5, 50, codec );
-    performSpillTest( 49, 50, codec );
-    performSpillTest( 50, 50, codec );
-    performSpillTest( 51, 50, codec );
-    performSpillTest( 499, 50, codec );
-    performSpillTest( 500, 50, codec );
-    performSpillTest( 501, 50, codec );
+    performListTest( 5, 50, codec );
+    performListTest( 49, 50, codec );
+    performListTest( 50, 50, codec );
+    performListTest( 51, 50, codec );
+    performListTest( 499, 50, codec );
+    performListTest( 500, 50, codec );
+    performListTest( 501, 50, codec );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
 
-  private void performSpillTest( int size, int threshold, CompressionCodec codec )
+  private void performListTest( int size, int threshold, CompressionCodec codec )
     {
-    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec );
+    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec, new JobConf() );
 
     for( int i = 0; i < size; i++ )
       {
@@ -106,5 +110,55 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     Iterator<Tuple> iterator = list.iterator();
 
     assertEquals( "not equal: iterator.next().get(0)", "string number 0", iterator.next().get( 1 ) );
+    }
+
+  @Test
+  public void testSpillMap()
+    {
+    long time = System.currentTimeMillis();
+
+    performMapTest( 5, 5, 100, 20, null );
+    performMapTest( 5, 50, 100, 20, null );
+    performMapTest( 50, 5, 200, 20, null );
+    performMapTest( 500, 50, 7000, 20, null );
+
+    System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
+    }
+
+  @Test
+  public void testSpillMapCompressed()
+    {
+    long time = System.currentTimeMillis();
+
+    GzipCodec codec = ReflectionUtils.newInstance( GzipCodec.class, new JobConf() );
+
+    performMapTest( 5, 5, 100, 20, codec );
+    performMapTest( 5, 50, 100, 20, codec );
+    performMapTest( 50, 5, 200, 20, codec );
+    performMapTest( 500, 50, 7000, 20, codec );
+
+    System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
+    }
+
+  private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, CompressionCodec codec )
+    {
+    HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( mapThreshold, listThreshold, codec, new JobConf() );
+
+    Set<Integer> keySet = new HashSet<Integer>();
+    Random gen = new Random( 1 );
+
+    for( int i = 0; i < listSize * numKeys; i++ )
+      {
+      String aString = "string number " + i;
+      double random = Math.random();
+
+      double keys = numKeys / 3.0;
+      int key = (int) ( gen.nextDouble() * keys + gen.nextDouble() * keys + gen.nextDouble() * keys );
+      map.get( new Tuple( key ) ).add( new Tuple( i, aString, random, new Text( aString ) ) );
+
+      keySet.add( key );
+      }
+
+    assertEquals( "not equal: map.size();", keySet.size(), map.size() );
     }
   }

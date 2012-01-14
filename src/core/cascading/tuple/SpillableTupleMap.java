@@ -26,36 +26,99 @@ import java.util.HashMap;
 import cascading.flow.FlowProcess;
 
 /**
+ * SpillableTupleMap is a HashMap that will allow for multiple values per key, and if the number of values for a given
+ * key reach a specific threshold, they will be spilled to disk using a {@link SpillableTupleList} instance. Only
+ * values are spilled, keys are not spilled and too many keys can result in a {@link OutOfMemoryError}.
+ * <p/>
+ * The {@link #MAP_THRESHOLD} value sets the number of total values that this map will strive to keep in memory regardless
+ * of the number of keys. This is achieved by dynamically calculating the threshold used by each child SpillableTupleList
+ * instance using threshold = Min( list_threshold, map_threshold / current_num_keys ).
+ * <p/>
+ * To set the list threshold, see {@link SpillableTupleList#SPILL_THRESHOLD}.
+ * <p/>
+ * This class is used by the {@link cascading.pipe.Join} pipe, to set properties specific to a given
+ * join instance, see the {@link cascading.pipe.Join#getConfigDef()} method.
  *
+ * @see cascading.tuple.hadoop.HadoopSpillableTupleMap
  */
-public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>> implements Spillable
+public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>>
   {
-  private final int threshold;
-  private final FlowProcess flowProcess;
-  private Listener listener;
+  /** The total number of tuple values (not keys) to attempt to keep in memory. */
+  public static final String MAP_THRESHOLD = "cascading.spillmap.threshold";
 
-  public SpillableTupleMap( int initialCapacity, int threshold, FlowProcess flowProcess )
+  /**
+   * The initial hash map capacity.
+   *
+   * @see java.util.HashMap
+   */
+  public static final String MAP_CAPACITY = "cascading.spillmap.capacity";
+
+  /**
+   * The initial hash map load factor.
+   *
+   * @see java.util.HashMap
+   */
+  public static final String MAP_LOADFACTOR = "cascading.spillmap.loadfactor";
+
+  public static final int defaultThreshold = 10 * 1000;
+  public static final int initialCapacity = 100 * 1000;
+  public static final float loadFactor = 0.75f;
+
+  private int mapThreshold;
+  private int initListThreshold;
+
+  public static int getThreshold( FlowProcess flowProcess, int defaultValue )
     {
-    super( initialCapacity, 0.75f );
-    this.threshold = threshold;
-    this.flowProcess = flowProcess;
+    String value = (String) flowProcess.getProperty( MAP_THRESHOLD );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Integer.parseInt( value );
     }
 
-  public SpillableTupleMap( int initialCapacity, int threshold, float loadFactor, FlowProcess flowProcess )
+  public static int getCapacity( FlowProcess flowProcess, int defaultValue )
+    {
+    String value = (String) flowProcess.getProperty( MAP_CAPACITY );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Integer.parseInt( value );
+    }
+
+  public static float getLoadFactor( FlowProcess flowProcess, float defaultValue )
+    {
+    String value = (String) flowProcess.getProperty( MAP_LOADFACTOR );
+
+    if( value == null || value.length() == 0 )
+      return defaultValue;
+
+    return Float.parseFloat( value );
+    }
+
+  public SpillableTupleMap( int mapThreshold, int initListThreshold )
     {
     super( initialCapacity, loadFactor );
-    this.threshold = threshold;
-    this.flowProcess = flowProcess;
+    this.mapThreshold = mapThreshold;
+    this.initListThreshold = initListThreshold;
     }
 
-  protected int getThreshold()
+  public SpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int initListThreshold )
     {
-    return threshold;
+    super( initialCapacity, loadFactor );
+    this.mapThreshold = mapThreshold;
+    this.initListThreshold = initListThreshold;
     }
 
-  protected FlowProcess getFlowProcess()
+  protected int getMapThreshold()
     {
-    return flowProcess;
+    return mapThreshold;
+    }
+
+  public int getInitListThreshold()
+    {
+    return initListThreshold;
     }
 
   @Override
@@ -65,25 +128,13 @@ public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>
 
     if( value == null )
       {
-      value = createSpillableTupleList();
-
-      if( value instanceof Spillable )
-        ( (Spillable) value ).setListener( listener );
+      value = createTupleCollection( (Tuple) object );
 
       super.put( (Tuple) object, value );
-
-      if( listener != null )
-        listener.notify( this );
       }
 
     return value;
     }
 
-  protected abstract SpillableTupleList createSpillableTupleList();
-
-  @Override
-  public void setListener( Listener listener )
-    {
-    this.listener = listener;
-    }
+  protected abstract SpillableTupleList createTupleCollection( Tuple object );
   }

@@ -33,6 +33,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.pipe.ConfigDef;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
@@ -70,7 +71,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     super( name, stepNum );
     }
 
-  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
+  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     JobConf conf = parentConfig == null ? new JobConf() : new JobConf( parentConfig );
 
@@ -100,6 +101,8 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     initFromSink( flowProcess, conf );
 
     initFromTraps( flowProcess, conf );
+
+    initFromPipes( conf );
 
     if( getSink().getScheme().getNumSinkParts() != 0 )
       {
@@ -158,25 +161,30 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     // perform last so init above will pass to tasks
     conf.set( "cascading.flow.step.id", getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
-    conf.set( "cascading.flow.step", HadoopUtil.serializeBase64( this ) );
+    conf.set( "cascading.flow.step", pack( this ) );
 
     return conf;
     }
 
-  protected FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  private String pack( Object object )
     {
     try
       {
-      JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
-
-      setConf( initializedConfig );
-
-      return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
+      return HadoopUtil.serializeBase64( object );
       }
     catch( IOException exception )
       {
-      throw new FlowException( "unable to create job", exception );
+      throw new FlowException( "unable to pack object: " + object.getClass().getCanonicalName(), exception );
       }
+    }
+
+  protected FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+    {
+    JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
+
+    setConf( initializedConfig );
+
+    return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
     }
 
   /**
@@ -236,7 +244,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       }
     }
 
-  private void addComparators( JobConf conf, String property, Map<String, Fields> map ) throws IOException
+  private void addComparators( JobConf conf, String property, Map<String, Fields> map )
     {
     Iterator<Fields> fieldsIterator = map.values().iterator();
 
@@ -247,7 +255,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
 
     if( fields.hasComparators() )
       {
-      conf.set( property, HadoopUtil.serializeBase64( fields ) );
+      conf.set( property, pack( fields ) );
       return;
       }
 
@@ -262,7 +270,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     return;
     }
 
-  private void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf, Map<String, Tap> traps ) throws IOException
+  private void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf, Map<String, Tap> traps )
     {
     if( !traps.isEmpty() )
       {
@@ -273,7 +281,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       }
     }
 
-  protected void initFromSources( FlowProcess<JobConf> flowProcess, JobConf conf ) throws IOException
+  protected void initFromSources( FlowProcess<JobConf> flowProcess, JobConf conf )
     {
     // handles case where same tap is used on multiple branches
     // we do not want to init the same tap multiple times
@@ -286,11 +294,56 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       {
       fromJobs[ i ] = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, fromJobs[ i ] );
-      fromJobs[ i ].set( "cascading.step.source", HadoopUtil.serializeBase64( tap ) );
+      fromJobs[ i ].set( "cascading.step.source", pack( tap ) );
       i++;
       }
 
     MultiInputFormat.addInputFormat( conf, fromJobs );
+    }
+
+  private void initFromPipes( final JobConf conf )
+    {
+    initConfFromPipes( getSetterFor( conf ) );
+    }
+
+  private ConfigDef.Setter getSetterFor( final JobConf conf )
+    {
+    return new ConfigDef.Setter()
+    {
+    @Override
+    public String set( String key, String value )
+      {
+      String oldValue = get( key );
+
+      conf.set( key, value );
+
+      return oldValue;
+      }
+
+    @Override
+    public String update( String key, String value )
+      {
+      String oldValue = get( key );
+
+      if( oldValue == null )
+        conf.set( key, value );
+      else if( !oldValue.contains( value ) )
+        conf.set( key, oldValue + "," + value );
+
+      return oldValue;
+      }
+
+    @Override
+    public String get( String key )
+      {
+      String value = conf.get( key );
+
+      if( value == null || value.isEmpty() )
+        return null;
+
+      return value;
+      }
+    };
     }
 
   private Set<Tap> getUniqueStreamedSources()
@@ -301,7 +354,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     return new HashSet<Tap>( getJoins().values() );
     }
 
-  protected void initFromSink( FlowProcess<JobConf> flowProcess, JobConf conf ) throws IOException
+  protected void initFromSink( FlowProcess<JobConf> flowProcess, JobConf conf )
     {
     // init sink first so tempSink can take precedence
     if( getSink() != null )
@@ -315,7 +368,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       tempSink.sinkConfInit( flowProcess, conf );
     }
 
-  protected void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf ) throws IOException
+  protected void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf )
     {
     initFromTraps( flowProcess, conf, getMapperTraps() );
     initFromTraps( flowProcess, conf, getReducerTraps() );

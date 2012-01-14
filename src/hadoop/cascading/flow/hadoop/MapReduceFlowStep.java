@@ -20,8 +20,6 @@
 
 package cascading.flow.hadoop;
 
-import java.io.IOException;
-
 import cascading.flow.FlowProcess;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
@@ -40,7 +38,7 @@ public class MapReduceFlowStep extends HadoopFlowStep
     }
 
   @Override
-  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig ) throws IOException
+  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     // allow to delete
     getSink().sinkConfInit( flowProcess, new JobConf() );

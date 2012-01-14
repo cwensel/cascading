@@ -35,21 +35,23 @@ import cascading.util.Util;
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
  * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy},
- * {@link CoGroup}, and {@link SubAssembly}.
+ * {@link CoGroup}, {@link Merge}, {@link Join}, and {@link SubAssembly}.
  * <p/>
  * Pipes are chained together through their constructors.
  * <p/>
  * To effect a split in the pipe,
  * simply pass a Pipe instance to two or more constructors of subsequent Pipe instances.
  * </p>
- * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} pipe.
+ * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} or {@link Join} pipe.
  * <p/>
- * A merge can be achieved by passing two or more Pipe instances to a {@link GroupBy} pipe.
+ * A merge can be achieved by passing two or more Pipe instances to a {@link GroupBy} or {@link Merge} pipe.
  *
  * @see Each
  * @see Every
  * @see GroupBy
+ * @see Merge
  * @see CoGroup
+ * @see Join
  * @see SubAssembly
  */
 public class Pipe implements FlowElement, Serializable
@@ -60,6 +62,11 @@ public class Pipe implements FlowElement, Serializable
   private String name;
   /** Field previous */
   protected Pipe previous;
+
+  protected ConfigDef configDef;
+
+  protected ConfigDef processConfigDef;
+
   /** Field trace */
   private final String trace = Util.captureDebugTrace( getClass() );
 
@@ -211,6 +218,64 @@ public class Pipe implements FlowElement, Serializable
       return new Pipe[ 0 ];
 
     return new Pipe[]{previous};
+    }
+
+  /**
+   * Returns a {@link ConfigDef} instance that allows for local properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
+   * <p/>
+   * Any properties set on the configDef will not show up in any Flow or process level configuration, but will
+   * override any of those values as seen by the current Pipe instance.
+   *
+   * @return an instance of ConfigDef
+   */
+  public ConfigDef getConfigDef()
+    {
+    if( configDef == null )
+      configDef = new ConfigDef();
+
+    return configDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the configDef instance.
+   *
+   * @return true if there are configDef properties
+   */
+  public boolean hasConfigDef()
+    {
+    return configDef != null && !configDef.isEmpty();
+    }
+
+  /**
+   * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
+   * <p/>
+   * Any properties set on the processConfigDef will not show up in any Flow configuration, but will show up in
+   * the current process step (in Hadoop the MapReduce jobconf). Any value set in the processConfigDef will be
+   * overridden by the pipe local {@code #getConfigDef} instance.
+   * </p>
+   * Use this method to tweak properties in the process step this pipe instance is planned into. In the case of the
+   * Hadoop platform, when set on a {@link GroupBy} instance, the number of reducers can be modified.
+   *
+   * @return an instance of ConfigDef
+   */
+  public ConfigDef getProcessConfigDef()
+    {
+    if( processConfigDef == null )
+      processConfigDef = new ConfigDef();
+
+    return processConfigDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the processConfigDef instance.
+   *
+   * @return true if there are processConfigDef properties
+   */
+  public boolean hasProcessConfigDef()
+    {
+    return processConfigDef != null && !processConfigDef.isEmpty();
     }
 
   /**

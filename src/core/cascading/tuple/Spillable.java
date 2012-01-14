@@ -20,15 +20,40 @@
 
 package cascading.tuple;
 
+import java.util.Collection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  */
 public interface Spillable
   {
-  interface Listener
+  interface SpillListener
     {
-    void notify( Spillable spillable );
+    SpillListener NULL = new SpillListener()
+    {
+    private final Logger LOG = LoggerFactory.getLogger( SpillListener.class );
+
+    @Override
+    public void notifySpill( Spillable spillable, Collection current )
+      {
+      LOG.info( "spilling {} tuples in list to file number {}", current.size(), spillable.spillCount() + 1 );
+      }
+
+    @Override
+    public void notifyRead( Spillable spillable )
+      {
+      }
+    };
+
+    void notifySpill( Spillable spillable, Collection current );
+
+    void notifyRead( Spillable spillable );
     }
 
-  void setListener( Listener listener );
+  void setSpillListener( SpillListener spillListener );
+
+  int spillCount();
   }

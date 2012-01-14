@@ -68,6 +68,10 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   public SpliceGate( FlowProcess flowProcess, Splice splice )
     {
     this.splice = splice;
+
+    if( splice.hasConfigDef() )
+      flowProcess = new PipeFlowProcess( flowProcess, splice.getConfigDef() );
+
     this.flowProcess = flowProcess;
     }
 
@@ -270,7 +274,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     {
     final StringBuilder sb = new StringBuilder();
     sb.append( getClass().getSimpleName() );
-    sb.append( "{group=" ).append( splice );
+    sb.append( "{splice=" ).append( splice );
     sb.append( '}' );
     return sb.toString();
     }

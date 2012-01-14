@@ -20,6 +20,8 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
+
 import cascading.pipe.joiner.Joiner;
 import cascading.tuple.Fields;
 
@@ -53,8 +55,7 @@ import cascading.tuple.Fields;
  * and N is small, instead of where M is small and N is large. Right hand side streams will be accumulated, and
  * spilled to disk if the collection reaches a specific threshold when using Hadoop.
  * <p/>
- * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopProperties#JOIN_SPILL_THRESHOLD}
- * via the properties handed to {@link cascading.flow.FlowConnector}.
+ * If spills are happening, consider increasing the spill thresholds, see {@link cascading.tuple.SpillableTupleMap}.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin
@@ -75,6 +76,7 @@ public class Join extends Splice
    * @param rhs
    * @param rhsJoinFields
    */
+  @ConstructorProperties({"joinName", "lhs", "lhsJoinFields", "rhs", "rhsJoinFields"})
   public Join( String joinName, Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields )
     {
     super( joinName, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), null, null );
@@ -90,6 +92,7 @@ public class Join extends Splice
    * @param rhsJoinFields
    * @param joiner
    */
+  @ConstructorProperties({"joinName", "lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "joiner"})
   public Join( String joinName, Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Joiner joiner )
     {
     super( joinName, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), null, null, joiner );
@@ -105,6 +108,7 @@ public class Join extends Splice
    * @param rhsJoinFields
    * @param declaredFields
    */
+  @ConstructorProperties({"joinName", "lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "declaredFields"})
   public Join( String joinName, Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Fields declaredFields )
     {
     super( joinName, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), declaredFields, null );
@@ -121,6 +125,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"joinName", "lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "declaredFields", "joiner"})
   public Join( String joinName, Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Fields declaredFields, Joiner joiner )
     {
     super( joinName, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), declaredFields, null, joiner );
@@ -136,6 +141,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"joinName", "pipe", "joinFields", "numSelfJoins", "declaredFields", "joiner"})
   public Join( String joinName, Pipe pipe, Fields joinFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( joinName, pipe, joinFields, numSelfJoins, declaredFields, joiner );
@@ -150,6 +156,7 @@ public class Join extends Splice
    * @param numSelfJoins
    * @param declaredFields
    */
+  @ConstructorProperties({"joinName", "pipe", "joinFields", "numSelfJoins", "declaredFields"})
   public Join( String joinName, Pipe pipe, Fields joinFields, int numSelfJoins, Fields declaredFields )
     {
     super( joinName, pipe, joinFields, numSelfJoins, declaredFields, null, null );
@@ -164,6 +171,7 @@ public class Join extends Splice
    * @param numSelfJoins
    * @param joiner
    */
+  @ConstructorProperties({"joinName", "pipe", "joinFields", "numSelfJoins", "joiner"})
   public Join( String joinName, Pipe pipe, Fields joinFields, int numSelfJoins, Joiner joiner )
     {
     super( joinName, pipe, joinFields, numSelfJoins, null, joiner );
@@ -178,6 +186,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"joinName", "pipes", "joinFields", "declaredFields", "joiner"})
   public Join( String joinName, Pipe[] pipes, Fields[] joinFields, Fields declaredFields, Joiner joiner )
     {
     super( joinName, pipes, joinFields, declaredFields, null, joiner );
@@ -191,6 +200,7 @@ public class Join extends Splice
    * @param rhs
    * @param rhsJoinFields
    */
+  @ConstructorProperties({"lhs", "lhsJoinFields", "rhs", "rhsJoinFields"})
   public Join( Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields )
     {
     super( null, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), null, null );
@@ -205,6 +215,7 @@ public class Join extends Splice
    * @param rhsJoinFields
    * @param joiner
    */
+  @ConstructorProperties({"lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "joiner"})
   public Join( Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Joiner joiner )
     {
     super( null, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), null, null, joiner );
@@ -219,6 +230,7 @@ public class Join extends Splice
    * @param rhsJoinFields
    * @param declaredFields
    */
+  @ConstructorProperties({"lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "declaredFields"})
   public Join( Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Fields declaredFields )
     {
     super( null, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), declaredFields, null );
@@ -234,6 +246,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"lhs", "lhsJoinFields", "rhs", "rhsJoinFields", "declaredFields", "joiner"})
   public Join( Pipe lhs, Fields lhsJoinFields, Pipe rhs, Fields rhsJoinFields, Fields declaredFields, Joiner joiner )
     {
     super( null, Pipe.pipes( lhs, rhs ), Fields.fields( lhsJoinFields, rhsJoinFields ), declaredFields, null, joiner );
@@ -248,6 +261,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"pipe", "joinFields", "numSelfJoins", "declaredFields", "joiner"})
   public Join( Pipe pipe, Fields joinFields, int numSelfJoins, Fields declaredFields, Joiner joiner )
     {
     super( null, pipe, joinFields, numSelfJoins, declaredFields, joiner );
@@ -261,6 +275,7 @@ public class Join extends Splice
    * @param numSelfJoins
    * @param declaredFields
    */
+  @ConstructorProperties({"pipe", "joinFields", "numSelfJoins", "declaredFields"})
   public Join( Pipe pipe, Fields joinFields, int numSelfJoins, Fields declaredFields )
     {
     super( null, pipe, joinFields, numSelfJoins, declaredFields );
@@ -274,6 +289,7 @@ public class Join extends Splice
    * @param numSelfJoins
    * @param joiner
    */
+  @ConstructorProperties({"pipe", "joinFields", "numSelfJoins", "joiner"})
   public Join( Pipe pipe, Fields joinFields, int numSelfJoins, Joiner joiner )
     {
     super( null, pipe, joinFields, numSelfJoins, null, joiner );
@@ -287,6 +303,7 @@ public class Join extends Splice
    * @param declaredFields
    * @param joiner
    */
+  @ConstructorProperties({"pipes", "joinFields", "declaredFields", "joiner"})
   public Join( Pipe[] pipes, Fields[] joinFields, Fields declaredFields, Joiner joiner )
     {
     super( null, pipes, joinFields, declaredFields, null, joiner );

@@ -20,6 +20,8 @@
 
 package cascading.pipe;
 
+import java.beans.ConstructorProperties;
+
 /**
  * The Merge Pipe allows for multiple branches, with the same fields to be spliced back into a single stream.
  * <p/>
@@ -41,6 +43,7 @@ public class Merge extends Splice
    *
    * @param pipes
    */
+  @ConstructorProperties({"pipes"})
   public Merge( Pipe... pipes )
     {
     super( null, pipes );
@@ -52,6 +55,7 @@ public class Merge extends Splice
    * @param name
    * @param pipes
    */
+  @ConstructorProperties({"name", "pipes"})
   public Merge( String name, Pipe... pipes )
     {
     super( name, pipes );

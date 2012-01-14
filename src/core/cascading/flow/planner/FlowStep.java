@@ -20,7 +20,6 @@
 
 package cascading.flow.planner;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,7 @@ import cascading.flow.Scope;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
 import cascading.operation.Operation;
+import cascading.pipe.ConfigDef;
 import cascading.pipe.Group;
 import cascading.pipe.Join;
 import cascading.pipe.Operator;
@@ -365,7 +365,7 @@ public abstract class FlowStep<Config> implements Serializable
     return properties != null && !properties.isEmpty();
     }
 
-  public abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig ) throws IOException;
+  public abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
 
   /**
    * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),
@@ -585,5 +585,29 @@ public abstract class FlowStep<Config> implements Serializable
   public void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
+    }
+
+  protected void initConfFromPipes( ConfigDef.Setter setter )
+    {
+    // applies each mode in order, topologically
+    for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
+      {
+      TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalOrderIterator();
+
+      while( iterator.hasNext() )
+        {
+        FlowElement element = iterator.next();
+
+        if( !( element instanceof Pipe ) )
+          continue;
+
+        Pipe pipe = (Pipe) element;
+
+        if( !pipe.hasProcessConfigDef() )
+          continue;
+
+        pipe.getProcessConfigDef().apply( mode, setter );
+        }
+      }
     }
   }

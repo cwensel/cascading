@@ -34,7 +34,7 @@ public class LocalSpillableTupleList extends SpillableTupleList
   {
   public LocalSpillableTupleList( FlowProcess flowProcess )
     {
-    super( -1, flowProcess ); // disable spills for now
+    super( -1 ); // disable spills for now
     }
 
   @Override

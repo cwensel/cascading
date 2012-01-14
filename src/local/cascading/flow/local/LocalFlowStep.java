@@ -20,7 +20,6 @@
 
 package cascading.flow.local;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.pipe.ConfigDef;
 import cascading.tap.Tap;
 
 /**
@@ -47,7 +47,7 @@ public class LocalFlowStep extends FlowStep<Properties>
     }
 
   @Override
-  public Properties getInitializedConfig( FlowProcess<Properties> flowProcess, Properties parentConfig ) throws IOException
+  public Properties getInitializedConfig( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
     Properties currentProperties = parentConfig == null ? new Properties() : new Properties( parentConfig );
 
@@ -62,10 +62,12 @@ public class LocalFlowStep extends FlowStep<Properties>
     initTaps( flowProcess, currentProperties, getSinks() );
     initTaps( flowProcess, currentProperties, getTraps() );
 
+    initFromPipes( currentProperties );
+
     return currentProperties;
     }
 
-  protected void initTaps( FlowProcess<Properties> flowProcess, Properties conf, Set<Tap> taps ) throws IOException
+  protected void initTaps( FlowProcess<Properties> flowProcess, Properties conf, Set<Tap> taps )
     {
     if( !taps.isEmpty() )
       {
@@ -76,6 +78,51 @@ public class LocalFlowStep extends FlowStep<Properties>
       }
     }
 
+  private void initFromPipes( final Properties properties )
+    {
+    initConfFromPipes( getSetterFor( properties ) );
+    }
+
+  private ConfigDef.Setter getSetterFor( final Properties properties )
+    {
+    return new ConfigDef.Setter()
+    {
+    @Override
+    public String set( String key, String value )
+      {
+      String oldValue = get( key );
+
+      properties.setProperty( key, value );
+
+      return oldValue;
+      }
+
+    @Override
+    public String update( String key, String value )
+      {
+      String oldValue = get( key );
+
+      if( oldValue == null )
+        properties.setProperty( key, value );
+      else if( !oldValue.contains( value ) )
+        properties.setProperty( key, oldValue + "," + value );
+
+      return oldValue;
+      }
+
+    @Override
+    public String get( String key )
+      {
+      String value = properties.getProperty( key );
+
+      if( value == null || value.isEmpty() )
+        return null;
+
+      return value;
+      }
+    };
+    }
+
   @Override
   public void clean( Properties config )
     {
@@ -84,7 +131,9 @@ public class LocalFlowStep extends FlowStep<Properties>
   @Override
   protected FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
-    setConf( flowProcess.getConfigCopy() );
+    setConf( getInitializedConfig( flowProcess, parentConfig ) );
+
+    flowProcess = new LocalFlowProcess( flowProcess.getCurrentSession(), getConfig() );
 
     return new LocalFlowStepJob( createClientState( flowProcess ), (LocalFlowProcess) flowProcess, this );
     }

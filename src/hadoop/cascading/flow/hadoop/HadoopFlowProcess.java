@@ -35,7 +35,6 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -290,54 +289,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
         }
       }
     };
-    }
-
-  public synchronized CompressionCodec getCoGroupCompressionCodec()
-    {
-    if( codec != null || compress != null )
-      return codec;
-
-    compress = (String) getProperty( HadoopProperties.COGROUP_SPILL_COMPRESS );
-
-    if( compress != null && !Boolean.parseBoolean( compress ) )
-      return null;
-
-    codecs = (String) getProperty( HadoopProperties.COGROUP_SPILL_CODECS );
-
-    if( codecs == null || codecs.length() == 0 )
-      codecs = HadoopProperties.defaultCodecs;
-
-    Class<? extends CompressionCodec> codecClass = null;
-
-    for( String codec : codecs.split( "[,\\s]+" ) )
-      {
-      try
-        {
-        LOG.info( "attempting to load codec: {}", codec );
-        codecClass = Thread.currentThread().getContextClassLoader().loadClass( codec ).asSubclass( CompressionCodec.class );
-
-        if( codecClass != null )
-          {
-          LOG.info( "found codec: {}", codec );
-
-          break;
-          }
-        }
-      catch( ClassNotFoundException exception )
-        {
-        // do nothing
-        }
-      }
-
-    if( codecClass == null )
-      {
-      LOG.warn( "codecs set, but unable to load any: {}", codecs );
-      return null;
-      }
-
-    codec = ReflectionUtils.newInstance( codecClass, jobConf );
-
-    return codec;
     }
 
   @Override

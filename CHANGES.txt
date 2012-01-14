@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added support for properties scoped at the pipe or process scope. Process scope properties will be inherited by
+  the current job if any.
+
   Added c.t.SpillableTupleMap to allow durable groups during asymmetrical joins.
 
   Changed c.t.SpillableTupleList to implement c.u.Collection and c.t.Spillable interfaces.

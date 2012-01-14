@@ -62,8 +62,8 @@ import cascading.tuple.Fields;
  * small and N is large. This typically will allow Cascading to forgo spilling a group (in the case of Hadoop,
  * via the {@link cascading.tuple.hadoop.HadoopSpillableTupleList }) internally.
  * <p/>
- * If spills are happening, consider increasing the spill threshold ({@link cascading.flow.hadoop.HadoopProperties#COGROUP_SPILL_THRESHOLD}
- * via the properties handed to {@link cascading.flow.FlowConnector}.
+ * If spills are happening, consider increasing the spill threshold, see {@link cascading.tuple.SpillableTupleList},
+ * if more RAM is available. See the logs for hints on how much more these values can be increased, if any.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin

@@ -44,20 +44,20 @@ import cascading.tuple.TupleEntryIterator;
 public abstract class FlowProcess<Config>
   {
   /** Field NULL is a noop implementation of FlowSession. */
-  public static FlowProcess NULL = new BaseFlowProcess();
+  public static FlowProcess NULL = new NullFlowProcess();
 
   private String id;
 
-  public static class BaseFlowProcess extends FlowProcess<Object>
+  public static class NullFlowProcess extends FlowProcess<Object>
     {
-    public BaseFlowProcess()
+    public NullFlowProcess()
       {
       }
 
     @Override
     public FlowProcess copyWith( Object object )
       {
-      return new BaseFlowProcess();
+      return new NullFlowProcess();
       }
 
     public Object getProperty( String key )

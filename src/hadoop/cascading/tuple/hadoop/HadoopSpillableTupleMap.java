@@ -20,29 +20,62 @@
 
 package cascading.tuple.hadoop;
 
-import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.tuple.Spillable;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.SpillableTupleMap;
+import cascading.tuple.Tuple;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
+ * HadoopSpillableTupleMap is responsible for spilling values to disk if the map threshold is reached.
  *
+ * @see SpillableTupleMap
+ * @see SpillableTupleList
  */
 public class HadoopSpillableTupleMap extends SpillableTupleMap
   {
-  public HadoopSpillableTupleMap( int initialCapacity, int threshold, FlowProcess flowProcess )
+  private CompressionCodec codec;
+  private final JobConf jobConf;
+
+  public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
     {
-    super( initialCapacity, threshold, flowProcess );
+    super( initialCapacity, loadFactor, mapThreshold, listThreshold );
+    this.jobConf = jobConf;
+    this.codec = codec;
     }
 
-  public HadoopSpillableTupleMap( int initialCapacity, int threshold, float loadFactor, FlowProcess flowProcess )
+  public HadoopSpillableTupleMap( int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
     {
-    super( initialCapacity, threshold, loadFactor, flowProcess );
+    super( mapThreshold, listThreshold );
+    this.codec = codec;
+    this.jobConf = jobConf;
     }
 
   @Override
-  protected SpillableTupleList createSpillableTupleList()
+  protected SpillableTupleList createTupleCollection( Tuple object )
     {
-    return new HadoopSpillableTupleList( getThreshold(), (HadoopFlowProcess) getFlowProcess() );
+    HadoopSpillableTupleList tupleList = new HadoopSpillableTupleList( getThreshold(), codec, jobConf );
+
+    tupleList.setSpillListener( getSpillableListener( object ) );
+
+    return tupleList;
+    }
+
+  protected Spillable.SpillListener getSpillableListener( Tuple tuple )
+    {
+    return Spillable.SpillListener.NULL;
+    }
+
+  private SpillableTupleList.Threshold getThreshold()
+    {
+    return new SpillableTupleList.Threshold()
+    {
+    @Override
+    public int current()
+      {
+      return Math.min( getInitListThreshold(), getMapThreshold() / size() );
+      }
+    };
     }
   }

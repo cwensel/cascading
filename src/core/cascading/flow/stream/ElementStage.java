@@ -27,6 +27,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
@@ -45,8 +46,12 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
 
   public ElementStage( FlowProcess flowProcess, FlowElement flowElement )
     {
-    this.flowProcess = flowProcess;
     this.flowElement = flowElement;
+
+    if( flowElement instanceof Pipe && ( (Pipe) flowElement ).hasConfigDef() )
+      flowProcess = new PipeFlowProcess( flowProcess, ( (Pipe) flowElement ).getConfigDef() );
+
+    this.flowProcess = flowProcess;
     }
 
   public FlowElement getFlowElement()
