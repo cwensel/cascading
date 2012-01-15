@@ -173,61 +173,59 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   private class SpilledListIterator implements Iterator<Tuple>
     {
     int fileIndex = 0;
-    List<Tuple> currentList;
+    private Iterator<Tuple> lastIterator;
     private Iterator<Tuple> iterator;
 
     private SpilledListIterator()
       {
-      getNextList();
+      lastIterator = current.iterator();
+      getNextIterator();
       }
 
-    private void getNextList()
+    private void getNextIterator()
       {
-      if( fileIndex < files.size() )
-        currentList = getListFor( files.get( fileIndex++ ) );
-      else
-        currentList = current;
+      if( iterator instanceof Closeable )
+        closeSilent( (Closeable) iterator );
 
-      iterator = currentList.iterator();
+      if( fileIndex < files.size() )
+        iterator = getIteratorFor( files.get( fileIndex++ ) );
+      else
+        iterator = lastIterator;
       }
 
-    private List<Tuple> getListFor( File file )
+    private Iterator<Tuple> getIteratorFor( File file )
       {
       spillListener.notifyRead( SpillableTupleList.this );
 
-      TupleInputStream dataInputStream = createTupleInputStream( file );
-
-      try
-        {
-        return readList( dataInputStream );
-        }
-      finally
-        {
-        closeSilent( dataInputStream );
-        }
+      return createIterator( createTupleInputStream( file ) );
       }
 
     public boolean hasNext()
       {
-      if( currentList == current )
+      if( isLastCollection() )
         return iterator.hasNext();
 
       if( iterator.hasNext() )
         return true;
 
-      getNextList();
+      getNextIterator();
 
       return hasNext();
       }
 
     public Tuple next()
       {
-      if( currentList == current || iterator.hasNext() )
+      if( isLastCollection() || iterator.hasNext() )
         return iterator.next();
 
-      getNextList();
+      getNextIterator();
 
       return next();
+      }
+
+    private boolean isLastCollection()
+      {
+      return iterator == lastIterator;
       }
 
     public void remove()
@@ -366,22 +364,59 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
   protected abstract TupleOutputStream createTupleOutputStream( File file );
 
-  private List<Tuple> readList( TupleInputStream tupleInputStream )
+  private Iterator<Tuple> createIterator( final TupleInputStream tupleInputStream )
     {
+    final long size;
+
     try
       {
-      long size = tupleInputStream.readLong();
-      List<Tuple> list = new LinkedList<Tuple>();
-
-      for( int i = 0; i < size; i++ )
-        list.add( tupleInputStream.readTuple() );
-
-      return list;
+      size = tupleInputStream.readLong();
       }
     catch( IOException exception )
       {
       throw new TupleException( "unable to read from file output stream", exception );
       }
+
+    return new CloseableIterator<Tuple>()
+    {
+    Tuple tuple = new Tuple();
+    long count = 0;
+
+    @Override
+    public boolean hasNext()
+      {
+      return count < size;
+      }
+
+    @Override
+    public Tuple next()
+      {
+      try
+        {
+        return tupleInputStream.readTuple( tuple );
+        }
+      catch( IOException exception )
+        {
+        throw new TupleException( "unable to read from file output stream", exception );
+        }
+      finally
+        {
+        count++;
+        }
+      }
+
+    @Override
+    public void remove()
+      {
+      throw new UnsupportedOperationException( "remove is not supported" );
+      }
+
+    @Override
+    public void close() throws IOException
+      {
+      tupleInputStream.close();
+      }
+    };
     }
 
   protected abstract TupleInputStream createTupleInputStream( File file );
