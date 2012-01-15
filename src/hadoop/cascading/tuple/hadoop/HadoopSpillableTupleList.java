@@ -35,8 +35,12 @@ import cascading.tuple.TupleException;
 import cascading.tuple.TupleInputStream;
 import cascading.tuple.TupleOutputStream;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionInputStream;
+import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SpillableTupleList is a simple {@link Iterable} object that can store an unlimited number of {@link cascading.tuple.Tuple} instances by spilling
@@ -47,6 +51,8 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 public class HadoopSpillableTupleList extends SpillableTupleList
   {
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopSpillableTupleList.class );
+
   public static final String defaultCodecs = "org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec";
 
   /** Field codec */
@@ -103,16 +109,33 @@ public class HadoopSpillableTupleList extends SpillableTupleList
 
     try
       {
-      if( codec == null )
-        outputStream = new FileOutputStream( file );
-      else
-        outputStream = codec.createOutputStream( new FileOutputStream( file ) );
+      outputStream = new FileOutputStream( file );
+
+      if( codec != null )
+        outputStream = createCodecOutputStream( outputStream );
 
       return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() );
       }
     catch( IOException exception )
       {
       throw new TupleException( "unable to create temporary file input stream", exception );
+      }
+    }
+
+  private CompressionOutputStream createCodecOutputStream( OutputStream outputStream ) throws IOException
+    {
+    // some codecs are using direct memory, and the gc for direct memory cannot sometimes keep up
+    // so we attempt to force a gc if we see a OOME once.
+    try
+      {
+      return codec.createOutputStream( outputStream );
+      }
+    catch( OutOfMemoryError error )
+      {
+      LOG.info( "received OOME when allocating output stream for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
+      System.gc();
+
+      return codec.createOutputStream( outputStream );
       }
     }
 
@@ -123,16 +146,33 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       {
       InputStream inputStream;
 
-      if( codec == null )
-        inputStream = new FileInputStream( file );
-      else
-        inputStream = codec.createInputStream( new FileInputStream( file ) );
+      inputStream = new FileInputStream( file );
+
+      if( codec != null )
+        inputStream = createCodecInputStream( inputStream );
 
       return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() );
       }
     catch( IOException exception )
       {
       throw new TupleException( "unable to create temporary file output stream", exception );
+      }
+    }
+
+  private CompressionInputStream createCodecInputStream( InputStream inputStream ) throws IOException
+    {
+    // some codecs are using direct memory, and the gc for direct memory cannot sometimes keep up
+    // so we attempt to force a gc if we see a OOME once.
+    try
+      {
+      return codec.createInputStream( inputStream );
+      }
+    catch( OutOfMemoryError error )
+      {
+      LOG.info( "received OOME when allocating input stream for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
+      System.gc();
+
+      return codec.createInputStream( inputStream );
       }
     }
   }
