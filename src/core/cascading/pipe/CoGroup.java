@@ -44,7 +44,8 @@ import cascading.tuple.Fields;
  * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' names
  * are equal, those names will be used for resultGroupFields.
  * <p/>
- * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin} {@link cascading.pipe.joiner.Joiner} class.
+ * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin}
+ * {@link cascading.pipe.joiner.Joiner} class.
  * <p/>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once.
@@ -57,13 +58,27 @@ import cascading.tuple.Fields;
  * CoGrouping does not scale well when implemented over MapReduce. In Cascading there are two
  * ways to optimize CoGrouping.
  * <p/>
- * The first is to join streams with more data on the left hand side to join with more sparse data on the right
- * hand side. That is, always attempt to effect M x N joins where M is large and N is small, instead of where M is
- * small and N is large. This typically will allow Cascading to forgo spilling a group (in the case of Hadoop,
- * via the {@link cascading.tuple.hadoop.HadoopSpillableTupleList }) internally.
+ * The first is to consider the order of the pipes handed to the CoGroup constructor.
+ * <p/>
+ * During co-grouping, for any given unique grouping key, all of the rightmost pipes will accumulate the current
+ * grouping values into memory so they may be iterated across for every value in the left hand side pipe. During
+ * the accumulation step, if the number of values exceeds the {@link cascading.tuple.SpillableTupleList#threshold}
+ * value, those values will be spilled to disk so the accumulation may continue.
+ * <p/>
+ * There is no accumulation for the left hand side pipe, only for those to the "right".
+ * <p/>
+ * Thus, for the pipe that has the largest number of values per unique key grouping, on average, it should be made the
+ * "left hand side" pipe ({@code lhs}). And all remaining pipes should be the on the "right hand side" ({@code rhs}) to
+ * prevent the likelihood of a spill and to reduce the blocking associated with accumulating the values. If using
+ * the {@code Pipe[]} constructor, {@code Pipe[0]} is the left hand sided pipe.
  * <p/>
  * If spills are happening, consider increasing the spill threshold, see {@link cascading.tuple.SpillableTupleList},
  * if more RAM is available. See the logs for hints on how much more these values can be increased, if any.
+ * <p/>
+ * Spills are intended to prevent {@link OutOfMemoryError}'s, so reducing the number of spills is important by
+ * increasing the threshold, but memory errors aren't recoverable, so the correct balance will need to be found.
+ * <p/>
+ * To customize the spill values for a given CoGroup only, see {@link #getProcessConfigDef()}.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin
