@@ -86,7 +86,10 @@ public abstract class FlowStepJob implements Callable<Throwable>
     // allow pending -> stopped transition
     // never want a hanging pending state
     if( !flowStepStats.isFinished() )
+      {
+      flowStep.rollbackSinks();
       flowStepStats.markStopped();
+      }
 
     try
       {
@@ -172,7 +175,10 @@ public abstract class FlowStepJob implements Callable<Throwable>
     if( !stop && !internalNonBlockingIsSuccessful() )
       {
       if( !flowStepStats.isFinished() )
+        {
+        flowStep.rollbackSinks();
         flowStepStats.markFailed( getThrowable() );
+        }
 
       dumpDebugInfo();
 

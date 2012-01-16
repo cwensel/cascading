@@ -329,6 +329,11 @@ public abstract class FlowStep<Config> implements Serializable
     flow.commitTaps( sinks.keySet() );
     }
 
+  void rollbackSinks()
+    {
+    flow.rollbackTaps( sinks.keySet() );
+    }
+
   /**
    * Method getProperties returns the properties of this FlowStep object.
    * </br>

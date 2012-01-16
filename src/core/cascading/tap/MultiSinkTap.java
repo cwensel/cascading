@@ -204,6 +204,18 @@ public class MultiSinkTap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   @Override
+  public boolean rollbackResource( Config conf ) throws IOException
+    {
+    for( Tap tap : getTaps() )
+      {
+      if( !tap.rollbackResource( conf ) )
+        return false;
+      }
+
+    return true;
+    }
+
+  @Override
   public boolean resourceExists( Config conf ) throws IOException
     {
     for( Tap tap : getTaps() )

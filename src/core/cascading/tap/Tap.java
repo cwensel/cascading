@@ -325,16 +325,39 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   public abstract boolean deleteResource( Config conf ) throws IOException;
 
   /**
-   * Method commitResource allows the underlying resource to be notified when all write processing is completed
-   * so that any additional cleanup or processing may be completed.
+   * Method commitResource allows the underlying resource to be notified when all write processing is
+   * successful so that any additional cleanup or processing may be completed.
+   * <p/>
+   * See {@link #rollbackResource(Object)} to handle cleanup in the face of failures.
+   * <p/>
+   * This method is invoked once "client side" and not in the cluster, if any.
    * <p/>
    * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
    *
    * @param conf
-   * @return
+   * @return returns true if successful
    * @throws IOException
    */
   public boolean commitResource( Config conf ) throws IOException
+    {
+    return true;
+    }
+
+  /**
+   * Method rollbackResource allows the underlying resource to be notified when any write processing has failed or
+   * was stopped so that any cleanup may be started.
+   * <p/>
+   * See {@link #commitResource(Object)} to handle cleanup when the write has successfully completed.
+   * <p/>
+   * This method is invoked once "client side" and not in the cluster, if any.
+   * <p/>
+   * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
+   *
+   * @param conf
+   * @return returns true if successful
+   * @throws IOException
+   */
+  public boolean rollbackResource( Config conf ) throws IOException
     {
     return true;
     }

@@ -575,6 +575,12 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReade
     return parent.commitResource( conf );
     }
 
+  @Override
+  public boolean rollbackResource( JobConf conf ) throws IOException
+    {
+    return parent.rollbackResource( conf );
+    }
+
   /** @see Tap#resourceExists(Object) */
   public boolean resourceExists( JobConf conf ) throws IOException
     {

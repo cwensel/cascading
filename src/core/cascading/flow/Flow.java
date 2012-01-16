@@ -994,6 +994,22 @@ public abstract class Flow<Config>
       }
     }
 
+  public void rollbackTaps( Collection<Tap> taps )
+    {
+    for( Tap tap : taps )
+      {
+      try
+        {
+        if( !tap.rollbackResource( getConfig() ) )
+          throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ) );
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ), exception );
+        }
+      }
+    }
+
   @ProcessCleanup
   public void cleanup()
     {
