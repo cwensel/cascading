@@ -41,6 +41,7 @@ import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
+import cascading.operation.aggregator.Max;
 import cascading.operation.assertion.AssertNotNull;
 import cascading.operation.assertion.AssertNull;
 import cascading.operation.expression.ExpressionFilter;
@@ -51,6 +52,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Join;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.scheme.Scheme;
@@ -1782,5 +1784,40 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "test flow", "test.value", flow.getProperty( "test.key" ) );
     assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getFlowSteps().get( 0 ) ).getInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
+    }
+
+  @Test
+  public void testEveryAfterJoin()
+    {
+    Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge1" );
+    Tap source2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo/merge2" );
+
+    Tap sink = new Hfs( new TextLine(), "foo" );
+
+    Pipe left = new Each( new Pipe( "left" ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Fields[] fields = Fields.fields( new Fields( "offset" ), new Fields( "offset" ) );
+    Pipe merge = new Join( "join", Pipe.pipes( left, right ), fields, Fields.size( 4 ), new InnerJoin() );
+
+    merge = new Every( merge, new Max() );
+
+    Map sources = new HashMap();
+    sources.put( "left", source1 );
+    sources.put( "right", source2 );
+
+    Map sinks = new HashMap();
+    sinks.put( "join", sink );
+
+    try
+      {
+      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      fail();
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+//      exception.printStackTrace();
+      }
     }
   }
