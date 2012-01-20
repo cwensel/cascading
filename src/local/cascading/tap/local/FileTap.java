@@ -97,7 +97,6 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     return new TupleEntrySchemeIterator( flowProcess, getScheme(), reader );
     }
 
-  @SuppressWarnings({"ResultOfMethodCallIgnored"})
   @Override
   public TupleEntryCollector openForWrite( LocalFlowProcess flowProcess, FileOutputStream output ) throws IOException
     {

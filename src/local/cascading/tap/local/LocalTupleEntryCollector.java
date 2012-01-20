@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-class LocalTupleEntryCollector extends TupleEntrySchemeCollector<Closeable>
+public class LocalTupleEntryCollector extends TupleEntrySchemeCollector<Closeable>
   {
   private static final Logger LOG = LoggerFactory.getLogger( LocalTupleEntryCollector.class );
 
