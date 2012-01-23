@@ -100,6 +100,9 @@ public class HadoopPlatform extends TestPlatform
 
       Configuration conf = new Configuration();
 
+      conf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
+      conf.setInt( "jobclient.completion.poll.interval", 100 );
+
       dfs = new MiniDFSCluster( conf, 4, true, null );
       fileSys = dfs.getFileSystem();
       mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
@@ -117,7 +120,7 @@ public class HadoopPlatform extends TestPlatform
     if( logger != null )
       properties.put( "log4j.logger", logger );
 
-    HadoopFlow.setJobPollingInterval( properties, 500 ); // should speed up tests
+    HadoopFlow.setJobPollingInterval( properties, 10 ); // should speed up tests
     HadoopPlanner.copyJobConf( properties, jobConf );
     }
 
