@@ -58,23 +58,28 @@ public class LocalFlowStep extends FlowStep<Properties>
         currentProperties.put( entry.getKey().toString(), entry.getValue().toString() );
       }
 
-    initTaps( flowProcess, currentProperties, getSources() );
-    initTaps( flowProcess, currentProperties, getSinks() );
-    initTaps( flowProcess, currentProperties, getTraps() );
+    initTaps( flowProcess, currentProperties, getSources(), false );
+    initTaps( flowProcess, currentProperties, getSinks(), true );
+    initTaps( flowProcess, currentProperties, getTraps(), true );
 
     initFromPipes( currentProperties );
 
     return currentProperties;
     }
 
-  protected void initTaps( FlowProcess<Properties> flowProcess, Properties conf, Set<Tap> taps )
+  protected void initTaps( FlowProcess<Properties> flowProcess, Properties conf, Set<Tap> taps, boolean isSink )
     {
     if( !taps.isEmpty() )
       {
       Properties confCopy = flowProcess.copyConfig( conf );
 
       for( Tap tap : taps )
-        tap.sinkConfInit( flowProcess, confCopy );
+        {
+        if( isSink )
+          tap.sinkConfInit( flowProcess, confCopy );
+        else
+          tap.sourceConfInit( flowProcess, confCopy );
+        }
       }
     }
 
