@@ -377,7 +377,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
     JobConf conf = HadoopUtil.createJobConf( properties, null );
 
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( this, conf ) );
+    return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this, conf ) );
     }
 
   @Override

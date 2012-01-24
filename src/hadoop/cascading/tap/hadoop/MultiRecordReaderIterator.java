@@ -22,6 +22,7 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.CloseableIterator;
@@ -44,6 +45,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( MultiRecordReaderIterator.class );
 
+  private final HadoopFlowProcess flowProcess;
   /** Field tap */
   private final Tap tap;
   /** Field inputFormat */
@@ -68,8 +70,9 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
    *
    * @throws IOException when
    */
-  public MultiRecordReaderIterator( Tap tap, JobConf jobConf ) throws IOException
+  public MultiRecordReaderIterator( HadoopFlowProcess flowProcess, Tap tap, JobConf jobConf ) throws IOException
     {
+    this.flowProcess = flowProcess;
     this.tap = tap;
     this.conf = new JobConf( jobConf );
 
@@ -78,7 +81,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
 
   private void initialize() throws IOException
     {
-    tap.sourceConfInit( null, conf );
+    tap.sourceConfInit( flowProcess, conf );
 
     if( !tap.resourceExists( conf ) )
       {
