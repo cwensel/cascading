@@ -203,6 +203,10 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
 
   /**
    * Method openForRead opens the resource represented by this Tap instance.
+   * <p/>
+   * {@code input} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
+   * via {@link Scheme#sourceConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
+   * input type and instantiate it before calling {@code super.openForRead()}.
    *
    * @param flowProcess
    * @param input
@@ -217,6 +221,10 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
+   * <p/>
+   * {@code output} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
+   * via {@link Scheme#sinkConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
+   * output type and instantiate it before calling {@code super.openForWrite()}.
    *
    * @param flowProcess
    * @param output
