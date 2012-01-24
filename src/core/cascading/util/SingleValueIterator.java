@@ -23,7 +23,11 @@ package cascading.util;
 import java.util.Iterator;
 
 /**
- *
+ * Class SingleValueIterator is a convenience to creating an {@link Iterator} that returns one value for use
+ * with interfaces that only accept Iterator instances.
+ * <p/>
+ * If given a {@code null} value, it will be assumed this Iterator instance has no value, and {@link #hasNext()}
+ * will return false.
  */
 public class SingleValueIterator<Value> implements Iterator<Value>
   {
@@ -39,6 +43,7 @@ public class SingleValueIterator<Value> implements Iterator<Value>
 
   public SingleValueIterator( Value value )
     {
+    this.hasValue = value != null;
     this.value = value;
     }
 
@@ -72,11 +77,7 @@ public class SingleValueIterator<Value> implements Iterator<Value>
 
   public void reset( Value value )
     {
-    if( value == null )
-      throw new IllegalArgumentException( "value may not be null" );
-
-
-    this.hasValue = true;
+    this.hasValue = value != null;
     this.value = value;
     }
   }
