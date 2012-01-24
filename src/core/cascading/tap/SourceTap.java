@@ -31,7 +31,8 @@ import cascading.tuple.TupleEntryCollector;
  * Class SourceTap is the base class for source only Taps.
  * <p/>
  * Some {@link Tap} instances may only be sources (as opposed
- * to being a sink). These types should subclass SourceTap for convenience.
+ * to being a sink). These types should subclass SourceTap for convenience or
+ * set {@link #isSink()} to {@code false} in a custom Tap sub-class.
  */
 public abstract class SourceTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
   {
