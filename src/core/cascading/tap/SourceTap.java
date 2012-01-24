@@ -26,7 +26,6 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
 
 /**
  * Class SourceTap is the base class for source only Taps.
@@ -64,6 +63,12 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     }
 
   @Override
+  public void sinkConfInit( Process flowProcess, Config conf )
+    {
+    throw new UnsupportedOperationException( "unable to source tuple streams via a SourceTap instance" );
+    }
+
+  @Override
   public boolean createResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );
@@ -76,9 +81,9 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     }
 
   @Override
-  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
+  public boolean rollbackResource( Config conf ) throws IOException
     {
-    throw new UnsupportedOperationException( "unable to open for read via a SourceTap instance" );
+    throw new UnsupportedOperationException( "unable to rollback resource via a SourceTap instance" );
     }
 
   @Override

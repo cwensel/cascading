@@ -334,7 +334,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
     FileInputFormat.addInputPath( conf, qualifiedPath );
 
-    super.sourceConfInit( null, conf );
+    super.sourceConfInit( process, conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
 
@@ -347,7 +347,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     Path qualifiedPath = new Path( getFullIdentifier( conf ) );
 
     FileOutputFormat.setOutputPath( conf, qualifiedPath );
-    super.sinkConfInit( null, conf );
+    super.sinkConfInit( process, conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
 

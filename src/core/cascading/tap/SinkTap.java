@@ -25,7 +25,6 @@ import java.io.IOException;
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
 /**
@@ -72,11 +71,5 @@ public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output
   public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
-    }
-
-  @Override
-  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
-    {
-    throw new UnsupportedOperationException( "unable to open for write via a SinkTap instance" );
     }
   }
