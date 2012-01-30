@@ -25,7 +25,10 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
+import cascading.cascade.CascadeException;
+import cascading.util.CascadingService;
 import cascading.util.ServiceUtil;
+import cascading.util.ShutdownUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +47,7 @@ public class CascadingServices
   Map<Object, Object> properties;
 
   MetricsService metricsService;
-  DocumentService objectService;
+  DocumentService documentService;
 
   static
     {
@@ -81,12 +84,12 @@ public class CascadingServices
     return metricsService;
     }
 
-  public DocumentService getObjectService()
+  public DocumentService getDocumentService()
     {
-    if( objectService == null )
-      objectService = createObjectService();
+    if( documentService == null )
+      documentService = createDocumentService();
 
-    return objectService;
+    return documentService;
     }
 
   public ClientState createClientState( String id )
@@ -108,18 +111,55 @@ public class CascadingServices
     MetricsService service = (MetricsService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
+      {
+      registerShutdownHook( service );
+
       return service;
+      }
 
     return new NullMetricsService();
     }
 
-  protected DocumentService createObjectService()
+  protected DocumentService createDocumentService()
     {
     DocumentService service = (DocumentService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
+      {
+      registerShutdownHook( service );
+
       return service;
+      }
 
     return new NullDocumentService();
+    }
+
+  private void registerShutdownHook( final CascadingService service )
+    {
+    if( service == null )
+      return;
+
+    ShutdownUtil.addHook( new ShutdownUtil.Hook()
+    {
+    @Override
+    public Priority priority()
+      {
+      return Priority.SERVICE_PROVIDER;
+      }
+
+    @Override
+    public void execute()
+      {
+      try
+        {
+        service.stopService();
+        }
+      catch( Throwable throwable )
+        {
+        LOG.error( "failed stopping cascading service", throwable );
+        throw new CascadeException( "failed stopping cascading service", throwable );
+        }
+      }
+    } );
     }
   }

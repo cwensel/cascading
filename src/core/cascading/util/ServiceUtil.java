@@ -43,7 +43,7 @@ public class ServiceUtil
     return null;
     }
 
-  public static CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
+  public static synchronized CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
     String className = PropertyUtil.getProperty( properties, property, defaultProperties.getProperty( property ) );
 
@@ -53,7 +53,7 @@ public class ServiceUtil
     return singletons.get( className );
     }
 
-  public static Collection<CascadingService> releaseSingletonServices()
+  public static synchronized Collection<CascadingService> releaseSingletonServices()
     {
     try
       {

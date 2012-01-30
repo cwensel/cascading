@@ -51,7 +51,7 @@ public abstract class BaseState implements CascadingService
       return;
 
     metricsService = cascadingServices.getMetricsService();
-    documentService = cascadingServices.getObjectService();
+    documentService = cascadingServices.getDocumentService();
     }
 
   public void startService()

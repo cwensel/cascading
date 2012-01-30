@@ -37,7 +37,6 @@ import cascading.flow.planner.FlowStepGraph;
 public class LocalFlow extends Flow<Properties>
   {
   private Properties config;
-  private Thread shutdownHook;
 
   public LocalFlow( Map<Object, Object> properties, Properties config, FlowDef flowDef, ElementGraph elementGraph, FlowStepGraph flowStepGraph )
     {
@@ -110,25 +109,6 @@ public class LocalFlow extends Flow<Properties>
       {
       throw new FlowException( "unable to delete sinks", exception );
       }
-
-    registerShutdownHook();
-    }
-
-  private void registerShutdownHook()
-    {
-    if( !isStopJobsOnExit() )
-      return;
-
-    shutdownHook = new Thread()
-    {
-    @Override
-    public void run()
-      {
-      LocalFlow.this.stop();
-      }
-    };
-
-    Runtime.getRuntime().addShutdownHook( shutdownHook );
     }
 
   @Override
@@ -151,14 +131,5 @@ public class LocalFlow extends Flow<Properties>
   @Override
   protected void internalShutdown()
     {
-    deregisterShutdownHook();
-    }
-
-  private void deregisterShutdownHook()
-    {
-    if( !isStopJobsOnExit() || stop )
-      return;
-
-    Runtime.getRuntime().removeShutdownHook( shutdownHook );
     }
   }

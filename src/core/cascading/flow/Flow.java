@@ -55,6 +55,7 @@ import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.PropertyUtil;
+import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.Graphs;
@@ -145,6 +146,7 @@ public abstract class Flow<Config>
   private transient ExecutorService executor;
 
   private transient ReentrantLock stopLock = new ReentrantLock( true );
+  protected ShutdownUtil.Hook shutdownHook;
 
   /**
    * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
@@ -855,6 +857,8 @@ public abstract class Flow<Config>
     if( stop )
       return;
 
+    registerShutdownHook();
+
     internalStart();
 
     String threadName = ( "flow " + Util.toNull( getName() ) ).trim();
@@ -1274,6 +1278,7 @@ public abstract class Flow<Config>
         {
         flowStats.cleanup();
         internalShutdown();
+        deregisterShutdownHook();
         }
       }
     }
@@ -1504,6 +1509,39 @@ public abstract class Flow<Config>
   public String getCascadeID()
     {
     return getProperty( "cascading.cascade.id" );
+    }
+
+  protected void registerShutdownHook()
+    {
+    if( !isStopJobsOnExit() )
+      return;
+
+    shutdownHook = new ShutdownUtil.Hook()
+    {
+    @Override
+    public Priority priority()
+      {
+      return Priority.WORK_CHILD;
+      }
+
+    @Override
+    public void execute()
+      {
+      logInfo( "shutdown hook calling stop on flow" );
+
+      Flow.this.stop();
+      }
+    };
+
+    ShutdownUtil.addHook( shutdownHook );
+    }
+
+  private void deregisterShutdownHook()
+    {
+    if( !isStopJobsOnExit() || stop )
+      return;
+
+    ShutdownUtil.removeHook( shutdownHook );
     }
 
   /** Class FlowHolder is a helper class for wrapping Flow instances. */

@@ -29,7 +29,9 @@ public interface CascadingService
   {
   void setProperties( Map<Object, Object> properties );
 
+  /** May be called more than once, but only the first invocation will start the service. */
   void startService();
 
+  /** May be called more than once, but only the first invocation will stop the service. */
   void stopService();
   }

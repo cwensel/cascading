@@ -32,6 +32,7 @@ import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.util.PropertyUtil;
+import cascading.util.ShutdownUtil;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
@@ -44,12 +45,10 @@ public class HadoopFlow extends Flow<JobConf>
   {
   /** Field hdfsShutdown */
   private static Thread hdfsShutdown = null;
-  /** Field shutdownCount */
-  private static int shutdownCount = 0;
+  /** Field shutdownHook */
+  private static ShutdownUtil.Hook shutdownHook;
   /** Field jobConf */
   private transient JobConf jobConf;
-  /** Field shutdownHook */
-  private transient Thread shutdownHook;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
 
@@ -238,7 +237,7 @@ public class HadoopFlow extends Flow<JobConf>
       throw new FlowException( "unable to delete sinks", exception );
       }
 
-    registerShutdownHook();
+    registerHadoopShutdownHook( this );
     }
 
   @Override
@@ -256,51 +255,54 @@ public class HadoopFlow extends Flow<JobConf>
       step.clean( getConfig() );
     }
 
-  private void registerShutdownHook()
+  private static synchronized void registerHadoopShutdownHook( Flow flow )
     {
-    if( !isStopJobsOnExit() )
+    if( !flow.isStopJobsOnExit() )
+      return;
+
+    // guaranteed singleton here
+    if( shutdownHook != null )
       return;
 
     getHdfsShutdownHook();
 
-    shutdownHook = new Thread()
+    shutdownHook = new ShutdownUtil.Hook()
     {
     @Override
-    public void run()
+    public Priority priority()
       {
-      HadoopFlow.this.stop();
+      return Priority.LAST; // very last thing to happen
+      }
 
+    @Override
+    public void execute()
+      {
       callHdfsShutdownHook();
       }
     };
 
-    Runtime.getRuntime().addShutdownHook( shutdownHook );
+    ShutdownUtil.addHook( shutdownHook );
     }
 
   private synchronized static void callHdfsShutdownHook()
     {
-    if( --shutdownCount != 0 )
-      return;
-
     if( hdfsShutdown != null )
       hdfsShutdown.start();
     }
 
   private synchronized static void getHdfsShutdownHook()
     {
-    shutdownCount++;
-
     if( hdfsShutdown == null )
       hdfsShutdown = HadoopUtil.getHDFSShutdownHook();
     }
 
-  private void deregisterShutdownHook()
-    {
-    if( !isStopJobsOnExit() || stop )
-      return;
-
-    Runtime.getRuntime().removeShutdownHook( shutdownHook );
-    }
+//  private void deregisterShutdownHook()
+//    {
+//    if( !isStopJobsOnExit() || stop )
+//      return;
+//
+//    ShutdownUtil.removeHook( shutdownHook );
+//    }
 
   protected void internalClean( boolean force )
     {
@@ -310,7 +312,7 @@ public class HadoopFlow extends Flow<JobConf>
 
   protected void internalShutdown()
     {
-    deregisterShutdownHook();
+//    deregisterShutdownHook();
     }
 
   protected int getMaxNumParallelSteps()

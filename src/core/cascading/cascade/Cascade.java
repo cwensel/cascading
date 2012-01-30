@@ -50,6 +50,7 @@ import cascading.management.ClientState;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.PropertyUtil;
+import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.Graphs;
@@ -113,7 +114,7 @@ public class Cascade implements Runnable
   /** Field executor */
   private ExecutorService executor;
   /** Field shutdownHook */
-  private Thread shutdownHook;
+  private ShutdownUtil.Hook shutdownHook;
   /** Field jobsMap */
   private Map<String, Callable<Throwable>> jobsMap;
   /** Field stop */
@@ -496,16 +497,24 @@ public class Cascade implements Runnable
     if( !isStopJobsOnExit() )
       return;
 
-    shutdownHook = new Thread()
+    shutdownHook = new ShutdownUtil.Hook()
     {
     @Override
-    public void run()
+    public Priority priority()
       {
+      return Priority.WORK_PARENT;
+      }
+
+    @Override
+    public void execute()
+      {
+      logInfo( "shutdown hook calling stop on cascade" );
+
       Cascade.this.stop();
       }
     };
 
-    Runtime.getRuntime().addShutdownHook( shutdownHook );
+    ShutdownUtil.addHook( shutdownHook );
     }
 
   private void deregisterShutdownHook()
@@ -513,7 +522,7 @@ public class Cascade implements Runnable
     if( !isStopJobsOnExit() || stop )
       return;
 
-    Runtime.getRuntime().removeShutdownHook( shutdownHook );
+    ShutdownUtil.removeHook( shutdownHook );
     }
 
   private boolean isStopJobsOnExit()
