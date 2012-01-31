@@ -22,38 +22,53 @@ package cascading.scheme;
 
 import cascading.tuple.TupleEntry;
 
-public class SourceCall<Context, Input> extends SchemeCall<Context>
+/**
+ * SourceCall provides access to the current {@link Scheme#source(cascading.flow.FlowProcess, SourceCall)} invocation
+ * arguments.
+ * <p/>
+ * Use the Context to store thread local values.
+ *
+ * @param <Context>
+ * @param <Input>
+ */
+public interface SourceCall<Context, Input>
   {
-  TupleEntry incomingEntry;
-  Input input;
+  /**
+   * Method getContext returns the context of this SourceCall object.
+   *
+   * @return the context (type C) of this SourceCall object.
+   */
+  Context getContext();
 
-  public SourceCall()
-    {
-    }
+  /**
+   * Method setContext sets the context of this SourceCall object.
+   *
+   * @param context the context of this SourceCall object.
+   */
+  void setContext( Context context );
 
-  public SourceCall( TupleEntry incomingEntry, Input input )
-    {
-    this.incomingEntry = incomingEntry;
-    this.input = input;
-    }
+  /**
+   * Method getIncomingEntry returns a pre-prepared {@link TupleEntry} to be populated
+   * with the input values from {@link #getInput()}.
+   * <p/>
+   * That is, using the getInput() method, retrieve the current incoming values and
+   * place them into the getIncomingEntry() via {@link TupleEntry#setTuple(cascading.tuple.Tuple)}
+   * or by modifying the tuple returned from {@link cascading.tuple.TupleEntry#getTuple()}.
+   * <p/>
+   * The returned Tuple entry is guaranteed to be the size of the declared incoming source fields.
+   * <p/>
+   * The returned TupleEntry from this method is modifiable and is intended to be re-used. This is an exception to
+   * the general rule that passed TupleEntry instances must not be modified.
+   *
+   * @return TupleEntry
+   */
+  TupleEntry getIncomingEntry();
 
-  public TupleEntry getIncomingEntry()
-    {
-    return incomingEntry;
-    }
-
-  public void setIncomingEntry( TupleEntry incomingEntry )
-    {
-    this.incomingEntry = incomingEntry;
-    }
-
-  public Input getInput()
-    {
-    return input;
-    }
-
-  public void setInput( Input input )
-    {
-    this.input = input;
-    }
+  /**
+   * Method getInput returns the input mechanism for the underlying platform used to retrieve new values (records,
+   * lines, etc).
+   *
+   * @return the platform dependent input handler
+   */
+  Input getInput();
   }

@@ -22,29 +22,43 @@ package cascading.scheme;
 
 import cascading.tuple.TupleEntry;
 
-public class SinkCall<C, O> extends SchemeCall<C>
+/**
+ * SinkCall provides access to the current {@link Scheme#sink(cascading.flow.FlowProcess, SinkCall)} invocation
+ * arguments.
+ * <p/>
+ * Use the Context to store thread local values.
+ *
+ * @param <Context>
+ * @param <Output>
+ */
+public interface SinkCall<Context, Output>
   {
-  TupleEntry outgoingEntry;
+  /**
+   * Method getContext returns the context of this SinkCall object.
+   *
+   * @return the context (type C) of this SinkCall object.
+   */
+  Context getContext();
 
-  public TupleEntry getOutgoingEntry()
-    {
-    return outgoingEntry;
-    }
+  /**
+   * Method setContext sets the context of this SinkCall object.
+   *
+   * @param context the context of this SinkCall object.
+   */
+  void setContext( Context context );
 
-  public void setOutgoingEntry( TupleEntry outgoingEntry )
-    {
-    this.outgoingEntry = outgoingEntry;
-    }
+  /**
+   * Method getOutgoingEntry returns the final {@link TupleEntry} to be passed to the
+   * {@link #getOutput()} output handler.
+   * <p/>
+   * That is, the result of calling getOutgoingEntry() should be passed directly to the
+   * platform specific output handler returned by getOutput().
+   * <p/>
+   * Note the returned value from this method cannot be modified.
+   *
+   * @return TupleEntry
+   */
+  TupleEntry getOutgoingEntry();
 
-  O output;
-
-  public O getOutput()
-    {
-    return output;
-    }
-
-  public void setOutput( O output )
-    {
-    this.output = output;
-    }
+  Output getOutput();
   }

@@ -24,8 +24,8 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
-import cascading.scheme.SourceCall;
 import cascading.util.SingleCloseableInputIterator;
 
 /**
@@ -36,7 +36,7 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
   private final FlowProcess flowProcess;
   private final Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme;
   private final CloseableIterator<Input> inputIterator;
-  private SourceCall<SourceContext, Input> sourceCall;
+  private ConcreteCall<SourceContext, Input> sourceCall;
 
   private boolean isComplete = false;
   private boolean hasWaiting = false;
@@ -60,7 +60,7 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
       return;
       }
 
-    this.sourceCall = new SourceCall<SourceContext, Input>();
+    this.sourceCall = new ConcreteCall<SourceContext, Input>();
 
     this.sourceCall.setIncomingEntry( getTupleEntry() );
     this.sourceCall.setInput( inputIterator.next() );

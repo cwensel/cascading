@@ -23,8 +23,8 @@ package cascading.tuple;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
-import cascading.scheme.SinkCall;
 
 /**
  *
@@ -34,7 +34,7 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
   private final FlowProcess flowProcess;
   private final Scheme scheme;
 
-  protected final SinkCall sinkCall;
+  protected final ConcreteCall sinkCall;
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme )
     {
@@ -42,7 +42,7 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     this.flowProcess = flowProcess;
     this.scheme = scheme;
 
-    this.sinkCall = new SinkCall();
+    this.sinkCall = new ConcreteCall();
     }
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output )
