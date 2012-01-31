@@ -23,7 +23,7 @@ package cascading.scheme;
 import cascading.tuple.TupleEntry;
 
 /**
- * SinkCall provides access to the current
+ * The concrete base class for {@link SourceCall} and {@link SinkCall}.
  *
  * @param <Context>
  * @param <IO>
@@ -34,26 +34,19 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
   TupleEntry entry;
   IO io;
 
-  /**
-   * Method getContext returns the context of this SchemeCall object.
-   *
-   * @return the context (type C) of this SchemeCall object.
-   */
+  @Override
   public Context getContext()
     {
     return context;
     }
 
-  /**
-   * Method setContext sets the context of this SchemeCall object.
-   *
-   * @param context the context of this SchemeCall object.
-   */
+  @Override
   public void setContext( Context context )
     {
     this.context = context;
     }
 
+  @Override
   public TupleEntry getOutgoingEntry()
     {
     return entry;
@@ -64,6 +57,7 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
     this.entry = outgoingEntry;
     }
 
+  @Override
   public TupleEntry getIncomingEntry()
     {
     return entry;
@@ -74,6 +68,7 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
     this.entry = incomingEntry;
     }
 
+  @Override
   public IO getInput()
     {
     return io;
@@ -84,6 +79,7 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
     this.io = input;
     }
 
+  @Override
   public IO getOutput()
     {
     return io;

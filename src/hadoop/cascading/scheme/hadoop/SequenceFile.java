@@ -97,7 +97,16 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     // todo: wrap tuples and defer the addAll
     Tuple tuple = sourceCall.getIncomingEntry().getTuple();
 
-    tuple.setAll( key, value );
+    // key is always null/empty, so don't bother
+    if( sourceCall.getIncomingEntry().getFields().isDefined() )
+      {
+      tuple.setAll( value );
+      }
+    else
+      {
+      tuple.clear();
+      tuple.addAll( value );
+      }
 
     return true;
     }

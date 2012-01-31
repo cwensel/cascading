@@ -84,6 +84,7 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
     catch( Exception exception )
       {
       currentException = new TupleException( "unable to read from input", exception );
+      return true;
       }
 
     if( !hasWaiting )
