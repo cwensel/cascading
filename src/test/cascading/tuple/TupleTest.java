@@ -325,4 +325,27 @@ public class TupleTest extends CascadingTestCase
     assertEquals( results.get( 2 ), date );
     assertEquals( results.get( 3 ), date.toString() );
     }
+
+  public void testSetAll()
+    {
+    Tuple aTuple = new Tuple( tuple );
+
+    int size = aTuple.size() + tuple.size();
+    Tuple result = Tuple.size( size );
+
+    result.setAll( aTuple, tuple );
+
+    assertEquals( "wrong size", size, result.size() );
+
+    result.setAll( aTuple, tuple );
+
+    assertEquals( "wrong size", size, result.size() );
+
+    int count = 0;
+    for( int i = 0; i < aTuple.size(); i++ )
+      assertEquals( "wrong value on: " + count, aTuple.get( i ), result.get( count++ ) );
+
+    for( int i = 0; i < tuple.size(); i++ )
+      assertEquals( "wrong value on: " + count, tuple.get( i ), result.get( count++ ) );
+    }
   }

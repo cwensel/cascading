@@ -415,6 +415,51 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
+   * Method setAll sets each element value of the given Tuple instance into the corresponding
+   * position of this instance.
+   *
+   * @param tuple of type Tuple
+   */
+  public void setAll( Tuple tuple )
+    {
+    verifyModifiable();
+
+    if( tuple == null )
+      return;
+
+    for( int i = 0; i < tuple.elements.size(); i++ )
+      internalSet( i, tuple.elements.get( i ) );
+    }
+
+  /**
+   * Method setAll sets each element value of the given Tuple instances into the corresponding
+   * position of this instance.
+   * <p/>
+   * All given tuple instances after the first will be offset by the length of the prior tuple instances.
+   *
+   * @param tuples of type Tuple[]
+   */
+  public void setAll( Tuple... tuples )
+    {
+    verifyModifiable();
+
+    if( tuples.length == 0 )
+      return;
+
+    int pos = 0;
+    for( int i = 0; i < tuples.length; i++ )
+      {
+      Tuple tuple = tuples[ i ];
+
+      if( tuple == null ) // being defensive
+        continue;
+
+      for( int j = 0; j < tuple.elements.size(); j++ )
+        internalSet( pos++, tuple.elements.get( j ) );
+      }
+    }
+
+  /**
    * Method set sets the given value to the given index position in this instance.
    *
    * @param index of type int
@@ -424,6 +469,11 @@ public class Tuple implements Comparable, Iterable, Serializable
     {
     verifyModifiable();
 
+    internalSet( index, value );
+    }
+
+  private final void internalSet( int index, Object value )
+    {
     try
       {
       elements.set( index, value );
@@ -452,7 +502,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     int[] pos = declarator.getPos( fields, size() );
 
     for( int i = 0; i < pos.length; i++ )
-      elements.set( pos[ i ], tuple.getObject( i ) );
+      internalSet( pos[ i ], tuple.getObject( i ) );
     }
 
   /**
