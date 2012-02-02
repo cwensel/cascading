@@ -93,6 +93,7 @@ public class AggregateBy extends SubAssembly
   private Fields[] argumentFields;
   private Functor[] functors;
   private Aggregator[] aggregators;
+  private transient GroupBy groupBy;
 
   /**
    * Interface Functor provides a means to create a simple function for use with the {@link CompositeFunction} class.
@@ -416,7 +417,9 @@ public class AggregateBy extends SubAssembly
     for( int i = 0; i < functions.length; i++ )
       functions[ i ] = new Each( pipes[ i ], argumentSelector, function, Fields.RESULTS );
 
-    Pipe pipe = new GroupBy( name, functions, groupingFields );
+    groupBy = new GroupBy( name, functions, groupingFields );
+
+    Pipe pipe = groupBy;
 
     for( int i = 0; i < aggregators.length; i++ )
       pipe = new Every( pipe, functors[ i ].getDeclaredFields(), aggregators[ i ], Fields.ALL );
@@ -443,5 +446,16 @@ public class AggregateBy extends SubAssembly
   protected Aggregator[] getAggregators()
     {
     return aggregators;
+    }
+
+  /**
+   * Method getGroupBy returns the internal {@link GroupBy} instance so that any custom properties
+   * can be set on it via {@link cascading.pipe.Pipe#getProcessConfigDef()}.
+   *
+   * @return GroupBy type
+   */
+  public GroupBy getGroupBy()
+    {
+    return groupBy;
     }
   }
