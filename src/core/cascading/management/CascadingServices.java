@@ -22,6 +22,9 @@ package cascading.management;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,16 +36,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class CascadingServices is the base class for pluggable services Cascading can call out to for distributed
+ * Class CascadingServices is the root class for pluggable services Cascading can call out to for distributed
  * monitoring and management systems.
+ * <p/>
+ * Be default all services will be loaded from the jar {@link #DEFAULT_PROPERTIES} resource is found in. If the
+ * property {@link #USE_CONTAINER} value is {@code false}, a ClassLoader container will not be created.
+ * <p/>
+ * For this to work, all service implementation and dependencies must be archived into a single jar.
+ *
+ * @see CascadingService
  */
 public class CascadingServices
   {
   private static final Logger LOG = LoggerFactory.getLogger( CascadingServices.class );
 
   public static final String DEFAULT_PROPERTIES = "cascading/management/service.properties";
+  public static final String USE_CONTAINER = "cascading.management.container";
 
   static Properties defaultProperties;
+  static URL libraryURL;
 
   Map<Object, Object> properties;
 
@@ -63,6 +75,25 @@ public class CascadingServices
     catch( IOException exception )
       {
       LOG.warn( "unable to load properties from {}", DEFAULT_PROPERTIES, exception );
+      }
+
+    URL url = CascadingServices.class.getClassLoader().getResource( DEFAULT_PROPERTIES );
+
+    if( url != null && defaultProperties.getProperty( USE_CONTAINER, "false" ).equalsIgnoreCase( "true" ) )
+      {
+      try
+        {
+        String path = url.toURI().getSchemeSpecificPart();
+        libraryURL = new URL( path.substring( 0, path.lastIndexOf( '!' ) ) );
+        }
+      catch( URISyntaxException exception )
+        {
+        LOG.warn( "unable to parse resource library: {}", url, exception );
+        }
+      catch( MalformedURLException exception )
+        {
+        LOG.warn( "unable to parse resource library: {}", url, exception );
+        }
       }
     }
 
@@ -94,7 +125,7 @@ public class CascadingServices
 
   public ClientState createClientState( String id )
     {
-    ClientState clientState = (ClientState) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY );
+    ClientState clientState = (ClientState) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY, libraryURL );
 
     if( clientState != null )
       {
@@ -108,7 +139,7 @@ public class CascadingServices
 
   protected MetricsService createMetricsService()
     {
-    MetricsService service = (MetricsService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
+    MetricsService service = (MetricsService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY, libraryURL );
 
     if( service != null )
       {
@@ -122,7 +153,7 @@ public class CascadingServices
 
   protected DocumentService createDocumentService()
     {
-    DocumentService service = (DocumentService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
+    DocumentService service = (DocumentService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY, libraryURL );
 
     if( service != null )
       {
