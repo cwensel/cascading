@@ -36,33 +36,44 @@ import org.slf4j.LoggerFactory;
 public class ServiceUtil
   {
   private static final Logger LOG = LoggerFactory.getLogger( ServiceUtil.class );
-  private static Map<String, CascadingService> singletons = new HashMap<String, CascadingService>();
-  private static ClassLoader classLoader;
 
-  // look in meta-inf/cascading-services for all classnames
-  public static Map<String, String> findAllServices()
+  private Map<String, CascadingService> singletons = new HashMap<String, CascadingService>();
+  private static ServiceUtil serviceUtil;
+
+  ClassLoader classLoader;
+  URL libraryURL;
+  String[] exclusions;
+
+  public synchronized static ServiceUtil getInstance( URL libraryURL, String[] exclusions )
     {
-    return null;
+    if( serviceUtil == null )
+      serviceUtil = new ServiceUtil( libraryURL, exclusions );
+
+    return serviceUtil;
     }
 
-  public static synchronized CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
+  public synchronized static void releaseSingletonsAndDestroy()
     {
-    return loadSingletonServiceFrom( defaultProperties, properties, property, null );
+    if( serviceUtil != null )
+      serviceUtil.releaseSingletonServices();
+
+    serviceUtil = null;
     }
 
-  public static synchronized CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property, URL libraryPath )
+  ServiceUtil( URL libraryURL, String[] exclusions )
+    {
+    this.libraryURL = libraryURL;
+    this.exclusions = exclusions;
+    }
+
+  public synchronized CascadingService loadSingletonServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
     String className = getStringProperty( defaultProperties, properties, property );
 
     if( !singletons.containsKey( className ) )
-      singletons.put( className, createService( properties, className, libraryPath ) );
+      singletons.put( className, createService( properties, className ) );
 
     return singletons.get( className );
-    }
-
-  private static boolean getBooleanProperty( Properties defaultProperties, Map<Object, Object> properties, String property )
-    {
-    return !( property == null || property.isEmpty() ) && PropertyUtil.getProperty( properties, property, defaultProperties.getProperty( property, "false" ) ).equalsIgnoreCase( "true" );
     }
 
   private static String getStringProperty( Properties defaultProperties, Map<Object, Object> properties, String property )
@@ -70,7 +81,7 @@ public class ServiceUtil
     return PropertyUtil.getProperty( properties, property, defaultProperties.getProperty( property ) );
     }
 
-  public static synchronized Collection<CascadingService> releaseSingletonServices()
+  public synchronized Collection<CascadingService> releaseSingletonServices()
     {
     try
       {
@@ -82,19 +93,14 @@ public class ServiceUtil
       }
     }
 
-  public static CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
-    {
-    return loadServiceFrom( defaultProperties, properties, property, null );
-    }
-
-  public static CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property, URL libraryPath )
+  public CascadingService loadServiceFrom( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
     String className = getStringProperty( defaultProperties, properties, property );
 
-    return createService( properties, className, libraryPath );
+    return createService( properties, className );
     }
 
-  public static CascadingService createService( Map<Object, Object> properties, String className, URL libraryPath )
+  public CascadingService createService( Map<Object, Object> properties, String className )
     {
     // test for ant style token escapes
     if( className == null || className.isEmpty() )
@@ -108,7 +114,7 @@ public class ServiceUtil
 
     try
       {
-      Class type = getClassLoader( libraryPath ).loadClass( className );
+      Class type = getClassLoader().loadClass( className );
 
       CascadingService service = (CascadingService) type.newInstance();
 
@@ -132,20 +138,20 @@ public class ServiceUtil
     return null;
     }
 
-  private synchronized static ClassLoader getClassLoader( URL libraryPath )
+  private synchronized ClassLoader getClassLoader()
     {
     if( classLoader != null )
       return classLoader;
 
-    if( libraryPath == null )
+    if( libraryURL == null )
       {
       classLoader = Thread.currentThread().getContextClassLoader();
       }
     else
       {
-      LOG.info( "loading services from library: {}", libraryPath );
+      LOG.info( "loading services from library: {}", libraryURL );
 
-      classLoader = new ChildFirstURLClassLoader( libraryPath );
+      classLoader = new ChildFirstURLClassLoader( exclusions, libraryURL );
       }
 
     return classLoader;

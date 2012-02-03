@@ -29,9 +29,10 @@ import java.net.URLClassLoader;
  */
 class ChildFirstURLClassLoader extends ClassLoader
   {
+  private final String[] exclusions;
   private ChildURLClassLoader childClassLoader;
 
-  private static class ChildURLClassLoader extends URLClassLoader
+  private class ChildURLClassLoader extends URLClassLoader
     {
     private ClassLoader parentClassLoader;
 
@@ -45,8 +46,11 @@ class ChildFirstURLClassLoader extends ClassLoader
     @Override
     public Class<?> findClass( String name ) throws ClassNotFoundException
       {
-      if( name.startsWith( "cascading." ) )
-        return parentClassLoader.loadClass( name );
+      for( String exclusion : exclusions )
+        {
+        if( name.startsWith( exclusion ) )
+          return parentClassLoader.loadClass( name );
+        }
 
       try
         {
@@ -59,9 +63,10 @@ class ChildFirstURLClassLoader extends ClassLoader
       }
     }
 
-  public ChildFirstURLClassLoader( URL... urls )
+  public ChildFirstURLClassLoader( String[] exclusions, URL... urls )
     {
     super( Thread.currentThread().getContextClassLoader() );
+    this.exclusions = exclusions;
 
     childClassLoader = new ChildURLClassLoader( urls, this.getParent() );
     }
@@ -69,8 +74,11 @@ class ChildFirstURLClassLoader extends ClassLoader
   @Override
   protected synchronized Class<?> loadClass( String name, boolean resolve ) throws ClassNotFoundException
     {
-    if( name.startsWith( "cascading." ) )
-      return super.loadClass( name, resolve );
+    for( String exclusion : exclusions )
+      {
+      if( name.startsWith( exclusion ) )
+        return super.loadClass( name, resolve );
+      }
 
     try
       {

@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import cascading.cascade.CascadeException;
 import cascading.util.CascadingService;
+import cascading.util.PropertyUtil;
 import cascading.util.ServiceUtil;
 import cascading.util.ShutdownUtil;
 import org.slf4j.Logger;
@@ -40,9 +41,12 @@ import org.slf4j.LoggerFactory;
  * monitoring and management systems.
  * <p/>
  * Be default all services will be loaded from the jar {@link #DEFAULT_PROPERTIES} resource is found in. If the
- * property {@link #USE_CONTAINER} value is {@code false}, a ClassLoader container will not be created.
+ * property {@link #CONTAINER_ENABLED} value is {@code false}, a ClassLoader container will not be created.
  * <p/>
  * For this to work, all service implementation and dependencies must be archived into a single jar.
+ * <p/>
+ * If any packages in the jar should be excluded, set a comma delimited list of names via the {@link #CONTAINER_EXCLUDE}
+ * property.
  *
  * @see CascadingService
  */
@@ -51,15 +55,19 @@ public class CascadingServices
   private static final Logger LOG = LoggerFactory.getLogger( CascadingServices.class );
 
   public static final String DEFAULT_PROPERTIES = "cascading/management/service.properties";
-  public static final String USE_CONTAINER = "cascading.management.container";
+  public static final String CONTAINER_ENABLED = "cascading.management.container.enabled";
+  public static final String CONTAINER_EXCLUDE = "cascading.management.container.exclude";
 
   static Properties defaultProperties;
   static URL libraryURL;
+  static String[] exclusions;
+  static ServiceUtil serviceUtil;
 
   Map<Object, Object> properties;
 
   MetricsService metricsService;
   DocumentService documentService;
+  boolean enableContainer;
 
   static
     {
@@ -79,27 +87,42 @@ public class CascadingServices
 
     URL url = CascadingServices.class.getClassLoader().getResource( DEFAULT_PROPERTIES );
 
-    if( url != null && defaultProperties.getProperty( USE_CONTAINER, "false" ).equalsIgnoreCase( "true" ) )
+    if( url != null )
       {
       try
         {
         String path = url.toURI().getSchemeSpecificPart();
-        libraryURL = new URL( path.substring( 0, path.lastIndexOf( '!' ) ) );
+        int endIndex = path.lastIndexOf( '!' );
+
+        if( endIndex != -1 )
+          path = path.substring( 0, endIndex );
+
+        if( path.endsWith( ".jar" ) )
+          libraryURL = new URL( path );
         }
-      catch( URISyntaxException exception )
-        {
-        LOG.warn( "unable to parse resource library: {}", url, exception );
-        }
-      catch( MalformedURLException exception )
+      catch( Exception exception )
         {
         LOG.warn( "unable to parse resource library: {}", url, exception );
         }
       }
+
+    exclusions = defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," );
+
+    }
+
+  private synchronized ServiceUtil getServiceUtil()
+    {
+    // allows for a system property to disable the container
+    if( serviceUtil == null )
+      serviceUtil = ServiceUtil.getInstance( enableContainer ? libraryURL : null, exclusions );
+
+    return serviceUtil;
     }
 
   public CascadingServices( Map<Object, Object> properties )
     {
     this.properties = properties;
+    this.enableContainer = PropertyUtil.getProperty( properties, CONTAINER_ENABLED, defaultProperties.getProperty( CONTAINER_ENABLED, "false" ) ).equalsIgnoreCase( "true" );
     }
 
   private Map<Object, Object> getProperties()
@@ -125,7 +148,7 @@ public class CascadingServices
 
   public ClientState createClientState( String id )
     {
-    ClientState clientState = (ClientState) ServiceUtil.loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY, libraryURL );
+    ClientState clientState = (ClientState) getServiceUtil().loadServiceFrom( defaultProperties, getProperties(), ClientState.STATE_SERVICE_CLASS_PROPERTY );
 
     if( clientState != null )
       {
@@ -139,7 +162,7 @@ public class CascadingServices
 
   protected MetricsService createMetricsService()
     {
-    MetricsService service = (MetricsService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY, libraryURL );
+    MetricsService service = (MetricsService) getServiceUtil().loadSingletonServiceFrom( defaultProperties, getProperties(), MetricsService.METRICS_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       {
@@ -153,7 +176,7 @@ public class CascadingServices
 
   protected DocumentService createDocumentService()
     {
-    DocumentService service = (DocumentService) ServiceUtil.loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY, libraryURL );
+    DocumentService service = (DocumentService) getServiceUtil().loadSingletonServiceFrom( defaultProperties, getProperties(), DocumentService.DOCUMENT_SERVICE_CLASS_PROPERTY );
 
     if( service != null )
       {
