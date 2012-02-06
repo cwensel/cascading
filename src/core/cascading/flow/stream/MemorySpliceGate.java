@@ -36,6 +36,7 @@ import cascading.flow.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -76,6 +77,8 @@ public abstract class MemorySpliceGate extends SpliceGate
     {
     super.initialize();
 
+    Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( Tuples.DEFAULT_ELEMENT_COMPARATOR ) );
+
     groupComparators = new Comparator[ orderedPrevious.length ];
 
     if( splice.isSorted() )
@@ -88,13 +91,18 @@ public abstract class MemorySpliceGate extends SpliceGate
       // we want the comparators
       Fields groupFields = splice.getKeySelectors().get( incomingScope.getName() );
 
-      groupComparators[ pos ] = splice.isSortReversed() ? Collections.reverseOrder( groupFields ) : groupFields;
+      if( groupFields.size() == 0 )
+        groupComparators[ pos ] = groupFields;
+      else
+        groupComparators[ pos ] = new SparseTupleComparator( Fields.asDeclaration( groupFields ), defaultComparator );
+
+      groupComparators[ pos ] = splice.isSortReversed() ? Collections.reverseOrder( groupComparators[ pos ] ) : groupComparators[ pos ];
 
       if( sortFields != null )
         {
         // we want the comparators
         Fields sortFields = splice.getSortingSelectors().get( incomingScope.getName() );
-        valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields );
+        valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields, defaultComparator );
 
         if( splice.isSortReversed() )
           valueComparators[ pos ] = Collections.reverseOrder( valueComparators[ pos ] );

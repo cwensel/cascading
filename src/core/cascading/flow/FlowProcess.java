@@ -73,6 +73,12 @@ public abstract class FlowProcess<Config>
       return Collections.EMPTY_SET;
       }
 
+    @Override
+    public Object newInstance( String className )
+      {
+      return null;
+      }
+
     public void keepAlive()
       {
       }
@@ -228,6 +234,15 @@ public abstract class FlowProcess<Config>
    * @return a Collection<String>
    */
   public abstract Collection<String> getPropertyKeys();
+
+  /**
+   * Method newInstance creates a new object instance from the given className argument delegating to any
+   * platform specific instantiation and configuration routines.
+   *
+   * @param className
+   * @return an instance of className
+   */
+  public abstract Object newInstance( String className );
 
   /**
    * Method keepAlive notifies the system that the current process is still alive. Use this method if a particular

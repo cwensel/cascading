@@ -39,6 +39,7 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -224,6 +225,24 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
       keys.add( entry.getKey() );
 
     return Collections.unmodifiableSet( keys );
+    }
+
+  @Override
+  public Object newInstance( String className )
+    {
+    if( className == null || className.isEmpty() )
+      return null;
+
+    try
+      {
+      Class type = (Class) HadoopFlowProcess.class.getClassLoader().loadClass( className.toString() );
+
+      return ReflectionUtils.newInstance( type, jobConf );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className.toString(), exception );
+      }
     }
 
   @Override

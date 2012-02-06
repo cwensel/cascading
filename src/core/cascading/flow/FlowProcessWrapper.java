@@ -102,6 +102,12 @@ public class FlowProcessWrapper extends FlowProcess<Object>
     }
 
   @Override
+  public Object newInstance( String className )
+    {
+    return delegate.newInstance( className );
+    }
+
+  @Override
   public void keepAlive()
     {
     delegate.keepAlive();

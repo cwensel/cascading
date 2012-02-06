@@ -30,9 +30,9 @@ import cascading.tuple.Tuple;
  */
 public class SparseTupleComparator implements Comparator<Tuple>
   {
-  final Comparator[] comparators;
+  private final static Comparator DEFAULT = new NaturalComparator();
 
-  private class NaturalComparator implements Comparator<Object>
+  private static class NaturalComparator implements Comparator<Object>
     {
     @Override
     public int compare( Object lhs, Object rhs )
@@ -48,19 +48,37 @@ public class SparseTupleComparator implements Comparator<Tuple>
       }
     }
 
-  public SparseTupleComparator( Fields valuesField, Fields sortField )
+  final Comparator[] comparators;
+
+  public SparseTupleComparator( Fields valuesField, Fields sortFields )
     {
-    comparators = new Comparator[ valuesField.size() ];
+    this( valuesField, sortFields, null );
+    }
 
-    for( int i = 0; i < sortField.size(); i++ )
+  public SparseTupleComparator( Fields groupFields, Comparator defaultComparator )
+    {
+    this( groupFields, groupFields, defaultComparator );
+    }
+
+  public SparseTupleComparator( Fields valuesFields, Fields sortFields, Comparator defaultComparator )
+    {
+    if( defaultComparator == null )
+      defaultComparator = DEFAULT;
+
+    int size = valuesFields != null ? valuesFields.size() : sortFields.size();
+    comparators = new Comparator[ size ];
+
+    Comparator[] sortFieldComparators = sortFields.getComparators(); // returns a copy
+
+    for( int i = 0; i < sortFields.size(); i++ )
       {
-      Comparable field = sortField.get( i );
-      int pos = valuesField.getPos( field );
+      Comparable field = sortFields.get( i );
+      int pos = valuesFields != null ? valuesFields.getPos( field ) : i;
 
-      comparators[ pos ] = sortField.getComparators()[ i ];
+      comparators[ pos ] = sortFieldComparators[ i ];
 
       if( comparators[ pos ] == null )
-        comparators[ pos ] = new NaturalComparator();
+        comparators[ pos ] = defaultComparator;
       }
     }
 

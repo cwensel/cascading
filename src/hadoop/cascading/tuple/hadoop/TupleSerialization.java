@@ -32,6 +32,7 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
 import cascading.tuple.TuplePair;
+import cascading.tuple.Tuples;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -157,26 +158,9 @@ public class TupleSerialization extends Configured implements Serialization
     return jobConf.get( "io.serializations", null );
     }
 
-  /**
-   * Sets a default {@link Comparator} to be used if no Comparator can be found for the class via the {@link Comparison}
-   * interface.
-   * </p>
-   * If the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
-   * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
-   * will be called.
-   *
-   * @param properties
-   * @param className
-   */
-  public static void setDefaultComparator( Map<Object, Object> properties, String className )
-    {
-    if( className != null )
-      properties.put( "cascading.comparator.default", className );
-    }
-
   static Comparator getDefaultComparator( Configuration jobConf )
     {
-    String typeName = jobConf.get( "cascading.comparator.default" );
+    String typeName = jobConf.get( Tuples.DEFAULT_ELEMENT_COMPARATOR );
 
     if( typeName == null || typeName.isEmpty() )
       return null;

@@ -394,6 +394,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * <p/>
    * Typically this is used to convert a selector to a declarator. Simply, all numeric position fields are replaced
    * by their absolute position.
+   * <p/>
+   * Comparators are preserved in the result.
    *
    * @param fields of type Fields
    * @return Fields
@@ -412,6 +414,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     Fields result = size( fields.size() );
 
     copy( null, result, fields, 0 );
+
+    result.comparators = fields.comparators;
 
     return result;
     }

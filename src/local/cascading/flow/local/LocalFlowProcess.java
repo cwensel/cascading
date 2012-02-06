@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.tap.Tap;
@@ -83,6 +84,32 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   public Collection<String> getPropertyKeys()
     {
     return Collections.unmodifiableSet( config.stringPropertyNames() );
+    }
+
+  @Override
+  public Object newInstance( String className )
+    {
+    if( className == null || className.isEmpty() )
+      return null;
+
+    try
+      {
+      Class type = (Class) LocalFlowProcess.class.getClassLoader().loadClass( className.toString() );
+
+      return type.newInstance();
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className.toString(), exception );
+      }
+    catch( InstantiationException exception )
+      {
+      throw new CascadingException( "unable to instantiate class: " + className.toString(), exception );
+      }
+    catch( IllegalAccessException exception )
+      {
+      throw new CascadingException( "unable to access class: " + className.toString(), exception );
+      }
     }
 
   @Override

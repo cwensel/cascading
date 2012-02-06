@@ -103,6 +103,12 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
+    public Object newInstance( String className )
+      {
+      return null;
+      }
+
+    @Override
     public void keepAlive()
       {
       }

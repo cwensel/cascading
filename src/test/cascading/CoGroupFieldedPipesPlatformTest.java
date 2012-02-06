@@ -54,7 +54,7 @@ import cascading.test.LocalPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.Tuples;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -123,7 +123,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Map<Object, Object> properties = getProperties();
 
     // make sure hasher is getting called, but does nothing special
-    TupleSerialization.setDefaultComparator( properties, TestStringComparator.class.getCanonicalName() );
+    Tuples.setDefaultTupleElementComparator( properties, TestStringComparator.class.getCanonicalName() );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 

@@ -26,11 +26,12 @@ import java.util.List;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobConfigurable;
 
 /**
  *
  */
-public class HasherPartitioner
+public class HasherPartitioner implements JobConfigurable
   {
   private static Hasher DEFAULT = new ObjectHasher();
   private Hasher[] hashers;
