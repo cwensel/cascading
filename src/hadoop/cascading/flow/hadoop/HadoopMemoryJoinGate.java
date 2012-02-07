@@ -127,6 +127,12 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
     return new HadoopSpillableTupleMap( capacity, loadFactor, mapThreshold, listThreshold, codec, jobConf )
     {
     @Override
+    public Collection<Tuple> get( final Object object )
+      {
+      return super.get( getDelegatedTuple( object ) );
+      }
+
+    @Override
     protected Spillable.SpillListener getSpillableListener( Tuple tuple )
       {
       return new SpillListener( flowProcess, tuple );

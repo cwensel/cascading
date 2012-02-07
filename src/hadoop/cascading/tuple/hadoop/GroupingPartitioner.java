@@ -29,6 +29,6 @@ public class GroupingPartitioner extends HasherPartitioner implements Partitione
   {
   public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
     {
-    return ( hash( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
+    return ( hashCode( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
     }
   }

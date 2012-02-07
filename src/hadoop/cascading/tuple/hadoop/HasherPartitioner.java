@@ -21,67 +21,21 @@
 package cascading.tuple.hadoop;
 
 import java.util.Comparator;
-import java.util.List;
 
-import cascading.tuple.Hasher;
-import cascading.tuple.Tuple;
+import cascading.tuple.TupleHasher;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 
 /**
  *
  */
-public class HasherPartitioner implements JobConfigurable
+public class HasherPartitioner extends TupleHasher implements JobConfigurable
   {
-  private static Hasher DEFAULT = new ObjectHasher();
-  private Hasher[] hashers;
-
-  protected final int hash( Tuple tuple )
-    {
-    int hash = 1;
-
-    List<Object> elements = Tuple.elements( tuple );
-
-    for( int i = 0; i < elements.size(); i++ )
-      {
-      Object element = elements.get( i );
-
-      hash = 31 * hash + ( element != null ? hashers[ i % hashers.length ].hashCode( element ) : 0 );
-      }
-
-    return hash;
-    }
-
   public void configure( JobConf jobConf )
     {
     Comparator defaultComparator = TupleSerialization.getDefaultComparator( jobConf );
-
-    Hasher defaultHasher = DEFAULT;
-
-    if( defaultComparator instanceof Hasher )
-      defaultHasher = (Hasher) defaultComparator;
-
     Comparator[] comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
 
-    hashers = new Hasher[ comparators.length ];
-
-    for( int i = 0; i < comparators.length; i++ )
-      {
-      Comparator comparator = comparators[ i ];
-
-      if( comparator instanceof Hasher )
-        hashers[ i ] = (Hasher) comparator;
-      else
-        hashers[ i ] = defaultHasher;
-      }
-    }
-
-  private static class ObjectHasher implements Hasher<Object>
-    {
-    @Override
-    public int hashCode( Object value )
-      {
-      return value.hashCode();
-      }
+    initialize( defaultComparator, comparators );
     }
   }

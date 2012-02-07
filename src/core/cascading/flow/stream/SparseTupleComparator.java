@@ -82,6 +82,11 @@ public class SparseTupleComparator implements Comparator<Tuple>
       }
     }
 
+  public Comparator[] getComparators()
+    {
+    return comparators;
+    }
+
   @Override
   public int compare( Tuple lhs, Tuple rhs )
     {

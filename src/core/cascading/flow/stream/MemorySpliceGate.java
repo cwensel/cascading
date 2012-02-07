@@ -36,6 +36,7 @@ import cascading.flow.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleHasher;
 import cascading.tuple.Tuples;
 
 /**
@@ -47,6 +48,7 @@ public abstract class MemorySpliceGate extends SpliceGate
 
   protected Comparator<Tuple>[] groupComparators;
   protected Comparator<Tuple>[] valueComparators;
+  protected TupleHasher groupHasher;
 
   protected Set<Tuple> keys;
   protected Map<Tuple, Collection<Tuple>>[] keyValues;
@@ -108,6 +110,8 @@ public abstract class MemorySpliceGate extends SpliceGate
           valueComparators[ pos ] = Collections.reverseOrder( valueComparators[ pos ] );
         }
       }
+
+    groupHasher = defaultComparator != null ? new TupleHasher( defaultComparator, new Comparator[ orderedPrevious.length ] ) : null;
 
     keys = createKeySet();
 
@@ -175,6 +179,8 @@ public abstract class MemorySpliceGate extends SpliceGate
     @Override
     public Collection<Tuple> get( Object object )
       {
+      object = getDelegatedTuple( object );
+
       Collection<Tuple> value = super.get( object );
 
       if( value == null )
@@ -189,5 +195,39 @@ public abstract class MemorySpliceGate extends SpliceGate
     };
     }
 
+  protected final Object getDelegatedTuple( Object object )
+    {
+    if( groupHasher == null )
+      return object;
+
+    return new DelegatedTuple( object );
+    }
+
   protected abstract boolean isBlockingStreamed();
+
+  protected class DelegatedTuple extends Tuple
+    {
+    public DelegatedTuple( Object object )
+      {
+      elements = (ArrayList<Object>) Tuple.elements( (Tuple) object );
+      }
+
+    @Override
+    public boolean equals( Object object )
+      {
+      return compareTo( object ) == 0;
+      }
+
+    @Override
+    public int compareTo( Object other )
+      {
+      return groupComparators[ 0 ].compare( this, (Tuple) other );
+      }
+
+    @Override
+    public int hashCode()
+      {
+      return groupHasher.hashCode( this );
+      }
+    }
   }

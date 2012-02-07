@@ -29,6 +29,6 @@ public class CoGroupingPartitioner extends HasherPartitioner implements Partitio
   {
   public int getPartition( IndexTuple key, Tuple value, int numReduceTasks )
     {
-    return ( hash( key.getTuple() ) & Integer.MAX_VALUE ) % numReduceTasks;
+    return ( hashCode( key.getTuple() ) & Integer.MAX_VALUE ) % numReduceTasks;
     }
   }
