@@ -294,10 +294,10 @@ public class StreamGraph
    */
   public int countAllEventingPathsTo( Duct duct )
     {
-    // find all immediate prior groups/ synchronizeDucts
+    // find all immediate prior groups/ collapsed
     LinkedList<List<Duct>> paths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
 
-    Set<Duct> synchronizeDucts = new HashSet<Duct>();
+    Set<Duct> collapsed = new HashSet<Duct>();
 
     for( List<Duct> path : paths )
       {
@@ -310,7 +310,7 @@ public class StreamGraph
         if( !( element instanceof Collapsing ) )
           continue;
 
-        synchronizeDucts.add( element );
+        collapsed.add( element );
         break;
         }
       }
@@ -322,12 +322,18 @@ public class StreamGraph
       {
       List<Duct> path = iterator.next();
 
-      if( !Collections.disjoint( path, synchronizeDucts ) )
+      if( !Collections.disjoint( path, collapsed ) )
         iterator.remove();
       }
 
-    // incoming == paths + prior groups
-    return paths.size() + synchronizeDucts.size();
+    int nonCollapsedPaths = paths.size();
+    int collapsedPaths = 0;
+
+    for( Duct element : collapsed )
+      collapsedPaths += allPathsBetweenInclusive( element, duct ).size();
+
+    // incoming == paths + prior
+    return nonCollapsedPaths + collapsedPaths;
     }
 
   private List<GraphPath<Duct, Integer>> allPathsBetweenInclusive( Duct from, Duct to )

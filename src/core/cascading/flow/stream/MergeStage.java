@@ -20,17 +20,71 @@
 
 package cascading.flow.stream;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.pipe.Merge;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class MergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class MergeStage extends ElementStage<TupleEntry, TupleEntry> implements Collapsing
   {
-  public MergeStage( FlowProcess flowProcess, Merge merge )
+  private boolean started = false;
+  protected final AtomicInteger completeCount = new AtomicInteger( 0 );
+  private int numIncomingPaths;
+
+  public MergeStage( FlowProcess flowProcess, FlowElement flowElement )
     {
-    super( flowProcess, merge );
+    super( flowProcess, flowElement );
+    }
+
+  @Override
+  public void bind( StreamGraph streamGraph )
+    {
+    super.bind( streamGraph );
+
+    numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
+    }
+
+  @Override
+  public void initialize()
+    {
+    super.initialize();
+
+    completeCount.set( numIncomingPaths );
+    }
+
+  @Override
+  public synchronized void start( Duct previous )
+    {
+    if( started )
+      return;
+
+    super.start( previous );
+    started = true;
+    }
+
+  /**
+   * Not synchronized, as by default, each source gets its turn, no concurrent threads. Except in local mode
+   *
+   * @param previous
+   * @param tupleEntry
+   */
+  @Override
+  public void receive( Duct previous, TupleEntry tupleEntry )
+    {
+    next.receive( previous, tupleEntry );
+    }
+
+  @Override
+  public void complete( Duct previous )
+    {
+    if( completeCount.decrementAndGet() != 0 )
+      return;
+
+    super.complete( previous );
+    completeCount.set( numIncomingPaths );
     }
   }

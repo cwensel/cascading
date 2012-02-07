@@ -28,6 +28,7 @@ import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.operation.Function;
+import cascading.operation.Identity;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -615,6 +616,63 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 1, 1 ),
       new Tuple( 2, 2 ),
       new Tuple( 4, 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  /**
+   * Tests chained merge + AggregateBy, which really tests the complete() calls within the pipeline. when failing
+   * the map side functor function will fail during a flush
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testSameSourceMerge() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "count" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "samesourcemergecount" ), SinkMode.REPLACE );
+
+    Pipe sourcePipe = new Pipe( "source" );
+    Pipe lhsPipe = new Pipe( "count-lhs", sourcePipe );
+    Pipe rhsPipe = new Pipe( "count-rhs", sourcePipe );
+
+    // redundant, but illustrates case
+    rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
+
+    Pipe merge = new Merge( "first", lhsPipe, rhsPipe );
+    Pipe countPipe = new CountBy( merge, new Fields( "char" ), new Fields( "count" ), 2 );
+
+    lhsPipe = new Each( new Pipe( "lhs", countPipe ), new Identity() );
+    rhsPipe = new Each( new Pipe( "rhs", countPipe ), new Identity() );
+
+    merge = new Merge( "second", lhsPipe, rhsPipe );
+
+    countPipe = new CountBy( merge, new Fields( "char" ), new Fields( "count" ), 2 );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( sourcePipe, source );
+
+    Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, countPipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 2 ),
+      new Tuple( "b", 2 ),
+      new Tuple( "c", 2 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 2 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();
