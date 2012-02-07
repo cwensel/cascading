@@ -109,7 +109,7 @@ public class LocalGroupByGate extends MemorySpliceGate
       {
       keys = createKeySet();
       valueMap = initNewValueMap();
-      count.set( allPrevious.length );
+      count.set( numIncomingPaths );
 
       next.complete( this );
       }

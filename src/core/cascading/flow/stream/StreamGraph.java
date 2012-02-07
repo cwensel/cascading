@@ -292,12 +292,12 @@ public class StreamGraph
    * @param duct
    * @return
    */
-  public int countAllIncomingPathsTo( Duct duct )
+  public int countAllEventingPathsTo( Duct duct )
     {
-    // find all immediate prior groups/gates
+    // find all immediate prior groups/ synchronizeDucts
     LinkedList<List<Duct>> paths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
 
-    Set<Duct> gates = new HashSet<Duct>();
+    Set<Duct> synchronizeDucts = new HashSet<Duct>();
 
     for( List<Duct> path : paths )
       {
@@ -307,10 +307,10 @@ public class StreamGraph
 
       for( Duct element : path )
         {
-        if( !( element instanceof Gate ) )
+        if( !( element instanceof Collapsing ) )
           continue;
 
-        gates.add( element );
+        synchronizeDucts.add( element );
         break;
         }
       }
@@ -322,12 +322,12 @@ public class StreamGraph
       {
       List<Duct> path = iterator.next();
 
-      if( !Collections.disjoint( path, gates ) )
+      if( !Collections.disjoint( path, synchronizeDucts ) )
         iterator.remove();
       }
 
     // incoming == paths + prior groups
-    return paths.size() + gates.size();
+    return paths.size() + synchronizeDucts.size();
     }
 
   private List<GraphPath<Duct, Integer>> allPathsBetweenInclusive( Duct from, Duct to )

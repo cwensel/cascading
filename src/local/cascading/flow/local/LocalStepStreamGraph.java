@@ -41,7 +41,6 @@ import cascading.tap.Tap;
  */
 public class LocalStepStreamGraph extends StepStreamGraph
   {
-
   public LocalStepStreamGraph( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
     super( flowProcess, step );

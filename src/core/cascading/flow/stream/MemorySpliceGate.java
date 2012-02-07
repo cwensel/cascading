@@ -66,7 +66,7 @@ public abstract class MemorySpliceGate extends SpliceGate
     {
     super.bind( streamGraph ); // finds allPrevious
 
-    numIncomingPaths = streamGraph.countAllIncomingPathsTo( this );
+    numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
     }
 
   @Override

@@ -348,6 +348,19 @@ public class AggregateBy extends SubAssembly
   /**
    * Constructor CompositeAggregator creates a new CompositeAggregator instance.
    *
+   * @param pipe           of type Pipe
+   * @param groupingFields of type Fields
+   * @param threshold      of type int
+   * @param assemblies     of type CompositeAggregator...
+   */
+  public AggregateBy( String name, Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
+    {
+    this( name, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
+    }
+
+  /**
+   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   *
    * @param name           of type String
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields

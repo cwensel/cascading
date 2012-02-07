@@ -20,25 +20,69 @@
 
 package cascading.flow.local;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.stream.Collapsing;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementStage;
+import cascading.flow.stream.StreamGraph;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class SyncMergeStage extends ElementStage<TupleEntry, TupleEntry>
+public class SyncMergeStage extends ElementStage<TupleEntry, TupleEntry> implements Collapsing
   {
+  private boolean started = false;
+  protected final AtomicInteger completeCount = new AtomicInteger( 0 );
+  private int numIncomingPaths;
+
   public SyncMergeStage( FlowProcess flowProcess, FlowElement flowElement )
     {
     super( flowProcess, flowElement );
     }
 
   @Override
+  public void bind( StreamGraph streamGraph )
+    {
+    super.bind( streamGraph );
+
+    numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
+    }
+
+  @Override
+  public void initialize()
+    {
+    super.initialize();
+
+    completeCount.set( numIncomingPaths );
+    }
+
+  @Override
+  public synchronized void start( Duct previous )
+    {
+    if( started )
+      return;
+
+    super.start( previous );
+    started = true;
+    }
+
+  @Override
   public synchronized void receive( Duct previous, TupleEntry tupleEntry )
     {
-    super.receive( previous, tupleEntry );
+    next.receive( previous, tupleEntry );
+    }
+
+  @Override
+  public void complete( Duct previous )
+    {
+    if( completeCount.decrementAndGet() != 0 )
+      return;
+
+    super.complete( previous );
+    completeCount.set( numIncomingPaths );
     }
   }

@@ -31,6 +31,7 @@ import cascading.operation.Function;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -520,6 +521,17 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
   @Test
   public void testParallelAggregatesMerge() throws IOException
     {
+    performParallelAggregatesMerge( false );
+    }
+
+  @Test
+  public void testParallelAggregatesPriorMerge() throws IOException
+    {
+    performParallelAggregatesMerge( true );
+    }
+
+  private void performParallelAggregatesMerge( boolean priorMerge ) throws IOException
+    {
     getPlatform().copyFromLocal( inputFileLhs );
     getPlatform().copyFromLocal( inputFileRhs );
 
@@ -531,7 +543,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
         String.class,
         Integer.TYPE,
         Integer.TYPE, Double.TYPE},
-      getOutputPath( "multimerge" ), SinkMode.REPLACE );
+      getOutputPath( "multimerge+" + priorMerge ), SinkMode.REPLACE );
 
     Pipe lhsPipe = new Pipe( "multi-lhs" );
     Pipe rhsPipe = new Pipe( "multi-rhs" );
@@ -542,7 +554,17 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     CountBy countPipe = new CountBy( new Fields( "count" ) );
     AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
 
-    Pipe pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+    Pipe pipe;
+    if( priorMerge )
+      {
+      Merge merge = new Merge( Pipe.pipes( lhsPipe, rhsPipe ) );
+
+      pipe = new AggregateBy( "name", merge, new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+      }
+    else
+      {
+      pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+      }
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 

@@ -272,6 +272,48 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     validateLength( flow, 6 );
     }
 
+  /**
+   * same test as MergePipesTest, but to test that chained groupby don't exhibit similar failures
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testSameSourceMergeThreeChainGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "split", sourceLower );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "samemergethreechaingroup" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipe = new Pipe( "split" );
+
+    Pipe pipeLower = new Each( new Pipe( "lower", pipe ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper", pipe ), new Fields( "line" ), splitter );
+    Pipe pipeOffset = new Each( new Pipe( "offset", pipe ), new Fields( "line" ), splitter );
+
+    //put group before merge to test path counts
+    Pipe splice = new GroupBy( Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ) );
+
+    // this group has its incoming paths counted, gated by the previous group
+    splice = new GroupBy( Pipe.pipes( splice, pipeOffset ), new Fields( "num" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 2, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 15 );
+    }
+
   @Test
   public void testUnGroup() throws Exception
     {

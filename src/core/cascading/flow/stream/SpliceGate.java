@@ -39,7 +39,7 @@ import cascading.tuple.TupleEntryIterator;
 /**
  *
  */
-public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements ElementDuct
+public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements ElementDuct, Collapsing
   {
   protected Duct[] orderedPrevious;
 
