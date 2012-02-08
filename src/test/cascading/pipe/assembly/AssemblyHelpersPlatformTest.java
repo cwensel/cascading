@@ -27,10 +27,12 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.stream.StreamGraph;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
@@ -673,6 +675,71 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 2 ),
       new Tuple( "d", 2 ),
       new Tuple( "e", 2 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  /**
+   * tests the case where a intermediate tap can be reached from a group from two paths resulting
+   * in difficulty distinguishing the pipe pos the pipelining is coming down.
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testSameSourceMergeThreeWay() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "count" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "samesourcemergethreeway" ), SinkMode.REPLACE );
+
+    Pipe sourcePipe = new Pipe( "source" );
+
+    sourcePipe = new CountBy( sourcePipe, new Fields( "char" ), new Fields( "count" ), 2 );
+
+    Pipe lhsPipe = new Pipe( "count-lhs", sourcePipe );
+
+    lhsPipe = new CountBy( lhsPipe, new Fields( "char" ), new Fields( "count" ), 2 );
+
+    Pipe rhsPipe = new Pipe( "count-rhs", sourcePipe );
+
+    rhsPipe = new CountBy( rhsPipe, new Fields( "char" ), new Fields( "count" ), 2 );
+
+//    sourcePipe = new Each( sourcePipe, new Debug("source", true ) );
+//    rhsPipe = new Each( rhsPipe, new Debug( "rhs", true ) );
+
+    Pipe groupPipe = new CoGroup( sourcePipe, new Fields( "char" ), rhsPipe, new Fields( "char" ), new Fields( "char", "num", "char2", "count" ) );
+
+//    groupPipe = new Each( groupPipe, new Debug( "cogroup", true ) );
+
+    groupPipe = new CoGroup( lhsPipe, new Fields( "char" ), groupPipe, new Fields( "char" ), new Fields( "char", "count", "char2", "num2", "char3", "count3" ) );
+
+    Map<String, Tap> tapMap = Cascades.tapsMap( sourcePipe, source );
+
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+    properties.put( StreamGraph.DOT_FILE_PATH, "." );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( tapMap, sink, groupPipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 1 ),
+      new Tuple( "b", 1 ),
+      new Tuple( "c", 1 ),
+      new Tuple( "d", 1 ),
+      new Tuple( "e", 1 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();

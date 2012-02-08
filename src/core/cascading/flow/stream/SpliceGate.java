@@ -30,6 +30,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
+import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -197,45 +198,50 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
     for( int i = 0; i < splice.getPrevious().length; i++ )
       {
-      Pipe next = splice.getPrevious()[ i ];
+      Pipe[] tails = SubAssembly.unwind( splice.getPrevious()[ i ] );
 
-      int[] depth = new int[ allPrevious.length ];
+      if( tails.length != 1 )
+        throw new IllegalStateException( "too many tails from previous: " + splice.getPrevious()[ i ] );
+
+      Pipe previousPipe = tails[ 0 ];
+
+      int[] distance = new int[ allPrevious.length ];
 
       for( int j = 0; j < allPrevious.length; j++ )
-        depth[ j ] = findName( 0, (ElementDuct) allPrevious[ j ], next );
+        distance[ j ] = findName( 0, (ElementDuct) allPrevious[ j ], previousPipe );
 
-      int lastDepth = Integer.MAX_VALUE;
+      int lastDistance = Integer.MAX_VALUE;
 
-      for( int j = 0; j < depth.length; j++ )
+      for( int j = 0; j < distance.length; j++ )
         {
-        if( lastDepth == depth[ j ] && lastDepth != Integer.MAX_VALUE )
+        if( lastDistance == distance[ j ] && lastDistance != Integer.MAX_VALUE )
           throw new IllegalStateException( "two branches with same depth" );
 
-        if( lastDepth > depth[ j ] )
+        if( lastDistance > distance[ j ] )
           {
           orderedPrevious[ i ] = allPrevious[ j ];
-          lastDepth = depth[ j ];
+          lastDistance = distance[ j ];
           }
         }
       }
     }
 
-  private int findName( int count, ElementDuct duct, Pipe next )
+  private int findName( int count, ElementDuct previousDuct, Pipe previousPipe )
     {
-    FlowElement flowElement = ( (ElementDuct) duct ).getFlowElement();
+    FlowElement previousElement = ( (ElementDuct) previousDuct ).getFlowElement();
 
-    if( next == flowElement )
+    if( previousPipe == previousElement )
       return count;
 
-    if( flowElement instanceof Tap && duct.getBranchNames().contains( next.getName() ) )
+    if( previousElement instanceof Tap && previousDuct.getBranchNames().contains( previousPipe.getName() ) )
       return count + 1;
 
-    Pipe[] previous = next.getPrevious();
+    Pipe[] previous = SubAssembly.unwind( previousPipe.getPrevious() );
 
     if( previous.length != 1 )
       return Integer.MAX_VALUE; // there is a merge
 
-    return findName( ++count, duct, previous[ 0 ] );
+    return findName( ++count, previousDuct, previous[ 0 ] );
     }
 
   protected void makePosMap( Map<Duct, Integer> posMap )

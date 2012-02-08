@@ -295,11 +295,11 @@ public class StreamGraph
   public int countAllEventingPathsTo( Duct duct )
     {
     // find all immediate prior groups/ collapsed
-    LinkedList<List<Duct>> paths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
+    LinkedList<List<Duct>> allPaths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
 
-    Set<Duct> collapsed = new HashSet<Duct>();
+    Set<Duct> nearestCollapsed = new HashSet<Duct>();
 
-    for( List<Duct> path : paths )
+    for( List<Duct> path : allPaths )
       {
       Collections.reverse( path );
 
@@ -310,30 +310,39 @@ public class StreamGraph
         if( !( element instanceof Collapsing ) )
           continue;
 
-        collapsed.add( element );
+        nearestCollapsed.add( element );
         break;
         }
       }
 
     // find all paths
     // remove all paths containing prior groups
-    ListIterator<List<Duct>> iterator = paths.listIterator();
+    LinkedList<List<Duct>> collapsedPaths = new LinkedList<List<Duct>>( allPaths );
+    ListIterator<List<Duct>> iterator = collapsedPaths.listIterator();
     while( iterator.hasNext() )
       {
       List<Duct> path = iterator.next();
 
-      if( !Collections.disjoint( path, collapsed ) )
+      if( Collections.disjoint( path, nearestCollapsed ) )
         iterator.remove();
       }
 
-    int nonCollapsedPaths = paths.size();
-    int collapsedPaths = 0;
+    int collapsedPathsCount = 0;
+    for( Duct collapsed : nearestCollapsed )
+      {
+      LinkedList<List<Duct>> subPaths = asPathList( allPathsBetweenInclusive( collapsed, duct ) );
+      for( List<Duct> subPath : subPaths )
+        {
+        subPath.remove( 0 ); // remove collapsed duct
+        if( Collections.disjoint( subPath, nearestCollapsed ) )
+          collapsedPathsCount += 1;
+        }
+      }
 
-    for( Duct element : collapsed )
-      collapsedPaths += allPathsBetweenInclusive( element, duct ).size();
+    int nonCollapsedPathsCount = allPaths.size() - collapsedPaths.size();
 
     // incoming == paths + prior
-    return nonCollapsedPaths + collapsedPaths;
+    return nonCollapsedPathsCount + collapsedPathsCount;
     }
 
   private List<GraphPath<Duct, Integer>> allPathsBetweenInclusive( Duct from, Duct to )
@@ -408,14 +417,14 @@ public class StreamGraph
     printGraph( filename );
     }
 
-  public void printGraph( String id, String classifier, int discrimiator )
+  public void printGraph( String id, String classifier, int discriminator )
     {
     String path = (String) getProperty( DOT_FILE_PATH );
 
     if( path == null )
       return;
 
-    path = String.format( "%s/streamgraph-%s-%s-%s.dot", path, id, classifier, discrimiator );
+    path = String.format( "%s/streamgraph-%s-%s-%s.dot", path, id, classifier, discriminator );
 
     printGraph( path );
     }
