@@ -94,7 +94,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
 
     Closeable reader = (Closeable) ( (LocalScheme) getScheme() ).createInput( input );
 
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), reader );
+    return new TupleEntrySchemeIterator( flowProcess, getScheme(), reader, path );
     }
 
   @Override
@@ -117,7 +117,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
 
     Closeable writer = (Closeable) ( (LocalScheme) getScheme() ).createOutput( output );
 
-    LocalTupleEntryCollector schemeCollector = new LocalTupleEntryCollector( flowProcess, getScheme(), writer );
+    LocalTupleEntryCollector schemeCollector = new LocalTupleEntryCollector( flowProcess, getScheme(), writer, path );
 
     schemeCollector.prepare();
 

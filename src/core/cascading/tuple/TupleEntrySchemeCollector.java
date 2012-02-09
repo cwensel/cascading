@@ -33,21 +33,28 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
   {
   private final FlowProcess flowProcess;
   private final Scheme scheme;
+  private String identifier;
 
   protected final ConcreteCall sinkCall;
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme )
     {
-    super( Fields.asDeclaration( scheme.getSinkFields() ) );
-    this.flowProcess = flowProcess;
-    this.scheme = scheme;
-
-    this.sinkCall = new ConcreteCall();
+    this( flowProcess, scheme, null );
     }
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output )
     {
-    this( flowProcess, scheme );
+    this( flowProcess, scheme, output, null );
+    }
+
+  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output, String identifier )
+    {
+    super( Fields.asDeclaration( scheme.getSinkFields() ) );
+    this.flowProcess = flowProcess;
+    this.scheme = scheme;
+    this.identifier = identifier;
+
+    this.sinkCall = new ConcreteCall();
 
     setOutput( output );
     }
@@ -74,7 +81,17 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     {
     sinkCall.setOutgoingEntry( tupleEntry );
 
-    scheme.sink( flowProcess, sinkCall );
+    try
+      {
+      scheme.sink( flowProcess, sinkCall );
+      }
+    catch( IOException exception )
+      {
+      if( identifier == null || identifier.isEmpty() )
+        identifier = "'unknown'";
+
+      throw new TupleException( "unable to sink into output identifier: " + identifier, exception );
+      }
     }
 
   @Override

@@ -38,21 +38,33 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
   private final CloseableIterator<Input> inputIterator;
   private ConcreteCall<SourceContext, Input> sourceCall;
 
+  private String identifier;
   private boolean isComplete = false;
   private boolean hasWaiting = false;
   private TupleException currentException;
 
   public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, Input input )
     {
-    this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ) );
+    this( flowProcess, scheme, input, null );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, Input input, String identifier )
+    {
+    this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), identifier );
     }
 
   public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator )
+    {
+    this( flowProcess, scheme, inputIterator, null );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator, String identifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
     this.scheme = scheme;
     this.inputIterator = inputIterator;
+    this.identifier = identifier;
 
     if( !inputIterator.hasNext() )
       {
@@ -83,7 +95,10 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
       }
     catch( Exception exception )
       {
-      currentException = new TupleException( "unable to read from input", exception );
+      if( identifier == null || identifier.isEmpty() )
+        identifier = "'unknown'";
+
+      currentException = new TupleException( "unable to read from input identifier: " + identifier, exception );
       return true;
       }
 
@@ -126,7 +141,10 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
       }
     catch( Exception exception )
       {
-      throw new TupleException( "unable to read from input", exception );
+      if( identifier == null || identifier.isEmpty() )
+        identifier = "'unknown'";
+
+      throw new TupleException( "unable to source from input identifier: " + identifier, exception );
       }
     finally
       {

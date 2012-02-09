@@ -26,6 +26,7 @@ import java.io.IOException;
 public abstract class TupleEntryCollector
   {
   protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null );
+  private String identifier;
 
   protected TupleEntryCollector()
     {

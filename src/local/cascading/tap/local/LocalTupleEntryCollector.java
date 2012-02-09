@@ -41,7 +41,12 @@ public class LocalTupleEntryCollector extends TupleEntrySchemeCollector<Closeabl
 
   public LocalTupleEntryCollector( LocalFlowProcess flowProcess, Scheme scheme, Closeable writer )
     {
-    super( flowProcess, scheme, writer );
+    this( flowProcess, scheme, writer, null );
+    }
+
+  public LocalTupleEntryCollector( LocalFlowProcess flowProcess, Scheme scheme, Closeable writer, String identifier )
+    {
+    super( flowProcess, scheme, writer, identifier );
 
     if( writer == null )
       throw new IllegalArgumentException( "writer may not be null" );

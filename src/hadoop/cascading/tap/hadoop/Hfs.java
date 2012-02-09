@@ -368,8 +368,10 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   @Override
   public TupleEntryIterator openForRead( HadoopFlowProcess flowProcess, RecordReader input ) throws IOException
     {
+    String identifier = (String) flowProcess.getProperty( "cascading.source.path" );
+
     if( input != null )
-      return new TupleEntrySchemeIterator( flowProcess, getScheme(), new RecordReaderIterator( input ) );
+      return new TupleEntrySchemeIterator( flowProcess, getScheme(), new RecordReaderIterator( input ), identifier );
 
     Map<Object, Object> properties = HadoopUtil.createProperties( flowProcess.getJobConf() );
 
@@ -377,7 +379,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
     JobConf conf = HadoopUtil.createJobConf( properties, null );
 
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this, conf ) );
+    return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this, conf ), identifier );
     }
 
   @Override
