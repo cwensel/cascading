@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.stream.StreamGraph;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.expression.ExpressionFunction;
@@ -724,11 +723,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Map<String, Tap> tapMap = Cascades.tapsMap( sourcePipe, source );
 
-    Map<Object, Object> properties = getPlatform().getProperties();
-
-    properties.put( StreamGraph.DOT_FILE_PATH, "." );
-
-    Flow flow = getPlatform().getFlowConnector( properties ).connect( tapMap, sink, groupPipe );
+    Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, groupPipe );
 
     flow.complete();
 

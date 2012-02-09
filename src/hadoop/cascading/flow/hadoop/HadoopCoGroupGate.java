@@ -28,6 +28,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.flow.stream.SpliceGate;
+import cascading.flow.stream.StreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
@@ -48,11 +49,12 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     }
 
   @Override
-  public void initialize()
+  public void bind( StreamGraph streamGraph )
     {
-    super.initialize();
+    super.bind( streamGraph );
 
-    orderDucts();
+    if( role == Role.sink )
+      orderDucts( streamGraph );
     }
 
   @Override
@@ -60,10 +62,10 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     {
     super.prepare();
 
-    makePosMap( posMap );
-
     if( role != Role.sink )
       closure = new HadoopCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
+    else
+      makePosMap( posMap );
     }
 
   @Override

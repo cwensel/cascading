@@ -322,6 +322,8 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( splitTap, sink, cogroup );
 
+    flow.writeDOT( "regression.dot" );
+
     flow.complete();
 
     validateLength( flow, 5, null );

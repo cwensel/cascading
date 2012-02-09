@@ -92,7 +92,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
       keys = createKeySet();
       keyValues = createKeyValuesArray();
 
-      count.set( allPrevious.length );
+      count.set( numIncomingPaths );
 
       next.complete( this );
       }

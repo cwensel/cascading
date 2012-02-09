@@ -109,6 +109,11 @@ public class StreamGraph
 
   public void addPath( Duct lhs, Duct rhs )
     {
+    addPath( lhs, 0, rhs );
+    }
+
+  public void addPath( Duct lhs, int ordinal, Duct rhs )
+    {
     if( lhs == null && rhs == null )
       throw new IllegalArgumentException( "both lhs and rhs may not be null" );
 
@@ -128,7 +133,7 @@ public class StreamGraph
       {
       graph.addVertex( lhs );
       graph.addVertex( rhs );
-      graph.addEdge( lhs, rhs );
+      graph.addEdge( lhs, rhs, graph.makeOrdinal( ordinal ) );
       }
     catch( RuntimeException exception )
       {
@@ -208,7 +213,7 @@ public class StreamGraph
       Duct successor = iterator.next();
 
       if( successor == getTAIL() )
-        throw new IllegalStateException( "TAIL may not be next" );
+        throw new IllegalStateException( "TAIL may not be successor" );
 
       if( successor == getHEAD() ) // head is not included, its just a marker
         iterator.remove();
@@ -222,7 +227,7 @@ public class StreamGraph
     if( current == getHEAD() || current == getTAIL() )
       return null;
 
-    Set<Integer> edges = graph.outgoingEdgesOf( current );
+    Set<DuctGraph.Ordinal> edges = graph.outgoingEdgesOf( current );
 
     if( edges.size() == 0 )
       throw new IllegalStateException( "ducts must have an outgoing edge, current: " + current );
@@ -345,19 +350,24 @@ public class StreamGraph
     return nonCollapsedPathsCount + collapsedPathsCount;
     }
 
-  private List<GraphPath<Duct, Integer>> allPathsBetweenInclusive( Duct from, Duct to )
+  public int ordinalBetween( Duct lhs, Duct rhs )
     {
-    return new KShortestPaths<Duct, Integer>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    return graph.getEdge( lhs, rhs ).ordinal;
     }
 
-  public static LinkedList<List<Duct>> asPathList( List<GraphPath<Duct, Integer>> paths )
+  private List<GraphPath<Duct, DuctGraph.Ordinal>> allPathsBetweenInclusive( Duct from, Duct to )
+    {
+    return new KShortestPaths<Duct, DuctGraph.Ordinal>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    }
+
+  public static LinkedList<List<Duct>> asPathList( List<GraphPath<Duct, DuctGraph.Ordinal>> paths )
     {
     LinkedList<List<Duct>> results = new LinkedList<List<Duct>>();
 
     if( paths == null )
       return results;
 
-    for( GraphPath<Duct, Integer> path : paths )
+    for( GraphPath<Duct, DuctGraph.Ordinal> path : paths )
       results.add( Graphs.getPathVertexList( path ) );
 
     return results;

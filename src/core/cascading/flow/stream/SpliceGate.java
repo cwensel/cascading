@@ -28,10 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
-import cascading.pipe.SubAssembly;
-import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
@@ -192,56 +189,18 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       TrapHandler.closeTraps();
     }
 
-  protected synchronized void orderDucts()
+  protected synchronized void orderDucts( StreamGraph streamGraph )
     {
     orderedPrevious = new Duct[ incomingScopes.size() ];
 
-    for( int i = 0; i < splice.getPrevious().length; i++ )
+    if( incomingScopes.size() == 1 && splice.getPrevious().length == 1 )
       {
-      Pipe[] tails = SubAssembly.unwind( splice.getPrevious()[ i ] );
-
-      if( tails.length != 1 )
-        throw new IllegalStateException( "too many tails from previous: " + splice.getPrevious()[ i ] );
-
-      Pipe previousPipe = tails[ 0 ];
-
-      int[] distance = new int[ allPrevious.length ];
-
-      for( int j = 0; j < allPrevious.length; j++ )
-        distance[ j ] = findName( 0, (ElementDuct) allPrevious[ j ], previousPipe );
-
-      int lastDistance = Integer.MAX_VALUE;
-
-      for( int j = 0; j < distance.length; j++ )
-        {
-        if( lastDistance == distance[ j ] && lastDistance != Integer.MAX_VALUE )
-          throw new IllegalStateException( "two branches with same depth" );
-
-        if( lastDistance > distance[ j ] )
-          {
-          orderedPrevious[ i ] = allPrevious[ j ];
-          lastDistance = distance[ j ];
-          }
-        }
+      orderedPrevious[ 0 ] = allPrevious[ 0 ];
+      return;
       }
-    }
 
-  private int findName( int count, ElementDuct previousDuct, Pipe previousPipe )
-    {
-    FlowElement previousElement = ( (ElementDuct) previousDuct ).getFlowElement();
-
-    if( previousPipe == previousElement )
-      return count;
-
-    if( previousElement instanceof Tap && previousDuct.getBranchNames().contains( previousPipe.getName() ) )
-      return count + 1;
-
-    Pipe[] previous = SubAssembly.unwind( previousPipe.getPrevious() );
-
-    if( previous.length != 1 )
-      return Integer.MAX_VALUE; // there is a merge
-
-    return findName( ++count, previousDuct, previous[ 0 ] );
+    for( Duct previous : allPrevious )
+      orderedPrevious[ streamGraph.ordinalBetween( previous, this ) ] = previous;
     }
 
   protected void makePosMap( Map<Duct, Integer> posMap )

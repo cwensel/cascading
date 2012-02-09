@@ -26,19 +26,63 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 /**
  *
  */
-public class DuctGraph extends SimpleDirectedGraph<Duct, Integer>
+public class DuctGraph extends SimpleDirectedGraph<Duct, DuctGraph.Ordinal>
   {
-  public DuctGraph()
-    {
-    super( new EdgeFactory<Duct, Integer>()
+  private static class DuctOrdinalEdgeFactory implements EdgeFactory<Duct, Ordinal>
     {
     int count = 0;
 
     @Override
-    public Integer createEdge( Duct lhs, Duct rhs )
+    public DuctGraph.Ordinal createEdge( Duct lhs, Duct rhs )
       {
-      return count++;
+      return makeOrdinal( 0 );
       }
-    } );
+
+    public DuctGraph.Ordinal makeOrdinal( int ordinal )
+      {
+      return new DuctGraph.Ordinal( count++, ordinal );
+      }
+    }
+
+  public static class Ordinal
+    {
+    int count;
+    int ordinal;
+
+    public Ordinal( int count, int ordinal )
+      {
+      this.count = count;
+      this.ordinal = ordinal;
+      }
+
+    @Override
+    public boolean equals( Object object )
+      {
+      if( this == object )
+        return true;
+
+      Ordinal ordinal = (Ordinal) object;
+
+      if( count != ordinal.count )
+        return false;
+
+      return true;
+      }
+
+    @Override
+    public int hashCode()
+      {
+      return count;
+      }
+    }
+
+  public DuctGraph()
+    {
+    super( new DuctOrdinalEdgeFactory() );
+    }
+
+  public synchronized DuctGraph.Ordinal makeOrdinal( int ordinal )
+    {
+    return ( (DuctOrdinalEdgeFactory) getEdgeFactory() ).makeOrdinal( ordinal );
     }
   }

@@ -27,6 +27,8 @@ import java.util.TreeSet;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.Scope;
+import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowStep;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -37,6 +39,7 @@ import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
+import org.jgrapht.GraphPath;
 
 import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
 
@@ -78,13 +81,34 @@ public abstract class StepStreamGraph extends StreamGraph
       Duct newRhsDuct = createDuctFor( rhsElement );
       Duct rhsDuct = findExisting( newRhsDuct );
 
-      addPath( lhsDuct, rhsDuct );
+      int ordinal = findEdgeOrdinal( lhsDuct, rhsDuct );
+
+      addPath( lhsDuct, ordinal, rhsDuct );
 
       if( rhsDuct != newRhsDuct ) // don't keep going if we have already seen rhs
         continue;
 
       handleDuct( rhsElement, rhsDuct );
       }
+    }
+
+  private int findEdgeOrdinal( Duct lhsDuct, Duct rhsDuct )
+    {
+    if( !( rhsDuct instanceof SpliceGate ) )
+      return 0;
+
+    FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
+    Splice rhsElement = (Splice) ( (SpliceGate) rhsDuct ).getFlowElement();
+
+    List<GraphPath<FlowElement, Scope>> paths = ( ElementGraphs.getAllShortestPathsBetween( step.getGraph(), lhsElement, rhsElement ) );
+
+    for( GraphPath<FlowElement, Scope> path : paths )
+      {
+      if( path.getEdgeList().size() == 1 )
+        return rhsElement.getPipePos().get( path.getEdgeList().get( 0 ).getName() );
+      }
+
+    throw new IllegalStateException( "could not find ordinal" );
     }
 
   private Duct createDuctFor( FlowElement element )

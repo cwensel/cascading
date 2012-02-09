@@ -67,14 +67,14 @@ public abstract class MemorySpliceGate extends SpliceGate
     super.bind( streamGraph ); // finds allPrevious
 
     numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
+
+    orderDucts( streamGraph );
     }
 
   @Override
   public void initialize()
     {
     super.initialize();
-
-    orderDucts();
 
     groupComparators = new Comparator[ orderedPrevious.length ];
 
@@ -152,7 +152,7 @@ public abstract class MemorySpliceGate extends SpliceGate
     for( int i = start; i < orderedPrevious.length; i++ )
       {
       if( orderedPrevious[ i ] == null ) // only true for local mode
-        throw new IllegalStateException( "previous duct is null" );
+        continue;
 
       valueMap[ i ] = createTupleMap();
       }

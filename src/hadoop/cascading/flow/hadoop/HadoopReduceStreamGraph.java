@@ -66,7 +66,7 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
 
     addHead( rhsDuct );
 
-    handleDuct( (FlowElement) group, rhsDuct );
+    handleDuct( group, rhsDuct );
     }
 
   @Override
