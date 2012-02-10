@@ -118,7 +118,15 @@ subprojects { subproject ->
           name = "pom.xml"
         }
         fileset(dir: "${buildDir}/libs/") {
-          name = "cascading-${project.name}-*.jar"
+          name = "cascading-${project.name}-${releaseVersion}.jar"
+        }
+
+        fileset(dir: "${buildDir}/libs/") {
+          name = "cascading-${project.name}-${releaseVersion}.jar"
+        }
+
+        fileset(dir: "${buildDir}/libs/") {
+          name = "cascading-${project.name}-${releaseVersion}-sources.jar"
         }
       }
     }
