@@ -34,8 +34,14 @@ subprojects { subproject ->
     manifest.attributes version: project.version
   }
 
+  task sourceJar(type: Jar, dependsOn:classes) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+    }
+
   configure(subproject.artifacts) {
     archives jar
+    archives sourceJar
   }
 
   configure(install.repositories.mavenInstaller) {
