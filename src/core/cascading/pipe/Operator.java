@@ -255,7 +255,7 @@ public abstract class Operator extends Pipe
     return plannerLevel != null;
     }
 
-  public Tuple makeResult( Fields outgoingSelector, TupleEntry inputEntry, Fields remainderFields, TupleEntry declaredEntry, Tuple output )
+  public Tuple makeResult( TupleEntry inputEntry, Fields argumentSelector, Fields remainderFields, TupleEntry declaredEntry, Fields outgoingSelector, Tuple output )
     {
     if( getOutputSelector().isResults() )
       return output;
@@ -269,7 +269,7 @@ public abstract class Operator extends Pipe
 
       // handle case where operation is declaring the argument fields, and they are positional
       if( getFieldDeclaration().isArguments() )
-        result.set( inputEntry.getFields(), getArgumentSelector(), output );
+        result.set( inputEntry.getFields(), argumentSelector, output );
       else
         result.set( inputEntry.getFields(), declaredEntry.getFields(), output );
 

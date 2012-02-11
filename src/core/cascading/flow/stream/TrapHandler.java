@@ -117,7 +117,7 @@ public class TrapHandler
   protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
     {
     if( trap == null )
-      handleReThrowableException( "no trap available", throwable );
+      handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
 
     if( tupleEntry == null )
       {

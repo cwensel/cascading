@@ -58,7 +58,7 @@ public class FunctionEachStage extends EachStage
     @Override
     protected void collect( TupleEntry input ) throws IOException
       {
-      Tuple outgoing = each.makeResult( outgoingSelector, incomingEntry, remainderFields, input, input.getTuple() );
+      Tuple outgoing = each.makeResult( incomingEntry, argumentsSelector, remainderFields, input, outgoingSelector, input.getTuple() );
 
       outgoingEntry.setTuple( outgoing );
 

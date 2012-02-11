@@ -58,7 +58,7 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
     @Override
     protected void collect( TupleEntry resultEntry ) throws IOException
       {
-      Tuple outgoing = every.makeResult( outgoingSelector, incomingEntry, remainderFields, resultEntry, resultEntry.getTuple() );
+      Tuple outgoing = every.makeResult( incomingEntry, argumentsSelector, remainderFields, resultEntry, outgoingSelector, resultEntry.getTuple() );
 
       outgoingEntry.setTuple( outgoing );
 

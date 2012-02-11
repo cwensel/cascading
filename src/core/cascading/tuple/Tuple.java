@@ -590,7 +590,7 @@ public class Tuple implements Comparable, Iterable, Serializable
     verifyModifiable();
 
     if( pos.length != tuple.size() )
-      throw new TupleException( "given tuple not same size as position array, tuple: " + tuple.print() );
+      throw new TupleException( "given tuple not same size as position array: " + pos.length + ", tuple: " + tuple.print() );
 
     int count = 0;
     for( int i : pos )

@@ -35,24 +35,24 @@ import cascading.tuple.TupleEntry;
  */
 public class TestBuffer extends BaseOperation implements Buffer
   {
-  private int exepectedSize = -1;
+  private int expectedSize = -1;
   private boolean insertHeader;
   private boolean insertFooter;
   private Comparable value;
 
-  public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, boolean insertFooter, String value )
+  public TestBuffer( Fields fieldDeclaration, int expectedSize, boolean insertHeader, boolean insertFooter, String value )
     {
     super( fieldDeclaration );
-    this.exepectedSize = exepectedSize;
+    this.expectedSize = expectedSize;
     this.insertHeader = insertHeader;
     this.insertFooter = insertFooter;
     this.value = value;
     }
 
-  public TestBuffer( Fields fieldDeclaration, int exepectedSize, boolean insertHeader, String value )
+  public TestBuffer( Fields fieldDeclaration, int expectedSize, boolean insertHeader, String value )
     {
     super( fieldDeclaration );
-    this.exepectedSize = exepectedSize;
+    this.expectedSize = expectedSize;
     this.insertHeader = insertHeader;
     this.value = value;
     }
@@ -70,6 +70,11 @@ public class TestBuffer extends BaseOperation implements Buffer
     this.value = value;
     }
 
+  public TestBuffer( Fields fieldDeclaration )
+    {
+    super( fieldDeclaration );
+    }
+
   public void operate( FlowProcess flowProcess, BufferCall bufferCall )
     {
     if( insertHeader )
@@ -81,10 +86,13 @@ public class TestBuffer extends BaseOperation implements Buffer
       {
       TupleEntry arguments = iterator.next(); // must be called
 
-      if( exepectedSize != -1 && arguments.size() != exepectedSize )
+      if( expectedSize != -1 && arguments.size() != expectedSize )
         throw new RuntimeException( "arguments wrong size" );
 
-      bufferCall.getOutputCollector().add( new Tuple( value ) );
+      if( value != null )
+        bufferCall.getOutputCollector().add( new Tuple( value ) );
+      else
+        bufferCall.getOutputCollector().add( arguments ); // copy
       }
 
     if( insertFooter )

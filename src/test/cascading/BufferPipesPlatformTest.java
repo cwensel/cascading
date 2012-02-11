@@ -141,4 +141,38 @@ public class BufferPipesPlatformTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "new\tb\tB" ) ) );
     assertTrue( results.contains( new Tuple( "new\tc\tC" ) ) );
     }
+
+  /**
+   * tests wildcard fields are properly resolving.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testIdentityBuffer() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "identity" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower" ), "\\s" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "num" ) );
+
+    pipe = new Every( pipe, Fields.VALUES, new TestBuffer( Fields.ARGS ), Fields.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 13 );
+
+    List<Tuple> results = getSinkAsList( flow );
+
+    assertTrue( results.contains( new Tuple( "1\ta" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tb" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tc" ) ) );
+    }
   }
