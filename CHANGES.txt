@@ -1,5 +1,9 @@
 Cascading Change Log
 
+1.2.6
+
+  Fixed bug in TupleEntry#selectInteger() and marked it as deprecated.
+
 1.2.5
 
   Removed accidental SLF4J dependencies.
