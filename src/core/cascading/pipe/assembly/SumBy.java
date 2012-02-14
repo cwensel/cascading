@@ -37,13 +37,13 @@ import cascading.tuple.Tuples;
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * This SubAssembly also uses the {@link SumBy.SumPartials} {@link AggregateBy.Functor}
- * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
+ * to sum field values before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
  * <p/>
- * The {@code threshold} value tells the underlying SumPartials functions how many values to cache for each
- * unique key before dropping values from the LRU cache.
+ * The {@code threshold} value tells the underlying SumPartials functions how many unique key sums to accumulate
+ * in the LRU cache, before emitting the least recently used entry.
  *
  * @see AggregateBy
  */
