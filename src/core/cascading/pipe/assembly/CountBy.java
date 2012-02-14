@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 2007-2010 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
  * This file is part of the Cascading project.
  *
- * Cascading is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Cascading is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package cascading.pipe.assembly;
@@ -37,13 +36,13 @@ import cascading.tuple.TupleEntry;
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
- * to count as many observed duplicates before the GroupBy operator to reduce IO over the network.
+ * to count field values before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
  * <p/>
- * The {@code threshold} value tells the underlying CountPartials functions how many values to cache for each
- * unique key before dropping values from the LRU cache.
+ * The {@code threshold} value tells the underlying CountPartials functions how many unique key counts to accumulate
+ * in the LRU cache, before emitting the least recently used entry.
  *
  * @see AggregateBy
  */
