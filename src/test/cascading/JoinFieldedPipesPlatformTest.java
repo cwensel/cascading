@@ -1306,4 +1306,38 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( actual.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( actual.contains( new Tuple( "5\te\t5\tE" ) ) );
     }
+
+  @Test
+  public void testJoinSamePipeAroundGroupBy() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "samepipearoundgroupby" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    Pipe lhsPipe = new Each( new Pipe( "lhs", pipeLower ), new Identity() );
+
+    Pipe rhsPipe = new Each( new Pipe( "rhs", pipeLower ), new Identity() );
+
+    rhsPipe = new GroupBy( rhsPipe, new Fields( "num" ) );
+
+    rhsPipe = new Each( rhsPipe, new Identity() );
+
+    Pipe pipe = new Join( lhsPipe, new Fields( "num" ), rhsPipe, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> actual = getSinkAsList( flow );
+
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    }
   }

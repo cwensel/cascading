@@ -41,7 +41,7 @@ import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import org.jgrapht.GraphPath;
 
-import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
+import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 
 /**
  *
@@ -222,7 +222,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private int getNumImmediateBranches( FlowElement tap, Join join )
     {
-    return countOrderedDirectPathsBetween( step.getGraph(), (FlowElement) tap, join ).size();
+    return getAllShortestPathsBetween( step.getGraph(), (FlowElement) tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )
