@@ -22,8 +22,6 @@ package cascading.management;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -33,6 +31,7 @@ import cascading.util.CascadingService;
 import cascading.util.PropertyUtil;
 import cascading.util.ServiceUtil;
 import cascading.util.ShutdownUtil;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,8 +105,7 @@ public class CascadingServices
         }
       }
 
-    exclusions = defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," );
-
+    exclusions = Util.removeNulls( defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," ) );
     }
 
   private synchronized ServiceUtil getServiceUtil()

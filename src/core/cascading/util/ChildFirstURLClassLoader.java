@@ -22,6 +22,10 @@ package cascading.util;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ChildFirstURLClassLoader is an internal utility class used to load CascadingServices from an isolated
@@ -29,6 +33,8 @@ import java.net.URLClassLoader;
  */
 class ChildFirstURLClassLoader extends ClassLoader
   {
+  private static final Logger LOG = LoggerFactory.getLogger( ChildFirstURLClassLoader.class );
+
   private final String[] exclusions;
   private ChildURLClassLoader childClassLoader;
 
@@ -66,9 +72,12 @@ class ChildFirstURLClassLoader extends ClassLoader
   public ChildFirstURLClassLoader( String[] exclusions, URL... urls )
     {
     super( Thread.currentThread().getContextClassLoader() );
-    this.exclusions = exclusions;
+    this.exclusions = Util.removeNulls( exclusions );
 
     childClassLoader = new ChildURLClassLoader( urls, this.getParent() );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "child first classloader exclusions: {}", Arrays.toString( exclusions ) );
     }
 
   @Override
@@ -77,11 +86,15 @@ class ChildFirstURLClassLoader extends ClassLoader
     for( String exclusion : exclusions )
       {
       if( name.startsWith( exclusion ) )
+        {
+        LOG.debug( "loading exclusion: {}, from parent: {}", exclusion, name );
         return super.loadClass( name, resolve );
+        }
       }
 
     try
       {
+      LOG.debug( "loading from child: {}", name );
       return childClassLoader.loadClass( name );
       }
     catch( ClassNotFoundException exception )
