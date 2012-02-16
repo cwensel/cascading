@@ -47,6 +47,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
+import cascading.management.UnitOfWork;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.PropertyUtil;
@@ -86,7 +87,7 @@ import org.slf4j.LoggerFactory;
  * @see Flow
  * @see cascading.flow.FlowSkipStrategy
  */
-public class Cascade
+public class Cascade implements UnitOfWork<CascadeStats>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Cascade.class );
@@ -170,6 +171,7 @@ public class Cascade
    *
    * @return the name (type String) of this Cascade object.
    */
+  @Override
   public String getName()
     {
     return name;
@@ -183,6 +185,7 @@ public class Cascade
    *
    * @return the ID (type String) of this Cascade object.
    */
+  @Override
   public String getID()
     {
     if( id == null )
@@ -196,6 +199,7 @@ public class Cascade
    *
    * @return the tags (type String) of this Cascade object.
    */
+  @Override
   public String getTags()
     {
     return tags;
@@ -222,6 +226,12 @@ public class Cascade
   public CascadeStats getCascadeStats()
     {
     return cascadeStats;
+    }
+
+  @Override
+  public CascadeStats getStats()
+    {
+    return getCascadeStats();
     }
 
   private void setIDOnFlow()
@@ -372,6 +382,11 @@ public class Cascade
       }
     }
 
+  @Override
+  public void prepare()
+    {
+    }
+
   /**
    * Method start begins the current Cascade process. It returns immediately. See method {@link #complete()} to block
    * until the Cascade completes.
@@ -427,6 +442,27 @@ public class Cascade
       shutdownHook = null;
       cascadeStats.cleanup();
       }
+    }
+
+  public synchronized void stop()
+    {
+    if( stop )
+      return;
+
+    stop = true;
+
+    if( !cascadeStats.isFailed() )
+      cascadeStats.markStopped();
+
+    internalStopAllFlows();
+    handleExecutorShutdown();
+
+    cascadeStats.cleanup();
+    }
+
+  @Override
+  public void cleanup()
+    {
     }
 
   /** Method run implements the Runnable run method. */
@@ -590,22 +626,6 @@ public class Cascade
       return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
       }
     } ) );
-    }
-
-  public synchronized void stop()
-    {
-    if( stop )
-      return;
-
-    stop = true;
-
-    if( !cascadeStats.isFailed() )
-      cascadeStats.markStopped();
-
-    internalStopAllFlows();
-    handleExecutorShutdown();
-
-    cascadeStats.cleanup();
     }
 
   private void handleExecutorShutdown()

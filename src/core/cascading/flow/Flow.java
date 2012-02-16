@@ -48,6 +48,7 @@ import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
+import cascading.management.UnitOfWork;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
 import cascading.tap.MultiSourceTap;
@@ -95,7 +96,7 @@ import riffle.process.ProcessStop;
  * @see cascading.flow.FlowConnector
  */
 @riffle.process.Process
-public abstract class Flow<Config>
+public abstract class Flow<Config> implements UnitOfWork<FlowStats>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
@@ -296,6 +297,7 @@ public abstract class Flow<Config>
    *
    * @return the name (type String) of this Flow object.
    */
+  @Override
   public String getName()
     {
     return name;
@@ -314,6 +316,7 @@ public abstract class Flow<Config>
    *
    * @return the ID (type String) of this Flow object.
    */
+  @Override
   public String getID()
     {
     if( id == null )
@@ -322,6 +325,7 @@ public abstract class Flow<Config>
     return id;
     }
 
+  @Override
   public String getTags()
     {
     return tags;
@@ -477,6 +481,12 @@ public abstract class Flow<Config>
   public FlowStats getFlowStats()
     {
     return flowStats;
+    }
+
+  @Override
+  public FlowStats getStats()
+    {
+    return getFlowStats();
     }
 
   void addListeners( Collection listeners )
@@ -823,13 +833,14 @@ public abstract class Flow<Config>
     }
 
   /**
-   * Method prepare is used by a {@link Cascade} to notify the given Flow it should initialize or clear any resources
+   * Method prepare is used by a {@link cascading.cascade.Cascade} to notify the given Flow it should initialize or clear any resources
    * necessary for {@link #start()} to be called successfully.
    * <p/>
    * Specifically, this implementation calls {@link #deleteSinksIfNotUpdate()} && {@link #deleteTrapsIfNotUpdate()}.
    *
-   * @throws IOException when
+   * @throws java.io.IOException when
    */
+  @Override
   @ProcessPrepare
   public void prepare()
     {
@@ -848,6 +859,7 @@ public abstract class Flow<Config>
    * Method start begins the execution of this Flow instance. It will return immediately. Use the method {@link #complete()}
    * to block until this Flow completes.
    */
+  @Override
   @ProcessStart
   public synchronized void start()
     {
@@ -878,6 +890,7 @@ public abstract class Flow<Config>
   protected abstract void internalStart();
 
   /** Method stop stops all running jobs, killing any currently executing. */
+  @Override
   @ProcessStop
   public synchronized void stop()
     {
@@ -911,6 +924,7 @@ public abstract class Flow<Config>
   protected abstract void internalClean( boolean force );
 
   /** Method complete starts the current Flow instance if it has not be previously started, then block until completion. */
+  @Override
   @ProcessComplete
   public void complete()
     {
@@ -1014,6 +1028,7 @@ public abstract class Flow<Config>
       }
     }
 
+  @Override
   @ProcessCleanup
   public void cleanup()
     {
