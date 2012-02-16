@@ -20,8 +20,10 @@
 
 package cascading.tuple.hadoop;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import cascading.CascadingException;
@@ -121,6 +123,9 @@ public class TupleSerialization extends Configured implements Serialization
 
   /**
    * Adds this class as a Hadoop Serialization class. This method is safe to call redundantly.
+   * <p/>
+   * This method will guarantee {@link TupleSerialization} and {@link WritableSerialization} are
+   * first in the list, as both are required.
    *
    * @param jobConf of type JobConf
    */
@@ -128,19 +133,23 @@ public class TupleSerialization extends Configured implements Serialization
     {
     String serializations = getSerializations( jobConf );
 
+    LinkedList<String> list = new LinkedList<String>();
+
+    if( serializations != null && !serializations.isEmpty() )
+      Collections.addAll( list, serializations.split( "," ) );
+
     // required by MultiInputSplit
-    String writable = null;
+    String writable = WritableSerialization.class.getName();
+    String tuple = TupleSerialization.class.getName();
 
-    if( !serializations.contains( WritableSerialization.class.getName() ) )
-      writable = WritableSerialization.class.getName();
+    list.remove( writable );
+    list.remove( tuple );
 
-    String tuple = null;
-
-    if( !serializations.contains( TupleSerialization.class.getName() ) )
-      tuple = TupleSerialization.class.getName();
+    list.addFirst( writable );
+    list.addFirst( tuple );
 
     // make writable last
-    jobConf.set( "io.serializations", Util.join( ",", Util.removeNulls( serializations, tuple, writable ) ) );
+    jobConf.set( "io.serializations", Util.join( list, "," ) );
     }
 
   static String getSerializations( JobConf jobConf )

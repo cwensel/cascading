@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.t.h.TupleSerialization#setSerializations() to force TupleSerialization and o.a.h.i.s.WritableSerialization
+  are first in the "io.serializations" list.
+
   Added support for properties scoped at the pipe or process scope. Process scope properties will be inherited by
   the current job if any.
 
