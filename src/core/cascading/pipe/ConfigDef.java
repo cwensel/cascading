@@ -21,9 +21,12 @@
 package cascading.pipe;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The ConfigDef class allows for the creation of a configuration properties template to be applied to an existing
@@ -168,5 +171,15 @@ public class ConfigDef implements Serializable
           break;
         }
       }
+    }
+
+  public Collection<String> getAllKeys()
+    {
+    Set<String> keys = new HashSet<String>();
+
+    for( Map<String, String> map : config.values() )
+      keys.addAll( map.keySet() );
+
+    return Collections.unmodifiableSet( keys );
     }
   }

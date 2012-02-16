@@ -21,6 +21,7 @@
 package cascading.operation.filter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 import cascading.CascadingTestCase;
@@ -91,6 +92,12 @@ public class LimitFilterTest extends CascadingTestCase
 
     @Override
     public Object getProperty( String key )
+      {
+      return null;
+      }
+
+    @Override
+    public Collection<String> getPropertyKeys()
       {
       return null;
       }

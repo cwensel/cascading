@@ -21,6 +21,7 @@
 package cascading.flow;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 import cascading.tap.Tap;
@@ -92,6 +93,12 @@ public class FlowProcessWrapper extends FlowProcess<Object>
   public Object getProperty( String key )
     {
     return delegate.getProperty( key );
+    }
+
+  @Override
+  public Collection<String> getPropertyKeys()
+    {
+    return delegate.getPropertyKeys();
     }
 
   @Override

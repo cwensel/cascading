@@ -21,6 +21,8 @@
 package cascading.flow;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import cascading.tap.Tap;
@@ -63,6 +65,12 @@ public abstract class FlowProcess<Config>
     public Object getProperty( String key )
       {
       return null;
+      }
+
+    @Override
+    public Collection<String> getPropertyKeys()
+      {
+      return Collections.EMPTY_SET;
       }
 
     public void keepAlive()
@@ -200,6 +208,13 @@ public abstract class FlowProcess<Config>
    * @return an Object
    */
   public abstract Object getProperty( String key );
+
+  /**
+   * Method getPropertyKeys returns an immutable collection of all available property key values.
+   *
+   * @return a Collection<String>
+   */
+  public abstract Collection<String> getPropertyKeys();
 
   /**
    * Method keepAlive notifies the system that the current process is still alive. Use this method if a particular

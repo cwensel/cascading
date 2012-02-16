@@ -20,6 +20,11 @@
 
 package cascading.flow.stream;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProcessWrapper;
 import cascading.pipe.ConfigDef;
@@ -70,5 +75,16 @@ class PipeFlowProcess extends FlowProcessWrapper
   public Object getProperty( String key )
     {
     return configDef.apply( key, getter );
+    }
+
+  @Override
+  public Collection<String> getPropertyKeys()
+    {
+    Set<String> keys = new HashSet<String>();
+
+    keys.addAll( getDelegate().getPropertyKeys() );
+    keys.addAll( configDef.getAllKeys() );
+
+    return Collections.unmodifiableSet( keys );
     }
   }

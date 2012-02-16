@@ -21,6 +21,8 @@
 package cascading.flow.local;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
@@ -75,6 +77,12 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   public Object getProperty( String key )
     {
     return config.getProperty( key );
+    }
+
+  @Override
+  public Collection<String> getPropertyKeys()
+    {
+    return Collections.unmodifiableSet( config.stringPropertyNames() );
     }
 
   @Override

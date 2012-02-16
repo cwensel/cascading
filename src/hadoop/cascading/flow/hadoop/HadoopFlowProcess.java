@@ -21,7 +21,11 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
@@ -209,6 +213,17 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   public Object getProperty( String key )
     {
     return jobConf.get( key );
+    }
+
+  @Override
+  public Collection<String> getPropertyKeys()
+    {
+    Set<String> keys = new HashSet<String>();
+
+    for( Map.Entry<String, String> entry : jobConf )
+      keys.add( entry.getKey() );
+
+    return Collections.unmodifiableSet( keys );
     }
 
   @Override
