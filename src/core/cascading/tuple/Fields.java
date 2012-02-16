@@ -995,8 +995,6 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( to.isSubstitution() || to.isUnknown() )
       throw new TupleException( "to fields may not be a substitution or unknown" );
 
-    Set<String> names = new HashSet<String>();
-
     Comparable[] newFields = Arrays.copyOf( this.fields, this.fields.length );
 
     int[] pos = getPos( from );
