@@ -86,7 +86,7 @@ import org.slf4j.LoggerFactory;
  * @see Flow
  * @see cascading.flow.FlowSkipStrategy
  */
-public class Cascade implements Runnable
+public class Cascade
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Cascade.class );
@@ -381,7 +381,14 @@ public class Cascade implements Runnable
     if( thread != null )
       return;
 
-    thread = new Thread( this, ( "cascade " + Util.toNull( getName() ) ).trim() );
+    thread = new Thread( new Runnable()
+    {
+    @Override
+    public void run()
+      {
+      Cascade.this.run();
+      }
+    }, ( "cascade " + Util.toNull( getName() ) ).trim() );
 
     thread.start();
     }
@@ -423,7 +430,7 @@ public class Cascade implements Runnable
     }
 
   /** Method run implements the Runnable run method. */
-  public void run()
+  private void run()
     {
     Version.printBanner();
 
