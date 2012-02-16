@@ -296,14 +296,6 @@ public class HadoopFlow extends Flow<JobConf>
       hdfsShutdown = HadoopUtil.getHDFSShutdownHook();
     }
 
-//  private void deregisterShutdownHook()
-//    {
-//    if( !isStopJobsOnExit() || stop )
-//      return;
-//
-//    ShutdownUtil.removeHook( shutdownHook );
-//    }
-
   protected void internalClean( boolean force )
     {
     if( !isPreserveTemporaryFiles() )
@@ -312,7 +304,6 @@ public class HadoopFlow extends Flow<JobConf>
 
   protected void internalShutdown()
     {
-//    deregisterShutdownHook();
     }
 
   protected int getMaxNumParallelSteps()
