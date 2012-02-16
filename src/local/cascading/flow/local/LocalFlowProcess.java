@@ -62,13 +62,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     }
 
   @Override
-  public int getNumConcurrentTasks()
+  public int getNumProcessSlices()
     {
     return 0;
     }
 
   @Override
-  public int getCurrentTaskNum()
+  public int getCurrentSliceNum()
     {
     return 0;
     }

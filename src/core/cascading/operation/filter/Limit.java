@@ -80,8 +80,8 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
 
     operationCall.setContext( context );
 
-    int numTasks = flowProcess.getNumConcurrentTasks();
-    int taskNum = flowProcess.getCurrentTaskNum();
+    int numTasks = flowProcess.getNumProcessSlices();
+    int taskNum = flowProcess.getCurrentSliceNum();
 
     context.limit = (long) Math.floor( (double) limit / (double) numTasks );
 

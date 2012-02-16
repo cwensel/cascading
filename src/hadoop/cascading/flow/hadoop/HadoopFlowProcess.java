@@ -157,13 +157,13 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
    * @return int
    */
   @Override
-  public int getCurrentTaskNum()
+  public int getCurrentSliceNum()
     {
     return getJobConf().getInt( "mapred.task.partition", 0 );
     }
 
   @Override
-  public int getNumConcurrentTasks()
+  public int getNumProcessSlices()
     {
     if( isMapper() )
       return getCurrentNumMappers();

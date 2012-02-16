@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added the c.m.UnitOfWork interface to give c.f.Flow and c.c.Cascade a common contract.
+
   Changed c.t.h.TupleSerialization#setSerializations() to force TupleSerialization and o.a.h.i.s.WritableSerialization
   are first in the "io.serializations" list.
 

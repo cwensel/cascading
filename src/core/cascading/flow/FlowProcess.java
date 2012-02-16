@@ -96,13 +96,13 @@ public abstract class FlowProcess<Config>
       }
 
     @Override
-    public int getNumConcurrentTasks()
+    public int getNumProcessSlices()
       {
       return 0;
       }
 
     @Override
-    public int getCurrentTaskNum()
+    public int getCurrentSliceNum()
       {
       return 0;
       }
@@ -195,9 +195,22 @@ public abstract class FlowProcess<Config>
     currentSession.setCurrentProcess( this );
     }
 
-  public abstract int getNumConcurrentTasks();
+  /**
+   * Method getNumProcessSlices returns the number of parallel slices or tasks allocated
+   * for this process execution.
+   * <p/>
+   * For MapReduce platforms, this is the same as the number of tasks for a given MapReduce job.
+   *
+   * @return an int
+   */
+  public abstract int getNumProcessSlices();
 
-  public abstract int getCurrentTaskNum();
+  /**
+   * Method getCurrentSliceNum returns an integer representing which slice instance currently running.
+   *
+   * @return an int
+   */
+  public abstract int getCurrentSliceNum();
 
   /**
    * Method getProperty should be used to return configuration parameters from the underlying system.

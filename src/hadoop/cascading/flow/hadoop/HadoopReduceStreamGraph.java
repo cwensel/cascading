@@ -48,7 +48,7 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
-    printGraph( step.getID(), "reduce", flowProcess.getCurrentTaskNum() );
+    printGraph( step.getID(), "reduce", flowProcess.getCurrentSliceNum() );
 
     bind();
     }

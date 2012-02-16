@@ -79,13 +79,13 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
-    public int getNumConcurrentTasks()
+    public int getNumProcessSlices()
       {
       return numTasks;
       }
 
     @Override
-    public int getCurrentTaskNum()
+    public int getCurrentSliceNum()
       {
       return taskNum;
       }

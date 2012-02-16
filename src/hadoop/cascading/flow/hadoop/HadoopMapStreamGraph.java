@@ -54,7 +54,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
-    printGraph( step.getID(), "map", flowProcess.getCurrentTaskNum() );
+    printGraph( step.getID(), "map", flowProcess.getCurrentSliceNum() );
     bind();
     }
 

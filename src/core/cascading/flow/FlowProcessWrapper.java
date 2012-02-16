@@ -78,15 +78,15 @@ public class FlowProcessWrapper extends FlowProcess<Object>
     }
 
   @Override
-  public int getNumConcurrentTasks()
+  public int getNumProcessSlices()
     {
-    return delegate.getNumConcurrentTasks();
+    return delegate.getNumProcessSlices();
     }
 
   @Override
-  public int getCurrentTaskNum()
+  public int getCurrentSliceNum()
     {
-    return delegate.getCurrentTaskNum();
+    return delegate.getCurrentSliceNum();
     }
 
   @Override
