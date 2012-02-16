@@ -34,10 +34,23 @@ import cascading.operation.OperationCall;
  * <p/>
  * Where fraction is between 1 and zero, inclusive. Thus to sample {@code 50%} of the tuples in a stream, use the
  * fraction {@code 0.5}.
+ * <p/>
+ * By default, the seed is created at random on the constructor. This implies every branch using the Sample
+ * filter will return the same random stream based on that seed. So if this Sample instance is distributed
+ * into multiple systems against the same data, the result will be the same tuple stream. The alternative
+ * would be to make this Operation "not safe". See {@link cascading.operation.Operation#isSafe()}.
+ * <p/>
+ * Conversely, if the same stream of random data is require across application executions, set the seed manually.
+ * <p/>
+ * The seed is generated from the following code:
+ * <p/>
+ * {@code System.identityHashCode(this) * 2654435761L ^ System.currentTimeMillis()}
+ * <p/>
+ * Override {@link #makeSeed()} to customize.
  */
 public class Sample extends BaseOperation<Random> implements Filter<Random>
   {
-  private long seed = System.currentTimeMillis();
+  private long seed = 0;
   private double fraction = 1.0d;
 
   /**
@@ -48,6 +61,7 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
   @ConstructorProperties({"fraction"})
   public Sample( double fraction )
     {
+    this.seed = makeSeed();
     this.fraction = fraction;
     }
 
@@ -62,6 +76,11 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     {
     this.seed = seed;
     this.fraction = fraction;
+    }
+
+  protected long makeSeed()
+    {
+    return System.identityHashCode( this ) * 2654435761L ^ System.currentTimeMillis();
     }
 
   @Override
