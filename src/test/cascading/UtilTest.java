@@ -48,7 +48,8 @@ public class UtilTest
       "/foo/bar/name-test-3.0.5.RELEASE.jar",
       "name-test-2.0.0-wip-dev.jar",
       "foo/bar/name-test-2.0.0-wip-dev.jar",
-      "/foo/bar/name-test-2.0.0-wip-dev.jar"
+      "/foo/bar/name-test-2.0.0-wip-dev.jar",
+      "file:///C:\\foo\\bar\\name-test-2.0.0-wip-dev.jar"
     };
 
     String[] names = new String[]{
@@ -61,6 +62,7 @@ public class UtilTest
       "name",
       "name",
       "name",
+      "name-test",
       "name-test",
       "name-test",
       "name-test",
@@ -82,6 +84,7 @@ public class UtilTest
       "3.0.5.RELEASE",
       "3.0.5.RELEASE",
       "3.0.5.RELEASE",
+      "2.0.0-wip-dev",
       "2.0.0-wip-dev",
       "2.0.0-wip-dev",
       "2.0.0-wip-dev"

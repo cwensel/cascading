@@ -20,7 +20,6 @@
 
 package cascading.util;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -535,7 +534,12 @@ public class Util
 
   private static String[] findSplitName( String path )
     {
-    String[] split = path.split( File.separator );
+    String separator = "/";
+
+    if( path.lastIndexOf( "/" ) < path.lastIndexOf( "\\" ) )
+      separator = "\\\\";
+
+    String[] split = path.split( separator );
 
     path = split[ split.length - 1 ];
 
