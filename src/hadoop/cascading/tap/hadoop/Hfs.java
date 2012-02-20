@@ -65,6 +65,15 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * Call {@link #setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
+ * <p/>
+ * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
+ * intends to read files from the local client filesystem (for example when using the {@code Lfs} Tap) where the Hadoop
+ * job jar is started, Tap so will force any MapReduce jobs reading or writing to {@code file://} resources to run in
+ * Hadoop "local mode" so that the file can be read.
+ * <p/>
+ * To change this behavior, {@link #setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
+ * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
+ * in the exact same path.
  */
 public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector>
   {
@@ -72,7 +81,10 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
 
   /** Field TEMPORARY_DIRECTORY */
-  private static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
+  public static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
+
+  /** Fields LOCAL_MODE_SCHEME * */
+  public static final String LOCAL_MODE_SCHEME = "cascading.hadoop.localmode.scheme";
 
   /** Field stringPath */
   String stringPath;
@@ -103,6 +115,24 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   public static String getTemporaryDirectory( Map<Object, Object> properties )
     {
     return (String) properties.get( TEMPORARY_DIRECTORY );
+    }
+
+  /**
+   * Method setLocalModeScheme provides a means to change the scheme value used to detect when a
+   * MapReduce job should be run in Hadoop local mode. By default the value is {@code "file"}, set to
+   * {@code "none"} to disable entirely.
+   *
+   * @param properties of tyep Map<Object,Object>
+   * @param scheme     a String
+   */
+  public static void setLocalModeScheme( Map<Object, Object> properties, String scheme )
+    {
+    properties.put( LOCAL_MODE_SCHEME, scheme );
+    }
+
+  protected static String getLocalModeScheme( JobConf conf, String defaultValue )
+    {
+    return conf.get( LOCAL_MODE_SCHEME, defaultValue );
     }
 
   protected Hfs()
@@ -356,7 +386,9 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
   private void makeLocal( JobConf conf, Path qualifiedPath, String infoMessage )
     {
-    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( "file" ) )
+    String scheme = getLocalModeScheme( conf, "file" );
+
+    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( scheme ) )
       {
       if( LOG.isInfoEnabled() )
         LOG.info( infoMessage + toString() );
@@ -399,7 +431,7 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
   public boolean createResource( JobConf conf ) throws IOException
     {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "making dirs: " + getFullIdentifier( conf ) );
+      LOG.debug( "making dirs: {}", getFullIdentifier( conf ) );
 
     return getFileSystem( conf ).mkdirs( new Path( getIdentifier() ) );
     }
