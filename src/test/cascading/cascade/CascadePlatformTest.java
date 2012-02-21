@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowSkipStrategy;
@@ -62,7 +63,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -73,7 +74,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path + "/second" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -84,7 +85,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path + "/third" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -95,7 +96,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap sink = getPlatform().getTextFile( getOutputPath( path + "/fourth" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -132,10 +133,10 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "simple";
 
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
+    Flow first = firstFlow( path + "/first" );
+    Flow second = secondFlow( first.getSink(), path + "/second" );
+    Flow third = thirdFlow( second.getSink(), path + "/third" );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
     Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
 
@@ -173,10 +174,10 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "skipped";
 
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
+    Flow first = firstFlow( path + "/first" );
+    Flow second = secondFlow( first.getSink(), path + "/second" );
+    Flow third = thirdFlow( second.getSink(), path + "/third" );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
 
@@ -203,10 +204,11 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "stopped";
 
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
+    // remove from comparison tests
+    Flow first = firstFlow( path + "/first" + ComparePlatformsTest.NONDETERMINISTIC );
+    Flow second = secondFlow( first.getSink(), path + "/second" + ComparePlatformsTest.NONDETERMINISTIC );
+    Flow third = thirdFlow( second.getSink(), path + "/third" + ComparePlatformsTest.NONDETERMINISTIC );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" + ComparePlatformsTest.NONDETERMINISTIC );
 
     LockingFlowListener listener = new LockingFlowListener();
 
@@ -250,10 +252,10 @@ public class CascadePlatformTest extends PlatformTestCase
     {
     String path = "idtest";
 
-    Flow first = firstFlow( path );
-    Flow second = secondFlow( first.getSink(), path );
-    Flow third = thirdFlow( second.getSink(), path );
-    Flow fourth = fourthFlow( third.getSink(), path );
+    Flow first = firstFlow( path + "/first" );
+    Flow second = secondFlow( first.getSink(), path + "/second" );
+    Flow third = thirdFlow( second.getSink(), path + "/third" );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
 

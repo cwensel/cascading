@@ -46,6 +46,7 @@ import static cascading.PlatformTestCase.getTestRoot;
 public class ComparePlatformsTest extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( ComparePlatformsTest.class );
+  public static final String NONDETERMINISTIC = "-nondeterministic";
 
   public static Test suite() throws Exception
     {
@@ -64,7 +65,7 @@ public class ComparePlatformsTest extends CascadingTestCase
       File localFile = iterator.next();
       File file = new File( hadoopRoot, localFile.toString().substring( rootLength ) );
 
-      if( localFile.toString().endsWith( "-nondeterministic" ) )
+      if( localFile.toString().endsWith( NONDETERMINISTIC ) )
         iterator.remove();
       else if( file.exists() )
         hadoopFiles.add( file );
