@@ -371,11 +371,18 @@ public abstract class HadoopStepStats extends FlowStepStats
     if( runningJob == null )
       return;
 
-    // todo: doesn't actually work, these are the defaults, not from the running job
-    JobConf ranJob = new JobConf( runningJob.getJobFile() );
+    try
+      {
+      // todo: doesn't actually work, these are the defaults, not from the running job
+      JobConf ranJob = new JobConf( runningJob.getJobFile() ); // can throw a file not found exception
 
-    setNumMapTasks( ranJob.getNumMapTasks() );
-    setNumReducerTasks( ranJob.getNumReduceTasks() );
+      setNumMapTasks( ranJob.getNumMapTasks() );
+      setNumReducerTasks( ranJob.getNumReduceTasks() );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
     }
 
   /**
