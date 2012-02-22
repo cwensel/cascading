@@ -402,6 +402,8 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
     {
     String identifier = (String) flowProcess.getProperty( "cascading.source.path" );
 
+    // this is only called cluster task side when Hadoop is providing a RecordReader instance it owns
+    // during processing of an InputSplit
     if( input != null )
       return new TupleEntrySchemeIterator( flowProcess, getScheme(), new RecordReaderIterator( input ), identifier );
 
@@ -411,15 +413,19 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
     JobConf conf = HadoopUtil.createJobConf( properties, null );
 
+    // this is only called when, on the client side, a user wants to open a tap for writing on a client
+    // MultiRecordReader will create a new RecordReader instance for use across any file parts
     return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this, conf ), identifier );
     }
 
   @Override
   public TupleEntryCollector openForWrite( HadoopFlowProcess flowProcess, OutputCollector output ) throws IOException
     {
+    // this is only called cluster task side when Hadoop is providing an OutputCollector instance it owns
     if( output != null )
       return super.openForWrite( flowProcess, output );
 
+    // this is only called when, on the client side, a user want to open a tap for reading on the client
     HadoopTapCollector schemeCollector = new HadoopTapCollector( flowProcess, this );
 
     schemeCollector.prepare();
