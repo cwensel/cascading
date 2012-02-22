@@ -44,9 +44,9 @@ import static java.util.Arrays.copyOf;
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
-public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> extends SourceTap<Process, Config, Input, Output> implements CompositeTap
+public class MultiSourceTap<Child extends Tap, Process extends FlowProcess, Config, Input> extends SourceTap<Process, Config, Input> implements CompositeTap<Child>
   {
-  protected Tap[] taps;
+  protected Child[] taps;
 
   private class TupleIterator implements Iterator
     {
@@ -87,7 +87,7 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
    * @param taps of type Tap...
    */
   @ConstructorProperties({"taps"})
-  public MultiSourceTap( Tap... taps )
+  public MultiSourceTap( Child... taps )
     {
     this.taps = copyOf( taps, taps.length );
 
@@ -113,15 +113,15 @@ public class MultiSourceTap<Process extends FlowProcess, Config, Input, Output> 
    *
    * @return the taps (type Tap[]) of this MultiTap object.
    */
-  protected Tap[] getTaps()
+  protected Child[] getTaps()
     {
     return taps;
     }
 
   @Override
-  public Iterator<Tap> getChildTaps()
+  public Iterator<Child> getChildTaps()
     {
-    Tap[] taps = getTaps();
+    Child[] taps = getTaps();
 
     if( taps == null )
       return Collections.EMPTY_LIST.iterator();

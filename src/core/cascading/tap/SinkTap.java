@@ -34,7 +34,7 @@ import cascading.tuple.TupleEntryIterator;
  * to being a source). These types should subclass SinkTap for convenience or
  * set {@link #isSource()} to {@code false} in a custom Tap sub-class.
  */
-public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
+public abstract class SinkTap<Process extends FlowProcess, Config, Output> extends Tap<Process, Config, Void, Output>
   {
   protected SinkTap()
     {
@@ -69,7 +69,7 @@ public abstract class SinkTap<Process extends FlowProcess, Config, Input, Output
     }
 
   @Override
-  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
+  public TupleEntryIterator openForRead( Process flowProcess, Void input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }

@@ -27,9 +27,9 @@ import java.util.Iterator;
  * <p/>
  * This information is required by the planner in order to properly configure the underlying platform.
  */
-public interface CompositeTap
+public interface CompositeTap<Child extends Tap>
   {
-  Iterator<Tap> getChildTaps();
+  Iterator<Child> getChildTaps();
 
   long getNumChildTaps();
   }

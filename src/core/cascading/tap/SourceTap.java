@@ -34,7 +34,7 @@ import cascading.tuple.TupleEntryCollector;
  * to being a sink). These types should subclass SourceTap for convenience or
  * set {@link #isSink()} to {@code false} in a custom Tap sub-class.
  */
-public abstract class SourceTap<Process extends FlowProcess, Config, Input, Output> extends Tap<Process, Config, Input, Output>
+public abstract class SourceTap<Process extends FlowProcess, Config, Input> extends Tap<Process, Config, Input, Void>
   {
   protected SourceTap()
     {
@@ -88,7 +88,7 @@ public abstract class SourceTap<Process extends FlowProcess, Config, Input, Outp
     }
 
   @Override
-  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
+  public TupleEntryCollector openForWrite( Process flowProcess, Void output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

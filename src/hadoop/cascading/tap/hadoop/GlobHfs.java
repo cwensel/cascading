@@ -28,14 +28,12 @@ import java.util.List;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
-import cascading.tap.Tap;
 import cascading.tap.TapException;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
 /**
@@ -57,7 +55,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * @see cascading.tap.MultiSourceTap
  * @see FileSystem
  */
-public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCollector, RecordReader>
+public class GlobHfs extends MultiSourceTap<Hfs, HadoopFlowProcess, JobConf, RecordReader>
   {
   /** Field pathPattern */
   private final String pathPattern;
@@ -92,12 +90,12 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
     }
 
   @Override
-  protected Tap[] getTaps()
+  protected Hfs[] getTaps()
     {
     return initTapsInternal( new JobConf() );
     }
 
-  private Tap[] initTapsInternal( JobConf conf )
+  private Hfs[] initTapsInternal( JobConf conf )
     {
     if( taps != null )
       return taps;
@@ -114,7 +112,7 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
     return taps;
     }
 
-  private Tap[] makeTaps( JobConf conf ) throws IOException
+  private Hfs[] makeTaps( JobConf conf ) throws IOException
     {
     FileStatus[] statusList = null;
 
@@ -143,7 +141,7 @@ public class GlobHfs extends MultiSourceTap<HadoopFlowProcess, JobConf, OutputCo
     if( notEmpty.isEmpty() )
       throw new TapException( "all paths matching path pattern are zero length and not directories: " + pathPattern );
 
-    return notEmpty.toArray( new Tap[ notEmpty.size() ] );
+    return notEmpty.toArray( new Hfs[ notEmpty.size() ] );
     }
 
   @Override

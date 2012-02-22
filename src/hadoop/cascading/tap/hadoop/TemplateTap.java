@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * {@code openTapsThreshold} limits the number of open files to be output to. This value defaults to 300 files.
  * Each time the threshold is exceeded, 10% of the least recently used open files will be closed.
  */
-public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector>
+public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputCollector>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TemplateTap.class );
