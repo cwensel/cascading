@@ -390,4 +390,29 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     assertEquals( 1, count[ 0 ] );
     validateLength( flow, 8, null );
     }
+
+  @Test
+  public void testHfsAsterisk() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
+
+    Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "*" );
+    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+    assertTrue( iterator.hasNext() );
+    iterator.close();
+
+    try
+      {
+      Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "/blah/" );
+      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+      fail();
+      }
+    catch( IOException exception )
+      {
+      // do nothing
+      }
+    }
   }

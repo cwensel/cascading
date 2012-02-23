@@ -83,17 +83,13 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     {
     tap.sourceConfInit( flowProcess, conf );
 
-    if( !tap.resourceExists( conf ) )
-      {
-      complete = true;
-      return;
-      }
-
     inputFormat = conf.getInputFormat();
 
     if( inputFormat instanceof JobConfigurable )
       ( (JobConfigurable) inputFormat ).configure( conf );
 
+    // do not test for existence, let hadoop decide how to handle the given path
+    // this delegates globbing to the inputformat on split generation.
     splits = inputFormat.getSplits( conf, 1 );
 
     if( splits.length == 0 )
