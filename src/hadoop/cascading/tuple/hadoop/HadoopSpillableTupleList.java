@@ -102,6 +102,13 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       this.tupleSerialization = new TupleSerialization( jobConf );
     }
 
+  public HadoopSpillableTupleList( Threshold threshold, TupleSerialization tupleSerialization, CompressionCodec codec )
+    {
+    super( threshold );
+    this.tupleSerialization = tupleSerialization;
+    this.codec = codec;
+    }
+
   @Override
   protected TupleOutputStream createTupleOutputStream( File file )
     {

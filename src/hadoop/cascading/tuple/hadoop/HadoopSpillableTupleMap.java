@@ -35,14 +35,18 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class HadoopSpillableTupleMap extends SpillableTupleMap
   {
-  private CompressionCodec codec;
+  private final CompressionCodec codec;
   private final JobConf jobConf;
+  private final TupleSerialization tupleSerialization;
+  private final SpillableTupleList.Threshold threshold;
 
   public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
     {
     super( initialCapacity, loadFactor, mapThreshold, listThreshold );
     this.jobConf = jobConf;
     this.codec = codec;
+    this.tupleSerialization = new TupleSerialization( jobConf );
+    this.threshold = getThreshold();
     }
 
   public HadoopSpillableTupleMap( int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
@@ -50,12 +54,14 @@ public class HadoopSpillableTupleMap extends SpillableTupleMap
     super( mapThreshold, listThreshold );
     this.codec = codec;
     this.jobConf = jobConf;
+    this.tupleSerialization = new TupleSerialization( jobConf );
+    this.threshold = getThreshold();
     }
 
   @Override
   protected SpillableTupleList createTupleCollection( Tuple object )
     {
-    HadoopSpillableTupleList tupleList = new HadoopSpillableTupleList( getThreshold(), codec, jobConf );
+    HadoopSpillableTupleList tupleList = new HadoopSpillableTupleList( threshold, tupleSerialization, codec );
 
     tupleList.setSpillListener( getSpillableListener( object ) );
 
