@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Properties;
 
 import cascading.flow.local.LocalFlowProcess;
@@ -33,7 +32,6 @@ import cascading.scheme.local.LocalScheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
-import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeIterator;
@@ -84,13 +82,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
   public TupleEntryIterator openForRead( LocalFlowProcess flowProcess, FileInputStream input ) throws IOException
     {
     if( input == null )
-      {
-      // return an empty iterator
-      if( !new File( path ).exists() )
-        return new TupleEntryChainIterator( getSourceFields(), new Iterator[ 0 ] );
-
       input = new FileInputStream( path );
-      }
 
     Closeable reader = (Closeable) ( (LocalScheme) getScheme() ).createInput( input );
 

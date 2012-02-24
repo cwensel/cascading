@@ -76,7 +76,16 @@ public class TrapPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 8, null );
-    validateLength( flow.openTrap(), 0 );
+
+    try
+      {
+      flow.openTrap();
+      fail(); // should throw a file not found exception
+      }
+    catch( IOException exception )
+      {
+      // do nothing
+      }
     }
 
   @Test
