@@ -76,7 +76,10 @@ import org.slf4j.LoggerFactory;
  * {@link Functor} for use on the Map side. Multiple Functor instances are managed by the {@link CompositeFunction}
  * class allowing them all to share the same LRU value map for more efficiency.
  * <p/>
- * To tune the LRU, set the {@code threshold} value to a high enough value to utilize available memory.
+ * To tune the LRU, set the {@code threshold} value to a high enough value to utilize available memory. Or set a
+ * default value via the {@link #AGGREGATE_BY_THRESHOLD} property. The current default ({@link CompositeFunction#DEFAULT_THRESHOLD})
+ * is {@code 10, 000} unique keys. Note "flushes" from the LRU will be logged in threshold increments along with memory
+ * information.
  * <p/>
  * Note using a AggregateBy instance automatically inserts a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
@@ -91,6 +94,8 @@ import org.slf4j.LoggerFactory;
 public class AggregateBy extends SubAssembly
   {
   private static final Logger LOG = LoggerFactory.getLogger( AggregateBy.class );
+
+  public static final String AGGREGATE_BY_THRESHOLD = "cascading.aggregateby.threshold";
 
   private String name;
   private int threshold;
@@ -155,7 +160,7 @@ public class AggregateBy extends SubAssembly
     {
     public static final int DEFAULT_THRESHOLD = 10000;
 
-    private int threshold = DEFAULT_THRESHOLD;
+    private int threshold = 0;
     private final Fields groupingFields;
     private final Fields[] argumentFields;
     private final Fields[] functorFields;
@@ -209,6 +214,18 @@ public class AggregateBy extends SubAssembly
     @Override
     public void prepare( final FlowProcess flowProcess, final OperationCall<LinkedHashMap<Tuple, Tuple[]>> operationCall )
       {
+      if( threshold == 0 )
+        {
+        Object value = flowProcess.getProperty( AGGREGATE_BY_THRESHOLD );
+
+        if( value != null && !value.toString().isEmpty() )
+          threshold = Integer.valueOf( (String) flowProcess.getProperty( AGGREGATE_BY_THRESHOLD ) );
+        else
+          threshold = DEFAULT_THRESHOLD;
+        }
+
+      LOG.info( "using threshold value: {}", threshold );
+
       operationCall.setContext( new LinkedHashMap<Tuple, Tuple[]>( threshold, 0.75f, true )
       {
       long flushes = 0;
