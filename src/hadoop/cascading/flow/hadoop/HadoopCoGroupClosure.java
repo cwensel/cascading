@@ -73,8 +73,9 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
 
       if( ( numFiles - 1 ) % 10 == 0 )
         {
-        LOG.info( "spilled group: {}, on grouping: {}, num times: {}",
-          new Object[]{joinField.printVerbose(), getGrouping().print(), numFiles} );
+        LOG.info( "spilled group: {}, on grouping: {}, num times: {}, with threshold: {}",
+          new Object[]{joinField.printVerbose(), getGrouping().print(), numFiles,
+                       ( (SpillableTupleList) spillable ).getThreshold()} );
 
         Runtime runtime = Runtime.getRuntime();
         long freeMem = runtime.freeMemory() / 1024 / 1024;

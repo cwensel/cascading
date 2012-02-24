@@ -72,7 +72,8 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
 
       if( ( numFiles - 1 ) % 10 == 0 )
         {
-        LOG.info( "spilled grouping: {}, num times: {}", tuple.print(), numFiles );
+        LOG.info( "spilled grouping: {}, num times: {}, with threshold: {}",
+          new Object[]{tuple.print(), numFiles, ( (SpillableTupleList) spillable ).getThreshold()} );
 
         Runtime runtime = Runtime.getRuntime();
         long freeMem = runtime.freeMemory() / 1024 / 1024;

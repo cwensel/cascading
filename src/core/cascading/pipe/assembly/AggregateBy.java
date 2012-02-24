@@ -43,6 +43,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class AggregateBy is a {@link SubAssembly} that serves two roles for handling aggregate operations.
@@ -88,12 +90,19 @@ import cascading.tuple.TupleEntryCollector;
  */
 public class AggregateBy extends SubAssembly
   {
+  private static final Logger LOG = LoggerFactory.getLogger( AggregateBy.class );
+
   private String name;
   private int threshold;
   private Fields[] argumentFields;
   private Functor[] functors;
   private Aggregator[] aggregators;
   private transient GroupBy groupBy;
+
+  public enum Flush
+    {
+      Num_Keys_Flushed
+    }
 
   /**
    * Interface Functor provides a means to create a simple function for use with the {@link CompositeFunction} class.
@@ -202,13 +211,31 @@ public class AggregateBy extends SubAssembly
       {
       operationCall.setContext( new LinkedHashMap<Tuple, Tuple[]>( threshold, 0.75f, true )
       {
+      long flushes = 0;
+
       @Override
       protected boolean removeEldestEntry( Map.Entry<Tuple, Tuple[]> eldest )
         {
         boolean doRemove = size() > threshold;
 
         if( doRemove )
+          {
           completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), eldest );
+          flowProcess.increment( Flush.Num_Keys_Flushed, 1 );
+
+          if( flushes % threshold == 0 ) // every multiple, write out data
+            {
+            Runtime runtime = Runtime.getRuntime();
+            long freeMem = runtime.freeMemory() / 1024 / 1024;
+            long maxMem = runtime.maxMemory() / 1024 / 1024;
+            long totalMem = runtime.totalMemory() / 1024 / 1024;
+
+            LOG.info( "flushed keys num times: {}, with threshold: {}", flushes + 1, threshold );
+            LOG.info( "mem on flush (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+            }
+
+          flushes++;
+          }
 
         return doRemove;
         }
