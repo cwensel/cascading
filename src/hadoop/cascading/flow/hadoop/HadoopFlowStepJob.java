@@ -30,16 +30,12 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class HadoopFlowStepJob extends FlowStepJob
   {
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopFlowStepJob.class );
-
   /** Field currentConf */
   private final JobConf currentConf;
   /** Field jobClient */
@@ -85,6 +81,8 @@ public class HadoopFlowStepJob extends FlowStepJob
     {
     jobClient = new JobClient( currentConf );
     runningJob = jobClient.submitJob( currentConf );
+
+    flowStep.logInfo( "submitted hadoop job: " + runningJob.getID() );
     }
 
   protected boolean internalNonBlockingIsSuccessful() throws IOException
@@ -145,7 +143,7 @@ public class HadoopFlowStepJob extends FlowStepJob
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to test for map progress", exception );
+      flowStep.logWarn( "unable to test for map progress", exception );
       return false;
       }
     }
