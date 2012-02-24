@@ -77,10 +77,12 @@ public class HadoopSpillableTupleMap extends SpillableTupleMap
     {
     return new SpillableTupleList.Threshold()
     {
+    int minThreshold = (int) ( getMapThreshold() * .05 );
+
     @Override
     public int current()
       {
-      return Math.min( getInitListThreshold(), getMapThreshold() / size() );
+      return Math.max( minThreshold, Math.min( getInitListThreshold(), getMapThreshold() / size() ) );
       }
     };
     }
