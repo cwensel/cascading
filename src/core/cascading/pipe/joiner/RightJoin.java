@@ -45,9 +45,8 @@ public class RightJoin implements Joiner
     return -1;
     }
 
-  protected static class JoinIterator extends OuterJoin.JoinIterator
+  public static class JoinIterator extends OuterJoin.JoinIterator
     {
-
     public JoinIterator( JoinerClosure closure )
       {
       super( closure );

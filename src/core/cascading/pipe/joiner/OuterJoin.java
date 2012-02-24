@@ -42,7 +42,7 @@ public class OuterJoin implements Joiner
     return -1;
     }
 
-  protected static class JoinIterator extends InnerJoin.JoinIterator
+  public static class JoinIterator extends InnerJoin.JoinIterator
     {
     List[] singletons;
 
@@ -78,6 +78,5 @@ public class OuterJoin implements Joiner
 
       return singletons[ i ].iterator();
       }
-
     }
   }

@@ -45,7 +45,7 @@ public class InnerJoin implements Joiner
     return -1;
     }
 
-  protected static class JoinIterator implements Iterator<Tuple>
+  public static class JoinIterator implements Iterator<Tuple>
     {
     final JoinerClosure closure;
     Iterator[] iterators;

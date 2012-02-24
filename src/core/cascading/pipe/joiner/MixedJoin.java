@@ -61,7 +61,7 @@ public class MixedJoin implements Joiner
     return new JoinIterator( closure );
     }
 
-  protected class JoinIterator extends OuterJoin.JoinIterator
+  public class JoinIterator extends OuterJoin.JoinIterator
     {
     public JoinIterator( JoinerClosure closure )
       {
