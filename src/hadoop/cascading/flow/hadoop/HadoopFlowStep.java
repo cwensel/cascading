@@ -346,14 +346,16 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     };
     }
 
+  /**
+   * sources are specific to step, remove all known accumulated sources, if any
+   *
+   * @return
+   */
   private Set<Tap> getUniqueStreamedSources()
     {
-    if( !hasJoins() )
-      return sources.keySet();
-
     HashSet<Tap> set = new HashSet<Tap>( sources.keySet() );
 
-    set.removeAll( getRightMostInJoins() );
+    set.removeAll( getAllAccumulatedSources() );
 
     return set;
     }

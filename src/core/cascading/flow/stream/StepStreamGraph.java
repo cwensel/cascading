@@ -28,7 +28,6 @@ import java.util.TreeSet;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowStep;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -100,7 +99,7 @@ public abstract class StepStreamGraph extends StreamGraph
     FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
     Splice rhsElement = (Splice) ( (SpliceGate) rhsDuct ).getFlowElement();
 
-    List<GraphPath<FlowElement, Scope>> paths = ( ElementGraphs.getAllShortestPathsBetween( step.getGraph(), lhsElement, rhsElement ) );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( step.getGraph(), lhsElement, rhsElement );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -202,10 +201,10 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private boolean joinHasSameStreamedSource( Join join )
     {
-    if( !step.getJoinsWithLeftMost().isEmpty() )
+    if( !step.getStreamedSourceByJoin().isEmpty() )
       {
       // if streamed source is multi path
-      Object tap = step.getJoinsWithLeftMost().get( join );
+      Object tap = step.getStreamedSourceByJoin().get( join );
 
       return getNumImmediateBranches( (FlowElement) tap, join ) > 1;
       }

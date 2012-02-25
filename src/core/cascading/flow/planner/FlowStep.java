@@ -94,9 +94,9 @@ public abstract class FlowStep<Config> implements Serializable
   private final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
 
   /** Field sources */
-  protected final Map<Tap, Set<String>> sources = new HashMap<Tap, Set<String>>();
+  protected final Map<Tap, Set<String>> sources = new HashMap<Tap, Set<String>>(); // all sources
   /** Field sink */
-  protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>();
+  protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>(); // all sinks
 
   /** Field tempSink */
   protected Tap tempSink; // used if we need to bypass
@@ -104,8 +104,10 @@ public abstract class FlowStep<Config> implements Serializable
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
-  protected final Map<Join, Tap> joinWithLeftMost = new LinkedHashMap<Join, Tap>(); // leftmost sources
-  protected final Map<Join, Set<Tap>> joinWithRightMost = new LinkedHashMap<Join, Set<Tap>>(); // leftmost sources
+  // sources streamed into join - not necessarily all sources
+  protected final Map<Join, Tap> streamedSourceByJoin = new LinkedHashMap<Join, Tap>();
+  // sources accumulated by join
+  protected final Map<Join, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<Join, Set<Tap>>();
 
   private transient FlowStepJob flowStepJob;
 
@@ -262,37 +264,32 @@ public abstract class FlowStep<Config> implements Serializable
       groups.add( group );
     }
 
-  public Map<Join, Tap> getJoinsWithLeftMost()
+  public Map<Join, Tap> getStreamedSourceByJoin()
     {
-    return joinWithLeftMost;
+    return streamedSourceByJoin;
     }
 
-  public void addJoinWithLeftMost( Join join, Tap leftMostSource )
+  public void addStreamedSourceFor( Join join, Tap streamedSource )
     {
-    joinWithLeftMost.put( join, leftMostSource );
+    streamedSourceByJoin.put( join, streamedSource );
     }
 
-  public Set<Tap> getRightMostInJoins()
+  public Set<Tap> getAllAccumulatedSources()
     {
     HashSet<Tap> set = new HashSet<Tap>();
 
-    for( Set<Tap> taps : joinWithRightMost.values() )
+    for( Set<Tap> taps : accumulatedSourcesByJoin.values() )
       set.addAll( taps );
 
     return set;
     }
 
-  public void addJoinWithRightMost( Join join, Tap rightMostSource )
+  public void addAccumulatedSourceFor( Join join, Tap accumulatedSource )
     {
-    if( !joinWithRightMost.containsKey( join ) )
-      joinWithRightMost.put( join, new HashSet<Tap>() );
+    if( !accumulatedSourcesByJoin.containsKey( join ) )
+      accumulatedSourcesByJoin.put( join, new HashSet<Tap>() );
 
-    joinWithRightMost.get( join ).add( rightMostSource );
-    }
-
-  public boolean hasJoins()
-    {
-    return !joinWithLeftMost.isEmpty();
+    accumulatedSourcesByJoin.get( join ).add( accumulatedSource );
     }
 
   public void addSource( String name, Tap source )
