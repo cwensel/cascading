@@ -32,6 +32,7 @@ import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
@@ -807,7 +808,6 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-
     Pipe[] pipes = Pipe.pipes( pipeLowerOffset, pipeUpper, pipeLower );
     Fields[] fields = Fields.fields( new Fields( "num" ), new Fields( "num" ), new Fields( "num" ) );
 
@@ -1339,5 +1339,62 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
     assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    }
+
+  @Test
+  public void testJoinsIntoCoGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileRhs );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Tap sourceLhs = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLhs );
+    Tap sourceRhs = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileRhs );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "lhs", sourceLhs );
+    sources.put( "rhs", sourceRhs );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "joinsintocogroup" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
+    Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
+
+    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+
+    upperLower = new Each( upperLower, new Identity() );
+
+    Pipe lhsUpperLower = new Join( pipeLhs, new Fields( "num" ), upperLower, new Fields( "numUpperLower" ), new Fields( "numLhs", "charLhs", "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+
+    lhsUpperLower = new Each( lhsUpperLower, new Identity() );
+
+    Pipe grouped = new CoGroup( "cogrouping", lhsUpperLower, new Fields( "numLhs" ), pipeRhs, new Fields( "num" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, grouped );
+
+//    if( getPlatform() instanceof HadoopPlatform )
+//      assertEquals( "wrong number of steps", 1, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    List<Tuple> actual = getSinkAsList( flow );
+
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta\t1\tA\t1\tA" ) ) );
+    assertTrue( actual.contains( new Tuple( "5\ta\t5\te\t5\tE\t5\tA" ) ) );
     }
   }

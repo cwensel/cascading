@@ -155,7 +155,9 @@ public class HadoopStepGraph extends FlowStepGraph
           Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( elementGraph, source, (Splice) rhs );
 
           if( sourcePaths.containsKey( 0 ) )
-            step.addJoin( (Join) rhs, source );
+            step.addJoinWithLeftMost( (Join) rhs, source );
+          else
+            step.addJoinWithRightMost( (Join) rhs, source );
           }
         else if( rhs instanceof Pipe ) // add relevant traps to step
           {

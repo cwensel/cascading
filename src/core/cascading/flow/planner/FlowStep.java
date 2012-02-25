@@ -104,7 +104,8 @@ public abstract class FlowStep<Config> implements Serializable
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
-  protected final Map<Join, Tap> joins = new LinkedHashMap<Join, Tap>(); // leftmost sources
+  protected final Map<Join, Tap> joinWithLeftMost = new LinkedHashMap<Join, Tap>(); // leftmost sources
+  protected final Map<Join, Set<Tap>> joinWithRightMost = new LinkedHashMap<Join, Set<Tap>>(); // leftmost sources
 
   private transient FlowStepJob flowStepJob;
 
@@ -261,19 +262,37 @@ public abstract class FlowStep<Config> implements Serializable
       groups.add( group );
     }
 
-  public Map<Join, Tap> getJoins()
+  public Map<Join, Tap> getJoinsWithLeftMost()
     {
-    return joins;
+    return joinWithLeftMost;
     }
 
-  public void addJoin( Join join, Tap leftMostSource )
+  public void addJoinWithLeftMost( Join join, Tap leftMostSource )
     {
-    joins.put( join, leftMostSource );
+    joinWithLeftMost.put( join, leftMostSource );
+    }
+
+  public Set<Tap> getRightMostInJoins()
+    {
+    HashSet<Tap> set = new HashSet<Tap>();
+
+    for( Set<Tap> taps : joinWithRightMost.values() )
+      set.addAll( taps );
+
+    return set;
+    }
+
+  public void addJoinWithRightMost( Join join, Tap rightMostSource )
+    {
+    if( !joinWithRightMost.containsKey( join ) )
+      joinWithRightMost.put( join, new HashSet<Tap>() );
+
+    joinWithRightMost.get( join ).add( rightMostSource );
     }
 
   public boolean hasJoins()
     {
-    return !joins.isEmpty();
+    return !joinWithLeftMost.isEmpty();
     }
 
   public void addSource( String name, Tap source )

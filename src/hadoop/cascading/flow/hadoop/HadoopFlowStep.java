@@ -351,7 +351,11 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     if( !hasJoins() )
       return sources.keySet();
 
-    return new HashSet<Tap>( getJoins().values() );
+    HashSet<Tap> set = new HashSet<Tap>( sources.keySet() );
+
+    set.removeAll( getRightMostInJoins() );
+
+    return set;
     }
 
   protected void initFromSink( FlowProcess<JobConf> flowProcess, JobConf conf )

@@ -202,10 +202,10 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private boolean joinHasSameStreamedSource( Join join )
     {
-    if( !step.getJoins().isEmpty() )
+    if( !step.getJoinsWithLeftMost().isEmpty() )
       {
       // if streamed source is multi path
-      Object tap = step.getJoins().get( join );
+      Object tap = step.getJoinsWithLeftMost().get( join );
 
       return getNumImmediateBranches( (FlowElement) tap, join ) > 1;
       }
