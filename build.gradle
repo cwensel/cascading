@@ -44,8 +44,8 @@ dependencies {
 repositories {
   mavenLocal()
   mavenCentral()
-  mavenRepo name: 'conjars', urls: 'http://conjars.org/repo/'
-  mavenRepo name: 'apache', urls: 'https://repository.apache.org/content/repositories/releases/'
+  mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
+  mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
 }
 
 subprojects { subproject ->
@@ -66,8 +66,8 @@ subprojects { subproject ->
     repositories {
       mavenLocal()
       mavenCentral()
-      mavenRepo name: 'conjars', urls: 'http://conjars.org/repo/'
-      mavenRepo name: 'apache', urls: 'https://repository.apache.org/content/repositories/releases/'
+      mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
+      mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
     }
 
     dependencies {

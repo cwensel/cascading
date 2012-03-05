@@ -20,12 +20,12 @@
 
 apply from: '../testing.gradle'
 
-pomDirName = 'poms/core'
+mavenPomDir = 'poms/core'
 archivesBaseName = 'cascading-core'
 
 sourceSets {
   main {
-    classesDir = new File("${buildDir}/classes/core")
+    output.classesDir = new File("${buildDir}/classes/core")
 
     java {
       srcDir 'cascading'

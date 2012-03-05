@@ -18,12 +18,12 @@
  * limitations under the License.
  */
 
-pomDirName = 'poms/xml'
+mavenPomDir = 'poms/xml'
 archivesBaseName = 'cascading-xml'
 
 sourceSets {
   main {
-    classesDir = new File("${buildDir}/classes/xml")
+    output.classesDir = new File("${buildDir}/classes/xml")
 
     java {
       srcDir 'cascading'

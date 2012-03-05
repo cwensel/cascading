@@ -20,12 +20,12 @@
 
 apply from: '../testing.gradle'
 
-pomDirName = 'poms/hadoop'
+mavenPomDir = 'poms/hadoop'
 archivesBaseName = 'cascading-hadoop'
 
 sourceSets {
   main {
-    classesDir = new File("${buildDir}/classes/hadoop")
+    output.classesDir = new File("${buildDir}/classes/hadoop")
 
     java {
       srcDir 'cascading'
