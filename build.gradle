@@ -207,7 +207,15 @@ task buildPackage(type: Tar, dependsOn: buildDist) {
 
 task prepareRelease(dependsOn: ['src:core:build', 'src:local:build', 'src:hadoop:build', 'src:xml:build', 'src:test:build'])
 
+prepareRelease << {
+  logger.info('built all artifacts')
+}
+
 task repoRelease(dependsOn: [prepareRelease, 'src:core:repoUpload', 'src:local:repoUpload', 'src:hadoop:repoUpload', 'src:xml:repoUpload', 'src:test:repoUpload'])
+
+repoRelease << {
+  logger.info('uploaded all artifacts')
+}
 
 task s3Upload(dependsOn: buildPackage) {
 
