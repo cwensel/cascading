@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-mavenPomDir = 'poms/xml'
+mavenPomDir = "${buildDir}/poms/xml"
 archivesBaseName = 'cascading-xml'
 
 sourceSets {

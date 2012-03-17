@@ -20,7 +20,7 @@
 
 apply from: '../testing.gradle'
 
-mavenPomDir = 'poms/test'
+mavenPomDir = "${buildDir}/poms/test"
 archivesBaseName = 'cascading-test'
 
 sourceSets {

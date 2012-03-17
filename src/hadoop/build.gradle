@@ -20,7 +20,7 @@
 
 apply from: '../testing.gradle'
 
-mavenPomDir = 'poms/hadoop'
+mavenPomDir = "${buildDir}/poms/hadoop"
 archivesBaseName = 'cascading-hadoop'
 
 sourceSets {
