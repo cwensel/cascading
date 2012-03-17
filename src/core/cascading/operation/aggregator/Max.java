@@ -61,11 +61,13 @@ public class Max extends ExtremaBase
     super( fieldDeclaration, ignoreValues );
     }
 
+  @Override
   protected boolean compare( Number lhs, Number rhs )
     {
     return lhs.doubleValue() < rhs.doubleValue();
     }
 
+  @Override
   protected double getInitialValue()
     {
     return Double.NEGATIVE_INFINITY;

@@ -31,6 +31,7 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp
@@ -39,7 +40,7 @@ import cascading.tuple.Tuple;
  * Note the timezone data is given to the SimpleDateFormat, not the internal Calendar instance which interprets
  * the 'timestamp' value as it is assumed the timestamp is already in GMT.
  */
-public class DateFormatter extends DateOperation implements Function<SimpleDateFormat>
+public class DateFormatter extends DateOperation implements Function<Pair<SimpleDateFormat, Tuple>>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "datetime";
@@ -94,20 +95,18 @@ public class DateFormatter extends DateOperation implements Function<SimpleDateF
     super( 1, fieldDeclaration, dateFormatString, zone, locale );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<SimpleDateFormat> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, Tuple>> functionCall )
     {
-    Tuple output = new Tuple();
-
     long ts = functionCall.getArguments().getLong( 0 );
 
     Calendar calendar = getCalendar();
 
     calendar.setTimeInMillis( ts );
 
-    output.add( functionCall.getContext().format( calendar.getTime() ) );
+    functionCall.getContext().getRhs().set( 0, functionCall.getContext().getLhs().format( calendar.getTime() ) );
 
-    functionCall.getOutputCollector().add( output );
+    functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
     }
 
   }

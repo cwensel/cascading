@@ -18,30 +18,39 @@
  * limitations under the License.
  */
 
-package cascading.operation.filter;
-
-import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Filter;
-import cascading.operation.FilterCall;
+package cascading.util;
 
 /**
- * Class FilterNull verifies that every value in the argument values {@link cascading.tuple.Tuple}
- * is not a null value. If a null value is encountered, the current Tuple will be filtered out.
  *
- * @see FilterNotNull
  */
-public class FilterNull extends BaseOperation implements Filter
+public class Pair<Lhs, Rhs>
   {
-  @Override
-  public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
-    {
-    for( Object value : filterCall.getArguments().getTuple() )
-      {
-      if( value == null )
-        return true;
-      }
+  Lhs lhs;
+  Rhs rhs;
 
-    return false;
+  public Pair( Lhs lhs, Rhs rhs )
+    {
+    this.lhs = lhs;
+    this.rhs = rhs;
+    }
+
+  public Lhs getLhs()
+    {
+    return lhs;
+    }
+
+  public void setLhs( Lhs lhs )
+    {
+    this.lhs = lhs;
+    }
+
+  public Rhs getRhs()
+    {
+    return rhs;
+    }
+
+  public void setRhs( Rhs rhs )
+    {
+    this.rhs = rhs;
     }
   }

@@ -81,7 +81,7 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
     return plannerLevel instanceof AssertionLevel;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
+  @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Context> assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

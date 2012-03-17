@@ -29,6 +29,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -45,7 +46,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
   protected static class Context
     {
     Number extrema;
-    Object value;
+    Tuple value = Tuple.size( 1 );
 
     public Context( Number extrema )
       {
@@ -55,7 +56,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     public Context reset( Number extrema )
       {
       this.extrema = extrema;
-      this.value = null;
+      this.value.set( 0, null );
 
       return this;
       }
@@ -86,16 +87,21 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     Collections.addAll( this.ignoreValues, ignoreValues );
     }
 
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
+    {
+    operationCall.setContext( new Context( getInitialValue() ) );
+    }
+
+  @Override
   public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
-    if( aggregatorCall.getContext() == null )
-      aggregatorCall.setContext( new Context( getInitialValue() ) );
-    else
-      aggregatorCall.getContext().reset( getInitialValue() );
+    aggregatorCall.getContext().reset( getInitialValue() );
     }
 
   protected abstract double getInitialValue();
 
+  @Override
   public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     TupleEntry entry = aggregatorCall.getArguments();
@@ -117,13 +123,14 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
 
     if( compare( lhs, rhs ) )
       {
-      context.value = arg; // keep and return original value
+      context.value.set( 0, arg ); // keep and return original value
       context.extrema = rhs;
       }
     }
 
   protected abstract boolean compare( Number lhs, Number rhs );
 
+  @Override
   public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
@@ -131,7 +138,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
 
   protected Tuple getResult( AggregatorCall<Context> aggregatorCall )
     {
-    return new Tuple( (Comparable) aggregatorCall.getContext().value );
+    return aggregatorCall.getContext().value;
     }
 
   @Override

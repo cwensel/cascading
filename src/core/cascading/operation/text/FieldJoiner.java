@@ -26,11 +26,12 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /** Class FieldJoiner joins the values in a Tuple with a given delimiter and stuffs the result into a new field. */
-public class FieldJoiner extends BaseOperation implements Function
+public class FieldJoiner extends BaseOperation<Tuple> implements Function<Tuple>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "joined";
@@ -84,10 +85,17 @@ public class FieldJoiner extends BaseOperation implements Function
     return delimiter;
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Tuple> operationCall )
     {
-    functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().toString( delimiter ) ) );
+    operationCall.setContext( Tuple.size( 1 ) );
+    }
+
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
+    {
+    functionCall.getContext().set( 0, functionCall.getArguments().getTuple().toString( delimiter ) );
+    functionCall.getOutputCollector().add( functionCall.getContext() );
     }
 
   @Override

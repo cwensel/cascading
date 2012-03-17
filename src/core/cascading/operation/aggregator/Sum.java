@@ -26,12 +26,14 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
+import cascading.util.Pair;
 
 /** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
-public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
+public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggregator<Pair<Double[], Tuple>>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "sum";
@@ -74,27 +76,35 @@ public class Sum extends BaseOperation<Double[]> implements Aggregator<Double[]>
     this.type = type;
     }
 
-  public void start( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Double[], Tuple>> operationCall )
     {
-    if( aggregatorCall.getContext() == null )
-      aggregatorCall.setContext( new Double[]{0.0D} );
-    else
-      aggregatorCall.getContext()[ 0 ] = 0.0D;
+    operationCall.setContext( new Pair<Double[], Tuple>( new Double[]{0.0D}, Tuple.size( 1 ) ) );
     }
 
-  public void aggregate( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
+  @Override
+  public void start( FlowProcess flowProcess, AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext()[ 0 ] += aggregatorCall.getArguments().getDouble( 0 );
+    aggregatorCall.getContext().getLhs()[ 0 ] = 0.0D;
     }
 
-  public void complete( FlowProcess flowProcess, AggregatorCall<Double[]> aggregatorCall )
+  @Override
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
+    {
+    aggregatorCall.getContext().getLhs()[ 0 ] += aggregatorCall.getArguments().getDouble( 0 );
+    }
+
+  @Override
+  public void complete( FlowProcess flowProcess, AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }
 
-  protected Tuple getResult( AggregatorCall<Double[]> aggregatorCall )
+  protected Tuple getResult( AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
-    return new Tuple( (Comparable) Tuples.coerce( aggregatorCall.getContext()[ 0 ], type ) );
+    aggregatorCall.getContext().getRhs().set( 0, Tuples.coerce( aggregatorCall.getContext().getLhs()[ 0 ], type ) );
+
+    return aggregatorCall.getContext().getRhs();
     }
 
   @Override

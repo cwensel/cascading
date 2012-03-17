@@ -31,6 +31,7 @@ import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class RegexParser is used to extract a matched regex from an incoming argument value.
@@ -42,7 +43,7 @@ import cascading.tuple.Tuple;
  * empty string is returned:<br/>
  * <pre>(?<=key1=)[^&]*|$</pre>
  */
-public class RegexParser extends RegexOperation<Matcher> implements Function<Matcher>
+public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {
   /** Field groups */
   private int[] groups = null;
@@ -122,25 +123,27 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
     {
-    operationCall.setContext( getPattern().matcher( "" ) );
+    operationCall.setContext( new Pair<Matcher, Tuple>( getPattern().matcher( "" ), new Tuple() ) );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, Tuple>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    Matcher matcher = functionCall.getContext().reset( value );
+    Matcher matcher = functionCall.getContext().getLhs().reset( value );
 
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPatternString() + "] with value: [" + value + "]" );
 
-    Tuple output = new Tuple();
+    Tuple output = functionCall.getContext().getRhs();
+
+    output.clear();
 
     if( groups != null )
       onGivenGroups( functionCall, matcher, output );
@@ -148,7 +151,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
       onFoundGroups( functionCall, matcher, output );
     }
 
-  private final void onFoundGroups( FunctionCall<Matcher> functionCall, Matcher matcher, Tuple output )
+  private final void onFoundGroups( FunctionCall<Pair<Matcher, Tuple>> functionCall, Matcher matcher, Tuple output )
     {
     int count = matcher.groupCount();
 
@@ -165,7 +168,7 @@ public class RegexParser extends RegexOperation<Matcher> implements Function<Mat
     functionCall.getOutputCollector().add( output );
     }
 
-  private final void onGivenGroups( FunctionCall<Matcher> functionCall, Matcher matcher, Tuple output )
+  private final void onGivenGroups( FunctionCall<Pair<Matcher, Tuple>> functionCall, Matcher matcher, Tuple output )
     {
     for( int pos : groups )
       output.add( matcher.group( pos ) );

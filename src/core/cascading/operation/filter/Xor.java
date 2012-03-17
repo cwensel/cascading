@@ -69,7 +69,7 @@ public class Xor extends Logic
     super( lhsArgumentSelector, lhsFilter, rhsArgumentSelector, rhsFilter );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
+  @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     TupleEntry arguments = filterCall.getArguments();

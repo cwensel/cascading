@@ -49,7 +49,7 @@ public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion
     this.size = size;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
+  @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

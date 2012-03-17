@@ -26,15 +26,17 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class Count is an {@link Aggregator} that calculates the number of items in the current group.
  * </p>
  * Note the resulting value for count is always a long. So any comparisons should be against a long value.
  */
-public class Count extends BaseOperation<Long[]> implements Aggregator<Long[]>
+public class Count extends BaseOperation<Pair<Long[], Tuple>> implements Aggregator<Pair<Long[], Tuple>>
   {
   /** Field COUNT */
   public static final String FIELD_NAME = "count";
@@ -56,26 +58,34 @@ public class Count extends BaseOperation<Long[]> implements Aggregator<Long[]>
     super( fieldDeclaration ); // allow ANY number of arguments
     }
 
-  public void start( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Long[], Tuple>> operationCall )
     {
-    if( aggregatorCall.getContext() == null )
-      aggregatorCall.setContext( new Long[]{0L} );
-    else
-      aggregatorCall.getContext()[ 0 ] = 0L;
+    operationCall.setContext( new Pair<Long[], Tuple>( new Long[]{0L}, Tuple.size( 1 ) ) );
     }
 
-  public void aggregate( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
+  @Override
+  public void start( FlowProcess flowProcess, AggregatorCall<Pair<Long[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext()[ 0 ] += 1L;
+    aggregatorCall.getContext().getLhs()[ 0 ] = 0L;
     }
 
-  public void complete( FlowProcess flowProcess, AggregatorCall<Long[]> aggregatorCall )
+  @Override
+  public void aggregate( FlowProcess flowProcess, AggregatorCall<Pair<Long[], Tuple>> aggregatorCall )
+    {
+    aggregatorCall.getContext().getLhs()[ 0 ] += 1L;
+    }
+
+  @Override
+  public void complete( FlowProcess flowProcess, AggregatorCall<Pair<Long[], Tuple>> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
     }
 
-  protected Tuple getResult( AggregatorCall<Long[]> aggregatorCall )
+  protected Tuple getResult( AggregatorCall<Pair<Long[], Tuple>> aggregatorCall )
     {
-    return new Tuple( (Comparable) aggregatorCall.getContext()[ 0 ] );
+    aggregatorCall.getContext().getRhs().set( 0, (Comparable) aggregatorCall.getContext().getLhs()[ 0 ] );
+
+    return aggregatorCall.getContext().getRhs();
     }
   }

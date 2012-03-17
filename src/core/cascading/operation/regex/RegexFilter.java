@@ -85,7 +85,7 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
     this.matchEachElement = matchEachElement;
     }
 
-  /** @see Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
+  @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Matcher> filterCall )
     {
     if( matchEachElement )

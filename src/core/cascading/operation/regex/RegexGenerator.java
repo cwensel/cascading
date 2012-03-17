@@ -29,9 +29,10 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /** Class RegexGenerator will emit a new Tuple for every matched regex group. */
-public class RegexGenerator extends RegexOperation<Matcher> implements Function<Matcher>
+public class RegexGenerator extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -60,22 +61,25 @@ public class RegexGenerator extends RegexOperation<Matcher> implements Function<
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
     {
-    operationCall.setContext( getPattern().matcher( "" ) );
+    operationCall.setContext( new Pair<Matcher, Tuple>( getPattern().matcher( "" ), Tuple.size( 1 ) ) );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, Tuple>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    Matcher matcher = functionCall.getContext().reset( value );
+    Matcher matcher = functionCall.getContext().getLhs().reset( value );
 
     while( matcher.find() )
-      functionCall.getOutputCollector().add( new Tuple( matcher.group() ) );
+      {
+      functionCall.getContext().getRhs().set( 0, matcher.group() );
+      functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
+      }
     }
   }

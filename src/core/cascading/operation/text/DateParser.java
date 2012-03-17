@@ -35,6 +35,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds
@@ -42,7 +43,7 @@ import cascading.tuple.Tuple;
  * <p/>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
-public class DateParser extends DateOperation implements Function<SimpleDateFormat>
+public class DateParser extends DateOperation implements Function<Pair<SimpleDateFormat, Tuple>>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "ts";
@@ -131,17 +132,17 @@ public class DateParser extends DateOperation implements Function<SimpleDateForm
       }
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<SimpleDateFormat> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, Tuple>> functionCall )
     {
-    Tuple output = new Tuple();
+    Tuple output = functionCall.getContext().getRhs();
 
     try
       {
-      Date date = functionCall.getContext().parse( (String) functionCall.getArguments().getObject( 0 ) );
+      Date date = functionCall.getContext().getLhs().parse( (String) functionCall.getArguments().getObject( 0 ) );
 
       if( calendarFields == null )
-        output.add( date.getTime() );
+        output.set( 0, date.getTime() ); // safe to call set, tuple is size of 1
       else
         makeCalendarFields( output, date );
       }
@@ -155,6 +156,8 @@ public class DateParser extends DateOperation implements Function<SimpleDateForm
 
   private void makeCalendarFields( Tuple output, Date date )
     {
+    output.clear();
+
     Calendar calendar = getCalendar();
     calendar.setTime( date );
 

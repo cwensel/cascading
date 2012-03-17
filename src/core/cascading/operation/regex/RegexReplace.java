@@ -29,6 +29,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class RegexReplace is used to replace a matched regex with a replacement value.
@@ -36,7 +37,7 @@ import cascading.tuple.Tuple;
  * RegexReplace only expects one field value. If more than one argument value is passed, only the
  * first is handled, the remainder are ignored.
  */
-public class RegexReplace extends RegexOperation<Matcher> implements Function<Matcher>
+public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {
   /** Field replacement */
   private final String replacement;
@@ -73,13 +74,13 @@ public class RegexReplace extends RegexOperation<Matcher> implements Function<Ma
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Matcher> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
     {
-    operationCall.setContext( getPattern().matcher( "" ) );
+    operationCall.setContext( new Pair<Matcher, Tuple>( getPattern().matcher( "" ), Tuple.size( 1 ) ) );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Matcher> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, Tuple>> functionCall )
     {
     // coerce to string
     String value = functionCall.getArguments().getString( 0 );
@@ -88,14 +89,13 @@ public class RegexReplace extends RegexOperation<Matcher> implements Function<Ma
     if( value == null )
       value = "";
 
-    Tuple output = new Tuple();
-
-    Matcher matcher = functionCall.getContext().reset( value );
+    Tuple output = functionCall.getContext().getRhs();
+    Matcher matcher = functionCall.getContext().getLhs().reset( value );
 
     if( replaceAll )
-      output.add( matcher.replaceAll( replacement ) );
+      output.set( 0, matcher.replaceAll( replacement ) );
     else
-      output.add( matcher.replaceFirst( replacement ) );
+      output.set( 0, matcher.replaceFirst( replacement ) );
 
     functionCall.getOutputCollector().add( output );
     }

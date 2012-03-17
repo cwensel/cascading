@@ -29,6 +29,8 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationException;
+import cascading.tuple.Tuple;
+import cascading.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -37,7 +39,7 @@ import org.w3c.dom.Document;
  * XPathFilter will filter out a Tuple if the given XPath expression returns false. Set removeMatch to true
  * if the filter should be reversed.
  */
-public class XPathFilter extends XPathOperation implements Filter<DocumentBuilder>
+public class XPathFilter extends XPathOperation implements Filter<Pair<DocumentBuilder, Tuple>>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( XPathFilter.class );
@@ -69,11 +71,11 @@ public class XPathFilter extends XPathOperation implements Filter<DocumentBuilde
     this.removeMatch = removeMatch;
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
-  public boolean isRemove( FlowProcess flowProcess, FilterCall<DocumentBuilder> filterCall )
+  @Override
+  public boolean isRemove( FlowProcess flowProcess, FilterCall<Pair<DocumentBuilder, Tuple>> filterCall )
     {
     String argument = (String) filterCall.getArguments().getString( 0 );
-    Document document = parseDocument( filterCall.getContext(), argument );
+    Document document = parseDocument( filterCall.getContext().getLhs(), argument );
     XPathExpression expression = getExpressions().get( 0 );
 
     try

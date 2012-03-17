@@ -75,7 +75,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
     return plannerLevel instanceof AssertionLevel;
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
+  @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Matcher> assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

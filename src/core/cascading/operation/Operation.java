@@ -47,6 +47,8 @@ public interface Operation<Context>
    * This method should initialize any resources that can be shutdown or released in the
    * {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} method.
    * <p/>
+   * Any resources created should be stored in the {@code Context}, not as instance fields on the class.
+   * <p/>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a cleanup invocation immediately before subsequent invocations.
    * <p/>
@@ -59,7 +61,11 @@ public interface Operation<Context>
   void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall );
 
   /**
-   * The flush method is called...
+   * The flush method is called when an Operation that is caching values must empty the cache. It is called before
+   * {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} is invoked.
+   * <p/>
+   * It is safe to cast the {@link cascading.operation.OperationCall} to a {@link FunctionCall}, or equivalent, and
+   * get its {@link cascading.operation.FunctionCall#getOutputCollector()}.
    *
    * @param flowProcess
    * @param operationCall

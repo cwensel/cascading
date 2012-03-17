@@ -36,7 +36,7 @@ public class AssertNotNull extends BaseAssertion implements ValueAssertion
     super( "argument '%s' value was null, in tuple: %s" );
     }
 
-  /** @see cascading.operation.ValueAssertion#doAssert(cascading.flow.FlowProcess, cascading.operation.ValueAssertionCall) */
+  @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {
     TupleEntry input = assertionCall.getArguments();

@@ -29,13 +29,14 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /**
  * Class RegexGenerator will emit a new Tuple for every split on the incoming argument value delimited by the given patternString.
  * <p/>
  * This could be used to break a document into single word tuples for later processing for a word count.
  */
-public class RegexSplitGenerator extends RegexOperation<Pattern> implements Function<Pattern>
+public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -64,22 +65,25 @@ public class RegexSplitGenerator extends RegexOperation<Pattern> implements Func
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pattern> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, Tuple>> operationCall )
     {
-    operationCall.setContext( getPattern() );
+    operationCall.setContext( new Pair<Pattern, Tuple>( getPattern(), Tuple.size( 1 ) ) );
     }
 
-  /** @see cascading.operation.Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Pattern> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, Tuple>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    String[] split = functionCall.getContext().split( value );
+    String[] split = functionCall.getContext().getLhs().split( value );
 
     for( String string : split )
-      functionCall.getOutputCollector().add( new Tuple( string ) );
+      {
+      functionCall.getContext().getRhs().set( 0, string );
+      functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
+      }
     }
   }

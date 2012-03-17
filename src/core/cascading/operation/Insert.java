@@ -51,7 +51,7 @@ public class Insert extends BaseOperation implements Function
   /** @see Function#operate(cascading.flow.FlowProcess, FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
-    functionCall.getOutputCollector().add( new Tuple( values ) );
+    functionCall.getOutputCollector().add( values );
     }
 
   @Override

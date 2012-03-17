@@ -61,11 +61,13 @@ public class Min extends ExtremaBase
     super( fieldDeclaration, ignoreValues );
     }
 
+  @Override
   protected boolean compare( Number lhs, Number rhs )
     {
     return lhs.doubleValue() > rhs.doubleValue();
     }
 
+  @Override
   protected double getInitialValue()
     {
     return Double.POSITIVE_INFINITY;

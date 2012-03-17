@@ -26,6 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -39,6 +40,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
   /** Class Context is used to hold intermediate values. */
   protected static class Context
     {
+    Tuple tuple = Tuple.size( 1 );
     double sum = 0.0D;
     long count = 0L;
 
@@ -48,6 +50,13 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
       count = 0L;
 
       return this;
+      }
+
+    public Tuple result()
+      {
+      tuple.set( 0, (Double) sum / count );
+
+      return tuple;
       }
     }
 
@@ -71,14 +80,19 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
-    if( aggregatorCall.getContext() != null )
-      aggregatorCall.getContext().reset();
-    else
-      aggregatorCall.setContext( new Context() );
+    operationCall.setContext( new Context() );
     }
 
+  @Override
+  public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
+    {
+    aggregatorCall.getContext().reset();
+    }
+
+  @Override
   public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     Context context = aggregatorCall.getContext();
@@ -88,6 +102,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
     context.count += 1d;
     }
 
+  @Override
   public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
     aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
@@ -95,8 +110,6 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
 
   private Tuple getResult( AggregatorCall<Context> aggregatorCall )
     {
-    Context context = aggregatorCall.getContext();
-
-    return new Tuple( (Double) context.sum / context.count );
+    return aggregatorCall.getContext().result();
     }
   }

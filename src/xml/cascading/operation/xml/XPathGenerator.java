@@ -31,6 +31,7 @@ import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,7 +41,7 @@ import org.w3c.dom.NodeList;
  * XPathGenerator is a Generator function that will emit a new Tuple for every Node returned by
  * the given XPath expression.
  */
-public class XPathGenerator extends XPathOperation implements Function<DocumentBuilder>
+public class XPathGenerator extends XPathOperation implements Function<Pair<DocumentBuilder, Tuple>>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( XPathGenerator.class );
@@ -61,8 +62,8 @@ public class XPathGenerator extends XPathOperation implements Function<DocumentB
 
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<DocumentBuilder> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<DocumentBuilder, Tuple>> functionCall )
     {
     TupleEntry input = functionCall.getArguments();
 
@@ -74,7 +75,7 @@ public class XPathGenerator extends XPathOperation implements Function<DocumentB
     if( value.length() == 0 ) // intentionally not trim()ing this value
       return;
 
-    Document document = parseDocument( functionCall.getContext(), value );
+    Document document = parseDocument( functionCall.getContext().getLhs(), value );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {
@@ -89,7 +90,10 @@ public class XPathGenerator extends XPathOperation implements Function<DocumentB
           continue;
 
         for( int j = 0; j < nodeList.getLength(); j++ )
-          functionCall.getOutputCollector().add( new Tuple( writeAsXML( nodeList.item( j ) ) ) );
+          {
+          functionCall.getContext().getRhs().set( 0, writeAsXML( nodeList.item( j ) ) );
+          functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
+          }
 
         }
       catch( XPathExpressionException exception )

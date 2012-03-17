@@ -142,6 +142,7 @@ public class UnGroup extends BaseOperation implements Function
     this.size = numValues;
     }
 
+  @Override
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     if( resultFieldSelectors != null )

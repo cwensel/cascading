@@ -51,7 +51,7 @@ public class SetValue extends BaseOperation implements Function
   /** Field filter */
   private final Filter filter;
   /** Field values */
-  private Serializable[] values = new Serializable[]{true, false};
+  private Tuple[] values = new Tuple[]{new Tuple( true ), new Tuple( false )};
 
   /**
    * Constructor SetValue creates a new SetValue instance.
@@ -81,7 +81,7 @@ public class SetValue extends BaseOperation implements Function
     {
     super( fieldDeclaration );
     this.filter = filter;
-    this.values = new Serializable[]{firstValue, secondValue};
+    this.values = new Tuple[]{new Tuple( firstValue ), new Tuple( secondValue )};
 
     verify();
     }
@@ -105,19 +105,19 @@ public class SetValue extends BaseOperation implements Function
     }
 
   @Override
-  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
-    {
-    filter.cleanup( flowProcess, operationCall );
-    }
-
-  @Override
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {
     boolean isRemove = !filter.isRemove( flowProcess, (FilterCall) functionCall );
 
     int pos = isRemove ? 0 : 1;
 
-    functionCall.getOutputCollector().add( new Tuple( values[ pos ] ) );
+    functionCall.getOutputCollector().add( values[ pos ] );
+    }
+
+  @Override
+  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
+    {
+    filter.cleanup( flowProcess, operationCall );
     }
 
   @Override

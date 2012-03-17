@@ -25,6 +25,7 @@ import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Tuples;
@@ -33,7 +34,7 @@ import cascading.tuple.Tuples;
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
  * coerced into specific types.
  */
-public class Identity extends BaseOperation implements Function
+public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
   {
   /** Field types */
   private Class[] types = null;
@@ -56,6 +57,10 @@ public class Identity extends BaseOperation implements Function
   public Identity( Class... types )
     {
     super( Fields.ARGS );
+
+    if( types.length == 0 )
+      throw new IllegalArgumentException( "number of types must not be zero" );
+
     this.types = Arrays.copyOf( types, types.length );
     }
 
@@ -89,15 +94,22 @@ public class Identity extends BaseOperation implements Function
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Tuple> operationCall )
+    {
+    if( types != null )
+      operationCall.setContext( Tuple.size( types.length ) );
+    }
+
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
     {
     TupleEntry input = functionCall.getArguments();
     TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 
-    if( types == null || types.length == 0 )
+    if( types == null )
       outputCollector.add( input.getTuple() );
     else
-      outputCollector.add( Tuples.coerce( input.getTuple(), types ) );
+      outputCollector.add( Tuples.coerce( input.getTuple(), types, functionCall.getContext() ) );
     }
 
   @Override

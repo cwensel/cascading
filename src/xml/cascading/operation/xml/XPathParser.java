@@ -30,6 +30,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -44,7 +45,7 @@ import org.w3c.dom.NodeList;
  * XML document and converted to a String. If only the text values are required, search on the text() nodes, or consider
  * using {@link XPathGenerator} to handle multiple NodeList values.
  */
-public class XPathParser extends XPathOperation implements Function<DocumentBuilder>
+public class XPathParser extends XPathOperation implements Function<Pair<DocumentBuilder, Tuple>>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( XPathParser.class );
@@ -78,12 +79,15 @@ public class XPathParser extends XPathOperation implements Function<DocumentBuil
       throw new IllegalArgumentException( "declared fields and given xpath expressions are not the same size: " + fieldDeclaration.print() + " paths: " + paths.length );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<DocumentBuilder> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<DocumentBuilder, Tuple>> functionCall )
     {
-    Tuple tuple = new Tuple();
+    Tuple tuple = functionCall.getContext().getRhs();
+
+    tuple.clear();
+
     String argument = functionCall.getArguments().getString( 0 );
-    Document document = parseDocument( functionCall.getContext(), argument );
+    Document document = parseDocument( functionCall.getContext().getLhs(), argument );
 
     for( int i = 0; i < getExpressions().size(); i++ )
       {

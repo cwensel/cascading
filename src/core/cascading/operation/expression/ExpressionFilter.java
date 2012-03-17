@@ -71,7 +71,7 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Expr
     super( expression, parameterNames, parameterTypes );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
+  @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Context> filterCall )
     {
     return (Boolean) evaluate( filterCall.getContext(), filterCall.getArguments() );

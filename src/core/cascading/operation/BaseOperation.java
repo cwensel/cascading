@@ -118,6 +118,7 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
     }
 
   /** Method prepare does nothing, and may safely be overridden. */
+  @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
     // do nothing
@@ -129,24 +130,25 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
     }
 
   /** Method cleanup does nothing, and may safely be overridden. */
+  @Override
   public void cleanup( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
     // do nothing
     }
 
-  /** @see Operation#getFieldDeclaration() */
+  @Override
   public Fields getFieldDeclaration()
     {
     return fieldDeclaration;
     }
 
-  /** @see Operation#getNumArgs() */
+  @Override
   public int getNumArgs()
     {
     return numArgs;
     }
 
-  /** @see Operation#isSafe() */
+  @Override
   public boolean isSafe()
     {
     return true;

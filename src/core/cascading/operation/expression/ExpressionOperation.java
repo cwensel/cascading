@@ -59,6 +59,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     private ExpressionEvaluator expressionEvaluator;
     private Fields parameterFields;
     private String[] parameterNames;
+    protected Tuple tuple;
     }
 
   @ConstructorProperties({"fieldDeclaration", "expression"})
@@ -204,6 +205,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     context.parameterFields = getParameterFields();
     context.parameterTypes = getParameterTypes( context.parameterNames );
     context.expressionEvaluator = getExpressionEvaluator( context.parameterNames, context.parameterTypes );
+    context.tuple = Tuple.size( 1 );
     }
 
   /**

@@ -119,6 +119,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     operationCall.getContext().pattern = getPattern();
     }
 
+  @Override
   public void start( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     TupleEntry groupEntry = assertionCall.getGroup();
@@ -131,6 +132,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
       context.set( 0L, groupEntry.getFields().print(), groupEntry.getTuple().print() );
     }
 
+  @Override
   public void aggregate( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     Long groupSize = (Long) assertionCall.getContext().count;
@@ -140,6 +142,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
       assertionCall.getContext().count += 1L;
     }
 
+  @Override
   public void doAssert( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
     Context context = assertionCall.getContext();

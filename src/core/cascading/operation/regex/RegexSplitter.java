@@ -29,10 +29,13 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /** Class RegexSplitter will split an incoming argument value by the given regex delimiter patternString. */
-public class RegexSplitter extends RegexOperation<Pattern> implements Function<Pattern>
+public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
   {
+  private final int length;
+
   /**
    * Constructor RegexSplitter creates a new RegexSplitter instance.
    *
@@ -42,6 +45,7 @@ public class RegexSplitter extends RegexOperation<Pattern> implements Function<P
   public RegexSplitter( String patternString )
     {
     super( 1, patternString );
+    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
     }
 
   /**
@@ -53,6 +57,7 @@ public class RegexSplitter extends RegexOperation<Pattern> implements Function<P
   public RegexSplitter( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration, "\t" );
+    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
     }
 
   /**
@@ -65,27 +70,28 @@ public class RegexSplitter extends RegexOperation<Pattern> implements Function<P
   public RegexSplitter( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );
+    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pattern> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, Tuple>> operationCall )
     {
-    operationCall.setContext( getPattern() );
+    operationCall.setContext( new Pair<Pattern, Tuple>( getPattern(), new Tuple() ) );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Pattern> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, Tuple>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    Tuple output = new Tuple();
+    Tuple output = functionCall.getContext().getRhs();
 
-    // TODO: optimize this
-    int length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
-    String[] split = functionCall.getContext().split( value, length );
+    output.clear();
+
+    String[] split = functionCall.getContext().getLhs().split( value, length );
 
     for( int i = 0; i < split.length; i++ )
       output.add( split[ i ] );

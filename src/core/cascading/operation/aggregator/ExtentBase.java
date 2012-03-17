@@ -29,6 +29,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -61,15 +62,19 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
     Collections.addAll( this.ignoreTuples, ignoreTuples );
     }
 
-  @SuppressWarnings("unchecked")
-  public void start( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Tuple[]> operationCall )
     {
-    if( aggregatorCall.getContext() == null )
-      aggregatorCall.setContext( new Tuple[ 1 ] );
-    else
-      aggregatorCall.getContext()[ 0 ] = null;
+    operationCall.setContext( new Tuple[ 1 ] );
     }
 
+  @Override
+  public void start( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
+    {
+    aggregatorCall.getContext()[ 0 ] = null;
+    }
+
+  @Override
   public void aggregate( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( ignoreTuples != null && ignoreTuples.contains( aggregatorCall.getArguments().getTuple() ) )
@@ -80,6 +85,7 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
 
   protected abstract void performOperation( Tuple[] context, TupleEntry entry );
 
+  @Override
   public void complete( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
     {
     if( aggregatorCall.getContext()[ 0 ] != null )

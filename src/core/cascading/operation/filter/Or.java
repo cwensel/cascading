@@ -79,7 +79,7 @@ public class Or extends Logic
     super( argumentSelectors, filters );
     }
 
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
+  @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     TupleEntry arguments = filterCall.getArguments();

@@ -238,6 +238,30 @@ public class Tuples
     }
 
   /**
+   * Method coerce forces each element value in the given Tuple to the corresponding primitive type.
+   * <p/>
+   * This method expects the destination Tuple was created with the same size at the types array.
+   *
+   * @param tuple       of type Tuple
+   * @param types       of type Class[]
+   * @param destination of type Tuple
+   * @return Tuple
+   */
+  public static Tuple coerce( Tuple tuple, Class[] types, Tuple destination )
+    {
+    if( tuple.size() != types.length )
+      throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match number of coercion types: " + types.length );
+
+    if( destination.size() != types.length )
+      throw new OperationException( "number of destination tuple values: " + destination.size() + ", does not match number of coercion types: " + types.length );
+
+    for( int i = 0; i < types.length; i++ )
+      destination.set( i, coerce( tuple, i, types[ i ] ) );
+
+    return destination;
+    }
+
+  /**
    * Method extractTuple returns a new Tuple based on the given selector. But sets the values of the
    * given TupleEntry to null.
    *

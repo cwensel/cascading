@@ -27,6 +27,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -35,7 +36,7 @@ import cascading.tuple.Tuple;
  * <p/>
  * This function uses the {@link Formatter} class for formatting the argument tuple values into a new string.
  */
-public class FieldFormatter extends BaseOperation implements Function
+public class FieldFormatter extends BaseOperation<Tuple> implements Function<Tuple>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "formatted";
@@ -81,10 +82,17 @@ public class FieldFormatter extends BaseOperation implements Function
     return format;
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Tuple> operationCall )
     {
-    functionCall.getOutputCollector().add( new Tuple( functionCall.getArguments().getTuple().format( format ) ) );
+    operationCall.setContext( Tuple.size( 1 ) );
+    }
+
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
+    {
+    functionCall.getContext().set( 0, functionCall.getArguments().getTuple().format( format ) );
+    functionCall.getOutputCollector().add( functionCall.getContext() );
     }
 
   @Override

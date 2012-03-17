@@ -91,6 +91,7 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     operationCall.setContext( new Random( seed ) );
     }
 
+  @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Random> filterCall )
     {
     return !( filterCall.getContext().nextDouble() < fraction );

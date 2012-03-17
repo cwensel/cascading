@@ -30,9 +30,11 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.util.Pair;
 
 /** Class DateOperation is the base class for {@link DateFormatter} and {@link DateParser}. */
-public class DateOperation extends BaseOperation<SimpleDateFormat>
+public class DateOperation extends BaseOperation<Pair<SimpleDateFormat, Tuple>>
   {
   /** Field zone */
   protected TimeZone zone;
@@ -112,9 +114,9 @@ public class DateOperation extends BaseOperation<SimpleDateFormat>
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<SimpleDateFormat> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<SimpleDateFormat, Tuple>> operationCall )
     {
-    operationCall.setContext( getDateFormat() );
+    operationCall.setContext( new Pair<SimpleDateFormat, Tuple>( getDateFormat(), Tuple.size( 1 ) ) );
     }
 
   @Override

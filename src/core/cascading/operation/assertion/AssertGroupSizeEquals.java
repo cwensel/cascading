@@ -55,6 +55,7 @@ public class AssertGroupSizeEquals extends AssertGroupBase
     super( "group matching '%s' with size: %s, is not equal to: %s, in group %s: %s", patternString, size );
     }
 
+  @Override
   protected boolean assertFails( Long groupSize )
     {
     return groupSize != size;

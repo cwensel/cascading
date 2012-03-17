@@ -77,8 +77,8 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
     {
     if( copyTupleOnCollect )
       tuples.add( tupleEntry.getTupleCopy() );
-
-    tuples.add( tupleEntry.getTuple() );
+    else
+      tuples.add( tupleEntry.getTuple() );
     }
 
   /**

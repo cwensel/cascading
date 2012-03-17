@@ -56,6 +56,7 @@ public class AssertGroupSizeMoreThan extends AssertGroupBase
     super( "group matching '%s' with size: %s, is less than or equal to: %s, in group %s: %s", patternString, size );
     }
 
+  @Override
   protected boolean assertFails( Long groupSize )
     {
     return groupSize <= size;

@@ -326,6 +326,22 @@ public class TupleTest extends CascadingTestCase
     assertEquals( results.get( 3 ), date.toString() );
     }
 
+  public void testCoerceInto()
+    {
+    Date date = new Date();
+    Tuple tuple = new Tuple( "1", null, date, date );
+    Tuple destination = Tuple.size( 4 );
+
+    Tuple results = Tuples.coerce( tuple, new Class[]{int.class, boolean.class, Date.class,
+                                                      String.class}, destination );
+
+    assertTrue( results == destination );
+    assertEquals( results.get( 0 ), 1 );
+    assertEquals( results.get( 1 ), false );
+    assertEquals( results.get( 2 ), date );
+    assertEquals( results.get( 3 ), date.toString() );
+    }
+
   public void testSetAll()
     {
     Tuple aTuple = new Tuple( tuple );

@@ -52,6 +52,8 @@ import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -60,7 +62,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /** Class XPathOperation is the base class for all XPath operations. */
-public class XPathOperation extends BaseOperation<DocumentBuilder>
+public class XPathOperation extends BaseOperation<Pair<DocumentBuilder, Tuple>>
   {
   /** Field NAMESPACE_XHTML */
   public static final String[][] NAMESPACE_XHTML = new String[][]{
@@ -102,7 +104,7 @@ public class XPathOperation extends BaseOperation<DocumentBuilder>
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<DocumentBuilder> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<DocumentBuilder, Tuple>> operationCall )
     {
     try
       {
@@ -110,7 +112,7 @@ public class XPathOperation extends BaseOperation<DocumentBuilder>
 
       factory.setNamespaceAware( true );
 
-      operationCall.setContext( factory.newDocumentBuilder() );
+      operationCall.setContext( new Pair<DocumentBuilder, Tuple>( factory.newDocumentBuilder(), Tuple.size( 1 ) ) );
       }
     catch( ParserConfigurationException exception )
       {

@@ -26,6 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
+import cascading.operation.OperationCall;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -100,13 +101,22 @@ public class AverageBy extends AggregateBy
       {
       double sum = 0.0D;
       long count = 0L;
+      Tuple tuple = Tuple.size( 1 );
 
       public Context reset()
         {
         sum = 0.0D;
         count = 0L;
+        tuple.set( 0, null );
 
         return this;
+        }
+
+      public Tuple result()
+        {
+        tuple.set( 0, (Double) sum / count );
+
+        return tuple;
         }
       }
 
@@ -123,14 +133,19 @@ public class AverageBy extends AggregateBy
         throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
       }
 
-    public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
+    @Override
+    public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
       {
-      if( aggregatorCall.getContext() != null )
-        aggregatorCall.getContext().reset();
-      else
-        aggregatorCall.setContext( new Context() );
+      operationCall.setContext( new Context() );
       }
 
+    @Override
+    public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
+      {
+      aggregatorCall.getContext().reset();
+      }
+
+    @Override
     public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
       {
       Context context = aggregatorCall.getContext();
@@ -140,16 +155,10 @@ public class AverageBy extends AggregateBy
       context.count += arguments.getLong( 1 );
       }
 
+    @Override
     public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
       {
-      aggregatorCall.getOutputCollector().add( getResult( aggregatorCall ) );
-      }
-
-    private Tuple getResult( AggregatorCall<Context> aggregatorCall )
-      {
-      Context context = aggregatorCall.getContext();
-
-      return new Tuple( (Double) context.sum / context.count );
+      aggregatorCall.getOutputCollector().add( aggregatorCall.getContext().result() );
       }
     }
 

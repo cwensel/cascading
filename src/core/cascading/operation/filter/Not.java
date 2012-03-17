@@ -65,15 +65,15 @@ public class Not extends BaseOperation implements Filter
     }
 
   @Override
-  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
-    {
-    filter.cleanup( flowProcess, operationCall );
-    }
-
-  /** @see cascading.operation.Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall) */
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
     return !filter.isRemove( flowProcess, filterCall );
+    }
+
+  @Override
+  public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
+    {
+    filter.cleanup( flowProcess, operationCall );
     }
 
   @Override

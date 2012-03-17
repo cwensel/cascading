@@ -105,10 +105,10 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
-  /** @see Function#operate(cascading.flow.FlowProcess, cascading.operation.FunctionCall) */
-  public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<ExpressionOperation.Context> functionCall )
     {
-    functionCall.getOutputCollector().add( new Tuple( evaluate( functionCall.getContext(), functionCall.getArguments() ) ) );
+    functionCall.getContext().tuple.set( 0, evaluate( functionCall.getContext(), functionCall.getArguments() ) );
+    functionCall.getOutputCollector().add( functionCall.getContext().tuple );
     }
-
   }

@@ -145,7 +145,7 @@ public class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
-    TupleListCollector collector = new TupleListCollector( resultFields );
+    TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     operationCall.setArguments( arguments );
     operationCall.setOutputCollector( collector );
@@ -167,7 +167,7 @@ public class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
     {
     ConcreteCall operationCall = new ConcreteCall();
-    TupleListCollector collector = new TupleListCollector( resultFields );
+    TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     function.prepare( FlowProcess.NULL, operationCall );
     operationCall.setOutputCollector( collector );
@@ -258,7 +258,7 @@ public class CascadingTestCase extends TestCase implements Serializable
       aggregator.aggregate( FlowProcess.NULL, operationCall );
       }
 
-    TupleListCollector collector = new TupleListCollector( resultFields );
+    TupleListCollector collector = new TupleListCollector( resultFields, true );
     operationCall.setOutputCollector( collector );
 
     aggregator.complete( FlowProcess.NULL, operationCall );
@@ -287,7 +287,7 @@ public class CascadingTestCase extends TestCase implements Serializable
     operationCall.setGroup( group );
 
     buffer.prepare( FlowProcess.NULL, operationCall );
-    TupleListCollector collector = new TupleListCollector( resultFields );
+    TupleListCollector collector = new TupleListCollector( resultFields, true );
     operationCall.setOutputCollector( collector );
 
     operationCall.setArgumentsIterator( Arrays.asList( argumentsArray ).iterator() );
