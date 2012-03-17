@@ -46,9 +46,14 @@ dependencies {
   runtime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
+jar.doFirst {
+  new File(buildDir, 'build.number.properties').write(buildNumber)
+}
+
 jar {
   into('cascading') {
     from '../../version.properties'
+    from "${buildDir}/build.number.properties"
   }
 }
 
