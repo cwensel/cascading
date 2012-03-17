@@ -405,12 +405,16 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public synchronized void recordChildStats()
     {
+    // if null instance don't bother capturing detail
+    if( !clientState.isEnabled() )
+      return;
+
     captureDetail();
 
     try
       {
       for( String id : taskStats.keySet() )
-        clientState.record( id, taskStats.get( id ) ); // todo: need a bulk record interface here
+        clientState.record( id, taskStats.get( id ) );
       }
     catch( Exception exception )
       {

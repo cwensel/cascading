@@ -39,6 +39,12 @@ public abstract class BaseState implements CascadingService
     }
 
   @Override
+  public boolean isEnabled()
+    {
+    return metricsService.isEnabled() || documentService.isEnabled();
+    }
+
+  @Override
   public void setProperties( Map<Object, Object> properties )
     {
     }

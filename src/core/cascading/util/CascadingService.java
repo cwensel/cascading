@@ -34,4 +34,11 @@ public interface CascadingService
 
   /** May be called more than once, but only the first invocation will stop the service. */
   void stopService();
+
+  /**
+   * Returns true if this service has been enabled.
+   *
+   * @return boolean
+   */
+  boolean isEnabled();
   }

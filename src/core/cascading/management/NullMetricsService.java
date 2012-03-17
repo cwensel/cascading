@@ -26,6 +26,12 @@ import java.util.Map;
 class NullMetricsService implements MetricsService
   {
   @Override
+  public boolean isEnabled()
+    {
+    return false;
+    }
+
+  @Override
   public void increment( String[] context, int amount )
     {
     }

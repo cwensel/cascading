@@ -28,6 +28,12 @@ import java.util.Map;
 public class NullDocumentService implements DocumentService
   {
   @Override
+  public boolean isEnabled()
+    {
+    return false;
+    }
+
+  @Override
   public void setProperties( Map<Object, Object> properties )
     {
     }

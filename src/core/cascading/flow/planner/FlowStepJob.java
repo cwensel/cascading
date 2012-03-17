@@ -47,7 +47,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field pollingInterval */
   protected long pollingInterval = 1000;
   /** Field recordStatsInterval */
-  protected long recordStatsInterval = 10 * 1000;
+  protected long recordStatsInterval = 60 * 1000;
   /** Field predecessors */
   protected List<FlowStepJob> predecessors;
   /** Field latch */
@@ -222,7 +222,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
       if( stop || internalNonBlockingIsComplete() )
         break;
 
-      sleep();
+      sleepForPollingInterval();
 
       if( iterations == count++ )
         {
@@ -276,7 +276,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   protected abstract boolean internalNonBlockingIsComplete() throws IOException;
 
-  protected void sleep()
+  protected void sleepForPollingInterval()
     {
     try
       {
