@@ -161,7 +161,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   protected void blockOnJob() throws IOException
     {
-    if( stop )
+    if( stop ) // true if a predecessor failed
       return;
 
     if( flowStep.isInfoEnabled() )
@@ -197,7 +197,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
         }
       }
 
-    flowStepStats.captureJobStats();
+    flowStepStats.recordChildStats();
     }
 
   protected abstract boolean isRemoteExecution();
@@ -228,6 +228,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
       if( iterations == count++ )
         {
         count = 0;
+        flowStepStats.recordStats();
         flowStepStats.recordChildStats();
         }
       }

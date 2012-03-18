@@ -68,7 +68,7 @@ public class Version
       if( releaseBuild == null )
         message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, platformVersion );
       else
-        message = String.format( "Concurrent, Inc - Cascading %s%s [%s]", releaseFull, releaseBuild, platformVersion );
+        message = String.format( "Concurrent, Inc - Cascading %s-%s [%s]", releaseFull, releaseBuild, platformVersion );
 
       LOG.info( message );
       }

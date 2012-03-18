@@ -83,11 +83,13 @@ public abstract class HadoopStepStats extends FlowStepStats
    *
    * @return the numMapTasks (type int) of this HadoopStepStats object.
    */
+  @Deprecated
   public int getNumMapTasks()
     {
     return numMapTasks;
     }
 
+  @Deprecated
   void setNumMapTasks( int numMapTasks )
     {
     this.numMapTasks = numMapTasks;
@@ -98,11 +100,13 @@ public abstract class HadoopStepStats extends FlowStepStats
    *
    * @return the numReducerTasks (type int) of this HadoopStepStats object.
    */
+  @Deprecated
   public int getNumReducerTasks()
     {
     return numReducerTasks;
     }
 
+  @Deprecated
   void setNumReducerTasks( int numReducerTasks )
     {
     this.numReducerTasks = numReducerTasks;
@@ -363,26 +367,9 @@ public abstract class HadoopStepStats extends FlowStepStats
     return runningJob.getTrackingURL();
     }
 
-  /** Method captureJobStats forces capture of all Hadoop statistics. */
   public void captureJobStats()
     {
-    RunningJob runningJob = getRunningJob();
-
-    if( runningJob == null )
-      return;
-
-    try
-      {
-      // todo: doesn't actually work, these are the defaults, not from the running job
-      JobConf ranJob = new JobConf( runningJob.getJobFile() ); // can throw a file not found exception
-
-      setNumMapTasks( ranJob.getNumMapTasks() );
-      setNumReducerTasks( ranJob.getNumReduceTasks() );
-      }
-    catch( Exception exception )
-      {
-      // do nothing
-      }
+    // do nothing
     }
 
   /**

@@ -47,7 +47,7 @@ dependencies {
 }
 
 jar.doFirst {
-  new File(buildDir, 'build.number.properties').write(buildNumber)
+  new File(buildDir, 'build.number.properties').write("build.number=${buildNumber}")
 }
 
 jar {
