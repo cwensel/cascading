@@ -22,6 +22,7 @@ package cascading.stats;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 import cascading.flow.Flow;
 import cascading.management.ClientState;
@@ -59,6 +60,23 @@ import cascading.management.ClientState;
  */
 public abstract class CascadingStats<Config> implements Serializable
   {
+  public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
+
+  /**
+   * Method setStatsStoreInterval sets the interval time between store operations against the underlying
+   * document storage services. This affects the rate at which metrics and status information is updated.
+   *
+   * @param properties
+   * @param intervalMs milliseconds between storage calls
+   */
+  public static void setStatsStoreInterval( Map<Object, Object> properties, long intervalMs )
+    {
+    if( intervalMs <= 0 )
+      throw new IllegalArgumentException( "interval must be greater than zero, got: " + intervalMs );
+
+    properties.put( STATS_STORE_INTERVAL, Long.toString( intervalMs ) );
+    }
+
   public enum Status
     {
       PENDING, SKIPPED, STARTED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, FAILED

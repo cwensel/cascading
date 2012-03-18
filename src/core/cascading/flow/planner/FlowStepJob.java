@@ -47,7 +47,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field pollingInterval */
   protected long pollingInterval = 1000;
   /** Field recordStatsInterval */
-  protected long recordStatsInterval = 60 * 1000;
+  protected long statsStoreInterval = 60 * 1000;
   /** Field predecessors */
   protected List<FlowStepJob> predecessors;
   /** Field latch */
@@ -63,11 +63,12 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( ClientState clientState, FlowStep flowStep, long pollingInterval )
+  public FlowStepJob( ClientState clientState, FlowStep flowStep, long pollingInterval, long statsStoreInterval )
     {
     this.flowStep = flowStep;
     this.stepName = flowStep.getName();
     this.pollingInterval = pollingInterval;
+    this.statsStoreInterval = statsStoreInterval;
     this.flowStepStats = createStepStats( clientState );
 
     this.flowStepStats.prepare();
@@ -211,7 +212,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   protected void blockTillCompleteOrStopped() throws IOException
     {
-    int iterations = (int) Math.floor( recordStatsInterval / pollingInterval );
+    int iterations = (int) Math.floor( statsStoreInterval / pollingInterval );
     int count = 0;
 
     while( true )
