@@ -20,7 +20,12 @@
 
 package cascading.flow;
 
-/** Interface FlowListener provides hooks for receiving events on various stages of a {@link Flow} execution. */
+/**
+ * Interface FlowListener provides hooks for receiving events on various stages of a {@link Flow} execution.
+ * <p/>
+ * Any {@link RuntimeException} thrown from any of the listener methods will force the given {@code flow} to
+ * stop by calling {@link cascading.flow.Flow#stop()}.
+ */
 public interface FlowListener
   {
   /**
