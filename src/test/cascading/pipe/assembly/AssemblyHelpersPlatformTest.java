@@ -482,11 +482,12 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileLhs );
 
     Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum", "count", "average" ), "\t",
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum", "count", "average", "average2" ), "\t",
       new Class[]{
         String.class,
         Integer.TYPE,
         Integer.TYPE,
+        Double.TYPE,
         Double.TYPE}, getOutputPath( "multi" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "multi" );
@@ -494,21 +495,22 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
     CountBy countPipe = new CountBy( new Fields( "count" ) );
     AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
+    AverageBy averagePipe2 = new AverageBy( new Fields( "num" ), new Fields( "average2" ) );
 
-    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe, averagePipe2 );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 5, 4, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+$" ) );
+    validateLength( flow, 5, 5, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+\\s[\\d.]+$" ) );
 
     Tuple[] results = new Tuple[]{
-      new Tuple( "a", 6, 2, (double) 6 / 2 ),
-      new Tuple( "b", 12, 4, (double) 12 / 4 ),
-      new Tuple( "c", 10, 4, (double) 10 / 4 ),
-      new Tuple( "d", 6, 2, (double) 6 / 2 ),
-      new Tuple( "e", 5, 1, (double) 5 / 1 ),
+      new Tuple( "a", 6, 2, (double) 6 / 2, (double) 6 / 2 ),
+      new Tuple( "b", 12, 4, (double) 12 / 4, (double) 12 / 4 ),
+      new Tuple( "c", 10, 4, (double) 10 / 4, (double) 10 / 4 ),
+      new Tuple( "d", 6, 2, (double) 6 / 2, (double) 6 / 2 ),
+      new Tuple( "e", 5, 1, (double) 5 / 1, (double) 5 / 1 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();

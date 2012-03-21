@@ -51,8 +51,6 @@ import cascading.tuple.TupleEntry;
  */
 public class AverageBy extends AggregateBy
   {
-  private static final Fields BIND_FIELDS = new Fields( AverageBy.class.getPackage().getName() + ".sum", AverageBy.class.getPackage().getName() + ".count" );
-
   /**
    * Class AveragePartials is a {@link cascading.pipe.assembly.AggregateBy.Functor} that is used to count and sum observed duplicates from the tuple stream.
    *
@@ -60,15 +58,22 @@ public class AverageBy extends AggregateBy
    */
   public static class AveragePartials implements Functor
     {
-    /** Constructor SumPartials creates a new SumPartials instance. */
-    public AveragePartials()
+    private final Fields declaredFields;
+
+    /**
+     * Constructor SumPartials creates a new SumPartials instance.
+     *
+     * @param declaredFields
+     */
+    public AveragePartials( Fields declaredFields )
       {
+      this.declaredFields = declaredFields;
       }
 
     @Override
     public Fields getDeclaredFields()
       {
-      return BIND_FIELDS;
+      return new Fields( AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".sum", AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".count" );
       }
 
     @Override
@@ -172,7 +177,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"valueField", "averageField"})
   public AverageBy( Fields valueField, Fields averageField )
     {
-    super( valueField, new AveragePartials(), new AverageFinal( averageField ) );
+    super( valueField, new AveragePartials( averageField ), new AverageFinal( averageField ) );
     }
 
   //////////////
@@ -294,6 +299,6 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
-    super( name, pipes, groupingFields, valueField, new AveragePartials(), new AverageFinal( averageField ), threshold );
+    super( name, pipes, groupingFields, valueField, new AveragePartials( averageField ), new AverageFinal( averageField ), threshold );
     }
   }

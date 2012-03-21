@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Fixed issue where c.p.a.AggregateBy.AveragePartials functor was using fixed declared fields.
+
   Added the "cascading.aggregateby.threshold" property so that a default threshold can be set for the
   c.p.a.AggregateBy sub-assemblies.
 
