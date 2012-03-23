@@ -437,7 +437,8 @@ public abstract class Flow<Config> implements UnitOfWork<FlowStats>
    * Method getConfig returns the internal configuration object.
    * <p/>
    * Any changes to this object will not be reflected in child steps. See {@link FlowConnector} for setting
-   * default properties visible to children.
+   * default properties visible to children. Or see {@link FlowStepStrategy} for setting properties on
+   * individual steps before they are executed.
    *
    * @return the default configuration of this Flow
    */

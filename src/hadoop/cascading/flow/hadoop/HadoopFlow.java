@@ -172,11 +172,7 @@ public class HadoopFlow extends Flow<JobConf>
     return defaultConfig == null ? new JobConf() : new JobConf( defaultConfig );
     }
 
-  /**
-   * Method getJobConf returns the jobConf of this Flow object.
-   *
-   * @return the jobConf (type JobConf) of this Flow object.
-   */
+  @Override
   public JobConf getConfig()
     {
     if( jobConf == null )
