@@ -33,12 +33,16 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements ElementDuct, Collapsing
   {
+  private static final Logger LOG = LoggerFactory.getLogger( SpliceGate.class );
+
   protected Duct[] orderedPrevious;
 
   public enum Role
@@ -138,6 +142,16 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
       if( sortFields != null )
         sortFields[ pos ] = outgoingScopes.get( 0 ).getSortingSelectors().get( incomingScope.getName() );
+
+      if( LOG.isDebugEnabled() )
+        {
+        LOG.debug( "incomingScope: {}, in pos: {}", incomingScope.getName(), pos );
+        LOG.debug( "keyFields: {}", printSafe( keyFields[ pos ] ) );
+        LOG.debug( "valueFields: {}", printSafe( valuesFields[ pos ] ) );
+
+        if( sortFields != null )
+          LOG.debug( "sortFields: {}", printSafe( sortFields[ pos ] ) );
+        }
       }
 
     if( role == Role.sink )
@@ -210,6 +224,14 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       if( orderedPrevious[ i ] != null )
         posMap.put( orderedPrevious[ i ], i );
       }
+    }
+
+  private String printSafe( Fields fields )
+    {
+    if( fields != null )
+      return fields.printVerbose();
+
+    return "";
     }
 
   @Override
