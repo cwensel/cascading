@@ -26,6 +26,7 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.StepCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;
@@ -100,6 +101,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     if( !calledPrepare )
       {
+      currentProcess.increment( StepCounters.Process_Begin, System.currentTimeMillis() );
+
       streamGraph.prepare();
 
       calledPrepare = true;
@@ -123,13 +126,21 @@ public class FlowReducer extends MapReduceBase implements Reducer
   @Override
   public void close() throws IOException
     {
-    if( calledPrepare )
+    try
       {
-      group.complete( group );
+      if( calledPrepare )
+        {
+        group.complete( group );
 
-      streamGraph.cleanup();
+        streamGraph.cleanup();
+        }
+
+      super.close();
       }
-
-    super.close();
+    finally
+      {
+      if( currentProcess != null )
+        currentProcess.increment( StepCounters.Process_End, System.currentTimeMillis() );
+      }
     }
   }

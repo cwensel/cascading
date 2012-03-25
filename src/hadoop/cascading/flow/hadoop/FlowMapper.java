@@ -26,6 +26,7 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.StepCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.flow.stream.SourceStage;
@@ -89,6 +90,7 @@ public class FlowMapper implements MapRunnable
   public void run( RecordReader input, OutputCollector output, Reporter reporter ) throws IOException
     {
     currentProcess.setReporter( reporter );
+    currentProcess.increment( StepCounters.Process_Begin, System.currentTimeMillis() );
     currentProcess.setOutputCollector( output );
 
     streamGraph.prepare();
@@ -124,7 +126,14 @@ public class FlowMapper implements MapRunnable
       }
     finally
       {
-      streamGraph.cleanup();
+      try
+        {
+        streamGraph.cleanup();
+        }
+      finally
+        {
+        currentProcess.increment( StepCounters.Process_End, System.currentTimeMillis() );
+        }
       }
     }
   }
