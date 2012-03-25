@@ -63,13 +63,13 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setInputFormat( SequenceFileInputFormat.class );
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
     conf.setOutputValueClass( Tuple.class ); // supports TapCollector

@@ -40,11 +40,11 @@ public class NullScheme<Process extends FlowProcess, Config, Input, Output, Sour
     super( sourceFields, sinkFields );
     }
 
-  public void sourceConfInit( Process flowProcess, Tap tap, Config conf )
+  public void sourceConfInit( Process flowProcess, Tap<Process, Config, Input, Output> tap, Config conf )
     {
     }
 
-  public void sinkConfInit( Process flowProcess, Tap tap, Config conf )
+  public void sinkConfInit( Process flowProcess, Tap<Process, Config, Input, Output> tap, Config conf )
     {
     }
 

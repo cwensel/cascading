@@ -258,7 +258,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       scheme.sourceConfInit( flowProcess, tap, conf );
       }
@@ -282,7 +282,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       scheme.sinkConfInit( flowProcess, tap, conf );
       }

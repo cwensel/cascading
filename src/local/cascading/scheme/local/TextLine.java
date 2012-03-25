@@ -126,12 +126,12 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
     }
 
   @Override
-  public void sourceConfInit( LocalFlowProcess flowProcess, Tap tap, Properties conf )
+  public void sourceConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkConfInit( LocalFlowProcess flowProcess, Tap tap, Properties conf )
+  public void sinkConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 

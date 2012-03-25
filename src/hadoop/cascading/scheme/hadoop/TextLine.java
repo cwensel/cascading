@@ -238,7 +238,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
       throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( conf ) ) );
@@ -260,7 +260,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );

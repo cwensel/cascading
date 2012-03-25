@@ -93,7 +93,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     super.sinkConfInit( flowProcess, tap, conf );
 

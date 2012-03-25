@@ -277,7 +277,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sourceConfInit( LocalFlowProcess flowProcess, Tap tap, Properties conf )
+  public void sourceConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
@@ -304,7 +304,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sinkConfInit( LocalFlowProcess flowProcess, Tap tap, Properties conf )
+  public void sinkConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
