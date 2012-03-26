@@ -53,6 +53,14 @@ public class ShutdownUtil
   @Override
   public int compare( Hook lhs, Hook rhs )
     {
+    if( lhs == rhs )
+      return 0;
+
+    if( lhs == null )
+      return -1;
+    else if( rhs == null )
+      return 1;
+
     return lhs.priority().compareTo( rhs.priority() );
     }
   }
