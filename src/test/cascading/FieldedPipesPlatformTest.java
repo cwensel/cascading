@@ -830,4 +830,35 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     validateLength( flow, 8, 2, Pattern.compile( "^\\d+\\s\\d+\\s[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}$" ) );
     }
+
+  /**
+   * this tests a merge on two pipes with the same source and name.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testSplitSameSourceMergedSameName() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    // 46 192
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "splitsourcemergedsamename" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "split" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( pipe, new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( pipe, new Fields( "line" ), new RegexFilter( ".*102.*" ) );
+
+    Pipe merged = new GroupBy( "merged", Pipe.pipes( left, right ), new Fields( "line" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, merged );
+
+    flow.complete();
+
+    validateLength( flow, 3 );
+    }
   }

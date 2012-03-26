@@ -135,7 +135,8 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
     for( Scope incomingScope : incomingScopes )
       {
-      int pos = splice.getPipePos().get( incomingScope.getName() );
+      // for GroupBy, incoming may have same name, but guaranteed to have same key/value/sort fields for merge
+      int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
 
       keyFields[ pos ] = outgoingScopes.get( 0 ).getKeySelectors().get( incomingScope.getName() );
       valuesFields[ pos ] = incomingScope.getOutValuesFields();

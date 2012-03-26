@@ -52,6 +52,7 @@ public class HadoopGroupByGate extends HadoopGroupGate
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
+    // always use pos == 0 since all key/value/sort fields are guaranteed to be the same
     Tuple groupTuple = incomingEntry.selectTuple( keyFields[ 0 ] );
     Tuple sortTuple = sortFields == null ? null : incomingEntry.selectTuple( sortFields[ 0 ] );
     Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, keyFields[ 0 ] );
