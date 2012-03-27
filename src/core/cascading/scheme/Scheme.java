@@ -272,10 +272,18 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
     }
 
   /**
-   * Method source takes the given key and value and returns a new {@link Tuple} instance.
+   * Method source will read a new "record" or value from {@link cascading.scheme.SourceCall#getInput()} and populate
+   * the available {@link Tuple} via {@link cascading.scheme.SourceCall#getIncomingEntry()} and return {@code true}
+   * on success or {@code false} if no more values available.
+   * <p/>
+   * It's ok to set a new Tuple instance on the {@code incomingEntry} {@link cascading.tuple.TupleEntry}, or
+   * to simply re-use the existing instance.
+   * <p/>
+   * Note this is only time it is safe to modify a Tuple instance handed over via a method call.
    *
-   * @param flowProcess
-   * @param sourceCall
+   * @param flowProcess of Process
+   * @param sourceCall of SourceCall
+   * @return returns {@code true} when a Tuple was successfully read
    */
   public abstract boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
 
@@ -305,10 +313,11 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
     }
 
   /**
-   * Method sink writes out the given {@link Tuple} instance to the outputCollector.
+   * Method sink writes out the given {@link Tuple} found on {@link cascading.scheme.SinkCall#getOutgoingEntry()} to
+   * the {@link cascading.scheme.SinkCall#getOutput()}.
    *
-   * @param flowProcess
-   * @param sinkCall
+   * @param flowProcess of Process
+   * @param sinkCall of SinkCall
    */
   public abstract void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
 
