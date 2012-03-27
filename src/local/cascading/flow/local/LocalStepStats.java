@@ -50,11 +50,6 @@ public class LocalStepStats extends FlowStepStats
     }
 
   @Override
-  public void captureJobStats()
-    {
-    }
-
-  @Override
   public Collection<String> getCounterGroups()
     {
     return counters.keySet();

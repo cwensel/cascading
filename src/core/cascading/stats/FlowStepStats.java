@@ -54,6 +54,4 @@ public abstract class FlowStepStats extends CascadingStats
     }
 
   public abstract void recordChildStats();
-
-  public abstract void captureJobStats();
   }

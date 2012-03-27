@@ -43,7 +43,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Class HadoopStepStats provides Hadoop specific statistics and methods to underyling Hadoop facilities. */
+/** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
 public abstract class HadoopStepStats extends FlowStepStats
   {
   /** Field LOG */
@@ -54,7 +54,7 @@ public abstract class HadoopStepStats extends FlowStepStats
   /** Field numMapTasks */
   int numMapTasks;
   /** Field numReducerTasks */
-  int numReducerTasks;
+  int numReduceTasks;
   /** Field taskStats */
   Map<String, HadoopTaskStats> taskStats = (Map<String, HadoopTaskStats>) Collections.EMPTY_MAP;
 
@@ -83,33 +83,29 @@ public abstract class HadoopStepStats extends FlowStepStats
    *
    * @return the numMapTasks (type int) of this HadoopStepStats object.
    */
-  @Deprecated
   public int getNumMapTasks()
     {
     return numMapTasks;
     }
 
-  @Deprecated
   void setNumMapTasks( int numMapTasks )
     {
     this.numMapTasks = numMapTasks;
     }
 
   /**
-   * Method getNumReducerTasks returns the numReducerTasks from the Hadoop job file.
+   * Method getNumReduceTasks returns the numReducerTasks from the Hadoop job file.
    *
    * @return the numReducerTasks (type int) of this HadoopStepStats object.
    */
-  @Deprecated
-  public int getNumReducerTasks()
+  public int getNumReduceTasks()
     {
-    return numReducerTasks;
+    return numReduceTasks;
     }
 
-  @Deprecated
-  void setNumReducerTasks( int numReducerTasks )
+  void setNumReduceTasks( int numReduceTasks )
     {
-    this.numReducerTasks = numReducerTasks;
+    this.numReduceTasks = numReduceTasks;
     }
 
   /**
@@ -367,11 +363,6 @@ public abstract class HadoopStepStats extends FlowStepStats
     return runningJob.getTrackingURL();
     }
 
-  public void captureJobStats()
-    {
-    // do nothing
-    }
-
   /**
    * Method getChildren returns the children of this HadoopStepStats object.
    *
@@ -413,8 +404,6 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public synchronized void captureDetail()
     {
-    captureJobStats();
-
     captureDetail( true );
     }
 
@@ -427,6 +416,9 @@ public abstract class HadoopStepStats extends FlowStepStats
 
     if( jobClient == null || runningJob == null )
       return;
+
+    numMapTasks = 0;
+    numReduceTasks = 0;
 
     try
       {
@@ -446,7 +438,7 @@ public abstract class HadoopStepStats extends FlowStepStats
           break;
 
         addAttemptsToTaskStats( newStats, events );
-        count += 10;
+        count += events.length;
         }
 
       setTaskStats( newStats );
@@ -471,6 +463,25 @@ public abstract class HadoopStepStats extends FlowStepStats
 
       String id = getIDFor( taskReport.getTaskID() );
       taskStats.put( id, new HadoopTaskStats( id, getStatus(), kind, taskReport ) );
+
+      incrementKind( kind );
+      }
+    }
+
+  private void incrementKind( HadoopTaskStats.Kind kind )
+    {
+    switch( kind )
+      {
+      case SETUP:
+        break;
+      case MAPPER:
+        numMapTasks++;
+        break;
+      case REDUCER:
+        numReduceTasks++;
+        break;
+      case CLEANUP:
+        break;
       }
     }
 
