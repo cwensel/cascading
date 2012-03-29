@@ -99,7 +99,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
     TupleEntry arguments = aggregatorCall.getArguments();
 
     context.sum += arguments.getDouble( 0 );
-    context.count += 1d;
+    context.count += 1L;
     }
 
   @Override
