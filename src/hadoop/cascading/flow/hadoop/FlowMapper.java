@@ -90,7 +90,7 @@ public class FlowMapper implements MapRunnable
   public void run( RecordReader input, OutputCollector output, Reporter reporter ) throws IOException
     {
     currentProcess.setReporter( reporter );
-    currentProcess.increment( StepCounters.Process_Begin, System.currentTimeMillis() );
+    currentProcess.increment( StepCounters.Process_Begin_Time, System.currentTimeMillis() );
     currentProcess.setOutputCollector( output );
 
     streamGraph.prepare();
@@ -132,7 +132,7 @@ public class FlowMapper implements MapRunnable
         }
       finally
         {
-        currentProcess.increment( StepCounters.Process_End, System.currentTimeMillis() );
+        currentProcess.increment( StepCounters.Process_End_Time, System.currentTimeMillis() );
         }
       }
     }

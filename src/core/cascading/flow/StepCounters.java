@@ -23,5 +23,5 @@ package cascading.flow;
 /** Enum FlowCounters lists all counters */
 public enum StepCounters
   {
-    Tuples_Read, Tuples_Written, Tuples_Trapped, Process_Begin, Process_End
+    Tuples_Read, Tuples_Written, Tuples_Trapped, Process_Begin_Time, Process_End_Time
   }

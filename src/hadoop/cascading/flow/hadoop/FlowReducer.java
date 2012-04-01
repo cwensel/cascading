@@ -101,7 +101,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     if( !calledPrepare )
       {
-      currentProcess.increment( StepCounters.Process_Begin, System.currentTimeMillis() );
+      currentProcess.increment( StepCounters.Process_Begin_Time, System.currentTimeMillis() );
 
       streamGraph.prepare();
 
@@ -140,7 +140,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     finally
       {
       if( currentProcess != null )
-        currentProcess.increment( StepCounters.Process_End, System.currentTimeMillis() );
+        currentProcess.increment( StepCounters.Process_End_Time, System.currentTimeMillis() );
       }
     }
   }
