@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.Set;
 
 import cascading.CascadingTestCase;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.hadoop.HadoopSpillableTupleList;
 import cascading.tuple.hadoop.HadoopSpillableTupleMap;
 import org.apache.hadoop.io.Text;
@@ -34,6 +35,9 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Test;
+
+import static cascading.tuple.SpillableTupleMap.initialCapacity;
+import static cascading.tuple.SpillableTupleMap.loadFactor;
 
 /**
  *
@@ -92,7 +96,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
       }
 
     assertEquals( "not equal: list.size();", size, list.size() );
-    assertEquals( "not equal: list.getNumFiles()", (int) Math.floor( size / threshold ), list.getNumFiles() );
+    assertEquals( "not equal: list.getNumFiles()", (int) Math.floor( size / threshold ), list.spillCount() );
 
     int i = -1;
     int count = 0;
@@ -117,10 +121,10 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    performMapTest( 5, 5, 100, 20, null );
-    performMapTest( 5, 50, 100, 20, null );
-    performMapTest( 50, 5, 200, 20, null );
-    performMapTest( 500, 50, 7000, 20, null );
+    performMapTest( 5, 5, 100, 20, new JobConf() );
+    performMapTest( 5, 50, 100, 20, new JobConf() );
+    performMapTest( 50, 5, 200, 20, new JobConf() );
+    performMapTest( 500, 50, 7000, 20, new JobConf() );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
@@ -130,19 +134,21 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    GzipCodec codec = ReflectionUtils.newInstance( GzipCodec.class, new JobConf() );
+    JobConf jobConf = new JobConf();
+    jobConf.set( SpillableTupleList.SPILL_CODECS, "org.apache.hadoop.io.compress.GzipCodec" );
 
-    performMapTest( 5, 5, 100, 20, codec );
-    performMapTest( 5, 50, 100, 20, codec );
-    performMapTest( 50, 5, 200, 20, codec );
-    performMapTest( 500, 50, 7000, 20, codec );
+    performMapTest( 5, 5, 100, 20, jobConf );
+    performMapTest( 5, 50, 100, 20, jobConf );
+    performMapTest( 50, 5, 200, 20, jobConf );
+    performMapTest( 500, 50, 7000, 20, jobConf );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
 
-  private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, CompressionCodec codec )
+  private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, JobConf jobConf )
     {
-    HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( mapThreshold, listThreshold, codec, new JobConf() );
+    HadoopFlowProcess flowProcess = new HadoopFlowProcess( jobConf );
+    HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( initialCapacity, loadFactor, mapThreshold, listThreshold, flowProcess );
 
     Set<Integer> keySet = new HashSet<Integer>();
     Random gen = new Random( 1 );

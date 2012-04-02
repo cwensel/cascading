@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added the c.t.TupleCollectionFactory and c.t.TupleMapFactory interfaces and relevant implementations to allow
+  custom c.t.Spillable types to be plugged into a given execution. Spillable types are used to back in memory
+  collections to disk to improve scalability of c.p.CoGroup and c.p.Join pipes on different platforms.
+
   Fixed issue where a c.s.Scheme was not seeing properly resolved fields if they were not declared in the Scheme
   instance. This allows a Scheme declared to sink c.t.Fields#ALL to see the actual field names during the
   Scheme#sinkPrepare() and Scheme#sink() methods.

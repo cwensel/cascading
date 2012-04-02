@@ -91,18 +91,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       this.tupleSerialization = new TupleSerialization( jobConf );
     }
 
-  public HadoopSpillableTupleList( Threshold threshold, CompressionCodec codec, JobConf jobConf )
-    {
-    super( threshold );
-    this.codec = codec;
-
-    if( jobConf == null )
-      this.tupleSerialization = new TupleSerialization();
-    else
-      this.tupleSerialization = new TupleSerialization( jobConf );
-    }
-
-  public HadoopSpillableTupleList( Threshold threshold, TupleSerialization tupleSerialization, CompressionCodec codec )
+  public HadoopSpillableTupleList( int threshold, TupleSerialization tupleSerialization, CompressionCodec codec )
     {
     super( threshold );
     this.tupleSerialization = tupleSerialization;

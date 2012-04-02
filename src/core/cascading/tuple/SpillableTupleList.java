@@ -116,46 +116,60 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     return codecClass;
     }
 
-  private Threshold threshold;
+
+  private SpillStrategy spillStrategy;
+
   /** Field files */
   private final List<File> files = new LinkedList<File>();
   /** Field current */
   private final List<Tuple> current = new LinkedList<Tuple>();
-  /** Field overrideIterator */
-  private Iterator<Tuple> overrideIterator;
   /** Field size */
   private int size = 0;
-  /** Field fields */
-  private Fields fields;
-  /** Fields listener * */
+  /** Fields listener */
   private SpillListener spillListener = SpillListener.NULL;
 
-  public interface Threshold
-    {
-    int current();
-    }
+  private Tuple group;
 
   protected SpillableTupleList( final int threshold )
     {
-    this( new Threshold()
+    this( new SpillStrategy()
     {
+
     @Override
-    public int current()
+    public boolean doSpill( Spillable spillable, int size )
       {
-      return threshold;
+      return size >= threshold;
+      }
+
+    @Override
+    public String getSpillReason( Spillable spillable )
+      {
+      return "met threshold: " + threshold;
       }
     } );
     }
 
-  protected SpillableTupleList( Threshold threshold )
+  protected SpillableTupleList( SpillStrategy spillStrategy )
     {
-    this.threshold = threshold;
+    this.spillStrategy = spillStrategy;
     }
 
-  /** Field threshold */
-  public long getThreshold()
+  @Override
+  public void setGrouping( Tuple group )
     {
-    return threshold.current();
+    this.group = group;
+    }
+
+  @Override
+  public Tuple getGrouping()
+    {
+    return group;
+    }
+
+  @Override
+  public void setSpillStrategy( SpillStrategy spillStrategy )
+    {
+    this.spillStrategy = spillStrategy;
     }
 
   @Override
@@ -195,7 +209,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
     private Iterator<Tuple> getIteratorFor( File file )
       {
-      spillListener.notifyRead( SpillableTupleList.this );
+      spillListener.notifyReadSpillBegin( SpillableTupleList.this );
 
       return createIterator( createTupleInputStream( file ) );
       }
@@ -239,6 +253,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
    *
    * @param tuple of type Tuple
    */
+  @Override
   public boolean add( Tuple tuple )
     {
     current.add( tuple );
@@ -249,60 +264,24 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     return true;
     }
 
-  /**
-   * Method add the given {@link cascading.tuple.TupleEntry} to this list. All TupleEntry instances added must declare the same {@link cascading.tuple.Fields}.
-   *
-   * @param tupleEntry of type TupleEntry
-   */
-  public boolean add( TupleEntry tupleEntry )
-    {
-    if( fields == null )
-      fields = tupleEntry.fields;
-    else if( !fields.equals( tupleEntry.fields ) )
-      throw new IllegalArgumentException( "all entries must have same fields, have: " + fields.print() + " got: " + tupleEntry.fields.print() );
-
-    return add( tupleEntry.getTuple() );
-    }
-
-  /**
-   * Method size returns the size of this list.
-   *
-   * @return long
-   */
+  @Override
   public int size()
     {
     return size;
     }
 
-  /**
-   * Method isEmpty returns true if this list is empty
-   *
-   * @return the empty (type boolean) of this SpillableTupleList object.
-   */
+  @Override
   public boolean isEmpty()
     {
-    if( overrideIterator != null ) // a hack
-      return !overrideIterator.hasNext();
-
     return files.isEmpty() && current.size() == 0;
-    }
-
-  /**
-   * Method getNumFiles returns the number of files this list has spilled to.
-   *
-   * @return the numFiles (type int) of this SpillableTupleList object.
-   */
-  public int getNumFiles()
-    {
-    return files.size();
     }
 
   private final boolean doSpill()
     {
-    if( current.size() < getThreshold() ) // may change over time
+    if( !spillStrategy.doSpill( this, current.size() ) )
       return false;
 
-    spillListener.notifySpill( this, current );
+    spillListener.notifyWriteSpillBegin( this, current.size(), spillStrategy.getSpillReason( this ) );
 
     File file = createTempFile();
     TupleOutputStream dataOutputStream = createTupleOutputStream( file );
@@ -436,81 +415,24 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
     }
 
-  /** Method clear empties this container so it may be re-used. */
+  @Override
   public void clear()
     {
-    overrideIterator = null;
     files.clear();
     current.clear();
     size = 0;
     }
 
-  public void setOverrideIterator( Iterator<Tuple> overrideIterator )
-    {
-    this.overrideIterator = overrideIterator;
-    }
-
-  public void setIterator( final IndexTuple current, final Iterator values )
-    {
-    overrideIterator = new Iterator<Tuple>()
-    {
-    IndexTuple value = current;
-
-    @Override
-    public boolean hasNext()
-      {
-      return value != null;
-      }
-
-    @Override
-    public Tuple next()
-      {
-      Tuple result = value.getTuple();
-
-      if( values.hasNext() )
-        value = (IndexTuple) values.next();
-      else
-        value = null;
-
-      return result;
-      }
-
-    @Override
-    public void remove()
-      {
-      // unsupported
-      }
-    };
-    }
-
-  /**
-   * Method iterator returns a Tuple Iterator of all the values in this collection.
-   *
-   * @return Iterator<Tuple>
-   */
+  @Override
   public Iterator<Tuple> iterator()
     {
-    if( overrideIterator != null )
-      return overrideIterator;
-
     if( files.isEmpty() )
       return current.iterator();
 
     return new SpilledListIterator();
     }
 
-  /**
-   * Method entryIterator returns a TupleEntry Iterator of all the values in this collection.
-   *
-   * @return Iterator<TupleEntry>
-   */
-  public TupleEntryIterator entryIterator()
-    {
-    return new TupleEntryChainIterator( fields, iterator() );
-    }
-
   // collection methods, this class cannot only be added to, so they aren't implemented
-
   @Override
   public boolean contains( Object object )
     {

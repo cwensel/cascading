@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import cascading.CascadingException;
+import cascading.flow.FlowProcess;
 import cascading.tuple.Comparison;
 import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
@@ -182,6 +183,25 @@ public class TupleSerialization extends Configured implements Serialization
   /** Constructor TupleSerialization creates a new TupleSerialization instance. */
   public TupleSerialization()
     {
+    }
+
+  public TupleSerialization( final FlowProcess<Object> flowProcess )
+    {
+    defaultComparator = getDefaultComparator( new Configuration()
+    {
+    @Override
+    public String get( String name )
+      {
+      return get( name, null );
+      }
+
+    @Override
+    public String get( String name, String defaultValue )
+      {
+      Object value = flowProcess.getProperty( name );
+      return value == null ? defaultValue : String.valueOf( value );
+      }
+    } );
     }
 
   /**

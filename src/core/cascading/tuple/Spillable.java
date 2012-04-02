@@ -20,8 +20,6 @@
 
 package cascading.tuple;
 
-import java.util.Collection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +28,13 @@ import org.slf4j.LoggerFactory;
  */
 public interface Spillable
   {
+  interface SpillStrategy
+    {
+    boolean doSpill( Spillable spillable, int size );
+
+    String getSpillReason( Spillable spillable );
+    }
+
   interface SpillListener
     {
     SpillListener NULL = new SpillListener()
@@ -37,23 +42,34 @@ public interface Spillable
     private final Logger LOG = LoggerFactory.getLogger( SpillListener.class );
 
     @Override
-    public void notifySpill( Spillable spillable, Collection current )
+    public void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason )
       {
-      LOG.info( "spilling {} tuples in list to file number {}", current.size(), spillable.spillCount() + 1 );
+      LOG.info( "spilling {} tuples in list to spill number {}", spillSize, spillable.spillCount() + 1 );
       }
 
     @Override
-    public void notifyRead( Spillable spillable )
+    public void notifyReadSpillBegin( Spillable spillable )
       {
       }
     };
 
-    void notifySpill( Spillable spillable, Collection current );
+    void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason );
 
-    void notifyRead( Spillable spillable );
+    void notifyReadSpillBegin( Spillable spillable );
     }
+
+  void setGrouping( Tuple group );
+
+  Tuple getGrouping();
+
+  void setSpillStrategy( SpillStrategy spillStrategy );
 
   void setSpillListener( SpillListener spillListener );
 
+  /**
+   * The number of times this container has spilled data to disk.
+   *
+   * @return in int
+   */
   int spillCount();
   }

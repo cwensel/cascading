@@ -29,7 +29,7 @@ import java.util.Properties;
 import cascading.cascade.CascadeException;
 import cascading.util.CascadingService;
 import cascading.util.PropertyUtil;
-import cascading.util.ServiceUtil;
+import cascading.util.ServiceLoader;
 import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class CascadingServices
   static Properties defaultProperties;
   static URL libraryURL;
   static String[] exclusions;
-  static ServiceUtil serviceUtil;
+  static ServiceLoader serviceLoader;
 
   Map<Object, Object> properties;
 
@@ -108,13 +108,13 @@ public class CascadingServices
     exclusions = Util.removeNulls( defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," ) );
     }
 
-  private synchronized ServiceUtil getServiceUtil()
+  private synchronized ServiceLoader getServiceUtil()
     {
     // allows for a system property to disable the container
-    if( serviceUtil == null )
-      serviceUtil = ServiceUtil.getInstance( enableContainer ? libraryURL : null, exclusions );
+    if( serviceLoader == null )
+      serviceLoader = ServiceLoader.getInstance( enableContainer ? libraryURL : null, exclusions );
 
-    return serviceUtil;
+    return serviceLoader;
     }
 
   public CascadingServices( Map<Object, Object> properties )

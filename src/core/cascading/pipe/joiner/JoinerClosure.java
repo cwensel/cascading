@@ -61,7 +61,7 @@ public abstract class JoinerClosure
 
   public abstract int size();
 
-  public abstract Iterator getIterator( int pos );
+  public abstract Iterator<Tuple> getIterator( int pos );
 
   public abstract boolean isEmpty( int pos );
 

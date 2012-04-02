@@ -56,6 +56,8 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     Tuple groupTuple = incomingEntry.selectTuple( keyFields[ pos ] );
     Tuple valuesTuple = incomingEntry.getTupleCopy();
 
+    groupTuple = getDelegatedTuple( groupTuple ); // wrap so hasher/comparator is honored
+
     keys.add( groupTuple );
     keyValues[ pos ].get( groupTuple ).add( valuesTuple );
     }
@@ -70,7 +72,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
 
     try
       {
-      Collection[] collections = new Collection[ orderedPrevious.length ];
+      Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
 
       for( Tuple keysTuple : keys )
         {
