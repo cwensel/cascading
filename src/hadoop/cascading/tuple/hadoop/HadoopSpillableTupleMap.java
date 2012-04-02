@@ -20,12 +20,16 @@
 
 package cascading.tuple.hadoop;
 
+import java.util.Collection;
+
+import cascading.flow.FlowProcess;
 import cascading.tuple.Spillable;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.SpillableTupleMap;
 import cascading.tuple.Tuple;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
+import cascading.tuple.TupleCollectionFactory;
+import cascading.tuple.TupleMapFactory;
+import cascading.util.FactoryLoader;
 
 /**
  * HadoopSpillableTupleMap is responsible for spilling values to disk if the map threshold is reached.
@@ -35,54 +39,63 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class HadoopSpillableTupleMap extends SpillableTupleMap
   {
-  private final CompressionCodec codec;
-  private final JobConf jobConf;
-  private final TupleSerialization tupleSerialization;
-  private final SpillableTupleList.Threshold threshold;
+  private final FlowProcess flowProcess;
+  private final Spillable.SpillStrategy spillStrategy;
+  private final TupleCollectionFactory tupleCollectionFactory;
 
-  public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
+  public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, FlowProcess flowProcess )
     {
     super( initialCapacity, loadFactor, mapThreshold, listThreshold );
-    this.jobConf = jobConf;
-    this.codec = codec;
-    this.tupleSerialization = new TupleSerialization( jobConf );
-    this.threshold = getThreshold();
-    }
+    this.flowProcess = flowProcess;
+    this.spillStrategy = getSpillStrategy();
 
-  public HadoopSpillableTupleMap( int mapThreshold, int listThreshold, CompressionCodec codec, JobConf jobConf )
-    {
-    super( mapThreshold, listThreshold );
-    this.codec = codec;
-    this.jobConf = jobConf;
-    this.tupleSerialization = new TupleSerialization( jobConf );
-    this.threshold = getThreshold();
+    FactoryLoader loader = FactoryLoader.getInstance();
+
+    this.tupleCollectionFactory = loader.loadFactoryFrom( flowProcess, TupleMapFactory.TUPLE_MAP_FACTORY, HadoopTupleCollectionFactory.class );
     }
 
   @Override
-  protected SpillableTupleList createTupleCollection( Tuple object )
+  protected Collection<Tuple> createTupleCollection( Tuple tuple )
     {
-    HadoopSpillableTupleList tupleList = new HadoopSpillableTupleList( threshold, tupleSerialization, codec );
+    Collection<Tuple> collection = tupleCollectionFactory.create( flowProcess );
 
-    tupleList.setSpillListener( getSpillableListener( object ) );
+    if( collection instanceof Spillable )
+      {
+      ( (Spillable) collection ).setGrouping( tuple );
+      ( (Spillable) collection ).setSpillListener( getSpillListener() );
+      ( (Spillable) collection ).setSpillStrategy( spillStrategy );
+      }
 
-    return tupleList;
+    return collection;
     }
 
-  protected Spillable.SpillListener getSpillableListener( Tuple tuple )
+  /**
+   * Method getSpillStrategy returns a SpillStrategy instance that is passed to the underlying Spillable
+   * tuple collection.
+   *
+   * @return of type Spillable#SpillStrategy
+   */
+  protected Spillable.SpillStrategy getSpillStrategy()
     {
-    return Spillable.SpillListener.NULL;
-    }
-
-  private SpillableTupleList.Threshold getThreshold()
-    {
-    return new SpillableTupleList.Threshold()
+    return new Spillable.SpillStrategy()
     {
     int minThreshold = (int) ( getMapThreshold() * .05 );
 
-    @Override
-    public int current()
+    int current()
       {
       return Math.max( minThreshold, Math.min( getInitListThreshold(), getMapThreshold() / size() ) );
+      }
+
+    @Override
+    public boolean doSpill( Spillable spillable, int size )
+      {
+      return current() >= size;
+      }
+
+    @Override
+    public String getSpillReason( Spillable spillable )
+      {
+      return "met current threshold: " + current();
       }
     };
     }

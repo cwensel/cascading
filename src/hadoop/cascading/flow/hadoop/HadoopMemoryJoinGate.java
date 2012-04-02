@@ -26,21 +26,17 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.FlowProcessWrapper;
 import cascading.flow.stream.MemoryJoinGate;
 import cascading.pipe.Join;
 import cascading.tuple.Spillable;
-import cascading.tuple.SpillableTupleList;
-import cascading.tuple.SpillableTupleMap;
 import cascading.tuple.Tuple;
-import cascading.tuple.hadoop.HadoopSpillableTupleMap;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
+import cascading.tuple.TupleMapFactory;
+import cascading.tuple.hadoop.HadoopTupleMapFactory;
+import cascading.util.FactoryLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.tuple.hadoop.HadoopSpillableTupleList.defaultCodecs;
-import static cascading.tuple.hadoop.HadoopSpillableTupleList.getCodec;
+import static cascading.tuple.TupleMapFactory.TUPLE_MAP_FACTORY;
 
 /**
  *
@@ -57,23 +53,21 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
   private class SpillListener implements Spillable.SpillListener
     {
     private final FlowProcess flowProcess;
-    private final Tuple tuple;
 
-    public SpillListener( FlowProcess flowProcess, Tuple tuple )
+    public SpillListener( FlowProcess flowProcess )
       {
       this.flowProcess = flowProcess;
-      this.tuple = tuple;
       }
 
     @Override
-    public void notifySpill( Spillable spillable, Collection current )
+    public void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason )
       {
-      int numFiles = ( (SpillableTupleList) spillable ).getNumFiles();
+      int numFiles = spillable.spillCount();
 
-      if( ( numFiles - 1 ) % 10 == 0 )
+      if( numFiles % 10 == 0 )
         {
-        LOG.info( "spilled grouping: {}, num times: {}, with threshold: {}",
-          new Object[]{tuple.print(), numFiles, ( (SpillableTupleList) spillable ).getThreshold()} );
+        LOG.info( "spilling grouping: {}, num times: {}, with reason: {}",
+          new Object[]{spillable.getGrouping().print(), numFiles + 1, spillReason} );
 
         Runtime runtime = Runtime.getRuntime();
         long freeMem = runtime.freeMemory() / 1024 / 1024;
@@ -83,36 +77,31 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
         LOG.info( "mem on spill (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
         }
 
-      LOG.info( "spilling {} tuples in list to file number {}", current.size(), numFiles + 1 );
+      LOG.info( "spilling {} tuples in list to file number {}", spillSize, numFiles + 1 );
 
       flowProcess.increment( Spill.Num_Spills_Written, 1 );
-      flowProcess.increment( Spill.Num_Tuples_Spilled, current.size() );
+      flowProcess.increment( Spill.Num_Tuples_Spilled, spillSize );
       }
 
     @Override
-    public void notifyRead( Spillable spillable )
+    public void notifyReadSpillBegin( Spillable spillable )
       {
       flowProcess.increment( Spill.Num_Spills_Read, 1 );
       }
     }
 
-  private final int capacity;
-  private final float loadFactor;
-  private final int mapThreshold;
-  private final int listThreshold;
-  private JobConf jobConf;
-  private CompressionCodec codec;
+  private final SpillListener spillListener;
+  private TupleMapFactory tupleMapFactory;
 
   public HadoopMemoryJoinGate( FlowProcess flowProcess, Join join )
     {
     super( flowProcess, join );
 
-    capacity = SpillableTupleMap.getCapacity( flowProcess, SpillableTupleMap.initialCapacity );
-    loadFactor = SpillableTupleMap.getLoadFactor( flowProcess, SpillableTupleMap.loadFactor );
-    mapThreshold = SpillableTupleMap.getThreshold( flowProcess, SpillableTupleMap.defaultThreshold );
-    listThreshold = SpillableTupleList.getThreshold( flowProcess, SpillableTupleList.defaultThreshold );
-    jobConf = ( (HadoopFlowProcess) FlowProcessWrapper.undelegate( flowProcess ) ).getJobConf();
-    codec = getCodec( flowProcess, defaultCodecs );
+    this.spillListener = new SpillListener( flowProcess );
+
+    FactoryLoader loader = FactoryLoader.getInstance();
+
+    this.tupleMapFactory = loader.loadFactoryFrom( flowProcess, TUPLE_MAP_FACTORY, HadoopTupleMapFactory.class );
     }
 
   @Override
@@ -124,20 +113,12 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
   @Override
   protected Map<Tuple, Collection<Tuple>> createTupleMap()
     {
-    return new HadoopSpillableTupleMap( capacity, loadFactor, mapThreshold, listThreshold, codec, jobConf )
-    {
-    @Override
-    public Collection<Tuple> get( final Object object )
-      {
-      return super.get( getDelegatedTuple( object ) );
-      }
+    Map<Tuple, Collection<Tuple>> map = tupleMapFactory.create( flowProcess );
 
-    @Override
-    protected Spillable.SpillListener getSpillableListener( Tuple tuple )
-      {
-      return new SpillListener( flowProcess, tuple );
-      }
-    };
+    if( map instanceof Spillable )
+      ( (Spillable) map ).setSpillListener( spillListener );
+
+    return map;
     }
 
   @Override

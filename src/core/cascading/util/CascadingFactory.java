@@ -18,34 +18,16 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
-
-import java.io.File;
+package cascading.util;
 
 import cascading.flow.FlowProcess;
-import cascading.tuple.SpillableTupleList;
-import cascading.tuple.TupleInputStream;
-import cascading.tuple.TupleOutputStream;
 
 /**
  *
  */
-public class LocalSpillableTupleList extends SpillableTupleList
+public interface CascadingFactory<Instance>
   {
-  public LocalSpillableTupleList( FlowProcess flowProcess )
-    {
-    super( -1 ); // disable spills for now
-    }
+  void initialize( FlowProcess flowProcess );
 
-  @Override
-  protected TupleOutputStream createTupleOutputStream( File file )
-    {
-    throw new UnsupportedOperationException( "does not actually support spills" );
-    }
-
-  @Override
-  protected TupleInputStream createTupleInputStream( File file )
-    {
-    throw new UnsupportedOperationException( "does not actually support spills" );
-    }
+  Instance create( FlowProcess flowProcess );
   }

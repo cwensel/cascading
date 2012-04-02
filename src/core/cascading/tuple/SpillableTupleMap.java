@@ -41,7 +41,7 @@ import cascading.flow.FlowProcess;
  *
  * @see cascading.tuple.hadoop.HadoopSpillableTupleMap
  */
-public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>>
+public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>> implements Spillable
   {
   /** The total number of tuple values (not keys) to attempt to keep in memory. */
   public static final String MAP_THRESHOLD = "cascading.spillmap.threshold";
@@ -66,8 +66,9 @@ public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>
 
   private int mapThreshold;
   private int initListThreshold;
+  private Spillable.SpillListener spillListener = Spillable.SpillListener.NULL;
 
-  public static int getThreshold( FlowProcess flowProcess, int defaultValue )
+  public static int getMapThreshold( FlowProcess flowProcess, int defaultValue )
     {
     String value = (String) flowProcess.getProperty( MAP_THRESHOLD );
 
@@ -77,7 +78,7 @@ public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>
     return Integer.parseInt( value );
     }
 
-  public static int getCapacity( FlowProcess flowProcess, int defaultValue )
+  public static int getMapCapacity( FlowProcess flowProcess, int defaultValue )
     {
     String value = (String) flowProcess.getProperty( MAP_CAPACITY );
 
@@ -87,7 +88,7 @@ public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>
     return Integer.parseInt( value );
     }
 
-  public static float getLoadFactor( FlowProcess flowProcess, float defaultValue )
+  public static float getMapLoadFactor( FlowProcess flowProcess, float defaultValue )
     {
     String value = (String) flowProcess.getProperty( MAP_LOADFACTOR );
 
@@ -136,5 +137,37 @@ public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>
     return value;
     }
 
-  protected abstract SpillableTupleList createTupleCollection( Tuple object );
+  protected abstract Collection<Tuple> createTupleCollection( Tuple object );
+
+  @Override
+  public void setGrouping( Tuple group )
+    {
+    }
+
+  @Override
+  public Tuple getGrouping()
+    {
+    return null;
+    }
+
+  @Override
+  public void setSpillStrategy( SpillStrategy spillStrategy )
+    {
+    }
+
+  @Override
+  public int spillCount()
+    {
+    return 0;
+    }
+
+  public Spillable.SpillListener getSpillListener()
+    {
+    return spillListener;
+    }
+
+  public void setSpillListener( Spillable.SpillListener spillListener )
+    {
+    this.spillListener = spillListener;
+    }
   }

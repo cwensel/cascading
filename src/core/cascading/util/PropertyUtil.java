@@ -32,6 +32,11 @@ public class PropertyUtil
     return getProperty( properties, key, (String) null );
     }
 
+  static String getStringProperty( Properties defaultProperties, Map<Object, Object> properties, String property )
+    {
+    return getProperty( properties, property, defaultProperties.getProperty( property ) );
+    }
+
   public static <A> A getProperty( Map<Object, Object> properties, String key, A defaultValue )
     {
     if( properties == null )

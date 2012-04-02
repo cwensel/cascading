@@ -38,7 +38,7 @@ public class MemoryJoinGate extends MemorySpliceGate
   {
   protected CountDownLatch latch;
 
-  private Collection[] collections;
+  private Collection<Tuple>[] collections;
   private ArrayList<Tuple> streamedCollection;
 
   public MemoryJoinGate( FlowProcess flowProcess, Join join )
@@ -71,6 +71,7 @@ public class MemoryJoinGate extends MemorySpliceGate
     int pos = posMap.get( previous );
 
     Tuple keyTuple = incomingEntry.selectTuple( keyFields[ pos ] );
+    keyTuple = getDelegatedTuple( keyTuple );
 
     if( pos != 0 )
       {

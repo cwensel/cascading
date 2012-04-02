@@ -179,8 +179,6 @@ public abstract class MemorySpliceGate extends SpliceGate
     @Override
     public Collection<Tuple> get( Object object )
       {
-      object = getDelegatedTuple( object );
-
       Collection<Tuple> value = super.get( object );
 
       if( value == null )
@@ -195,7 +193,13 @@ public abstract class MemorySpliceGate extends SpliceGate
     };
     }
 
-  protected final Object getDelegatedTuple( Object object )
+  /**
+   * This allows the tuple to honor the hasher and comparators, if any
+   *
+   * @param object the tuple to wrap
+   * @return a DelegatedTuple instance
+   */
+  protected final Tuple getDelegatedTuple( Tuple object )
     {
     if( groupHasher == null )
       return object;
@@ -207,9 +211,10 @@ public abstract class MemorySpliceGate extends SpliceGate
 
   protected class DelegatedTuple extends Tuple
     {
-    public DelegatedTuple( Object object )
+    public DelegatedTuple( Tuple wrapped )
       {
-      elements = (ArrayList<Object>) Tuple.elements( (Tuple) object );
+      // pass it in to prevent one being allocated
+      super( (ArrayList<Object>) Tuple.elements( wrapped ) );
       }
 
     @Override

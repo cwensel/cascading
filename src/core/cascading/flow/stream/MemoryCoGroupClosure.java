@@ -34,7 +34,7 @@ import cascading.tuple.Tuples;
  */
 public class MemoryCoGroupClosure extends JoinerClosure
   {
-  private Collection[] collections;
+  private Collection<Tuple>[] collections;
   private final int numSelfJoins;
   private final Tuple emptyTuple;
   private final Tuple joinedTuple;
@@ -53,13 +53,13 @@ public class MemoryCoGroupClosure extends JoinerClosure
     return Math.max( joinFields.length, numSelfJoins + 1 );
     }
 
-  public void reset( Collection[] collections )
+  public void reset( Collection<Tuple>[] collections )
     {
     this.collections = collections;
     }
 
   @Override
-  public Iterator getIterator( int pos )
+  public Iterator<Tuple> getIterator( int pos )
     {
     if( numSelfJoins != 0 )
       return collections[ 0 ].iterator();

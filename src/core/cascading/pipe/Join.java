@@ -56,6 +56,9 @@ import cascading.tuple.Fields;
  * spilled to disk if the collection reaches a specific threshold when using Hadoop.
  * <p/>
  * If spills are happening, consider increasing the spill thresholds, see {@link cascading.tuple.SpillableTupleMap}.
+ * * <p/>
+ * See the {@link cascading.tuple.TupleCollectionFactory} and {@link cascading.tuple.TupleMapFactory} for a means
+ * to use alternative spillable types.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin
