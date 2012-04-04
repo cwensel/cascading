@@ -372,6 +372,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     join = new Every( join, new Count() );
 
+//    join = new Each( join, new Debug( true ) );
+
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, join );
 
     flow.complete();
@@ -380,8 +382,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\t1" ) );
-    results.add( new Tuple( "5\t2" ) );
+    results.add( new Tuple( "1\t1\t1" ) );
+    results.add( new Tuple( "5\t5\t2" ) );
 
     List<Tuple> actual = getSinkAsList( flow );
 
@@ -457,7 +459,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     results.add( new Tuple( "4\td2\t4\tD1" ) );
     results.add( new Tuple( "4\td3\t4\tD1" ) );
 
-    handleJoins( "cogroupinner", new InnerJoin(), results, 7 );
+    handleJoins( "cogroupinner", new InnerJoin(), results, 7, false );
+    handleJoins( "cogroupinner-resultgroup", new InnerJoin(), results, 7, true );
     }
 
   /**
@@ -549,7 +552,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     results.add( new Tuple( "7\tg4\tnull\tnull" ) );
     results.add( new Tuple( "7\tg5\tnull\tnull" ) );
 
-    handleJoins( "cogroupouter", new OuterJoin(), results, 7 );
+    handleJoins( "cogroupouter", new OuterJoin(), results, 7, false );
+    handleJoins( "cogroupouter-resultgroup", new OuterJoin(), results, 7, true );
     }
 
   /**
@@ -637,7 +641,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     results.add( new Tuple( "7\tg4\tnull\tnull" ) );
     results.add( new Tuple( "7\tg5\tnull\tnull" ) );
 
-    handleJoins( "cogroupinnerouter", new LeftJoin(), results, 7 );
+    handleJoins( "cogroupinnerouter", new LeftJoin(), results, 7, false );
+    handleJoins( "cogroupinnerouter-resultgroup", new LeftJoin(), results, 7, true );
     }
 
   /**
@@ -711,11 +716,14 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     results.add( new Tuple( "null\tnull\t6\tF1" ) );
     results.add( new Tuple( "null\tnull\t6\tF2" ) );
 
-    handleJoins( "cogroupouterinner", new RightJoin(), results, 7 );
+    handleJoins( "cogroupouterinner", new RightJoin(), results, 7, false );
+    handleJoins( "cogroupouterinner-resultgroup", new RightJoin(), results, 7, true );
     }
 
-  private void handleJoins( String path, Joiner joiner, Set<Tuple> results, int numGroups ) throws Exception
+  private void handleJoins( String path, Joiner joiner, Set<Tuple> results, int numGroups, boolean useResultGroupFields ) throws Exception
     {
+    results = new HashSet<Tuple>( results );
+
     getPlatform().copyFromLocal( inputFileLhsSparse );
     getPlatform().copyFromLocal( inputFileRhsSparse );
 
@@ -735,9 +743,14 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num" ), joiner );
 
-    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num" ), numGroups ), Fields.RESULTS );
+    Pipe splice;
+    if( useResultGroupFields )
+      splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, new Fields( "num", "num2" ), joiner );
+    else
+      splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, joiner );
+
+    splice = new Every( splice, Fields.ALL, new TestIdentityBuffer( new Fields( "num", "num2" ), numGroups ), Fields.RESULTS );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 

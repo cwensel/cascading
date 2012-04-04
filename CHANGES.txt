@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Fixed issue where the grouping Tuple resulting from a c.p.CoGroup did not properly reflect all the current
+  grouping keys and field names. This fix allows an c.o.Aggregator or c.o.Buffer see which fields are null, if at all,
+  during an "outer" join type. resultGroupFields parameter now must reflect all joined fields as well.
+
   Fixed issue where a c.p.GroupBy merge of branches with the same names threw a NPE.
 
   Fixed issue where c.p.a.AggregateBy.AveragePartials functor was using fixed declared fields.

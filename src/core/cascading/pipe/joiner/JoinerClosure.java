@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 /**
  *
@@ -63,4 +64,6 @@ public abstract class JoinerClosure
   public abstract Iterator getIterator( int pos );
 
   public abstract boolean isEmpty( int pos );
+
+  public abstract Tuple getGroupTuple( Tuple keysTuple );
   }

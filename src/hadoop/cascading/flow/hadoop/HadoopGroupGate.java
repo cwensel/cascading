@@ -80,7 +80,7 @@ public abstract class HadoopGroupGate extends SpliceGate
 
     values = splice.getJoiner().getIterator( closure );
 
-    keyEntry.setTuple( key );
+    keyEntry.setTuple( closure.getGroupTuple( key ) );
     tupleEntryIterator.reset( values );
 
     next.receive( this, grouping );

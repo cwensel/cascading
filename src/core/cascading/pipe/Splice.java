@@ -277,8 +277,8 @@ public class Splice extends Pipe
       this.numSelfJoins = pipes.length - 1;
       this.keyFieldsMap.put( pipes[ 0 ].getName(), groupFields[ 0 ] );
 
-      if( resultGroupFields != null && groupFields[ 0 ].size() != resultGroupFields.size() )
-        throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+      if( resultGroupFields != null && groupFields[ 0 ].size() * pipes.length != resultGroupFields.size() )
+        throw new IllegalArgumentException( "resultGroupFields and cogroup joined fields must be same size" );
       }
     else
       {
@@ -300,8 +300,8 @@ public class Splice extends Pipe
         addGroupFields( pipes[ i ], groupFields[ i ] );
         }
 
-      if( resultGroupFields != null && last != resultGroupFields.size() )
-        throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+      if( resultGroupFields != null && last * pipes.length != resultGroupFields.size() )
+        throw new IllegalArgumentException( "resultGroupFields and cogroup resulting joined fields must be same size" );
       }
 
     this.declaredFields = declaredFields;
@@ -451,8 +451,8 @@ public class Splice extends Pipe
     this.declaredFields = declaredFields;
     this.resultGroupFields = resultGroupFields;
 
-    if( resultGroupFields != null && groupFields.size() != resultGroupFields.size() )
-      throw new IllegalArgumentException( "resultGroupFields and cogroup fields must be same size" );
+    if( resultGroupFields != null && groupFields.size() * numSelfJoins != resultGroupFields.size() )
+      throw new IllegalArgumentException( "resultGroupFields and cogroup resulting join fields must be same size" );
     }
 
   /**
@@ -981,8 +981,37 @@ public class Splice extends Pipe
     Map<String, Fields> sortingSelectors = resolveSortingSelectors( incomingScopes );
     Fields declared = resolveDeclared( incomingScopes );
 
+    Fields outGroupingFields = resultGroupFields;
+
+    if( outGroupingFields == null && isCoGroup() )
+      outGroupingFields = createJoinFields( incomingScopes, groupingSelectors, declared );
+
     // for Group, the outgoing fields are the same as those declared
-    return new Scope( getName(), declared, resultGroupFields, groupingSelectors, sortingSelectors, declared, isGroupBy() );
+    return new Scope( getName(), declared, outGroupingFields, groupingSelectors, sortingSelectors, declared, isGroupBy() );
+    }
+
+  private Fields createJoinFields( Set<Scope> incomingScopes, Map<String, Fields> groupingSelectors, Fields declared )
+    {
+    Fields outGroupingFields;
+    Map<String, Fields> incomingFields = new HashMap<String, Fields>();
+
+    for( Scope scope : incomingScopes )
+      incomingFields.put( scope.getName(), scope.getOutValuesFields() );
+
+    outGroupingFields = new Fields();
+
+    int offset = 0;
+    for( Pipe pipe : pipes ) // need to retain order of pipes
+      {
+      Fields pipeGroupingSelector = groupingSelectors.get( pipe.getName() );
+      Fields fields = incomingFields.get( pipe.getName() ).selectPos( pipeGroupingSelector, offset );
+      Fields select = declared.select( fields );
+
+      outGroupingFields = outGroupingFields.append( select );
+
+      offset += incomingFields.get( pipe.getName() ).size();
+      }
+    return outGroupingFields;
     }
 
   Map<String, Fields> resolveGroupingSelectors( Set<Scope> incomingScopes )

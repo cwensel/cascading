@@ -379,17 +379,22 @@ public class Scope implements Serializable
    */
   public Fields getOutGroupingFields()
     {
-    if( kind != Kind.GROUP )
+    if( !isGroup() )
       return outGroupingFields;
 
     Fields first = keySelectors.values().iterator().next();
 
+    // if more than one, this is a merge, so same key names are expected
     if( keySelectors.size() == 1 || isGroup() && isGroupBy )
       return first;
 
-    // if given by user
+    // handling CoGroup only
+
+    // if given by user as resultGroupFields
     if( outGroupingFields != null )
       return outGroupingFields;
+
+    // todo throw an exception if we make it this far
 
     // if all have the same names, then use for grouping
     Set<Fields> set = new HashSet<Fields>( keySelectors.values() );

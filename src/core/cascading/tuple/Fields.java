@@ -887,6 +887,36 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
+   * Method selectPos returns a Fields instance with only positional fields, no field names.
+   *
+   * @param selector of type Fields
+   * @return Fields instance with only positions.
+   */
+  public Fields selectPos( Fields selector )
+    {
+    return selectPos( selector, 0 );
+    }
+
+  /**
+   * Method selectPos returns a Fields instance with only positional fields, offset by given offset value, no field names.
+   *
+   * @param selector of type Fields
+   * @param offset   of type int
+   * @return Fields instance with only positions.
+   */
+  public Fields selectPos( Fields selector, int offset )
+    {
+    int[] pos = getPos( selector );
+
+    Fields results = size( pos.length );
+
+    for( int i = 0; i < pos.length; i++ )
+      results.fields[ i ] = pos[ i ] + offset;
+
+    return results;
+    }
+
+  /**
    * Method subtract returns the difference between this instance and the given fields instance.
    * <p/>
    * See {@link #append(Fields)} for adding field names.

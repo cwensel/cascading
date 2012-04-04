@@ -33,11 +33,16 @@ import cascading.tuple.Fields;
 /**
  * The Every operator applies an {@link Aggregator} or {@link Buffer} to every grouping.
  * <p/>
- * Any number of Every instances may follow other Every, {@link GroupBy}, {@link CoGroup} instance if they apply an Aggregator, not a Buffer.
- * If a Buffer, only one Every may follow a GroupBy or CoGroup.
+ * Any number of Every instances may follow other Every, {@link GroupBy}, or {@link CoGroup} instances if they apply an
+ * Aggregator, not a Buffer. If a Buffer, only one Every may follow a GroupBy or CoGroup.
  * <p/>
  * Every operators create aggregate values for every grouping they encounter. This aggregate value is added to the current
- * grouping Tuple. Subsequent Every instances can continue to append values to the grouping Tuple. When an Each follows
+ * grouping Tuple.
+ * <p/>
+ * In the case of a CoGroup, the grouping Tuple will be all the grouping keys from all joined streams,
+ * and if an "outer" type join is used, one value on the groupingTuple may be null.
+ * <p/>
+ * Subsequent Every instances can continue to append values to the grouping Tuple. When an Each follows
  * and Every, the Each applies its operation to the grouping Tuple (thus all child values in the grouping are discarded
  * and only aggregate values are propagated).
  */

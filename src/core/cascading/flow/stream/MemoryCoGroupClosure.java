@@ -26,6 +26,8 @@ import java.util.Iterator;
 import cascading.flow.FlowProcess;
 import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -34,11 +36,15 @@ public class MemoryCoGroupClosure extends JoinerClosure
   {
   private Collection[] collections;
   private final int numSelfJoins;
+  private final Tuple emptyTuple;
+  private final Tuple joinedTuple;
 
   public MemoryCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
     super( flowProcess, groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
+    this.emptyTuple = Tuple.size( groupingFields[ 0 ].size() );
+    this.joinedTuple = new Tuple();
     }
 
   @Override
@@ -68,5 +74,17 @@ public class MemoryCoGroupClosure extends JoinerClosure
       return collections[ 0 ].isEmpty();
     else
       return collections[ pos ].isEmpty();
+    }
+
+  @Override
+  public Tuple getGroupTuple( Tuple keysTuple )
+    {
+    Tuples.asModifiable( joinedTuple );
+    joinedTuple.clear();
+
+    for( Collection collection : collections )
+      joinedTuple.addAll( collection.isEmpty() ? emptyTuple : keysTuple );
+
+    return joinedTuple;
     }
   }

@@ -96,4 +96,10 @@ public class HadoopGroupByClosure extends JoinerClosure
     this.grouping = grouping;
     this.values = values;
     }
+
+  @Override
+  public Tuple getGroupTuple( Tuple keysTuple )
+    {
+    return keysTuple;
+    }
   }

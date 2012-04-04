@@ -922,7 +922,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "lhs", "num2", "rhs" ) );
 
-    splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "num", "value" ) );
+    splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "num1", "value" ) );
 
     Flow countFlow = new HadoopFlowConnector().connect( sources, sink, splice );
     }
@@ -946,7 +946,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "lhs", "num2", "rhs" ), new Fields( "somenum" ) );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "lhs", "num2", "rhs" ), new Fields( "somenum", "somenum2" ) );
 
     splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "somenum", "value" ) );
 

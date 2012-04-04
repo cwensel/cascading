@@ -38,11 +38,14 @@ import cascading.tuple.Fields;
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
- * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
- * to overcome field name collisions.
+ * one or more field with the same name, the declaredFields must be given to name all the outgoing Tuple stream fields
+ * to overcome field name collisions. That is, if the first pipe has 4 fields, and the second pipe has 3 fields, 7 fields
+ * total must be declared having unique field names, if any.
  * <p/>
- * {@code resultGroupFields} value sets the resulting grouping field names. By default, if all 'groupFields' names
- * are equal, those names will be used for resultGroupFields.
+ * {@code resultGroupFields} value is a convenience allowing the override of the resulting grouping field names. The
+ * size of resultGroupFields must be equal to the total number of grouping keys fields. That is, if joining on two pipes
+ * which are grouping on two keys, the resultGroupFields must be 4 fields, each field field name being unique, if any.
+ * By default, the resultGroupKeys are retrieved from the declaredFields.
  * <p/>
  * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin}
  * {@link cascading.pipe.joiner.Joiner} class.

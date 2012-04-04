@@ -72,14 +72,14 @@ public class MemoryCoGroupGate extends MemorySpliceGate
       {
       Collection[] collections = new Collection[ orderedPrevious.length ];
 
-      for( Tuple groupTuple : keys )
+      for( Tuple keysTuple : keys )
         {
         for( int i = 0; i < keyValues.length; i++ )
-          collections[ i ] = keyValues[ i ].get( groupTuple );
+          collections[ i ] = keyValues[ i ].get( keysTuple );
 
         closure.reset( collections );
 
-        keyEntry.setTuple( groupTuple );
+        keyEntry.setTuple( closure.getGroupTuple( keysTuple ) );
 
         // create Closure type here
         tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );

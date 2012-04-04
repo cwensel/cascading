@@ -29,6 +29,7 @@ import cascading.tuple.IndexTuple;
 import cascading.tuple.Spillable;
 import cascading.tuple.SpillableTupleList;
 import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 import cascading.tuple.hadoop.HadoopSpillableTupleList;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
@@ -103,6 +104,8 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
   private final int numSelfJoins;
   private final int spillThreshold;
   private CompressionCodec codec;
+  private final Tuple emptyTuple;
+  private final Tuple joinedTuple;
 
   public HadoopCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -110,6 +113,9 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     this.numSelfJoins = numSelfJoins;
     this.spillThreshold = getThreshold( flowProcess, SpillableTupleList.defaultThreshold );
     this.codec = getCodec( flowProcess, defaultCodecs );
+
+    this.emptyTuple = Tuple.size( groupingFields[ 0 ].size() );
+    this.joinedTuple = new Tuple();
 
     initLists( flowProcess );
     }
@@ -127,6 +133,18 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
       throw new IllegalArgumentException( "invalid group position: " + pos );
 
     return makeIterator( pos, groups[ pos ].iterator() );
+    }
+
+  @Override
+  public Tuple getGroupTuple( Tuple keysTuple )
+    {
+    Tuples.asModifiable( joinedTuple );
+    joinedTuple.clear();
+
+    for( Collection collection : groups )
+      joinedTuple.addAll( collection.isEmpty() ? emptyTuple : keysTuple );
+
+    return joinedTuple;
     }
 
   @Override

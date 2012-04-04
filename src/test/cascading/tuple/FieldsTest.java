@@ -779,4 +779,20 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", join.get( 2 ) );
     assertEquals( "not equal: ", "d", join.get( 3 ) );
     }
+
+  public void testSelectFrom()
+    {
+    Fields declarationA = new Fields( "a", "b", "c", "d", "e", "f", "g" );
+    Fields declarationB = new Fields( "A", "B", "C", "D", "E", "F", "G" );
+
+    Fields selectA = new Fields( "b", "d", "f" );
+
+    Fields fields = declarationA.selectPos( selectA );
+    Fields results = declarationB.select( fields );
+
+    assertEquals( "not equal: ", 3, results.size() );
+    assertEquals( "not equal: ", "B", results.get( 0 ) );
+    assertEquals( "not equal: ", "D", results.get( 1 ) );
+    assertEquals( "not equal: ", "F", results.get( 2 ) );
+    }
   }
