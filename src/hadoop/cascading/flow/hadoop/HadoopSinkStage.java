@@ -35,7 +35,7 @@ public class HadoopSinkStage extends SinkStage
     }
 
   @Override
-  protected Object getInput()
+  protected Object getOutput()
     {
     return ( (HadoopFlowProcess) flowProcess ).getOutputCollector();
     }

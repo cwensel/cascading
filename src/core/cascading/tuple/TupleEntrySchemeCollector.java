@@ -36,6 +36,7 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
   private String identifier;
 
   protected final ConcreteCall sinkCall;
+  private boolean prepared = false;
 
   public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme )
     {
@@ -55,8 +56,18 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     this.identifier = identifier;
 
     this.sinkCall = new ConcreteCall();
+    this.sinkCall.setOutgoingEntry( this.tupleEntry ); // created in super ctor
 
     setOutput( output );
+    }
+
+  @Override
+  public void setFields( Fields declared )
+    {
+    super.setFields( declared );
+
+    if( this.sinkCall != null )
+      this.sinkCall.setOutgoingEntry( this.tupleEntry );
     }
 
   protected void setOutput( O output )
@@ -64,16 +75,28 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     sinkCall.setOutput( output );
     }
 
-  /**
-   * Must be called within {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess, Object)}.
-   * <p/>
-   * Allows for an Output instance to be set before #sinkPrepare is called on the Scheme.
-   *
-   * @throws IOException
-   */
-  public void prepare() throws IOException
+  protected void prepare()
     {
     scheme.sinkPrepare( flowProcess, sinkCall );
+    prepared = true;
+    }
+
+  @Override
+  public void add( TupleEntry tupleEntry )
+    {
+    if( !prepared )
+      prepare();
+
+    super.add( tupleEntry );
+    }
+
+  @Override
+  public void add( Tuple tuple )
+    {
+    if( !prepared )
+      prepare();
+
+    super.add( tuple );
     }
 
   @Override

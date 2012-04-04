@@ -26,6 +26,7 @@ import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
 import cascading.tap.Tap;
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 
@@ -54,7 +55,13 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     {
     try
       {
-      collector = sink.openForWrite( flowProcess, getInput() );
+      collector = sink.openForWrite( flowProcess, getOutput() );
+
+      if( sink.getSinkFields().isAll() )
+        {
+        Fields fields = sink.resolveFields( getIncomingScopes().get( 0 ) );
+        collector.setFields( fields );
+        }
       }
     catch( IOException exception )
       {
@@ -62,7 +69,7 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
       }
     }
 
-  protected Object getInput()
+  protected Object getOutput()
     {
     return null;
     }

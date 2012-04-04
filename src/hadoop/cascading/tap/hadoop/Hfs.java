@@ -426,11 +426,8 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
       return super.openForWrite( flowProcess, output );
 
     // this is only called when, on the client side, a user want to open a tap for reading on the client
-    HadoopTapCollector schemeCollector = new HadoopTapCollector( flowProcess, this );
-
-    schemeCollector.prepare();
-
-    return schemeCollector;
+    // or cluster side when this tap is being accumulated into a Join pipe
+    return new HadoopTapCollector( flowProcess, this );
     }
 
   @Override

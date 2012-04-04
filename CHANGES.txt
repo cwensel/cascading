@@ -2,6 +2,14 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Fixed issue where a c.s.Scheme was not seeing properly resolved fields if they were not declared in the Scheme
+  instance. This allows a Scheme declared to sink c.t.Fields#ALL to see the actual field names during the
+  Scheme#sinkPrepare() and Scheme#sink() methods.
+
+  Changed c.t.TupleEntrySchemeSelector#prepare method to protected and is now called lazily internally during
+  the first add method. This should simplify custom c.t.Tap development and allows for lazily setting of resolved
+  sink fields.
+
   Fixed issue where the grouping Tuple resulting from a c.p.CoGroup did not properly reflect all the current
   grouping keys and field names. This fix allows an c.o.Aggregator or c.o.Buffer see which fields are null, if at all,
   during an "outer" join type. resultGroupFields parameter now must reflect all joined fields as well.

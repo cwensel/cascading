@@ -36,9 +36,19 @@ import cascading.util.Util;
  * <p/>
  * A Scheme defines the type of resource data will be sourced from or sinked to.
  * <p/>
- * The given sourceFields only label the values in the {@link Tuple}s as they are sourced.
+ * The default sourceFields are {@link Fields#UNKNOWN} and the default sinkFields are {@link Fields#ALL}.
+ * <p/>
+ * Any given sourceFields only label the values in the {@link Tuple}s as they are sourced.
  * It does not necessarily filter the output since a given implementation may choose to
  * collapse values and ignore keys depending on the format.
+ * <p/>
+ * If the sinkFields are {@link Fields#ALL}, the Cascading planner will attempt to resolve the actual field names
+ * and make them available via the {@link cascading.scheme.SinkCall#getOutgoingEntry()} method. Sometimes this may
+ * not be possible (in the case the {@link Tap#openForWrite(cascading.flow.FlowProcess)} method is called from user
+ * code directly (without planner intervention).
+ * <p/>
+ * If the sinkFields are a valid selector, the {@link #sink(cascading.flow.FlowProcess, SinkCall)} method will
+ * only see the fields expected.
  * <p/>
  * Setting the {@code numSinkParts} value to 1 (one) attempts to ensure the output resource has only one part.
  * In the case of MapReduce, this is only a suggestion for the Map side, on the Reduce side it does this by
@@ -282,7 +292,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * Note this is only time it is safe to modify a Tuple instance handed over via a method call.
    *
    * @param flowProcess of Process
-   * @param sourceCall of SourceCall
+   * @param sourceCall  of SourceCall
    * @return returns {@code true} when a Tuple was successfully read
    */
   public abstract boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
@@ -317,7 +327,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * the {@link cascading.scheme.SinkCall#getOutput()}.
    *
    * @param flowProcess of Process
-   * @param sinkCall of SinkCall
+   * @param sinkCall    of SinkCall
    */
   public abstract void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
 

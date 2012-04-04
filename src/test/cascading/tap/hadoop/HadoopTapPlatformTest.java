@@ -42,6 +42,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
@@ -55,6 +56,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
 
@@ -171,6 +173,68 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     TupleEntryIterator iterator = flow.openSink();
 
     assertEquals( "not equal: tuple.get(1)", "1 a", iterator.next().get( 1 ) );
+
+    iterator.close();
+
+    // confirm the tuple iterator can handle nulls from the source
+    validateLength( flow.openSource(), 5 );
+    }
+
+  public class ResolvedScheme extends TextLine
+    {
+    private final Fields expectedFields;
+
+    public ResolvedScheme( Fields expectedFields )
+      {
+      this.expectedFields = expectedFields;
+      }
+
+    @Override
+    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall )
+      {
+      Fields found = sinkCall.getOutgoingEntry().getFields();
+
+      if( !found.equals( expectedFields ) )
+        throw new RuntimeException( "fields to not match, expect: " + expectedFields + ", found: " + found );
+
+      super.sinkPrepare( flowProcess, sinkCall );
+      }
+
+    @Override
+    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+      {
+      Fields found = sinkCall.getOutgoingEntry().getFields();
+
+      if( !found.equals( expectedFields ) )
+        throw new RuntimeException( "fields to not match, expect: " + expectedFields + ", found: " + found );
+
+      super.sink( flowProcess, sinkCall );
+      }
+    }
+
+  @Test
+  public void testResolvedSinkFields() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileLower );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    Tap sink = new Hfs( new ResolvedScheme( new Fields( "num", "char" ) ), getOutputPath( "resolvedfields" ), SinkMode.REPLACE );
+
+    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().get( 1 ) );
 
     iterator.close();
 

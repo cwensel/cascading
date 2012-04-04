@@ -236,11 +236,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     if( output == null )
       throw new IllegalArgumentException( "output may not be null" );
 
-    TupleEntrySchemeCollector schemeCollector = new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
-
-    schemeCollector.prepare();
-
-    return schemeCollector;
+    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
     }
 
   public TupleEntryCollector openForWrite( Process flowProcess ) throws IOException

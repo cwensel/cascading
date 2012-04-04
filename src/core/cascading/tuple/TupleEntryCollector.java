@@ -26,7 +26,6 @@ import java.io.IOException;
 public abstract class TupleEntryCollector
   {
   protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null );
-  private String identifier;
 
   protected TupleEntryCollector()
     {
@@ -39,10 +38,15 @@ public abstract class TupleEntryCollector
    */
   public TupleEntryCollector( Fields declared )
     {
+    setFields( declared );
+    }
+
+  public void setFields( Fields declared )
+    {
     if( declared == null )
       throw new IllegalArgumentException( "declared fields must not be null" );
 
-    if( declared.isUnknown() )
+    if( declared.isUnknown() || declared.isAll() )
       return;
 
     this.tupleEntry = new TupleEntry( declared, Tuple.size( declared.size() ) );
@@ -57,13 +61,14 @@ public abstract class TupleEntryCollector
   public void add( TupleEntry tupleEntry )
     {
     Fields expectedFields = this.tupleEntry.getFields();
+    TupleEntry outgoingEntry = this.tupleEntry;
 
     if( expectedFields.isUnknown() )
-      this.tupleEntry.setTuple( tupleEntry.getTuple() );
+      outgoingEntry = tupleEntry;
     else
-      this.tupleEntry.setTuple( tupleEntry.selectTuple( expectedFields ) );
+      outgoingEntry.setTuple( tupleEntry.selectTuple( expectedFields ) );
 
-    safeCollect( this.tupleEntry );
+    safeCollect( outgoingEntry );
     }
 
   /**
@@ -103,5 +108,4 @@ public abstract class TupleEntryCollector
     {
     // do nothing
     }
-
   }

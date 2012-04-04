@@ -106,8 +106,6 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
         LOG.debug( "creating collector for path: {}", fullPath );
 
         collector = new HadoopTapCollector( flowProcess, parent, path );
-
-        ( (HadoopTapCollector) collector ).prepare();
         }
       catch( IOException exception )
         {

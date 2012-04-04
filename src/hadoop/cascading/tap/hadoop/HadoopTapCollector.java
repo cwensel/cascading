@@ -98,9 +98,16 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
     }
 
   @Override
-  public void prepare() throws IOException
+  protected void prepare()
     {
-    initialize();
+    try
+      {
+      initialize();
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to initialize collector", exception );
+      }
 
     super.prepare();
     }
