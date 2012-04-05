@@ -64,7 +64,7 @@ public class ServiceLoader extends ProviderLoader<CascadingService>
     String className = getStringProperty( defaultProperties, properties, property );
 
     if( !singletons.containsKey( className ) )
-      singletons.put( className, loadSingletonServiceFrom( defaultProperties, properties, property ) );
+      singletons.put( className, loadServiceFrom( defaultProperties, properties, property ) );
 
     return singletons.get( className );
     }
