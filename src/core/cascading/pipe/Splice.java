@@ -294,7 +294,7 @@ public class Splice extends Pipe
           }
 
         if( last != -1 && last != groupFields[ i ].size() )
-          throw new IllegalArgumentException( "all cogroup fields must be same size" );
+          throw new IllegalArgumentException( "all groupFields must be same size" );
 
         last = groupFields[ i ].size();
         addGroupFields( pipes[ i ], groupFields[ i ] );
