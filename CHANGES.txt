@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally write headers if writeHeaders or hasHeaders
+  is set to true. If Fields.ALL or Fields.UNKNOWN is declared, during sinking the field names will be resolved
+  at runtime.
+
   Added the c.t.TupleCollectionFactory and c.t.TupleMapFactory interfaces and relevant implementations to allow
   custom c.t.Spillable types to be plugged into a given execution. Spillable types are used to back in memory
   collections to disk to improve scalability of c.p.CoGroup and c.p.Join pipes on different platforms.

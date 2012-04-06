@@ -262,7 +262,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall )
+    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
       {
       scheme.sourcePrepare( flowProcess, sourceCall );
       }
@@ -274,7 +274,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall )
+    public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
       {
       scheme.sourceCleanup( flowProcess, sourceCall );
       }
@@ -286,7 +286,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall )
+    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       scheme.sinkPrepare( flowProcess, sinkCall );
       }
@@ -298,7 +298,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sinkCleanup( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall )
+    public void sinkCleanup( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       scheme.sinkCleanup( flowProcess, sinkCall );
       }

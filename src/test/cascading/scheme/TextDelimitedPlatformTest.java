@@ -150,8 +150,25 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
     Class[] types = new Class[]{String.class, String.class, String.class, String.class, long.class};
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
 
-    Tap input = getPlatform().getDelimitedFile( fields, true, ",", "\"", types, testDelimited, SinkMode.KEEP );
-    Tap output = getPlatform().getDelimitedFile( fields, false, ",", "\"", types, getOutputPath( "header" ), SinkMode.REPLACE );
+    Tap input = getPlatform().getDelimitedFile( fields, true, true, ",", "\"", types, testDelimited, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( fields, true, true, ",", "\"", types, getOutputPath( "header" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipe" );
+
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10, 5 );
+    }
+
+  @Test
+  public void testHeaderAll() throws IOException
+    {
+    Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+
+    Tap input = getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, testDelimited, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( Fields.ALL, true, true, ",", "\"", null, getOutputPath( "headerall" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "pipe" );
 

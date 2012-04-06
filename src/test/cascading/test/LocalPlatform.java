@@ -102,4 +102,10 @@ public class LocalPlatform extends TestPlatform
     {
     return new FileTap( new TextDelimited( fields, skipHeader, delimiter, quote, types ), filename, mode );
     }
+
+  @Override
+  public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
+    {
+    return new FileTap( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    }
   }

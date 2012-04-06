@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
 import org.slf4j.Logger;
@@ -256,14 +255,14 @@ public class DelimitedParser implements Serializable
     return split;
     }
 
-  public String joinLine( Tuple tuple, StringBuilder buffer )
+  public String joinLine( Iterable iterable, StringBuilder buffer )
     {
     try
       {
       if( quote != null )
-        return joinWithQuote( tuple, buffer );
+        return joinWithQuote( iterable, buffer );
 
-      return joinNoQuote( tuple, buffer );
+      return joinNoQuote( iterable, buffer );
       }
     finally
       {
@@ -271,7 +270,7 @@ public class DelimitedParser implements Serializable
       }
     }
 
-  private String joinWithQuote( Tuple tuple, StringBuilder buffer )
+  private String joinWithQuote( Iterable tuple, StringBuilder buffer )
     {
     int count = 0;
 
@@ -299,7 +298,7 @@ public class DelimitedParser implements Serializable
     return buffer.toString();
     }
 
-  private String joinNoQuote( Tuple tuple, StringBuilder buffer )
+  private String joinNoQuote( Iterable tuple, StringBuilder buffer )
     {
     int count = 0;
 

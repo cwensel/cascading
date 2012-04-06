@@ -77,7 +77,14 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
     this.sourceCall.setIncomingEntry( getTupleEntry() );
     this.sourceCall.setInput( inputIterator.next() );
 
-    this.scheme.sourcePrepare( flowProcess, sourceCall );
+    try
+      {
+      this.scheme.sourcePrepare( flowProcess, sourceCall );
+      }
+    catch( IOException exception )
+      {
+      throw new TupleException( "unable to prepare source for input identifier: " + identifier, exception );
+      }
     }
 
   @Override

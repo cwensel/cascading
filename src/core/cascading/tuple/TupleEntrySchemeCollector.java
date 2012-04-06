@@ -25,6 +25,7 @@ import java.io.IOException;
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
+import cascading.tap.TapException;
 
 /**
  *
@@ -77,7 +78,15 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
 
   protected void prepare()
     {
-    scheme.sinkPrepare( flowProcess, sinkCall );
+    try
+      {
+      scheme.sinkPrepare( flowProcess, sinkCall );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "could not prepare scheme", exception );
+      }
+
     prepared = true;
     }
 
@@ -122,8 +131,17 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     {
     try
       {
-      if( sinkCall != null )
+      if( sinkCall == null )
+        return;
+
+      try
+        {
         scheme.sinkCleanup( flowProcess, sinkCall );
+        }
+      catch( IOException exception )
+        {
+        throw new TupleException( "unable to cleanup sink for output identifier: " + identifier, exception );
+        }
       }
     finally
       {

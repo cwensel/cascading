@@ -41,7 +41,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- * Class TextDelimited provides direct support for delimited text files, like
+ * Class TextDelimited is a sub-class of {@link TextLine}. It provides direct support for delimited text files, like
  * TAB (\t) or COMMA (,) delimited files. It also optionally allows for quoted values.
  * <p/>
  * TextDelimited may also be used to skip the "header" in a file, where the header is defined as the very first line
@@ -49,6 +49,15 @@ import cascading.tuple.Tuple;
  * be skipped.
  * <p/>
  * By default headers are not skipped.
+ * <p/>
+ * <p/>
+ * TextDelimited may also be used to write a "header" in a file. The fields names for the header are taken directly
+ * from the declared fields.
+ * <p/>
+ * By default headers are not written.
+ * <p/>
+ * If {@code hasHeaders} is set to {@code true} on a constructor, both {@code skipHeader} and {@code writeHeader} will
+ * be set to {@code true}.
  * <p/>
  * By default this {@link cascading.scheme.Scheme} is both {@code strict} and {@code safe}.
  * <p/>
@@ -68,10 +77,13 @@ import cascading.tuple.Tuple;
  * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
  * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
  * either, so all values will be returned as Strings.
+ *
+ * @see TextLine
  */
 public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Void, StringBuilder>
   {
   private final boolean skipHeader;
+  private final boolean writeHeader;
   private final DelimitedParser delimitedParser;
 
   /**
@@ -100,14 +112,27 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
+   * @param fields    of type Fields
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimiter"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter )
+    {
+    this( fields, hasHeader, hasHeader, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
    * @param fields     of type Fields
    * @param skipHeader of type boolean
    * @param delimiter  of type String
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter )
     {
-    this( fields, skipHeader, delimiter, null, null );
+    this( fields, skipHeader, writeHeader, delimiter, null, null );
     }
 
   /**
@@ -126,15 +151,30 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields     of type Fields
-   * @param skipHeader of type boolean
-   * @param delimiter  of type String
-   * @param types      of type Class[]
+   * @param fields    of type Fields
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   * @param types     of type Class[]
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "types"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, Class[] types )
+    {
+    this( fields, hasHeader, hasHeader, delimiter, null, types );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param types       of type Class[]
    */
   @ConstructorProperties({"fields", "skipHeader", "delimiter", "types"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter, Class[] types )
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, Class[] types )
     {
-    this( fields, skipHeader, delimiter, null, types );
+    this( fields, skipHeader, writeHeader, delimiter, null, types );
     }
 
   /**
@@ -154,16 +194,32 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields     of type Fields
-   * @param skipHeader of type boolean
-   * @param delimiter  of type String
-   * @param quote      of type String
-   * @param types      of type Class[]
+   * @param fields    of type Fields
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   * @param quote     of type String
+   * @param types     of type Class[]
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter", "quote", "types"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter, String quote, Class[] types )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types )
     {
-    this( fields, skipHeader, delimiter, quote, types, true );
+    this( fields, hasHeader, hasHeader, delimiter, quote, types, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types )
+    {
+    this( fields, skipHeader, writeHeader, delimiter, quote, types, true );
     }
 
   /**
@@ -184,17 +240,34 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields     of type Fields
-   * @param skipHeader of type boolean
-   * @param delimiter  of type String
-   * @param quote      of type String
-   * @param types      of type Class[]
-   * @param safe       of type boolean
+   * @param fields    of type Fields
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   * @param quote     of type String
+   * @param types     of type Class[]
+   * @param safe      of type boolean
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter", "quote", "types", "safe"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter, String quote, Class[] types, boolean safe )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe )
     {
-    this( fields, skipHeader, delimiter, true, quote, types, safe );
+    this( fields, hasHeader, hasHeader, delimiter, true, quote, types, safe );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, boolean safe )
+    {
+    this( fields, skipHeader, writeHeader, delimiter, true, quote, types, safe );
     }
 
   /**
@@ -213,31 +286,32 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields     of type Fields
-   * @param skipHeader of type boolean
-   * @param delimiter  of type String
-   * @param quote      of type String
+   * @param fields    of type Fields
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   * @param quote     of type String
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter", "quote"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter, String quote )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote )
     {
-    this( fields, skipHeader, delimiter, quote, null, true );
+    this( fields, hasHeader, delimiter, quote, null, true );
     }
 
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields     of type Fields
-   * @param skipHeader of type boolean
-   * @param delimiter  of type String
-   * @param strict     of type boolean
-   * @param quote      of type String
-   * @param types      of type Class[]
-   * @param safe       of type boolean
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param strict      of type boolean
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter", "strict", "quote", "types", "safe"})
-  public TextDelimited( Fields fields, boolean skipHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
     super( fields, fields );
 
@@ -246,6 +320,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     setSourceFields( fields );
 
     this.skipHeader = skipHeader;
+    this.writeHeader = writeHeader;
 
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, getSourceFields(), getSinkFields() );
     }
@@ -312,6 +387,14 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   public void sinkPrepare( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
     {
     sinkCall.setContext( new StringBuilder( 4 * 1024 ) );
+
+    if( writeHeader )
+      {
+      Fields fields = sinkCall.getOutgoingEntry().getFields();
+      String line = delimitedParser.joinLine( fields, sinkCall.getContext() );
+
+      sinkCall.getOutput().println( line );
+      }
     }
 
   @Override

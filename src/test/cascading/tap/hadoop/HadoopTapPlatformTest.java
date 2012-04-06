@@ -190,7 +190,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall )
+    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       Fields found = sinkCall.getOutgoingEntry().getFields();
 

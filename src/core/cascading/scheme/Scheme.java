@@ -277,7 +277,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess of Process
    * @param sourceCall  of SourceCall<SourceContext, Input>
    */
-  public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
+  public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     }
 
@@ -304,7 +304,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess of Process
    * @param sourceCall  of SourceCall<SourceContext, Input>
    */
-  public void sourceCleanup( Process flowProcess, SourceCall<SourceContext, Input> sourceCall )
+  public void sourceCleanup( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     }
 
@@ -318,7 +318,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall<SinkContext, Output>
    */
-  public void sinkPrepare( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
+  public void sinkPrepare( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
     }
 
@@ -338,7 +338,7 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall<SinkContext, Output>
    */
-  public void sinkCleanup( Process flowProcess, SinkCall<SinkContext, Output> sinkCall )
+  public void sinkCleanup( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
     }
 
