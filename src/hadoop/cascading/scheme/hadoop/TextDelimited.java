@@ -635,6 +635,12 @@ public class TextDelimited extends TextLine
     }
 
   @Override
+  public boolean isSymmetrical()
+    {
+    return super.isSymmetrical() && skipHeader == writeHeader;
+    }
+
+  @Override
   public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();

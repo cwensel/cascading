@@ -352,6 +352,12 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
+  public boolean isSymmetrical()
+    {
+    return super.isSymmetrical() && skipHeader == writeHeader;
+    }
+
+  @Override
   public void sourceConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
