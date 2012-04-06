@@ -56,8 +56,8 @@ public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closea
   /**
    * Method getTupleEntry returns the entry of this TupleEntryIterator object.
    * <p/>
-   * Since TupleEntry instances are re-used, this entry will inherit a new Tuple
-   * on every {@link #next()} call.
+   * Since {@link TupleEntry} and the underlying {@link Tuple} instances are re-used, you must make a copy if you wish
+   * to store the instances in a Collection for later use.
    *
    * @return the entry (type TupleEntry) of this TupleEntryIterator object.
    */

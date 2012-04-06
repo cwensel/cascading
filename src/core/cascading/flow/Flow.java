@@ -1187,6 +1187,10 @@ public abstract class Flow<Config> implements UnitOfWork<FlowStats>
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
+   * <p/>
+   * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
+   * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
+   * stored in a Collection.
    *
    * @param tap of type Tap
    * @return TupleIterator

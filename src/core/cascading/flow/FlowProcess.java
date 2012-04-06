@@ -293,6 +293,10 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
+   * <p/>
+   * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
+   * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
+   * stored in a Collection.
    *
    * @param tap of type Tap
    * @return TupleIterator
@@ -309,6 +313,13 @@ public abstract class FlowProcess<Config>
    */
   public abstract TupleEntryCollector openTapForWrite( Tap tap ) throws IOException;
 
+  /**
+   * Method openTrapForWrite returns a (@link TupleCollector} for the given Tap instance.
+   *
+   * @param trap of type Tap
+   * @return TupleCollector
+   * @throws java.io.IOException when there is a failure opening the resource
+   */
   public abstract TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException;
 
   public abstract TupleEntryCollector openSystemIntermediateForWrite() throws IOException;

@@ -207,6 +207,10 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    * {@code input} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
    * via {@link Scheme#sourceConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
    * input type and instantiate it before calling {@code super.openForRead()}.
+   * <p/>
+   * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
+   * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
+   * stored in a Collection.
    *
    * @param flowProcess
    * @param input
@@ -214,6 +218,16 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
    */
   public abstract TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException;
 
+  /**
+   * Method openForRead opens the resource represented by this Tap instance.
+   * <p/>
+   * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
+   * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
+   * stored in a Collection.
+   *
+   * @param flowProcess
+   * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
+   */
   public TupleEntryIterator openForRead( Process flowProcess ) throws IOException
     {
     return openForRead( flowProcess, null );
@@ -239,6 +253,13 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     return new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
     }
 
+  /**
+   * Method openForWrite opens the resource represented by this Tap instance.
+   *
+   * @param flowProcess
+   * @return TupleEntryCollector
+   * @throws java.io.IOException when
+   */
   public TupleEntryCollector openForWrite( Process flowProcess ) throws IOException
     {
     return openForWrite( flowProcess, null );
