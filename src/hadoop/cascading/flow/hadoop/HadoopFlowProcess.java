@@ -35,7 +35,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
@@ -66,9 +65,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   /** Field reporter */
   Reporter reporter = Reporter.NULL;
   private OutputCollector outputCollector;
-  private CompressionCodec codec;
-  private String codecs;
-  private String compress;
 
   public HadoopFlowProcess()
     {

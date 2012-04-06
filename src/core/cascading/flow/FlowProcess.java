@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import cascading.flow.planner.FlowStep;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -48,11 +49,9 @@ public abstract class FlowProcess<Config>
   /** Field NULL is a noop implementation of FlowSession. */
   public static FlowProcess NULL = new NullFlowProcess();
 
-  private String id;
-
   public static class NullFlowProcess extends FlowProcess<Object>
     {
-    public NullFlowProcess()
+    protected NullFlowProcess()
       {
       }
 
@@ -142,9 +141,9 @@ public abstract class FlowProcess<Config>
       }
 
     @Override
-    public Object copyConfig( Object jobConf )
+    public Object copyConfig( Object config )
       {
-      return jobConf;
+      return config;
       }
 
     @Override
@@ -174,9 +173,14 @@ public abstract class FlowProcess<Config>
 
   public abstract FlowProcess copyWith( Config config );
 
+  /**
+   * Method getID() returns the current
+   *
+   * @return
+   */
   public String getID()
     {
-    return id;
+    return getStringProperty( FlowStep.CASCADING_FLOW_STEP_ID );
     }
 
   /**
@@ -221,12 +225,30 @@ public abstract class FlowProcess<Config>
   /**
    * Method getProperty should be used to return configuration parameters from the underlying system.
    * <p/>
-   * In the case of Hadoop, the current JobConf will be queried.
+   * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key of type String
    * @return an Object
    */
   public abstract Object getProperty( String key );
+
+  /**
+   * Method getStringProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key of type String
+   * @return an Object
+   */
+  public String getStringProperty( String key )
+    {
+    Object value = getProperty( key );
+
+    if( value == null )
+      return null;
+
+    return value.toString();
+    }
 
   /**
    * Method getPropertyKeys returns an immutable collection of all available property key values.

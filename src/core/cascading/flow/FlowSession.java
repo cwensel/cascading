@@ -20,8 +20,6 @@
 
 package cascading.flow;
 
-import java.util.Map;
-
 import cascading.management.CascadingServices;
 
 /**
@@ -34,15 +32,13 @@ import cascading.management.CascadingServices;
  */
 public class FlowSession
   {
-  /** Field currentProcess */
-  private FlowProcess currentProcess;
-
   /** Field NULL is a noop implementation of FlowSession. */
   public static final FlowSession NULL = new FlowSession();
-  private Map<Object, Object> properties;
-  private String id;
 
   protected CascadingServices cascadingServices;
+
+  /** Field currentProcess */
+  private FlowProcess currentProcess = FlowProcess.NULL; // is set via accessor
 
   public FlowSession()
     {
@@ -51,12 +47,6 @@ public class FlowSession
   public FlowSession( CascadingServices cascadingServices )
     {
     this.cascadingServices = cascadingServices;
-    }
-
-  public FlowSession( CascadingServices cascadingServices, FlowProcess currentProcess )
-    {
-    this.cascadingServices = cascadingServices;
-    this.currentProcess = currentProcess;
     }
 
   /**
@@ -84,13 +74,13 @@ public class FlowSession
     return cascadingServices;
     }
 
-  public Map<Object, Object> getProperties()
-    {
-    return properties;
-    }
-
+  /**
+   * Method getID returns the parent {@link Flow} ID value.
+   *
+   * @return
+   */
   public String getID()
     {
-    return id;
+    return currentProcess.getStringProperty( Flow.CASCADING_FLOW_ID );
     }
   }

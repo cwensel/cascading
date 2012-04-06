@@ -98,6 +98,8 @@ import riffle.process.ProcessStop;
 @riffle.process.Process
 public abstract class Flow<Config> implements UnitOfWork<FlowStats>
   {
+  public static final String CASCADING_FLOW_ID = "cascading.flow.id";
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
 
@@ -214,7 +216,7 @@ public abstract class Flow<Config> implements UnitOfWork<FlowStats>
     if( properties == null )
       return;
 
-    PropertyUtil.setProperty( properties, "cascading.flow.id", getID() );
+    PropertyUtil.setProperty( properties, CASCADING_FLOW_ID, getID() );
     PropertyUtil.setProperty( properties, "cascading.flow.tags", getTags() );
     FlowConnector.setApplicationID( properties );
     PropertyUtil.setProperty( properties, "cascading.app.name", makeAppName( properties ) );

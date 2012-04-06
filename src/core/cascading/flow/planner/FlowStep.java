@@ -66,6 +66,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class FlowStep<Config> implements Serializable
   {
+  public static final String CASCADING_FLOW_STEP_ID = "cascading.flow.step.id";
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowStep.class );
 
