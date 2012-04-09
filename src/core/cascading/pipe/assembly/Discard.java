@@ -37,9 +37,9 @@ import cascading.tuple.Fields;
  */
 public class Discard extends SubAssembly
   {
-  @ConstructorProperties({"previous", "fields"})
-  public Discard( Pipe previous, Fields fields )
+  @ConstructorProperties({"previous", "discardFields"})
+  public Discard( Pipe previous, Fields discardFields )
     {
-    setTails( new Each( previous, fields, new NoOp(), Fields.SWAP ) );
+    setTails( new Each( previous, discardFields, new NoOp(), Fields.SWAP ) );
     }
   }

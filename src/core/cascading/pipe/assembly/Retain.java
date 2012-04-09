@@ -37,9 +37,9 @@ import cascading.tuple.Fields;
  */
 public class Retain extends SubAssembly
   {
-  @ConstructorProperties({"previous", "fields"})
-  public Retain( Pipe previous, Fields fields )
+  @ConstructorProperties({"previous", "retainFields"})
+  public Retain( Pipe previous, Fields retainFields )
     {
-    setTails( new Each( previous, fields, new Identity(), Fields.RESULTS ) );
+    setTails( new Each( previous, retainFields, new Identity(), Fields.RESULTS ) );
     }
   }
