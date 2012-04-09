@@ -34,7 +34,7 @@ import cascading.tuple.TupleEntry;
  * constructor provided Filter instances.
  * <p/>
  * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for all given instances,
- * or returns {@code false} for all given instances, this filter will return {@code true}.
+ * or returns {@code false} for all given instances, this filter will return {@code false}.
  * <p/>
  * Note that Xor can only be applied to two values.
  *
