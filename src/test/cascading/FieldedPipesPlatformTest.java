@@ -861,4 +861,35 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     validateLength( flow, 3 );
     }
+
+  /**
+   * Catches failure to properly resolve the grouping fields as incoming to the second group-by
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testGroupGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ), new Fields( "count" ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "groupgroup" ), SinkMode.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 8, null );
+    }
   }

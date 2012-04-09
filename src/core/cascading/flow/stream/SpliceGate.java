@@ -139,7 +139,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
 
       keyFields[ pos ] = outgoingScopes.get( 0 ).getKeySelectors().get( incomingScope.getName() );
-      valuesFields[ pos ] = incomingScope.getOutValuesFields();
+      valuesFields[ pos ] = incomingScope.isEvery() ? incomingScope.getOutGroupingFields() : incomingScope.getOutValuesFields();
 
       if( sortFields != null )
         sortFields[ pos ] = outgoingScopes.get( 0 ).getSortingSelectors().get( incomingScope.getName() );
