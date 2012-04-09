@@ -43,6 +43,7 @@ import org.apache.hadoop.io.serializer.Serializer;
  * This class also implements {@link Comparison} so it is not required to set a {@link BytesComparator}
  * when attempting to group on a byte array via GroupBy or CoGroup.
  *
+ * @see TupleSerialization#addSerialization(java.util.Map, String)
  * @see cascading.tuple.hadoop.BytesComparator
  * @see Comparison
  */
