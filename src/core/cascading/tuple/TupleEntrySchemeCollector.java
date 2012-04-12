@@ -117,7 +117,7 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
       {
       scheme.sink( flowProcess, sinkCall );
       }
-    catch( IOException exception )
+    catch( Exception exception )
       {
       if( identifier == null || identifier.isEmpty() )
         identifier = "'unknown'";

@@ -33,6 +33,7 @@ import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopPlanner;
+import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
@@ -188,6 +189,12 @@ public class HadoopPlatform extends TestPlatform
   public boolean remoteExists( String outputFile ) throws IOException
     {
     return fileSys.exists( new Path( outputFile ) );
+    }
+
+  @Override
+  public Tap getTap( Scheme scheme, String filename, SinkMode mode )
+    {
+    return new Hfs( scheme, filename, mode );
     }
 
   @Override

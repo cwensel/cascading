@@ -290,6 +290,10 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
    * to simply re-use the existing instance.
    * <p/>
    * Note this is only time it is safe to modify a Tuple instance handed over via a method call.
+   * <p/>
+   * This method may optionally throw a {@link cascading.tap.TapException} if it cannot process a particular
+   * instance of data. If the payload Tuple is set on the TapException, that Tuple will be written to
+   * any applicable failure trap Tap.
    *
    * @param flowProcess of Process
    * @param sourceCall  of SourceCall
@@ -325,6 +329,10 @@ public abstract class Scheme<Process extends FlowProcess, Config, Input, Output,
   /**
    * Method sink writes out the given {@link Tuple} found on {@link cascading.scheme.SinkCall#getOutgoingEntry()} to
    * the {@link cascading.scheme.SinkCall#getOutput()}.
+   * <p/>
+   * This method may optionally throw a {@link cascading.tap.TapException} if it cannot process a particular
+   * instance of data. If the payload Tuple is set on the TapException, that Tuple will be written to
+   * any applicable failure trap Tap. If not set, the incoming Tuple will be written instead.
    *
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall

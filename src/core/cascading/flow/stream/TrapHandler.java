@@ -27,6 +27,7 @@ import java.util.Map;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.util.Util;
@@ -119,13 +120,21 @@ public class TrapHandler
     if( trap == null )
       handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
 
-    if( tupleEntry == null )
+    Throwable cause = throwable.getCause();
+
+    if( cause instanceof TapException && ( (TapException) cause ).getPayload() != null )
+      {
+      getTrapCollector( trap, flowProcess ).add( ( (TapException) cause ).getPayload() );
+      }
+    else if( tupleEntry != null )
+      {
+      getTrapCollector( trap, flowProcess ).add( tupleEntry );
+      }
+    else
       {
       LOG.error( "failure resolving tuple entry", throwable );
       throw new DuctException( "failure resolving tuple entry", throwable );
       }
-
-    getTrapCollector( trap, flowProcess ).add( tupleEntry );
 
     flowProcess.increment( StepCounters.Tuples_Trapped, 1 );
 

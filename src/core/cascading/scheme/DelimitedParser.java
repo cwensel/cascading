@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
 import org.slf4j.Logger;
@@ -214,7 +215,7 @@ public class DelimitedParser implements Serializable
       String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
 
       if( strict )
-        throw new TapException( message );
+        throw new TapException( message, new Tuple( line ) ); // trap actual line data
 
       LOG.warn( message );
 
@@ -246,12 +247,13 @@ public class DelimitedParser implements Serializable
           LOG.warn( message, exception );
 
           if( !safe )
-            throw new TapException( message, exception );
+            throw new TapException( message, exception, new Tuple( line ) ); // trap actual line data
           }
         }
 
       split = result;
       }
+
     return split;
     }
 

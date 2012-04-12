@@ -22,11 +22,20 @@ package cascading.tap;
 
 import cascading.CascadingException;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.util.Util;
 
-/** Class TapException is thrown from {@link Tap} subclasses. */
+/**
+ * Class TapException is thrown from {@link Tap} and {@link cascading.scheme.Scheme} subclasses.
+ * <p/>
+ * Use the payload {@link Tuple} constructor if being thrown from inside a Scheme and which for specific data
+ * to be trapped by a failure trap Tap. If the payload is not null, and there is a trap covering the source or sink
+ * Tap in question, it will be written to the trap Tap.
+ */
 public class TapException extends CascadingException
   {
+  Tuple payload;
+
   /** Constructor TapException creates a new TapException instance. */
   public TapException()
     {
@@ -56,6 +65,31 @@ public class TapException extends CascadingException
   /**
    * Constructor TapException creates a new TapException instance.
    *
+   * @param string    of type String
+   * @param throwable of type Throwable
+   * @param payload   of type Tuple
+   */
+  public TapException( String string, Throwable throwable, Tuple payload )
+    {
+    super( string, throwable );
+    this.payload = payload;
+    }
+
+  /**
+   * Constructor TapException creates a new TapException instance.
+   *
+   * @param string  of type String
+   * @param payload of type Tuple
+   */
+  public TapException( String string, Tuple payload )
+    {
+    super( string );
+    this.payload = payload;
+    }
+
+  /**
+   * Constructor TapException creates a new TapException instance.
+   *
    * @param throwable of type Throwable
    */
   public TapException( Throwable throwable )
@@ -74,6 +108,11 @@ public class TapException extends CascadingException
   public TapException( Tap tap, Fields incomingFields, Fields selectorFields, Throwable throwable )
     {
     super( createMessage( tap, incomingFields, selectorFields ), throwable );
+    }
+
+  public Tuple getPayload()
+    {
+    return payload;
     }
 
   private static String createMessage( Tap tap, Fields incomingFields, Fields selectorFields )

@@ -83,14 +83,17 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
         catch( OutOfMemoryError error )
           {
           handleReThrowableException( "out of memory, try increasing task memory allocation", error );
+          continue;
           }
         catch( CascadingException exception )
           {
           handleException( exception, null );
+          continue;
           }
         catch( Throwable throwable )
           {
           handleException( new DuctException( "internal error", throwable ), null );
+          continue;
           }
 
         next.receive( this, tupleEntry );

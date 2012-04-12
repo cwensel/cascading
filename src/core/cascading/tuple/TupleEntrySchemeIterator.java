@@ -133,8 +133,15 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
   @Override
   public TupleEntry next()
     {
-    if( currentException != null )
-      throw currentException;
+    try
+      {
+      if( currentException != null )
+        throw currentException;
+      }
+    finally
+      {
+      currentException = null; // data may be trapped
+      }
 
     if( isComplete )
       throw new IllegalStateException( "no next element" );

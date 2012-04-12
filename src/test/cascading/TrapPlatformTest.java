@@ -21,10 +21,15 @@
 package cascading;
 
 import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.local.LocalFlowProcess;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.assertion.AssertNotEquals;
@@ -33,13 +38,20 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.scheme.Scheme;
+import cascading.scheme.SinkCall;
+import cascading.scheme.SourceCall;
+import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.test.HadoopPlatform;
 import cascading.test.LocalPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
 
 import static data.InputData.inputFileApache;
@@ -336,74 +348,119 @@ public class TrapPlatformTest extends PlatformTestCase
     validateLength( flow.openTrap(), 10 );
     }
 
-//  private static class FailScheme extends TextLine
-//    {
-//    boolean sourceFired = false;
-//    boolean sinkFired = false;
-//
-//    public FailScheme()
-//      {
-//      }
-//
-//    public FailScheme( Fields sourceFields )
-//      {
-//      super( sourceFields );
-//      }
-//
-//    @Override
-//    public boolean source( HadoopFlowProcess flowProcess, SourceCall sourceCall ) throws IOException
-//      {
-//      if( !sourceFired )
-//        {
-//        sourceFired = true;
-//        throw new TapException( "fail" );
-//        }
-//
-//      return super.source( flowProcess, sourceCall );
-//      }
-//
-//    @Override
-//    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
-//      {
-//      if( !sinkFired )
-//        {
-//        sinkFired = true;
-//        throw new TapException( "fail" );
-//        }
-//
-//      super.sink( flowProcess, sinkCall );
-//      }
-//    }
+  private static class HadoopFailScheme extends TextLine
+    {
+    boolean sourceFired = false;
+    boolean sinkFired = false;
 
-/**  public void testTrapTapSourceSink() throws Exception
- {
- if( !new File( inputFileApache ).exists() )
- fail( "data file not found" );
+    public HadoopFailScheme()
+      {
+      }
 
- copyFromLocal( inputFileApache );
+    public HadoopFailScheme( Fields sourceFields )
+      {
+      super( sourceFields );
+      }
 
- Tap source = new Hfs( new FailScheme( new Fields( "offset", "line" ) ), inputFileApache );
+    @Override
+    public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+      {
+      if( !sourceFired )
+        {
+        sourceFired = true;
+        throw new TapException( "fail", new Tuple( "bad data" ) );
+        }
 
- Pipe pipe = new Pipe( "map" );
+      return super.source( flowProcess, sourceCall );
+      }
 
- pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
- pipe = new GroupBy( pipe, new Fields( "ip" ) );
- pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+    @Override
+    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+      {
+      if( !sinkFired )
+        {
+        sinkFired = true;
+        throw new TapException( "fail", new Tuple( "bad data" ) );
+        }
 
- Tap sink = new Hfs( new FailScheme(), outputPath + "sink/tap", true );
- Tap trap = new Hfs( new TextLine(), outputPath + "sink/trap", true );
+      super.sink( flowProcess, sinkCall );
+      }
+    }
 
- Map<Object, Object> properties = getProperties();
+  private static class LocalFailScheme extends cascading.scheme.local.TextLine
+    {
+    boolean sourceFired = false;
+    boolean sinkFired = false;
 
- // compensate for running in cluster mode
- properties.put( "mapred.map.tasks", 1 );
- properties.put( "mapred.reduce.tasks", 1 );
+    public LocalFailScheme()
+      {
+      }
 
- Flow flow = new HadoopFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
+    public LocalFailScheme( Fields sourceFields )
+      {
+      super( sourceFields );
+      }
 
- flow.complete();
+    @Override
+    public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+      {
+      if( !sourceFired )
+        {
+        sourceFired = true;
+        throw new TapException( "fail", new Tuple( "bad data" ) );
+        }
 
- validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath + "sink/tap", true ) ), 6, null );
- validateLength( flow.openTrap(), 2 );
- } **/
+      return super.source( flowProcess, sourceCall );
+      }
+
+    @Override
+    public void sink( LocalFlowProcess flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
+      {
+      if( !sinkFired )
+        {
+        sinkFired = true;
+        throw new TapException( "fail", new Tuple( "bad data" ) );
+        }
+
+      super.sink( flowProcess, sinkCall );
+      }
+    }
+
+  @Test
+  public void testTrapTapSourceSink() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Scheme scheme;
+
+    if( getPlatform() instanceof HadoopPlatform )
+      scheme = new HadoopFailScheme( new Fields( "line" ) );
+    else
+      scheme = new LocalFailScheme( new Fields( "line" ) );
+
+    Tap source = getPlatform().getTap( scheme, inputFileApache, SinkMode.KEEP );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = getPlatform().getTap( scheme, getOutputPath( "trapsourcesink/sink" ), SinkMode.REPLACE );
+
+    Tap trap = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "trapsourcesink/trap" ), SinkMode.REPLACE );
+
+    Map<Object, Object> properties = getProperties();
+
+    // compensate for running in cluster mode
+    properties.put( "mapred.map.tasks", 1 );
+    properties.put( "mapred.reduce.tasks", 1 );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow.openTapForRead( getPlatform().getTextFile( sink.getIdentifier() ) ), 7 );
+    validateLength( flow.openTrap(), 2, Pattern.compile( "bad data" ) ); // confirm the payload is written
+    }
   }

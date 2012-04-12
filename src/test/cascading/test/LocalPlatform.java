@@ -30,6 +30,8 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.flow.local.LocalFlowConnector;
 import cascading.flow.local.LocalFlowProcess;
+import cascading.scheme.Scheme;
+import cascading.scheme.local.LocalScheme;
 import cascading.scheme.local.TextDelimited;
 import cascading.scheme.local.TextLine;
 import cascading.tap.SinkMode;
@@ -86,6 +88,12 @@ public class LocalPlatform extends TestPlatform
   public FlowConnector getFlowConnector( Map<Object, Object> properties )
     {
     return new LocalFlowConnector( properties );
+    }
+
+  @Override
+  public Tap getTap( Scheme scheme, String filename, SinkMode mode )
+    {
+    return new FileTap( (LocalScheme) scheme, filename, mode );
     }
 
   @Override

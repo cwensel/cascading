@@ -25,6 +25,7 @@ import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -81,6 +82,8 @@ public abstract class TestPlatform
     return getFlowConnector( getProperties() );
     }
 
+  public abstract Tap getTap( Scheme scheme, String filename, SinkMode mode );
+
   public Tap getTextFile( Fields sourceFields, String filename )
     {
     return getTextFile( sourceFields, filename, SinkMode.KEEP );
@@ -102,11 +105,6 @@ public abstract class TestPlatform
     }
 
   public abstract Tap getTextFile( Fields sourceFields, Fields sinkFields, String filename, SinkMode mode );
-
-  public Tap getBinaryFile( Fields fields, String filename )
-    {
-    return getBinaryFile( fields, filename );
-    }
 
   public Tap getDelimitedFile( Fields fields, String delimiter, String filename )
     {

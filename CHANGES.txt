@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added support for trapping actual raw input data as read by a c.s.Scheme during processing by allowing
+  c.t.TupleException to accept a payload c.t.Tuple instance with the data to be trapped. Updated c.s.h.TextDelimited
+  and c.s.l.TextDelimited to provide a proper payload when sourcing and parsing text.
+
   Fixed issue where a c.p.GroupBy following a c.p.Every could not see result Aggregator fields from the Every instance.
 
   Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally write headers if writeHeaders or hasHeaders
