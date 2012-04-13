@@ -426,4 +426,14 @@ public class HadoopUtil
 
     return currentConf;
     }
+
+  public static JobConf removePropertiesFrom( JobConf jobConf, String... keys )
+    {
+    Map<Object, Object> properties = createProperties( jobConf );
+
+    for( String key : keys )
+      properties.remove( key );
+
+    return createJobConf( properties, null );
+    }
   }

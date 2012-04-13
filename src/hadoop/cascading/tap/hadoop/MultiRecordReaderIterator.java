@@ -23,6 +23,7 @@ package cascading.tap.hadoop;
 import java.io.IOException;
 
 import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.CloseableIterator;
@@ -70,22 +71,26 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
    *
    * @throws IOException when
    */
-  public MultiRecordReaderIterator( HadoopFlowProcess flowProcess, Tap tap, JobConf jobConf ) throws IOException
+  public MultiRecordReaderIterator( HadoopFlowProcess flowProcess, Tap tap ) throws IOException
     {
     this.flowProcess = flowProcess;
     this.tap = tap;
-    this.conf = new JobConf( jobConf );
+    this.conf = flowProcess.getConfigCopy();
 
     initialize();
     }
 
   private void initialize() throws IOException
     {
-    // allows client side config to be used cluster side
+    // prevent collisions of configuration properties set client side if now cluster side
     String property = flowProcess.getStringProperty( "cascading.step.accumulated.source.conf." + tap.getIdentifier() );
 
     if( property == null )
+      {
+      // default behavior is to accumulate paths, so remove any set prior
+      conf = HadoopUtil.removePropertiesFrom( conf, "mapred.input.dir" );
       tap.sourceConfInit( flowProcess, conf );
+      }
 
     inputFormat = conf.getInputFormat();
 

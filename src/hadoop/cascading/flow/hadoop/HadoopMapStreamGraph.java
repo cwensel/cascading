@@ -20,10 +20,14 @@
 
 package cascading.flow.hadoop;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowException;
+import cascading.flow.FlowProcess;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryJoinGate;
 import cascading.flow.stream.SinkStage;
@@ -35,6 +39,7 @@ import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Join;
 import cascading.tap.Tap;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
@@ -65,7 +70,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
 
   protected void buildGraph()
     {
-    streamedHead = handleHead( this.source );
+    streamedHead = handleHead( this.source, flowProcess );
 
     FlowElement tail = step.getGroup() != null ? step.getGroup() : step.getSink();
     Set<Tap> tributaries = step.getJoinTributariesBetween( this.source, tail );
@@ -73,10 +78,39 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     tributaries.remove( this.source );
 
     for( Object source : tributaries )
-      handleHead( (Tap) source );
+      {
+      HadoopFlowProcess hadoopProcess = (HadoopFlowProcess) flowProcess;
+      JobConf conf = hadoopProcess.getJobConf();
+
+      // allows client side config to be used cluster side
+      String property = conf.getRaw( "cascading.step.accumulated.source.conf." + ( (Tap) source ).getIdentifier() );
+
+      if( property == null )
+        throw new IllegalStateException( "accumulated source conf property missing" );
+
+      conf = getSourceConf( hadoopProcess, conf, property );
+      flowProcess = new HadoopFlowProcess( hadoopProcess, conf );
+
+      handleHead( (Tap) source, flowProcess );
+      }
     }
 
-  private SourceStage handleHead( Tap source )
+  private JobConf getSourceConf( HadoopFlowProcess flowProcess, JobConf conf, String property )
+    {
+    Map<String, String> priorConf = null;
+    try
+      {
+      priorConf = HadoopUtil.deserializeMapBase64( property, true );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to deserialize properties", exception );
+      }
+
+    return flowProcess.mergeMapIntoConfig( conf, priorConf );
+    }
+
+  private SourceStage handleHead( Tap source, FlowProcess flowProcess )
     {
     SourceStage sourceDuct = new SourceStage( flowProcess, source );
 

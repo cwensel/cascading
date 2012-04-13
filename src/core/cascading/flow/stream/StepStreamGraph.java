@@ -47,7 +47,7 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
  */
 public abstract class StepStreamGraph extends StreamGraph
   {
-  protected final FlowProcess flowProcess;
+  protected FlowProcess flowProcess;
   protected final FlowStep step;
 
   public StepStreamGraph( FlowProcess flowProcess, FlowStep step )
