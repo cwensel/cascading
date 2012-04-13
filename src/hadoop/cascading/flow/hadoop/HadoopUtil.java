@@ -22,11 +22,14 @@ package cascading.flow.hadoop;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -147,6 +150,123 @@ public class HadoopUtil
     LOG.debug( "unable to find and remove client hdfs shutdown hook, received exception: {}", caughtException.getClass().getName() );
 
     return null;
+    }
+
+  public static String serializeMapBase64( Map<String, String> map, boolean compress ) throws IOException
+    {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    DataOutputStream out = new DataOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+
+    try
+      {
+      out.writeInt( map.size() );
+
+      for( Map.Entry<String, String> entry : map.entrySet() )
+        {
+        out.writeUTF( entry.getKey() );
+        out.writeUTF( entry.getValue() );
+        }
+      }
+    finally
+      {
+      out.close();
+      }
+
+    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
+    }
+
+  public static Map<String, String> deserializeMapBase64( String string, boolean decompress ) throws IOException
+    {
+    if( string == null || string.length() == 0 )
+      return null;
+
+    DataInputStream in = null;
+
+    try
+      {
+      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
+
+      in = new DataInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
+
+      int mapSize = in.readInt();
+      Map<String, String> map = new HashMap<String, String>( mapSize );
+
+      for( int j = 0; j < mapSize; j++ )
+        map.put( in.readUTF(), in.readUTF() );
+
+      return map;
+      }
+    finally
+      {
+      if( in != null )
+        in.close();
+      }
+    }
+
+  public static String serializeListMapBase64( List<Map<String, String>> listMap, boolean compress ) throws IOException
+    {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+    DataOutputStream out = new DataOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+
+    try
+      {
+      out.writeInt( listMap.size() );
+
+      for( Map<String, String> map : listMap )
+        {
+        out.writeInt( map.size() );
+
+        for( Map.Entry<String, String> entry : map.entrySet() )
+          {
+          out.writeUTF( entry.getKey() );
+          out.writeUTF( entry.getValue() );
+          }
+        }
+      }
+    finally
+      {
+      out.close();
+      }
+
+    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
+    }
+
+  public static List<Map<String, String>> deserializeListMapBase64( String string, boolean decompress ) throws IOException
+    {
+    if( string == null || string.length() == 0 )
+      return null;
+
+    DataInputStream in = null;
+
+    try
+      {
+      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
+
+      in = new DataInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
+
+      int listSize = in.readInt();
+      List<Map<String, String>> list = new ArrayList<Map<String, String>>( listSize );
+
+      for( int i = 0; i < listSize; i++ )
+        {
+        int mapSize = in.readInt();
+
+        Map<String, String> map = new HashMap<String, String>( mapSize );
+
+        for( int j = 0; j < mapSize; j++ )
+          map.put( in.readUTF(), in.readUTF() );
+
+        list.add( map );
+        }
+
+      return list;
+      }
+    finally
+      {
+      if( in != null )
+        in.close();
+      }
     }
 
   /**

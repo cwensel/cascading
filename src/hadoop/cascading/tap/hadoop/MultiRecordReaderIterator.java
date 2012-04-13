@@ -51,7 +51,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
   /** Field inputFormat */
   private InputFormat inputFormat;
   /** Field conf */
-  private final JobConf conf;
+  private JobConf conf;
   /** Field splits */
   private InputSplit[] splits;
   /** Field reader */
@@ -81,7 +81,11 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
 
   private void initialize() throws IOException
     {
-    tap.sourceConfInit( flowProcess, conf );
+    // allows client side config to be used cluster side
+    String property = flowProcess.getStringProperty( "cascading.step.accumulated.source.conf." + tap.getIdentifier() );
+
+    if( property == null )
+      tap.sourceConfInit( flowProcess, conf );
 
     inputFormat = conf.getInputFormat();
 

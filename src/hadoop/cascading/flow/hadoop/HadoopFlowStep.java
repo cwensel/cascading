@@ -170,6 +170,9 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     {
     try
       {
+      if( object instanceof Map )
+        return HadoopUtil.serializeMapBase64( (Map<String, String>) object, true );
+
       return HadoopUtil.serializeBase64( object );
       }
     catch( IOException exception )
@@ -287,18 +290,31 @@ public class HadoopFlowStep extends FlowStep<JobConf>
     // we do not want to init the same tap multiple times
     Set<Tap> uniqueSources = getUniqueStreamedSources();
 
-    JobConf[] fromJobs = new JobConf[ uniqueSources.size() ];
+    JobConf[] streamedJobs = new JobConf[ uniqueSources.size() ];
     int i = 0;
 
     for( Tap tap : uniqueSources )
       {
-      fromJobs[ i ] = flowProcess.copyConfig( conf );
-      tap.sourceConfInit( flowProcess, fromJobs[ i ] );
-      fromJobs[ i ].set( "cascading.step.source", pack( tap ) );
+      if( tap.getIdentifier() == null )
+        throw new IllegalStateException( "tap may not have null identifier: " + tap.toString() );
+
+      streamedJobs[ i ] = flowProcess.copyConfig( conf );
+      tap.sourceConfInit( flowProcess, streamedJobs[ i ] );
+      streamedJobs[ i ].set( "cascading.step.source", tap.getIdentifier() );
       i++;
       }
 
-    MultiInputFormat.addInputFormat( conf, fromJobs );
+    Set<Tap> accumulatedSources = getAllAccumulatedSources();
+
+    for( Tap tap : accumulatedSources )
+      {
+      JobConf accumulatedJob = flowProcess.copyConfig( conf );
+      tap.sourceConfInit( flowProcess, accumulatedJob );
+      Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
+      conf.set( "cascading.step.accumulated.source.conf." + tap.getIdentifier(), pack( map ) );
+      }
+
+    MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last
     }
 
   private void initFromPipes( final JobConf conf )

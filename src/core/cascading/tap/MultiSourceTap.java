@@ -46,6 +46,7 @@ import static java.util.Arrays.copyOf;
  */
 public class MultiSourceTap<Child extends Tap, Process extends FlowProcess, Config, Input> extends SourceTap<Process, Config, Input> implements CompositeTap<Child>
   {
+  private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
   protected Child[] taps;
 
   private class TupleIterator implements Iterator
@@ -135,10 +136,10 @@ public class MultiSourceTap<Child extends Tap, Process extends FlowProcess, Conf
     return getTaps().length;
     }
 
-  /** Method getPath() always returns null. Since this class represents multiple resources, this is not one single path. */
+  @Override
   public String getIdentifier()
     {
-    return null;
+    return identifier;
     }
 
   @Override

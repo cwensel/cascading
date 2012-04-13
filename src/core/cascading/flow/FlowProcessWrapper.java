@@ -31,9 +31,9 @@ import cascading.tuple.TupleEntryIterator;
 /**
  *
  */
-public class FlowProcessWrapper extends FlowProcess<Object>
+public class FlowProcessWrapper<Config> extends FlowProcess<Config>
   {
-  final FlowProcess delegate;
+  final FlowProcess<Config> delegate;
 
   public static FlowProcess undelegate( FlowProcess flowProcess )
     {
@@ -54,7 +54,7 @@ public class FlowProcessWrapper extends FlowProcess<Object>
     }
 
   @Override
-  public FlowProcess copyWith( Object object )
+  public FlowProcess copyWith( Config object )
     {
     return delegate.copyWith( object );
     }
@@ -162,26 +162,26 @@ public class FlowProcessWrapper extends FlowProcess<Object>
     }
 
   @Override
-  public Object getConfigCopy()
+  public Config getConfigCopy()
     {
     return delegate.getConfigCopy();
     }
 
   @Override
-  public Object copyConfig( Object jobConf )
+  public Config copyConfig( Config jobConf )
     {
     return delegate.copyConfig( jobConf );
     }
 
   @Override
-  public Map<String, String> diffConfigIntoMap( Object defaultConfig, Object updatedConfig )
+  public Map<String, String> diffConfigIntoMap( Config defaultConfig, Config updatedConfig )
     {
     return delegate.diffConfigIntoMap( defaultConfig, updatedConfig );
     }
 
   @Override
-  public Object mergeMapIntoConfig( Object defaultConfig, Map<String, String> map )
+  public Config mergeMapIntoConfig( Config defaultConfig, Map<String, String> map )
     {
-    return delegate.mergeMapIntoConfig( defaultConfig, map );
+    return (Config) delegate.mergeMapIntoConfig( defaultConfig, map );
     }
   }

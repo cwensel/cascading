@@ -338,6 +338,28 @@ public abstract class FlowStep<Config> implements Serializable
     return Collections.unmodifiableSet( sinks.get( sink ) );
     }
 
+  public Tap getSourceWith( String identifier )
+    {
+    for( Tap tap : sources.keySet() )
+      {
+      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+        return tap;
+      }
+
+    return null;
+    }
+
+  public Tap getSinkWith( String identifier )
+    {
+    for( Tap tap : sinks.keySet() )
+      {
+      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+        return tap;
+      }
+
+    return null;
+    }
+
   public abstract Set<Tap> getTraps();
 
   public abstract Tap getTrap( String name );

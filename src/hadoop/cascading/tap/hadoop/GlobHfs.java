@@ -90,6 +90,12 @@ public class GlobHfs extends MultiSourceTap<Hfs, HadoopFlowProcess, JobConf, Rec
     }
 
   @Override
+  public String getIdentifier()
+    {
+    return pathPattern;
+    }
+
+  @Override
   protected Hfs[] getTaps()
     {
     return initTapsInternal( new JobConf() );

@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
@@ -41,6 +44,7 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Join;
 import cascading.pipe.Pipe;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -53,6 +57,7 @@ import cascading.tap.Tap;
 import cascading.test.HadoopPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -125,10 +130,6 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
   public class CommentScheme extends TextLine
     {
-    public CommentScheme()
-      {
-      }
-
     public CommentScheme( Fields sourceFields )
       {
       super( sourceFields );
@@ -478,5 +479,70 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       {
       // do nothing
       }
+    }
+
+  public class DupeConfigScheme extends TextLine
+    {
+    public DupeConfigScheme( Fields sourceFields )
+      {
+      super( sourceFields );
+      }
+
+    @Override
+    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+      {
+      if( conf.get( "this.is.a.dupe" ) != null )
+        throw new IllegalStateException( "has dupe config value" );
+
+      conf.set( "this.is.a.dupe", "dupe" );
+
+      super.sourceConfInit( flowProcess, tap, conf );
+      }
+
+    @Override
+    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+      {
+      if( flowProcess.getStringProperty( "this.is.a.dupe" ) == null )
+        throw new IllegalStateException( "has no dupe config value" );
+
+      super.sourcePrepare( flowProcess, sourceCall );
+      }
+    }
+
+  @Test
+  public void testDupeConfigFromScheme() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTap( new DupeConfigScheme( new Fields( "offset", "line" ) ), inputFileUpper, SinkMode.KEEP );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "dupeconfig" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
   }

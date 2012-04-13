@@ -413,9 +413,26 @@ public class Hfs extends Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCol
 
     JobConf conf = HadoopUtil.createJobConf( properties, null );
 
+    // allows client side config to be used cluster side
+    String property = flowProcess.getJobConf().getRaw( "cascading.step.accumulated.source.conf." + getIdentifier() );
+
+    if( property != null )
+      {
+      conf = getSourceConf( flowProcess, conf, property );
+      flowProcess = new HadoopFlowProcess( flowProcess, conf );
+      }
+
     // this is only called when, on the client side, a user wants to open a tap for writing on a client
     // MultiRecordReader will create a new RecordReader instance for use across any file parts
+    // or on the cluster side during accumulation for a Join
     return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this, conf ), identifier );
+    }
+
+  private JobConf getSourceConf( HadoopFlowProcess flowProcess, JobConf conf, String property ) throws IOException
+    {
+    Map<String, String> priorConf = HadoopUtil.deserializeMapBase64( property, true );
+
+    return flowProcess.mergeMapIntoConfig( conf, priorConf );
     }
 
   @Override
