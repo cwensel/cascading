@@ -25,7 +25,7 @@ archivesBaseName = 'cascading-core'
 
 sourceSets {
   main {
-    output.classesDir = new File("${buildDir}/classes/core")
+    output.classesDir = new File( "${buildDir}/classes/core" )
 
     java {
       srcDir 'cascading'
@@ -47,26 +47,26 @@ dependencies {
 }
 
 jar.doFirst {
-  new File(buildDir, 'build.number.properties').write("build.number=${buildNumber}")
+  new File( buildDir, 'build.number.properties' ).write( "cascading.build.number=${buildNumber}" )
 }
 
 jar {
-  into('cascading') {
+  into( 'cascading' ) {
     from '../../version.properties'
     from "${buildDir}/build.number.properties"
   }
 }
 
 assemble << {
-  def distDir = mkdir("${buildDir}/dist")
+  def distDir = mkdir( "${buildDir}/dist" )
 
   copy {
     into "${distDir}/lib/cascading-core"
-    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-      !dep.name.contains('cascading')
+    from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains( 'cascading' )
     }.collect { dep ->
       dep.moduleArtifacts.collect { it.file }
-    })
+    } )
   }
 
   copy {
@@ -80,8 +80,8 @@ test {
   exclude '**/*PlatformTest.class'
   exclude '**/ComparePlatformsTest.class'
 
-  systemProperties = setTestingProperties('core')
+  systemProperties = setTestingProperties( 'core' )
 
-  testReportDir = new File(testReportDir, 'core')
-  testResultsDir = new File(testResultsDir, 'core')
+  testReportDir = new File( testReportDir, 'core' )
+  testResultsDir = new File( testResultsDir, 'core' )
 }

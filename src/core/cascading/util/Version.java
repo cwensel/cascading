@@ -54,7 +54,7 @@ public class Version
 
       String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
       String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
-      String releaseBuild = versionProperties.getProperty( "build.number", null );
+      String releaseBuild = versionProperties.getProperty( "cascading.build.number", null );
       String platformVersion = versionProperties.getProperty( "cascading.platform.compatible.version" );
       String releaseFull = null;
 
