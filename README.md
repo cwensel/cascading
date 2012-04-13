@@ -31,7 +31,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading currently requires Gradle 1.0-milestone-3 to build.
+Cascading currently requires Gradle 1.0-milestone-8a to build.
 
 To use an IDE like IntelliJ, run the following to get all jar dependencies:
 
