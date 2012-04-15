@@ -44,7 +44,7 @@ import static java.util.Arrays.copyOf;
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
-public class MultiSourceTap<Child extends Tap, Process extends FlowProcess, Config, Input> extends SourceTap<Process, Config, Input> implements CompositeTap<Child>
+public class MultiSourceTap<Child extends Tap, Process extends FlowProcess<Config>, Config, Input> extends SourceTap<Process, Config, Input> implements CompositeTap<Child>
   {
   private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
   protected Child[] taps;
@@ -77,7 +77,7 @@ public class MultiSourceTap<Child extends Tap, Process extends FlowProcess, Conf
       }
     }
 
-  protected MultiSourceTap( Scheme scheme )
+  protected MultiSourceTap( Scheme<Process, Config, Input, Void, ?, ?> scheme )
     {
     super( scheme );
     }

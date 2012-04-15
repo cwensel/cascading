@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import cascading.flow.planner.FlowStep;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -35,7 +34,7 @@ import cascading.tuple.TupleEntryIterator;
  * {@link cascading.operation.Operation} is given a reference to a particular implementation, allowing it
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
  * <p/>
- * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link cascading.flow.Flow}.
+ * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link Flow}.
  * Thus, a call to {@link #increment(Enum, long)} may start incrementing from zero if the operation making the call
  * belongs to a subsequent 'job' or 'step' from any previous operations calling increment.
  * <p/>

@@ -22,7 +22,7 @@ package cascading.flow.hadoop;
 
 import java.io.IOException;
 
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.ClientState;
 import cascading.stats.CascadingStats;
@@ -37,7 +37,7 @@ import static cascading.flow.hadoop.HadoopFlow.getJobPollingInterval;
 /**
  *
  */
-public class HadoopFlowStepJob extends FlowStepJob
+public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   {
   private static long getStoreInterval( JobConf jobConf )
     {
@@ -51,7 +51,7 @@ public class HadoopFlowStepJob extends FlowStepJob
   /** Field runningJob */
   private RunningJob runningJob;
 
-  public HadoopFlowStepJob( ClientState clientState, FlowStep flowStep, JobConf currentConf )
+  public HadoopFlowStepJob( ClientState clientState, BaseFlowStep flowStep, JobConf currentConf )
     {
     super( clientState, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
     this.currentConf = currentConf;
@@ -61,9 +61,15 @@ public class HadoopFlowStepJob extends FlowStepJob
     }
 
   @Override
+  public JobConf getConfig()
+    {
+    return currentConf;
+    }
+
+  @Override
   protected FlowStepStats createStepStats( ClientState clientState )
     {
-    return new HadoopStepStats( currentConf, flowStep, clientState )
+    return new HadoopStepStats( flowStep, clientState )
     {
     @Override
     public JobClient getJobClient()

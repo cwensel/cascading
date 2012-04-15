@@ -78,7 +78,7 @@ public class CascadeDef extends Def<CascadeDef>
     }
 
   /**
-   * Method addFlow adds a new {@link Flow} instance that is intended to participate in a {@link Cascade}.
+   * Method addFlow adds a new {@link cascading.flow.Flow} instance that is intended to participate in a {@link Cascade}.
    *
    * @param flow of Flow
    * @return CascadeDef
@@ -97,7 +97,7 @@ public class CascadeDef extends Def<CascadeDef>
     }
 
   /**
-   * Method addFlows adds many new {@link Flow} instances intended to participate in a {@link Cascade}.
+   * Method addFlows adds many new {@link cascading.flow.Flow} instances intended to participate in a {@link Cascade}.
    *
    * @param flows of Flow[]
    * @return CascadeDef
@@ -111,7 +111,7 @@ public class CascadeDef extends Def<CascadeDef>
     }
 
   /**
-   * Method addFlows adds many new {@link Flow} instances intended to participate in a {@link Cascade}.
+   * Method addFlows adds many new {@link cascading.flow.Flow} instances intended to participate in a {@link Cascade}.
    *
    * @param flows of Collection<Flow>
    * @return CascadeDef

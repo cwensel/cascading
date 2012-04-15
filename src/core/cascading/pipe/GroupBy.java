@@ -22,7 +22,6 @@ package cascading.pipe;
 
 import java.beans.ConstructorProperties;
 
-import cascading.flow.Flow;
 import cascading.operation.Aggregator;
 import cascading.operation.Filter;
 import cascading.operation.Function;
@@ -34,7 +33,7 @@ import cascading.tuple.Tuple;
  * </p>
  * If more than one {@link Pipe} instance is provided on the constructor, all branches will be merged. It is required
  * that all Pipe instances output the same field names, otherwise the {@link cascading.flow.FlowConnector} will fail to create a
- * {@link Flow} instance. Again, the Pipe instances are merged together as if one Tuple stream and not joined.
+ * {@link cascading.flow.Flow} instance. Again, the Pipe instances are merged together as if one Tuple stream and not joined.
  * See {@link CoGroup} for joining by common fields.
  * </p>
  * Typically an {@link Every} follows GroupBy to apply an {@link Aggregator} function to every grouping. The

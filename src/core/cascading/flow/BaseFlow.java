@@ -1,0 +1,1407 @@
+/*
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cascading.flow;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+import cascading.CascadingException;
+import cascading.cascade.Cascade;
+import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.FlowStepJob;
+import cascading.management.CascadingServices;
+import cascading.management.ClientState;
+import cascading.stats.FlowStats;
+import cascading.tap.MultiSourceTap;
+import cascading.tap.Tap;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
+import cascading.util.PropertyUtil;
+import cascading.util.ShutdownUtil;
+import cascading.util.Util;
+import cascading.util.Version;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import riffle.process.DependencyIncoming;
+import riffle.process.DependencyOutgoing;
+import riffle.process.ProcessCleanup;
+import riffle.process.ProcessComplete;
+import riffle.process.ProcessPrepare;
+import riffle.process.ProcessStart;
+import riffle.process.ProcessStop;
+
+import static org.jgrapht.Graphs.predecessorListOf;
+
+@riffle.process.Process
+public abstract class BaseFlow<Config> implements Flow<Config>
+  {
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
+
+  /** Field id */
+  private String id;
+  /** Field name */
+  private String name;
+  /** Field tags */
+  private String tags;
+  /** Field listeners */
+  private List<SafeFlowListener> listeners;
+  /** Field skipStrategy */
+  private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
+  /** Field flowStats */
+  protected final FlowStats<Config> flowStats; // don't use a listener to set values
+  /** Field sources */
+  protected Map<String, Tap> sources = Collections.EMPTY_MAP;
+  /** Field sinks */
+  protected Map<String, Tap> sinks = Collections.EMPTY_MAP;
+  /** Field traps */
+  private Map<String, Tap> traps = Collections.EMPTY_MAP;
+  /** Field stopJobsOnExit */
+  protected boolean stopJobsOnExit = true;
+  /** Field submitPriority */
+  private int submitPriority = 5;
+
+  /** Field stepGraph */
+  private FlowStepGraph<Config> flowStepGraph;
+  /** Field thread */
+  protected transient Thread thread;
+  /** Field throwable */
+  private Throwable throwable;
+  /** Field stop */
+  protected boolean stop;
+
+  /** Field pipeGraph */
+  private ElementGraph pipeGraph; // only used for documentation purposes
+
+  private transient CascadingServices cascadingServices;
+
+  private FlowStepStrategy<Config> flowStepStrategy = null;
+  /** Field steps */
+  private transient List<FlowStep<Config>> steps;
+  /** Field jobsMap */
+  private transient Map<String, FlowStepJob<Config>> jobsMap;
+  /** Field executor */
+  private transient ExecutorService executor;
+
+  private transient ReentrantLock stopLock = new ReentrantLock( true );
+  protected ShutdownUtil.Hook shutdownHook;
+
+  /**
+   * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
+   * underlying computing system supports it. Defaults to {@code true}.
+   *
+   * @param properties     of type Map
+   * @param stopJobsOnExit of type boolean
+   */
+  public static void setStopJobsOnExit( Map<Object, Object> properties, boolean stopJobsOnExit )
+    {
+    properties.put( "cascading.flow.stopjobsonexit", Boolean.toString( stopJobsOnExit ) );
+    }
+
+  /**
+   * Returns property stopJobsOnExit.
+   *
+   * @param properties of type Map
+   * @return a boolean
+   */
+  public static boolean getStopJobsOnExit( Map<Object, Object> properties )
+    {
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.flow.stopjobsonexit", "true" ) );
+    }
+
+  /** Used for testing. */
+  protected BaseFlow()
+    {
+    this.name = "NA";
+    this.flowStats = createPrepareFlowStats();
+    }
+
+  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, String name )
+    {
+    this.name = name;
+    addSessionProperties( properties );
+    initConfig( properties, defaultConfig );
+    initFromProperties( properties );
+
+    this.flowStats = createPrepareFlowStats(); // must be last
+    }
+
+  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
+    {
+    this.name = flowDef.getName();
+    this.tags = flowDef.getTags();
+    this.pipeGraph = pipeGraph;
+    this.flowStepGraph = flowStepGraph;
+    addSessionProperties( properties );
+    initConfig( properties, defaultConfig );
+    initSteps();
+    setSources( flowDef.getSourcesCopy() );
+    setSinks( flowDef.getSinksCopy() );
+    setTraps( flowDef.getTrapsCopy() );
+    initFromProperties( properties );
+    initFromTaps();
+
+    this.flowStats = createPrepareFlowStats(); // must be last
+
+    initializeNewJobsMap();
+    }
+
+  private void addSessionProperties( Map<Object, Object> properties )
+    {
+    if( properties == null )
+      return;
+
+    PropertyUtil.setProperty( properties, CASCADING_FLOW_ID, getID() );
+    PropertyUtil.setProperty( properties, "cascading.flow.tags", getTags() );
+    FlowConnector.setApplicationID( properties );
+    PropertyUtil.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
+    PropertyUtil.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
+    }
+
+  private String makeAppName( Map<Object, Object> properties )
+    {
+    if( properties == null )
+      return null;
+
+    String name = FlowConnector.getApplicationName( properties );
+
+    if( name != null )
+      return name;
+
+    return Util.findName( FlowConnector.getApplicationJarPath( properties ) );
+    }
+
+  private String makeAppVersion( Map<Object, Object> properties )
+    {
+    if( properties == null )
+      return null;
+
+    String name = FlowConnector.getApplicationVersion( properties );
+
+    if( name != null )
+      return name;
+
+    return Util.findVersion( FlowConnector.getApplicationJarPath( properties ) );
+    }
+
+  private FlowStats createPrepareFlowStats()
+    {
+    FlowStats flowStats = new FlowStats( this, getClientState() );
+
+    flowStats.prepare();
+    flowStats.markPending();
+
+    return flowStats;
+    }
+
+  public CascadingServices getCascadingServices()
+    {
+    if( cascadingServices == null )
+      cascadingServices = new CascadingServices( getConfigAsProperties() );
+
+    return cascadingServices;
+    }
+
+  private ClientState getClientState()
+    {
+    return getFlowSession().getCascadingServices().createClientState( getID() );
+    }
+
+  protected void initSteps()
+    {
+    if( flowStepGraph == null )
+      return;
+
+    for( Object flowStep : flowStepGraph.vertexSet() )
+      ( (BaseFlowStep<Config>) flowStep ).setFlow( this );
+    }
+
+  private void initFromTaps()
+    {
+    initFromTaps( sources );
+    initFromTaps( sinks );
+    initFromTaps( traps );
+    }
+
+  private void initFromTaps( Map<String, Tap> taps )
+    {
+    for( Tap tap : taps.values() )
+      tap.flowConfInit( this );
+    }
+
+  @Override
+  public String getName()
+    {
+    return name;
+    }
+
+  protected void setName( String name )
+    {
+    this.name = name;
+    }
+
+  @Override
+  public String getID()
+    {
+    if( id == null )
+      id = Util.createUniqueID( getName() );
+
+    return id;
+    }
+
+  @Override
+  public String getTags()
+    {
+    return tags;
+    }
+
+  @Override
+  public int getSubmitPriority()
+    {
+    return submitPriority;
+    }
+
+  @Override
+  public void setSubmitPriority( int submitPriority )
+    {
+    if( submitPriority < 1 || submitPriority > 10 )
+      throw new IllegalArgumentException( "submitPriority must be between 1 and 10 inclusive, was: " + submitPriority );
+
+    this.submitPriority = submitPriority;
+    }
+
+  ElementGraph getPipeGraph()
+    {
+    return pipeGraph;
+    }
+
+  FlowStepGraph getFlowStepGraph()
+    {
+    return flowStepGraph;
+    }
+
+  protected void setSources( Map<String, Tap> sources )
+    {
+    addListeners( sources.values() );
+    this.sources = sources;
+    }
+
+  protected void setSinks( Map<String, Tap> sinks )
+    {
+    addListeners( sinks.values() );
+    this.sinks = sinks;
+    }
+
+  protected void setTraps( Map<String, Tap> traps )
+    {
+    addListeners( traps.values() );
+    this.traps = traps;
+    }
+
+  protected void setFlowStepGraph( FlowStepGraph flowStepGraph )
+    {
+    this.flowStepGraph = flowStepGraph;
+    }
+
+  /**
+   * This method creates a new internal Config with the parentConfig as defaults using the properties to override
+   * the defaults.
+   *
+   * @param properties
+   * @param parentConfig
+   */
+  protected abstract void initConfig( Map<Object, Object> properties, Config parentConfig );
+
+  public Config createConfig( Map<Object, Object> properties, Config defaultConfig )
+    {
+    Config config = newConfig( defaultConfig );
+
+    if( properties == null )
+      return config;
+
+    Set<Object> keys = new HashSet<Object>( properties.keySet() );
+
+    // keys will only be grabbed if both key/value are String, so keep orig keys
+    if( properties instanceof Properties )
+      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
+
+    for( Object key : keys )
+      {
+      Object value = properties.get( key );
+
+      if( value == null && properties instanceof Properties && key instanceof String )
+        value = ( (Properties) properties ).getProperty( (String) key );
+
+      if( value == null ) // don't stuff null values
+        continue;
+
+      setConfigProperty( config, key, value );
+      }
+
+    return config;
+    }
+
+  protected abstract void setConfigProperty( Config config, Object key, Object value );
+
+  protected abstract Config newConfig( Config defaultConfig );
+
+  protected void initFromProperties( Map<Object, Object> properties )
+    {
+    stopJobsOnExit = getStopJobsOnExit( properties );
+    }
+
+  public FlowSession getFlowSession()
+    {
+    return new FlowSession( getCascadingServices() );
+    }
+
+  @Override
+  public FlowStats<Config> getFlowStats()
+    {
+    return flowStats;
+    }
+
+  @Override
+  public FlowStats<Config> getStats()
+    {
+    return getFlowStats();
+    }
+
+  void addListeners( Collection listeners )
+    {
+    for( Object listener : listeners )
+      {
+      if( listener instanceof FlowListener )
+        addListener( (FlowListener) listener );
+      }
+    }
+
+  List<SafeFlowListener> getListeners()
+    {
+    if( listeners == null )
+      listeners = new LinkedList<SafeFlowListener>();
+
+    return listeners;
+    }
+
+  @Override
+  public boolean hasListeners()
+    {
+    return listeners != null && !listeners.isEmpty();
+    }
+
+  @Override
+  public void addListener( FlowListener flowListener )
+    {
+    getListeners().add( new SafeFlowListener( flowListener ) );
+    }
+
+  @Override
+  public boolean removeListener( FlowListener flowListener )
+    {
+    return getListeners().remove( new SafeFlowListener( flowListener ) );
+    }
+
+  @Override
+  public Map<String, Tap> getSources()
+    {
+    return Collections.unmodifiableMap( sources );
+    }
+
+  @Override
+  public Tap getSource( String name )
+    {
+    return sources.get( name );
+    }
+
+  @Override
+  @DependencyIncoming
+  public Collection<Tap> getSourcesCollection()
+    {
+    return getSources().values();
+    }
+
+  @Override
+  public Map<String, Tap> getSinks()
+    {
+    return Collections.unmodifiableMap( sinks );
+    }
+
+  @Override
+  public Tap getSink( String name )
+    {
+    return sinks.get( name );
+    }
+
+  @Override
+  @DependencyOutgoing
+  public Collection<Tap> getSinksCollection()
+    {
+    return getSinks().values();
+    }
+
+  @Override
+  public Map<String, Tap> getTraps()
+    {
+    return Collections.unmodifiableMap( traps );
+    }
+
+  @Override
+  public Collection<Tap> getTrapsCollection()
+    {
+    return getTraps().values();
+    }
+
+  @Override
+  public Tap getSink()
+    {
+    return sinks.values().iterator().next();
+    }
+
+  @Override
+  public boolean isStopJobsOnExit()
+    {
+    return stopJobsOnExit;
+    }
+
+  @Override
+  public FlowSkipStrategy getFlowSkipStrategy()
+    {
+    return flowSkipStrategy;
+    }
+
+  @Override
+  public FlowSkipStrategy setFlowSkipStrategy( FlowSkipStrategy flowSkipStrategy )
+    {
+    if( flowSkipStrategy == null )
+      throw new IllegalArgumentException( "flowSkipStrategy may not be null" );
+
+    try
+      {
+      return this.flowSkipStrategy;
+      }
+    finally
+      {
+      this.flowSkipStrategy = flowSkipStrategy;
+      }
+    }
+
+  @Override
+  public boolean isSkipFlow() throws IOException
+    {
+    return flowSkipStrategy.skipFlow( this );
+    }
+
+  @Override
+  public boolean areSinksStale() throws IOException
+    {
+    return areSourcesNewer( getSinkModified() );
+    }
+
+  @Override
+  public boolean areSourcesNewer( long sinkModified ) throws IOException
+    {
+    Config confCopy = getConfigCopy();
+    Iterator<Tap> values = sources.values().iterator();
+
+    long sourceModified = 0;
+
+    try
+      {
+      sourceModified = getSourceModified( confCopy, values, sinkModified );
+
+      if( sinkModified < sourceModified )
+        return true;
+
+      return false;
+      }
+    finally
+      {
+      if( LOG.isInfoEnabled() )
+        logInfo( "source modification date at: " + new Date( sourceModified ) ); // not oldest, we didnt check them all
+      }
+    }
+
+  private long getSourceModified( Config confCopy, Iterator<Tap> values, long sinkModified ) throws IOException
+    {
+    long sourceModified = 0;
+
+    while( values.hasNext() )
+      {
+      Tap source = values.next();
+
+      if( source instanceof MultiSourceTap )
+        return getSourceModified( confCopy, ( (MultiSourceTap) source ).getChildTaps(), sinkModified );
+
+      sourceModified = source.getModifiedTime( confCopy );
+
+      // source modified returns zero if does not exist
+      // this should minimize number of times we touch any file meta-data server
+      if( sourceModified == 0 && !source.resourceExists( confCopy ) )
+        throw new FlowException( "source does not exist: " + source );
+
+      if( sinkModified < sourceModified )
+        return sourceModified;
+      }
+
+    return sourceModified;
+    }
+
+  @Override
+  public long getSinkModified() throws IOException
+    {
+    Config confCopy = getConfigCopy();
+    long sinkModified = Long.MAX_VALUE;
+
+    for( Tap sink : sinks.values() )
+      {
+      if( sink.isReplace() || sink.isUpdate() )
+        sinkModified = -1L;
+      else
+        {
+        if( !sink.resourceExists( confCopy ) )
+          sinkModified = 0L;
+        else
+          sinkModified = Math.min( sinkModified, sink.getModifiedTime( confCopy ) ); // return youngest mod date
+        }
+      }
+
+    if( LOG.isInfoEnabled() )
+      {
+      if( sinkModified == -1L )
+        logInfo( "at least one sink is marked for delete" );
+      if( sinkModified == 0L )
+        logInfo( "at least one sink does not exist" );
+      else
+        logInfo( "sink oldest modified date: " + new Date( sinkModified ) );
+      }
+
+    return sinkModified;
+    }
+
+  @Override
+  public FlowStepStrategy getFlowStepStrategy()
+    {
+    return flowStepStrategy;
+    }
+
+  @Override
+  public void setFlowStepStrategy( FlowStepStrategy flowStepStrategy )
+    {
+    this.flowStepStrategy = flowStepStrategy;
+    }
+
+  @Override
+  public List<FlowStep<Config>> getFlowSteps()
+    {
+    if( steps != null )
+      return steps;
+
+    if( flowStepGraph == null )
+      return Collections.EMPTY_LIST;
+
+    TopologicalOrderIterator<FlowStep<Config>, Integer> topoIterator = flowStepGraph.getTopologicalIterator();
+
+    steps = new ArrayList<FlowStep<Config>>();
+
+    while( topoIterator.hasNext() )
+      steps.add( (FlowStep<Config>) topoIterator.next() );
+
+    return steps;
+    }
+
+  @Override
+  @ProcessPrepare
+  public void prepare()
+    {
+    try
+      {
+      deleteSinksIfNotUpdate();
+      deleteTrapsIfNotUpdate();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to prepare flow", exception );
+      }
+    }
+
+  @Override
+  @ProcessStart
+  public synchronized void start()
+    {
+    if( thread != null )
+      return;
+
+    if( stop )
+      return;
+
+    registerShutdownHook();
+
+    internalStart();
+
+    String threadName = ( "flow " + Util.toNull( getName() ) ).trim();
+
+    thread = new Thread( new Runnable()
+    {
+    @Override
+    public void run()
+      {
+      BaseFlow.this.run();
+      }
+    }, threadName );
+
+    thread.start();
+    }
+
+  protected abstract void internalStart();
+
+  @Override
+  @ProcessStop
+  public synchronized void stop()
+    {
+    stopLock.lock();
+
+    try
+      {
+      if( stop )
+        return;
+
+      stop = true;
+
+      fireOnStopping();
+
+      if( !flowStats.isFinished() )
+        flowStats.markStopped();
+
+      internalStopAllJobs();
+
+      handleExecutorShutdown();
+
+      internalClean( true );
+      }
+    finally
+      {
+      flowStats.cleanup();
+      stopLock.unlock();
+      }
+    }
+
+  protected abstract void internalClean( boolean force );
+
+  @Override
+  @ProcessComplete
+  public void complete()
+    {
+    start();
+
+    try
+      {
+      try
+        {
+        thread.join();
+        }
+      catch( InterruptedException exception )
+        {
+        throw new FlowException( getName(), "thread interrupted", exception );
+        }
+
+      // if in #stop and stopping, lets wait till its done in this thread
+      try
+        {
+        stopLock.lock();
+        }
+      finally
+        {
+        stopLock.unlock();
+        }
+
+      if( throwable instanceof FlowException )
+        ( (FlowException) throwable ).setFlowName( getName() );
+
+      if( throwable instanceof CascadingException )
+        throw (CascadingException) throwable;
+
+      if( throwable != null )
+        throw new FlowException( getName(), "unhandled exception", throwable );
+
+      if( hasListeners() )
+        {
+        for( SafeFlowListener safeFlowListener : getListeners() )
+          {
+          if( safeFlowListener.throwable != null )
+            throw new FlowException( getName(), "unhandled listener exception", throwable );
+          }
+        }
+      }
+    finally
+      {
+      thread = null;
+      throwable = null;
+
+      try
+        {
+        commitTraps();
+
+        if( hasListeners() )
+          {
+          for( SafeFlowListener safeFlowListener : getListeners() )
+            safeFlowListener.throwable = null;
+          }
+        }
+      finally
+        {
+        flowStats.cleanup();
+        }
+      }
+    }
+
+  private void commitTraps()
+    {
+    commitTaps( traps.values() );
+    }
+
+  public void commitTaps( Collection<Tap> taps )
+    {
+    for( Tap tap : taps )
+      {
+      try
+        {
+        if( !tap.commitResource( getConfig() ) )
+          throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ) );
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ), exception );
+        }
+      }
+    }
+
+  public void rollbackTaps( Collection<Tap> taps )
+    {
+    for( Tap tap : taps )
+      {
+      try
+        {
+        if( !tap.rollbackResource( getConfig() ) )
+          throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ) );
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ), exception );
+        }
+      }
+    }
+
+  @Override
+  @ProcessCleanup
+  public void cleanup()
+    {
+    // do nothing
+    }
+
+  @Override
+  public TupleEntryIterator openSource() throws IOException
+    {
+    return sources.values().iterator().next().openForRead( getFlowProcess() );
+    }
+
+  @Override
+  public TupleEntryIterator openSource( String name ) throws IOException
+    {
+    if( !sources.containsKey( name ) )
+      throw new IllegalArgumentException( "source does not exist: " + name );
+
+    return sources.get( name ).openForRead( getFlowProcess() );
+    }
+
+  @Override
+  public TupleEntryIterator openSink() throws IOException
+    {
+    return sinks.values().iterator().next().openForRead( getFlowProcess() );
+    }
+
+  @Override
+  public TupleEntryIterator openSink( String name ) throws IOException
+    {
+    if( !sinks.containsKey( name ) )
+      throw new IllegalArgumentException( "sink does not exist: " + name );
+
+    return sinks.get( name ).openForRead( getFlowProcess(), null );
+    }
+
+  @Override
+  public TupleEntryIterator openTrap() throws IOException
+    {
+    return traps.values().iterator().next().openForRead( getFlowProcess() );
+    }
+
+  @Override
+  public TupleEntryIterator openTrap( String name ) throws IOException
+    {
+    if( !traps.containsKey( name ) )
+      throw new IllegalArgumentException( "trap does not exist: " + name );
+
+    return traps.get( name ).openForRead( getFlowProcess() );
+    }
+
+  /**
+   * Method deleteSinks deletes all sinks, whether or not they are configured for {@link cascading.tap.SinkMode#UPDATE}.
+   * <p/>
+   * Use with caution.
+   *
+   * @throws IOException when
+   * @see BaseFlow#deleteSinksIfNotUpdate()
+   */
+  public void deleteSinks() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      tap.deleteResource( getConfig() );
+    }
+
+  /**
+   * Method deleteSinksIfNotUpdate deletes all sinks if they are not configured with the {@link cascading.tap.SinkMode#UPDATE} flag.
+   * <p/>
+   * Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
+   * <p/>
+   * Use with caution.
+   *
+   * @throws IOException when
+   */
+  public void deleteSinksIfNotUpdate() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      {
+      if( !tap.isUpdate() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteSinksIfReplace() throws IOException
+    {
+    for( Tap tap : sinks.values() )
+      {
+      if( tap.isReplace() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteTrapsIfNotUpdate() throws IOException
+    {
+    for( Tap tap : traps.values() )
+      {
+      if( !tap.isUpdate() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteTrapsIfReplace() throws IOException
+    {
+    for( Tap tap : traps.values() )
+      {
+      if( tap.isReplace() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  @Override
+  public boolean resourceExists( Tap tap ) throws IOException
+    {
+    return tap.resourceExists( getConfig() );
+    }
+
+  @Override
+  public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
+    {
+    return tap.openForRead( getFlowProcess(), null );
+    }
+
+  @Override
+  public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
+    {
+    return tap.openForWrite( getFlowProcess(), null );
+    }
+
+  /** Method run implements the Runnable run method and should not be called by users. */
+  private void run()
+    {
+    if( thread == null )
+      throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
+
+    Version.printBanner();
+
+    try
+      {
+      flowStats.markStarted();
+
+      fireOnStarting();
+
+      if( LOG.isInfoEnabled() )
+        {
+        logInfo( "starting" );
+
+        for( Tap source : getSourcesCollection() )
+          logInfo( " source: " + source );
+        for( Tap sink : getSinksCollection() )
+          logInfo( " sink: " + sink );
+        }
+
+      // if jobs are run local, then only use one thread to force execution serially
+      //int numThreads = jobsAreLocal() ? 1 : getMaxConcurrentSteps( getJobConf() );
+      int numThreads = getMaxNumParallelSteps();
+
+      if( numThreads == 0 )
+        numThreads = jobsMap.size();
+
+      if( numThreads == 0 )
+        throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
+
+      if( LOG.isInfoEnabled() )
+        {
+        logInfo( " parallel execution is enabled: " + ( getMaxNumParallelSteps() != 1 ) );
+        logInfo( " starting jobs: " + jobsMap.size() );
+        logInfo( " allocating threads: " + numThreads );
+        }
+
+      List<Future<Throwable>> futures = spawnJobs( numThreads );
+
+      for( Future<Throwable> future : futures )
+        {
+        throwable = future.get();
+
+        if( throwable != null )
+          {
+          if( !stop )
+            internalStopAllJobs();
+
+          handleExecutorShutdown();
+          break;
+          }
+        }
+      }
+    catch( Throwable throwable )
+      {
+      this.throwable = throwable;
+      }
+    finally
+      {
+      internalClean( stop );
+
+      handleThrowableAndMarkFailed();
+
+      if( !stop && !flowStats.isFinished() )
+        flowStats.markSuccessful();
+
+      try
+        {
+        fireOnCompleted();
+        }
+      finally
+        {
+        flowStats.cleanup();
+        internalShutdown();
+        deregisterShutdownHook();
+        }
+      }
+    }
+
+  protected abstract int getMaxNumParallelSteps();
+
+  protected abstract void internalShutdown();
+
+  private List<Future<Throwable>> spawnJobs( int numThreads ) throws InterruptedException
+    {
+    if( stop )
+      return new ArrayList<Future<Throwable>>();
+
+    executor = Executors.newFixedThreadPool( numThreads );
+
+    List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() ); // todo: consider submit()
+
+    executor.shutdown(); // don't accept any more work
+
+    return futures;
+    }
+
+  private void handleThrowableAndMarkFailed()
+    {
+    if( throwable != null && !stop )
+      {
+      flowStats.markFailed( throwable );
+
+      fireOnThrowable();
+      }
+    }
+
+  Map<String, FlowStepJob<Config>> getJobsMap()
+    {
+    return jobsMap;
+    }
+
+  protected void initializeNewJobsMap()
+    {
+    // keep topo order
+    jobsMap = new LinkedHashMap<String, FlowStepJob<Config>>();
+    TopologicalOrderIterator<FlowStep<Config>, Integer> topoIterator = flowStepGraph.getTopologicalIterator();
+
+    while( topoIterator.hasNext() )
+      {
+      BaseFlowStep<Config> step = (BaseFlowStep<Config>) topoIterator.next();
+      FlowStepJob<Config> flowStepJob = step.getFlowStepJob( getFlowProcess(), getConfig() );
+
+      jobsMap.put( step.getName(), flowStepJob );
+
+      List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
+
+      for( Object flowStep : predecessorListOf( flowStepGraph, step ) )
+        predecessors.add( (FlowStepJob<Config>) jobsMap.get( ( (FlowStep<Config>) flowStep ).getName() ) );
+
+      flowStepJob.setPredecessors( predecessors );
+
+      flowStats.addStepStats( flowStepJob.getStepStats() );
+      }
+    }
+
+  protected void internalStopAllJobs()
+    {
+    LOG.warn( "stopping jobs" );
+
+    try
+      {
+      if( jobsMap == null )
+        return;
+
+      List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
+
+      Collections.reverse( jobs );
+
+      for( Callable<Throwable> callable : jobs )
+        ( (FlowStepJob) callable ).stop();
+      }
+    finally
+      {
+      LOG.warn( "stopped jobs" );
+      }
+    }
+
+  protected void handleExecutorShutdown()
+    {
+    if( executor == null )
+      return;
+
+    LOG.warn( "shutting down job executor" );
+
+    try
+      {
+      executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+      }
+    catch( InterruptedException exception )
+      {
+      // ignore
+      }
+
+    LOG.warn( "shutdown complete" );
+    }
+
+  private void fireOnCompleted()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onCompleted event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onCompleted( this );
+      }
+    }
+
+  private void fireOnThrowable()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onThrowable event: " + getListeners().size() );
+
+      boolean isHandled = false;
+
+      for( FlowListener flowListener : getListeners() )
+        isHandled = flowListener.onThrowable( this, throwable ) || isHandled;
+
+      if( isHandled )
+        throwable = null;
+      }
+    }
+
+  protected void fireOnStopping()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStopping event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onStopping( this );
+      }
+    }
+
+  protected void fireOnStarting()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStarting event: " + getListeners().size() );
+
+      for( FlowListener flowListener : getListeners() )
+        flowListener.onStarting( this );
+      }
+    }
+
+  @Override
+  public String toString()
+    {
+    StringBuffer buffer = new StringBuffer();
+
+    if( getName() != null )
+      buffer.append( getName() ).append( ": " );
+
+    for( FlowStep step : getFlowSteps() )
+      buffer.append( step );
+
+    return buffer.toString();
+    }
+
+  protected void logInfo( String message )
+    {
+    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    }
+
+  private void logDebug( String message )
+    {
+    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    }
+
+  private void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    }
+
+  @Override
+  public void writeDOT( String filename )
+    {
+    if( pipeGraph == null )
+      throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
+
+    pipeGraph.writeDOT( filename );
+    }
+
+  @Override
+  public void writeStepsDOT( String filename )
+    {
+    if( flowStepGraph == null )
+      throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
+
+    flowStepGraph.writeDOT( filename );
+    }
+
+  /**
+   * Used to return a simple wrapper for use as an edge in a graph where there can only be
+   * one instance of every edge.
+   *
+   * @return FlowHolder
+   */
+  public FlowHolder getHolder()
+    {
+    return new FlowHolder( this );
+    }
+
+  public void setCascade( Cascade cascade )
+    {
+    setConfigProperty( getConfig(), "cascading.cascade.id", cascade.getID() );
+    flowStats.recordInfo();
+    }
+
+  @Override
+  public String getCascadeID()
+    {
+    return getProperty( "cascading.cascade.id" );
+    }
+
+  protected void registerShutdownHook()
+    {
+    if( !isStopJobsOnExit() )
+      return;
+
+    shutdownHook = new ShutdownUtil.Hook()
+    {
+    @Override
+    public Priority priority()
+      {
+      return Priority.WORK_CHILD;
+      }
+
+    @Override
+    public void execute()
+      {
+      logInfo( "shutdown hook calling stop on flow" );
+
+      BaseFlow.this.stop();
+      }
+    };
+
+    ShutdownUtil.addHook( shutdownHook );
+    }
+
+  private void deregisterShutdownHook()
+    {
+    if( !isStopJobsOnExit() || stop )
+      return;
+
+    ShutdownUtil.removeHook( shutdownHook );
+    }
+
+  /** Class FlowHolder is a helper class for wrapping Flow instances. */
+  public static class FlowHolder
+    {
+    /** Field flow */
+    public Flow flow;
+
+    public FlowHolder()
+      {
+      }
+
+    public FlowHolder( Flow flow )
+      {
+      this.flow = flow;
+      }
+    }
+
+  /**
+   * Class SafeFlowListener safely calls a wrapped FlowListener.
+   * <p/>
+   * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
+   * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
+   * which in turn is run in a new Thread.
+   */
+  private class SafeFlowListener implements FlowListener
+    {
+    /** Field flowListener */
+    final FlowListener flowListener;
+    /** Field throwable */
+    Throwable throwable;
+
+    private SafeFlowListener( FlowListener flowListener )
+      {
+      this.flowListener = flowListener;
+      }
+
+    public void onStarting( Flow flow )
+      {
+      try
+        {
+        flowListener.onStarting( flow );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onStopping( Flow flow )
+      {
+      try
+        {
+        flowListener.onStopping( flow );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onCompleted( Flow flow )
+      {
+      try
+        {
+        flowListener.onCompleted( flow );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public boolean onThrowable( Flow flow, Throwable flowThrowable )
+      {
+      try
+        {
+        return flowListener.onThrowable( flow, flowThrowable );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+
+      return false;
+      }
+
+    private void handleThrowable( Throwable throwable )
+      {
+      this.throwable = throwable;
+
+      logWarn( String.format( "flow listener %s threw throwable", flowListener ), throwable );
+
+      // stop this flow
+      stop();
+      }
+
+    public boolean equals( Object object )
+      {
+      if( object instanceof BaseFlow.SafeFlowListener )
+        return flowListener.equals( ( (BaseFlow.SafeFlowListener) object ).flowListener );
+
+      return flowListener.equals( object );
+      }
+
+    public int hashCode()
+      {
+      return flowListener.hashCode();
+      }
+    }
+  }

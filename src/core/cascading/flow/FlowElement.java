@@ -20,6 +20,7 @@
 
 package cascading.flow;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import cascading.tuple.Fields;
@@ -28,7 +29,7 @@ import cascading.tuple.Fields;
  * Interface FlowElement is a utility interface used internally to simplify DAG management. It is not intended
  * for users to interact with these methods directly.
  */
-public interface FlowElement
+public interface FlowElement extends Serializable
   {
   /**
    * Method outgoingScopeFor returns the Scope this FlowElement hands off to the next FlowElement.

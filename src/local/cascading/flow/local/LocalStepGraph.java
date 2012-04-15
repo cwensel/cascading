@@ -23,8 +23,8 @@ package cascading.flow.local;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import cascading.flow.FlowStep;
 import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.Tap;
 import org.jgrapht.Graphs;

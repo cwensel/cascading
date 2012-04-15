@@ -26,13 +26,11 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +40,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
+import cascading.cascade.planner.FlowGraph;
+import cascading.cascade.planner.TapGraph;
+import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
@@ -64,27 +65,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Cascade is an assembly of {@link Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
+ * A Cascade is an assembly of {@link cascading.flow.Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
  * a single group. The most common case is where one Flow instance depends on a Tap created by a second Flow instance. This
  * dependency chain can continue as practical.
  * <p/>
  * Note Flow instances that have no shared dependencies will be executed in parallel.
  * <p/>
  * Additionally, a Cascade allows for incremental builds of complex data processing processes. If a given source {@link Tap} is newer than
- * a subsequent sink {@link Tap} in the assembly, the connecting {@link Flow}(s) will be executed
+ * a subsequent sink {@link Tap} in the assembly, the connecting {@link cascading.flow.Flow}(s) will be executed
  * when the Cascade executed. If all the targets (sinks) are up to date, the Cascade exits immediately and does nothing.
  * <p/>
  * The concept of 'stale' is pluggable, see the {@link cascading.flow.FlowSkipStrategy} class.
  * <p/>
  * When a Cascade starts up, if first verifies which Flow instances have stale sinks, if the sinks are not stale, the
- * method {@link cascading.flow.Flow#deleteSinksIfNotUpdate()} is called. Before appends were supported (logically)
+ * method {@link cascading.flow.BaseFlow#deleteSinksIfNotUpdate()} is called. Before appends were supported (logically)
  * the Cascade deleted all the sinks in a Flow.
  * <p/>
  * The new consequence of this is if the Cascade fails, but does complete a Flow that appended or updated data, re-running
  * the Cascade (and the successful append/update Flow) will re-update data to the source. Some systems may be idempotent and
  * may not have any side-effects. So plan accordingly.
  *
- * @see Flow
+ * @see cascading.flow.Flow
  * @see cascading.flow.FlowSkipStrategy
  */
 public class Cascade implements UnitOfWork<CascadeStats>
@@ -101,9 +102,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
   /** Field properties */
   private final Map<Object, Object> properties;
   /** Field jobGraph */
-  private final SimpleDirectedGraph<Flow, Integer> jobGraph;
+  private final FlowGraph flowGraph;
   /** Field tapGraph */
-  private final SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph;
+  private final TapGraph tapGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
   /** Field cascadingServices */
@@ -145,12 +146,12 @@ public class Cascade implements UnitOfWork<CascadeStats>
     }
 
 
-  Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
+  Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, FlowGraph flowGraph, TapGraph tapGraph )
     {
     this.name = cascadeDef.getName();
     this.tags = cascadeDef.getTags();
     this.properties = properties;
-    this.jobGraph = jobGraph;
+    this.flowGraph = flowGraph;
     this.tapGraph = tapGraph;
     this.cascadeStats = createPrepareCascadeStats();
     setIDOnFlow();
@@ -236,12 +237,22 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
   private void setIDOnFlow()
     {
-    for( Flow flow : getFlows() )
-      flow.setCascade( this );
+    for( Flow<?> flow : getFlows() )
+      ( (BaseFlow<?>) flow ).setCascade( this );
+    }
+
+  protected FlowGraph getFlowGraph()
+    {
+    return flowGraph;
+    }
+
+  protected TapGraph getTapGraph()
+    {
+    return tapGraph;
     }
 
   /**
-   * Method getFlows returns the flows managed by this Cascade object. The returned {@link Flow} instances
+   * Method getFlows returns the flows managed by this Cascade object. The returned {@link cascading.flow.Flow} instances
    * will be in topological order.
    *
    * @return the flows (type Collection<Flow>) of this Cascade object.
@@ -249,7 +260,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   public List<Flow> getFlows()
     {
     List<Flow> flows = new LinkedList<Flow>();
-    TopologicalOrderIterator<Flow, Integer> topoIterator = getTopologicalIterator();
+    TopologicalOrderIterator<Flow, Integer> topoIterator = flowGraph.getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       flows.add( topoIterator.next() );
@@ -285,7 +296,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
    */
   public Collection<Flow> getSuccessorFlows( Flow flow )
     {
-    return Graphs.successorListOf( jobGraph, flow );
+    return Graphs.successorListOf( flowGraph, flow );
     }
 
   /**
@@ -297,7 +308,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
    */
   public Collection<Flow> getPredecessorFlows( Flow flow )
     {
-    return Graphs.predecessorListOf( jobGraph, flow );
+    return Graphs.predecessorListOf( flowGraph, flow );
     }
 
   /**
@@ -336,11 +347,11 @@ public class Cascade implements UnitOfWork<CascadeStats>
       }
     }
 
-  private Collection<Flow> unwrapFlows( Set<Flow.FlowHolder> flowHolders )
+  private Collection<Flow> unwrapFlows( Set<BaseFlow.FlowHolder> flowHolders )
     {
     Set<Flow> flows = new HashSet<Flow>();
 
-    for( Flow.FlowHolder flowHolder : flowHolders )
+    for( BaseFlow.FlowHolder flowHolder : flowHolders )
       flows.add( flowHolder.flow );
 
     return flows;
@@ -358,7 +369,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
   /**
    * Method setFlowSkipStrategy sets a new {@link cascading.flow.FlowSkipStrategy}, the current strategy, if any, is returned.
-   * If a strategy is given, it will be used as the strategy for all {@link Flow} instances managed by this Cascade instance.
+   * If a strategy is given, it will be used as the strategy for all {@link cascading.flow.BaseFlow} instances managed by this Cascade instance.
    * To revert back to consulting the strategies associated with each Flow instance, re-set this value to {@code null}, its
    * default value.
    * <p/>
@@ -595,7 +606,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     // keep topo order
     jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-    TopologicalOrderIterator<Flow, Integer> topoIterator = getTopologicalIterator();
+    TopologicalOrderIterator<Flow, Integer> topoIterator = flowGraph.getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       {
@@ -609,23 +620,11 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
       List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
 
-      for( Flow predecessor : Graphs.predecessorListOf( jobGraph, flow ) )
+      for( Flow predecessor : Graphs.predecessorListOf( flowGraph, flow ) )
         predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
 
       job.init( predecessors );
       }
-    }
-
-  private TopologicalOrderIterator<Flow, Integer> getTopologicalIterator()
-    {
-    return new TopologicalOrderIterator<Flow, Integer>( jobGraph, new PriorityQueue<Flow>( 10, new Comparator<Flow>()
-    {
-    @Override
-    public int compare( Flow lhs, Flow rhs )
-      {
-      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
-      }
-    } ) );
     }
 
   private void handleExecutorShutdown()
@@ -671,7 +670,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     printElementGraph( filename, tapGraph );
     }
 
-  protected void printElementGraph( String filename, SimpleDirectedGraph<String, Flow.FlowHolder> graph )
+  protected void printElementGraph( String filename, SimpleDirectedGraph<String, BaseFlow.FlowHolder> graph )
     {
     try
       {
@@ -683,13 +682,13 @@ public class Cascade implements UnitOfWork<CascadeStats>
           {
           return object.toString().replaceAll( "\"", "\'" );
           }
-        }, new EdgeNameProvider<Flow.FlowHolder>()
-      {
-      public String getEdgeName( Flow.FlowHolder object )
+        }, new EdgeNameProvider<BaseFlow.FlowHolder>()
         {
-        return object.flow.getName().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+        public String getEdgeName( BaseFlow.FlowHolder object )
+          {
+          return object.flow.getName().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+          }
         }
-      }
       );
 
       writer.close();

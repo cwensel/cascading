@@ -33,8 +33,9 @@ import cascading.TestFunction;
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.FlowStep;
 import cascading.flow.Scope;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlannerException;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
@@ -131,7 +132,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 1, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -163,7 +164,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 1, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -196,7 +197,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 2, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -234,7 +235,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 2, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -269,7 +270,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 2, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -402,7 +403,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     FlowStep step = steps.get( 0 );
 
-    assertEquals( "wrong number of operations", 2, step.getAllOperations().size() );
+    assertEquals( "wrong number of operations", 2, ( (BaseFlowStep) step ).getAllOperations().size() );
     }
 
   // verify unsafe splits happen when splitting on a pipe
@@ -443,7 +444,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     FlowStep step = steps.get( 0 );
 
-    assertEquals( "wrong number of operations", 2, step.getAllOperations().size() );
+    assertEquals( "wrong number of operations", 2, ( (BaseFlowStep) step ).getAllOperations().size() );
     }
 
   /**
@@ -485,7 +486,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
-    FlowStep step = steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );
@@ -542,7 +543,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "not equal: steps.size()", 3, steps.size() );
 
-    FlowStep step = steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );
@@ -1503,7 +1504,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     assertEquals( "not equal: step.sources.size()", 1, step.getSources().size() );
     assertNotNull( "null: step.groupBy", step.getGroup() );
@@ -1694,7 +1695,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     assertEquals( "not equal: steps.size()", testTempReplaced ? 2 : 3, steps.size() );
 
-    FlowStep step = steps.get( 0 );
+    BaseFlowStep step = (BaseFlowStep) steps.get( 0 );
 
     Scope nextScope = step.getNextScope( step.getGroup() );
     FlowElement operator = step.getNextFlowElement( nextScope );

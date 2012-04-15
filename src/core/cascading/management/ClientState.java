@@ -22,7 +22,7 @@ package cascading.management;
 
 import cascading.cascade.Cascade;
 import cascading.flow.Flow;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.FlowStep;
 import cascading.stats.CascadingStats;
 
 /**

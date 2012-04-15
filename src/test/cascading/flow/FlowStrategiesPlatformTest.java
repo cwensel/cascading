@@ -23,7 +23,6 @@ package cascading.flow;
 import java.util.List;
 
 import cascading.PlatformTestCase;
-import cascading.flow.planner.FlowStep;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;

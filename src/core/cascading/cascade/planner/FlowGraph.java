@@ -18,32 +18,34 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.cascade.planner;
 
-import cascading.flow.FlowProcess;
-import cascading.tap.Tap;
-import org.apache.hadoop.mapred.JobConf;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
-/** Class MapReduceFlowStep wraps a {@link JobConf} and allows it to be executed as a {@link cascading.flow.Flow}. */
-public class MapReduceFlowStep extends HadoopFlowStep
+import cascading.flow.Flow;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+
+/**
+ *
+ */
+public class FlowGraph extends SimpleDirectedGraph<Flow, Integer>
   {
-  /** Field jobConf */
-  private final JobConf jobConf;
-
-  MapReduceFlowStep( String flowName, String stepName, JobConf jobConf, Tap sink )
+  public FlowGraph()
     {
-    super( stepName, 1 );
-    setFlowName( flowName );
-    this.jobConf = jobConf;
-    addSink( "default", sink );
+    super( Integer.class );
     }
 
-  @Override
-  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  public TopologicalOrderIterator<Flow, Integer> getTopologicalIterator()
     {
-    // allow to delete
-    getSink().sinkConfInit( flowProcess, new JobConf() );
-
-    return jobConf;
+    return new TopologicalOrderIterator<Flow, Integer>( this, new PriorityQueue<Flow>( 10, new Comparator<Flow>()
+    {
+    @Override
+    public int compare( Flow lhs, Flow rhs )
+      {
+      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
+      }
+    } ) );
     }
   }

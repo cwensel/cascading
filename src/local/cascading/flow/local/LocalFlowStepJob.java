@@ -21,6 +21,7 @@
 package cascading.flow.local;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class LocalFlowStepJob extends FlowStepJob
+public class LocalFlowStepJob extends FlowStepJob<Properties>
   {
   private static final Logger LOG = LoggerFactory.getLogger( LocalFlowStepJob.class );
 
@@ -46,6 +47,12 @@ public class LocalFlowStepJob extends FlowStepJob
     super( clientState, flowStep, 200, 1000 );
     flowProcess.setStepStats( (LocalStepStats) this.flowStepStats );
     this.stackRunner = new LocalStepRunner( flowProcess, flowStep );
+    }
+
+  @Override
+  public Properties getConfig()
+    {
+    return ( (LocalFlowStep) flowStep ).getConfig();
     }
 
   @Override

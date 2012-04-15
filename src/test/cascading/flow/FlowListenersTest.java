@@ -35,7 +35,7 @@ public class FlowListenersTest extends TestCase
 
   public void testListeners()
     {
-    Flow flow = new Flow<Object>()
+    Flow flow = new BaseFlow<Object>()
     {
 
     @Override

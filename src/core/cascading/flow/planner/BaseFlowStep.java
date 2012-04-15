@@ -29,12 +29,13 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
@@ -44,6 +45,7 @@ import cascading.pipe.Group;
 import cascading.pipe.Join;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
+import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;
@@ -64,18 +66,13 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * This class is for internal use, there are no stable public methods.
  */
-public abstract class FlowStep<Config> implements Serializable
+public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Config>
   {
-  public static final String CASCADING_FLOW_STEP_ID = "cascading.flow.step.id";
-
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowStep.class );
 
-  /** Field properties */
-  private Map<Object, Object> properties = null;
-
   /** Field flow */
-  private transient Flow flow;
+  private transient Flow<Config> flow;
   /** Field flowName */
   private String flowName;
   /** Field flowID */
@@ -111,19 +108,15 @@ public abstract class FlowStep<Config> implements Serializable
   // sources accumulated by join
   protected final Map<Join, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<Join, Set<Tap>>();
 
-  private transient FlowStepJob flowStepJob;
+  private transient FlowStepJob<Config> flowStepJob;
 
-  protected FlowStep( String name, int stepNum )
+  protected BaseFlowStep( String name, int stepNum )
     {
     this.name = name;
     this.stepNum = stepNum;
     }
 
-  /**
-   * Method getId returns the id of this FlowStep object.
-   *
-   * @return the id (type int) of this FlowStep object.
-   */
+  @Override
   public String getID()
     {
     if( id == null )
@@ -132,22 +125,19 @@ public abstract class FlowStep<Config> implements Serializable
     return id;
     }
 
+  @Override
   public int getStepNum()
     {
     return stepNum;
     }
 
-  /**
-   * Method getName returns the name of this FlowStep object.
-   *
-   * @return the name (type String) of this FlowStep object.
-   */
+  @Override
   public String getName()
     {
     return name;
     }
 
-  public void setName( String name )
+  void setName( String name )
     {
     if( name == null || name.isEmpty() )
       throw new IllegalArgumentException( "step name may not be null or empty" );
@@ -155,82 +145,60 @@ public abstract class FlowStep<Config> implements Serializable
     this.name = name;
     }
 
-  public void setFlow( Flow flow )
+  public void setFlow( Flow<Config> flow )
     {
     this.flow = flow;
     this.flowID = flow.getID();
     this.flowName = flow.getName();
     }
 
-  protected Flow getFlow()
+  @Override
+  public Flow<Config> getFlow()
     {
     return flow;
     }
 
+  @Override
   public String getFlowID()
     {
     return flowID;
     }
 
-  /**
-   * Method getParentFlowName returns the parentFlowName of this FlowStep object.
-   *
-   * @return the parentFlowName (type Flow) of this FlowStep object.
-   */
+  @Override
   public String getFlowName()
     {
     return flowName;
     }
 
-  /**
-   * Method setParentFlowName sets the parentFlowName of this FlowStep object.
-   *
-   * @param flowName the parentFlowName of this FlowStep object.
-   */
-  public void setFlowName( String flowName )
+  protected void setFlowName( String flowName )
     {
     this.flowName = flowName;
     }
 
+  @Override
   public Config getConfig()
     {
     return conf;
     }
 
-  public void setConf( Config conf )
+  protected void setConf( Config conf )
     {
     this.conf = conf;
     }
 
-  /**
-   * Method getStepDisplayName returns the stepDisplayName of this FlowStep object.
-   *
-   * @return the stepName (type String) of this FlowStep object.
-   */
+  @Override
   public String getStepDisplayName()
     {
     return String.format( "%s[%s]", getFlowName(), getName() );
     }
 
-  /**
-   * Method getSubmitPriority returns the submitPriority of this FlowStep object.
-   * <p/>
-   * 10 is lowest, 1 is the highest, 5 is the default.
-   *
-   * @return the submitPriority (type int) of this FlowStep object.
-   */
+  @Override
   public int getSubmitPriority()
     {
     return submitPriority;
     }
 
-  /**
-   * Method setSubmitPriority sets the submitPriority of this FlowStep object.
-   * <p/>
-   * 10 is lowest, 1 is the highest, 5 is the default.
-   *
-   * @param submitPriority the submitPriority of this FlowStep object.
-   */
+  @Override
   public void setSubmitPriority( int submitPriority )
     {
     if( submitPriority < 1 || submitPriority > 10 )
@@ -239,11 +207,17 @@ public abstract class FlowStep<Config> implements Serializable
     this.submitPriority = submitPriority;
     }
 
+  public FlowStepStats getFlowStepStats()
+    {
+    return flowStepJob.getStepStats();
+    }
+
   public SimpleDirectedGraph<FlowElement, Scope> getGraph()
     {
     return graph;
     }
 
+  @Override
   public Group getGroup()
     {
     if( groups.isEmpty() )
@@ -255,6 +229,7 @@ public abstract class FlowStep<Config> implements Serializable
     return groups.get( 0 );
     }
 
+  @Override
   public List<Group> getGroups()
     {
     return groups;
@@ -266,6 +241,7 @@ public abstract class FlowStep<Config> implements Serializable
       groups.add( group );
     }
 
+  @Override
   public Map<Join, Tap> getStreamedSourceByJoin()
     {
     return streamedSourceByJoin;
@@ -276,6 +252,7 @@ public abstract class FlowStep<Config> implements Serializable
     streamedSourceByJoin.put( join, streamedSource );
     }
 
+  @Override
   public Set<Tap> getAllAccumulatedSources()
     {
     HashSet<Tap> set = new HashSet<Tap>();
@@ -310,16 +287,19 @@ public abstract class FlowStep<Config> implements Serializable
     sinks.get( sink ).add( name );
     }
 
+  @Override
   public Set<Tap> getSources()
     {
     return Collections.unmodifiableSet( new HashSet<Tap>( sources.keySet() ) );
     }
 
+  @Override
   public Set<Tap> getSinks()
     {
     return Collections.unmodifiableSet( new HashSet<Tap>( sinks.keySet() ) );
     }
 
+  @Override
   public Tap getSink()
     {
     if( sinks.size() != 1 )
@@ -328,16 +308,19 @@ public abstract class FlowStep<Config> implements Serializable
     return sinks.keySet().iterator().next();
     }
 
+  @Override
   public Set<String> getSourceName( Tap source )
     {
     return Collections.unmodifiableSet( sources.get( source ) );
     }
 
+  @Override
   public Set<String> getSinkName( Tap sink )
     {
     return Collections.unmodifiableSet( sinks.get( sink ) );
     }
 
+  @Override
   public Tap getSourceWith( String identifier )
     {
     for( Tap tap : sources.keySet() )
@@ -349,6 +332,7 @@ public abstract class FlowStep<Config> implements Serializable
     return null;
     }
 
+  @Override
   public Tap getSinkWith( String identifier )
     {
     for( Tap tap : sinks.keySet() )
@@ -360,57 +344,17 @@ public abstract class FlowStep<Config> implements Serializable
     return null;
     }
 
-  public abstract Set<Tap> getTraps();
-
-  public abstract Tap getTrap( String name );
-
-  void commitSinks()
+  public void commitSinks()
     {
-    flow.commitTaps( sinks.keySet() );
+    ( (BaseFlow<Config>) flow ).commitTaps( sinks.keySet() );
     }
 
-  void rollbackSinks()
+  public void rollbackSinks()
     {
-    flow.rollbackTaps( sinks.keySet() );
+    ( (BaseFlow<Config>) flow ).rollbackTaps( sinks.keySet() );
     }
 
-  /**
-   * Method getProperties returns the properties of this FlowStep object.
-   * </br>
-   * These properties are local only to this step, use this method to set additional properties and configuration
-   * for the underlying platform.
-   *
-   * @return the properties (type Map<Object, Object>) of this FlowStep object.
-   */
-  public Map<Object, Object> getProperties()
-    {
-    if( properties == null )
-      properties = new Properties();
-
-    return properties;
-    }
-
-  /**
-   * Method setProperties sets the properties of this FlowStep object.
-   *
-   * @param properties the properties of this FlowStep object.
-   */
-  public void setProperties( Map<Object, Object> properties )
-    {
-    this.properties = properties;
-    }
-
-  /**
-   * Method hasProperties returns {@code true} if there are properties associated with this FlowStep.
-   *
-   * @return boolean
-   */
-  public boolean hasProperties()
-    {
-    return properties != null && !properties.isEmpty();
-    }
-
-  public abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
+  protected abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
 
   /**
    * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),
@@ -522,12 +466,7 @@ public abstract class FlowStep<Config> implements Serializable
     return operations;
     }
 
-  /**
-   * Returns true if this FlowStep contains a pipe/branch with the given name.
-   *
-   * @param pipeName
-   * @return
-   */
+  @Override
   public boolean containsPipeNamed( String pipeName )
     {
     Set<FlowElement> vertices = getGraph().vertexSet();
@@ -551,7 +490,7 @@ public abstract class FlowStep<Config> implements Serializable
     if( object == null || getClass() != object.getClass() )
       return false;
 
-    FlowStep flowStep = (FlowStep) object;
+    BaseFlowStep flowStep = (BaseFlowStep) object;
 
     if( name != null ? !name.equals( flowStep.name ) : flowStep.name != null )
       return false;
@@ -565,7 +504,7 @@ public abstract class FlowStep<Config> implements Serializable
     return services.createClientState( getID() );
     }
 
-  public FlowStepJob getFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )
+  public FlowStepJob<Config> getFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )
     {
     if( flowStepJob != null )
       return flowStepJob;
@@ -579,6 +518,30 @@ public abstract class FlowStep<Config> implements Serializable
     }
 
   protected abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
+
+  protected void initConfFromPipes( ConfigDef.Setter setter )
+    {
+    // applies each mode in order, topologically
+    for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
+      {
+      TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalOrderIterator();
+
+      while( iterator.hasNext() )
+        {
+        FlowElement element = iterator.next();
+
+        if( !( element instanceof Pipe ) )
+          continue;
+
+        Pipe pipe = (Pipe) element;
+
+        if( !pipe.hasProcessConfigDef() )
+          continue;
+
+        pipe.getProcessConfigDef().apply( mode, setter );
+        }
+      }
+    }
 
   @Override
   public int hashCode()
@@ -630,29 +593,5 @@ public abstract class FlowStep<Config> implements Serializable
   public void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
-    }
-
-  protected void initConfFromPipes( ConfigDef.Setter setter )
-    {
-    // applies each mode in order, topologically
-    for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
-      {
-      TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalOrderIterator();
-
-      while( iterator.hasNext() )
-        {
-        FlowElement element = iterator.next();
-
-        if( !( element instanceof Pipe ) )
-          continue;
-
-        Pipe pipe = (Pipe) element;
-
-        if( !pipe.hasProcessConfigDef() )
-          continue;
-
-        pipe.getProcessConfigDef().apply( mode, setter );
-        }
-      }
     }
   }

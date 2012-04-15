@@ -28,7 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.pipe.ConfigDef;
 import cascading.tap.Tap;
@@ -36,7 +36,7 @@ import cascading.tap.Tap;
 /**
  *
  */
-public class LocalFlowStep extends FlowStep<Properties>
+public class LocalFlowStep extends BaseFlowStep<Properties>
   {
   /** Field mapperTraps */
   private final Map<String, Tap> traps = new HashMap<String, Tap>();
@@ -50,13 +50,6 @@ public class LocalFlowStep extends FlowStep<Properties>
   public Properties getInitializedConfig( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
     Properties currentProperties = parentConfig == null ? new Properties() : new Properties( parentConfig );
-
-    // sets properties local to step
-    if( hasProperties() )
-      {
-      for( Map.Entry entry : getProperties().entrySet() )
-        currentProperties.put( entry.getKey().toString(), entry.getValue().toString() );
-      }
 
     initTaps( flowProcess, currentProperties, getSources(), false );
     initTaps( flowProcess, currentProperties, getSinks(), true );
@@ -134,7 +127,7 @@ public class LocalFlowStep extends FlowStep<Properties>
     }
 
   @Override
-  protected FlowStepJob createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
+  protected FlowStepJob<Properties> createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
     setConf( getInitializedConfig( flowProcess, parentConfig ) );
 

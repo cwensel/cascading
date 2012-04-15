@@ -36,7 +36,7 @@ public class LockingFlowListener implements FlowListener
 
   public static Map<String, Callable<Throwable>> getJobsMap( Flow flow )
     {
-    return flow.getJobsMap();
+    return ( (BaseFlow) flow ).getJobsMap();
     }
 
   public LockingFlowListener()

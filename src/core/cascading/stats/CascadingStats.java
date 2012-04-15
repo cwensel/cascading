@@ -35,10 +35,10 @@ import cascading.management.ClientState;
  * <ul>
  * <li>{@code pending} - when the Flow or Cascade has yet to start.</li>
  * <li>{@code skipped} - when the Flow was skipped by the parent Cascade.</li>
- * <li>{@code started} - when {@link Flow#start()} was called.</li>
+ * <li>{@code started} - when {@link cascading.flow.Flow#start()} was called.</li>
  * <li>{@code submitted} - when the Step was submitted to the underlying platform for work.</li>
  * <li>{@code running} - when the Flow or Cascade is executing a workload.</li>
- * <li>{@code stopped} - when the user calls {@link Flow#stop()} on the Flow or Cascade.</li>
+ * <li>{@code stopped} - when the user calls {@link cascading.flow.Flow#stop()} on the Flow or Cascade.</li>
  * <li>{@code failed} - when the Flow or Cascade threw an error and failed to finish the workload.</li>
  * <li>{@code successful} - when the Flow or Cascade naturally completed its workload without failure.</li>
  * </ul>

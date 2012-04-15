@@ -25,21 +25,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import cascading.flow.planner.FlowStep;
+import cascading.flow.FlowStep;
 import cascading.management.ClientState;
 import cascading.stats.FlowStepStats;
 
 /**
  *
  */
-public class LocalStepStats extends FlowStepStats
+public class LocalStepStats extends FlowStepStats<Properties>
   {
   final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected LocalStepStats( FlowStep flowStep, ClientState clientState )
+  protected LocalStepStats( FlowStep<Properties> flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }

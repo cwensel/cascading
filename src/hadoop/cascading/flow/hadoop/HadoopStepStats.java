@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowException;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.FlowStep;
 import cascading.management.ClientState;
 import cascading.stats.FlowStepStats;
 import cascading.util.Util;
@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
-public abstract class HadoopStepStats extends FlowStepStats
+public abstract class HadoopStepStats extends FlowStepStats<JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
@@ -58,7 +58,7 @@ public abstract class HadoopStepStats extends FlowStepStats
   /** Field taskStats */
   Map<String, HadoopTaskStats> taskStats = (Map<String, HadoopTaskStats>) Collections.EMPTY_MAP;
 
-  protected HadoopStepStats( JobConf currentConf, FlowStep flowStep, ClientState clientState )
+  protected HadoopStepStats( FlowStep<JobConf> flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }

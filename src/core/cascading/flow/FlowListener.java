@@ -24,7 +24,7 @@ package cascading.flow;
  * Interface FlowListener provides hooks for receiving events on various stages of a {@link Flow} execution.
  * <p/>
  * Any {@link RuntimeException} thrown from any of the listener methods will force the given {@code flow} to
- * stop by calling {@link cascading.flow.Flow#stop()}.
+ * stop by calling {@link Flow#stop()}.
  */
 public interface FlowListener
   {
@@ -51,7 +51,7 @@ public interface FlowListener
   void onCompleted( Flow flow );
 
   /**
-   * The onThrowable event is fired if any child {@link cascading.flow.planner.FlowStep} throws a Throwable type. This throwable is passed
+   * The onThrowable event is fired if any child {@link cascading.flow.FlowStep} throws a Throwable type. This throwable is passed
    * as an argument to the event. This event method should return true if the given throwable was handled and should
    * not be rethrown from the {@link Flow#complete()} method.
    *

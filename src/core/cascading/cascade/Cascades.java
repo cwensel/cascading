@@ -23,16 +23,17 @@ package cascading.cascade;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.Flow;
+import cascading.cascade.planner.FlowGraph;
+import cascading.cascade.planner.TapGraph;
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
 /**
- * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link Flow}
+ * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link cascading.flow.Flow}
  * instances via the {@link CascadeConnector} and {@link cascading.flow.FlowConnector}, respectively.
  * <p/>
- * See the {@link FlowDef} for alternatives to dealing with Maps of Taps.
+ * See the {@link FlowDef} for the recommended alternative to dealing with Maps of Taps.
  */
 public class Cascades
   {
@@ -92,5 +93,15 @@ public class Cascades
       map.put( pipes[ i ].getName(), taps[ i ] );
 
     return map;
+    }
+
+  public static FlowGraph getFlowGraphFrom( Cascade cascade )
+    {
+    return cascade.getFlowGraph();
+    }
+
+  public static TapGraph getTapGraphFrom( Cascade cascade )
+    {
+    return cascade.getTapGraph();
     }
   }

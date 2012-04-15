@@ -31,7 +31,7 @@ import java.util.Set;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.pipe.ConfigDef;
 import cascading.tap.Tap;
@@ -59,7 +59,7 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  *
  */
-public class HadoopFlowStep extends FlowStep<JobConf>
+public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
   /** Field mapperTraps */
   private final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
@@ -74,13 +74,6 @@ public class HadoopFlowStep extends FlowStep<JobConf>
   public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     JobConf conf = parentConfig == null ? new JobConf() : new JobConf( parentConfig );
-
-    // set values first so they can't break things downstream
-    if( hasProperties() )
-      {
-      for( Map.Entry entry : getProperties().entrySet() )
-        conf.set( entry.getKey().toString(), entry.getValue().toString() );
-      }
 
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
@@ -181,7 +174,7 @@ public class HadoopFlowStep extends FlowStep<JobConf>
       }
     }
 
-  protected FlowStepJob createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  protected FlowStepJob<JobConf> createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
 

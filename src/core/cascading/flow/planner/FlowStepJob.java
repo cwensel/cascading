@@ -28,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
+import cascading.flow.FlowStep;
 import cascading.flow.FlowStepStrategy;
 import cascading.management.ClientState;
 import cascading.stats.FlowStats;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public abstract class FlowStepJob implements Callable<Throwable>
+public abstract class FlowStepJob<Config> implements Callable<Throwable>
   {
   private static final Logger LOG = LoggerFactory.getLogger( FlowStepJob.class );
 
@@ -49,7 +50,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field recordStatsInterval */
   protected long statsStoreInterval = 60 * 1000;
   /** Field predecessors */
-  protected List<FlowStepJob> predecessors;
+  protected List<FlowStepJob<Config>> predecessors;
   /** Field latch */
   private final CountDownLatch latch = new CountDownLatch( 1 );
   /** Field wasSuccessful */
@@ -57,13 +58,13 @@ public abstract class FlowStepJob implements Callable<Throwable>
   /** Field stop */
   private boolean stop = false;
   /** Field flowStep */
-  protected final FlowStep flowStep;
+  protected final BaseFlowStep<Config> flowStep;
   /** Field stepStats */
   protected FlowStepStats flowStepStats;
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( ClientState clientState, FlowStep flowStep, long pollingInterval, long statsStoreInterval )
+  public FlowStepJob( ClientState clientState, BaseFlowStep flowStep, long pollingInterval, long statsStoreInterval )
     {
     this.flowStep = flowStep;
     this.stepName = flowStep.getName();
@@ -74,6 +75,8 @@ public abstract class FlowStepJob implements Callable<Throwable>
     this.flowStepStats.prepare();
     this.flowStepStats.markPending();
     }
+
+  public abstract Config getConfig();
 
   protected abstract FlowStepStats createStepStats( ClientState clientState );
 
@@ -108,7 +111,7 @@ public abstract class FlowStepJob implements Callable<Throwable>
 
   protected abstract void internalStop() throws IOException;
 
-  public void setPredecessors( List<FlowStepJob> predecessors )
+  public void setPredecessors( List<FlowStepJob<Config>> predecessors )
     {
     this.predecessors = predecessors;
     }

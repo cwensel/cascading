@@ -23,25 +23,21 @@ package cascading.flow.hadoop;
 import java.io.IOException;
 import java.util.Map;
 
+import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.hadoop.HttpFileSystem;
 import cascading.util.PropertyUtil;
 import cascading.util.ShutdownUtil;
 import org.apache.hadoop.mapred.JobConf;
 
-/**
- * <p/>
- * Flows are submitted in order of dependency. If two or more steps do not share the same dependencies and all
- * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
- * all steps will be submitted for execution. The default submit priority is 5.
- */
-public class HadoopFlow extends Flow<JobConf>
+public class HadoopFlow extends BaseFlow<JobConf>
   {
   /** Field hdfsShutdown */
   private static Thread hdfsShutdown = null;
@@ -247,8 +243,8 @@ public class HadoopFlow extends Flow<JobConf>
     if( stop ) // unstable to call fs operations during shutdown
       return;
 
-    for( FlowStep step : getFlowSteps() )
-      step.clean( getConfig() );
+    for( FlowStep<JobConf> step : getFlowSteps() )
+      ( (BaseFlowStep<JobConf>) step ).clean( getConfig() );
     }
 
   private static synchronized void registerHadoopShutdownHook( Flow flow )

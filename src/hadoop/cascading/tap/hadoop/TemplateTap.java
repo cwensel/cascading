@@ -42,7 +42,6 @@ import cascading.tuple.TupleEntryCollector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.RecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,7 +198,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
     }
 
-  public static class TemplateScheme extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object, Object>
+  public static class TemplateScheme extends Scheme<HadoopFlowProcess, JobConf, Void, OutputCollector, Object, Object>
     {
     private final Scheme scheme;
     private final Fields pathFields;
@@ -256,13 +255,13 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, Void, OutputCollector> tap, JobConf conf )
       {
       scheme.sourceConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
+    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
       {
       scheme.sourcePrepare( flowProcess, sourceCall );
       }
@@ -274,13 +273,13 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
+    public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
       {
       scheme.sourceCleanup( flowProcess, sourceCall );
       }
 
     @Override
-    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, Void, OutputCollector> tap, JobConf conf )
       {
       scheme.sinkConfInit( flowProcess, tap, conf );
       }

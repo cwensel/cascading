@@ -29,7 +29,7 @@ import cascading.tuple.Fields;
 /**
  *
  */
-public class NullScheme<Process extends FlowProcess, Config, Input, Output, SourceContext, SinkContext> extends Scheme<Process, Config, Input, Output, SourceContext, SinkContext>
+public class NullScheme<Process extends FlowProcess<Config>, Config, Input, Output, SourceContext, SinkContext> extends Scheme<Process, Config, Input, Output, SourceContext, SinkContext>
   {
   public NullScheme()
     {

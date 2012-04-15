@@ -30,6 +30,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.cascade.planner.FlowGraph;
+import cascading.cascade.planner.TapGraph;
+import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
@@ -43,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import static cascading.cascade.CascadeDef.cascadeDef;
 
 /**
- * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link Flow} instance.
+ * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link cascading.flow.Flow} instance.
  * <p/>
  * Note order is not significant when adding passing Flow instances to the {@code connect}
  * method. This connector will order them based on their dependencies, if any.
@@ -73,7 +76,7 @@ public class CascadeConnector
     }
 
   /**
-   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
+   * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
    * of the Cascade is derived from the given Flow instances.
    *
    * @param flows of type Collection<Flow>
@@ -85,7 +88,7 @@ public class CascadeConnector
     }
 
   /**
-   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance.
+   * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance.
    *
    * @param name  of type String
    * @param flows of type Collection<Flow>
@@ -97,7 +100,7 @@ public class CascadeConnector
     }
 
   /**
-   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
+   * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
    * of the Cascade is derived from the given Flow instances.
    *
    * @param flows of type Flow
@@ -109,7 +112,7 @@ public class CascadeConnector
     }
 
   /**
-   * Given any number of {@link Flow} objects, it will connect them and return a new {@link Cascade} instance.
+   * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance.
    *
    * @param name  of type String
    * @param flows of type Flow
@@ -128,8 +131,8 @@ public class CascadeConnector
 
   public Cascade connect( CascadeDef cascadeDef )
     {
-    SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph = new SimpleDirectedGraph<String, Flow.FlowHolder>( Flow.FlowHolder.class );
-    SimpleDirectedGraph<Flow, Integer> flowGraph = new SimpleDirectedGraph<Flow, Integer>( Integer.class );
+    TapGraph tapGraph = new TapGraph();
+    FlowGraph flowGraph = new FlowGraph();
 
     makeTapGraph( tapGraph, cascadeDef.getFlowsArray() );
     makeFlowGraph( flowGraph, tapGraph );
@@ -162,7 +165,7 @@ public class CascadeConnector
       throw new CascadeException( "there are likely cycles in the set of given flows, topological iterator cannot traverse flows with cycles" );
     }
 
-  private void makeTapGraph( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow[] flows )
+  private void makeTapGraph( SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph, Flow[] flows )
     {
     for( Flow flow : flows )
       {
@@ -186,11 +189,11 @@ public class CascadeConnector
       }
     }
 
-  private void addEdgeFor( SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph, Flow flow, Tap source, Tap sink )
+  private void addEdgeFor( SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph, Flow flow, Tap source, Tap sink )
     {
     try
       {
-      tapGraph.addEdge( getFullPath( flow, source ), getFullPath( flow, sink ), flow.getHolder() );
+      tapGraph.addEdge( getFullPath( flow, source ), getFullPath( flow, sink ), ( (BaseFlow) flow ).getHolder() );
       }
     catch( IllegalArgumentException exception )
       {
@@ -226,7 +229,7 @@ public class CascadeConnector
       }
     }
 
-  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, Flow.FlowHolder> tapGraph )
+  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph )
     {
     Set<String> identifiers = tapGraph.vertexSet();
 
@@ -248,9 +251,9 @@ public class CascadeConnector
 
         jobGraph.addVertex( flow );
 
-        Set<Flow.FlowHolder> previous = tapGraph.incomingEdgesOf( source );
+        Set<BaseFlow.FlowHolder> previous = tapGraph.incomingEdgesOf( source );
 
-        for( Flow.FlowHolder previousFlow : previous )
+        for( BaseFlow.FlowHolder previousFlow : previous )
           {
           jobGraph.addVertex( previousFlow.flow );
 

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.flow.planner.FlowStep;
+import cascading.flow.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.scheme.NullScheme;
 import cascading.tap.Tap;
@@ -131,12 +131,10 @@ public class MapReduceFlow extends HadoopFlow
 
   private FlowStepGraph makeStepGraph( JobConf jobConf )
     {
-    FlowStepGraph flowStepGraph = new HadoopStepGraph();
+    FlowStepGraph<JobConf> flowStepGraph = new HadoopStepGraph();
 
     Tap sink = getSinksCollection().iterator().next();
-    FlowStep step = new MapReduceFlowStep( sink.toString(), jobConf, sink );
-
-    step.setFlowName( getName() );
+    FlowStep<JobConf> step = new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
 
     flowStepGraph.addVertex( step );
 

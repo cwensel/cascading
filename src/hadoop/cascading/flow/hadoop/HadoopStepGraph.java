@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlannerException;
 import cascading.pipe.Group;
@@ -36,6 +36,7 @@ import cascading.pipe.Join;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
+import org.apache.hadoop.mapred.JobConf;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -49,7 +50,7 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 /**
  *
  */
-public class HadoopStepGraph extends FlowStepGraph
+public class HadoopStepGraph extends FlowStepGraph<JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepGraph.class );
@@ -63,7 +64,7 @@ public class HadoopStepGraph extends FlowStepGraph
     super( flowName, elementGraph );
     }
 
-  protected FlowStep createFlowStep( String stepName, int stepNum )
+  protected FlowStep<JobConf> createFlowStep( String stepName, int stepNum )
     {
     return new HadoopFlowStep( stepName, stepNum );
     }
@@ -80,7 +81,7 @@ public class HadoopStepGraph extends FlowStepGraph
 
     int numJobs = countNumJobs( tapGraph );
 
-    Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
+    Map<String, FlowStep<JobConf>> steps = new LinkedHashMap<String, FlowStep<JobConf>>();
     TopologicalOrderIterator<Tap, Integer> topoIterator = new TopologicalOrderIterator<Tap, Integer>( tapGraph );
     int count = 0;
 

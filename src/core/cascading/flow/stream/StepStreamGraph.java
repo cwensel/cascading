@@ -28,7 +28,7 @@ import java.util.TreeSet;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -48,9 +48,9 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 public abstract class StepStreamGraph extends StreamGraph
   {
   protected FlowProcess flowProcess;
-  protected final FlowStep step;
+  protected final BaseFlowStep step;
 
-  public StepStreamGraph( FlowProcess flowProcess, FlowStep step )
+  public StepStreamGraph( FlowProcess flowProcess, BaseFlowStep step )
     {
     this.flowProcess = flowProcess;
     this.step = step;

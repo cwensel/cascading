@@ -27,7 +27,7 @@ import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
 import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.flow.planner.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
 import cascading.operation.DebugLevel;
@@ -102,7 +102,7 @@ public class BuildDebugPlatformTest extends PlatformTestCase
 
   private int getDebugCount( Flow flow )
     {
-    FlowStep step = (FlowStep) flow.getFlowSteps().get( 0 );
+    BaseFlowStep step = (BaseFlowStep) flow.getFlowSteps().get( 0 );
 
     Collection<Operation> operations = step.getAllOperations();
     int count = 0;

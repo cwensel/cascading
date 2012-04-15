@@ -22,17 +22,15 @@ package cascading.flow;
 
 import java.util.List;
 
-import cascading.flow.planner.FlowStep;
-
 /**
- * The FlowStepStrategy interface allows for on the fly customization of {@link FlowStep} configuration values
+ * The FlowStepStrategy interface allows for on the fly customization of {@link cascading.flow.FlowStep} configuration values
  * before they are submitted to the underlying platform.
  * <p/>
  * Use a strategy instance to change the display name for a job, or in the case of Hadoop, the number of
  * mapper or reducer instances.
  * <p/>
- * Note, to change the configuration information, {@link cascading.flow.planner.FlowStep#getConfig()} must be
- * called to get access to the current configuration. Calling {@link FlowStep#setName(String)} would have no effect.
+ * Note, to change the configuration information, {@link cascading.flow.FlowStep#getConfig()} must be
+ * called to get access to the current configuration.
  * <p/>
  * If any, the completed predecessor steps are provided so that the predecessors can be inspected via the
  * {@link cascading.stats.FlowStepStats} interface for any information that may influence the current job.

@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.f.Flow and c.f.FlowStep to interfaces to hide internal only methods.
+
   Added support for trapping actual raw input data as read by a c.s.Scheme during processing by allowing
   c.t.TupleException to accept a payload c.t.Tuple instance with the data to be trapped. Updated c.s.h.TextDelimited
   and c.s.l.TextDelimited to provide a proper payload when sourcing and parsing text.

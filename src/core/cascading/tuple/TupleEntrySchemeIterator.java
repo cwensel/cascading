@@ -31,10 +31,10 @@ import cascading.util.SingleCloseableInputIterator;
 /**
  *
  */
-public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends TupleEntryIterator
+public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Config, SourceContext, SinkContext, Input> extends TupleEntryIterator
   {
-  private final FlowProcess flowProcess;
-  private final Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme;
+  private final Process flowProcess;
+  private final Scheme<Process, Config, Input, ?, SourceContext, SinkContext> scheme;
   private final CloseableIterator<Input> inputIterator;
   private ConcreteCall<SourceContext, Input> sourceCall;
 
@@ -43,22 +43,22 @@ public class TupleEntrySchemeIterator<SourceContext, SinkContext, Input> extends
   private boolean hasWaiting = false;
   private TupleException currentException;
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, Input input )
+  public TupleEntrySchemeIterator( Process flowProcess, Scheme<Process, Config, Input, ?, SourceContext, SinkContext> scheme, Input input )
     {
     this( flowProcess, scheme, input, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, Input input, String identifier )
+  public TupleEntrySchemeIterator( Process flowProcess, Scheme<Process, Config, Input, ?, SourceContext, SinkContext> scheme, Input input, String identifier )
     {
     this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), identifier );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator )
+  public TupleEntrySchemeIterator( Process flowProcess, Scheme<Process, Config, Input, ?, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator )
     {
     this( flowProcess, scheme, inputIterator, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess flowProcess, Scheme<FlowProcess, Object, Input, Object, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator, String identifier )
+  public TupleEntrySchemeIterator( Process flowProcess, Scheme<Process, Config, Input, ?, SourceContext, SinkContext> scheme, CloseableIterator<Input> inputIterator, String identifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;

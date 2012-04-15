@@ -20,16 +20,16 @@
 
 package cascading.stats;
 
-import cascading.flow.planner.FlowStep;
+import cascading.flow.FlowStep;
 import cascading.management.ClientState;
 
-/** Class StepStats collects {@link cascading.flow.planner.FlowStep} specific statistics. */
-public abstract class FlowStepStats extends CascadingStats
+/** Class StepStats collects {@link cascading.flow.FlowStep} specific statistics. */
+public abstract class FlowStepStats<Config> extends CascadingStats<Config>
   {
-  private FlowStep flowStep;
+  private final FlowStep<Config> flowStep;
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected FlowStepStats( FlowStep flowStep, ClientState clientState )
+  protected FlowStepStats( FlowStep<Config> flowStep, ClientState clientState )
     {
     super( flowStep.getName(), clientState );
     this.flowStep = flowStep;

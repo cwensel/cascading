@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.flow.Flow;
+import cascading.flow.BaseFlow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
@@ -34,7 +34,7 @@ import cascading.flow.planner.FlowStepGraph;
 /**
  *
  */
-public class LocalFlow extends Flow<Properties>
+public class LocalFlow extends BaseFlow<Properties>
   {
   private Properties config;
 

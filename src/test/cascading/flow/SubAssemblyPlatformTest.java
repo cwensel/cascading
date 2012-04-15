@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.PlatformTestCase;
-import cascading.flow.planner.FlowStep;
 import cascading.flow.planner.PlannerException;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;

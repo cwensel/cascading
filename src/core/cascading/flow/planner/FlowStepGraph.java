@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowStep;
 import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -42,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
-public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Integer>
+public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep<Config>, Integer>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowStepGraph.class );
@@ -73,7 +74,7 @@ public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Intege
    * @param numJobs  of type int
    * @return FlowStep
    */
-  protected FlowStep getCreateFlowStep( Map<String, FlowStep> steps, String sinkName, int numJobs )
+  protected FlowStep<Config> getCreateFlowStep( Map<String, FlowStep<Config>> steps, String sinkName, int numJobs )
     {
     if( steps.containsKey( sinkName ) )
       return steps.get( sinkName );
@@ -82,16 +83,16 @@ public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Intege
 
     String stepName = makeStepName( steps, numJobs, sinkName );
     int stepNum = steps.size() + 1;
-    FlowStep step = createFlowStep( stepName, stepNum );
+    FlowStep<Config> step = createFlowStep( stepName, stepNum );
 
     steps.put( sinkName, step );
 
     return step;
     }
 
-  protected abstract FlowStep createFlowStep( String stepName, int stepNum );
+  protected abstract FlowStep<Config> createFlowStep( String stepName, int stepNum );
 
-  private String makeStepName( Map<String, FlowStep> steps, int numJobs, String sinkPath )
+  private String makeStepName( Map<String, FlowStep<Config>> steps, int numJobs, String sinkPath )
     {
     // todo make the long form optional via a property
     if( sinkPath.length() > 75 )
@@ -118,12 +119,12 @@ public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Intege
     return count > 2;
     }
 
-  public TopologicalOrderIterator<FlowStep, Integer> getTopologicalIterator()
+  public TopologicalOrderIterator<FlowStep<Config>, Integer> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<FlowStep, Integer>( this, new PriorityQueue<FlowStep>( 10, new Comparator<FlowStep>()
+    return new TopologicalOrderIterator<FlowStep<Config>, Integer>( this, new PriorityQueue<FlowStep<Config>>( 10, new Comparator<FlowStep<Config>>()
     {
     @Override
-    public int compare( FlowStep lhs, FlowStep rhs )
+    public int compare( FlowStep<Config> lhs, FlowStep<Config> rhs )
       {
       return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
       }
@@ -146,7 +147,7 @@ public abstract class FlowStepGraph extends SimpleDirectedGraph<FlowStep, Intege
       {
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, this, new IntegerNameProvider<FlowStep>(), new VertexNameProvider<FlowStep>()
+      Util.writeDOT( writer, this, new IntegerNameProvider<BaseFlowStep>(), new VertexNameProvider<FlowStep>()
       {
       public String getVertexName( FlowStep flowStep )
         {

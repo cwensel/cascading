@@ -18,33 +18,18 @@
  * limitations under the License.
  */
 
-package cascading.flow;
+package cascading.cascade.planner;
 
-import java.util.Map;
+import cascading.flow.BaseFlow;
+import org.jgrapht.graph.SimpleDirectedGraph;
 
-import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.FlowStepGraph;
-import cascading.flow.planner.FlowStepJob;
-
-/** Flows is a utility helper class. */
-public class Flows
+/**
+ *
+ */
+public class TapGraph extends SimpleDirectedGraph<String, BaseFlow.FlowHolder>
   {
-  private Flows()
+  public TapGraph()
     {
-    }
-
-  public static Map<String, FlowStepJob> getJobsMap( Flow flow )
-    {
-    return ( (BaseFlow) flow ).getJobsMap();
-    }
-
-  public static ElementGraph getPipeGraphFrom( Flow flow )
-    {
-    return ( (BaseFlow) flow ).getPipeGraph();
-    }
-
-  public static FlowStepGraph getStepGraphFrom( Flow flow )
-    {
-    return ( (BaseFlow) flow ).getFlowStepGraph();
+    super( BaseFlow.FlowHolder.class );
     }
   }

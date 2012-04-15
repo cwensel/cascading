@@ -58,7 +58,7 @@ import cascading.util.Util;
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
-public abstract class Scheme<Process extends FlowProcess, Config, Input, Output, SourceContext, SinkContext> implements Serializable
+public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input, Output, SourceContext, SinkContext> implements Serializable
   {
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;

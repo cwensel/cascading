@@ -30,11 +30,11 @@ import cascading.cascade.Cascade;
 import cascading.management.ClientState;
 
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
-public class CascadeStats extends CascadingStats
+public class CascadeStats extends CascadingStats<Void>
   {
   private Cascade cascade;
   /** Field flowStatsList */
-  final List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
+  final List<FlowStats<Void>> flowStatsList = new LinkedList<FlowStats<Void>>(); // maintain order
 
   public CascadeStats( Cascade cascade, ClientState clientState )
     {
@@ -79,7 +79,7 @@ public class CascadeStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       results.addAll( flowStats.getCounterGroups() );
 
     return results;
@@ -90,7 +90,7 @@ public class CascadeStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       results.addAll( flowStats.getCounterGroupsMatching( regex ) );
 
     return results;
@@ -101,7 +101,7 @@ public class CascadeStats extends CascadingStats
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       results.addAll( flowStats.getCountersFor( group ) );
 
     return results;
@@ -112,7 +112,7 @@ public class CascadeStats extends CascadingStats
     {
     long value = 0;
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       value += flowStats.getCounterValue( counter );
 
     return value;
@@ -123,7 +123,7 @@ public class CascadeStats extends CascadingStats
     {
     long value = 0;
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       value += flowStats.getCounterValue( group, counter );
 
     return value;
@@ -132,12 +132,12 @@ public class CascadeStats extends CascadingStats
   @Override
   public void captureDetail()
     {
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats<Void> flowStats : flowStatsList )
       flowStats.captureDetail();
     }
 
   @Override
-  public Collection getChildren()
+  public Collection<FlowStats<Void>> getChildren()
     {
     return flowStatsList;
     }

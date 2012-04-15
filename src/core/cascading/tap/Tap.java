@@ -40,7 +40,7 @@ import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.util.Util;
 
 /**
- * A Tap represents the physical data source or sink in a connected {@link Flow}.
+ * A Tap represents the physical data source or sink in a connected {@link cascading.flow.Flow}.
  * </p>
  * That is, a source Tap is the head end of a connected {@link Pipe} and {@link Tuple} stream, and
  * a sink Tap is the tail end. Kinds of Tap types are used to manage files from a local disk,
@@ -51,12 +51,12 @@ import cascading.util.Util;
  * A Tap is responsible for how the resource is reached.
  * <p/>
  * A Tap is not given an explicit name by design. This is so a given Tap instance can be
- * re-used in different {@link Flow}s that may expect a source or sink by a different
+ * re-used in different {@link cascading.flow.Flow}s that may expect a source or sink by a different
  * logical name, but are the same physical resource. If a tap had a name other than its path, which would be
  * used for the tap identity? If the name, then two Tap instances with different names but the same path could
  * interfere with one another.
  */
-public abstract class Tap<Process extends FlowProcess, Config, Input, Output> implements FlowElement, Serializable
+public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Output> implements FlowElement, Serializable
   {
   /** Field scheme */
   private Scheme scheme;
@@ -119,7 +119,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
     }
 
   /**
-   * Method flowInit allows this Tap instance to initialize itself in context of the given {@link Flow} instance.
+   * Method flowInit allows this Tap instance to initialize itself in context of the given {@link cascading.flow.Flow} instance.
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
    * <p/>
@@ -136,7 +136,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   /**
    * Method sourceInit initializes this instance as a source.
    * <p/>
-   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link Flow}
+   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
    * a {@link cascading.cascade.Cascade}.
    * <p/>
@@ -154,7 +154,7 @@ public abstract class Tap<Process extends FlowProcess, Config, Input, Output> im
   /**
    * Method sinkInit initializes this instance as a sink.
    * <p/>
-   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link Flow}
+   * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
    * a {@link cascading.cascade.Cascade}.
    * <p/>

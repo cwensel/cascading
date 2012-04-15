@@ -34,18 +34,18 @@ import cascading.tuple.TupleEntryIterator;
  * to being a source). These types should subclass SinkTap for convenience or
  * set {@link #isSource()} to {@code false} in a custom Tap sub-class.
  */
-public abstract class SinkTap<Process extends FlowProcess, Config, Output> extends Tap<Process, Config, Void, Output>
+public abstract class SinkTap<Process extends FlowProcess<Config>, Config, Output> extends Tap<Process, Config, Void, Output>
   {
   protected SinkTap()
     {
     }
 
-  protected SinkTap( Scheme scheme )
+  protected SinkTap( Scheme<Process, Config, Void, Output, ?, ?> scheme )
     {
     super( scheme );
     }
 
-  protected SinkTap( Scheme scheme, SinkMode sinkMode )
+  protected SinkTap( Scheme<Process, Config, Void, Output, ?, ?> scheme, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     }

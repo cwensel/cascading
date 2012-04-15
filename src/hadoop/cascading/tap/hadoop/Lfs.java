@@ -23,7 +23,6 @@ package cascading.tap.hadoop;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 
-import cascading.flow.Flow;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.TapException;
@@ -34,7 +33,7 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  * Class Lfs is a {@link cascading.tap.Tap} class that provides access to the Local File System via Hadoop.
  * <p/>
- * Note that using a Lfs {@link cascading.tap.Tap} instance in a {@link Flow} will force a portion of not the whole Flow to be executed
+ * Note that using a Lfs {@link cascading.tap.Tap} instance in a {@link cascading.flow.Flow} will force a portion of not the whole Flow to be executed
  * in "local" mode forcing the Flow to execute in the current JVM. Mixing with {@link cascading.tap.hadoop.Dfs} and other Tap
  * types is possible, providing a means to implement complex file/data management functions.
  * <p/>
