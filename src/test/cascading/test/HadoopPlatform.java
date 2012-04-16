@@ -32,7 +32,7 @@ import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.HadoopPlanner;
+import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;

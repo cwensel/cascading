@@ -35,7 +35,7 @@ import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.HadoopPlanner;
+import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;

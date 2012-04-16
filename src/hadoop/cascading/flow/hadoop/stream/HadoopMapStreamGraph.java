@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.stream;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +28,9 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.hadoop.HadoopFlowStep;
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryJoinGate;
 import cascading.flow.stream.SinkStage;

@@ -18,12 +18,13 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.local.planner;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import cascading.flow.FlowStep;
+import cascading.flow.local.LocalFlowStep;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.tap.Tap;

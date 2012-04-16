@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.stats.local;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +40,7 @@ public class LocalStepStats extends FlowStepStats
   final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
-  protected LocalStepStats( FlowStep<Properties> flowStep, ClientState clientState )
+  public LocalStepStats( FlowStep<Properties> flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }

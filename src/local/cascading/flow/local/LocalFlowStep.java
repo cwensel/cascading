@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.local.planner.LocalFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.pipe.ConfigDef;
@@ -41,7 +42,7 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   /** Field mapperTraps */
   private final Map<String, Tap> traps = new HashMap<String, Tap>();
 
-  protected LocalFlowStep( String name, int id )
+  public LocalFlowStep( String name, int id )
     {
     super( name, id );
     }

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.stats.hadoop;
 
 import java.io.IOException;
 import java.util.Collection;

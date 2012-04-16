@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.stream;
 
 import java.util.Collection;
 import java.util.HashSet;

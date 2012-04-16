@@ -48,6 +48,9 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * Spills will automatically be compressed using the {@link #defaultCodecs} values. To disable compression or
  * change the codecs, see {@link SpillableTupleList#SPILL_COMPRESS} and {@link SpillableTupleList#SPILL_CODECS}.
+ * <p/>
+ * It is recommended to add Lzo if available.
+ * {@code "org.apache.hadoop.io.compress.LzoCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec" }
  */
 public class HadoopSpillableTupleList extends SpillableTupleList
   {

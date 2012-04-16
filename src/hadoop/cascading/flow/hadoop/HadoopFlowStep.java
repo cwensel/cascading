@@ -31,6 +31,7 @@ import java.util.Set;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.pipe.ConfigDef;

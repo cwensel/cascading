@@ -23,6 +23,7 @@ package cascading.flow.local;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.local.planner.LocalPlanner;
 import cascading.flow.planner.FlowPlanner;
 import cascading.scheme.Scheme;
 

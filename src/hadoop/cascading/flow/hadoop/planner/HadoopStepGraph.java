@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.planner;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlannerException;

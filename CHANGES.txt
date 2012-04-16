@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed packages for many internal types to simplify documentation.
+
   Changed c.f.Flow and c.f.FlowStep to interfaces to hide internal only methods.
 
   Added support for trapping actual raw input data as read by a c.s.Scheme during processing by allowing

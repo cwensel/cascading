@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.local.planner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +30,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.local.LocalFlowStep;
+import cascading.flow.local.stream.LocalStepStreamGraph;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.StreamGraph;
 import org.slf4j.Logger;

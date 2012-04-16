@@ -27,6 +27,8 @@ import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
 import cascading.flow.StepCounters;
+import cascading.flow.hadoop.stream.HadoopGroupGate;
+import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;

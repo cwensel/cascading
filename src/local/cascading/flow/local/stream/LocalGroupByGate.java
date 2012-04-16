@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.local.stream;
 
 import java.util.Collections;
 import java.util.List;

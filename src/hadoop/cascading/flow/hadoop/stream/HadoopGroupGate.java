@@ -18,11 +18,13 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.stream;
 
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;

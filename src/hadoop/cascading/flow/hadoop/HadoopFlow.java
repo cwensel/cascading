@@ -128,7 +128,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     super( properties, jobConf, name );
     }
 
-  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph flowStepGraph )
+  public HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph flowStepGraph )
     {
     super( properties, jobConf, flowDef, pipeGraph, flowStepGraph );
     }

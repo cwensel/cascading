@@ -18,10 +18,12 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.stream;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopGroupByClosure;
+import cascading.flow.hadoop.MapReduceCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.pipe.GroupBy;

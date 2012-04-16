@@ -18,9 +18,10 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.stream;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.stream.SinkStage;
 import cascading.tap.Tap;
 

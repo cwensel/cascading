@@ -18,13 +18,14 @@
  * limitations under the License.
  */
 
-package cascading.flow.local;
+package cascading.flow.local.stream;
 
 import java.util.List;
 import java.util.Properties;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.local.LocalFlowStep;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryCoGroupGate;

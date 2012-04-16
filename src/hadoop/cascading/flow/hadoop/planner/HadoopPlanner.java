@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.planner;
 
 import java.net.URI;
 import java.util.Collections;
@@ -37,6 +37,9 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.Scope;
+import cascading.flow.hadoop.HadoopFlow;
+import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowPlanner;
@@ -59,13 +62,13 @@ import org.slf4j.LoggerFactory;
 import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 
 /**
- * Class MultiMapReducePlanner is the core Hadoop MapReduce planner.
+ * Class HadoopPlanner is the core Hadoop MapReduce planner.
  * <p/>
  * Notes:
  * <p/>
  * <strong>Custom JobConf properties</strong><br/>
  * A custom JobConf instance can be passed to this planner by calling {@link #copyJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
- * on a map properties object before constructing a new {@link HadoopFlowConnector}.
+ * on a map properties object before constructing a new {@link cascading.flow.hadoop.HadoopFlowConnector}.
  * <p/>
  * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
  * All values in the map will be passed to a new default JobConf instance to be used as defaults for all resulting

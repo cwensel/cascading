@@ -35,6 +35,8 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
 import cascading.flow.LockingFlowListener;
+import cascading.flow.hadoop.planner.HadoopFlowStepJob;
+import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.planner.FlowPlanner;
 import cascading.operation.Assertion;
 import cascading.pipe.Pipe;
@@ -36,7 +37,7 @@ import cascading.tap.Tap;
  * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
  * an executable {@link cascading.flow.Flow}.
  * <p/>
- * FlowConnector invokes a planner for the target execution environment. Currently only {@link HadoopPlanner}
+ * FlowConnector invokes a planner for the target execution environment. Currently only {@link cascading.flow.hadoop.planner.HadoopPlanner}
  * is supported (for Hadoop). If you have just one pre-existing custom Hadoop job to execute, see {@link cascading.flow.hadoop.MapReduceFlow}.
  * <p/>
  * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"

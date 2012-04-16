@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.stats.hadoop;
 
 import java.util.HashMap;
 import java.util.Map;

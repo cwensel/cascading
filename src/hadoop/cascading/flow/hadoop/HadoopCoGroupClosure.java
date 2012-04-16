@@ -37,12 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import static cascading.tuple.TupleCollectionFactory.TUPLE_COLLECTION_FACTORY;
 
-/**
- * Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams.
- * <p/>
- * <p/>
- * "org.apache.hadoop.io.compress.LzoCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec"
- */
+/** Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams. */
 public class HadoopCoGroupClosure extends HadoopGroupByClosure
   {
   /** Field LOG */

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.hadoop.planner;
 
 import java.io.IOException;
 
@@ -27,6 +27,7 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.management.ClientState;
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowStepStats;
+import cascading.stats.hadoop.HadoopStepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;

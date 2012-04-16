@@ -29,6 +29,7 @@ import java.util.Properties;
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
+import cascading.stats.local.LocalStepStats;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
