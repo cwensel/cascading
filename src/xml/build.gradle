@@ -23,14 +23,16 @@ archivesBaseName = 'cascading-xml'
 
 sourceSets {
   main {
-    output.classesDir = new File("${buildDir}/classes/xml")
+    output.classesDir = new File( "${buildDir}/classes/xml" )
 
     java {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
 
     resources {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
   }
 }
@@ -40,15 +42,15 @@ dependencies {
 }
 
 assemble << {
-  def distDir = mkdir("${buildDir}/dist")
+  def distDir = mkdir( "${buildDir}/dist" )
 
   copy {
     into "${distDir}/lib/cascading-xml"
-    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-      !dep.name.contains('cascading')
+    from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains( 'cascading' )
     }.collect { dep ->
       dep.moduleArtifacts.collect { it.file }
-    })
+    } )
   }
 
   copy {

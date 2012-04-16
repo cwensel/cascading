@@ -25,35 +25,37 @@ archivesBaseName = 'cascading-hadoop'
 
 sourceSets {
   main {
-    output.classesDir = new File("${buildDir}/classes/hadoop")
+    output.classesDir = new File( "${buildDir}/classes/hadoop" )
 
     java {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
 
     resources {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
   }
 }
 
 dependencies {
-  compile(group: 'org.apache.hadoop', name: 'hadoop-core', version: '0.20.2') {
+  compile( group: 'org.apache.hadoop', name: 'hadoop-core', version: '0.20.2' ) {
     exclude group: 'ant'
     exclude group: 'junit'
   }
 }
 
 assemble << {
-  def distDir = mkdir("${buildDir}/dist")
+  def distDir = mkdir( "${buildDir}/dist" )
 
   copy {
     into "${distDir}/lib/cascading-hadoop"
-    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-      !dep.name.contains('cascading') && !dep.name.contains('hadoop')
+    from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains( 'cascading' ) && !dep.name.contains( 'hadoop' )
     }.collect { dep ->
       dep.moduleArtifacts.collect { it.file }
-    })
+    } )
   }
 
   copy {
@@ -66,8 +68,8 @@ test {
   include '**/*PlatformTest.class'
   include '**/*HadoopTest.class'
 
-  systemProperties = setTestingProperties('hadoop')
+  systemProperties = setTestingProperties( 'hadoop' )
 
-  testReportDir = new File(testReportDir, 'hadoop')
-  testResultsDir = new File(testResultsDir, 'hadoop')
+  testReportDir = new File( testReportDir, 'hadoop' )
+  testResultsDir = new File( testResultsDir, 'hadoop' )
 }

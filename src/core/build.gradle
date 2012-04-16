@@ -28,11 +28,13 @@ sourceSets {
     output.classesDir = new File( "${buildDir}/classes/core" )
 
     java {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
 
     resources {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
   }
 }

@@ -25,14 +25,16 @@ archivesBaseName = 'cascading-local'
 
 sourceSets {
   main {
-    output.classesDir = new File("${buildDir}/classes/local")
+    output.classesDir = new File( "${buildDir}/classes/local" )
 
     java {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
 
     resources {
-      srcDir 'cascading'
+      srcDirs projectDir
+      exclude 'build.gradle'
     }
   }
 }
@@ -42,15 +44,15 @@ dependencies {
 }
 
 assemble << {
-  def distDir = mkdir("${buildDir}/dist")
+  def distDir = mkdir( "${buildDir}/dist" )
 
   copy {
     into "${distDir}/lib/cascading-local"
-    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-      !dep.name.contains('cascading')
+    from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains( 'cascading' )
     }.collect { dep ->
       dep.moduleArtifacts.collect { it.file }
-    })
+    } )
   }
 
   copy {
@@ -62,9 +64,9 @@ assemble << {
 test {
   include '**/*PlatformTest.class'
 
-  systemProperties = setTestingProperties('local')
+  systemProperties = setTestingProperties( 'local' )
 
-  testReportDir = new File(testReportDir, 'local')
-  testResultsDir = new File(testResultsDir, 'local')
+  testReportDir = new File( testReportDir, 'local' )
+  testResultsDir = new File( testResultsDir, 'local' )
 }
 
