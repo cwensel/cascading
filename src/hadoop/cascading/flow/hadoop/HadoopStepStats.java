@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
-public abstract class HadoopStepStats extends FlowStepStats<JobConf>
+public abstract class HadoopStepStats extends FlowStepStats
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );

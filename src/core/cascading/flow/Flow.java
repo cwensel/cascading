@@ -168,7 +168,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    *
    * @return the flowStats (type FlowStats) of this Flow object.
    */
-  FlowStats<Config> getFlowStats();
+  FlowStats getFlowStats();
 
   /**
    * Method hasListeners returns true if {@link FlowListener} instances have been registered.

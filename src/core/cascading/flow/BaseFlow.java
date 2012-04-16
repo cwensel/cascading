@@ -87,7 +87,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
   /** Field flowStats */
-  protected final FlowStats<Config> flowStats; // don't use a listener to set values
+  protected final FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
   protected Map<String, Tap> sources = Collections.EMPTY_MAP;
   /** Field sinks */
@@ -394,13 +394,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     }
 
   @Override
-  public FlowStats<Config> getFlowStats()
+  public FlowStats getFlowStats()
     {
     return flowStats;
     }
 
   @Override
-  public FlowStats<Config> getStats()
+  public FlowStats getStats()
     {
     return getFlowStats();
     }

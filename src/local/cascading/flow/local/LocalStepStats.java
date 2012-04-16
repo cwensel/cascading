@@ -35,7 +35,7 @@ import cascading.stats.FlowStepStats;
 /**
  *
  */
-public class LocalStepStats extends FlowStepStats<Properties>
+public class LocalStepStats extends FlowStepStats
   {
   final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
 

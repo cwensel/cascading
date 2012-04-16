@@ -58,7 +58,7 @@ import cascading.management.ClientState;
  * @see FlowStats
  * @see FlowStepStats
  */
-public abstract class CascadingStats<Config> implements Serializable
+public abstract class CascadingStats implements Serializable
   {
   public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
 
