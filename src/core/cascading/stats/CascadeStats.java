@@ -137,7 +137,7 @@ public class CascadeStats extends CascadingStats<Void>
     }
 
   @Override
-  public Collection<FlowStats<Void>> getChildren()
+  public Collection getChildren()
     {
     return flowStatsList;
     }
