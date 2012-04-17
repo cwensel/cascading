@@ -27,8 +27,8 @@ import java.util.TreeSet;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
 import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.Scope;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;

@@ -28,7 +28,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
@@ -172,10 +172,12 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
     }
 
   /**
-   * Method getIdentifier returns a String representing the resource identifier this Tap instance represents.
+   * Method getIdentifier returns a String representing the resource this Tap instance represents.
    * <p/>
    * Often, if the tap accesses a filesystem, the identifier is nothing more than the path to the file or directory.
    * In other cases it may be a an URL or URI representing a connection string or remote resource.
+   * <p/>
+   * Any two Tap instances having the same value for the identifier are considered equal.
    *
    * @return String
    */
@@ -250,7 +252,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
     if( output == null )
       throw new IllegalArgumentException( "output may not be null" );
 
-    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output );
+    return new TupleEntrySchemeCollector<Output>( flowProcess, getScheme(), output );
     }
 
   /**

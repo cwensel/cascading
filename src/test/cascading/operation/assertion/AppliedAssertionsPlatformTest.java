@@ -26,7 +26,7 @@ import java.util.Map;
 import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexFilter;
@@ -163,7 +163,7 @@ public class AppliedAssertionsPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getPlatform().getProperties();
 
-    FlowConnector.setAssertionLevel( properties, planLevel );
+    FlowConnectorProps.setAssertionLevel( properties, planLevel );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
@@ -288,7 +288,7 @@ public class AppliedAssertionsPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getPlatform().getProperties();
 
-    FlowConnector.setAssertionLevel( properties, planLevel );
+    FlowConnectorProps.setAssertionLevel( properties, planLevel );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 

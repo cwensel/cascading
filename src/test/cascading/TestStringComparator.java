@@ -26,9 +26,9 @@ import java.util.Comparator;
 
 import cascading.tuple.Hasher;
 import cascading.tuple.StreamComparator;
-import cascading.tuple.hadoop.BufferedInputStream;
-import cascading.tuple.hadoop.HadoopTupleInputStream;
 import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.hadoop.io.BufferedInputStream;
+import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 
 /**
  *

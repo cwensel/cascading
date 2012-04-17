@@ -26,9 +26,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import cascading.CascadingTestCase;
-import cascading.tuple.hadoop.HadoopTupleInputStream;
-import cascading.tuple.hadoop.HadoopTupleOutputStream;
 import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.hadoop.io.HadoopTupleInputStream;
+import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
+import cascading.tuple.io.TupleInputStream;
+import cascading.tuple.io.TupleOutputStream;
+import cascading.tuple.io.TuplePair;
 
 public class TupleTest extends CascadingTestCase
   {

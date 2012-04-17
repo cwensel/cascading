@@ -24,18 +24,19 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.util.FalseCollection;
+import cascading.provider.FactoryLoader;
 import cascading.tuple.Fields;
-import cascading.tuple.IndexTuple;
-import cascading.tuple.Spillable;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleCollectionFactory;
 import cascading.tuple.Tuples;
-import cascading.tuple.hadoop.HadoopTupleCollectionFactory;
-import cascading.util.FactoryLoader;
+import cascading.tuple.collect.Spillable;
+import cascading.tuple.collect.TupleCollectionFactory;
+import cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory;
+import cascading.tuple.io.IndexTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.tuple.TupleCollectionFactory.TUPLE_COLLECTION_FACTORY;
+import static cascading.tuple.collect.TupleCollectionFactory.TUPLE_COLLECTION_FACTORY;
 
 /** Class CoGroupClosure is used internally to represent co-grouping results of multiple tuple streams. */
 public class HadoopCoGroupClosure extends HadoopGroupByClosure

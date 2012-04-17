@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation SerializationToken enables {@link cascading.tuple.TupleInputStream} and {@link cascading.tuple.TupleOutputStream}
+ * Annotation SerializationToken enables {@link cascading.tuple.io.TupleInputStream} and {@link cascading.tuple.io.TupleOutputStream}
  * to substitute Integer values for a class name when writing out nested objects inside a {@link cascading.tuple.Tuple}.
  * <p/>
  * To use, add this annotation to any custom Hadoop {@link org.apache.hadoop.io.serializer.Serialization} implementation.
@@ -49,8 +49,8 @@ import java.lang.annotation.Target;
  * <p/>
  * Note that the token integer value must be 128 or greater to save room for internal types.
  *
- * @see cascading.tuple.TupleInputStream
- * @see cascading.tuple.TupleOutputStream
+ * @see cascading.tuple.io.TupleInputStream
+ * @see cascading.tuple.io.TupleOutputStream
  * @see TupleSerialization
  */
 @Retention(RetentionPolicy.RUNTIME)

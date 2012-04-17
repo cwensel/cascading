@@ -29,8 +29,8 @@ import cascading.flow.stream.DuctException;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
+import cascading.tuple.io.TuplePair;
 
 /**
  *

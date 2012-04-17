@@ -25,10 +25,12 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowException;
+import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.flow.StepCounters;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;
@@ -143,6 +145,46 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       if( currentProcess != null )
         currentProcess.increment( StepCounters.Process_End_Time, System.currentTimeMillis() );
+      }
+    }
+
+  /**
+   *
+   */
+  static class IteratorWrapper implements Iterator
+    {
+    private final FlowProcess flowProcess;
+
+    Iterator iterator;
+
+    public IteratorWrapper( FlowProcess flowProcess )
+      {
+      this.flowProcess = flowProcess;
+      }
+
+    public void reset( Iterator iterator )
+      {
+      this.iterator = iterator;
+      }
+
+    @Override
+    public boolean hasNext()
+      {
+      return iterator.hasNext();
+      }
+
+    @Override
+    public Object next()
+      {
+      flowProcess.increment( MapReduceCounters.Reduce_Tuples_Read, 1 );
+
+      return iterator.next();
+      }
+
+    @Override
+    public void remove()
+      {
+      iterator.remove();
       }
     }
   }

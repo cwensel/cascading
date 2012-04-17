@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
 import cascading.operation.PlannedOperation;
 import cascading.operation.PlannerLevel;
 import cascading.pipe.CoGroup;
@@ -441,12 +440,12 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
           return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" );
           }
         }, new EdgeNameProvider<Scope>()
-      {
-      public String getEdgeName( Scope object )
         {
-        return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+        public String getEdgeName( Scope object )
+          {
+          return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+          }
         }
-      }
       );
 
       writer.close();

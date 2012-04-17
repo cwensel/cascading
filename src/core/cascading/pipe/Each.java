@@ -23,7 +23,7 @@ package cascading.pipe;
 import java.beans.ConstructorProperties;
 import java.util.Set;
 
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.operation.Assertion;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;

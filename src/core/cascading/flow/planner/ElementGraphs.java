@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
 import cascading.pipe.Group;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;

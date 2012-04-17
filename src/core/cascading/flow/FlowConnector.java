@@ -30,12 +30,11 @@ import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.flow.planner.FlowPlanner;
-import cascading.operation.AssertionLevel;
-import cascading.operation.DebugLevel;
 import cascading.pipe.Pipe;
+import cascading.property.AppProps;
+import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
-import cascading.util.PropertyUtil;
 import cascading.util.Util;
 
 import static cascading.flow.FlowDef.flowDef;
@@ -44,89 +43,67 @@ import static cascading.flow.FlowDef.flowDef;
  * Class FlowConnector is the base class for all platform planners.
  * <p/>
  * See the {@link FlowDef} class for a fluent way to define a new Flow.
+ * <p/>
+ * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
+ * an executable {@link cascading.flow.Flow}.
+ * <p/>
+ * FlowConnector invokes a planner for the target execution environment.
+ * <p/>
+ * For executing Flows in local memory against local files, see {@link cascading.flow.local.LocalFlowConnector}.
+ * <p/>
+ * For Apache Hadoop, see the {@link cascading.flow.hadoop.HadoopFlowConnector}.
+ * Or if you have a pre-existing custom Hadoop job to execute, see {@link cascading.flow.hadoop.MapReduceFlow}, which
+ * doesn't require a planner.
+ * <p/>
+ * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"
+ * refers to the last connected Pipe instances in a pipe-assembly. Pipe-assemblies are graphs of object with "heads"
+ * and "tails". From a given "tail", all connected heads can be found, but not the reverse. So "tails" must be
+ * supplied by the user.
+ * <p/>
+ * The FlowConnector and the underlying execution framework (Hadoop or local mode) can be configured via a
+ * {@link Map} or {@link Properties} instance given to the constructor.
+ * <p/>
+ * This properties map must be populated before constructing a FlowConnector instance. Many planner specific
+ * properties can be set through the {@link FlowConnectorProps} fluent interface.
+ * <p/>
+ * Some planners have required properties. Hadoop expects {@link AppProps#setApplicationJarPath(java.util.Map, String)} or
+ * {@link AppProps#setApplicationJarClass(java.util.Map, Class)} to be set.
+ * <p/>
+ * Any properties set and passed through the FlowConnector constructor will be global to all Flow instances created through
+ * the that FlowConnector instance. Some properties are on the {@link FlowDef} and would only be applicable to the
+ * resulting Flow instance.
+ * <p/>
+ * These properties are used to influence the current planner and are also passed down to the
+ * execution framework to override any default values. For example when using the Hadoop planner, the number of reducers
+ * or mappers can be set by using platform specific properties.
+ * <p/>
+ * Custom operations (Functions, Filter, etc) may also retrieve these property values at runtime through calls to
+ * {@link cascading.flow.FlowProcess#getProperty(String)} or {@link FlowProcess#getStringProperty(String)}.
+ * <p/>
+ * Most applications will need to call {@link cascading.property.AppProps#setApplicationJarClass(java.util.Map, Class)} or
+ * {@link cascading.property.AppProps#setApplicationJarPath(java.util.Map, String)} so that
+ * the correct application jar file is passed through to all child processes. The Class or path must reference
+ * the custom application jar, not a Cascading library class or jar. The easiest thing to do is give setApplicationJarClass
+ * the Class with your static main function and let Cascading figure out which jar to use.
+ * <p/>
+ * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
+ * runtime from a configuration file.
+ * <p/>
+ * By default, all {@link cascading.operation.Assertion}s are planned into the resulting Flow instance. This can be
+ * changed for a given Flow by calling {@link FlowDef#setAssertionLevel(cascading.operation.AssertionLevel)} or globally
+ * via {@link FlowConnectorProps#setAssertionLevel(cascading.operation.AssertionLevel)}.
+ * <p/>
+ * Also by default, all {@link cascading.operation.Debug}s are planned into the resulting Flow instance. This can be
+ * changed for a given flow by calling {@link FlowDef#setDebugLevel(cascading.operation.DebugLevel)} or globally via
+ * {@link FlowConnectorProps#setDebugLevel(cascading.operation.DebugLevel)}.
  *
  * @see cascading.flow.local.LocalFlowConnector
  * @see cascading.flow.hadoop.HadoopFlowConnector
  */
 public abstract class FlowConnector
   {
-  // need a global unique value here
-  private static String appID;
-
   /** Field properties */
   protected Map<Object, Object> properties;
-
-  /**
-   * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
-   *
-   * @param properties     of type Map<Object, Object>
-   * @param assertionLevel of type AssertionLevel
-   */
-  public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
-    {
-    if( assertionLevel != null )
-      properties.put( "cascading.flowconnector.assertionlevel", assertionLevel.toString() );
-    }
-
-  /**
-   * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
-   *
-   * @param properties of type Map<Object, Object>
-   * @return AssertionLevel the configured AssertionLevel
-   */
-  public static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
-    {
-    String assertionLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
-
-    return AssertionLevel.valueOf( assertionLevel );
-    }
-
-  /**
-   * Method setDebugLevel sets the target planner {@link cascading.operation.DebugLevel}.
-   *
-   * @param properties of type Map<Object, Object>
-   * @param debugLevel of type DebugLevel
-   */
-  public static void setDebugLevel( Map<Object, Object> properties, DebugLevel debugLevel )
-    {
-    if( debugLevel != null )
-      properties.put( "cascading.flowconnector.debuglevel", debugLevel.toString() );
-    }
-
-  /**
-   * Method getDebugLevel returns the configured target planner {@link cascading.operation.DebugLevel}.
-   *
-   * @param properties of type Map<Object, Object>
-   * @return DebugLevel the configured DebugLevel
-   */
-  public static DebugLevel getDebugLevel( Map<Object, Object> properties )
-    {
-    String debugLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.debuglevel", DebugLevel.DEFAULT.name() );
-
-    return DebugLevel.valueOf( debugLevel );
-    }
-
-  /**
-   * Method setIntermediateSchemeClass is used for debugging.
-   *
-   * @param properties              of type Map<Object, Object>
-   * @param intermediateSchemeClass of type Class
-   */
-  public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class intermediateSchemeClass )
-    {
-    properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
-    }
-
-  /**
-   * Method setIntermediateSchemeClass is used for debugging.
-   *
-   * @param properties              of type Map<Object, Object>
-   * @param intermediateSchemeClass of type String
-   */
-  public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClass )
-    {
-    properties.put( "cascading.flowconnector.intermediateschemeclass", intermediateSchemeClass );
-    }
 
   /**
    * Method getIntermediateSchemeClass is used for debugging.
@@ -137,7 +114,7 @@ public abstract class FlowConnector
   public Class getIntermediateSchemeClass( Map<Object, Object> properties )
     {
     // supporting stuffed classes to overcome classloading issue
-    Object type = PropertyUtil.getProperty( properties, "cascading.flowconnector.intermediateschemeclass", (Object) null );
+    Object type = PropertyUtil.getProperty( properties, FlowConnectorProps.INTERMEDIATE_SCHEME_CLASS, (Object) null );
 
     if( type == null )
       return getDefaultIntermediateSchemeClass();
@@ -155,133 +132,31 @@ public abstract class FlowConnector
       }
     }
 
-  protected abstract Class<? extends Scheme> getDefaultIntermediateSchemeClass();
-
   /**
-   * Method setApplicationJarClass is used to set the application jar file.
-   * </p>
-   * All cluster executed Cascading applications
-   * need to call setApplicationJarClass(java.util.Map, Class) or
-   * {@link #setApplicationJarPath(java.util.Map, String)}, otherwise ClassNotFound exceptions are likely.
+   * This has moved to {@link cascading.property.AppProps#setApplicationJarClass(java.util.Map, Class)}.
    *
-   * @param properties of type Map
-   * @param type       of type Class
+   * @param properties
+   * @param type
    */
+  @Deprecated
   public static void setApplicationJarClass( Map<Object, Object> properties, Class type )
     {
-    if( type != null )
-      properties.put( "cascading.flowconnector.appjar.class", type );
+    AppProps.setApplicationJarClass( properties, type );
     }
 
   /**
-   * Method getApplicationJarClass returns the Class set by the setApplicationJarClass method.
+   * This has moved to {@link cascading.property.AppProps#setApplicationJarPath(java.util.Map, String)}.
    *
-   * @param properties of type Map<Object, Object>
-   * @return Class
+   * @param properties
+   * @param path
    */
-  public static Class getApplicationJarClass( Map<Object, Object> properties )
-    {
-    return PropertyUtil.getProperty( properties, "cascading.flowconnector.appjar.class", (Class) null );
-    }
-
-  /**
-   * Method setApplicationJarPath is used to set the application jar file.
-   * </p>
-   * All cluster executed Cascading applications
-   * need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
-   * setApplicationJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.
-   *
-   * @param properties of type Map
-   * @param path       of type String
-   */
+  @Deprecated
   public static void setApplicationJarPath( Map<Object, Object> properties, String path )
     {
-    if( path != null )
-      properties.put( "cascading.flowconnector.appjar.path", path );
+    AppProps.setApplicationJarPath( properties, path );
     }
 
-  /**
-   * Method getApplicationJarPath return the path set by the setApplicationJarPath method.
-   *
-   * @param properties of type Map<Object, Object>
-   * @return String
-   */
-  public static String getApplicationJarPath( Map<Object, Object> properties )
-    {
-    return PropertyUtil.getProperty( properties, "cascading.flowconnector.appjar.path", (String) null );
-    }
-
-  public static void setApplicationID( Map<Object, Object> properties )
-    {
-    properties.put( "cascading.app.id", getAppID( properties ) );
-    }
-
-  public static String getApplicationID( Map<Object, Object> properties )
-    {
-    if( properties == null )
-      return getAppID( null );
-
-    return PropertyUtil.getProperty( properties, "cascading.app.id", getAppID( properties ) );
-    }
-
-  private static String getAppID( Map<Object, Object> properties )
-    {
-    if( appID == null )
-      {
-      String appName = properties == null ? "appnameseed" : getApplicationName( properties );
-      appID = Util.createUniqueID( appName );
-      }
-
-    return appID;
-    }
-
-  /** Sets the static appID value to null. For debugging purposes. */
-  public static void resetAppID()
-    {
-    appID = null;
-    }
-
-  public static void setApplicationName( Map<Object, Object> properties, String name )
-    {
-    if( name != null )
-      properties.put( "cascading.app.name", name );
-    }
-
-  public static String getApplicationName( Map<Object, Object> properties )
-    {
-    return PropertyUtil.getProperty( properties, "cascading.app.name", (String) null );
-    }
-
-  public static void setApplicationVersion( Map<Object, Object> properties, String version )
-    {
-    if( version != null )
-      properties.put( "cascading.app.version", version );
-    }
-
-  public static String getApplicationVersion( Map<Object, Object> properties )
-    {
-    return PropertyUtil.getProperty( properties, "cascading.app.version", (String) null );
-    }
-
-  public static void addApplicationTag( Map<Object, Object> properties, String tag )
-    {
-    if( tag == null )
-      return;
-
-    String tags = PropertyUtil.getProperty( properties, "cascading.app.tags", (String) null );
-
-    if( tags != null )
-      tags = Util.join( ",", tag.trim(), tags );
-    else
-      tags = tag;
-
-    properties.put( "cascading.app.tags", tags );
-    }
-
-  public static String getApplicationTags( Map<Object, Object> properties )
-    {
-    return PropertyUtil.getProperty( properties, "cascading.app.tags", (String) null );
-    }
+  protected abstract Class<? extends Scheme> getDefaultIntermediateSchemeClass();
 
   protected FlowConnector()
     {

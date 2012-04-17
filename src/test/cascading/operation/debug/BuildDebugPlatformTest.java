@@ -26,7 +26,7 @@ import java.util.Map;
 import cascading.PlatformTestCase;
 import cascading.TestConstants;
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
@@ -90,13 +90,13 @@ public class BuildDebugPlatformTest extends PlatformTestCase
     // test default config case
     assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
 
-    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.DEFAULT );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.DEFAULT );
     assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 1 );
 
-    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.VERBOSE );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.VERBOSE );
     assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 2 );
 
-    HadoopFlowConnector.setDebugLevel( properties, DebugLevel.NONE );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.NONE );
     assertEquals( getDebugCount( getPlatform().getFlowConnector( properties ).connect( source, sink, pipe ) ), 0 );
     }
 

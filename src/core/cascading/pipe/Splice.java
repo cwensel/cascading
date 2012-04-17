@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.tuple.Fields;

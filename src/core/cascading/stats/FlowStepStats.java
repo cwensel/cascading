@@ -21,7 +21,7 @@
 package cascading.stats;
 
 import cascading.flow.FlowStep;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 
 /** Class StepStats collects {@link cascading.flow.FlowStep} specific statistics. */
 public abstract class FlowStepStats extends CascadingStats

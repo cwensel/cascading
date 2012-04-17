@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
+import cascading.property.AppProps;
 
 
 /** Class FlowStats collects {@link cascading.flow.Flow} specific statistics. */
@@ -51,12 +51,12 @@ public class FlowStats extends CascadingStats
 
   public String getAppID()
     {
-    return FlowConnector.getApplicationID( getFlowProperties() );
+    return AppProps.getApplicationID( getFlowProperties() );
     }
 
   public String getAppName()
     {
-    return FlowConnector.getApplicationName( getFlowProperties() );
+    return AppProps.getApplicationName( getFlowProperties() );
     }
 
   @Override

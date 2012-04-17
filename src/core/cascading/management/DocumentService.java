@@ -23,9 +23,9 @@ package cascading.management;
 import java.util.List;
 import java.util.Map;
 
-import cascading.util.CascadingService;
+import cascading.provider.CascadingService;
 
-/** Interface DocumentService provides coars grained hooks for managing various statistics. */
+/** Interface DocumentService provides coarse grained hooks for managing various statistics. */
 public interface DocumentService extends CascadingService
   {
   String DOCUMENT_SERVICE_CLASS_PROPERTY = "cascading.management.document.service.classname";

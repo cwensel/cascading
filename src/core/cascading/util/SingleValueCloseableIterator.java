@@ -22,8 +22,6 @@ package cascading.util;
 
 import java.io.IOException;
 
-import cascading.tuple.CloseableIterator;
-
 /**
  * SingleValueIterator is a utility class used for quickly presenting a single value to a consumer
  * expecting both a {@link java.io.Closeable} and an {@link java.util.Iterator} interface. After returning the Value

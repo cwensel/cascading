@@ -45,15 +45,16 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.CascadingServices;
-import cascading.management.ClientState;
 import cascading.management.UnitOfWorkExecutorStrategy;
 import cascading.management.UnitOfWorkSpawnStrategy;
+import cascading.management.state.ClientState;
+import cascading.property.AppProps;
+import cascading.property.PropertyUtil;
 import cascading.stats.FlowStats;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.util.PropertyUtil;
 import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -124,26 +125,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   protected ShutdownUtil.Hook shutdownHook;
 
   /**
-   * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
-   * underlying computing system supports it. Defaults to {@code true}.
-   *
-   * @param properties     of type Map
-   * @param stopJobsOnExit of type boolean
-   */
-  public static void setStopJobsOnExit( Map<Object, Object> properties, boolean stopJobsOnExit )
-    {
-    properties.put( "cascading.flow.stopjobsonexit", Boolean.toString( stopJobsOnExit ) );
-    }
-
-  /**
    * Returns property stopJobsOnExit.
    *
    * @param properties of type Map
    * @return a boolean
    */
-  public static boolean getStopJobsOnExit( Map<Object, Object> properties )
+  static boolean getStopJobsOnExit( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.flow.stopjobsonexit", "true" ) );
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, FlowProps.STOP_JOBS_ON_EXIT, "true" ) );
     }
 
   /** Used for testing. */
@@ -190,7 +179,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     PropertyUtil.setProperty( properties, CASCADING_FLOW_ID, getID() );
     PropertyUtil.setProperty( properties, "cascading.flow.tags", getTags() );
-    FlowConnector.setApplicationID( properties );
+    AppProps.setApplicationID( properties );
     PropertyUtil.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
     PropertyUtil.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
     }
@@ -200,12 +189,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     if( properties == null )
       return null;
 
-    String name = FlowConnector.getApplicationName( properties );
+    String name = AppProps.getApplicationName( properties );
 
     if( name != null )
       return name;
 
-    return Util.findName( FlowConnector.getApplicationJarPath( properties ) );
+    return Util.findName( AppProps.getApplicationJarPath( properties ) );
     }
 
   private String makeAppVersion( Map<Object, Object> properties )
@@ -213,12 +202,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     if( properties == null )
       return null;
 
-    String name = FlowConnector.getApplicationVersion( properties );
+    String name = AppProps.getApplicationVersion( properties );
 
     if( name != null )
       return name;
 
-    return Util.findVersion( FlowConnector.getApplicationJarPath( properties ) );
+    return Util.findVersion( AppProps.getApplicationJarPath( properties ) );
     }
 
   private FlowStats createPrepareFlowStats()

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.CascadingException;
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;

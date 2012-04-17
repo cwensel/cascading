@@ -34,14 +34,14 @@ import java.io.InputStream;
  * Thus concrete implementations should implement this interface and the Comparator interface when being used
  * as a "grouping" or "sorting" field Comparator
  * <p/>
- * When used with Hadoop, a {@link cascading.tuple.hadoop.BufferedInputStream} is passed into the
+ * When used with Hadoop, a {@link cascading.tuple.hadoop.io.BufferedInputStream} is passed into the
  * {@link #compare(java.io.InputStream, java.io.InputStream)}
  * method. This class gives access to the underlying byte[] array so each individual byte need to be
  * {@link java.io.InputStream#read()}.
  * So it is useful to declare an implementation as
  * {@code public class YourCustomComparator implements StreamComparator&lt;BufferedInputStream>, Comparator&lt;YourCustomType>, Serializable}
  * <p/>
- * Note the method {@link cascading.tuple.hadoop.BufferedInputStream#skip(long)} will need to be called with the number
+ * Note the method {@link cascading.tuple.hadoop.io.BufferedInputStream#skip(long)} will need to be called with the number
  * of bytes read from the underlying byte buffer before the compare() method returns.
  *
  * @param <T>

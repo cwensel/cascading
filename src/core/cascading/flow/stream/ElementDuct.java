@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 
 /**
  *

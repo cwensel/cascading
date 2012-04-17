@@ -20,11 +20,6 @@
 
 package cascading.flow.hadoop;
 
-/**
- * $Author: $
- * $Date: $
- * $Revision: $
- */
 public enum MapReduceCounters
   {
     Map_Tuples_Read, Map_Tuples_Written, Reduce_Tuples_Read, Reduce_Tuples_Written

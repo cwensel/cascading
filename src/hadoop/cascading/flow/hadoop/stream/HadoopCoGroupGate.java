@@ -32,11 +32,11 @@ import cascading.flow.stream.DuctException;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.CoGroup;
-import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
+import cascading.tuple.io.IndexTuple;
+import cascading.tuple.io.TuplePair;
 
 /**
  *

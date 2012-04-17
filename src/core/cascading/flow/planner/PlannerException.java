@@ -22,7 +22,6 @@ package cascading.flow.planner;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.Scope;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
 import org.jgrapht.graph.SimpleDirectedGraph;

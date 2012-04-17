@@ -27,7 +27,7 @@ import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProcessWrapper;
-import cascading.pipe.ConfigDef;
+import cascading.property.ConfigDef;
 
 /**
  *

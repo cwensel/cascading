@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
@@ -1098,7 +1098,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Map<Object, Object> properties = getPlatform().getProperties();
 
     if( getPlatform() instanceof HadoopPlatform )
-      HadoopFlowConnector.setIntermediateSchemeClass( properties, schemeClass );
+      FlowConnectorProps.setIntermediateSchemeClass( properties, schemeClass );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( "cogroupopt", sources, sink, splice2 );
 

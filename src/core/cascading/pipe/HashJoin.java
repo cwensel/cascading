@@ -56,9 +56,9 @@ import cascading.tuple.Fields;
  * and N is small, instead of where M is small and N is large. Right hand side streams will be accumulated, and
  * spilled to disk if the collection reaches a specific threshold when using Hadoop.
  * <p/>
- * If spills are happening, consider increasing the spill thresholds, see {@link cascading.tuple.SpillableTupleMap}.
+ * If spills are happening, consider increasing the spill thresholds, see {@link cascading.tuple.collect.SpillableTupleMap}.
  * * <p/>
- * See the {@link cascading.tuple.TupleCollectionFactory} and {@link cascading.tuple.TupleMapFactory} for a means
+ * See the {@link cascading.tuple.collect.TupleCollectionFactory} and {@link cascading.tuple.collect.TupleMapFactory} for a means
  * to use alternative spillable types.
  *
  * @see cascading.pipe.joiner.InnerJoin
@@ -67,7 +67,7 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.joiner.RightJoin
  * @see cascading.pipe.joiner.MixedJoin
  * @see cascading.tuple.Fields
- * @see cascading.tuple.SpillableTupleMap
+ * @see cascading.tuple.collect.SpillableTupleMap
  */
 public class HashJoin extends Splice
   {

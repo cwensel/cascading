@@ -36,22 +36,22 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlow;
-import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.Scope;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
+import cascading.property.AppProps;
+import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.TempHfs;
-import cascading.util.PropertyUtil;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.jgrapht.GraphPath;
@@ -79,7 +79,6 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
  * <p/>
  * <strong>Properties</strong><br/>
  * <ul>
- * <li>cascading.hadoop.jobconf</li>
  * <li>cascading.multimapreduceplanner.job.status.pollinterval</li>
  * </ul>
  */
@@ -170,18 +169,18 @@ public class HadoopPlanner extends FlowPlanner
     jobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
     intermediateSchemeClass = flowConnector.getIntermediateSchemeClass( properties );
 
-    Class type = HadoopFlowConnector.getApplicationJarClass( properties );
+    Class type = AppProps.getApplicationJarClass( properties );
     if( jobConf.getJar() == null && type != null )
       jobConf.setJarByClass( type );
 
-    String path = HadoopFlowConnector.getApplicationJarPath( properties );
+    String path = AppProps.getApplicationJarPath( properties );
     if( jobConf.getJar() == null && path != null )
       jobConf.setJar( path );
 
     if( jobConf.getJar() == null )
       jobConf.setJarByClass( HadoopUtil.findMainClass( HadoopPlanner.class ) );
 
-    HadoopFlowConnector.setApplicationJarPath( properties, jobConf.getJar() );
+    AppProps.setApplicationJarPath( properties, jobConf.getJar() );
 
     LOG.info( "using application jar: {}", jobConf.getJar() );
     }

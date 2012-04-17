@@ -29,7 +29,7 @@ import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 
 /**
- * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
+ * Class FlowStep is an internal representation of a given "job" possibly to be executed on a remote cluster. During
  * planning, pipe assemblies are broken down into "steps" and encapsulated in this class.
  * <p/>
  * FlowSteps are submitted in order of dependency. If two or more steps do not share the same dependencies and all

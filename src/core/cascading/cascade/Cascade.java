@@ -45,13 +45,12 @@ import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
 import cascading.management.CascadingServices;
-import cascading.management.ClientState;
 import cascading.management.UnitOfWork;
 import cascading.management.UnitOfWorkExecutorStrategy;
 import cascading.management.UnitOfWorkSpawnStrategy;
+import cascading.management.state.ClientState;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
-import cascading.util.PropertyUtil;
 import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -63,6 +62,8 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.property.PropertyUtil.getProperty;
 
 /**
  * A Cascade is an assembly of {@link cascading.flow.Flow} instances that share or depend on equivalent {@link Tap} instances and are executed as
@@ -122,28 +123,16 @@ public class Cascade implements UnitOfWork<CascadeStats>
   private boolean stop;
   /** Field flowSkipStrategy */
   private FlowSkipStrategy flowSkipStrategy = null;
+  /** Field maxConcurrentFlows */
+  private int maxConcurrentFlows = 0;
 
-  /**
-   * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
-   * <p/>
-   * A value of one (1) will run one Flow at a time. A value of zero (0), the default, disables the restriction.
-   * <p/>
-   * By default a Cascade will attempt to run all give Flow instances at the same time. But there are occasions
-   * where limiting the number for flows helps manages resources.
-   *
-   * @param properties         of type Map<Object, Object>
-   * @param numConcurrentFlows of type int
-   */
-  public static void setMaxConcurrentFlows( Map<Object, Object> properties, int numConcurrentFlows )
+  static int getMaxConcurrentFlows( Map<Object, Object> properties, int maxConcurrentFlows )
     {
-    properties.put( "cascading.cascade.maxconcurrentflows", Integer.toString( numConcurrentFlows ) );
-    }
+    if( maxConcurrentFlows != -1 ) // CascadeDef is -1 by default
+      return maxConcurrentFlows;
 
-  public static int getMaxConcurrentFlows( Map<Object, Object> properties )
-    {
-    return Integer.parseInt( PropertyUtil.getProperty( properties, "cascading.cascade.maxconcurrentflows", "0" ) );
+    return Integer.parseInt( getProperty( properties, CascadeProps.MAX_CONCURRENT_FLOWS, "0" ) );
     }
-
 
   Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, FlowGraph flowGraph, TapGraph tapGraph )
     {
@@ -154,6 +143,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     this.tapGraph = tapGraph;
     this.cascadeStats = createPrepareCascadeStats();
     setIDOnFlow();
+    this.maxConcurrentFlows = cascadeDef.getMaxConcurrentFlows();
     }
 
   private CascadeStats createPrepareCascadeStats()
@@ -492,7 +482,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
       initializeNewJobsMap();
 
-      int numThreads = getMaxConcurrentFlows( properties );
+      int numThreads = getMaxConcurrentFlows( properties, maxConcurrentFlows );
 
       if( numThreads == 0 )
         numThreads = jobsMap.size();

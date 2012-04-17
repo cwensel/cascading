@@ -65,10 +65,10 @@ import cascading.tuple.Fields;
  * <p/>
  * During co-grouping, for any given unique grouping key, all of the rightmost pipes will accumulate the current
  * grouping values into memory so they may be iterated across for every value in the left hand side pipe. During
- * the accumulation step, if the number of values exceeds the {@link cascading.tuple.SpillableTupleList} threshold
+ * the accumulation step, if the number of values exceeds the {@link cascading.tuple.collect.SpillableTupleList} threshold
  * value, those values will be spilled to disk so the accumulation may continue.
  * <p/>
- * See the {@link cascading.tuple.TupleCollectionFactory} and {@link cascading.tuple.TupleMapFactory} for a means
+ * See the {@link cascading.tuple.collect.TupleCollectionFactory} and {@link cascading.tuple.collect.TupleMapFactory} for a means
  * to use alternative spillable types.
  * <p/>
  * There is no accumulation for the left hand side pipe, only for those to the "right".
@@ -78,7 +78,7 @@ import cascading.tuple.Fields;
  * prevent the likelihood of a spill and to reduce the blocking associated with accumulating the values. If using
  * the {@code Pipe[]} constructor, {@code Pipe[0]} is the left hand sided pipe.
  * <p/>
- * If spills are happening, consider increasing the spill threshold, see {@link cascading.tuple.SpillableTupleList},
+ * If spills are happening, consider increasing the spill threshold, see {@link cascading.tuple.collect.SpillableTupleList},
  * if more RAM is available. See the logs for hints on how much more these values can be increased, if any.
  * <p/>
  * Spills are intended to prevent {@link OutOfMemoryError}'s, so reducing the number of spills is important by
@@ -92,7 +92,7 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.joiner.RightJoin
  * @see cascading.pipe.joiner.MixedJoin
  * @see cascading.tuple.Fields
- * @see cascading.tuple.SpillableTupleList
+ * @see cascading.tuple.collect.SpillableTupleList
  */
 public class CoGroup extends Splice implements Group
   {

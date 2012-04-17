@@ -30,7 +30,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopFlowStep;
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryHashJoinGate;
 import cascading.flow.stream.SinkStage;

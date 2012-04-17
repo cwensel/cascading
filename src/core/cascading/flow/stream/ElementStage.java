@@ -26,7 +26,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;

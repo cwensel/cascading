@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.planner.FlowStepJob;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 import cascading.stats.local.LocalStepStats;
 import org.slf4j.Logger;

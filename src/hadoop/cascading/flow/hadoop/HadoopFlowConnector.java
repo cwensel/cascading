@@ -34,58 +34,22 @@ import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.Tap;
 
 /**
- * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
- * an executable {@link cascading.flow.Flow}.
- * <p/>
- * FlowConnector invokes a planner for the target execution environment. Currently only {@link cascading.flow.hadoop.planner.HadoopPlanner}
- * is supported (for Hadoop). If you have just one pre-existing custom Hadoop job to execute, see {@link cascading.flow.hadoop.MapReduceFlow}.
- * <p/>
- * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"
- * refers to the last connected Pipe instances in a pipe-assembly. Pipe-assemblies are graphs of object with "heads"
- * and "tails". From a given "tail", all connected heads can be found, but not the reverse. So "tails" must be
- * supplied by the user.
- * <p/>
- * The FlowConnector, resulting Flow, and the underlying execution framework (Hadoop) can be configured via a
- * {@link Map} or {@link Properties} instance given to the constructor. This properties map can be
- * populated before constructing a FlowConnector instance through static methods on FlowConnector and
- * MultiMapReducePlanner. These properties are used to influence the current planner and are also passed down to the
- * execution framework (Hadoop) to override any default values (the number of reducers or mappers, etc. by using
- * application specific properties).
- * <p/>
- * Custom operations (Functions, Filter, etc) may also retrieve these property values at runtime through calls to
- * {@link cascading.flow.FlowProcess#getProperty(String)}.
- * <p/>
- * Most applications will need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
- * {@link #setApplicationJarPath(java.util.Map, String)} so that the correct application jar file is passed through
- * to all child processes. The Class or path must reference
- * the custom application jar, not a Cascading library class or jar. The easiest thing to do is give setApplicationJarClass
- * the Class with your static main function and let Cascading figure out which jar to use.
- * <p/>
- * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
- * runtime from a configuration file.
- * <p/>
- * By default, all {@link Assertion}s are planned into the resulting Flow instance. This can be
- * changed by calling {@link #setAssertionLevel(java.util.Map, cascading.operation.AssertionLevel)}.
- * <p/>
- * Also by default, all {@link cascading.operation.Debug}s are planned into the resulting Flow instance. This can be
- * changed by calling {@link #setDebugLevel(java.util.Map, cascading.operation.DebugLevel)}.
- * <p/>
- * <strong>Properties</strong><br/>
- * <ul>
- * <li>cascading.flowconnector.appjar.class</li>
- * <li>cascading.flowconnector.appjar.path</li>
- * <li>cascading.flowconnector.assertionlevel</li>
- * <li>cascading.flowconnector.debuglevel</li>
- * <li>cascading.flowconnector.intermediateschemeclass</li>
- * </ul>
+ * Use the HadoopFlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
+ * an executable {@link HadoopFlow} for execution on an Apache Hadoop cluster.
  *
+ * @see cascading.property.AppProps
+ * @see cascading.flow.FlowConnectorProps
+ * @see cascading.flow.FlowDef
  * @see cascading.flow.hadoop.MapReduceFlow
  */
 public class HadoopFlowConnector extends FlowConnector
   {
-
-
-  /** Constructor FlowConnector creates a new FlowConnector instance. */
+  /**
+   * Constructor FlowConnector creates a new FlowConnector instance.
+   *
+   * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
+   * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
+   * */
   public HadoopFlowConnector()
     {
     }

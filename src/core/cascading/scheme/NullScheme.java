@@ -27,7 +27,9 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
 /**
+ * Class NullScheme is a {@link Scheme} that neither reads or writes any values.
  *
+ * It is typically used as a placeholder where a Scheme instance is needed but generally ignored.
  */
 public class NullScheme<Process extends FlowProcess<Config>, Config, Input, Output, SourceContext, SinkContext> extends Scheme<Process, Config, Input, Output, SourceContext, SinkContext>
   {
@@ -50,12 +52,12 @@ public class NullScheme<Process extends FlowProcess<Config>, Config, Input, Outp
 
   public boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
-    throw new UnsupportedOperationException( "sourcing is not supported in the scheme" );
+    return false;
     }
 
   public void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
-    throw new UnsupportedOperationException( "sinking is not supported in the scheme" );
+
     }
 
   @Override

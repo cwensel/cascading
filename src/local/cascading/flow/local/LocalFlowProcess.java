@@ -35,7 +35,7 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
 /**
- *
+ * Class LocalFlowProcess is the local mode implementation of {@link FlowProcess}.
  */
 public class LocalFlowProcess extends FlowProcess<Properties>
   {

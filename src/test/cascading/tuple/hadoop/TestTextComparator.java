@@ -27,6 +27,7 @@ import java.util.Comparator;
 
 import cascading.CascadingException;
 import cascading.tuple.StreamComparator;
+import cascading.tuple.hadoop.io.BufferedInputStream;
 import org.apache.hadoop.io.WritableUtils;
 
 /** Class BytesComparator is used to compare arrays of bytes. */

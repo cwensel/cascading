@@ -30,7 +30,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepStrategy;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
 import org.slf4j.Logger;

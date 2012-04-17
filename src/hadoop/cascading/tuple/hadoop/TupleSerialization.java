@@ -20,6 +20,11 @@
 
 package cascading.tuple.hadoop;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,14 +34,24 @@ import java.util.Map;
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.tuple.Comparison;
-import cascading.tuple.IndexTuple;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
-import cascading.tuple.TuplePair;
 import cascading.tuple.Tuples;
+import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
+import cascading.tuple.hadoop.io.IndexTupleDeserializer;
+import cascading.tuple.hadoop.io.IndexTupleSerializer;
+import cascading.tuple.hadoop.io.TupleDeserializer;
+import cascading.tuple.hadoop.io.TuplePairDeserializer;
+import cascading.tuple.hadoop.io.TuplePairSerializer;
+import cascading.tuple.hadoop.io.TupleSerializer;
+import cascading.tuple.io.IndexTuple;
+import cascading.tuple.io.TupleInputStream;
+import cascading.tuple.io.TupleOutputStream;
+import cascading.tuple.io.TuplePair;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
@@ -47,6 +62,8 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZATIONS;
+
 /**
  * Class TupleSerialization is an implementation of Hadoop's {@link Serialization} interface.
  * <p/>
@@ -55,6 +72,12 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * By default, all primitive types are natively handled, and {@link org.apache.hadoop.io.BytesWritable}
  * has a pre-configured serialization token since byte arrays are not handled natively by {@link Tuple}.
+ * <p/>
+ * To add or manipulate Hadoop serializations or Cascading serializations tokens, see
+ * {@link TupleSerializationProps} for a fluent property builder class.
+ * <p/>
+ * By default this Serialization interface registers the class {@link org.apache.hadoop.io.ByteWritable} as
+ * token 127.
  */
 @SerializationToken(
   tokens = {127},
@@ -63,7 +86,6 @@ public class TupleSerialization extends Configured implements Serialization
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TupleSerialization.class );
-
 
   /** Field defaultComparator * */
   private Comparator defaultComparator;
@@ -82,45 +104,50 @@ public class TupleSerialization extends Configured implements Serialization
   /**
    * Adds the given token and className pair as a serialization token property. During object serialization and deserialization,
    * the given token will be used instead of the className when an instance of the className is encountered.
+   * <p/>
+   * This method has moved to {@link TupleSerializationProps#addSerializationToken(java.util.Map, int, String)}.
    *
    * @param properties of type Map
    * @param token      of type int
    * @param className  of type String
    */
+  @Deprecated
   public static void addSerializationToken( Map<Object, Object> properties, int token, String className )
     {
-    String tokens = getSerializationTokens( properties );
-
-    properties.put( "cascading.serialization.tokens", Util.join( ",", Util.removeNulls( tokens, token + "=" + className ) ) );
+    TupleSerializationProps.addSerializationToken( properties, token, className );
     }
 
   /**
    * Returns the serialization tokens property.
+   * <p/>
+   * This method has moved to {@link TupleSerializationProps#getSerializationTokens(java.util.Map)}.
    *
    * @param properties of type Map
    * @return returns a String
    */
+  @Deprecated
   public static String getSerializationTokens( Map<Object, Object> properties )
     {
-    return (String) properties.get( "cascading.serialization.tokens" );
+    return TupleSerializationProps.getSerializationTokens( properties );
     }
 
   static String getSerializationTokens( JobConf jobConf )
     {
-    return jobConf.get( "cascading.serialization.tokens" );
+    return jobConf.get( TupleSerializationProps.SERIALIZATION_TOKENS );
     }
 
   /**
    * Adds the given className as a Hadoop IO serialization class.
+   * <p/>
+   * This method has moved to {@link TupleSerializationProps#addSerialization(java.util.Map, String)}.
    *
    * @param properties of type Map
    * @param className  of type String
    */
+  @Deprecated
   public static void addSerialization( Map<Object, Object> properties, String className )
     {
-    String serializations = (String) properties.get( "io.serializations" );
-
-    properties.put( "io.serializations", Util.join( ",", Util.removeNulls( serializations, className ) ) );
+    TupleSerializationProps.addSerialization( properties, className );
     }
 
   /**
@@ -151,15 +178,15 @@ public class TupleSerialization extends Configured implements Serialization
     list.addFirst( tuple );
 
     // make writable last
-    jobConf.set( "io.serializations", Util.join( list, "," ) );
+    jobConf.set( HADOOP_IO_SERIALIZATIONS, Util.join( list, "," ) );
     }
 
   static String getSerializations( JobConf jobConf )
     {
-    return jobConf.get( "io.serializations", null );
+    return jobConf.get( HADOOP_IO_SERIALIZATIONS, null );
     }
 
-  static Comparator getDefaultComparator( Configuration jobConf )
+  public static Comparator getDefaultComparator( Configuration jobConf )
     {
     String typeName = jobConf.get( Tuples.DEFAULT_ELEMENT_COMPARATOR );
 
@@ -525,5 +552,183 @@ public class TupleSerialization extends Configured implements Serialization
     classCache.put( className, type );
 
     return type;
+    }
+
+  public static class SerializationElementReader implements TupleInputStream.ElementReader
+    {
+    /** Field LOG */
+    private static final Logger LOG = LoggerFactory.getLogger( SerializationElementReader.class );
+
+    /** Field tupleSerialization */
+    private final TupleSerialization tupleSerialization;
+
+    /** Field deserializers */
+    final Map<String, Deserializer> deserializers = new HashMap<String, Deserializer>();
+
+    /**
+     * Constructor SerializationElementReader creates a new SerializationElementReader instance.
+     *
+     * @param tupleSerialization of type TupleSerialization
+     */
+    public SerializationElementReader( TupleSerialization tupleSerialization )
+      {
+      this.tupleSerialization = tupleSerialization;
+
+      tupleSerialization.initTokenMaps();
+      }
+
+    public Object read( int token, DataInputStream inputStream ) throws IOException
+      {
+      String className = getClassNameFor( token, inputStream );
+      Deserializer deserializer = getDeserializerFor( inputStream, className );
+
+      Object foundObject = null;
+      Object object = null;
+
+      try
+        {
+        object = deserializer.deserialize( foundObject );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "failed deserializing token: " + token + " with classname: " + className, exception );
+
+        throw exception;
+        }
+
+      return object;
+      }
+
+    @Override
+    public Comparator getComparatorFor( int token, DataInputStream inputStream ) throws IOException
+      {
+      Class type = tupleSerialization.getClass( getClassNameFor( token, inputStream ) );
+
+      return tupleSerialization.getComparator( type );
+      }
+
+    private Deserializer getDeserializerFor( DataInputStream inputStream, String className ) throws IOException
+      {
+      Deserializer deserializer = deserializers.get( className );
+
+      if( deserializer == null )
+        {
+        deserializer = tupleSerialization.getNewDeserializer( className );
+        deserializer.open( inputStream );
+        deserializers.put( className, deserializer );
+        }
+
+      return deserializer;
+      }
+
+    public String getClassNameFor( int token, DataInputStream inputStream ) throws IOException
+      {
+      String className = tupleSerialization.getClassNameFor( token );
+
+      if( className == null )
+        className = WritableUtils.readString( inputStream );
+
+      return className;
+      }
+
+    public void close()
+      {
+      if( deserializers.size() == 0 )
+        return;
+
+      Collection<Deserializer> clone = new ArrayList<Deserializer>( deserializers.values() );
+
+      deserializers.clear();
+
+      for( Deserializer deserializer : clone )
+        {
+        try
+          {
+          deserializer.close();
+          }
+        catch( IOException exception )
+          {
+          // do nothing
+          }
+        }
+      }
+    }
+
+  public static class SerializationElementWriter implements TupleOutputStream.ElementWriter
+    {
+    /** Field LOG */
+    private static final Logger LOG = LoggerFactory.getLogger( SerializationElementWriter.class );
+
+    /** Field tupleSerialization */
+    private final TupleSerialization tupleSerialization;
+
+    /** Field serializers */
+    final Map<Class, Serializer> serializers = new HashMap<Class, Serializer>();
+
+    public SerializationElementWriter( TupleSerialization tupleSerialization )
+      {
+      this.tupleSerialization = tupleSerialization;
+
+      tupleSerialization.initTokenMaps();
+      }
+
+    public void write( DataOutputStream outputStream, Object object ) throws IOException
+      {
+      Class<?> type = object.getClass();
+      String className = type.getName();
+      Integer token = tupleSerialization.getTokenFor( className );
+
+      if( token == null )
+        {
+        LOG.debug( "no serialization token found for classname: {}", className );
+
+        WritableUtils.writeVInt( outputStream, HadoopTupleOutputStream.WRITABLE_TOKEN ); // denotes to punt to hadoop serialization
+        WritableUtils.writeString( outputStream, className );
+        }
+      else
+        WritableUtils.writeVInt( outputStream, token );
+
+      Serializer serializer = serializers.get( type );
+
+      if( serializer == null )
+        {
+        serializer = tupleSerialization.getNewSerializer( type );
+        serializer.open( outputStream );
+        serializers.put( type, serializer );
+        }
+
+      try
+        {
+        serializer.serialize( object );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "failed serializing token: " + token + " with classname: " + className, exception );
+
+        throw exception;
+        }
+      }
+
+    public void close()
+      {
+      if( serializers.size() == 0 )
+        return;
+
+      Collection<Serializer> clone = new ArrayList<Serializer>( serializers.values() );
+
+      serializers.clear();
+
+      for( Serializer serializer : clone )
+        {
+        try
+          {
+          serializer.close();
+          }
+        catch( IOException exception )
+          {
+          // do nothing
+          }
+        }
+      }
     }
   }

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import cascading.cascade.Cascade;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats

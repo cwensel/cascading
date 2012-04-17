@@ -28,8 +28,8 @@ import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProps;
 import cascading.flow.FlowSession;
-import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
@@ -121,7 +121,7 @@ public class HadoopPlatform extends TestPlatform
     if( logger != null )
       properties.put( "log4j.logger", logger );
 
-    HadoopFlow.setJobPollingInterval( properties, 10 ); // should speed up tests
+    FlowProps.setJobPollingInterval( properties, 10 ); // should speed up tests
     HadoopPlanner.copyJobConf( properties, jobConf );
     }
 

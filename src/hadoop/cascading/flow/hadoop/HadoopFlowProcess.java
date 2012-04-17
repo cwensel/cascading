@@ -30,6 +30,7 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;

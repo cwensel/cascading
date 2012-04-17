@@ -23,7 +23,7 @@ package cascading.operation;
 import java.io.Serializable;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Pipe;

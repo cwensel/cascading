@@ -29,7 +29,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowStep;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 
 /**

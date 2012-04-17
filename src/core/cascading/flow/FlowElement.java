@@ -23,6 +23,7 @@ package cascading.flow;
 import java.io.Serializable;
 import java.util.Set;
 
+import cascading.flow.planner.Scope;
 import cascading.tuple.Fields;
 
 /**

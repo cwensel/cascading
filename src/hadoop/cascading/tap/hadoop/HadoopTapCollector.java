@@ -25,6 +25,7 @@ import java.io.IOException;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.TupleEntrySchemeCollector;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;

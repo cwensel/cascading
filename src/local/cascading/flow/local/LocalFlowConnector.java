@@ -28,14 +28,25 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.scheme.Scheme;
 
 /**
+ * Use the LocalFlowConnector to link source and sink {@link cascading.tap.Tap} instances with an assembly of {@link cascading.pipe.Pipe} instances into
+ * an executable {@link LocalFlow} for execution in local memory.
  *
+ * @see cascading.property.AppProps
+ * @see cascading.flow.FlowConnectorProps
+ * @see cascading.flow.FlowDef
  */
 public class LocalFlowConnector extends FlowConnector
   {
+  /** Constructor LocalFlowConnector creates a default instance. */
   public LocalFlowConnector()
     {
     }
 
+  /**
+   * Constructor LocalFlowConnector creates an instance using any of the given properites.
+   *
+   * @param properties of type Map
+   */
   public LocalFlowConnector( Map<Object, Object> properties )
     {
     super( properties );

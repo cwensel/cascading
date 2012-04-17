@@ -20,7 +20,7 @@
 
 package cascading.management;
 
-import cascading.util.CascadingService;
+import cascading.provider.CascadingService;
 
 /** Interface MetricsService provides fine grained hooks for managing various metrics. */
 public interface MetricsService extends CascadingService

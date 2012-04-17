@@ -36,7 +36,7 @@ import java.util.List;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;

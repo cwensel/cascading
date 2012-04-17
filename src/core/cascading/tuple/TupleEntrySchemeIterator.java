@@ -26,6 +26,7 @@ import java.io.IOException;
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
+import cascading.util.CloseableIterator;
 import cascading.util.SingleCloseableInputIterator;
 
 /**

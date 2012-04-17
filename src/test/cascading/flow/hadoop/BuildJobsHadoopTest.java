@@ -31,12 +31,13 @@ import cascading.CascadingTestCase;
 import cascading.TestBuffer;
 import cascading.TestFunction;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
-import cascading.flow.Scope;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlannerException;
+import cascading.flow.planner.Scope;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -844,7 +845,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
 
     Properties properties = new Properties();
-    HadoopFlowConnector.setIntermediateSchemeClass( properties, TextLine.class );
+    FlowConnectorProps.setIntermediateSchemeClass( properties, TextLine.class );
 
     HadoopFlowConnector flowConnector = new HadoopFlowConnector( properties );
 

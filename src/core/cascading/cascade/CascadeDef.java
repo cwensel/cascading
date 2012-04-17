@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
-import cascading.util.Def;
+import cascading.property.UnitOfWorkDef;
 
 /**
  * Class CascadeDef is a fluent interface for defining a {@link Cascade}.
@@ -35,12 +35,13 @@ import cascading.util.Def;
  * Instead of calling one of the {@link CascadeConnector} connect methods, {@link CascadeConnector#connect(CascadeDef)}
  * can be called.
  *
- * @see Def
+ * @see cascading.property.UnitOfWorkDef
  * @see cascading.flow.FlowDef
  */
-public class CascadeDef extends Def<CascadeDef>
+public class CascadeDef extends UnitOfWorkDef<CascadeDef>
   {
   Map<String, Flow> flows = new HashMap<String, Flow>();
+  int maxConcurrentFlows = -1;
 
   /**
    * Creates a new instance of a CascadeDef.
@@ -122,5 +123,17 @@ public class CascadeDef extends Def<CascadeDef>
       addFlow( flow );
 
     return this;
+    }
+
+  public CascadeDef setMaxConcurrentFlows( int maxConcurrentFlows )
+    {
+    this.maxConcurrentFlows = maxConcurrentFlows;
+
+    return this;
+    }
+
+  public int getMaxConcurrentFlows()
+    {
+    return maxConcurrentFlows;
     }
   }

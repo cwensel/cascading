@@ -54,6 +54,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.test.HadoopPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;

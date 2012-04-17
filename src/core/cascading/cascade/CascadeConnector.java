@@ -50,6 +50,15 @@ import static cascading.cascade.CascadeDef.cascadeDef;
  * <p/>
  * Note order is not significant when adding passing Flow instances to the {@code connect}
  * method. This connector will order them based on their dependencies, if any.
+ * <p/>
+ * The {@link CascadeDef} is a convenience class for dynamically defining a Cascade that can be passed to the
+ * {@link CascadeConnector#connect(CascadeDef)} method.
+ * <p/>
+ * Use the {@link CascadeProps} fluent helper class to create global properties to pass to the CascadeConnector
+ * constructor.
+ *
+ * @see CascadeDef
+ * @see CascadeProps
  */
 public class CascadeConnector
   {

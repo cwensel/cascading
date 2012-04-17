@@ -32,7 +32,11 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 
 /**
+ * Class LocalFlow is the local mode specific implementation of a {@link cascading.flow.Flow}.
+ * <p/>
+ * LocalFlow must be created through a {@link LocalFlowConnector} instance.
  *
+ * @see LocalFlowConnector
  */
 public class LocalFlow extends BaseFlow<Properties>
   {

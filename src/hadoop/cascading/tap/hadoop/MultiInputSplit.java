@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.hadoop.util.HadoopUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.FileSplit;

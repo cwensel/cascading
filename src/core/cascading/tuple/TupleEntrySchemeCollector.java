@@ -30,7 +30,7 @@ import cascading.tap.TapException;
 /**
  *
  */
-public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
+public class TupleEntrySchemeCollector<Output> extends TupleEntryCollector
   {
   private final FlowProcess flowProcess;
   private final Scheme scheme;
@@ -44,12 +44,12 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
     this( flowProcess, scheme, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output )
+  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, Output output )
     {
     this( flowProcess, scheme, output, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, O output, String identifier )
+  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, Output output, String identifier )
     {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
@@ -71,7 +71,7 @@ public class TupleEntrySchemeCollector<O> extends TupleEntryCollector
       this.sinkCall.setOutgoingEntry( this.tupleEntry );
     }
 
-  protected void setOutput( O output )
+  protected void setOutput( Output output )
     {
     sinkCall.setOutput( output );
     }

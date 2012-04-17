@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import cascading.flow.Flow;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of

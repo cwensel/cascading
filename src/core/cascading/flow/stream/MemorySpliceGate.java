@@ -32,12 +32,12 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleHasher;
 import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleHasher;
 
 /**
  *

@@ -28,7 +28,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
+import cascading.flow.planner.Scope;
+import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 import cascading.util.Util;
 

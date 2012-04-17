@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Debug;
 import cascading.operation.DebugLevel;
@@ -95,7 +95,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getPlatform().getProperties();
 
-    FlowConnector.setDebugLevel( properties, DebugLevel.NONE );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.NONE );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
@@ -146,7 +146,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getPlatform().getProperties();
 
-    FlowConnector.setDebugLevel( properties, DebugLevel.NONE );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.NONE );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 

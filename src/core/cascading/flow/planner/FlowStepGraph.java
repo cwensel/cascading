@@ -30,7 +30,6 @@ import java.util.PriorityQueue;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
-import cascading.flow.Scope;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;

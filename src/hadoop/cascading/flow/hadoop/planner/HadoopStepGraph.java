@@ -27,11 +27,11 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
-import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlannerException;
+import cascading.flow.planner.Scope;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;

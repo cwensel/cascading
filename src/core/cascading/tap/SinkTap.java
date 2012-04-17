@@ -28,10 +28,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
 
 /**
- * Class SinkTap is the base class for sink only Taps.
+ * Class SinkTap is an optional base class for sink only Taps.
  * <p/>
  * Some {@link cascading.tap.Tap} instances may only be sinks (as opposed
- * to being a source). These types should subclass SinkTap for convenience or
+ * to being a source). These types may subclass SinkTap for convenience or
  * set {@link #isSource()} to {@code false} in a custom Tap sub-class.
  */
 public abstract class SinkTap<Process extends FlowProcess<Config>, Config, Output> extends Tap<Process, Config, Void, Output>

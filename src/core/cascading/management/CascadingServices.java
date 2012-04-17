@@ -23,13 +23,15 @@ package cascading.management;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import cascading.cascade.CascadeException;
-import cascading.util.CascadingService;
-import cascading.util.PropertyUtil;
-import cascading.util.ServiceLoader;
+import cascading.management.state.ClientState;
+import cascading.property.PropertyUtil;
+import cascading.provider.CascadingService;
+import cascading.provider.ServiceLoader;
 import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import org.slf4j.Logger;
@@ -213,5 +215,139 @@ public class CascadingServices
         }
       }
     } );
+    }
+
+  /** Class NullDocumentService provides a null implementation. */
+  public static class NullDocumentService implements DocumentService
+    {
+    @Override
+    public boolean isEnabled()
+      {
+      return false;
+      }
+
+    @Override
+    public void setProperties( Map<Object, Object> properties )
+      {
+      }
+
+    @Override
+    public void startService()
+      {
+      }
+
+    @Override
+    public void stopService()
+      {
+      }
+
+    @Override
+    public void put( String key, Object object )
+      {
+      }
+
+    @Override
+    public void put( String type, String key, Object object )
+      {
+      }
+
+    @Override
+    public Map get( String type, String key )
+      {
+      return null;
+      }
+
+    @Override
+    public boolean supportsFind()
+      {
+      return false;
+      }
+
+    @Override
+    public List<Map<String, Object>> find( String type, String[] query )
+      {
+      return null;
+      }
+    }
+
+  /** Class NullMetricsService provides a null implementation. */
+  public static class NullMetricsService implements MetricsService
+    {
+    @Override
+    public boolean isEnabled()
+      {
+      return false;
+      }
+
+    @Override
+    public void increment( String[] context, int amount )
+      {
+      }
+
+    @Override
+    public void set( String[] context, String value )
+      {
+      }
+
+    @Override
+    public void set( String[] context, int value )
+      {
+      }
+
+    @Override
+    public void set( String[] context, long value )
+      {
+      }
+
+    @Override
+    public String getString( String[] context )
+      {
+      return null;
+      }
+
+    @Override
+    public int getInt( String[] context )
+      {
+      return 0;
+      }
+
+    @Override
+    public long getLong( String[] context )
+      {
+      return 0;
+      }
+
+    @Override
+    public boolean compareSet( String[] context, String isValue, String toValue )
+      {
+      return true;
+      }
+
+    @Override
+    public boolean compareSet( String[] context, int isValue, int toValue )
+      {
+      return true;
+      }
+
+    @Override
+    public boolean compareSet( String[] context, long isValue, long toValue )
+      {
+      return true;
+      }
+
+    @Override
+    public void setProperties( Map<Object, Object> properties )
+      {
+      }
+
+    @Override
+    public void startService()
+      {
+      }
+
+    @Override
+    public void stopService()
+      {
+      }
     }
   }

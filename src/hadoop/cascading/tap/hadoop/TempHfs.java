@@ -25,8 +25,8 @@ import java.net.URI;
 import java.util.Set;
 
 import cascading.CascadingException;
-import cascading.flow.Scope;
 import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.planner.Scope;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;

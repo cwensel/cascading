@@ -50,12 +50,6 @@ import cascading.tuple.TupleEntryIterator;
  * Flows are submitted in order of dependency when used with a {@link cascading.cascade.Cascade}. If two or more steps do not share the
  * same dependencies and all can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines
  * the order in which all steps will be submitted for execution. The default submit priority is 5.
- * <p/>
- * <strong>Properties</strong><br/>
- * <ul>
- * <li>cascading.flow.preservetemporaryfiles</li>
- * <li>cascading.flow.stopjobsonexit</li>
- * </ul>
  *
  * @see cascading.flow.FlowConnector
  */

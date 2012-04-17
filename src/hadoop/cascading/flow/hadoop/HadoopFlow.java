@@ -29,14 +29,25 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
-import cascading.tap.hadoop.HttpFileSystem;
-import cascading.util.PropertyUtil;
+import cascading.property.PropertyUtil;
+import cascading.tap.hadoop.io.HttpFileSystem;
 import cascading.util.ShutdownUtil;
 import org.apache.hadoop.mapred.JobConf;
 
+import static cascading.flow.FlowProps.MAX_CONCURRENT_STEPS;
+import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
+
+/**
+ * Class HadoopFlow is the Apache Hadoop specific implementation of a {@link Flow}.
+ *
+ * HadoopFlow must be created through a {@link HadoopFlowConnector} instance.
+ *
+ * @see HadoopFlowConnector
+ */
 public class HadoopFlow extends BaseFlow<JobConf>
   {
   /** Field hdfsShutdown */
@@ -53,75 +64,20 @@ public class HadoopFlow extends BaseFlow<JobConf>
     }
 
   /**
-   * Property preserveTemporaryFiles forces the Flow instance to keep any temporary intermediate data sets. Useful
-   * for debugging. Defaults to {@code false}.
-   *
-   * @param properties             of type Map
-   * @param preserveTemporaryFiles of type boolean
-   */
-  public static void setPreserveTemporaryFiles( Map<Object, Object> properties, boolean preserveTemporaryFiles )
-    {
-    properties.put( "cascading.flow.preservetemporaryfiles", Boolean.toString( preserveTemporaryFiles ) );
-    }
-
-  /**
    * Returns property preserveTemporaryFiles.
    *
    * @param properties of type Map
    * @return a boolean
    */
-  public static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
+  static boolean getPreserveTemporaryFiles( Map<Object, Object> properties )
     {
-    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.flow.preservetemporaryfiles", "false" ) );
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, PRESERVE_TEMPORARY_FILES, "false" ) );
     }
 
-  /**
-   * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
-   * The default value is 5000 msec (5 seconds).
-   *
-   * @param properties of type Map
-   * @param interval   of type long
-   */
-  public static void setJobPollingInterval( Map<Object, Object> properties, long interval )
+  static int getMaxConcurrentSteps( JobConf jobConf )
     {
-    properties.put( "cascading.flow.job.pollinginterval", Long.toString( interval ) );
+    return jobConf.getInt( MAX_CONCURRENT_STEPS, 0 );
     }
-
-  /**
-   * Returns property jobPollingInterval. The default is 5000 (5 sec).
-   *
-   * @param properties of type Map
-   * @return a long
-   */
-  public static long getJobPollingInterval( Map<Object, Object> properties )
-    {
-    return Long.parseLong( PropertyUtil.getProperty( properties, "cascading.flow.job.pollinginterval", "500" ) );
-    }
-
-  public static long getJobPollingInterval( JobConf jobConf )
-    {
-    return jobConf.getLong( "cascading.flow.job.pollinginterval", 5000 );
-    }
-
-  /**
-   * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
-   * <p/>
-   * By default a Flow will attempt to run all give steps at the same time. But there are occasions
-   * where limiting the number of steps helps manages resources.
-   *
-   * @param properties         of type Map<Object, Object>
-   * @param numConcurrentSteps of type int
-   */
-  public static void setMaxConcurrentSteps( Map<Object, Object> properties, int numConcurrentSteps )
-    {
-    properties.put( "cascading.flow.maxconcurrentsteps", Integer.toString( numConcurrentSteps ) );
-    }
-
-  public static int getMaxConcurrentSteps( JobConf jobConf )
-    {
-    return jobConf.getInt( "cascading.flow.maxconcurrentsteps", 0 );
-    }
-
 
   protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, String name )
     {

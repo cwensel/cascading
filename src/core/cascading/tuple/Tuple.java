@@ -1053,10 +1053,10 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public String print()
     {
-    return print( new StringBuffer() ).toString();
+    return printTo( new StringBuffer() ).toString();
     }
 
-  protected StringBuffer print( StringBuffer buffer )
+  public StringBuffer printTo( StringBuffer buffer )
     {
     buffer.append( "[" );
 
@@ -1067,7 +1067,7 @@ public class Tuple implements Comparable, Iterable, Serializable
         Object element = elements.get( i );
 
         if( element instanceof Tuple )
-          ( (Tuple) element ).print( buffer );
+          ( (Tuple) element ).printTo( buffer );
         else if( element == null ) // don't quote nulls to distinguish from null strings
           buffer.append( element );
         else

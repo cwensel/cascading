@@ -21,6 +21,7 @@
 package cascading.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,19 +30,18 @@ import java.util.Map;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Pipe;
+import cascading.property.UnitOfWorkDef;
 import cascading.tap.Tap;
-import cascading.util.Def;
 
 /**
  * Class FlowDef is a fluent interface for defining a {@link Flow}.
- * <p/>
  * <p/>
  * This allows for ad-hoc building of Flow data and meta-data like tags.
  * <p/>
  * Instead of calling one of the {@link FlowConnector} connect methods, {@link FlowConnector#connect(FlowDef)}
  * can be called.
  */
-public class FlowDef extends Def<FlowDef>
+public class FlowDef extends UnitOfWorkDef<FlowDef>
   {
   protected Map<String, Tap> sources = new HashMap<String, Tap>();
   protected Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -105,14 +105,25 @@ public class FlowDef extends Def<FlowDef>
 
   /**
    * Method addSource adds a new source {@link Tap} named after the given {@link Pipe} for use in the resulting {@link Flow}.
+   * <p/>
+   * If the given pipe is not a head pipe, it will be resolved. If more than one is found, an
+   * {@link IllegalArgumentException} will be thrown.
    *
-   * @param head   of Pipe
+   * @param pipe   of Pipe
    * @param source of Tap
    * @return FlowDef
    */
-  public FlowDef addSource( Pipe head, Tap source )
+  public FlowDef addSource( Pipe pipe, Tap source )
     {
-    addSource( head.getName(), source );
+    if( pipe == null )
+      throw new IllegalArgumentException( "pipe may not be null" );
+
+    Pipe[] heads = pipe.getHeads();
+
+    if( heads.length != 1 )
+      throw new IllegalArgumentException( "pipe has too many heads, found: " + Arrays.toString( Pipe.names( heads ) ) );
+
+    addSource( heads[ 0 ].getName(), source );
     return this;
     }
 
@@ -255,13 +266,13 @@ public class FlowDef extends Def<FlowDef>
   /**
    * Method addTrap adds a new trap {@link Tap} named after the given {@link Pipe} for use in the resulting {@link Flow}.
    *
-   * @param head of Pipe
+   * @param pipe of Pipe
    * @param trap of Tap
    * @return FlowDef
    */
-  public FlowDef addTrap( Pipe head, Tap trap )
+  public FlowDef addTrap( Pipe pipe, Tap trap )
     {
-    addTrap( head.getName(), trap );
+    addTrap( pipe.getName(), trap );
     return this;
     }
 

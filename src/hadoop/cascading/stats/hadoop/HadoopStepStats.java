@@ -30,7 +30,7 @@ import java.util.Set;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
-import cascading.management.ClientState;
+import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.Counters;

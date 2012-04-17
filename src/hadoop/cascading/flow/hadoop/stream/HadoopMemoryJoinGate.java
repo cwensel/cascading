@@ -26,17 +26,17 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
-import cascading.tuple.Spillable;
 import cascading.flow.stream.MemoryHashJoinGate;
 import cascading.pipe.HashJoin;
+import cascading.provider.FactoryLoader;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleMapFactory;
-import cascading.tuple.hadoop.HadoopTupleMapFactory;
-import cascading.util.FactoryLoader;
+import cascading.tuple.collect.Spillable;
+import cascading.tuple.collect.TupleMapFactory;
+import cascading.tuple.hadoop.collect.HadoopTupleMapFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.tuple.TupleMapFactory.TUPLE_MAP_FACTORY;
+import static cascading.tuple.collect.TupleMapFactory.TUPLE_MAP_FACTORY;
 
 /**
  *

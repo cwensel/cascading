@@ -27,7 +27,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.HadoopUtil;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;

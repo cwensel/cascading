@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.operation.DebugLevel;
 import cascading.test.HadoopPlatform;
 import cascading.test.PlatformRunner;
@@ -160,7 +160,7 @@ public class PlatformTestCase extends CascadingTestCase
   protected Map<Object, Object> disableDebug()
     {
     Map<Object, Object> properties = getProperties();
-    FlowConnector.setDebugLevel( properties, DebugLevel.NONE );
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.NONE );
 
     return properties;
     }

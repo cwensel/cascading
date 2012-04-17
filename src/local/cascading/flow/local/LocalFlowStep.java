@@ -31,11 +31,11 @@ import cascading.flow.FlowProcess;
 import cascading.flow.local.planner.LocalFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
-import cascading.pipe.ConfigDef;
+import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 
 /**
- *
+ * Class LocalFlowStep is the local mode implementation of {@link cascading.flow.FlowStep}.
  */
 public class LocalFlowStep extends BaseFlowStep<Properties>
   {

@@ -28,7 +28,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 
 /**
- * Class SourceTap is the base class for source only Taps.
+ * Class SourceTap is an optional base class for source only Taps.
  * <p/>
  * Some {@link Tap} instances may only be sources (as opposed
  * to being a sink). These types should subclass SourceTap for convenience or

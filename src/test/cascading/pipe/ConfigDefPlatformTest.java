@@ -30,6 +30,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
+import cascading.property.ConfigDef;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.test.HadoopPlatform;

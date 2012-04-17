@@ -33,7 +33,6 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
-import cascading.flow.Scope;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Each;
@@ -44,6 +43,7 @@ import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
+import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.util.Util;
@@ -68,11 +68,38 @@ public abstract class FlowPlanner
   /** Field debugLevel */
   protected DebugLevel debugLevel;
 
+
+  /**
+   * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return AssertionLevel the configured AssertionLevel
+   */
+  static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
+    {
+    String assertionLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.assertionlevel", AssertionLevel.STRICT.name() );
+
+    return AssertionLevel.valueOf( assertionLevel );
+    }
+
+  /**
+   * Method getDebugLevel returns the configured target planner {@link cascading.operation.DebugLevel}.
+   *
+   * @param properties of type Map<Object, Object>
+   * @return DebugLevel the configured DebugLevel
+   */
+  static DebugLevel getDebugLevel( Map<Object, Object> properties )
+    {
+    String debugLevel = PropertyUtil.getProperty( properties, "cascading.flowconnector.debuglevel", DebugLevel.DEFAULT.name() );
+
+    return DebugLevel.valueOf( debugLevel );
+    }
+
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
     {
     this.properties = properties;
-    this.assertionLevel = FlowConnector.getAssertionLevel( properties );
-    this.debugLevel = FlowConnector.getDebugLevel( properties );
+    this.assertionLevel = getAssertionLevel( properties );
+    this.debugLevel = getDebugLevel( properties );
     }
 
   /**

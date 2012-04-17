@@ -27,17 +27,16 @@ import java.util.Set;
 
 import cascading.CascadingTestCase;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.tuple.hadoop.HadoopSpillableTupleList;
-import cascading.tuple.hadoop.HadoopSpillableTupleMap;
+import cascading.tuple.collect.SpillableProps;
+import cascading.tuple.collect.SpillableTupleList;
+import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
+import cascading.tuple.hadoop.collect.HadoopSpillableTupleMap;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Test;
-
-import static cascading.tuple.SpillableTupleMap.initialCapacity;
-import static cascading.tuple.SpillableTupleMap.loadFactor;
 
 /**
  *
@@ -148,7 +147,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
   private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, JobConf jobConf )
     {
     HadoopFlowProcess flowProcess = new HadoopFlowProcess( jobConf );
-    HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( initialCapacity, loadFactor, mapThreshold, listThreshold, flowProcess );
+    HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( SpillableProps.defaultMapInitialCapacity, SpillableProps.defaultMapLoadFactor, mapThreshold, listThreshold, flowProcess );
 
     Set<Integer> keySet = new HashSet<Integer>();
     Random gen = new Random( 1 );
