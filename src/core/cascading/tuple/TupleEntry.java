@@ -304,6 +304,83 @@ public class TupleEntry
     }
 
   /**
+   * Method setBoolean sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type boolean
+   */
+  public void setBoolean( Comparable fieldName, boolean value )
+    {
+    tuple.setBoolean( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setShort sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type short
+   */
+  public void setShort( Comparable fieldName, short value )
+    {
+    tuple.setShort( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setInteger sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type int
+   */
+  public void setInteger( Comparable fieldName, int value )
+    {
+    tuple.setInteger( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setLong sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type long
+   */
+  public void setLong( Comparable fieldName, long value )
+    {
+    tuple.setLong( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setFloat sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type float
+   */
+  public void setFloat( Comparable fieldName, float value )
+    {
+    tuple.setFloat( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setDouble sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type double
+   */
+  public void setDouble( Comparable fieldName, double value )
+    {
+    tuple.setDouble( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
+   * Method setString sets the value in the given field or position.
+   *
+   * @param fieldName field name or position to set
+   * @param value     of type String
+   */
+  public void setString( Comparable fieldName, String value )
+    {
+    tuple.setString( fields.getPos( asFieldName( fieldName ) ), value );
+    }
+
+  /**
    * Method getString returns the element for the given field name or position as a String.
    * <br/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will

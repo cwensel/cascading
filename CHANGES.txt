@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.p.Props base and sub-classes to simplify managing Cascading and Hadoop related properties.
+
+  Added typed set and add methods to c.t.Tuple and c.t.TupleEntry.
+
   Changed packages for many internal types to simplify documentation.
 
   Changed c.f.Flow and c.f.FlowStep to interfaces to hide internal only methods.

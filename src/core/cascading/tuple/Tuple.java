@@ -387,6 +387,90 @@ public class Tuple implements Comparable, Iterable, Serializable
     }
 
   /**
+   * Method addBoolean adds a new element value to this instance.
+   *
+   * @param value of type boolean
+   */
+  public void addBoolean( boolean value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addShort adds a new element value to this instance.
+   *
+   * @param value of type short
+   */
+  public void addShort( short value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addInteger adds a new element value to this instance.
+   *
+   * @param value of type int
+   */
+  public void addInteger( int value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addLong adds a new element value to this instance.
+   *
+   * @param value of type long
+   */
+  public void addLong( long value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addFloat adds a new element value to this instance.
+   *
+   * @param value of type float
+   */
+  public void addFloat( float value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addDouble adds a new element value to this instance.
+   *
+   * @param value of type double
+   */
+  public void addDouble( double value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
+   * Method addString adds a new element value to this instance.
+   *
+   * @param value of type String
+   */
+  public void addString( String value )
+    {
+    verifyModifiable();
+
+    elements.add( value );
+    }
+
+  /**
    * Method addAll adds all given values to this instance.
    *
    * @param values of type Object...
@@ -472,7 +556,98 @@ public class Tuple implements Comparable, Iterable, Serializable
     internalSet( index, value );
     }
 
-  private final void internalSet( int index, Object value )
+  /**
+   * Method setBoolean sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type boolean
+   */
+  public void setBoolean( int index, boolean value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setShort sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type short
+   */
+  public void setShort( int index, short value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setInteger sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type int
+   */
+  public void setInteger( int index, int value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setLong sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type long
+   */
+  public void setLong( int index, long value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setFloat sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type float
+   */
+  public void setFloat( int index, float value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setDouble sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type double
+   */
+  public void setDouble( int index, double value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  /**
+   * Method setString sets the given value to the given index position in this instance.
+   *
+   * @param index of type int
+   * @param value of type String
+   */
+  public void setString( int index, String value )
+    {
+    verifyModifiable();
+
+    internalSet( index, value );
+    }
+
+  protected final void internalSet( int index, Object value )
     {
     try
       {
