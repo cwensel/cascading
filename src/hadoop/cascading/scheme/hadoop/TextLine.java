@@ -24,7 +24,7 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Arrays;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -63,7 +63,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * <p/>
  * If any of the input files end with ".zip", an error will be thrown.
  */
-public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[], Object[]>
+public class TextLine extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object[], Object[]>
   {
   public enum Compress
     {
@@ -238,7 +238,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
       throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( conf ) ) );
@@ -260,7 +260,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
@@ -276,7 +276,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     sourceCall.setContext( new Object[ 2 ] );
 
@@ -285,7 +285,7 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     if( !sourceReadInput( sourceCall ) )
       return false;
@@ -316,13 +316,13 @@ public class TextLine extends Scheme<HadoopFlowProcess, JobConf, RecordReader, O
     }
 
   @Override
-  public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourceCleanup( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     // it's ok to use NULL here so the collector does not write anything
     sinkCall.getOutput().collect( null, sinkCall.getOutgoingEntry().getTuple().toString() );

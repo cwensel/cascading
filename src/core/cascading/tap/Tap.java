@@ -30,6 +30,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
+import cascading.property.ConfigDef;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
@@ -63,6 +64,10 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
 
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
+
+  private ConfigDef configDef;
+
+  private ConfigDef processConfigDef;
 
   /** Field trace */
   private final String trace = Util.captureDebugTrace( getClass() );
@@ -478,6 +483,73 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
   public boolean isTemporary()
     {
     return false;
+    }
+
+  /**
+   * Returns a {@link cascading.property.ConfigDef} instance that allows for local properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
+   * <p/>
+   * Any properties set on the configDef will not show up in any {@link Flow} or {@link cascading.flow.FlowStep} process
+   * level configuration, but will override any of those values as seen by the current Tap instance method call where a
+   * FlowProcess is provided except for the {@link #sourceConfInit(cascading.flow.FlowProcess, Object)} and
+   * {@link #sinkConfInit(cascading.flow.FlowProcess, Object)} methods.
+   * <p/>
+   * That is, the {@code *confInit} methods are called before any ConfigDef is applied, so any values placed into
+   * a ConfigDef instance will not be visible to them.
+   *
+   * @return an instance of ConfigDef
+   */
+  public ConfigDef getConfigDef()
+    {
+    if( configDef == null )
+      configDef = new ConfigDef();
+
+    return configDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the configDef instance.
+   *
+   * @return true if there are configDef properties
+   */
+  public boolean hasConfigDef()
+    {
+    return configDef != null && !configDef.isEmpty();
+    }
+
+  /**
+   * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
+   * <p/>
+   * Any properties set on the processConfigDef will not show up in any Flow configuration, but will show up in
+   * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
+   * processConfigDef will be overridden by the tap local {@code #getConfigDef} instance.
+   * </p>
+   * Use this method to tweak properties in the process step this tap instance is planned into.
+   * <p/>
+   * Note the {@code *confInit} methods are called before any ConfigDef is applied, so any values placed into
+   * a ConfigDef instance will not be visible to them.
+   *
+   * @return an instance of ConfigDef
+   */
+  @Override
+  public ConfigDef getProcessConfigDef()
+    {
+    if( processConfigDef == null )
+      processConfigDef = new ConfigDef();
+
+    return processConfigDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the processConfigDef instance.
+   *
+   * @return true if there are processConfigDef properties
+   */
+  @Override
+  public boolean hasProcessConfigDef()
+    {
+    return processConfigDef != null && !processConfigDef.isEmpty();
     }
 
   @Override

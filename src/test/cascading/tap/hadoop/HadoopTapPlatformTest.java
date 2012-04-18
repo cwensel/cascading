@@ -33,6 +33,7 @@ import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
@@ -137,7 +138,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
       {
       boolean success = sourceCall.getInput().next( sourceCall.getContext()[ 0 ], sourceCall.getContext()[ 1 ] );
 
@@ -192,7 +193,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       Fields found = sinkCall.getOutgoingEntry().getFields();
 
@@ -203,7 +204,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       Fields found = sinkCall.getOutgoingEntry().getFields();
 
@@ -490,7 +491,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       if( conf.get( "this.is.a.dupe" ) != null )
         throw new IllegalStateException( "has dupe config value" );
@@ -501,7 +502,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+    public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
       {
       if( flowProcess.getStringProperty( "this.is.a.dupe" ) == null )
         throw new IllegalStateException( "has no dupe config value" );

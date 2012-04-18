@@ -24,7 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 
@@ -32,7 +32,7 @@ import cascading.tuple.Fields;
  * Class LocalScheme is the abstract base class for all local mode {@link Scheme} classes. It is offered as a
  * convenience for those implementing custom Scheme types.
  */
-public abstract class LocalScheme<Input, Output, SourceContext, SinkContext> extends Scheme<LocalFlowProcess, Properties, Input, Output, SourceContext, SinkContext>
+public abstract class LocalScheme<Input, Output, SourceContext, SinkContext> extends Scheme<FlowProcess<Properties>, Properties, Input, Output, SourceContext, SinkContext>
   {
   protected LocalScheme()
     {

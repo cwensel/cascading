@@ -24,12 +24,12 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.assertion.AssertNotEquals;
@@ -50,6 +50,7 @@ import cascading.test.LocalPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
@@ -363,7 +364,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
       {
       if( !sourceFired )
         {
@@ -375,7 +376,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       if( !sinkFired )
         {
@@ -402,7 +403,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
       {
       if( !sourceFired )
         {
@@ -414,7 +415,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sink( LocalFlowProcess flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
+    public void sink( FlowProcess<Properties> flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
       {
       if( !sinkFired )
         {

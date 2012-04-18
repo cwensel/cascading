@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.Set;
 
 import cascading.CascadingException;
+import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.scheme.Scheme;
@@ -170,14 +171,14 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
     initTemporaryPath( conf );
     super.sourceConfInit( process, conf );
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess process, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
     initTemporaryPath( conf );
     super.sinkConfInit( process, conf );

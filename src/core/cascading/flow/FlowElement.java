@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import cascading.flow.planner.Scope;
+import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 
 /**
@@ -58,4 +59,12 @@ public interface FlowElement extends Serializable
   Fields resolveFields( Scope scope ); // todo: consider moving this functionality to Scope
 
   boolean isEquivalentTo( FlowElement element );
+
+  ConfigDef getProcessConfigDef();
+
+  boolean hasProcessConfigDef();
+
+  ConfigDef getConfigDef();
+
+  boolean hasConfigDef();
   }

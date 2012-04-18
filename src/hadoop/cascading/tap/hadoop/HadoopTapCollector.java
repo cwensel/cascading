@@ -22,7 +22,7 @@ package cascading.tap.hadoop;
 
 import java.io.IOException;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
@@ -56,9 +56,9 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
   /** Field filename */
   private String filename;
   /** Field flowProcess */
-  private final HadoopFlowProcess hadoopFlowProcess;
+  private final FlowProcess<JobConf> flowProcess;
   /** Field tap */
-  private final Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap;
+  private final Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap;
   /** Field prefix */
   private final String prefix;
   /** Field isFileOutputFormat */
@@ -69,30 +69,30 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
   /**
    * Constructor TapCollector creates a new TapCollector instance.
    *
-   * @param hadoopFlowProcess
-   * @param tap               of type Tap  @throws IOException when fails to initialize
+   * @param flowProcess
+   * @param tap         of type Tap  @throws IOException when fails to initialize
    */
-  HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  HadoopTapCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
-    this( hadoopFlowProcess, tap, null );
+    this( flowProcess, tap, null );
     }
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
    *
-   * @param hadoopFlowProcess
-   * @param tap               of type Tap
-   * @param prefix            of type String
+   * @param flowProcess
+   * @param tap         of type Tap
+   * @param prefix      of type String
    * @throws IOException when fails to initialize
    */
-  HadoopTapCollector( HadoopFlowProcess hadoopFlowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  HadoopTapCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
-    super( hadoopFlowProcess, tap.getScheme() );
-    this.hadoopFlowProcess = hadoopFlowProcess;
+    super( flowProcess, tap.getScheme() );
+    this.flowProcess = flowProcess;
 
     this.tap = tap;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
-    this.conf = new JobConf( hadoopFlowProcess.getJobConf() );
+    this.conf = flowProcess.getConfigCopy();
     this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
 
     this.setOutput( this );
@@ -115,7 +115,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
 
   private void initialize() throws IOException
     {
-    tap.sinkConfInit( hadoopFlowProcess, conf );
+    tap.sinkConfInit( flowProcess, conf );
 
     OutputFormat outputFormat = conf.getOutputFormat();
 
@@ -183,7 +183,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
    */
   public void collect( Object writableComparable, Object writable ) throws IOException
     {
-    hadoopFlowProcess.getReporter().progress();
+    flowProcess.keepAlive();
     writer.write( writableComparable, writable );
     }
   }

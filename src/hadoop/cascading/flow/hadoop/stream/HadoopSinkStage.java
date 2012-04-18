@@ -21,6 +21,7 @@
 package cascading.flow.hadoop.stream;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProcessWrapper;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.stream.SinkStage;
 import cascading.tap.Tap;
@@ -30,14 +31,18 @@ import cascading.tap.Tap;
  */
 public class HadoopSinkStage extends SinkStage
   {
+  HadoopFlowProcess hadoopFlowProcess;
+
   public HadoopSinkStage( FlowProcess flowProcess, Tap sink )
     {
     super( flowProcess, sink );
+
+    hadoopFlowProcess = (HadoopFlowProcess) FlowProcessWrapper.undelegate( flowProcess );
     }
 
   @Override
   protected Object getOutput()
     {
-    return ( (HadoopFlowProcess) flowProcess ).getOutputCollector();
+    return hadoopFlowProcess.getOutputCollector();
     }
   }

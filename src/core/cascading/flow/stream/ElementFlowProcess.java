@@ -32,12 +32,12 @@ import cascading.property.ConfigDef;
 /**
  *
  */
-class PipeFlowProcess extends FlowProcessWrapper
+class ElementFlowProcess extends FlowProcessWrapper
   {
   private final ConfigDef configDef;
   private final ConfigDef.Getter getter;
 
-  public PipeFlowProcess( FlowProcess flowProcess, ConfigDef configDef )
+  public ElementFlowProcess( FlowProcess flowProcess, ConfigDef configDef )
     {
     super( flowProcess );
 

@@ -518,7 +518,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   protected abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
 
-  protected void initConfFromPipes( ConfigDef.Setter setter )
+  protected void initConfFromProcessConfigDef( ConfigDef.Setter setter )
     {
     // applies each mode in order, topologically
     for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
@@ -529,15 +529,8 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         {
         FlowElement element = iterator.next();
 
-        if( !( element instanceof Pipe ) )
-          continue;
-
-        Pipe pipe = (Pipe) element;
-
-        if( !pipe.hasProcessConfigDef() )
-          continue;
-
-        pipe.getProcessConfigDef().apply( mode, setter );
+        if( element.hasProcessConfigDef() )
+          element.getProcessConfigDef().apply( mode, setter );
         }
       }
     }

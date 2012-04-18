@@ -31,7 +31,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.DelimitedParser;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -358,12 +358,12 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sourceConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
   @Override
-  public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
     {
     String line = sourceCall.getInput().readLine();
 
@@ -385,12 +385,12 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sinkConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkPrepare( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
     {
     sinkCall.setContext( new StringBuilder( 4 * 1024 ) );
 
@@ -404,7 +404,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sink( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall ) throws IOException
+  public void sink( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
 
@@ -414,7 +414,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sinkCleanup( LocalFlowProcess flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
     {
     sinkCall.setContext( null );
     }

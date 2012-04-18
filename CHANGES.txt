@@ -2,10 +2,13 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
-  Added c.m.UnitOfWorkSpawnStrategy interface to allow for pluggable thread management services. Also added
-  c.m.UnitOfWorkExecutorStrategy class as the default implementation.
+  Added support for c.p.ConfigDef on c.p.Pipe and c.t.Tap classes to allow for process and pipe/tap level
+  property values. Where process allows a Pipe or Tap to set c.f.FlowStep specific properties.
 
   Added c.p.Props base and sub-classes to simplify managing Cascading and Hadoop related properties.
+
+  Added c.m.UnitOfWorkSpawnStrategy interface to allow for pluggable thread management services. Also added
+  c.m.UnitOfWorkExecutorStrategy class as the default implementation.
 
   Added typed set and add methods to c.t.Tuple and c.t.TupleEntry.
 

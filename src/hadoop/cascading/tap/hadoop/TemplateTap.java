@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * {@code openTapsThreshold} limits the number of open files to be output to. This value defaults to 300 files.
  * Each time the threshold is exceeded, 10% of the least recently used open files will be closed.
  */
-public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputCollector>
+public class TemplateTap extends SinkTap<FlowProcess<JobConf>, JobConf, OutputCollector>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TemplateTap.class );
@@ -77,16 +77,16 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
 
   private class TemplateCollector extends TupleEntryCollector implements OutputCollector
     {
-    private final HadoopFlowProcess flowProcess;
+    private final FlowProcess<JobConf> flowProcess;
     private final JobConf conf;
     private final Fields parentFields;
     private final Fields pathFields;
 
-    public TemplateCollector( HadoopFlowProcess flowProcess )
+    public TemplateCollector( FlowProcess<JobConf> flowProcess )
       {
       super( Fields.asDeclaration( getSinkFields() ) );
       this.flowProcess = flowProcess;
-      this.conf = flowProcess.getJobConf();
+      this.conf = flowProcess.getConfigCopy();
       this.parentFields = parent.getSinkFields();
       this.pathFields = ( (TemplateScheme) getScheme() ).pathFields;
       }
@@ -198,7 +198,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
     }
 
-  public static class TemplateScheme extends Scheme<HadoopFlowProcess, JobConf, Void, OutputCollector, Object, Object>
+  public static class TemplateScheme extends Scheme<FlowProcess<JobConf>, JobConf, Void, OutputCollector, Object, Object>
     {
     private final Scheme scheme;
     private final Fields pathFields;
@@ -255,49 +255,49 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
       }
 
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, Void, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, Void, OutputCollector> tap, JobConf conf )
       {
       scheme.sourceConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
+    public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
       {
       scheme.sourcePrepare( flowProcess, sourceCall );
       }
 
     @Override
-    public boolean source( HadoopFlowProcess flowProcess, SourceCall sourceCall ) throws IOException
+    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
       {
       throw new UnsupportedOperationException( "not supported" );
       }
 
     @Override
-    public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
+    public void sourceCleanup( FlowProcess<JobConf> flowProcess, SourceCall<Object, Void> sourceCall ) throws IOException
       {
       scheme.sourceCleanup( flowProcess, sourceCall );
       }
 
     @Override
-    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, Void, OutputCollector> tap, JobConf conf )
+    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, Void, OutputCollector> tap, JobConf conf )
       {
       scheme.sinkConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       scheme.sinkPrepare( flowProcess, sinkCall );
       }
 
     @Override
-    public void sink( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
+    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       throw new UnsupportedOperationException( "should never be called" );
       }
 
     @Override
-    public void sinkCleanup( HadoopFlowProcess flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
+    public void sinkCleanup( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       scheme.sinkCleanup( flowProcess, sinkCall );
       }
@@ -549,7 +549,7 @@ public class TemplateTap extends SinkTap<HadoopFlowProcess, JobConf, OutputColle
     }
 
   @Override
-  public TupleEntryCollector openForWrite( HadoopFlowProcess flowProcess, OutputCollector output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<JobConf> flowProcess, OutputCollector output ) throws IOException
     {
     return new TemplateCollector( flowProcess );
     }

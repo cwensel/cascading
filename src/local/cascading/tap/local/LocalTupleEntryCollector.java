@@ -23,8 +23,9 @@ package cascading.tap.local;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.Properties;
 
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.TupleEntrySchemeCollector;
 import org.slf4j.Logger;
@@ -39,12 +40,12 @@ public class LocalTupleEntryCollector extends TupleEntrySchemeCollector<Closeabl
 
   private final Closeable writer;
 
-  public LocalTupleEntryCollector( LocalFlowProcess flowProcess, Scheme scheme, Closeable writer )
+  public LocalTupleEntryCollector( FlowProcess<Properties> flowProcess, Scheme scheme, Closeable writer )
     {
     this( flowProcess, scheme, writer, null );
     }
 
-  public LocalTupleEntryCollector( LocalFlowProcess flowProcess, Scheme scheme, Closeable writer, String identifier )
+  public LocalTupleEntryCollector( FlowProcess<Properties> flowProcess, Scheme scheme, Closeable writer, String identifier )
     {
     super( flowProcess, scheme, writer, identifier );
 

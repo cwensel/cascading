@@ -34,9 +34,7 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 
-/**
- * Class LocalFlowStep is the local mode implementation of {@link cascading.flow.FlowStep}.
- */
+/** Class LocalFlowStep is the local mode implementation of {@link cascading.flow.FlowStep}. */
 public class LocalFlowStep extends BaseFlowStep<Properties>
   {
   /** Field mapperTraps */
@@ -56,7 +54,7 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     initTaps( flowProcess, currentProperties, getSinks(), true );
     initTaps( flowProcess, currentProperties, getTraps(), true );
 
-    initFromPipes( currentProperties );
+    initFromProcessConfigDef( currentProperties );
 
     return currentProperties;
     }
@@ -77,9 +75,9 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
       }
     }
 
-  private void initFromPipes( final Properties properties )
+  private void initFromProcessConfigDef( final Properties properties )
     {
-    initConfFromPipes( getSetterFor( properties ) );
+    initConfFromProcessConfigDef( getSetterFor( properties ) );
     }
 
   private ConfigDef.Setter getSetterFor( final Properties properties )

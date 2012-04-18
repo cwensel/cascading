@@ -30,7 +30,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
@@ -126,17 +126,17 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
     }
 
   @Override
-  public void sourceConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkConfInit( LocalFlowProcess flowProcess, Tap<LocalFlowProcess, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
     {
     }
 
   @Override
-  public boolean source( LocalFlowProcess flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
     {
     // first line is 0, this matches offset being zero, so when throwing out the first line for comments
     int lineNumber = sourceCall.getInput().getLineNumber();
@@ -161,7 +161,7 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
     }
 
   @Override
-  public void sink( LocalFlowProcess flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
+  public void sink( FlowProcess<Properties> flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
     {
     sinkCall.getOutput().println( sinkCall.getOutgoingEntry().getTuple().toString() );
     }

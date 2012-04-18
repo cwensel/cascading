@@ -37,9 +37,9 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.hadoop.MultiInputFormat;
 import cascading.tap.hadoop.TempHfs;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
@@ -97,7 +97,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     initFromTraps( flowProcess, conf );
 
-    initFromPipes( conf );
+    initFromProcessConfigDef( conf );
 
     if( getSink().getScheme().getNumSinkParts() != 0 )
       {
@@ -312,9 +312,9 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last
     }
 
-  private void initFromPipes( final JobConf conf )
+  private void initFromProcessConfigDef( final JobConf conf )
     {
-    initConfFromPipes( getSetterFor( conf ) );
+    initConfFromProcessConfigDef( getSetterFor( conf ) );
     }
 
   private ConfigDef.Setter getSetterFor( final JobConf conf )

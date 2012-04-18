@@ -27,7 +27,6 @@ import java.util.Properties;
 import cascading.flow.FlowConnector;
 import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.planner.FlowPlanner;
-import cascading.operation.Assertion;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
@@ -46,10 +45,10 @@ public class HadoopFlowConnector extends FlowConnector
   {
   /**
    * Constructor FlowConnector creates a new FlowConnector instance.
-   *
+   * <p/>
    * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
    * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
-   * */
+   */
   public HadoopFlowConnector()
     {
     }

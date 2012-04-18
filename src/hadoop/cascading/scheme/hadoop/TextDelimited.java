@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.DelimitedParser;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -33,6 +33,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -641,7 +642,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();
 
@@ -665,7 +666,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public void sinkPrepare( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.setContext( new Object[]{new DecoratorTuple(), new StringBuilder( 4 * 1024 )} );
 
@@ -683,7 +684,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
     String line = delimitedParser.joinLine( tuple, (StringBuilder) sinkCall.getContext()[ 1 ] );

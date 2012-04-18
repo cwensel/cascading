@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.TapException;
@@ -55,7 +55,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * @see cascading.tap.MultiSourceTap
  * @see FileSystem
  */
-public class GlobHfs extends MultiSourceTap<Hfs, HadoopFlowProcess, JobConf, RecordReader>
+public class GlobHfs extends MultiSourceTap<Hfs, FlowProcess<JobConf>, JobConf, RecordReader>
   {
   /** Field pathPattern */
   private final String pathPattern;
@@ -151,7 +151,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, HadoopFlowProcess, JobConf, Rec
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess process, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
     initTapsInternal( conf );
     super.sourceConfInit( null, conf );

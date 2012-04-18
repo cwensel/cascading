@@ -27,7 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import cascading.flow.local.LocalFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.local.LocalScheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -43,7 +43,7 @@ import cascading.util.Util;
  * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
  * {@link cascading.flow.Flow} instances that run in "local" mode.
  */
-public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, FileOutputStream>
+public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputStream, FileOutputStream>
   {
   private final String path;
 
@@ -79,7 +79,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public TupleEntryIterator openForRead( LocalFlowProcess flowProcess, FileInputStream input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, FileInputStream input ) throws IOException
     {
     if( input == null )
       input = new FileInputStream( path );
@@ -90,7 +90,7 @@ public class FileTap extends Tap<LocalFlowProcess, Properties, FileInputStream, 
     }
 
   @Override
-  public TupleEntryCollector openForWrite( LocalFlowProcess flowProcess, FileOutputStream output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, FileOutputStream output ) throws IOException
     {
     // ignore the output. will catch the failure downstream if any.
     // not ignoring the output causes race conditions with other systems writing to the same directory.
