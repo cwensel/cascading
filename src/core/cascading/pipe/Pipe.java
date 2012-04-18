@@ -35,14 +35,14 @@ import cascading.util.Util;
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
  * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy},
- * {@link CoGroup}, {@link Merge}, {@link Join}, and {@link SubAssembly}.
+ * {@link CoGroup}, {@link Merge}, {@link HashJoin}, and {@link SubAssembly}.
  * <p/>
  * Pipes are chained together through their constructors.
  * <p/>
  * To effect a split in the pipe,
  * simply pass a Pipe instance to two or more constructors of subsequent Pipe instances.
  * </p>
- * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} or {@link Join} pipe.
+ * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} or {@link HashJoin} pipe.
  * <p/>
  * A merge can be achieved by passing two or more Pipe instances to a {@link GroupBy} or {@link Merge} pipe.
  *
@@ -51,7 +51,7 @@ import cascading.util.Util;
  * @see GroupBy
  * @see Merge
  * @see CoGroup
- * @see Join
+ * @see HashJoin
  * @see SubAssembly
  */
 public class Pipe implements FlowElement, Serializable

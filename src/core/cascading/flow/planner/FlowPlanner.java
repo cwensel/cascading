@@ -39,7 +39,7 @@ import cascading.operation.DebugLevel;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -589,7 +589,7 @@ public abstract class FlowPlanner
       {
       List<FlowElement> flowElements = Graphs.getPathVertexList( path );
       List<Pipe> tapInsertions = new ArrayList<Pipe>();
-      List<Join> joins = new ArrayList<Join>();
+      List<HashJoin> joins = new ArrayList<HashJoin>();
 
       FlowElement lastSourceElement = null;
 
@@ -597,9 +597,9 @@ public abstract class FlowPlanner
         {
         FlowElement flowElement = flowElements.get( i );
 
-        if( flowElement instanceof Join )
+        if( flowElement instanceof HashJoin )
           {
-          joins.add( (Join) flowElement );
+          joins.add( (HashJoin) flowElement );
           }
         else if( flowElement instanceof Tap || flowElement instanceof Group )
           {
@@ -612,7 +612,7 @@ public abstract class FlowPlanner
 
           for( int j = 0; j < joins.size(); j++ )
             {
-            Join join = joins.get( j );
+            HashJoin join = joins.get( j );
 
             Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );
 

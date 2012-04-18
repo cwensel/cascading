@@ -22,7 +22,7 @@ Cascading Change Log
 
   Added the c.t.TupleCollectionFactory and c.t.TupleMapFactory interfaces and relevant implementations to allow
   custom c.t.Spillable types to be plugged into a given execution. Spillable types are used to back in memory
-  collections to disk to improve scalability of c.p.CoGroup and c.p.Join pipes on different platforms.
+  collections to disk to improve scalability of c.p.CoGroup and c.p.HashJoin pipes on different platforms.
 
   Fixed issue where a c.s.Scheme was not seeing properly resolved fields if they were not declared in the Scheme
   instance. This allows a Scheme declared to sink c.t.Fields#ALL to see the actual field names during the
@@ -55,12 +55,12 @@ Cascading Change Log
 
   Changed c.t.SpillableTupleList to implement c.u.Collection and c.t.Spillable interfaces.
 
-  Renamed the c.p.Group class to c.p.Splice and created a c.p.Group interface. c.p.Groupby, CoGroup, Merge, and Join
+  Renamed the c.p.Group class to c.p.Splice and created a c.p.Group interface. c.p.Groupby, CoGroup, Merge, and HashJoin
   are all c.p.Splice types. Only GroupBy and CoGroup are c.p.Group types.
 
-  Moved all "joiners" to c.p.joiner package from c.p.cogroup as they are now shared with the c.p.Join pipe.
+  Moved all "joiners" to c.p.joiner package from c.p.cogroup as they are now shared with the c.p.HashJoin pipe.
 
-  Added c.p.Join pipe to join two or more streams by a common key value without blocking/accumulating the largest
+  Added c.p.HashJoin pipe to join two or more streams by a common key value without blocking/accumulating the largest
   data stream. This differs from c.p.CoGroup in that there is no grouping or sorting, and on the MapReduce platform,
   no Reduce task. The is commonly known as an asymmetrical or replicated join.
 

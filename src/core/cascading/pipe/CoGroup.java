@@ -34,7 +34,7 @@ import cascading.tuple.Fields;
  * all values are associated with a given unique grouping key.
  * <p/>
  * If no aggregations are to be performed, and one or more streams of data are small (may fit in reasonable memory),
- * see the {@link Join} Pipe for partially non-blocking joins.
+ * see the {@link HashJoin} Pipe for partially non-blocking joins.
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare

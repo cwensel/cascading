@@ -31,7 +31,7 @@ import java.beans.ConstructorProperties;
  * Merge is non-blocking and performs no processing. Any number of branches and merges may be performed in a
  * {@link cascading.flow.Flow} without triggering any additional MapReduce jobs on the Hadoop platform.
  * <p/>
- * Unlike {@link Join}, no preference need be made for left-hand or right-hand sided-ness of streams in relation
+ * Unlike {@link HashJoin}, no preference need be made for left-hand or right-hand sided-ness of streams in relation
  * to their sizes.
  *
  * @see GroupBy

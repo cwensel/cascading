@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.pipe.Group;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 
 /**
@@ -106,7 +106,7 @@ public interface FlowStep<Config>
 
   List<Group> getGroups();
 
-  Map<Join, Tap> getStreamedSourceByJoin();
+  Map<HashJoin, Tap> getStreamedSourceByJoin();
 
   Set<Tap> getAllAccumulatedSources();
 

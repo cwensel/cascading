@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.stream.MemoryJoinGate;
-import cascading.pipe.Join;
 import cascading.tuple.Spillable;
+import cascading.flow.stream.MemoryHashJoinGate;
+import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleMapFactory;
 import cascading.tuple.hadoop.HadoopTupleMapFactory;
@@ -41,7 +41,7 @@ import static cascading.tuple.TupleMapFactory.TUPLE_MAP_FACTORY;
 /**
  *
  */
-public class HadoopMemoryJoinGate extends MemoryJoinGate
+public class HadoopMemoryJoinGate extends MemoryHashJoinGate
   {
   private static final Logger LOG = LoggerFactory.getLogger( HadoopMemoryJoinGate.class );
 
@@ -93,7 +93,7 @@ public class HadoopMemoryJoinGate extends MemoryJoinGate
   private final SpillListener spillListener;
   private TupleMapFactory tupleMapFactory;
 
-  public HadoopMemoryJoinGate( FlowProcess flowProcess, Join join )
+  public HadoopMemoryJoinGate( FlowProcess flowProcess, HashJoin join )
     {
     super( flowProcess, join );
 

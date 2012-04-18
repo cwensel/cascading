@@ -27,21 +27,21 @@ import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 import cascading.flow.FlowProcess;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public class MemoryJoinGate extends MemorySpliceGate
+public class MemoryHashJoinGate extends MemorySpliceGate
   {
   protected CountDownLatch latch;
 
   private Collection<Tuple>[] collections;
   private ArrayList<Tuple> streamedCollection;
 
-  public MemoryJoinGate( FlowProcess flowProcess, Join join )
+  public MemoryHashJoinGate( FlowProcess flowProcess, HashJoin join )
     {
     super( flowProcess, join );
     }

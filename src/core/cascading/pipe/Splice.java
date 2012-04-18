@@ -40,12 +40,12 @@ import cascading.tuple.TupleException;
 import cascading.util.Util;
 
 /**
- * The base class for {@link GroupBy}, {@link CoGroup}, {@link Merge}, and {@link Join}. This class should not be used directly.
+ * The base class for {@link GroupBy}, {@link CoGroup}, {@link Merge}, and {@link HashJoin}. This class should not be used directly.
  *
  * @see GroupBy
  * @see CoGroup
  * @see Merge
- * @see Join
+ * @see HashJoin
  */
 public class Splice extends Pipe
   {

@@ -42,7 +42,7 @@ import cascading.management.ClientState;
 import cascading.operation.Operation;
 import cascading.pipe.ConfigDef;
 import cascading.pipe.Group;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStepStats;
@@ -104,9 +104,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   private final List<Group> groups = new ArrayList<Group>();
 
   // sources streamed into join - not necessarily all sources
-  protected final Map<Join, Tap> streamedSourceByJoin = new LinkedHashMap<Join, Tap>();
+  protected final Map<HashJoin, Tap> streamedSourceByJoin = new LinkedHashMap<HashJoin, Tap>();
   // sources accumulated by join
-  protected final Map<Join, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<Join, Set<Tap>>();
+  protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<HashJoin, Set<Tap>>();
 
   private transient FlowStepJob<Config> flowStepJob;
 
@@ -242,12 +242,12 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     }
 
   @Override
-  public Map<Join, Tap> getStreamedSourceByJoin()
+  public Map<HashJoin, Tap> getStreamedSourceByJoin()
     {
     return streamedSourceByJoin;
     }
 
-  public void addStreamedSourceFor( Join join, Tap streamedSource )
+  public void addStreamedSourceFor( HashJoin join, Tap streamedSource )
     {
     streamedSourceByJoin.put( join, streamedSource );
     }
@@ -263,7 +263,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return set;
     }
 
-  public void addAccumulatedSourceFor( Join join, Tap accumulatedSource )
+  public void addAccumulatedSourceFor( HashJoin join, Tap accumulatedSource )
     {
     if( !accumulatedSourcesByJoin.containsKey( join ) )
       accumulatedSourcesByJoin.put( join, new HashSet<Tap>() );
@@ -411,21 +411,21 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   public Set<Tap> getJoinTributariesBetween( FlowElement from, FlowElement to )
     {
-    Set<Join> joins = new HashSet<Join>();
+    Set<HashJoin> joins = new HashSet<HashJoin>();
     List<GraphPath<FlowElement, Scope>> paths = getPathsBetween( from, to );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
       for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
         {
-        if( flowElement instanceof Join )
-          joins.add( (Join) flowElement );
+        if( flowElement instanceof HashJoin )
+          joins.add( (HashJoin) flowElement );
         }
       }
 
     Set<Tap> tributaries = new HashSet<Tap>();
 
-    for( Join join : joins )
+    for( HashJoin join : joins )
       {
       for( Tap source : sources.keySet() )
         {

@@ -32,7 +32,7 @@ import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.HadoopUtil;
 import cascading.flow.stream.Gate;
-import cascading.flow.stream.MemoryJoinGate;
+import cascading.flow.stream.MemoryHashJoinGate;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
 import cascading.flow.stream.SpliceGate;
@@ -40,7 +40,7 @@ import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -141,7 +141,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     }
 
   @Override
-  protected MemoryJoinGate createNonBlockingJoinGate( Join join )
+  protected MemoryHashJoinGate createNonBlockingJoinGate( HashJoin join )
     {
     return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }

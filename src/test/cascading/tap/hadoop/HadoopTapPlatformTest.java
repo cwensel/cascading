@@ -44,7 +44,7 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -530,7 +530,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     Map<Object, Object> properties = getProperties();
 

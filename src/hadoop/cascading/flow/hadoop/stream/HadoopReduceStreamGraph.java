@@ -33,7 +33,7 @@ import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 
 /**
@@ -88,7 +88,7 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     }
 
   @Override
-  protected Gate createJoinGate( Join join )
+  protected Gate createHashJoinGate( HashJoin join )
     {
     throw new IllegalStateException( "should not happen" );
     }

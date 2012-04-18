@@ -36,8 +36,8 @@ import cascading.flow.FlowProcess;
  * <p/>
  * To set the list threshold, see {@link SpillableTupleList#SPILL_THRESHOLD}.
  * <p/>
- * This class is used by the {@link cascading.pipe.Join} pipe, to set properties specific to a given
- * join instance, see the {@link cascading.pipe.Join#getConfigDef()} method.
+ * This class is used by the {@link cascading.pipe.HashJoin} pipe, to set properties specific to a given
+ * join instance, see the {@link cascading.pipe.HashJoin#getConfigDef()} method.
  *
  * @see cascading.tuple.hadoop.HadoopSpillableTupleMap
  */

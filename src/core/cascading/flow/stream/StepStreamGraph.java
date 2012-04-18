@@ -33,7 +33,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -151,7 +151,7 @@ public abstract class StepStreamGraph extends StreamGraph
       else if( spliceElement.isMerge() )
         rhsDuct = createMergeStage( (Merge) element );
       else
-        rhsDuct = createJoinGate( (Join) element );
+        rhsDuct = createHashJoinGate( (HashJoin) element );
       }
     else if( element instanceof Tap )
       {
@@ -177,7 +177,7 @@ public abstract class StepStreamGraph extends StreamGraph
     return new MergeStage( flowProcess, merge );
     }
 
-  protected Gate createJoinGate( Join join )
+  protected Gate createHashJoinGate( HashJoin join )
     {
     if( join.getNumSelfJoins() != 0 )
       return createBlockingJoinGate( join );
@@ -189,17 +189,17 @@ public abstract class StepStreamGraph extends StreamGraph
     return createNonBlockingJoinGate( join );
     }
 
-  protected MemoryJoinGate createNonBlockingJoinGate( Join join )
+  protected MemoryHashJoinGate createNonBlockingJoinGate( HashJoin join )
     {
-    return new MemoryJoinGate( flowProcess, join );
+    return new MemoryHashJoinGate( flowProcess, join );
     }
 
-  protected MemoryCoGroupGate createBlockingJoinGate( Join join )
+  protected MemoryCoGroupGate createBlockingJoinGate( HashJoin join )
     {
     return new MemoryCoGroupGate( flowProcess, join );
     }
 
-  private boolean joinHasSameStreamedSource( Join join )
+  private boolean joinHasSameStreamedSource( HashJoin join )
     {
     if( !step.getStreamedSourceByJoin().isEmpty() )
       {
@@ -219,7 +219,7 @@ public abstract class StepStreamGraph extends StreamGraph
     return false;
     }
 
-  private int getNumImmediateBranches( FlowElement tap, Join join )
+  private int getNumImmediateBranches( FlowElement tap, HashJoin join )
     {
     return getAllShortestPathsBetween( step.getGraph(), (FlowElement) tap, join ).size();
     }

@@ -33,7 +33,7 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlannerException;
 import cascading.pipe.Group;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
@@ -149,7 +149,7 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
           step.addGroup( (Group) rhs );
           onMapSide = false;
           }
-        else if( rhs instanceof Join )
+        else if( rhs instanceof HashJoin )
           {
           if( !onMapSide )
             throw new PlannerException( "joins must not present Reduce side" );
@@ -157,9 +157,9 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
           Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( elementGraph, source, (Splice) rhs );
 
           if( sourcePaths.containsKey( 0 ) )
-            step.addStreamedSourceFor( (Join) rhs, source );
+            step.addStreamedSourceFor( (HashJoin) rhs, source );
           else
-            step.addAccumulatedSourceFor( (Join) rhs, source );
+            step.addAccumulatedSourceFor( (HashJoin) rhs, source );
           }
         else if( rhs instanceof Pipe ) // add relevant traps to step
           {

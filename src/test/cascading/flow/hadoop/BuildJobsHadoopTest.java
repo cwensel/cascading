@@ -53,7 +53,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.scheme.Scheme;
@@ -1799,7 +1799,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Pipe right = new Each( new Pipe( "right" ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
 
     Fields[] fields = Fields.fields( new Fields( "offset" ), new Fields( "offset" ) );
-    Pipe merge = new Join( "join", Pipe.pipes( left, right ), fields, Fields.size( 4 ), new InnerJoin() );
+    Pipe merge = new HashJoin( "join", Pipe.pipes( left, right ), fields, Fields.size( 4 ), new InnerJoin() );
 
     merge = new Every( merge, new Max() );
 

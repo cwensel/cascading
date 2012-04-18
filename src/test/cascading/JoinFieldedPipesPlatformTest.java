@@ -36,7 +36,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
@@ -79,7 +79,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
     Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
 
-    Pipe cross = new Join( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+    Pipe cross = new HashJoin( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cross );
 
@@ -114,7 +114,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     Map<Object, Object> properties = getProperties();
 
@@ -167,7 +167,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 //    pipeLower = new Each( pipeLower, new Debug( true ) );
 //    pipeUpper = new Each( pipeUpper, new Debug( true ) );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
 //    splice = new Each( splice, new Debug( true ) );
     splice = new Pipe( "splice", splice );
@@ -206,7 +206,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Join( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ), Fields.size( 4 ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
@@ -249,7 +249,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     pipeUpper = new Each( pipeUpper, new Fields( "num" ), new RegexFilter( "^fobar" ) ); // intentionally filtering all
     pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ), new OuterJoin() );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
@@ -283,7 +283,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
@@ -328,7 +328,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
     pipeUpper = new Every( pipeUpper, new Fields( "char" ), new First(), Fields.ALL );
 
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
@@ -361,7 +361,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char" ), " " ), new Fields( "num1" ) );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char" ), " " ), new Fields( "num2" ) );
 
-    Pipe join = new Join( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
+    Pipe join = new HashJoin( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, join );
 
@@ -734,7 +734,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
     Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
-    Pipe splice = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, joiner );
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, joiner );
 
     splice = new Each( splice, Fields.ALL, new Identity(), Fields.RESULTS );
 
@@ -812,7 +812,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Fields[] fields = Fields.fields( new Fields( "num" ), new Fields( "num" ), new Fields( "num" ) );
 
     MixedJoin join = new MixedJoin( new boolean[]{MixedJoin.OUTER, MixedJoin.INNER, MixedJoin.OUTER} );
-    Pipe splice = new Join( pipes, fields, Fields.size( 6 ), join );
+    Pipe splice = new HashJoin( pipes, fields, Fields.size( 6 ), join );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 
@@ -858,7 +858,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
 
-    Pipe pipe = new Join( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+    Pipe pipe = new HashJoin( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, pipe );
 
@@ -894,7 +894,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
 
-    Pipe pipe = new Join( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+    Pipe pipe = new HashJoin( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
     Pipe groupby = new GroupBy( pipe, new Fields( "numA" ) );
 
@@ -927,7 +927,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
-    Pipe pipe = new Join( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe pipe = new HashJoin( pipeLower, new Fields( "num" ), 1, new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, pipe );
 
@@ -958,7 +958,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
-    Pipe join = new Join( pipeLower, new Fields( "num" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe join = new HashJoin( pipeLower, new Fields( "num" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, join );
 
@@ -990,7 +990,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe lhs = new Pipe( "lhs", pipe );
     Pipe rhs = new Pipe( "rhs", pipe );
 
-    Pipe join = new Join( lhs, new Fields( "num" ), rhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), rhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, join );
 
@@ -1032,11 +1032,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
     Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
 
-    Pipe splice1 = new Join( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe splice1 = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     splice1 = new Each( splice1, new Identity() );
 
-    Pipe splice2 = new Join( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+    Pipe splice2 = new HashJoin( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
@@ -1081,11 +1081,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
     Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
 
-    Pipe splice1 = new Join( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe splice1 = new HashJoin( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     splice1 = new Each( splice1, new Identity() );
 
-    Pipe splice2 = new Join( splice1, new Fields( "num1" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+    Pipe splice2 = new HashJoin( splice1, new Fields( "num1" ), pipeLower, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
@@ -1130,12 +1130,12 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
     Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
 
-    Pipe splice1 = new Join( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe splice1 = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper1, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     splice1 = new Each( splice1, new Identity() );
 
     // upper2 becomes leftmost, forcing a tap between the joins
-    Pipe splice2 = new Join( pipeUpper2, new Fields( "num" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+    Pipe splice2 = new HashJoin( pipeUpper2, new Fields( "num" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
@@ -1179,11 +1179,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
     Pipe pipeJoined = new Each( new Pipe( "joined" ), new Fields( "line" ), splitterJoined );
 
-    Pipe pipe = new Join( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+    Pipe pipe = new HashJoin( pipeLower, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
 
     pipe = new GroupBy( pipe, new Fields( "numA" ) );
 
-    pipe = new Join( pipe, new Fields( "numA" ), pipeJoined, new Fields( "numC" ) );
+    pipe = new HashJoin( pipe, new Fields( "numA" ), pipeJoined, new Fields( "numC" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, pipe );
 
@@ -1223,11 +1223,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
     Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
 
-    Pipe splice1 = new Join( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe splice1 = new HashJoin( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     splice1 = new Each( splice1, new Identity() );
 
-    Pipe splice2 = new Join( pipeLower, new Fields( "num" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
+    Pipe splice2 = new HashJoin( pipeLower, new Fields( "num" ), splice1, new Fields( "num1" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
@@ -1282,11 +1282,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
     Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
-    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe upperLower = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     upperLower = new Each( upperLower, new Identity() );
 
-    Pipe lhsRhs = new Join( pipeLhs, new Fields( "num" ), pipeRhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe lhsRhs = new HashJoin( pipeLhs, new Fields( "num" ), pipeRhs, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     lhsRhs = new Each( lhsRhs, new Identity() );
 
@@ -1327,7 +1327,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     rhsPipe = new Each( rhsPipe, new Identity() );
 
-    Pipe pipe = new Join( lhsPipe, new Fields( "num" ), rhsPipe, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+    Pipe pipe = new HashJoin( lhsPipe, new Fields( "num" ), rhsPipe, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -1379,11 +1379,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
     Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
-    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+    Pipe upperLower = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
 
     upperLower = new Each( upperLower, new Identity() );
 
-    Pipe lhsUpperLower = new Join( pipeLhs, new Fields( "num" ), upperLower, new Fields( "numUpperLower" ), new Fields( "numLhs", "charLhs", "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+    Pipe lhsUpperLower = new HashJoin( pipeLhs, new Fields( "num" ), upperLower, new Fields( "numUpperLower" ), new Fields( "numLhs", "charLhs", "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
 
     lhsUpperLower = new Each( lhsUpperLower, new Identity() );
 
@@ -1441,11 +1441,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
     Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
-    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+    Pipe upperLower = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
 
     upperLower = new Each( upperLower, new Identity() );
 
-    Pipe lhsUpperLower = new Join( upperLower, new Fields( "numUpperLower" ), pipeLhs, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower", "numLhs", "charLhs" ) );
+    Pipe lhsUpperLower = new HashJoin( upperLower, new Fields( "numUpperLower" ), pipeLhs, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower", "numLhs", "charLhs" ) );
 
     lhsUpperLower = new Each( lhsUpperLower, new Identity() );
 
@@ -1498,11 +1498,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
     Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
-    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+    Pipe upperLower = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
 
     upperLower = new Each( upperLower, new Identity() );
 
-    Pipe lhsUpperLower = new Join( pipeLhs, new Fields( "num" ), upperLower, new Fields( "numUpperLower" ), new Fields( "numLhs", "charLhs", "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
+    Pipe lhsUpperLower = new HashJoin( pipeLhs, new Fields( "num" ), upperLower, new Fields( "numUpperLower" ), new Fields( "numLhs", "charLhs", "numUpperLower", "charUpperLower", "num2UpperLower", "char2UpperLower" ) );
 
     lhsUpperLower = new Each( lhsUpperLower, new Identity() );
 
@@ -1555,11 +1555,11 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLhs = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
     Pipe pipeRhs = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
-    Pipe upperLower = new Join( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower1", "charUpperLower1", "numUpperLower2", "charUpperLower2" ) );
+    Pipe upperLower = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new Fields( "numUpperLower1", "charUpperLower1", "numUpperLower2", "charUpperLower2" ) );
 
     upperLower = new Each( upperLower, new Identity() );
 
-    Pipe lhsRhs = new Join( pipeLhs, new Fields( "num" ), pipeRhs, new Fields( "num" ), new Fields( "numLhsRhs1", "charLhsRhs1", "numLhsRhs2", "charLhsRhs2" ) );
+    Pipe lhsRhs = new HashJoin( pipeLhs, new Fields( "num" ), pipeRhs, new Fields( "num" ), new Fields( "numLhsRhs1", "charLhsRhs1", "numLhsRhs2", "charLhsRhs2" ) );
 
     lhsRhs = new Each( lhsRhs, new Identity() );
 

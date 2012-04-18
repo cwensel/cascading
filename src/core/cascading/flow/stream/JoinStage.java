@@ -21,7 +21,7 @@
 package cascading.flow.stream;
 
 import cascading.flow.FlowProcess;
-import cascading.pipe.Join;
+import cascading.pipe.HashJoin;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -29,7 +29,7 @@ import cascading.tuple.TupleEntry;
  */
 public class JoinStage extends ElementStage<TupleEntry, TupleEntry>
   {
-  public JoinStage( FlowProcess flowProcess, Join join )
+  public JoinStage( FlowProcess flowProcess, HashJoin join )
     {
     super( flowProcess, join );
     }
