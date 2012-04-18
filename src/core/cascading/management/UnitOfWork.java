@@ -45,4 +45,8 @@ public interface UnitOfWork<Stats extends CascadingStats>
   void complete();
 
   void cleanup();
+
+  void setSpawnStrategy( UnitOfWorkSpawnStrategy spawnStrategy );
+
+  UnitOfWorkSpawnStrategy getSpawnStrategy();
   }

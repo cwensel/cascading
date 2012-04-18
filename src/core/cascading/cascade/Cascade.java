@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +47,8 @@ import cascading.flow.FlowSkipStrategy;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
 import cascading.management.UnitOfWork;
+import cascading.management.UnitOfWorkExecutorStrategy;
+import cascading.management.UnitOfWorkSpawnStrategy;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
 import cascading.util.PropertyUtil;
@@ -113,8 +113,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   private Thread thread;
   /** Field throwable */
   private Throwable throwable;
-  /** Field executor */
-  private ExecutorService executor;
+  private transient UnitOfWorkSpawnStrategy spawnStrategy = new UnitOfWorkExecutorStrategy();
   /** Field shutdownHook */
   private ShutdownUtil.Hook shutdownHook;
   /** Field jobsMap */
@@ -512,10 +511,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
         logInfo( " allocating threads: " + numThreads );
         }
 
-      executor = Executors.newFixedThreadPool( numThreads );
-      List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() );
-
-      executor.shutdown(); // don't accept any more work
+      List<Future<Throwable>> futures = spawnStrategy.start( this, numThreads, jobsMap.values() );
 
       for( Future<Throwable> future : futures )
         {
@@ -629,26 +625,26 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
   private void handleExecutorShutdown()
     {
-    if( executor == null )
+    if( spawnStrategy.isCompleted( this ) )
       return;
 
-    logWarn( "shutting down flow executor" );
+    logInfo( "shutting down flow executor" );
 
     try
       {
-      executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+      spawnStrategy.complete( this, 5 * 60, TimeUnit.SECONDS );
       }
     catch( InterruptedException exception )
       {
       // ignore
       }
 
-    logWarn( "shutdown complete" );
+    logInfo( "shutdown complete" );
     }
 
   private void internalStopAllFlows()
     {
-    logWarn( "stopping flows" );
+    logInfo( "stopping all flows" );
 
     List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
 
@@ -657,7 +653,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     for( Callable<Throwable> callable : jobs )
       ( (CascadeJob) callable ).stop();
 
-    logWarn( "stopped flows" );
+    logInfo( "stopped all flows" );
     }
 
   /**
@@ -833,5 +829,17 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
       return false;
       }
+    }
+
+  @Override
+  public UnitOfWorkSpawnStrategy getSpawnStrategy()
+    {
+    return spawnStrategy;
+    }
+
+  @Override
+  public void setSpawnStrategy( UnitOfWorkSpawnStrategy spawnStrategy )
+    {
+    this.spawnStrategy = spawnStrategy;
     }
   }

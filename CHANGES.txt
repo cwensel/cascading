@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.m.UnitOfWorkSpawnStrategy interface to allow for pluggable thread management services. Also added
+  c.m.UnitOfWorkExecutorStrategy class as the default implementation.
+
   Added c.p.Props base and sub-classes to simplify managing Cascading and Hadoop related properties.
 
   Added typed set and add methods to c.t.Tuple and c.t.TupleEntry.

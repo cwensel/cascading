@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,6 +46,8 @@ import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.CascadingServices;
 import cascading.management.ClientState;
+import cascading.management.UnitOfWorkExecutorStrategy;
+import cascading.management.UnitOfWorkSpawnStrategy;
 import cascading.stats.FlowStats;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
@@ -118,8 +118,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private transient List<FlowStep<Config>> steps;
   /** Field jobsMap */
   private transient Map<String, FlowStepJob<Config>> jobsMap;
-  /** Field executor */
-  private transient ExecutorService executor;
+  private transient UnitOfWorkSpawnStrategy spawnStrategy = new UnitOfWorkExecutorStrategy();
 
   private transient ReentrantLock stopLock = new ReentrantLock( true );
   protected ShutdownUtil.Hook shutdownHook;
@@ -1051,13 +1050,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     if( stop )
       return new ArrayList<Future<Throwable>>();
 
-    executor = Executors.newFixedThreadPool( numThreads );
+    List<Callable<Throwable>> list = new ArrayList<Callable<Throwable>>();
 
-    List<Future<Throwable>> futures = executor.invokeAll( jobsMap.values() ); // todo: consider submit()
+    for( FlowStepJob<Config> job : jobsMap.values() )
+      list.add( job );
 
-    executor.shutdown(); // don't accept any more work
-
-    return futures;
+    return spawnStrategy.start( this, numThreads, list );
     }
 
   private void handleThrowableAndMarkFailed()
@@ -1101,43 +1099,43 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   protected void internalStopAllJobs()
     {
-    LOG.warn( "stopping jobs" );
+    logInfo( "stopping all jobs" );
 
     try
       {
       if( jobsMap == null )
         return;
 
-      List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
+      List<FlowStepJob<Config>> jobs = new ArrayList<FlowStepJob<Config>>( jobsMap.values() );
 
       Collections.reverse( jobs );
 
-      for( Callable<Throwable> callable : jobs )
-        ( (FlowStepJob) callable ).stop();
+      for( FlowStepJob<Config> job : jobs )
+        job.stop();
       }
     finally
       {
-      LOG.warn( "stopped jobs" );
+      logInfo( "stopped all jobs" );
       }
     }
 
   protected void handleExecutorShutdown()
     {
-    if( executor == null )
+    if( spawnStrategy.isCompleted( this ) )
       return;
 
-    LOG.warn( "shutting down job executor" );
+    logInfo( "shutting down job executor" );
 
     try
       {
-      executor.awaitTermination( 5 * 60, TimeUnit.SECONDS );
+      spawnStrategy.complete( this, 5 * 60, TimeUnit.SECONDS );
       }
     catch( InterruptedException exception )
       {
       // ignore
       }
 
-    LOG.warn( "shutdown complete" );
+    logInfo( "shutdown complete" );
     }
 
   private void fireOnCompleted()
@@ -1261,6 +1259,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public String getCascadeID()
     {
     return getProperty( "cascading.cascade.id" );
+    }
+
+  @Override
+  public void setSpawnStrategy( UnitOfWorkSpawnStrategy spawnStrategy )
+    {
+    this.spawnStrategy = spawnStrategy;
+    }
+
+  @Override
+  public UnitOfWorkSpawnStrategy getSpawnStrategy()
+    {
+    return spawnStrategy;
     }
 
   protected void registerShutdownHook()
