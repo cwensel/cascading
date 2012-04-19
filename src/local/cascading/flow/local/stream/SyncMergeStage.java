@@ -34,6 +34,12 @@ public class SyncMergeStage extends MergeStage
     super( flowProcess, flowElement );
     }
 
+  /**
+   * synchronized, as by default, each source gets its turn, no concurrent threads. Except in local mode
+   *
+   * @param previous
+   * @param tupleEntry
+   */
   @Override
   public synchronized void receive( Duct previous, TupleEntry tupleEntry )
     {

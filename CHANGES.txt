@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Fixed issue where any c.p.Splice following a c.p.Merge may be unable to resolve the tuple stream branch.
+
   Added support for c.p.ConfigDef on c.p.Pipe and c.t.Tap classes to allow for process and pipe/tap level
   property values. Where process allows a Pipe or Tap to set c.f.FlowStep specific properties.
 

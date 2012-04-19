@@ -66,18 +66,6 @@ public class MergeStage extends ElementStage<TupleEntry, TupleEntry> implements 
     started = true;
     }
 
-  /**
-   * Not synchronized, as by default, each source gets its turn, no concurrent threads. Except in local mode
-   *
-   * @param previous
-   * @param tupleEntry
-   */
-  @Override
-  public void receive( Duct previous, TupleEntry tupleEntry )
-    {
-    next.receive( previous, tupleEntry );
-    }
-
   @Override
   public void complete( Duct previous )
     {

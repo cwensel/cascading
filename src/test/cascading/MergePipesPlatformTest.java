@@ -29,6 +29,7 @@ import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
@@ -206,6 +207,43 @@ public class MergePipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 14 );
+    }
+
+  @Test
+  public void testSimpleMergeThreeChainCoGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+    Tap sourceLowerOffset = getPlatform().getTextFile( inputFileLowerOffset );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "offset", sourceLowerOffset );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simplemergethreechaincogroup" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char2" ), " " ) );
+
+    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
+
+    splice = new CoGroup( splice, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 6 );
     }
 
   @Test
