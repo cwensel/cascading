@@ -22,8 +22,6 @@ package cascading.flow.hadoop.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -155,17 +153,14 @@ public class HadoopUtil
   public static String serializeMapBase64( Map<String, String> map, boolean compress ) throws IOException
     {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    DataOutputStream out = new DataOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
 
     try
       {
       out.writeInt( map.size() );
 
       for( Map.Entry<String, String> entry : map.entrySet() )
-        {
-        out.writeUTF( entry.getKey() );
-        out.writeUTF( entry.getValue() );
-        }
+        writeKeyValue( out, entry.getKey(), entry.getValue() );
       }
     finally
       {
@@ -180,19 +175,19 @@ public class HadoopUtil
     if( string == null || string.length() == 0 )
       return null;
 
-    DataInputStream in = null;
+    ObjectInputStream in = null;
 
     try
       {
       ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
 
-      in = new DataInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
+      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
 
       int mapSize = in.readInt();
       Map<String, String> map = new HashMap<String, String>( mapSize );
 
       for( int j = 0; j < mapSize; j++ )
-        map.put( in.readUTF(), in.readUTF() );
+        map.put( in.readUTF(), readStringAsObject( in ) );
 
       return map;
       }
@@ -207,7 +202,7 @@ public class HadoopUtil
     {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
-    DataOutputStream out = new DataOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
 
     try
       {
@@ -218,10 +213,7 @@ public class HadoopUtil
         out.writeInt( map.size() );
 
         for( Map.Entry<String, String> entry : map.entrySet() )
-          {
-          out.writeUTF( entry.getKey() );
-          out.writeUTF( entry.getValue() );
-          }
+          writeKeyValue( out, entry.getKey(), entry.getValue() );
         }
       }
     finally
@@ -232,18 +224,33 @@ public class HadoopUtil
     return new String( Base64.encodeBase64( bytes.toByteArray() ) );
     }
 
+  private static void writeKeyValue( ObjectOutputStream out, String key, String value ) throws IOException
+    {
+    try
+      {
+      out.writeUTF( key );
+      // we must writeObject as it knows how to handle large Strings larger than Short max value
+      out.writeObject( value );
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "could not write key/value: " + key + "/" + value, exception );
+      throw exception;
+      }
+    }
+
   public static List<Map<String, String>> deserializeListMapBase64( String string, boolean decompress ) throws IOException
     {
     if( string == null || string.length() == 0 )
       return null;
 
-    DataInputStream in = null;
+    ObjectInputStream in = null;
 
     try
       {
       ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
 
-      in = new DataInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
+      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
 
       int listSize = in.readInt();
       List<Map<String, String>> list = new ArrayList<Map<String, String>>( listSize );
@@ -255,7 +262,7 @@ public class HadoopUtil
         Map<String, String> map = new HashMap<String, String>( mapSize );
 
         for( int j = 0; j < mapSize; j++ )
-          map.put( in.readUTF(), in.readUTF() );
+          map.put( in.readUTF(), readStringAsObject( in ) );
 
         list.add( map );
         }
@@ -266,6 +273,18 @@ public class HadoopUtil
       {
       if( in != null )
         in.close();
+      }
+    }
+
+  private static String readStringAsObject( ObjectInputStream in ) throws IOException
+    {
+    try
+      {
+      return (String) in.readObject();
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new FlowException( "could not read string", exception );
       }
     }
 
