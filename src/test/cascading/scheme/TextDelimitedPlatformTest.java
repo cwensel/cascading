@@ -35,8 +35,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
-import static data.InputData.testDelimited;
-import static data.InputData.testDelimitedSpecialCharData;
+import static data.InputData.*;
 
 /**
  *
@@ -177,5 +176,26 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 10, 5 );
+    }
+
+  @Test
+  public void testHeaderFieldsAll() throws IOException
+    {
+    Tap input = getPlatform().getDelimitedFile( Fields.UNKNOWN, true, true, ",", "\"", null, testDelimitedHeader, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( Fields.ALL, true, true, ",", "\"", null, getOutputPath( "headerfieldsall" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipe" );
+
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 11, 5 );
+
+    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
+
+    assertEquals( iterator.next().get( 0 ), "first,second,third,fourth,fifth" );
+
+    iterator.close();
     }
   }

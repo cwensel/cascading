@@ -299,7 +299,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
 
     jobConf.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 
-    return trap.openForWrite( new HadoopFlowProcess( this, jobConf ), null );
+    return trap.openForWrite( new HadoopFlowProcess( this, jobConf ) );
     }
 
   @Override

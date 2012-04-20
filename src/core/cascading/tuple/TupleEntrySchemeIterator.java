@@ -67,6 +67,9 @@ public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Confi
     this.inputIterator = inputIterator;
     this.identifier = identifier;
 
+    if( this.identifier == null || this.identifier.isEmpty() )
+      this.identifier = "'unknown'";
+
     if( !inputIterator.hasNext() )
       {
       isComplete = true;
@@ -84,7 +87,7 @@ public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Confi
       }
     catch( IOException exception )
       {
-      throw new TupleException( "unable to prepare source for input identifier: " + identifier, exception );
+      throw new TupleException( "unable to prepare source for input identifier: " + this.identifier, exception );
       }
     }
 
@@ -156,9 +159,6 @@ public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Confi
       }
     catch( Exception exception )
       {
-      if( identifier == null || identifier.isEmpty() )
-        identifier = "'unknown'";
-
       throw new TupleException( "unable to source from input identifier: " + identifier, exception );
       }
     finally

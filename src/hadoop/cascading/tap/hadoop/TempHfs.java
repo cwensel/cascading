@@ -26,7 +26,6 @@ import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
@@ -37,6 +36,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
 
 /** Class TempHfs creates a temporary {@link cascading.tap.Tap} instance for use internally. */
@@ -50,17 +51,16 @@ public class TempHfs extends Hfs
   private String temporaryPath;
 
   /** Class NullScheme is a noop scheme used as a placeholder */
-  private static class NullScheme extends Scheme<HadoopFlowProcess, JobConf, Object, Object, Object, Object>
+  private static class NullScheme extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object, Object>
     {
-
     @Override
-    public void sourceConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       // do nothing
       }
 
     @Override
-    public void sinkConfInit( HadoopFlowProcess flowProcess, Tap tap, JobConf conf )
+    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       conf.setOutputKeyClass( Tuple.class );
       conf.setOutputValueClass( Tuple.class );
@@ -68,13 +68,13 @@ public class TempHfs extends Hfs
       }
 
     @Override
-    public boolean source( HadoopFlowProcess flowProcess, SourceCall sourceCall ) throws IOException
+    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
       {
       return false;
       }
 
     @Override
-    public void sink( HadoopFlowProcess flowProcess, SinkCall sinkCall ) throws IOException
+    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       }
 

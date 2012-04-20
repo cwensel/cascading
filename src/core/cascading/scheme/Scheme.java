@@ -230,6 +230,70 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
     }
 
   /**
+   * Method retrieveSourceFields notifies a Scheme when it is appropriate to dynamically
+   * update the fields it sources. By default the current declared fields are returned.
+   * <p/>
+   * The {@code FlowProcess} presents all known properties resolved by the current planner.
+   * <p/>
+   * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
+   *
+   * @param process of type FlowProcess
+   * @param tap     of type Tap
+   * @return Fields
+   */
+  public Fields retrieveSourceFields( Process process, Tap tap )
+    {
+    return getSourceFields();
+    }
+
+  /**
+   * Method presentSourceFields is called after the planner is invoked and all fields are resolved. This
+   * method presents to the Scheme the actual source fields after any planner intervention.
+   * <p/>
+   * This method is called after {@link #retrieveSourceFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
+   *
+   * @param process of type FlowProcess
+   * @param tap     of type Tap
+   * @param fields  of type Fields
+   */
+  public void presentSourceFields( Process process, Tap tap, Fields fields )
+    {
+
+    }
+
+  /**
+   * Method retrieveSinkFields notifies a Scheme when it is appropriate to dynamically
+   * update the fields it sources. By default the current declared fields are returned.
+   * <p/>
+   * The {@code FlowProcess} presents all known properties resolved by the current planner.
+   * <p/>
+   * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
+   *
+   * @param process of type FlowProcess
+   * @param tap     of type Tap
+   * @return Fields
+   */
+  public Fields retrieveSinkFields( Process process, Tap tap )
+    {
+    return getSinkFields();
+    }
+
+  /**
+   * Method presentSinkFields is called after the planner is invoked and all fields are resolved. This
+   * method presents to the Scheme the actual source fields after any planner intervention.
+   * <p/>
+   * This method is called after {@link #retrieveSinkFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
+   *
+   * @param process of type FlowProcess
+   * @param tap     of type Tap
+   * @param fields  of type Fields
+   */
+  public void presentSinkFields( Process process, Tap tap, Fields fields )
+    {
+
+    }
+
+  /**
    * Method sourceInit initializes this instance as a source.
    * <p/>
    * This method is executed client side as a means to provide necessary configuration parameters

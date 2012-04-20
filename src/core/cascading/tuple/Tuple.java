@@ -836,7 +836,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    * @param destination of type Object[]
    * @return Object[]
    */
-  Object[] elements( Object[] destination )
+  <T> T[] elements( T[] destination )
     {
     return elements.toArray( destination );
     }

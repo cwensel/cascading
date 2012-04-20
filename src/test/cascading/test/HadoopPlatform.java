@@ -41,7 +41,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.util.Util;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
@@ -99,18 +98,20 @@ public class HadoopPlatform extends TestPlatform
 
       new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs();
 
-      Configuration conf = new Configuration();
+      JobConf conf = new JobConf();
 
       conf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
-      conf.setInt( "jobclient.completion.poll.interval", 100 );
 
       dfs = new MiniDFSCluster( conf, 4, true, null );
       fileSys = dfs.getFileSystem();
-      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1 );
+      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1, null, null, conf );
 
       jobConf = mr.createJobConf();
 
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
+      jobConf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
+      jobConf.setInt( "jobclient.completion.poll.interval", 50 );
+      jobConf.setInt( "jobclient.progress.monitor.poll.interval", 50 );
       jobConf.setMapSpeculativeExecution( false );
       jobConf.setReduceSpeculativeExecution( false );
       }
@@ -207,9 +208,9 @@ public class HadoopPlatform extends TestPlatform
     }
 
   @Override
-  public Tap getDelimitedFile( Fields fields, boolean skipHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
+  public Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
-    return new Hfs( new TextDelimited( fields, skipHeader, delimiter, quote, types ), filename, mode );
+    return new Hfs( new TextDelimited( fields, hasHeader, delimiter, quote, types ), filename, mode );
     }
 
   @Override

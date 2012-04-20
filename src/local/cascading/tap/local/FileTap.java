@@ -20,7 +20,6 @@
 
 package cascading.tap.local;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,7 +33,6 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.Util;
 
 /**
@@ -84,9 +82,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     if( input == null )
       input = new FileInputStream( path );
 
-    Closeable reader = (Closeable) ( (LocalScheme) getScheme() ).createInput( input );
-
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), reader, path );
+    return new LocalTupleEntrySchemeIterator( flowProcess, (LocalScheme) getScheme(), input, path );
     }
 
   @Override
@@ -107,9 +103,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     if( output == null )
       output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
 
-    Closeable writer = (Closeable) ( (LocalScheme) getScheme() ).createOutput( output );
-
-    return new LocalTupleEntryCollector( flowProcess, getScheme(), writer, path );
+    return new LocalTupleEntryCollector( flowProcess, (LocalScheme) getScheme(), output, path );
     }
 
   /**

@@ -69,6 +69,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
       {
       next.start( this );
 
+      // input may be null
       iterator = source.openForRead( flowProcess, input );
 
       while( iterator.hasNext() )

@@ -31,8 +31,6 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.property.PropertyUtil;
 import cascading.tap.hadoop.io.HttpFileSystem;
 import cascading.util.ShutdownUtil;
@@ -43,7 +41,7 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
 
 /**
  * Class HadoopFlow is the Apache Hadoop specific implementation of a {@link Flow}.
- *
+ * <p/>
  * HadoopFlow must be created through a {@link HadoopFlowConnector} instance.
  *
  * @see HadoopFlowConnector
@@ -84,9 +82,9 @@ public class HadoopFlow extends BaseFlow<JobConf>
     super( properties, jobConf, name );
     }
 
-  public HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph flowStepGraph )
+  public HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef )
     {
-    super( properties, jobConf, flowDef, pipeGraph, flowStepGraph );
+    super( properties, jobConf, flowDef );
     }
 
   protected void initFromProperties( Map<Object, Object> properties )

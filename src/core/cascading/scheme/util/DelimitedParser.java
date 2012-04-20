@@ -18,22 +18,27 @@
  * limitations under the License.
  */
 
-package cascading.scheme;
+package cascading.scheme.util;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import cascading.flow.FlowProcess;
+import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.Tuples;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class DelimitedParser is not to be used directly but by platform specific {@link Scheme} implementations.
+ * Class DelimitedParser is not to be used directly but by platform specific {@link cascading.scheme.Scheme} implementations.
  *
  * @see cascading.scheme.hadoop.TextDelimited
  * @see cascading.scheme.local.TextDelimited
@@ -61,8 +66,6 @@ public class DelimitedParser implements Serializable
   protected Pattern cleanPattern;
   /** Field escapePattern */
   protected Pattern escapePattern;
-  /** Field skipHeader */
-  boolean skipHeader;
   /** Field delimiter * */
   final String delimiter;
   /** Field quote */
@@ -76,7 +79,7 @@ public class DelimitedParser implements Serializable
   /** Field safe */
   boolean safe = true;
 
-  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields )
+  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
     {
     this.delimiter = delimiter;
     this.strict = strict;
@@ -84,7 +87,7 @@ public class DelimitedParser implements Serializable
     this.sourceFields = sourceFields;
     this.numValues = sinkFields.size();
 
-    if( sinkFields.isAll() )
+    if( !skipHeader && sourceFields.isUnknown() )
       this.strict = false;
 
     if( !sinkFields.isAll() && numValues == 0 )
@@ -205,6 +208,49 @@ public class DelimitedParser implements Serializable
 
     return split;
     }
+
+  public Fields parseFirstLine( FlowProcess flowProcess, Tap tap )
+    {
+    Fields sourceFields;
+    TupleEntryIterator iterator = null;
+
+    try
+      {
+      if( !tap.resourceExists( flowProcess.getConfigCopy() ) )
+        throw new TapException( "unable to read fields from tap: " + tap + ", does not exist" );
+
+      iterator = tap.openForRead( flowProcess );
+
+      TupleEntry entry = iterator.hasNext() ? iterator.next() : null;
+
+      if( entry == null )
+        throw new TapException( "unable to read fields from tap: " + tap + ", is empty" );
+
+      Object[] result = parseLine( entry.getTuple().getString( 0 ) );
+
+      sourceFields = new Fields( Arrays.copyOf( result, result.length, Comparable[].class ) );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "unable to read fields from tap: " + tap, exception );
+      }
+    finally
+      {
+      if( iterator != null )
+        {
+        try
+          {
+          iterator.close();
+          }
+        catch( IOException exception )
+          {
+          // do nothing
+          }
+        }
+      }
+    return sourceFields;
+    }
+
 
   public Object[] parseLine( String line )
     {

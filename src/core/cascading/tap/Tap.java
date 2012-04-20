@@ -37,7 +37,6 @@ import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.util.Util;
 
 /**
@@ -252,13 +251,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
-    {
-    if( output == null )
-      throw new IllegalArgumentException( "output may not be null" );
-
-    return new TupleEntrySchemeCollector<Output>( flowProcess, getScheme(), output );
-    }
+  public abstract TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
@@ -305,6 +298,37 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
       return new Scope( getSinkFields() );
 
     return new Scope( getSourceFields() );
+    }
+
+  /**
+   * A hook for allowing a Scheme to lazily retrieve its source fields.
+   *
+   * @param flowProcess
+   * @return
+   */
+  public Fields retrieveSourceFields( FlowProcess<Config> flowProcess )
+    {
+    return getScheme().retrieveSourceFields( flowProcess, this );
+    }
+
+  public void presentSourceFields( FlowProcess<Config> flowProcess, Fields fields )
+    {
+    getScheme().presentSourceFields( flowProcess, this, fields );
+    }
+
+  /**
+   * A hook for allowing a Scheme to lazily retrieve its sink fields.
+   *
+   * @return
+   */
+  public Fields retrieveSinkFields( FlowProcess<Config> flowProcess )
+    {
+    return getScheme().retrieveSinkFields( flowProcess, this );
+    }
+
+  public void presentSinkFields( FlowProcess<Config> flowProcess, Fields fields )
+    {
+    getScheme().presentSinkFields( flowProcess, this, fields );
     }
 
   @Override

@@ -46,6 +46,7 @@ public interface InputData
   String inputPageData = inputPath + "url+page.200.txt";
 
   String testDelimited = inputPath + "delimited.txt";
+  String testDelimitedHeader = inputPath + "delimited-header.txt";
   String testDelimitedSpecialCharData = inputPath + "delimited-spec-char.txt";
 
   String inputFileComments = inputPath + "comments+lower.txt";

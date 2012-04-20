@@ -2,6 +2,14 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally read the field names from from the header during
+  planning if skipHeaders or hasHeaders is set to true and if Fields.ALL or Fields.UNKNOWN is declared on the
+  constructor.
+
+  Changed the planner and added new methods to c.s.Scheme so that field names can be retrieved after a proper
+  configuration has been built, but before the planner resolves fields internally. This is useful for reading field
+  names from a header of a text file, or meta-data in a binary file. These methods are optional.
+
   Fixed issue where any c.p.Splice following a c.p.Merge may be unable to resolve the tuple stream branch.
 
   Added support for c.p.ConfigDef on c.p.Pipe and c.t.Tap classes to allow for process and pipe/tap level

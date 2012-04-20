@@ -27,7 +27,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
@@ -36,7 +35,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleEntrySchemeIterator;
+import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
@@ -140,7 +139,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
     }
 
   @ConstructorProperties({"scheme"})
-  protected Hfs( Scheme scheme )
+  protected Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
     }
@@ -199,7 +198,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    * @param stringPath of type String
    */
   @ConstructorProperties({"scheme", "stringPath"})
-  public Hfs( Scheme scheme, String stringPath )
+  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
     setStringPath( stringPath );
@@ -214,7 +213,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    */
   @Deprecated
   @ConstructorProperties({"scheme", "stringPath", "replace"})
-  public Hfs( Scheme scheme, String stringPath, boolean replace )
+  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
@@ -228,7 +227,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    * @param sinkMode   of type SinkMode
    */
   @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
-  public Hfs( Scheme scheme, String stringPath, SinkMode sinkMode )
+  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     setStringPath( stringPath );
@@ -400,39 +399,30 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
   @Override
   public TupleEntryIterator openForRead( FlowProcess<JobConf> flowProcess, RecordReader input ) throws IOException
     {
-    String identifier = (String) flowProcess.getProperty( "cascading.source.path" );
-
-    // this is only called cluster task side when Hadoop is providing a RecordReader instance it owns
-    // during processing of an InputSplit
-    if( input != null )
-      return new TupleEntrySchemeIterator( flowProcess, getScheme(), new RecordReaderIterator( input ), identifier );
-
     // this is only called when, on the client side, a user wants to open a tap for writing on a client
     // MultiRecordReader will create a new RecordReader instance for use across any file parts
     // or on the cluster side during accumulation for a Join
     //
     // if custom jobConf properties need to be passed down, use the HadoopFlowProcess copy constructor
     //
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), new MultiRecordReaderIterator( flowProcess, this ), identifier );
-    }
+    if( input == null )
+      return new HadoopTupleEntrySchemeIterator( flowProcess, getScheme(), this );
 
-  private JobConf getSourceConf( FlowProcess<JobConf> flowProcess, JobConf conf, String property ) throws IOException
-    {
-    Map<String, String> priorConf = HadoopUtil.deserializeMapBase64( property, true );
-
-    return flowProcess.mergeMapIntoConfig( conf, priorConf );
+    // this is only called cluster task side when Hadoop is providing a RecordReader instance it owns
+    // during processing of an InputSplit
+    return new HadoopTupleEntrySchemeIterator( flowProcess, getScheme(), input );
     }
 
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<JobConf> flowProcess, OutputCollector output ) throws IOException
     {
-    // this is only called cluster task side when Hadoop is providing an OutputCollector instance it owns
-    if( output != null )
-      return super.openForWrite( flowProcess, output );
-
     // this is only called when, on the client side, a user want to open a tap for reading on the client
     // or cluster side when this tap is being accumulated into a Join pipe
-    return new HadoopTapCollector( flowProcess, this );
+    if( output == null )
+      return new HadoopTupleEntrySchemeCollector( flowProcess, this );
+
+    // this is only called cluster task side when Hadoop is providing an OutputCollector instance it owns
+    return new TupleEntrySchemeCollector<OutputCollector>( flowProcess, getScheme(), output );
     }
 
   @Override

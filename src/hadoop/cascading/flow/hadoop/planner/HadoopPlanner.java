@@ -195,6 +195,8 @@ public class HadoopPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
+      HadoopFlow flow = new HadoopFlow( properties, jobConf, flowDef );
+
       elementGraph = createElementGraph( flowDef );
 
       // rules
@@ -222,7 +224,9 @@ public class HadoopPlanner extends FlowPlanner
 
       FlowStepGraph flowStepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph );
 
-      return new HadoopFlow( properties, jobConf, flowDef, elementGraph, flowStepGraph );
+      flow.initialize( elementGraph, flowStepGraph );
+
+      return flow;
       }
     catch( Exception exception )
       {
@@ -433,8 +437,9 @@ public class HadoopPlanner extends FlowPlanner
         if( !tempURIScheme.equals( successorURIScheme ) )
           continue;
 
-        // safe, both are symetrical
-        if( !tap.getScheme().getSourceFields().equals( successorTap.getScheme().getSourceFields() ) )
+        // safe, both are symmetrical
+        // should be called after fields are resolved
+        if( !tap.getSourceFields().equals( successorTap.getSourceFields() ) )
           continue;
 
         elementGraph.replaceElementWith( tap, successor );

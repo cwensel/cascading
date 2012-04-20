@@ -23,7 +23,7 @@ package cascading.scheme.hadoop;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -40,7 +40,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
  * A SequenceFile is a type of {@link cascading.scheme.Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
-public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReader, OutputCollector, Object[], Void>
+public class SequenceFile extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object[], Void>
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
@@ -63,13 +63,13 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public void sourceConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setInputFormat( SequenceFileInputFormat.class );
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
     conf.setOutputValueClass( Tuple.class ); // supports TapCollector
@@ -77,7 +77,7 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public void sourcePrepare( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     Object[] pair = new Object[]{sourceCall.getInput().createKey(), sourceCall.getInput().createValue()};
 
@@ -85,7 +85,7 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Tuple key = (Tuple) sourceCall.getContext()[ 0 ];
     Tuple value = (Tuple) sourceCall.getContext()[ 1 ];
@@ -112,13 +112,13 @@ public class SequenceFile extends Scheme<HadoopFlowProcess, JobConf, RecordReade
     }
 
   @Override
-  public void sourceCleanup( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourceCleanup( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.getOutput().collect( Tuple.NULL, sinkCall.getOutgoingEntry().getTuple() );
     }

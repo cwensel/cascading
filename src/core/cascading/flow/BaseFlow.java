@@ -53,6 +53,7 @@ import cascading.property.PropertyUtil;
 import cascading.stats.FlowStats;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.ShutdownUtil;
@@ -152,24 +153,68 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef, ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
+  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
     {
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
-    this.pipeGraph = pipeGraph;
-    this.flowStepGraph = flowStepGraph;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
-    initSteps();
     setSources( flowDef.getSourcesCopy() );
     setSinks( flowDef.getSinksCopy() );
     setTraps( flowDef.getTrapsCopy() );
     initFromProperties( properties );
     initFromTaps();
 
+    retrieveSourceFields();
+    retrieveSinkFields();
+
     this.flowStats = createPrepareFlowStats(); // must be last
+    }
+
+  public void initialize( ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
+    {
+    this.pipeGraph = pipeGraph;
+    this.flowStepGraph = flowStepGraph;
+
+    initSteps();
+
+    presentSourceFields();
+    presentSinkFields();
 
     initializeNewJobsMap();
+    }
+
+  /** Force a Scheme to fetch any fields from a meta-data store */
+  protected void retrieveSourceFields()
+    {
+    for( Tap tap : sources.values() )
+      tap.retrieveSourceFields( getFlowProcess() );
+    }
+
+  /** Present the current resolved fields for the Tap */
+  protected void presentSourceFields()
+    {
+    for( Tap tap : sources.values() )
+      tap.presentSourceFields( getFlowProcess(), getFieldsFor( tap ) );
+    }
+
+  /** Force a Scheme to fetch any fields from a meta-data store */
+  protected void retrieveSinkFields()
+    {
+    for( Tap tap : sinks.values() )
+      tap.retrieveSinkFields( getFlowProcess() );
+    }
+
+  /** Present the current resolved fields for the Tap */
+  protected void presentSinkFields()
+    {
+    for( Tap tap : sinks.values() )
+      tap.presentSinkFields( getFlowProcess(), getFieldsFor( tap ) );
+    }
+
+  private Fields getFieldsFor( Tap tap )
+    {
+    return pipeGraph.outgoingEdgesOf( tap ).iterator().next().getOutValuesFields();
     }
 
   private void addSessionProperties( Map<Object, Object> properties )
@@ -852,7 +897,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     if( !sinks.containsKey( name ) )
       throw new IllegalArgumentException( "sink does not exist: " + name );
 
-    return sinks.get( name ).openForRead( getFlowProcess(), null );
+    return sinks.get( name ).openForRead( getFlowProcess() );
     }
 
   @Override
@@ -938,13 +983,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   @Override
   public TupleEntryIterator openTapForRead( Tap tap ) throws IOException
     {
-    return tap.openForRead( getFlowProcess(), null );
+    return tap.openForRead( getFlowProcess() );
     }
 
   @Override
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( getFlowProcess(), null );
+    return tap.openForWrite( getFlowProcess() );
     }
 
   /** Method run implements the Runnable run method and should not be called by users. */

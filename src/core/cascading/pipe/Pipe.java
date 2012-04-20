@@ -307,19 +307,19 @@ public class Pipe implements FlowElement, Serializable
     return heads.toArray( new Pipe[ heads.size() ] );
     }
 
-  /** @see FlowElement#outgoingScopeFor */
+  @Override
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     return incomingScopes.iterator().next();
     }
 
-  /** @see FlowElement#resolveIncomingOperationFields */
+  @Override
   public Fields resolveIncomingOperationFields( Scope incomingScope )
     {
     throw new IllegalStateException( "resolveIncomingOperationFields should never be called" );
     }
 
-  /** @see FlowElement#resolveFields(Scope) */
+  @Override
   public Fields resolveFields( Scope scope )
     {
     throw new IllegalStateException( "resolveFields should never be called" );

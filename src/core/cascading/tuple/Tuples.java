@@ -60,7 +60,7 @@ public class Tuples
    * @param destination of type Object[]
    * @return Object[]
    */
-  public static Object[] asArray( Tuple tuple, Object[] destination )
+  public static <T> T[] asArray( Tuple tuple, T[] destination )
     {
     if( tuple.size() != destination.length )
       throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match destination array size: " + destination.length );

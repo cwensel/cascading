@@ -32,11 +32,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
-import cascading.scheme.DelimitedParser;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.scheme.util.DelimitedParser;
+import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.local.FileTap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -48,11 +50,15 @@ import cascading.tuple.Tuple;
  * in every input file. That is, if the byte offset of the current line from the input is zero (0), that line will
  * be skipped.
  * <p/>
+ * It is assumed if sink/source {@code fields} is set to either {@link Fields#ALL} or {@link Fields#UNKNOWN} and
+ * {@code skipHeader} or {@code hasHeader} is {@code true}, the field names will be retrieved from the header of the
+ * file and used during planning. The header will parsed with the same rules as the body of the file.
+ * <p/>
  * By default headers are not skipped.
  * <p/>
- * <p/>
  * TextDelimited may also be used to write a "header" in a file. The fields names for the header are taken directly
- * from the declared fields.
+ * from the declared fields. Or if the declared fields are {@link Fields#ALL} or {@link Fields#UNKNOWN}, the
+ * resolved field names will be used, if any.
  * <p/>
  * By default headers are not written.
  * <p/>
@@ -322,7 +328,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     this.skipHeader = skipHeader;
     this.writeHeader = writeHeader;
 
-    delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, getSourceFields(), getSinkFields() );
+    delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
 
   @Override
@@ -355,6 +361,23 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
   public boolean isSymmetrical()
     {
     return super.isSymmetrical() && skipHeader == writeHeader;
+    }
+
+  @Override
+  public Fields retrieveSourceFields( FlowProcess<Properties> process, Tap tap )
+    {
+    if( !skipHeader || !getSourceFields().isUnknown() )
+      return getSourceFields();
+
+    // no need to open them all
+    if( tap instanceof CompositeTap )
+      tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
+
+    tap = new FileTap( new TextLine( new Fields( "line" ) ), tap.getIdentifier() );
+
+    setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
+
+    return getSourceFields();
     }
 
   @Override

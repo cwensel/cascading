@@ -23,7 +23,7 @@ package cascading.scheme.hadoop;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.FlowProcess;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
@@ -93,7 +93,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sinkConfInit( HadoopFlowProcess flowProcess, Tap<HadoopFlowProcess, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     super.sinkConfInit( flowProcess, tap, conf );
 
@@ -109,7 +109,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public boolean source( HadoopFlowProcess flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object key = sourceCall.getContext()[ 0 ];
     Object value = sourceCall.getContext()[ 1 ];
@@ -132,7 +132,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sink( HadoopFlowProcess flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 

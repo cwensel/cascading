@@ -42,10 +42,10 @@ import org.slf4j.LoggerFactory;
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class HadoopTapCollector extends TupleEntrySchemeCollector implements OutputCollector
+public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector implements OutputCollector
   {
   /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopTapCollector.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopTupleEntrySchemeCollector.class );
 
   /** Field conf */
   private final JobConf conf;
@@ -72,7 +72,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
    * @param flowProcess
    * @param tap         of type Tap  @throws IOException when fails to initialize
    */
-  HadoopTapCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
     this( flowProcess, tap, null );
     }
@@ -85,7 +85,7 @@ public class HadoopTapCollector extends TupleEntrySchemeCollector implements Out
    * @param prefix      of type String
    * @throws IOException when fails to initialize
    */
-  HadoopTapCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
     super( flowProcess, tap.getScheme() );
     this.flowProcess = flowProcess;
