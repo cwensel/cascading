@@ -89,7 +89,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
   /** Field flowStats */
-  protected final FlowStats flowStats; // don't use a listener to set values
+  protected FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
   protected Map<String, Tap> sources = Collections.EMPTY_MAP;
   /** Field sinks */
@@ -167,8 +167,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     retrieveSourceFields();
     retrieveSinkFields();
-
-    this.flowStats = createPrepareFlowStats(); // must be last
     }
 
   public void initialize( ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
@@ -180,6 +178,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     presentSourceFields();
     presentSinkFields();
+
+    this.flowStats = createPrepareFlowStats(); // must be last
 
     initializeNewJobsMap();
     }
