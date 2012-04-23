@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Updated dependency to Hadoop 1.0.2.
+
   Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally read the field names from from the header during
   planning if skipHeaders or hasHeaders is set to true and if Fields.ALL or Fields.UNKNOWN is declared on the
   constructor.

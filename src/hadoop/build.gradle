@@ -40,7 +40,7 @@ sourceSets {
 }
 
 dependencies {
-  compile( group: 'org.apache.hadoop', name: 'hadoop-core', version: '0.20.2' ) {
+  compile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
     exclude group: 'ant'
     exclude group: 'junit'
   }

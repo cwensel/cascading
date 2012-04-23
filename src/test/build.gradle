@@ -25,7 +25,7 @@ archivesBaseName = 'cascading-test'
 
 sourceSets {
   main {
-    output.classesDir = new File("${buildDir}/classes/test")
+    output.classesDir = new File( "${buildDir}/classes/test" )
 
     java {
       srcDirs projectDir
@@ -41,20 +41,36 @@ sourceSets {
 
 dependencies {
   compile group: 'junit', name: 'junit', version: '4.8.+'
-  compile group: 'org.apache.hadoop', name: 'hadoop-test', version: '0.20.2'
+  compile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
   compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
 }
 
+if( hadoopVersion.startsWith( "1.0." ) )
+{
+  dependencies {
+    runtime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
+  }
+}
+
+if( hadoopVersion.startsWith( "0.20.205." ) )
+{
+  dependencies {
+    runtime 'org.codehaus.jackson:jackson-core-asl:1.0.1'
+    runtime 'org.codehaus.jackson:jackson-mapper-asl:1.0.1'
+
+  }
+}
+
 assemble << {
-  def distDir = mkdir("${buildDir}/dist")
+  def distDir = mkdir( "${buildDir}/dist" )
 
   copy {
     into "${distDir}/lib/cascading-test"
-    from(configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-      !dep.name.contains('cascading') && !dep.name.contains('hadoop')
+    from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      !dep.name.contains( 'cascading' ) && !dep.name.contains( 'hadoop' )
     }.collect { dep ->
       dep.moduleArtifacts.collect { it.file }
-    })
+    } )
   }
 
   copy {
@@ -66,8 +82,8 @@ assemble << {
 test {
   include '**/ComparePlatformsTest.class'
 
-  systemProperties = setTestingProperties('compare')
+  systemProperties = setTestingProperties( 'compare' )
 
-  testReportDir = new File(testReportDir, 'compare')
-  testResultsDir = new File(testResultsDir, 'compare')
+  testReportDir = new File( testReportDir, 'compare' )
+  testResultsDir = new File( testResultsDir, 'compare' )
 }

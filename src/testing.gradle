@@ -18,6 +18,13 @@
  * limitations under the License.
  */
 
+//hadoopVersion = '0.20.2'
+//hadoopVersion = '0.20.205.0' // missing maven deps
+hadoopVersion = '1.0.2'  // missing maven deps
+
+if( System.properties[ 'hadoop.release.final' ] )
+  hadoopVersion = System.properties[ 'hadoop.release.final' ]
+
 project.setTestingProperties = { platform = '' ->
   System.properties[ 'test.platform.includes' ] = platform
 
@@ -27,9 +34,9 @@ project.setTestingProperties = { platform = '' ->
   }
 
   // hadoop hard codes 'build/test' into its test harness, so might as well play along
-  System.properties[ 'test.output.root' ] = new String("${buildDir}/test/output/")
-  System.properties[ 'test.data.path' ] = new String("${projectDir}/../test/data/")
-  System.properties[ 'hadoop.log.dir' ] = new String("${buildDir}/test/log")
-  System.properties[ 'hadoop.tmp.dir' ] = new String("${buildDir}/test/tmp")
+  System.properties[ 'test.output.root' ] = new String( "${buildDir}/test/output/" )
+  System.properties[ 'test.data.path' ] = new String( "${projectDir}/../test/data/" )
+  System.properties[ 'hadoop.log.dir' ] = new String( "${buildDir}/test/log" )
+  System.properties[ 'hadoop.tmp.dir' ] = new String( "${buildDir}/test/tmp" )
   System.properties
 }

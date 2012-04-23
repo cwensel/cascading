@@ -79,7 +79,7 @@ public class HadoopPlatform extends TestPlatform
     }
 
   @Override
-  public void setUp() throws IOException
+  public synchronized void setUp() throws IOException
     {
     if( jobConf != null )
       return;
