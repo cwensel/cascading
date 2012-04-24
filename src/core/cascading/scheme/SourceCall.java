@@ -67,6 +67,8 @@ public interface SourceCall<Context, Input>
   /**
    * Method getInput returns the input mechanism for the underlying platform used to retrieve new values (records,
    * lines, etc).
+   * <p/>
+   * Do not cache the returned value as it may change.
    *
    * @return the platform dependent input handler
    */

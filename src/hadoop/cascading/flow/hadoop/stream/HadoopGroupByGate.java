@@ -22,8 +22,8 @@ package cascading.flow.hadoop.stream;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopGroupByClosure;
-import cascading.flow.hadoop.MapReduceCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.pipe.GroupBy;
@@ -64,7 +64,7 @@ public class HadoopGroupByGate extends HadoopGroupGate
     try
       {
       collector.collect( groupKey, valuesTuple );
-      flowProcess.increment( MapReduceCounters.Map_Tuples_Written, 1 );
+      flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {

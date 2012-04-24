@@ -41,6 +41,11 @@ public abstract class FlowStepStats extends CascadingStats
     return flowStep.getID();
     }
 
+  protected FlowStep getFlowStep()
+    {
+    return flowStep;
+    }
+
   @Override
   public synchronized void recordInfo()
     {

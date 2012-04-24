@@ -25,8 +25,8 @@ import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopCoGroupClosure;
-import cascading.flow.hadoop.MapReduceCounters;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.flow.stream.SpliceGate;
@@ -84,7 +84,7 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     try
       {
       collector.collect( new IndexTuple( pos, groupKey ), new IndexTuple( pos, valuesTuple ) );
-      flowProcess.increment( MapReduceCounters.Map_Tuples_Written, 1 );
+      flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
       {

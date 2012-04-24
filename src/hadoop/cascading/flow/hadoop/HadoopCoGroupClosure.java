@@ -30,6 +30,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.tuple.collect.Spillable;
+import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory;
 import cascading.tuple.io.IndexTuple;
@@ -46,7 +47,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
 
   public enum Spill
     {
-      Num_Spills_Written, Num_Spills_Read, Num_Tuples_Spilled
+      Num_Spills_Written, Num_Spills_Read, Num_Tuples_Spilled, Duration_Millis_Written
     }
 
   private class SpillListener implements Spillable.SpillListener
@@ -82,6 +83,12 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
 
       flowProcess.increment( Spill.Num_Spills_Written, 1 );
       flowProcess.increment( Spill.Num_Tuples_Spilled, spillSize );
+      }
+
+    @Override
+    public void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration )
+      {
+      flowProcess.increment( Spill.Duration_Millis_Written, duration );
       }
 
     @Override

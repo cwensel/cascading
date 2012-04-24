@@ -56,7 +56,7 @@ public abstract class HadoopStepStats extends FlowStepStats
   /** Field numReducerTasks */
   int numReduceTasks;
   /** Field taskStats */
-  Map<String, HadoopTaskStats> taskStats = (Map<String, HadoopTaskStats>) Collections.EMPTY_MAP;
+  Map<String, HadoopSliceStats> taskStats = (Map<String, HadoopSliceStats>) Collections.EMPTY_MAP;
 
   protected HadoopStepStats( FlowStep<JobConf> flowStep, ClientState clientState )
     {
@@ -68,12 +68,12 @@ public abstract class HadoopStepStats extends FlowStepStats
    *
    * @return the taskStats (type ArrayList<HadoopTaskStats>) of this HadoopStepStats object.
    */
-  public Map<String, HadoopTaskStats> getTaskStats()
+  public Map<String, HadoopSliceStats> getTaskStats()
     {
     return taskStats;
     }
 
-  protected void setTaskStats( Map<String, HadoopTaskStats> taskStats )
+  protected void setTaskStats( Map<String, HadoopSliceStats> taskStats )
     {
     this.taskStats = taskStats;
     }
@@ -409,7 +409,7 @@ public abstract class HadoopStepStats extends FlowStepStats
 
   public void captureDetail( boolean captureAttempts )
     {
-    HashMap<String, HadoopTaskStats> newStats = new HashMap<String, HadoopTaskStats>();
+    HashMap<String, HadoopSliceStats> newStats = new HashMap<String, HadoopSliceStats>();
 
     JobClient jobClient = getJobClient();
     RunningJob runningJob = getRunningJob();
@@ -425,8 +425,8 @@ public abstract class HadoopStepStats extends FlowStepStats
       // cleanup/setup tasks have no useful info so far.
 //      addTaskStats( newStats, HadoopTaskStats.Kind.SETUP, jobClient.getSetupTaskReports( runningJob.getID() ), false );
 //      addTaskStats( newStats, HadoopTaskStats.Kind.CLEANUP, jobClient.getCleanupTaskReports( runningJob.getID() ), false );
-      addTaskStats( newStats, HadoopTaskStats.Kind.MAPPER, jobClient.getMapTaskReports( runningJob.getID() ), false );
-      addTaskStats( newStats, HadoopTaskStats.Kind.REDUCER, jobClient.getReduceTaskReports( runningJob.getID() ), false );
+      addTaskStats( newStats, HadoopSliceStats.Kind.MAPPER, jobClient.getMapTaskReports( runningJob.getID() ), false );
+      addTaskStats( newStats, HadoopSliceStats.Kind.REDUCER, jobClient.getReduceTaskReports( runningJob.getID() ), false );
 
       int count = 0;
 
@@ -449,7 +449,7 @@ public abstract class HadoopStepStats extends FlowStepStats
       }
     }
 
-  private void addTaskStats( Map<String, HadoopTaskStats> taskStats, HadoopTaskStats.Kind kind, TaskReport[] taskReports, boolean skipLast )
+  private void addTaskStats( Map<String, HadoopSliceStats> taskStats, HadoopSliceStats.Kind kind, TaskReport[] taskReports, boolean skipLast )
     {
     for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
       {
@@ -462,13 +462,18 @@ public abstract class HadoopStepStats extends FlowStepStats
         }
 
       String id = getIDFor( taskReport.getTaskID() );
-      taskStats.put( id, new HadoopTaskStats( id, getStatus(), kind, taskReport ) );
+      taskStats.put( id, new HadoopSliceStats( id, getStatus(), kind, stepHasReducers(), taskReport ) );
 
       incrementKind( kind );
       }
     }
 
-  private void incrementKind( HadoopTaskStats.Kind kind )
+  private boolean stepHasReducers()
+    {
+    return !getFlowStep().getGroups().isEmpty();
+    }
+
+  private void incrementKind( HadoopSliceStats.Kind kind )
     {
     switch( kind )
       {
@@ -485,7 +490,7 @@ public abstract class HadoopStepStats extends FlowStepStats
       }
     }
 
-  private void addAttemptsToTaskStats( Map<String, HadoopTaskStats> taskStats, TaskCompletionEvent[] events )
+  private void addAttemptsToTaskStats( Map<String, HadoopSliceStats> taskStats, TaskCompletionEvent[] events )
     {
     for( TaskCompletionEvent event : events )
       {
@@ -496,7 +501,7 @@ public abstract class HadoopStepStats extends FlowStepStats
         }
 
       // this will return a housekeeping task, which we are not tracking
-      HadoopTaskStats stats = taskStats.get( getIDFor( event.getTaskAttemptId().getTaskID() ) );
+      HadoopSliceStats stats = taskStats.get( getIDFor( event.getTaskAttemptId().getTaskID() ) );
 
       if( stats != null )
         stats.addAttempt( event );

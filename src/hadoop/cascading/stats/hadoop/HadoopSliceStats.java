@@ -31,7 +31,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import static cascading.stats.CascadingStats.Status.*;
 
 /** Class HadoopTaskStats tracks individual task stats. */
-public class HadoopTaskStats
+public class HadoopSliceStats
   {
   private final CascadingStats.Status parentStatus;
 
@@ -97,16 +97,18 @@ public class HadoopTaskStats
 
   private String id;
   private Kind kind;
+  private final boolean parentStepHasReducers;
   private TaskReport taskReport;
   private Map<String, Map<String, Long>> counters;
 
   private Map<Integer, HadoopAttempt> attempts = new HashMap<Integer, HadoopAttempt>();
 
-  HadoopTaskStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport )
+  HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, boolean parentStepHasReducers, TaskReport taskReport )
     {
     this.parentStatus = parentStatus;
     this.id = id;
     this.kind = kind;
+    this.parentStepHasReducers = parentStepHasReducers;
     this.taskReport = taskReport;
     }
 
@@ -138,6 +140,11 @@ public class HadoopTaskStats
   public String getJobID()
     {
     return taskReport.getTaskID().getJobID().toString();
+    }
+
+  public boolean parentStepHasReducers()
+    {
+    return parentStepHasReducers;
     }
 
   public float getProgress()

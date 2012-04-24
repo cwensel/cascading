@@ -27,7 +27,7 @@ import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
-import cascading.flow.StepCounters;
+import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -105,7 +105,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     if( !calledPrepare )
       {
-      currentProcess.increment( StepCounters.Process_Begin_Time, System.currentTimeMillis() );
+      currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
 
       streamGraph.prepare();
 
@@ -144,7 +144,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     finally
       {
       if( currentProcess != null )
-        currentProcess.increment( StepCounters.Process_End_Time, System.currentTimeMillis() );
+        currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
       }
     }
 
@@ -176,7 +176,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     @Override
     public Object next()
       {
-      flowProcess.increment( MapReduceCounters.Reduce_Tuples_Read, 1 );
+      flowProcess.increment( SliceCounters.Tuples_Read, 1 );
 
       return iterator.next();
       }

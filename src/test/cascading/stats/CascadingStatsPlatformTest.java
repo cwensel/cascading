@@ -29,8 +29,8 @@ import cascading.operation.state.Counter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.stats.hadoop.HadoopSliceStats;
 import cascading.stats.hadoop.HadoopStepStats;
-import cascading.stats.hadoop.HadoopTaskStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.test.HadoopPlatform;
@@ -133,10 +133,10 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
         {
         assertEquals( 5, stats1.getTaskStats().size() );
 
-        for( HadoopTaskStats hadoopTaskStats : stats1.getTaskStats().values() )
+        for( HadoopSliceStats hadoopSliceStats : stats1.getTaskStats().values() )
           {
-          if( hadoopTaskStats.getTaskIDNum() == 0 && hadoopTaskStats.getKind() == HadoopTaskStats.Kind.REDUCER )
-            assertTrue( hadoopTaskStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
+          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
+            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
           }
         }
 

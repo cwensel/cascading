@@ -31,6 +31,7 @@ import cascading.pipe.HashJoin;
 import cascading.provider.FactoryLoader;
 import cascading.tuple.Tuple;
 import cascading.tuple.collect.Spillable;
+import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleMapFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleMapFactory;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class HadoopMemoryJoinGate extends MemoryHashJoinGate
 
   public enum Spill
     {
-      Num_Spills_Written, Num_Spills_Read, Num_Tuples_Spilled
+      Num_Spills_Written, Num_Spills_Read, Num_Tuples_Spilled, Duration_Millis_Written
     }
 
   private class SpillListener implements Spillable.SpillListener
@@ -81,6 +82,12 @@ public class HadoopMemoryJoinGate extends MemoryHashJoinGate
 
       flowProcess.increment( Spill.Num_Spills_Written, 1 );
       flowProcess.increment( Spill.Num_Tuples_Spilled, spillSize );
+      }
+
+    @Override
+    public void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration )
+      {
+      flowProcess.increment( Spill.Duration_Millis_Written, duration );
       }
 
     @Override

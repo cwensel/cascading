@@ -289,6 +289,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     if( !spillStrategy.doSpill( this, current.size() ) )
       return false;
 
+    long start = System.currentTimeMillis();
     spillListener.notifyWriteSpillBegin( this, current.size(), spillStrategy.getSpillReason( this ) );
 
     File file = createTempFile();
@@ -303,6 +304,8 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       flushSilent( dataOutputStream );
       closeSilent( dataOutputStream );
       }
+
+    spillListener.notifyWriteSpillEnd( this, System.currentTimeMillis() - start );
 
     files.add( file );
     current.clear();

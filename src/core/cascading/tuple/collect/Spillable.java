@@ -52,9 +52,16 @@ public interface Spillable
     public void notifyReadSpillBegin( Spillable spillable )
       {
       }
+
+    @Override
+    public void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration )
+      {
+      }
     };
 
     void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason );
+
+    void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration );
 
     void notifyReadSpillBegin( Spillable spillable );
     }

@@ -18,9 +18,9 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow;
 
-public enum MapReduceCounters
+public enum SliceCounters
   {
-    Map_Tuples_Read, Map_Tuples_Written, Reduce_Tuples_Read, Reduce_Tuples_Written
+    Tuples_Read, Tuples_Written, Process_Begin_Time, Process_End_Time
   }
