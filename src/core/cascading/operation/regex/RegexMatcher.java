@@ -98,7 +98,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
    */
   protected boolean matchWholeTuple( Matcher matcher, Tuple input )
     {
-    matcher.reset( input.toString( "\t" ) );
+    matcher.reset( input.toString( "\t", false ) );
 
     boolean matchFound = matcher.find();
 

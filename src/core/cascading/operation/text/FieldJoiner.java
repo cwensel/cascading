@@ -94,7 +94,7 @@ public class FieldJoiner extends BaseOperation<Tuple> implements Function<Tuple>
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
     {
-    functionCall.getContext().set( 0, functionCall.getArguments().getTuple().toString( delimiter ) );
+    functionCall.getContext().set( 0, functionCall.getArguments().getTuple().toString( delimiter, false ) );
     functionCall.getOutputCollector().add( functionCall.getContext() );
     }
 

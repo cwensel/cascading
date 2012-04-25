@@ -105,7 +105,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     if( patternString == null )
       return true;
 
-    Matcher matcher = pattern.matcher( input.toString( "\t" ) );
+    Matcher matcher = pattern.matcher( input.toString( "\t", false ) );
 
     LOG.debug( "pattern: {}, matches: {}", pattern, matcher.matches() );
 
