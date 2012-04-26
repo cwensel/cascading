@@ -30,26 +30,21 @@ import cascading.tap.TapException;
 /**
  *
  */
-public class TupleEntrySchemeCollector<Output> extends TupleEntryCollector
+public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollector
   {
-  private final FlowProcess flowProcess;
+  private final FlowProcess<Config> flowProcess;
   private final Scheme scheme;
   private String identifier;
 
-  protected final ConcreteCall sinkCall;
+  protected final ConcreteCall<Object, Output> sinkCall;
   private boolean prepared = false;
 
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme )
-    {
-    this( flowProcess, scheme, null );
-    }
-
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, Output output )
+  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output )
     {
     this( flowProcess, scheme, output, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess flowProcess, Scheme scheme, Output output, String identifier )
+  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output, String identifier )
     {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
@@ -62,6 +57,11 @@ public class TupleEntrySchemeCollector<Output> extends TupleEntryCollector
     setOutput( output );
     }
 
+  protected FlowProcess<Config> getFlowProcess()
+    {
+    return flowProcess;
+    }
+
   @Override
   public void setFields( Fields declared )
     {
@@ -71,11 +71,22 @@ public class TupleEntrySchemeCollector<Output> extends TupleEntryCollector
       this.sinkCall.setOutgoingEntry( this.tupleEntry );
     }
 
-  protected void setOutput( Output output )
+  protected Output getOutput()
     {
-    sinkCall.setOutput( output );
+    return sinkCall.getOutput();
     }
 
+  protected void setOutput( Output output )
+    {
+    sinkCall.setOutput( wrapOutput( output ) );
+    }
+
+  protected Output wrapOutput( Output output )
+    {
+    return output;
+    }
+
+  /** Need to defer preparing the scheme till after the fields have been resolved */
   protected void prepare()
     {
     try

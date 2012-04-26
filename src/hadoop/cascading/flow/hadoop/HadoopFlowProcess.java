@@ -189,14 +189,6 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     return reporter;
     }
 
-  private final Reporter getReporterOrFail()
-    {
-    if( reporter == null )
-      throw new IllegalStateException( "unable to access the hadoop reporter, it is not available until the first map/reduce invocation" );
-
-    return reporter;
-    }
-
   public void setOutputCollector( OutputCollector outputCollector )
     {
     this.outputCollector = outputCollector;
@@ -245,25 +237,25 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   @Override
   public void keepAlive()
     {
-    getReporterOrFail().progress();
+    getReporter().progress();
     }
 
   @Override
   public void increment( Enum counter, long amount )
     {
-    getReporterOrFail().incrCounter( counter, amount );
+    getReporter().incrCounter( counter, amount );
     }
 
   @Override
   public void increment( String group, String counter, long amount )
     {
-    getReporterOrFail().incrCounter( group, counter, amount );
+    getReporter().incrCounter( group, counter, amount );
     }
 
   @Override
   public void setStatus( String status )
     {
-    getReporterOrFail().setStatus( status );
+    getReporter().setStatus( status );
     }
 
   @Override

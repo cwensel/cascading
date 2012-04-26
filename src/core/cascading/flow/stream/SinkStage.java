@@ -56,6 +56,7 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     {
     try
       {
+      // todo: pass the resolved fields down
       collector = sink.openForWrite( flowProcess, getOutput() );
 
       if( sink.getSinkFields().isAll() )

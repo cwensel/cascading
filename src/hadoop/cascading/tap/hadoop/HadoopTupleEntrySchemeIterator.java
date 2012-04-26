@@ -23,7 +23,10 @@ package cascading.tap.hadoop;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.scheme.Scheme;
+import cascading.tap.Tap;
+import cascading.tap.hadoop.util.TimedRecordReader;
 import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.CloseableIterator;
 import org.apache.hadoop.mapred.JobConf;
@@ -32,20 +35,33 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  *
  */
-public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator
+public class HadoopTupleEntrySchemeIterator<SourceContext> extends TupleEntrySchemeIterator<FlowProcess<JobConf>, JobConf, SourceContext, RecordReader>
   {
-  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Scheme scheme, RecordReader recordReader )
+  private TimedRecordReader timedRecordReader;
+
+  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap, RecordReader recordReader )
     {
-    this( flowProcess, scheme, new RecordReaderIterator( recordReader ) );
+    this( flowProcess, parentTap.getScheme(), new RecordReaderIterator( recordReader ) );
     }
 
-  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Scheme scheme, Hfs parentTap ) throws IOException
+  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap ) throws IOException
     {
-    this( flowProcess, scheme, new MultiRecordReaderIterator( flowProcess, parentTap ) );
+    this( flowProcess, parentTap.getScheme(), new MultiRecordReaderIterator( flowProcess, parentTap ) );
     }
 
   public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
     {
     super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( "cascading.source.path" ) );
+    }
+
+  @Override
+  protected RecordReader wrapInput( RecordReader recordReader )
+    {
+    if( timedRecordReader == null )
+      timedRecordReader = new TimedRecordReader( getFlowProcess(), SliceCounters.Read_Duration );
+
+    timedRecordReader.setRecordReader( recordReader );
+
+    return timedRecordReader;
     }
   }

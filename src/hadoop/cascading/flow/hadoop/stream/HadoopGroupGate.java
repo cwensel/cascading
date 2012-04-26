@@ -23,12 +23,14 @@ package cascading.flow.hadoop.stream;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
+import cascading.tap.hadoop.util.TimedOutputCollector;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -57,7 +59,7 @@ public abstract class HadoopGroupGate extends SpliceGate
   @Override
   public void prepare()
     {
-    collector = ( (HadoopFlowProcess) flowProcess ).getOutputCollector();
+    collector = new TimedOutputCollector( flowProcess, SliceCounters.Write_Duration, ( (HadoopFlowProcess) flowProcess ).getOutputCollector() );
     }
 
   @Override

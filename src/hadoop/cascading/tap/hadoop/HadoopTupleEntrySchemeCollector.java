@@ -20,51 +20,26 @@
 
 package cascading.tap.hadoop;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.tap.Tap;
-import cascading.tap.TapException;
-import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tap.hadoop.util.TimedOutputCollector;
 import cascading.tuple.TupleEntrySchemeCollector;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.RecordWriter;
-import org.apache.hadoop.mapred.Reporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector implements OutputCollector
+public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<JobConf, OutputCollector>
   {
-  /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopTupleEntrySchemeCollector.class );
 
-  /** Field conf */
-  private final JobConf conf;
-  /** Field writer */
-  private RecordWriter writer;
-  /** Field filenamePattern */
-  private String filenamePattern = "%s%spart-%05d";
-  /** Field filename */
-  private String filename;
-  /** Field flowProcess */
-  private final FlowProcess<JobConf> flowProcess;
-  /** Field tap */
-  private final Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap;
-  /** Field prefix */
-  private final String prefix;
-  /** Field isFileOutputFormat */
-  private boolean isFileOutputFormat;
-  /** Field reporter */
-  private final Reporter reporter = Reporter.NULL;
+  private TimedOutputCollector timedOutputCollector;
 
   /**
    * Constructor TapCollector creates a new TapCollector instance.
@@ -72,9 +47,9 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector i
    * @param flowProcess
    * @param tap         of type Tap  @throws IOException when fails to initialize
    */
-  HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
-    this( flowProcess, tap, null );
+    this( flowProcess, tap, (String) null );
     }
 
   /**
@@ -85,57 +60,25 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector i
    * @param prefix      of type String
    * @throws IOException when fails to initialize
    */
-  HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
-    super( flowProcess, tap.getScheme() );
-    this.flowProcess = flowProcess;
+    super( flowProcess, tap.getScheme(), new TapOutputCollector( flowProcess, tap, prefix ), tap.getIdentifier() );
+    }
 
-    this.tap = tap;
-    this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
-    this.conf = flowProcess.getConfigCopy();
-    this.filenamePattern = conf.get( "cascading.tapcollector.partname", this.filenamePattern );
-
-    this.setOutput( this );
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector )
+    {
+    super( flowProcess, tap.getScheme(), outputCollector, tap.getIdentifier() );
     }
 
   @Override
-  protected void prepare()
+  protected OutputCollector wrapOutput( OutputCollector outputCollector )
     {
-    try
-      {
-      initialize();
-      }
-    catch( IOException exception )
-      {
-      throw new TapException( "unable to initialize collector", exception );
-      }
+    if( timedOutputCollector == null )
+      timedOutputCollector = new TimedOutputCollector( getFlowProcess(), SliceCounters.Write_Duration );
 
-    super.prepare();
-    }
+    timedOutputCollector.setOutputCollector( outputCollector );
 
-  private void initialize() throws IOException
-    {
-    tap.sinkConfInit( flowProcess, conf );
-
-    OutputFormat outputFormat = conf.getOutputFormat();
-
-    isFileOutputFormat = outputFormat instanceof FileOutputFormat;
-
-    if( isFileOutputFormat )
-      {
-      Hadoop18TapUtil.setupJob( conf );
-
-      if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
-      else
-        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
-
-      Hadoop18TapUtil.setupTask( conf );
-      }
-
-    writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
-
-    sinkCall.setOutput( this );
+    return timedOutputCollector;
     }
 
   @Override
@@ -143,47 +86,16 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector i
     {
     try
       {
-      if( isFileOutputFormat )
-        LOG.info( "closing tap collector for: {}", new Path( tap.getIdentifier(), filename ) );
-      else
-        LOG.info( "closing tap collector for: {}", tap );
-
-      try
-        {
-        writer.close( reporter );
-        }
-      finally
-        {
-        if( isFileOutputFormat )
-          {
-          if( Hadoop18TapUtil.needsTaskCommit( conf ) )
-            Hadoop18TapUtil.commitTask( conf );
-
-          Hadoop18TapUtil.cleanupJob( conf );
-          }
-        }
+      if( getOutput() instanceof Closeable )
+        ( (Closeable) getOutput() ).close();
       }
     catch( IOException exception )
       {
-      LOG.warn( "exception closing: {}", filename, exception );
-      throw new TapException( "exception closing: " + filename, exception );
+      // do nothing
       }
     finally
       {
       super.close();
       }
-    }
-
-  /**
-   * Method collect writes the given values to the {@link Tap} this instance encapsulates.
-   *
-   * @param writableComparable of type WritableComparable
-   * @param writable           of type Writable
-   * @throws IOException when
-   */
-  public void collect( Object writableComparable, Object writable ) throws IOException
-    {
-    flowProcess.keepAlive();
-    writer.write( writableComparable, writable );
     }
   }

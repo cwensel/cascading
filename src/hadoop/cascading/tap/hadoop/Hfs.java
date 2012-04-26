@@ -35,7 +35,6 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileStatus;
@@ -406,11 +405,11 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
     // if custom jobConf properties need to be passed down, use the HadoopFlowProcess copy constructor
     //
     if( input == null )
-      return new HadoopTupleEntrySchemeIterator( flowProcess, getScheme(), this );
+      return new HadoopTupleEntrySchemeIterator( flowProcess, this );
 
     // this is only called cluster task side when Hadoop is providing a RecordReader instance it owns
     // during processing of an InputSplit
-    return new HadoopTupleEntrySchemeIterator( flowProcess, getScheme(), input );
+    return new HadoopTupleEntrySchemeIterator( flowProcess, this, input );
     }
 
   @Override
@@ -422,7 +421,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
       return new HadoopTupleEntrySchemeCollector( flowProcess, this );
 
     // this is only called cluster task side when Hadoop is providing an OutputCollector instance it owns
-    return new TupleEntrySchemeCollector<OutputCollector>( flowProcess, getScheme(), output );
+    return new HadoopTupleEntrySchemeCollector( flowProcess, this, output );
     }
 
   @Override

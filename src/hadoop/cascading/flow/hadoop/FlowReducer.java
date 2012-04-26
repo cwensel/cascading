@@ -25,12 +25,12 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowException;
-import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.hadoop.util.TimedIterator;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;
@@ -52,7 +52,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
   private HadoopReduceStreamGraph streamGraph;
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
-  private IteratorWrapper countingIterator;
+  private TimedIterator timedIterator;
 
   private boolean calledPrepare = false;
   private HadoopGroupGate group;
@@ -71,7 +71,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       HadoopUtil.initLog4j( jobConf );
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, false );
 
-      countingIterator = new IteratorWrapper( currentProcess );
+      timedIterator = new TimedIterator( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
 
       HadoopFlowStep step = (HadoopFlowStep) HadoopUtil.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
 
@@ -101,7 +101,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
     {
     currentProcess.setReporter( reporter );
     currentProcess.setOutputCollector( output );
-    countingIterator.reset( values ); // allows us to count read tuples
+
+    timedIterator.reset( values ); // allows us to count read tuples
 
     if( !calledPrepare )
       {
@@ -116,7 +117,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     try
       {
-      group.run( (Tuple) key, countingIterator );
+      group.run( (Tuple) key, timedIterator );
       }
     catch( Throwable throwable )
       {
@@ -145,46 +146,6 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       if( currentProcess != null )
         currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
-      }
-    }
-
-  /**
-   *
-   */
-  static class IteratorWrapper implements Iterator
-    {
-    private final FlowProcess flowProcess;
-
-    Iterator iterator;
-
-    public IteratorWrapper( FlowProcess flowProcess )
-      {
-      this.flowProcess = flowProcess;
-      }
-
-    public void reset( Iterator iterator )
-      {
-      this.iterator = iterator;
-      }
-
-    @Override
-    public boolean hasNext()
-      {
-      return iterator.hasNext();
-      }
-
-    @Override
-    public Object next()
-      {
-      flowProcess.increment( SliceCounters.Tuples_Read, 1 );
-
-      return iterator.next();
-      }
-
-    @Override
-    public void remove()
-      {
-      iterator.remove();
       }
     }
   }
