@@ -507,7 +507,7 @@ public class AggregateBy extends SubAssembly
 
   /**
    * Method getGroupBy returns the internal {@link GroupBy} instance so that any custom properties
-   * can be set on it via {@link cascading.pipe.Pipe#getProcessConfigDef()}.
+   * can be set on it via {@link cascading.pipe.Pipe#getStepConfigDef()}.
    *
    * @return GroupBy type
    */

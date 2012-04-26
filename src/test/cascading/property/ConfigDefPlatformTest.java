@@ -120,13 +120,13 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "default", "pipe-default" );
 
     // steps on above value
-    pipe.getProcessConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
 
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "replace", "pipe-default" );
     pipe.getConfigDef().setProperty( Mode.REPLACE, "replace", "pipe-replace" );
 
-    pipe.getProcessConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
-    pipe.getProcessConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
+    pipe.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "configdef" ), SinkMode.REPLACE );
 
@@ -307,13 +307,13 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     source.getConfigDef().setProperty( Mode.DEFAULT, "default", "source-default" );
 
     // steps on above value
-    source.getProcessConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
+    source.getStepConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
 
     source.getConfigDef().setProperty( Mode.DEFAULT, "replace", "source-default" );
     source.getConfigDef().setProperty( Mode.REPLACE, "replace", "source-replace" );
 
-    source.getProcessConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
-    source.getProcessConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+    source.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
+    source.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -353,13 +353,13 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     sink.getConfigDef().setProperty( Mode.DEFAULT, "default", "sink-default" );
 
     // steps on above value
-    sink.getProcessConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
+    sink.getStepConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
 
     sink.getConfigDef().setProperty( Mode.DEFAULT, "replace", "sink-default" );
     sink.getConfigDef().setProperty( Mode.REPLACE, "replace", "sink-replace" );
 
-    sink.getProcessConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
-    sink.getProcessConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+    sink.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
+    sink.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 

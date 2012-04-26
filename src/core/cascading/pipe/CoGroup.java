@@ -84,7 +84,7 @@ import cascading.tuple.Fields;
  * Spills are intended to prevent {@link OutOfMemoryError}'s, so reducing the number of spills is important by
  * increasing the threshold, but memory errors aren't recoverable, so the correct balance will need to be found.
  * <p/>
- * To customize the spill values for a given CoGroup only, see {@link #getProcessConfigDef()}.
+ * To customize the spill values for a given CoGroup only, see {@link #getStepConfigDef()}.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin

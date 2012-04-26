@@ -60,7 +60,7 @@ public interface FlowElement extends Serializable
 
   boolean isEquivalentTo( FlowElement element );
 
-  ConfigDef getProcessConfigDef();
+  ConfigDef getStepConfigDef();
 
   boolean hasProcessConfigDef();
 

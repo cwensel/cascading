@@ -545,9 +545,9 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
    * <p/>
-   * Any properties set on the processConfigDef will not show up in any Flow configuration, but will show up in
+   * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
-   * processConfigDef will be overridden by the tap local {@code #getConfigDef} instance.
+   * stepConfigDef will be overridden by the tap local {@code #getConfigDef} instance.
    * </p>
    * Use this method to tweak properties in the process step this tap instance is planned into.
    * <p/>
@@ -557,7 +557,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @return an instance of ConfigDef
    */
   @Override
-  public ConfigDef getProcessConfigDef()
+  public ConfigDef getStepConfigDef()
     {
     if( processConfigDef == null )
       processConfigDef = new ConfigDef();

@@ -66,7 +66,7 @@ public class Pipe implements FlowElement, Serializable
 
   protected ConfigDef configDef;
 
-  protected ConfigDef processConfigDef;
+  protected ConfigDef stepConfigDef;
 
   /** Field trace */
   private final String trace = Util.captureDebugTrace( getClass() );
@@ -255,9 +255,9 @@ public class Pipe implements FlowElement, Serializable
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
    * <p/>
-   * Any properties set on the processConfigDef will not show up in any Flow configuration, but will show up in
+   * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
-   * processConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
+   * stepConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
    * </p>
    * Use this method to tweak properties in the process step this pipe instance is planned into. In the case of the
    * Hadoop platform, when set on a {@link GroupBy} instance, the number of reducers can be modified.
@@ -265,12 +265,12 @@ public class Pipe implements FlowElement, Serializable
    * @return an instance of ConfigDef
    */
   @Override
-  public ConfigDef getProcessConfigDef()
+  public ConfigDef getStepConfigDef()
     {
-    if( processConfigDef == null )
-      processConfigDef = new ConfigDef();
+    if( stepConfigDef == null )
+      stepConfigDef = new ConfigDef();
 
-    return processConfigDef;
+    return stepConfigDef;
     }
 
   /**
@@ -281,7 +281,7 @@ public class Pipe implements FlowElement, Serializable
   @Override
   public boolean hasProcessConfigDef()
     {
-    return processConfigDef != null && !processConfigDef.isEmpty();
+    return stepConfigDef != null && !stepConfigDef.isEmpty();
     }
 
   /**
