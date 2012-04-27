@@ -26,6 +26,7 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
@@ -42,6 +43,9 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
+import static cascading.flow.hadoop.util.HadoopUtil.readStateFromDistCache;
 
 /** Class FlowReducer is the Hadoop Reducer implementation. */
 public class FlowReducer extends MapReduceBase implements Reducer
@@ -73,7 +77,12 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
       timedIterator = new TimedIterator( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
 
-      HadoopFlowStep step = (HadoopFlowStep) HadoopUtil.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
+      String stepState = jobConf.getRaw( "cascading.flow.step" );
+
+      if( stepState == null )
+        stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
+
+      HadoopFlowStep step = (HadoopFlowStep) deserializeBase64( stepState );
 
       streamGraph = new HadoopReduceStreamGraph( currentProcess, step );
 

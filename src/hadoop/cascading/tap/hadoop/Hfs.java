@@ -601,7 +601,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
     return date;
     }
 
-  protected Path getTempPath( JobConf conf )
+  public static Path getTempPath( JobConf conf )
     {
     String tempDir = conf.get( TEMPORARY_DIRECTORY );
 

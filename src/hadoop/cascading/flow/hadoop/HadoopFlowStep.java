@@ -58,6 +58,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 
+import static cascading.flow.hadoop.util.HadoopUtil.*;
+
 /**
  *
  */
@@ -156,7 +158,15 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     // perform last so init above will pass to tasks
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
-    conf.set( "cascading.flow.step", pack( this ) );
+
+    String stepState = pack( this );
+
+    // hadoop 20.2 doesn't like dist cache when using local mode
+    int maxSize = Short.MAX_VALUE;
+    if( "local".equals( conf.get( "mapred.job.tracker" ) ) || stepState.length() < maxSize ) // seems safe
+      conf.set( "cascading.flow.step", stepState );
+    else
+      conf.set( "cascading.flow.step.path", writeStateToDistCache( conf, getID(), stepState ) );
 
     return conf;
     }
@@ -166,9 +176,9 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     try
       {
       if( object instanceof Map )
-        return HadoopUtil.serializeMapBase64( (Map<String, String>) object, true );
+        return serializeMapBase64( (Map<String, String>) object, true );
 
-      return HadoopUtil.serializeBase64( object );
+      return serializeBase64( object );
       }
     catch( IOException exception )
       {
@@ -192,6 +202,20 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
    */
   public void clean( JobConf config )
     {
+    String stepStatePath = config.get( "cascading.flow.step.path" );
+
+    if( stepStatePath != null )
+      {
+      try
+        {
+        HadoopUtil.removeStateFromDistCache( config, stepStatePath );
+        }
+      catch( IOException exception )
+        {
+        logWarn( "unable to remove step state file: " + stepStatePath, exception );
+        }
+      }
+
     if( tempSink != null )
       {
       try

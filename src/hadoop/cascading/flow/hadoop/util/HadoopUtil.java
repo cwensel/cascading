@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,9 +39,20 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import cascading.flow.FlowException;
+import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.scheme.hadoop.TextLine;
+import cascading.tap.SinkMode;
+import cascading.tap.hadoop.Hfs;
+import cascading.tap.hadoop.Lfs;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -454,5 +466,82 @@ public class HadoopUtil
       properties.remove( key );
 
     return createJobConf( properties, null );
+    }
+
+  public static boolean removeStateFromDistCache( JobConf conf, String path ) throws IOException
+    {
+    return new Hfs( new TextLine(), path ).deleteResource( conf );
+    }
+
+  public static String writeStateToDistCache( JobConf conf, String id, String stepState )
+    {
+    LOG.info( "writing step state to dist cache, too large for job conf, size: {}", stepState.length() );
+
+    String statePath = Hfs.getTempPath( conf ) + "/step-state-" + id;
+
+    Hfs temp = new Hfs( new TextLine(), statePath, SinkMode.REPLACE );
+
+    try
+      {
+      TupleEntryCollector writer = temp.openForWrite( new HadoopFlowProcess( conf ) );
+
+      writer.add( new Tuple( stepState ) );
+
+      writer.close();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to write step state to Hadoop FS: " + temp.getIdentifier() );
+      }
+
+    URI uri = new Path( statePath ).toUri();
+    DistributedCache.addCacheFile( uri, conf );
+
+    LOG.info( "using step state path: {}", uri );
+
+    return statePath;
+    }
+
+  public static String readStateFromDistCache( JobConf jobConf, String id ) throws IOException
+    {
+    Path[] files = DistributedCache.getLocalCacheFiles( jobConf );
+
+    Path stepStatePath = null;
+
+    for( Path file : files )
+      {
+      if( !file.toString().contains( "step-state-" + id ) )
+        continue;
+
+      stepStatePath = file;
+      break;
+      }
+
+    if( stepStatePath == null )
+      throw new FlowException( "unable to find step state from distributed cache" );
+
+    LOG.info( "reading step state from local path: {}", stepStatePath );
+
+    Hfs temp = new Lfs( new TextLine( new Fields( "line" ) ), stepStatePath.toString() );
+
+    TupleEntryIterator reader = null;
+
+    try
+      {
+      reader = temp.openForRead( new HadoopFlowProcess( jobConf ) );
+
+      if( !reader.hasNext() )
+        throw new FlowException( "step state path is empty: " + temp.getIdentifier() );
+
+      return reader.next().getString( 0 );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to find state path: " + temp.getIdentifier(), exception );
+      }
+    finally
+      {
+      reader.close();
+      }
     }
   }

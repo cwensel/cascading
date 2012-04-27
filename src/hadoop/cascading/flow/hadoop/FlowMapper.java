@@ -26,6 +26,7 @@ import java.util.Iterator;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
+import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.stream.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -40,6 +41,9 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
+import static cascading.flow.hadoop.util.HadoopUtil.readStateFromDistCache;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
 public class FlowMapper implements MapRunnable
@@ -65,7 +69,12 @@ public class FlowMapper implements MapRunnable
 
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, true );
 
-      HadoopFlowStep step = (HadoopFlowStep) HadoopUtil.deserializeBase64( jobConf.getRaw( "cascading.flow.step" ) );
+      String stepState = jobConf.getRaw( "cascading.flow.step" );
+
+      if( stepState == null )
+        stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
+
+      HadoopFlowStep step = (HadoopFlowStep) deserializeBase64( stepState );
       Tap source = step.getSourceWith( jobConf.get( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, step, source );
