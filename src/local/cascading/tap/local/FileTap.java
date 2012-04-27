@@ -27,12 +27,14 @@ import java.io.IOException;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
-import cascading.scheme.local.LocalScheme;
+import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleEntrySchemeCollector;
+import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.Util;
 
 /**
@@ -51,7 +53,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
    * @param scheme of type LocalScheme
    * @param path   of type String
    */
-  public FileTap( LocalScheme scheme, String path )
+  public FileTap( Scheme scheme, String path )
     {
     this( scheme, path, SinkMode.KEEP );
     }
@@ -64,7 +66,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
    * @param path     of type String
    * @param sinkMode of type SinkMode
    */
-  public FileTap( LocalScheme scheme, String path, SinkMode sinkMode )
+  public FileTap( Scheme scheme, String path, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     this.path = path;
@@ -82,7 +84,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     if( input == null )
       input = new FileInputStream( path );
 
-    return new LocalTupleEntrySchemeIterator( flowProcess, (LocalScheme) getScheme(), input, path );
+    return new TupleEntrySchemeIterator( flowProcess, getScheme(), input, path );
     }
 
   @Override
@@ -103,7 +105,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     if( output == null )
       output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
 
-    return new LocalTupleEntryCollector( flowProcess, (LocalScheme) getScheme(), output, path );
+    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output, path );
     }
 
   /**

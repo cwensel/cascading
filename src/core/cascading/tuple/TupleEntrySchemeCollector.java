@@ -20,6 +20,8 @@
 
 package cascading.tuple;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
@@ -28,7 +30,12 @@ import cascading.scheme.Scheme;
 import cascading.tap.TapException;
 
 /**
- *
+ * Class TupleEntrySchemeCollector is a helper class for wrapping a {@link Scheme} instance, calling
+ * {@link Scheme#sink(cascading.flow.FlowProcess, cascading.scheme.SinkCall)} on every call to {@link #add(TupleEntry)}
+ * or {@link #add(Tuple)}.
+ * <p/>
+ * Use this class inside a custom {@link cascading.tap.Tap} when overriding the
+ * {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess)} method.
  */
 public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollector
   {
@@ -156,6 +163,26 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
       }
     finally
       {
+      try
+        {
+        if( getOutput() instanceof Flushable )
+          ( (Flushable) getOutput() ).flush();
+        }
+      catch( IOException exception )
+        {
+        // do nothing
+        }
+
+      try
+        {
+        if( getOutput() instanceof Closeable )
+          ( (Closeable) getOutput() ).close();
+        }
+      catch( IOException exception )
+        {
+        // do nothing
+        }
+
       super.close();
       }
     }

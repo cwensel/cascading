@@ -697,11 +697,13 @@ public class TextDelimited extends TextLine
     if( writeHeader )
       {
       Fields fields = sinkCall.getOutgoingEntry().getFields();
-      String line = delimitedParser.joinLine( fields, (StringBuilder) sinkCall.getContext()[ 1 ] );
+      StringBuilder line = (StringBuilder) delimitedParser.joinLine( fields, (StringBuilder) sinkCall.getContext()[ 1 ] );
 
       DecoratorTuple decoratorTuple = (DecoratorTuple) sinkCall.getContext()[ 0 ];
 
-      decoratorTuple.set( Tuple.NULL, line );
+      decoratorTuple.set( Tuple.NULL, line.toString() );
+
+      line.setLength( 0 );
 
       sinkCall.getOutput().collect( null, decoratorTuple );
       }
@@ -711,11 +713,13 @@ public class TextDelimited extends TextLine
   public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
-    String line = delimitedParser.joinLine( tuple, (StringBuilder) sinkCall.getContext()[ 1 ] );
+    StringBuilder line = (StringBuilder) delimitedParser.joinLine( tuple, (StringBuilder) sinkCall.getContext()[ 1 ] );
 
     DecoratorTuple decoratorTuple = (DecoratorTuple) sinkCall.getContext()[ 0 ];
 
-    decoratorTuple.set( tuple, line );
+    decoratorTuple.set( tuple, line.toString() );
+
+    line.setLength( 0 );
 
     sinkCall.getOutput().collect( null, decoratorTuple );
     }

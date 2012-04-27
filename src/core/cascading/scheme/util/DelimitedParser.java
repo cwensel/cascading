@@ -303,7 +303,7 @@ public class DelimitedParser implements Serializable
     return split;
     }
 
-  public String joinLine( Iterable iterable, StringBuilder buffer )
+  public Appendable joinLine( Iterable iterable, Appendable buffer )
     {
     try
       {
@@ -312,13 +312,13 @@ public class DelimitedParser implements Serializable
 
       return joinNoQuote( iterable, buffer );
       }
-    finally
+    catch( IOException exception )
       {
-      buffer.setLength( 0 );
+      throw new TapException( "unable to append data", exception );
       }
     }
 
-  private String joinWithQuote( Iterable tuple, StringBuilder buffer )
+  private Appendable joinWithQuote( Iterable tuple, Appendable buffer ) throws IOException
     {
     int count = 0;
 
@@ -343,10 +343,10 @@ public class DelimitedParser implements Serializable
       count++;
       }
 
-    return buffer.toString();
+    return buffer;
     }
 
-  private String joinNoQuote( Iterable tuple, StringBuilder buffer )
+  private Appendable joinNoQuote( Iterable tuple, Appendable buffer ) throws IOException
     {
     int count = 0;
 
@@ -356,12 +356,12 @@ public class DelimitedParser implements Serializable
         buffer.append( delimiter );
 
       if( value != null )
-        buffer.append( value );
+        buffer.append( value.toString() );
 
       count++;
       }
 
-    return buffer.toString();
+    return buffer;
     }
 
   }

@@ -21,17 +21,18 @@
 package cascading.scheme.local;
 
 import java.beans.ConstructorProperties;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.util.DelimitedParser;
@@ -86,7 +87,7 @@ import cascading.tuple.Tuple;
  *
  * @see TextLine
  */
-public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Void, StringBuilder>
+public class TextDelimited extends Scheme<FlowProcess<Properties>, Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
   private final boolean skipHeader;
   private final boolean writeHeader;
@@ -331,8 +332,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
 
-  @Override
-  public LineNumberReader createInput( FileInputStream inputStream )
+  public LineNumberReader createInput( InputStream inputStream )
     {
     try
       {
@@ -344,8 +344,7 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
       }
     }
 
-  @Override
-  public PrintWriter createOutput( FileOutputStream outputStream )
+  public PrintWriter createOutput( OutputStream outputStream )
     {
     try
       {
@@ -381,20 +380,26 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
-    String line = sourceCall.getInput().readLine();
+    sourceCall.setContext( createInput( sourceCall.getInput() ) );
+    }
+
+  @Override
+  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+    {
+    String line = sourceCall.getContext().readLine();
 
     if( line == null )
       return false;
 
-    if( skipHeader && sourceCall.getInput().getLineNumber() == 1 ) // todo: optimize this away
-      line = sourceCall.getInput().readLine();
+    if( skipHeader && sourceCall.getContext().getLineNumber() == 1 ) // todo: optimize this away
+      line = sourceCall.getContext().readLine();
 
     Object[] split = delimitedParser.parseLine( line );
 
@@ -408,37 +413,44 @@ public class TextDelimited extends LocalScheme<LineNumberReader, PrintWriter, Vo
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sourceCleanup( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+    {
+    sourceCall.setContext( null );
+    }
+
+  @Override
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
     {
-    sinkCall.setContext( new StringBuilder( 4 * 1024 ) );
+    sinkCall.setContext( createOutput( sinkCall.getOutput() ) );
 
     if( writeHeader )
       {
       Fields fields = sinkCall.getOutgoingEntry().getFields();
-      String line = delimitedParser.joinLine( fields, sinkCall.getContext() );
+      delimitedParser.joinLine( fields, sinkCall.getContext() );
 
-      sinkCall.getOutput().println( line );
+      sinkCall.getContext().println();
       }
     }
 
   @Override
-  public void sink( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall ) throws IOException
+  public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
 
-    String line = delimitedParser.joinLine( tuple, sinkCall.getContext() );
+    delimitedParser.joinLine( tuple, sinkCall.getContext() );
 
-    sinkCall.getOutput().println( line );
+    sinkCall.getContext().println();
     }
 
   @Override
-  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<StringBuilder, PrintWriter> sinkCall )
+  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
     {
+    sinkCall.getContext().flush();
     sinkCall.setContext( null );
     }
   }

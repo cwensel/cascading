@@ -21,7 +21,9 @@
 package cascading.property;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
@@ -146,7 +148,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+    public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )
@@ -156,7 +158,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+    public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )
@@ -166,7 +168,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> voidLineNumberReaderSourceCall ) throws IOException
+    public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
       {
       if( !( flowProcess instanceof FlowProcessWrapper ) )
         throw new RuntimeException( "not a flow process wrapper" );
@@ -185,11 +187,11 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       if( !"process-replace".equals( flowProcess.getProperty( "replace" ) ) )
         throw new RuntimeException( "not replaced value" );
 
-      super.sourcePrepare( flowProcess, voidLineNumberReaderSourceCall );
+      super.sourcePrepare( flowProcess, sourceCall );
       }
 
     @Override
-    public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<Void, PrintWriter> voidPrintWriterSinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
       {
       if( !( flowProcess instanceof FlowProcessWrapper ) )
         throw new RuntimeException( "not a flow process wrapper" );
@@ -208,7 +210,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       if( !"process-replace".equals( flowProcess.getProperty( "replace" ) ) )
         throw new RuntimeException( "not replaced value" );
 
-      super.sinkPrepare( flowProcess, voidPrintWriterSinkCall );
+      super.sinkPrepare( flowProcess, sinkCall );
       }
     }
 

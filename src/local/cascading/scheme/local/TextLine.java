@@ -20,17 +20,18 @@
 
 package cascading.scheme.local;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
@@ -55,7 +56,7 @@ import cascading.tuple.TupleEntry;
  * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
  * writing out the line.
  */
-public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, Void>
+public class TextLine extends Scheme<FlowProcess<Properties>, Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
   /**
    * Creates a new TextLine instance that sources "num" and "line" fields, and sinks all incoming fields, where
@@ -99,8 +100,7 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
       throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
     }
 
-  @Override
-  public LineNumberReader createInput( FileInputStream inputStream )
+  public LineNumberReader createInput( InputStream inputStream )
     {
     try
       {
@@ -112,8 +112,7 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
       }
     }
 
-  @Override
-  public PrintWriter createOutput( FileOutputStream outputStream )
+  public PrintWriter createOutput( OutputStream outputStream )
     {
     try
       {
@@ -126,21 +125,27 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, LineNumberReader, PrintWriter> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+    {
+    sourceCall.setContext( createInput( sourceCall.getInput() ) );
+    }
+
+  @Override
+  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     // first line is 0, this matches offset being zero, so when throwing out the first line for comments
-    int lineNumber = sourceCall.getInput().getLineNumber();
-    String line = sourceCall.getInput().readLine();
+    int lineNumber = sourceCall.getContext().getLineNumber();
+    String line = sourceCall.getContext().readLine();
 
     if( line == null )
       return false;
@@ -161,8 +166,27 @@ public class TextLine extends LocalScheme<LineNumberReader, PrintWriter, Void, V
     }
 
   @Override
-  public void sink( FlowProcess<Properties> flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
+  public void sourceCleanup( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
-    sinkCall.getOutput().println( sinkCall.getOutgoingEntry().getTuple().toString() );
+    sourceCall.setContext( null );
+    }
+
+  @Override
+  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+    {
+    sinkCall.setContext( createOutput( sinkCall.getOutput() ) );
+    }
+
+  @Override
+  public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+    {
+    sinkCall.getContext().println( sinkCall.getOutgoingEntry().getTuple().toString() );
+    }
+
+  @Override
+  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+    {
+    sinkCall.getContext().flush();
+    sinkCall.setContext( null );
     }
   }

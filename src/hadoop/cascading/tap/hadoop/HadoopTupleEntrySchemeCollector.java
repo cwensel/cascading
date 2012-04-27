@@ -20,7 +20,6 @@
 
 package cascading.tap.hadoop;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
@@ -38,7 +37,6 @@ import org.apache.hadoop.mapred.RecordReader;
  */
 public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<JobConf, OutputCollector>
   {
-
   private TimedOutputCollector timedOutputCollector;
 
   /**
@@ -79,23 +77,5 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<J
     timedOutputCollector.setOutputCollector( outputCollector );
 
     return timedOutputCollector;
-    }
-
-  @Override
-  public void close()
-    {
-    try
-      {
-      if( getOutput() instanceof Closeable )
-        ( (Closeable) getOutput() ).close();
-      }
-    catch( IOException exception )
-      {
-      // do nothing
-      }
-    finally
-      {
-      super.close();
-      }
     }
   }

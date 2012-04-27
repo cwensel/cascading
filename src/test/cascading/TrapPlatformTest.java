@@ -21,7 +21,9 @@
 package cascading;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Properties;
@@ -403,7 +405,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public boolean source( FlowProcess<Properties> flowProcess, SourceCall<Void, LineNumberReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
       {
       if( !sourceFired )
         {
@@ -415,7 +417,7 @@ public class TrapPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sink( FlowProcess<Properties> flowProcess, SinkCall<Void, PrintWriter> sinkCall ) throws IOException
+    public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
       {
       if( !sinkFired )
         {
