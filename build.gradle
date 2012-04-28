@@ -74,7 +74,7 @@ subprojects { subproject ->
       sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
     }
 
-    task repoUpload(dependsOn: jar) {
+    task repoUpload( dependsOn: jar ) {
       repoURL = 'repo@conjars.org:'
       repoPort = '22'
       repoKeyfile = System.properties[ 'repo.keyfile' ]
@@ -103,38 +103,35 @@ subprojects { subproject ->
             }
           }
         }
-      }.writeTo("${buildDir}/poms/${project.name}/pom.xml")
+      }.writeTo( "${buildDir}/poms/${project.name}/pom.xml" )
 
-      ant.taskdef(name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-              classpath: configurations.sshAntTask.asPath)
+      ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
+              classpath: configurations.sshAntTask.asPath )
 
       assert repoKeyfile
 
       // conjars expects to see no directories, just files
-      ant.scp(todir: repoURL,
-              keyfile: repoKeyfile, passphrase: repoKeyfilePassphrase, port: repoPort, trust: 'true') {
+      ant.scp( todir: repoURL,
+              keyfile: repoKeyfile, passphrase: repoKeyfilePassphrase, port: repoPort, trust: 'true' ) {
 
-        fileset(dir: "${buildDir}/poms/${project.name}") {
+        fileset( dir: "${buildDir}/poms/${project.name}" ) {
           name = "pom.xml"
         }
-        fileset(dir: "${buildDir}/libs/") {
+
+        fileset( dir: "${buildDir}/libs/" ) {
           name = "cascading-${project.name}-${releaseVersion}.jar"
         }
 
-        fileset(dir: "${buildDir}/libs/") {
-          name = "cascading-${project.name}-${releaseVersion}.jar"
-        }
-
-        fileset(dir: "${buildDir}/libs/") {
+        fileset( dir: "${buildDir}/libs/" ) {
           name = "cascading-${project.name}-${releaseVersion}-sources.jar"
         }
       }
     }
 
-    task ideLibs(type: Sync) {
+    task ideLibs( type: Sync ) {
       description = 'Copies the dependencies to the lib folder for use in an ide.'
       from {
-        configurations.runtime.files { dep -> !(dep instanceof ProjectDependency) }
+        configurations.runtime.files { dep -> !( dep instanceof ProjectDependency ) }
       }
       into "${rootDir}/lib/${subproject.name}"
     }
@@ -143,9 +140,9 @@ subprojects { subproject ->
   }
 }
 
-task javadocAll(type: Javadoc, dependsOn: ['src:core:assemble', 'src:local:assemble', 'src:hadoop:assemble', 'src:xml:assemble', 'src:test:assemble']) {
+task javadocAll( type: Javadoc, dependsOn: [ 'src:core:assemble', 'src:local:assemble', 'src:hadoop:assemble', 'src:xml:assemble', 'src:test:assemble' ] ) {
 
-  def nonSrcSubprojects = subprojects.findAll { !['src', 'test'].contains(it.name) }
+  def nonSrcSubprojects = subprojects.findAll { ![ 'src', 'test' ].contains( it.name ) }
   source nonSrcSubprojects.collect { it.sourceSets.main.allJava }
 
   source 'src/test/cascading/CascadingTestCase.java'
@@ -158,12 +155,12 @@ task javadocAll(type: Javadoc, dependsOn: ['src:core:assemble', 'src:local:assem
   copyright = '<i>Copyright &#169; 2007-2011 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"
 
-  classpath = files(nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath })
-  classpath = files(childProjects[ 'src' ].childProjects[ 'test' ].sourceSets.main.compileClasspath)
+  classpath = files( nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath } )
+  classpath = files( childProjects[ 'src' ].childProjects[ 'test' ].sourceSets.main.compileClasspath )
 
-  destinationDir = new File(rootDir, 'build/docs/javadoc')
+  destinationDir = new File( rootDir, 'build/docs/javadoc' )
 
-  configure(options) {
+  configure( options ) {
     encoding = "UTF8"
     bottom = copyright
     links = [
@@ -174,8 +171,8 @@ task javadocAll(type: Javadoc, dependsOn: ['src:core:assemble', 'src:local:assem
   }
 }
 
-task buildDist(dependsOn: javadocAll) << {
-  def distDir = mkdir("${rootDir}/build/dist")
+task buildDist( dependsOn: javadocAll ) << {
+  def distDir = mkdir( "${rootDir}/build/dist" )
 
   copy {
     from 'CHANGES.txt'
@@ -191,33 +188,33 @@ task buildDist(dependsOn: javadocAll) << {
   }
 }
 
-task buildPackage(type: Tar, dependsOn: buildDist) {
+task buildPackage( type: Tar, dependsOn: buildDist ) {
   description = "package current build, does not run tests"
 
-  def distDir = mkdir("${rootDir}/build/dist")
+  def distDir = mkdir( "${rootDir}/build/dist" )
 
   destinationDir = buildDir
   baseName = "cascading-${releaseVersion}-${releasePlatformVersion}"
   compression = "GZIP"
 
-  into(baseName) {
+  into( baseName ) {
     from distDir
   }
 }
 
-task prepareRelease(dependsOn: ['src:core:build', 'src:local:build', 'src:hadoop:build', 'src:xml:build', 'src:test:build'])
+task prepareRelease( dependsOn: [ 'src:core:build', 'src:local:build', 'src:hadoop:build', 'src:xml:build', 'src:test:build' ] )
 
 prepareRelease << {
-  logger.info('built all artifacts')
+  logger.info( 'built all artifacts' )
 }
 
-task repoRelease(dependsOn: [prepareRelease, 'src:core:repoUpload', 'src:local:repoUpload', 'src:hadoop:repoUpload', 'src:xml:repoUpload', 'src:test:repoUpload'])
+task repoRelease( dependsOn: [ prepareRelease, 'src:core:repoUpload', 'src:local:repoUpload', 'src:hadoop:repoUpload', 'src:xml:repoUpload', 'src:test:repoUpload' ] )
 
 repoRelease << {
-  logger.info('uploaded all artifacts')
+  logger.info( 'uploaded all artifacts' )
 }
 
-task s3Upload(dependsOn: buildPackage) {
+task s3Upload( dependsOn: buildPackage ) {
 
   awsAccessId = System.properties[ 'publish.aws.accessId' ]
   awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
@@ -230,16 +227,16 @@ task s3Upload(dependsOn: buildPackage) {
 
 s3Upload << {
 
-  ant.taskdef(name: 's3Upload', classname: 'dak.ant.taskdefs.S3Upload',
-          classpath: configurations.s3AntTask.asPath)
+  ant.taskdef( name: 's3Upload', classname: 'dak.ant.taskdefs.S3Upload',
+          classpath: configurations.s3AntTask.asPath )
 
-  ant.s3Upload(verbose: 'true', accessId: awsAccessId, secretKey: awsSecretKey,
-          bucket: s3Bucket, prefix: remotePath, publicRead: 'true') {
-    fileset(file: archive)
+  ant.s3Upload( verbose: 'true', accessId: awsAccessId, secretKey: awsSecretKey,
+          bucket: s3Bucket, prefix: remotePath, publicRead: 'true' ) {
+    fileset( file: archive )
   }
 }
 
-task sitePublish(dependsOn: s3Upload) << {
+task sitePublish( dependsOn: s3Upload ) << {
 
   assert currentCommit
 
@@ -250,15 +247,15 @@ task sitePublish(dependsOn: s3Upload) << {
 
   def releaseTar = buildPackage.archivePath.name
 
-  def currentPath = new File(buildDir, 'cascading-current.txt')
+  def currentPath = new File( buildDir, 'cascading-current.txt' )
 
-  currentPath.write("http://${publishBucket}/cascading/${majorVersion}/${releaseTar} ${currentCommit}")
+  currentPath.write( "http://${publishBucket}/cascading/${majorVersion}/${releaseTar} ${currentCommit}" )
 
-  ant.taskdef(name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-          classpath: configurations.sshAntTask.asPath)
+  ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
+          classpath: configurations.sshAntTask.asPath )
 
   def remoteToFile = "${publishDownloadPath}/cascading/${majorVersion}/${releaseTar}"
 
-  ant.scp(file: currentPath, remoteToFile: remoteToFile,
-          keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true')
+  ant.scp( file: currentPath, remoteToFile: remoteToFile,
+          keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true' )
 }
