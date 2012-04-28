@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
@@ -43,7 +45,7 @@ import cascading.util.Util;
  * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
  * {@link cascading.flow.Flow} instances that run in "local" mode.
  */
-public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputStream, FileOutputStream>
+public class FileTap extends Tap<Properties, InputStream, OutputStream>
   {
   private final String path;
 
@@ -53,7 +55,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
    * @param scheme of type LocalScheme
    * @param path   of type String
    */
-  public FileTap( Scheme scheme, String path )
+  public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String path )
     {
     this( scheme, path, SinkMode.KEEP );
     }
@@ -66,7 +68,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
    * @param path     of type String
    * @param sinkMode of type SinkMode
    */
-  public FileTap( Scheme scheme, String path, SinkMode sinkMode )
+  public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String path, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     this.path = path;
@@ -79,16 +81,16 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, FileInputStream input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, InputStream input ) throws IOException
     {
     if( input == null )
       input = new FileInputStream( path );
 
-    return new TupleEntrySchemeIterator( flowProcess, getScheme(), input, path );
+    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), input, path );
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, FileOutputStream output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, OutputStream output ) throws IOException
     {
     // ignore the output. will catch the failure downstream if any.
     // not ignoring the output causes race conditions with other systems writing to the same directory.
@@ -105,7 +107,7 @@ public class FileTap extends Tap<FlowProcess<Properties>, Properties, FileInputS
     if( output == null )
       output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
 
-    return new TupleEntrySchemeCollector( flowProcess, getScheme(), output, path );
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, path );
     }
 
   /**

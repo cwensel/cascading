@@ -56,10 +56,10 @@ import cascading.util.Util;
  * used for the tap identity? If the name, then two Tap instances with different names but the same path could
  * interfere with one another.
  */
-public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Output> implements FlowElement, Serializable
+public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable
   {
   /** Field scheme */
-  private Scheme scheme;
+  private Scheme<Config, Input, Output, ?, ?> scheme;
 
   /** Field mode */
   SinkMode sinkMode = SinkMode.KEEP;
@@ -86,18 +86,18 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
     {
     }
 
-  protected Tap( Scheme scheme )
+  protected Tap( Scheme<Config, Input, Output, ?, ?> scheme )
     {
     this.setScheme( scheme );
     }
 
-  protected Tap( Scheme scheme, SinkMode sinkMode )
+  protected Tap( Scheme<Config, Input, Output, ?, ?> scheme, SinkMode sinkMode )
     {
     this.setScheme( scheme );
     this.sinkMode = sinkMode;
     }
 
-  protected void setScheme( Scheme scheme )
+  protected void setScheme( Scheme<Config, Input, Output, ?, ?> scheme )
     {
     this.scheme = scheme;
     }
@@ -107,7 +107,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    *
    * @return the scheme (type Scheme) of this Tap object.
    */
-  public Scheme getScheme()
+  public Scheme<Config, Input, Output, ?, ?> getScheme()
     {
     return scheme;
     }
@@ -127,12 +127,12 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
    * <p/>
-   * This method will be called once per Flow, and before {@link #sourceConfInit(Process, Config)} and
-   * {@link #sinkConfInit(Process, Config)} methods.
+   * This method will be called once per Flow, and before {@link #sourceConfInit(FlowProcess, Config)} and
+   * {@link #sinkConfInit(FlowProcess, Config)} methods.
    *
    * @param flow of type Flow
    */
-  public void flowConfInit( Flow flow )
+  public void flowConfInit( Flow<Config> flow )
     {
 
     }
@@ -147,12 +147,12 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param process
-   * @param conf    of type JobConf  @throws IOException on resource initialization failure.
+   * @param flowProcess
+   * @param conf        of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sourceConfInit( Process process, Config conf )
+  public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
-    getScheme().sourceConfInit( process, this, conf );
+    getScheme().sourceConfInit( flowProcess, this, conf );
     }
 
   /**
@@ -167,12 +167,12 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    *
-   * @param process
-   * @param conf    of type JobConf  @throws IOException on resource initialization failure.
+   * @param flowProcess
+   * @param conf        of type JobConf  @throws IOException on resource initialization failure.
    */
-  public void sinkConfInit( Process process, Config conf )
+  public void sinkConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
-    getScheme().sinkConfInit( process, this, conf );
+    getScheme().sinkConfInit( flowProcess, this, conf );
     }
 
   /**
@@ -222,7 +222,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @param input
    * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException;
+  public abstract TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException;
 
   /**
    * Method openForRead opens the resource represented by this Tap instance.
@@ -234,7 +234,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @param flowProcess
    * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
    */
-  public TupleEntryIterator openForRead( Process flowProcess ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess ) throws IOException
     {
     return openForRead( flowProcess, null );
     }
@@ -251,7 +251,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public abstract TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
@@ -260,7 +260,7 @@ public abstract class Tap<Process extends FlowProcess<Config>, Config, Input, Ou
    * @return TupleEntryCollector
    * @throws java.io.IOException when
    */
-  public TupleEntryCollector openForWrite( Process flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess ) throws IOException
     {
     return openForWrite( flowProcess, null );
     }

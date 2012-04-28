@@ -35,6 +35,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
 /**
  * Class WritableSequenceFile is a sub-class of {@link SequenceFile} that reads and writes values of the given
@@ -93,10 +94,8 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
-    super.sinkConfInit( flowProcess, tap, conf );
-
     if( keyType != null )
       conf.setOutputKeyClass( keyType );
     else
@@ -106,6 +105,8 @@ public class WritableSequenceFile extends SequenceFile
       conf.setOutputValueClass( valueType );
     else
       conf.setOutputValueClass( NullWritable.class );
+
+    conf.setOutputFormat( SequenceFileOutputFormat.class );
     }
 
   @Override
@@ -136,21 +137,21 @@ public class WritableSequenceFile extends SequenceFile
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 
-    Object keyValue = NullWritable.get();
-    Object valueValue = NullWritable.get();
+    Writable keyValue = NullWritable.get();
+    Writable valueValue = NullWritable.get();
 
     if( keyType == null )
       {
-      valueValue = tupleEntry.getObject( 0 );
+      valueValue = (Writable) tupleEntry.getObject( 0 );
       }
     else if( valueType == null )
       {
-      keyValue = tupleEntry.getObject( 0 );
+      keyValue = (Writable) tupleEntry.getObject( 0 );
       }
     else
       {
-      keyValue = tupleEntry.getObject( 0 );
-      valueValue = tupleEntry.getObject( 1 );
+      keyValue = (Writable) tupleEntry.getObject( 0 );
+      valueValue = (Writable) tupleEntry.getObject( 1 );
       }
 
     sinkCall.getOutput().collect( keyValue, valueValue );

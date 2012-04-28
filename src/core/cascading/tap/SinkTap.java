@@ -34,20 +34,20 @@ import cascading.tuple.TupleEntryIterator;
  * to being a source). These types may subclass SinkTap for convenience or
  * set {@link #isSource()} to {@code false} in a custom Tap sub-class.
  */
-public abstract class SinkTap<Process extends FlowProcess<Config>, Config, Output> extends Tap<Process, Config, Void, Output>
+public abstract class SinkTap<Config, Output> extends Tap<Config, Void, Output>
   {
   protected SinkTap()
     {
     }
 
-  protected SinkTap( Scheme<Process, Config, Void, Output, ?, ?> scheme )
+  protected SinkTap( Scheme<Config, ?, Output, ?, ?> scheme )
     {
-    super( scheme );
+    super( (Scheme<Config, Void, Output, ?, ?>) scheme );
     }
 
-  protected SinkTap( Scheme<Process, Config, Void, Output, ?, ?> scheme, SinkMode sinkMode )
+  protected SinkTap( Scheme<Config, ?, Output, ?, ?> scheme, SinkMode sinkMode )
     {
-    super( scheme, sinkMode );
+    super( (Scheme<Config, Void, Output, ?, ?>) scheme, sinkMode );
     }
 
   @Override
@@ -63,13 +63,13 @@ public abstract class SinkTap<Process extends FlowProcess<Config>, Config, Outpu
     }
 
   @Override
-  public void sourceConfInit( Process flowProcess, Config conf )
+  public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }
 
   @Override
-  public TupleEntryIterator openForRead( Process flowProcess, Void input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Void input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }

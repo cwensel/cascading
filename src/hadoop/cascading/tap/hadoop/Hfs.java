@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
  */
-public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector>
+public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
@@ -138,7 +138,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
     }
 
   @ConstructorProperties({"scheme"})
-  protected Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme )
+  protected Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
     }
@@ -197,7 +197,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    * @param stringPath of type String
    */
   @ConstructorProperties({"scheme", "stringPath"})
-  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
+  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
     setStringPath( stringPath );
@@ -212,7 +212,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    */
   @Deprecated
   @ConstructorProperties({"scheme", "stringPath", "replace"})
-  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
+  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
@@ -226,7 +226,7 @@ public class Hfs extends Tap<FlowProcess<JobConf>, JobConf, RecordReader, Output
    * @param sinkMode   of type SinkMode
    */
   @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
-  public Hfs( Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
+  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     setStringPath( stringPath );

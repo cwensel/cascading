@@ -163,12 +163,17 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;
-    if( "local".equals( conf.get( "mapred.job.tracker" ) ) || stepState.length() < maxSize ) // seems safe
+    if( isHadoopLocalMode( conf ) || stepState.length() < maxSize ) // seems safe
       conf.set( "cascading.flow.step", stepState );
     else
       conf.set( "cascading.flow.step.path", writeStateToDistCache( conf, getID(), stepState ) );
 
     return conf;
+    }
+
+  public boolean isHadoopLocalMode( JobConf conf )
+    {
+    return "local".equals( conf.get( "mapred.job.tracker" ) );
     }
 
   private String pack( Object object )

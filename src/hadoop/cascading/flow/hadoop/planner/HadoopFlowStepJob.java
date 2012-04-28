@@ -22,6 +22,7 @@ package cascading.flow.hadoop.planner;
 
 import java.io.IOException;
 
+import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.state.ClientState;
@@ -113,7 +114,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   @Override
   protected boolean isRemoteExecution()
     {
-    return true;
+    return !( (HadoopFlowStep) flowStep ).isHadoopLocalMode( getConfig() );
     }
 
   @Override

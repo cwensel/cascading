@@ -46,6 +46,16 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
   protected final ConcreteCall<Object, Output> sinkCall;
   private boolean prepared = false;
 
+  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme )
+    {
+    this( flowProcess, scheme, null, null );
+    }
+
+  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, String identifier )
+    {
+    this( flowProcess, scheme, null, identifier );
+    }
+
   public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output )
     {
     this( flowProcess, scheme, output, null );
@@ -61,7 +71,8 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
     this.sinkCall = new ConcreteCall();
     this.sinkCall.setOutgoingEntry( this.tupleEntry ); // created in super ctor
 
-    setOutput( output );
+    if( output != null )
+      setOutput( output );
     }
 
   protected FlowProcess<Config> getFlowProcess()
@@ -120,7 +131,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
   @Override
   public void add( Tuple tuple )
     {
-    if( !prepared )
+    if( !prepared ) // this is unfortunate
       prepare();
 
     super.add( tuple );
@@ -154,7 +165,8 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
 
       try
         {
-        scheme.sinkCleanup( flowProcess, sinkCall );
+        if( prepared )
+          scheme.sinkCleanup( flowProcess, sinkCall );
         }
       catch( IOException exception )
         {

@@ -37,9 +37,9 @@ import cascading.util.SingleCloseableInputIterator;
  * Use this class inside a custom {@link cascading.tap.Tap} when overriding the
  * {@link cascading.tap.Tap#openForRead(cascading.flow.FlowProcess)} method.
  */
-public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Config, Input> extends TupleEntryIterator
+public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   {
-  private final Process flowProcess;
+  private final FlowProcess<Config> flowProcess;
   private final Scheme scheme;
   private final CloseableIterator<Input> inputIterator;
   private ConcreteCall sourceCall;
@@ -49,22 +49,22 @@ public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Confi
   private boolean hasWaiting = false;
   private TupleException currentException;
 
-  public TupleEntrySchemeIterator( Process flowProcess, Scheme scheme, Input input )
+  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, Input input )
     {
     this( flowProcess, scheme, input, null );
     }
 
-  public TupleEntrySchemeIterator( Process flowProcess, Scheme scheme, Input input, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, Input input, String identifier )
     {
     this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), identifier );
     }
 
-  public TupleEntrySchemeIterator( Process flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
+  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
     {
     this( flowProcess, scheme, inputIterator, null );
     }
 
-  public TupleEntrySchemeIterator( Process flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String identifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
@@ -96,7 +96,7 @@ public class TupleEntrySchemeIterator<Process extends FlowProcess<Config>, Confi
       }
     }
 
-  protected Process getFlowProcess()
+  protected FlowProcess<Config> getFlowProcess()
     {
     return flowProcess;
     }

@@ -148,7 +148,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+    public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )
@@ -158,7 +158,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+    public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )
@@ -223,7 +223,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )
@@ -233,7 +233,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       // we should not see any config def values here
       if( flowProcess.getProperty( "default" ) != null )

@@ -87,7 +87,7 @@ import cascading.tuple.Tuple;
  *
  * @see TextLine
  */
-public class TextDelimited extends Scheme<FlowProcess<Properties>, Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
+public class TextDelimited extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
   private final boolean skipHeader;
   private final boolean writeHeader;
@@ -380,7 +380,7 @@ public class TextDelimited extends Scheme<FlowProcess<Properties>, Properties, I
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
@@ -419,7 +419,7 @@ public class TextDelimited extends Scheme<FlowProcess<Properties>, Properties, I
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 

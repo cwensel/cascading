@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  *
  */
-public class HadoopTupleEntrySchemeIterator<SourceContext> extends TupleEntrySchemeIterator<FlowProcess<JobConf>, JobConf, SourceContext, RecordReader>
+public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<JobConf, RecordReader>
   {
   private TimedRecordReader timedRecordReader;
 

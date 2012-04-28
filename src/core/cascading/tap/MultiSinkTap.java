@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * It is the counterpart to {@link cascading.tap.MultiSourceTap}.
  */
-public class MultiSinkTap<Child extends Tap, Process extends FlowProcess<Config>, Config, Output> extends SinkTap<Process, Config, Output> implements CompositeTap<Child>
+public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Config, Output> implements CompositeTap<Child>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( MultiSinkTap.class );
@@ -61,7 +61,7 @@ public class MultiSinkTap<Child extends Tap, Process extends FlowProcess<Config>
     {
     TupleEntryCollector[] collectors;
 
-    public MultiSinkCollector( Process flowProcess, Tap... taps ) throws IOException
+    public MultiSinkCollector( FlowProcess<Config> flowProcess, Tap... taps ) throws IOException
       {
       super( Fields.asDeclaration( getSinkFields() ) );
 
@@ -146,13 +146,13 @@ public class MultiSinkTap<Child extends Tap, Process extends FlowProcess<Config>
     }
 
   @Override
-  public TupleEntryCollector openForWrite( Process flowProcess, Output output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException
     {
     return new MultiSinkCollector( flowProcess, getTaps() );
     }
 
   @Override
-  public void sinkConfInit( Process process, Config conf )
+  public void sinkConfInit( FlowProcess<Config> process, Config conf )
     {
     childConfigs = new ArrayList<Map<String, String>>();
 

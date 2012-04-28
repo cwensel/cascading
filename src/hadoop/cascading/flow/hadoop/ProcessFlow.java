@@ -254,11 +254,11 @@ public class ProcessFlow<P> extends HadoopFlow
 
   static class NullScheme extends Scheme
     {
-    public void sourceConfInit( FlowProcess process, Tap tap, Object conf )
+    public void sourceConfInit( FlowProcess flowProcess, Tap tap, Object conf )
       {
       }
 
-    public void sinkConfInit( FlowProcess process, Tap tap, Object conf )
+    public void sinkConfInit( FlowProcess flowProcess, Tap tap, Object conf )
       {
       }
 

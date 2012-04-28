@@ -56,7 +56,7 @@ import cascading.tuple.TupleEntry;
  * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
  * writing out the line.
  */
-public class TextLine extends Scheme<FlowProcess<Properties>, Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
+public class TextLine extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
   /**
    * Creates a new TextLine instance that sources "num" and "line" fields, and sinks all incoming fields, where
@@ -125,12 +125,12 @@ public class TextLine extends Scheme<FlowProcess<Properties>, Properties, InputS
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<FlowProcess<Properties>, Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 

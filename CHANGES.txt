@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.t.l.StdIn, StdOut, and StdErr local mode c.t.Tap types.
+
   Changed c.f.h.HadoopFlowStep to save step state to the Hadoop distributed cache if larger than Short.MAX_VALUE.
 
   Fixed issue where a null value was printed as "null" in c.o.r.RegexMatcher, c.o.r.RegexFilter, c.o.a.AssertGroupBase,

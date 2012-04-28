@@ -491,7 +491,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       if( conf.get( "this.is.a.dupe" ) != null )
         throw new IllegalStateException( "has dupe config value" );

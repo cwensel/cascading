@@ -54,7 +54,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
   /** Field filename */
   private String filename;
   /** Field tap */
-  private Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap;
+  private Tap<JobConf, RecordReader, OutputCollector> tap;
   /** Field prefix */
   private String prefix;
   /** Field isFileOutputFormat */
@@ -63,7 +63,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
   private final Reporter reporter = Reporter.NULL;
   private final FlowProcess<JobConf> flowProcess;
 
-  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
     this.tap = tap;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;

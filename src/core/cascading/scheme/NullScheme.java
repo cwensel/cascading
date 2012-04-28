@@ -28,10 +28,10 @@ import cascading.tuple.Fields;
 
 /**
  * Class NullScheme is a {@link Scheme} that neither reads or writes any values.
- *
+ * <p/>
  * It is typically used as a placeholder where a Scheme instance is needed but generally ignored.
  */
-public class NullScheme<Process extends FlowProcess<Config>, Config, Input, Output, SourceContext, SinkContext> extends Scheme<Process, Config, Input, Output, SourceContext, SinkContext>
+public class NullScheme<Config, Input, Output, SourceContext, SinkContext> extends Scheme<Config, Input, Output, SourceContext, SinkContext>
   {
   public NullScheme()
     {
@@ -42,20 +42,24 @@ public class NullScheme<Process extends FlowProcess<Config>, Config, Input, Outp
     super( sourceFields, sinkFields );
     }
 
-  public void sourceConfInit( Process flowProcess, Tap<Process, Config, Input, Output> tap, Config conf )
+  @Override
+  public void sourceConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
     {
     }
 
-  public void sinkConfInit( Process flowProcess, Tap<Process, Config, Input, Output> tap, Config conf )
+  @Override
+  public void sinkConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
     {
     }
 
-  public boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
+  @Override
+  public boolean source( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     return false;
     }
 
-  public void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
+  @Override
+  public void sink( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
 
     }

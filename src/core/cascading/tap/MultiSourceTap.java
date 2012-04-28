@@ -44,7 +44,7 @@ import static java.util.Arrays.copyOf;
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
  */
-public class MultiSourceTap<Child extends Tap, Process extends FlowProcess<Config>, Config, Input> extends SourceTap<Process, Config, Input> implements CompositeTap<Child>
+public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
   private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
   protected Child[] taps;
@@ -77,7 +77,7 @@ public class MultiSourceTap<Child extends Tap, Process extends FlowProcess<Confi
       }
     }
 
-  protected MultiSourceTap( Scheme<Process, Config, Input, Void, ?, ?> scheme )
+  protected MultiSourceTap( Scheme<Config, Input, ?, ?, ?> scheme )
     {
     super( scheme );
     }
@@ -160,7 +160,7 @@ public class MultiSourceTap<Child extends Tap, Process extends FlowProcess<Confi
     }
 
   @Override
-  public void sourceConfInit( Process process, Config conf )
+  public void sourceConfInit( FlowProcess<Config> process, Config conf )
     {
     for( Tap tap : getTaps() )
       tap.sourceConfInit( process, conf );
@@ -195,7 +195,7 @@ public class MultiSourceTap<Child extends Tap, Process extends FlowProcess<Confi
     }
 
   @Override
-  public TupleEntryIterator openForRead( Process flowProcess, Input input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException
     {
     if( input != null )
       return taps[ 0 ].openForRead( flowProcess, input );

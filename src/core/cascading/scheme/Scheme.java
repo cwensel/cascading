@@ -58,7 +58,7 @@ import cascading.util.Util;
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
-public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input, Output, SourceContext, SinkContext> implements Serializable
+public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> implements Serializable
   {
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;
@@ -237,11 +237,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * <p/>
    * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
    *
-   * @param process of type FlowProcess
-   * @param tap     of type Tap
+   * @param flowProcess of type FlowProcess
+   * @param tap         of type Tap
    * @return Fields
    */
-  public Fields retrieveSourceFields( Process process, Tap tap )
+  public Fields retrieveSourceFields( FlowProcess<Config> flowProcess, Tap tap )
     {
     return getSourceFields();
     }
@@ -252,11 +252,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * <p/>
    * This method is called after {@link #retrieveSourceFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
    *
-   * @param process of type FlowProcess
-   * @param tap     of type Tap
-   * @param fields  of type Fields
+   * @param flowProcess of type FlowProcess
+   * @param tap         of type Tap
+   * @param fields      of type Fields
    */
-  public void presentSourceFields( Process process, Tap tap, Fields fields )
+  public void presentSourceFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
     {
 
     }
@@ -269,11 +269,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * <p/>
    * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
    *
-   * @param process of type FlowProcess
-   * @param tap     of type Tap
+   * @param flowProcess of type FlowProcess
+   * @param tap         of type Tap
    * @return Fields
    */
-  public Fields retrieveSinkFields( Process process, Tap tap )
+  public Fields retrieveSinkFields( FlowProcess<Config> flowProcess, Tap tap )
     {
     return getSinkFields();
     }
@@ -284,11 +284,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * <p/>
    * This method is called after {@link #retrieveSinkFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
    *
-   * @param process of type FlowProcess
-   * @param tap     of type Tap
-   * @param fields  of type Fields
+   * @param flowProcess of type FlowProcess
+   * @param tap         of type Tap
+   * @param fields      of type Fields
    */
-  public void presentSinkFields( Process process, Tap tap, Fields fields )
+  public void presentSinkFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
     {
 
     }
@@ -306,11 +306,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * before use. And {@link #sourceCleanup(cascading.flow.FlowProcess, SourceCall)} if resources must be
    * destroyed after use.
    *
-   * @param process
-   * @param tap     of type Tap
-   * @param conf    of type JobConf   @throws IOException on initialization failure
+   * @param flowProcess
+   * @param tap         of type Tap
+   * @param conf        of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sourceConfInit( Process process, Tap<Process, Config, Input, Output> tap, Config conf );
+  public abstract void sourceConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf );
 
   /**
    * Method sinkInit initializes this instance as a sink.
@@ -325,11 +325,11 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * before use. And {@link #sinkCleanup(cascading.flow.FlowProcess, SinkCall)} if resources must be
    * destroyed after use.
    *
-   * @param process
-   * @param tap     of type Tap
-   * @param conf    of type JobConf   @throws IOException on initialization failure
+   * @param flowProcess
+   * @param tap         of type Tap
+   * @param conf        of type JobConf   @throws IOException on initialization failure
    */
-  public abstract void sinkConfInit( Process process, Tap<Process, Config, Input, Output> tap, Config conf );
+  public abstract void sinkConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf );
 
   /**
    * Method sourcePrepare is used to initialize resources needed during each call of
@@ -341,7 +341,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param flowProcess of Process
    * @param sourceCall  of SourceCall<SourceContext, Input>
    */
-  public void sourcePrepare( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     }
 
@@ -363,7 +363,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param sourceCall  of SourceCall
    * @return returns {@code true} when a Tuple was successfully read
    */
-  public abstract boolean source( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
+  public abstract boolean source( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException;
 
   /**
    * Method sourceCleanup is used to destroy resources created by
@@ -372,7 +372,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param flowProcess of Process
    * @param sourceCall  of SourceCall<SourceContext, Input>
    */
-  public void sourceCleanup( Process flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
+  public void sourceCleanup( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     }
 
@@ -386,7 +386,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall<SinkContext, Output>
    */
-  public void sinkPrepare( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
     }
 
@@ -401,7 +401,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall
    */
-  public abstract void sink( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
+  public abstract void sink( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException;
 
   /**
    * Method sinkCleanup is used to destroy resources created by
@@ -410,7 +410,7 @@ public abstract class Scheme<Process extends FlowProcess<Config>, Config, Input,
    * @param flowProcess of Process
    * @param sinkCall    of SinkCall<SinkContext, Output>
    */
-  public void sinkCleanup( Process flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
+  public void sinkCleanup( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
     }
 

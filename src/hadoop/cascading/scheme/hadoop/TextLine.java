@@ -34,6 +34,7 @@ import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -63,7 +64,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * <p/>
  * If any of the input files end with ".zip", an error will be thrown.
  */
-public class TextLine extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object[], Object[]>
+public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]>
   {
   public enum Compress
     {
@@ -238,7 +239,7 @@ public class TextLine extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
       throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( conf ) ) );
@@ -260,7 +261,7 @@ public class TextLine extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
@@ -280,8 +281,8 @@ public class TextLine extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader
     {
     sourceCall.setContext( new Object[ 2 ] );
 
-    sourceCall.getContext()[ 0 ] = sourceCall.getInput().createKey();
-    sourceCall.getContext()[ 1 ] = sourceCall.getInput().createValue();
+    sourceCall.getContext()[ 0 ] = (Writable) sourceCall.getInput().createKey();
+    sourceCall.getContext()[ 1 ] = (Writable) sourceCall.getInput().createValue();
     }
 
   @Override

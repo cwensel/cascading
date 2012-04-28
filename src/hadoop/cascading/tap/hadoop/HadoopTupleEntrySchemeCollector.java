@@ -45,7 +45,7 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<J
    * @param flowProcess
    * @param tap         of type Tap  @throws IOException when fails to initialize
    */
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
     this( flowProcess, tap, (String) null );
     }
@@ -58,18 +58,18 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<J
    * @param prefix      of type String
    * @throws IOException when fails to initialize
    */
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
     super( flowProcess, tap.getScheme(), new TapOutputCollector( flowProcess, tap, prefix ), tap.getIdentifier() );
     }
 
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector )
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector )
     {
     super( flowProcess, tap.getScheme(), outputCollector, tap.getIdentifier() );
     }
 
   @Override
-  protected OutputCollector wrapOutput( OutputCollector outputCollector )
+  protected OutputCollector<?, ?> wrapOutput( OutputCollector outputCollector )
     {
     if( timedOutputCollector == null )
       timedOutputCollector = new TimedOutputCollector( getFlowProcess(), SliceCounters.Write_Duration );

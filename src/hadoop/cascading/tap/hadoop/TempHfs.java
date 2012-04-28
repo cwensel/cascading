@@ -51,16 +51,16 @@ public class TempHfs extends Hfs
   private String temporaryPath;
 
   /** Class NullScheme is a noop scheme used as a placeholder */
-  private static class NullScheme extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object, Object>
+  private static class NullScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object, Object>
     {
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       // do nothing
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
       {
       conf.setOutputKeyClass( Tuple.class );
       conf.setOutputValueClass( Tuple.class );

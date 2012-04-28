@@ -55,7 +55,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * @see cascading.tap.MultiSourceTap
  * @see FileSystem
  */
-public class GlobHfs extends MultiSourceTap<Hfs, FlowProcess<JobConf>, JobConf, RecordReader>
+public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
   {
   /** Field pathPattern */
   private final String pathPattern;
@@ -69,7 +69,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, FlowProcess<JobConf>, JobConf, 
    * @param pathPattern of type String
    */
   @ConstructorProperties({"scheme", "pathPattern"})
-  public GlobHfs( Scheme scheme, String pathPattern )
+  public GlobHfs( Scheme<JobConf, RecordReader, ?, ?, ?> scheme, String pathPattern )
     {
     this( scheme, pathPattern, null );
     }
@@ -82,7 +82,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, FlowProcess<JobConf>, JobConf, 
    * @param pathFilter  of type PathFilter
    */
   @ConstructorProperties({"scheme", "pathPattern", "pathFilter"})
-  public GlobHfs( Scheme scheme, String pathPattern, PathFilter pathFilter )
+  public GlobHfs( Scheme<JobConf, RecordReader, ?, ?, ?> scheme, String pathPattern, PathFilter pathFilter )
     {
     super( scheme );
     this.pathPattern = pathPattern;

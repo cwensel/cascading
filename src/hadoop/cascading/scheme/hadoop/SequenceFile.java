@@ -40,11 +40,8 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
  * A SequenceFile is a type of {@link cascading.scheme.Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
-public class SequenceFile extends Scheme<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector, Object[], Void>
+public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Void>
   {
-  /** Field serialVersionUID */
-  private static final long serialVersionUID = 1L;
-
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
     {
@@ -63,13 +60,13 @@ public class SequenceFile extends Scheme<FlowProcess<JobConf>, JobConf, RecordRe
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setInputFormat( SequenceFileInputFormat.class );
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<FlowProcess<JobConf>, JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
     conf.setOutputValueClass( Tuple.class ); // supports TapCollector
