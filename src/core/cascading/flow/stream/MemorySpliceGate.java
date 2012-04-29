@@ -32,11 +32,11 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProps;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.Tuples;
 import cascading.tuple.util.TupleHasher;
 
 /**
@@ -79,7 +79,7 @@ public abstract class MemorySpliceGate extends SpliceGate
     {
     super.initialize();
 
-    Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( Tuples.DEFAULT_ELEMENT_COMPARATOR ) );
+    Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( FlowProps.DEFAULT_ELEMENT_COMPARATOR ) );
 
     groupComparators = new Comparator[ orderedPrevious.length ];
 

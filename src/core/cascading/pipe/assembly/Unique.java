@@ -44,7 +44,7 @@ import cascading.tuple.Tuple;
  * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link First}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
- * This SubAssembly also uses the {@link FilterPartialDuplicates} {@link cascading.operation.Filter}
+ * This SubAssembly uses the {@link FilterPartialDuplicates} {@link cascading.operation.Filter}
  * to remove as many observed duplicates before the GroupBy operator to reduce IO over the network.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
@@ -151,111 +151,111 @@ public class Unique extends SubAssembly
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param pipe           of type Pipe
-   * @param groupingFields of type Fields
+   * @param pipe         of type Pipe
+   * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"pipe", "groupingFields"})
-  public Unique( Pipe pipe, Fields groupingFields )
+  @ConstructorProperties({"pipe", "uniqueFields"})
+  public Unique( Pipe pipe, Fields uniqueFields )
     {
-    this( null, pipe, groupingFields );
+    this( null, pipe, uniqueFields );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param pipe           of type Pipe
-   * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param pipe         of type Pipe
+   * @param uniqueFields of type Fields
+   * @param threshold    of type int
    */
-  @ConstructorProperties({"pipe", "groupingFields", "threshold"})
-  public Unique( Pipe pipe, Fields groupingFields, int threshold )
+  @ConstructorProperties({"pipe", "uniqueFields", "threshold"})
+  public Unique( Pipe pipe, Fields uniqueFields, int threshold )
     {
-    this( null, pipe, groupingFields, threshold );
+    this( null, pipe, uniqueFields, threshold );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param name           of type String
-   * @param pipe           of type Pipe
-   * @param groupingFields of type Fields
+   * @param name         of type String
+   * @param pipe         of type Pipe
+   * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields"})
-  public Unique( String name, Pipe pipe, Fields groupingFields )
+  @ConstructorProperties({"name", "pipe", "uniqueFields"})
+  public Unique( String name, Pipe pipe, Fields uniqueFields )
     {
-    this( name, pipe, groupingFields, 10000 );
+    this( name, pipe, uniqueFields, 10000 );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param name           of type String
-   * @param pipe           of type Pipe
-   * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param name         of type String
+   * @param pipe         of type Pipe
+   * @param uniqueFields of type Fields
+   * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "threshold"})
-  public Unique( String name, Pipe pipe, Fields groupingFields, int threshold )
+  @ConstructorProperties({"name", "pipe", "uniqueFields", "threshold"})
+  public Unique( String name, Pipe pipe, Fields uniqueFields, int threshold )
     {
-    this( name, Pipe.pipes( pipe ), groupingFields, threshold );
+    this( name, Pipe.pipes( pipe ), uniqueFields, threshold );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param pipes          of type Pipe[]
-   * @param groupingFields of type Fields
+   * @param pipes        of type Pipe[]
+   * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"pipes", "groupingFields"})
-  public Unique( Pipe[] pipes, Fields groupingFields )
+  @ConstructorProperties({"pipes", "uniqueFields"})
+  public Unique( Pipe[] pipes, Fields uniqueFields )
     {
-    this( null, pipes, groupingFields, 10000 );
+    this( null, pipes, uniqueFields, 10000 );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param pipes          of type Pipe[]
-   * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param pipes        of type Pipe[]
+   * @param uniqueFields of type Fields
+   * @param threshold    of type int
    */
-  @ConstructorProperties({"pipes", "groupingFields", "threshold"})
-  public Unique( Pipe[] pipes, Fields groupingFields, int threshold )
+  @ConstructorProperties({"pipes", "uniqueFields", "threshold"})
+  public Unique( Pipe[] pipes, Fields uniqueFields, int threshold )
     {
-    this( null, pipes, groupingFields, threshold );
+    this( null, pipes, uniqueFields, threshold );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param name           of type String
-   * @param pipes          of type Pipe[]
-   * @param groupingFields of type Fields
+   * @param name         of type String
+   * @param pipes        of type Pipe[]
+   * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields"})
-  public Unique( String name, Pipe[] pipes, Fields groupingFields )
+  @ConstructorProperties({"name", "pipes", "uniqueFields"})
+  public Unique( String name, Pipe[] pipes, Fields uniqueFields )
     {
-    this( name, pipes, groupingFields, 10000 );
+    this( name, pipes, uniqueFields, 10000 );
     }
 
   /**
    * Constructor Unique creates a new Unique instance.
    *
-   * @param name           of type String
-   * @param pipes          of type Pipe[]
-   * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param name         of type String
+   * @param pipes        of type Pipe[]
+   * @param uniqueFields of type Fields
+   * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "threshold"})
-  public Unique( String name, Pipe[] pipes, Fields groupingFields, int threshold )
+  @ConstructorProperties({"name", "pipes", "uniqueFields", "threshold"})
+  public Unique( String name, Pipe[] pipes, Fields uniqueFields, int threshold )
     {
     Pipe[] filters = new Pipe[ pipes.length ];
     FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( threshold );
 
     for( int i = 0; i < filters.length; i++ )
-      filters[ i ] = new Each( pipes[ i ], groupingFields, partialDuplicates );
+      filters[ i ] = new Each( pipes[ i ], uniqueFields, partialDuplicates );
 
-    Pipe pipe = new GroupBy( name, filters, groupingFields );
+    Pipe pipe = new GroupBy( name, filters, uniqueFields );
     pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
 
     setTails( pipe );

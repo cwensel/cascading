@@ -20,8 +20,6 @@
 
 package cascading.tuple;
 
-import java.util.Map;
-
 import cascading.operation.OperationException;
 
 /**
@@ -32,27 +30,6 @@ import cascading.operation.OperationException;
  */
 public class Tuples
   {
-  public static final String DEFAULT_ELEMENT_COMPARATOR = "cascading.tuple.element.comparator.default";
-
-  /**
-   * Sets a default {@link java.util.Comparator} to be used if no Comparator can be found for the class via the
-   * {@link cascading.tuple.Comparison} interface.
-   * <p/>
-   * In the case of Hadoop, if the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
-   * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
-   * will be called.
-   * <p/>
-   * In local mode, only the default constructor will be called for the comparator.
-   *
-   * @param properties
-   * @param className
-   */
-  public static void setDefaultTupleElementComparator( Map<Object, Object> properties, String className )
-    {
-    if( className != null )
-      properties.put( DEFAULT_ELEMENT_COMPARATOR, className );
-    }
-
   /**
    * Method asArray copies the elements of the given Tuple instance to the given Object array.
    *

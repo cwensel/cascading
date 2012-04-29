@@ -33,10 +33,10 @@ import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProps;
 import cascading.tuple.Comparison;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
-import cascading.tuple.Tuples;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.hadoop.io.IndexTupleDeserializer;
 import cascading.tuple.hadoop.io.IndexTupleSerializer;
@@ -188,7 +188,7 @@ public class TupleSerialization extends Configured implements Serialization
 
   public static Comparator getDefaultComparator( Configuration jobConf )
     {
-    String typeName = jobConf.get( Tuples.DEFAULT_ELEMENT_COMPARATOR );
+    String typeName = jobConf.get( FlowProps.DEFAULT_ELEMENT_COMPARATOR );
 
     if( typeName == null || typeName.isEmpty() )
       return null;

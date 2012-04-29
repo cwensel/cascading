@@ -35,15 +35,36 @@ import cascading.property.Props;
  */
 public class FlowProps extends Props
   {
+  public static final String DEFAULT_ELEMENT_COMPARATOR = "cascading.flow.tuple.element.comparator";
   public static final String PRESERVE_TEMPORARY_FILES = "cascading.flow.preservetemporaryfiles";
   public static final String JOB_POLLING_INTERVAL = "cascading.flow.job.pollinginterval";
   public static final String MAX_CONCURRENT_STEPS = "cascading.flow.maxconcurrentsteps";
   public static final String STOP_JOBS_ON_EXIT = "cascading.flow.stopjobsonexit"; // create a stop flows on exit for AppConfig
 
+  String defaultTupleElementComparator = null;
   boolean preserveTemporaryFiles = false;
   int jobPollingInterval = 5000;
   int maxConcurrentSteps = 0;
   boolean stopJobsOnExit = true;
+
+  /**
+   * Sets a default {@link java.util.Comparator} to be used if no Comparator can be found for the class via the
+   * {@link cascading.tuple.Comparison} interface.
+   * <p/>
+   * In the case of Hadoop, if the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
+   * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
+   * will be called.
+   * <p/>
+   * In local mode, only the default constructor will be called for the comparator.
+   *
+   * @param properties
+   * @param className
+   */
+  public static void setDefaultTupleElementComparator( Map<Object, Object> properties, String className )
+    {
+    if( className != null )
+      properties.put( DEFAULT_ELEMENT_COMPARATOR, className );
+    }
 
   /**
    * Property preserveTemporaryFiles forces the Flow instance to keep any temporary intermediate data sets. Useful
@@ -100,6 +121,18 @@ public class FlowProps extends Props
     {
     }
 
+  public String getDefaultTupleElementComparator()
+    {
+    return defaultTupleElementComparator;
+    }
+
+  public FlowProps setDefaultTupleElementComparator( String defaultTupleElementComparator )
+    {
+    this.defaultTupleElementComparator = defaultTupleElementComparator;
+
+    return this;
+    }
+
   public boolean isPreserveTemporaryFiles()
     {
     return preserveTemporaryFiles;
@@ -151,6 +184,7 @@ public class FlowProps extends Props
   @Override
   protected void addPropertiesTo( Properties properties )
     {
+    setDefaultTupleElementComparator( properties, defaultTupleElementComparator );
     setPreserveTemporaryFiles( properties, preserveTemporaryFiles );
     setJobPollingInterval( properties, jobPollingInterval );
     setMaxConcurrentSteps( properties, maxConcurrentSteps );
