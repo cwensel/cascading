@@ -131,7 +131,7 @@ public class TupleSerialization extends Configured implements Serialization
     return TupleSerializationProps.getSerializationTokens( properties );
     }
 
-  static String getSerializationTokens( JobConf jobConf )
+  static String getSerializationTokens( Configuration jobConf )
     {
     return jobConf.get( TupleSerializationProps.SERIALIZATION_TOKENS );
     }
@@ -181,7 +181,7 @@ public class TupleSerialization extends Configured implements Serialization
     jobConf.set( HADOOP_IO_SERIALIZATIONS, Util.join( list, "," ) );
     }
 
-  static String getSerializations( JobConf jobConf )
+  static String getSerializations( Configuration jobConf )
     {
     return jobConf.get( HADOOP_IO_SERIALIZATIONS, null );
     }
@@ -212,9 +212,9 @@ public class TupleSerialization extends Configured implements Serialization
     {
     }
 
-  public TupleSerialization( final FlowProcess<Object> flowProcess )
+  public TupleSerialization( final FlowProcess<JobConf> flowProcess )
     {
-    defaultComparator = getDefaultComparator( new Configuration()
+    super( new Configuration()
     {
     @Override
     public String get( String name )
@@ -276,7 +276,7 @@ public class TupleSerialization extends Configured implements Serialization
     tokenClassesMap = new HashMap<Integer, String>();
     classesTokensMap = new HashMap<String, Integer>();
 
-    String tokenProperty = getSerializationTokens( (JobConf) getConf() );
+    String tokenProperty = getSerializationTokens( getConf() );
 
     if( tokenProperty != null )
       {
@@ -289,7 +289,7 @@ public class TupleSerialization extends Configured implements Serialization
         }
       }
 
-    String serializationsString = getSerializations( (JobConf) getConf() );
+    String serializationsString = getSerializations( getConf() );
 
     if( serializationsString == null )
       return;
