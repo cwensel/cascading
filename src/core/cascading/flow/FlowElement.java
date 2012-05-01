@@ -62,7 +62,7 @@ public interface FlowElement extends Serializable
 
   ConfigDef getStepConfigDef();
 
-  boolean hasProcessConfigDef();
+  boolean hasStepConfigDef();
 
   ConfigDef getConfigDef();
 

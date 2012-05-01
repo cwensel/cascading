@@ -279,7 +279,7 @@ public class Pipe implements FlowElement, Serializable
    * @return true if there are processConfigDef properties
    */
   @Override
-  public boolean hasProcessConfigDef()
+  public boolean hasStepConfigDef()
     {
     return stepConfigDef != null && !stepConfigDef.isEmpty();
     }

@@ -571,7 +571,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return true if there are processConfigDef properties
    */
   @Override
-  public boolean hasProcessConfigDef()
+  public boolean hasStepConfigDef()
     {
     return processConfigDef != null && !processConfigDef.isEmpty();
     }
