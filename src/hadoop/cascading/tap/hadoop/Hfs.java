@@ -460,12 +460,6 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     }
 
   @Override
-  public boolean commitResource( JobConf conf ) throws IOException
-    {
-    return true;
-    }
-
-  @Override
   public boolean resourceExists( JobConf conf ) throws IOException
     {
     return getFileSystem( conf ).exists( new Path( getIdentifier() ) );

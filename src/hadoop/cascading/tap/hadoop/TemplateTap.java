@@ -532,7 +532,7 @@ public class TemplateTap extends SinkTap<JobConf, OutputCollector>
     return pathTemplate;
     }
 
-  /** @see Tap#getIdentifier() */
+  @Override
   public String getIdentifier()
     {
     return parent.getIdentifier();

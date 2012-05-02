@@ -40,8 +40,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class HadoopFlowProcess is an implementation of {@link FlowProcess} for Hadoop. Use this interface to get direct
@@ -56,9 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HadoopFlowProcess extends FlowProcess<JobConf>
   {
-  /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopFlowProcess.class );
-
   /** Field jobConf */
   final JobConf jobConf;
   /** Field isMapper */
