@@ -92,7 +92,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     };
     }
 
-  protected void internalStop() throws IOException
+  protected void internalBlockOnStop() throws IOException
     {
     if( runningJob != null )
       runningJob.killJob();

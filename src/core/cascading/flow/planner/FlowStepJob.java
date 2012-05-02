@@ -90,14 +90,11 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     // allow pending -> stopped transition
     // never want a hanging pending state
     if( !flowStepStats.isFinished() )
-      {
-      flowStep.rollbackSinks();
       flowStepStats.markStopped();
-      }
 
     try
       {
-      internalStop();
+      internalBlockOnStop();
       }
     catch( IOException exception )
       {
@@ -105,11 +102,15 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     finally
       {
+      // call rollback after the job has been stopped, only if it was stopped
+      if( flowStepStats.isStopped() )
+        flowStep.rollbackSinks();
+
       flowStepStats.cleanup();
       }
     }
 
-  protected abstract void internalStop() throws IOException;
+  protected abstract void internalBlockOnStop() throws IOException;
 
   public void setPredecessors( List<FlowStepJob<Config>> predecessors )
     {

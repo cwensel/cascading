@@ -121,7 +121,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
     }
 
   @Override
-  protected void internalStop() throws IOException
+  protected void internalBlockOnStop() throws IOException
     {
     }
 
