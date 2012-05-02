@@ -452,7 +452,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       }
     catch( IOException exception )
       {
-      LOG.error( "failed printing graph to {}", filename, exception );
+      LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
     }
 

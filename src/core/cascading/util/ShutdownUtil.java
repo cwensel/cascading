@@ -107,7 +107,7 @@ public class ShutdownUtil
           }
         catch( Exception exception )
           {
-          LOG.error( "failed executing hook: {}", hook, exception );
+          LOG.error( "failed executing hook: {}, with exception: {}", hook, exception );
           }
         }
       }

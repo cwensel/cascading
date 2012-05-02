@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class ProviderLoader is the base class for loading various "provider" types.
- *
+ * <p/>
  * This loader can optinally load a provider implementation within its own ClassLoader using the
  * {@link ChildFirstURLClassLoader}.
  *
@@ -72,15 +72,15 @@ public class ProviderLoader<Provider>
       }
     catch( ClassNotFoundException exception )
       {
-      LOG.error( "unable to find service class: {}", className, exception );
+      LOG.error( "unable to find service class: {}, with exception: {}", className, exception );
       }
     catch( IllegalAccessException exception )
       {
-      LOG.error( "unable to instantiate service class: {}", className, exception );
+      LOG.error( "unable to instantiate service class: {}, with exception: {}", className, exception );
       }
     catch( InstantiationException exception )
       {
-      LOG.error( "unable to instantiate service class: {}", className, exception );
+      LOG.error( "unable to instantiate service class: {}, with exception: {}", className, exception );
       }
 
     return null;

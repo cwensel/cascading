@@ -382,7 +382,7 @@ public class Util
       }
     catch( IOException exception )
       {
-      LOG.error( "failed printing graph to {}", filename, exception );
+      LOG.error( "failed printing graph to {}, with exception: {}", filename, exception );
       }
     }
 
@@ -632,7 +632,7 @@ public class Util
       }
     catch( Exception exception )
       {
-      LOG.error( "unable to instantiate type: {}", type.getName(), exception );
+      LOG.error( "unable to instantiate type: {}, with exception: {}", type.getName(), exception );
 
       throw new FlowException( "unable to instantiate type: " + type.getName(), exception );
       }
