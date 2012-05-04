@@ -89,7 +89,7 @@ public class HadoopSpillableTupleMap extends SpillableTupleMap
     @Override
     public boolean doSpill( Spillable spillable, int size )
       {
-      return current() >= size;
+      return current() <= size;
       }
 
     @Override
