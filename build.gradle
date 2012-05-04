@@ -194,7 +194,7 @@ task buildPackage( type: Tar, dependsOn: buildDist ) {
   def distDir = mkdir( "${rootDir}/build/dist" )
 
   destinationDir = buildDir
-  baseName = "cascading-${releaseVersion}-${releasePlatformVersion}"
+  baseName = "cascading-${releaseVersion}"
   compression = "GZIP"
 
   into( baseName ) {
@@ -214,7 +214,25 @@ repoRelease << {
   logger.info( 'uploaded all artifacts' )
 }
 
-task s3Upload( dependsOn: buildPackage ) {
+task buildLatestMeta( dependsOn: buildPackage ) {
+
+  latestArchivePath = null
+  latestReleaseTagPath = null
+}
+
+buildLatestMeta << {
+
+  def publishBucket = System.properties[ 'publish.bucket' ]
+  def releaseTar = buildPackage.archivePath.name
+
+  latestArchivePath = new File( buildDir, 'latest.txt' )
+  latestArchivePath.write( "http://${publishBucket}/cascading/${majorVersion}/${releaseTar}" )
+
+  latestReleaseTagPath = new File( buildDir, 'latest-tag.txt' )
+  latestReleaseTagPath.write( "${releaseTag}" )
+}
+
+task s3Upload( dependsOn: buildLatestMeta ) {
 
   awsAccessId = System.properties[ 'publish.aws.accessId' ]
   awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
@@ -233,29 +251,26 @@ s3Upload << {
   ant.s3Upload( verbose: 'true', accessId: awsAccessId, secretKey: awsSecretKey,
           bucket: s3Bucket, prefix: remotePath, publicRead: 'true' ) {
     fileset( file: archive )
+    fileset( file: buildLatestMeta.latestArchivePath )
+    fileset( file: buildLatestMeta.latestReleaseTagPath )
   }
 }
 
 task sitePublish( dependsOn: s3Upload ) << {
 
-  assert currentCommit
+  ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
+          classpath: configurations.sshAntTask.asPath )
 
-  def publishBucket = System.properties[ 'publish.bucket' ]
   def publishDownloadPath = System.properties[ 'publish.download.path' ]
   def publishPort = !System.properties[ 'publish.port' ] ? '22' : System.properties[ 'publish.port' ]
   def publishKeyFile = System.properties[ 'publish.keyfile' ]
 
-  def releaseTar = buildPackage.archivePath.name
+  def remoteToLatestFile = "${publishDownloadPath}/cascading/${majorVersion}/latest.txt"
+  def remoteToLatestReleaseTagFile = "${publishDownloadPath}/cascading/${majorVersion}/latest-tag.txt"
 
-  def currentPath = new File( buildDir, 'cascading-current.txt' )
+  ant.scp( file: buildLatestMeta.latestArchivePath, remoteToFile: remoteToLatestFile,
+          keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true' )
 
-  currentPath.write( "http://${publishBucket}/cascading/${majorVersion}/${releaseTar} ${currentCommit}" )
-
-  ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-          classpath: configurations.sshAntTask.asPath )
-
-  def remoteToFile = "${publishDownloadPath}/cascading/${majorVersion}/${releaseTar}"
-
-  ant.scp( file: currentPath, remoteToFile: remoteToFile,
+  ant.scp( file: buildLatestMeta.latestReleaseTagPath, remoteToFile: remoteToLatestReleaseTagFile,
           keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true' )
 }

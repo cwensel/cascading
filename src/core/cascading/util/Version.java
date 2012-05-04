@@ -39,43 +39,60 @@ public class Version
 
   public static synchronized void printBanner()
     {
+    // only print once
     if( versionProperties != null )
       return;
 
+    String version = getVersionString();
+
+    if( version != null )
+      LOG.info( version );
+    }
+
+  public static String getVersionString()
+    {
     try
       {
-      versionProperties = loadVersionProperties();
-
-      if( versionProperties.isEmpty() )
-        {
-        LOG.warn( "unable to load version information" );
-        return;
-        }
-
-      String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
-      String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
-      String releaseBuild = versionProperties.getProperty( "cascading.build.number", null );
-      String platformVersion = versionProperties.getProperty( "cascading.platform.compatible.version" );
-      String releaseFull = null;
-
-      if( releaseMinor == null )
-        releaseFull = releaseMajor;
-      else
-        releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
-
-      String message = null;
-
-      if( releaseBuild == null )
-        message = String.format( "Concurrent, Inc - Cascading %s [%s]", releaseFull, platformVersion );
-      else
-        message = String.format( "Concurrent, Inc - Cascading %s-%s [%s]", releaseFull, releaseBuild, platformVersion );
-
-      LOG.info( message );
+      if( versionProperties == null )
+        versionProperties = loadVersionProperties();
       }
     catch( IOException exception )
       {
       LOG.warn( "unable to load version information", exception );
+      return null;
       }
+
+    if( versionProperties.isEmpty() )
+      {
+      LOG.warn( "unable to load version information" );
+      return null;
+      }
+
+    String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
+    String releaseMinor = versionProperties.getProperty( "cascading.release.minor" );
+    String releaseBuild = versionProperties.getProperty( "cascading.build.number" );
+    String platformVersion = versionProperties.getProperty( "cascading.platform.compatible.version" );
+
+    String releaseFull = null;
+
+    if( releaseMinor == null )
+      releaseFull = releaseMajor;
+    else
+      releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
+
+    String releaseVersion = null;
+
+    if( releaseBuild == null )
+      releaseVersion = String.format( "Concurrent, Inc - Cascading %s", releaseFull );
+    else
+      releaseVersion = String.format( "Concurrent, Inc - Cascading %s-%s", releaseFull, releaseBuild );
+
+    if( platformVersion == null )
+      releaseVersion = String.format( "%s [%s]", releaseVersion, platformVersion );
+    else
+      releaseVersion = String.format( "%s [%s]", releaseVersion, platformVersion );
+
+    return releaseVersion;
     }
 
   public static Properties loadVersionProperties() throws IOException
