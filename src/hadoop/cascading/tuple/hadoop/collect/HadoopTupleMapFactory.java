@@ -29,11 +29,12 @@ import cascading.tuple.collect.SpillableProps;
 import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.SpillableTupleMap;
 import cascading.tuple.collect.TupleMapFactory;
+import org.apache.hadoop.mapred.JobConf;
 
 /**
  *
  */
-public class HadoopTupleMapFactory implements TupleMapFactory
+public class HadoopTupleMapFactory implements TupleMapFactory<JobConf>
   {
   private int capacity;
   private float loadFactor;
@@ -41,7 +42,7 @@ public class HadoopTupleMapFactory implements TupleMapFactory
   private int listThreshold;
 
   @Override
-  public void initialize( FlowProcess flowProcess )
+  public void initialize( FlowProcess<JobConf> flowProcess )
     {
     capacity = SpillableTupleMap.getMapCapacity( flowProcess, SpillableProps.defaultMapInitialCapacity );
     loadFactor = SpillableTupleMap.getMapLoadFactor( flowProcess, SpillableProps.defaultMapLoadFactor );
@@ -50,7 +51,7 @@ public class HadoopTupleMapFactory implements TupleMapFactory
     }
 
   @Override
-  public Map<Tuple, Collection<Tuple>> create( FlowProcess flowProcess )
+  public Map<Tuple, Collection<Tuple>> create( FlowProcess<JobConf> flowProcess )
     {
     return new HadoopSpillableTupleMap( capacity, loadFactor, mapThreshold, listThreshold, flowProcess );
     }

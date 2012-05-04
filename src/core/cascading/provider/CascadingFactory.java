@@ -25,19 +25,19 @@ import cascading.flow.FlowProcess;
 /**
  * Interface CascadingFactory defines a pluggable "factory" class that can be loaded by the {@link FactoryLoader}
  * utility.
- *
+ * <p/>
  * Factory instances are created process side (in a cluster for example) to augment any of the internal strategies.
  *
  * @see FactoryLoader
  */
-public interface CascadingFactory<Instance>
+public interface CascadingFactory<Config, Instance>
   {
   /**
    * Method initialize will configure an initialize this factory instance.
    *
    * @param flowProcess of type FlowProcess
    */
-  void initialize( FlowProcess flowProcess );
+  void initialize( FlowProcess<Config> flowProcess );
 
   /**
    * Method create will return a new instance of the type create by this factory.
@@ -45,5 +45,5 @@ public interface CascadingFactory<Instance>
    * @param flowProcess of type FlowProcess
    * @return of type Instance
    */
-  Instance create( FlowProcess flowProcess );
+  Instance create( FlowProcess<Config> flowProcess );
   }

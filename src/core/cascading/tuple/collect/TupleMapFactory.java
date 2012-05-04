@@ -56,7 +56,7 @@ import cascading.tuple.Tuple;
  * @see TupleCollectionFactory
  * @see cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory
  */
-public interface TupleMapFactory extends CascadingFactory<Map<Tuple, Collection<Tuple>>>
+public interface TupleMapFactory<Config> extends CascadingFactory<Config, Map<Tuple, Collection<Tuple>>>
   {
   String TUPLE_MAP_FACTORY = "cascading.factory.tuple.map.classname";
   }

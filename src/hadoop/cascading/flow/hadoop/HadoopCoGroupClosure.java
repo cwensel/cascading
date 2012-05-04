@@ -34,6 +34,7 @@ import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory;
 import cascading.tuple.io.IndexTuple;
+import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
 
   private final Tuple emptyTuple;
   private final Tuple joinedTuple;
-  private final TupleCollectionFactory tupleCollectionFactory;
+  private final TupleCollectionFactory<JobConf> tupleCollectionFactory;
 
   public HadoopCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
