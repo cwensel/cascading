@@ -32,10 +32,16 @@ import org.apache.hadoop.mapred.JobConfigurable;
  */
 public class HasherPartitioner extends TupleHasher implements JobConfigurable
   {
+  private static Comparator defaultComparator;
+  private Comparator[] comparators;
+
   public void configure( JobConf jobConf )
     {
-    Comparator defaultComparator = TupleSerialization.getDefaultComparator( jobConf );
-    Comparator[] comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
+    if( defaultComparator == null )
+      {
+      defaultComparator = TupleSerialization.getDefaultComparator( jobConf );
+      comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
+      }
 
     initialize( defaultComparator, comparators );
     }
