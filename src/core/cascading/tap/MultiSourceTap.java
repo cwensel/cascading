@@ -30,6 +30,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 
 import static java.util.Arrays.copyOf;
 
@@ -46,7 +47,7 @@ import static java.util.Arrays.copyOf;
  */
 public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
-  private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
+  private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Util.getRandomDouble() ) );
   protected Child[] taps;
 
   private class TupleIterator implements Iterator

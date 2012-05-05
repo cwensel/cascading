@@ -324,7 +324,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
       streamedJobs[ i ] = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, streamedJobs[ i ] );
-      streamedJobs[ i ].set( "cascading.step.source", tap.getIdentifier() );
+      streamedJobs[ i ].set( "cascading.step.source", Tap.id( tap ) );
       i++;
       }
 
@@ -335,10 +335,21 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       JobConf accumulatedJob = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, accumulatedJob );
       Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
-      conf.set( "cascading.step.accumulated.source.conf." + tap.getIdentifier(), pack( map ) );
+      conf.set( "cascading.step.accumulated.source.conf." + Tap.id( tap ), pack( map ) );
       }
 
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last
+    }
+
+  public Tap getTapForID( Set<Tap> taps, String id )
+    {
+    for( Tap tap : taps )
+      {
+      if( Tap.id( tap ).equals( id ) )
+        return tap;
+      }
+
+    return null;
     }
 
   private void initFromProcessConfigDef( final JobConf conf )

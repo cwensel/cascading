@@ -82,6 +82,25 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     return taps;
     }
 
+  private String id = null;
+
+  /**
+   * Creates and returns a unique ID for the given Tap, this value is cached and may be used to uniquely identify
+   * the Tap instance in properties files etc.
+   * <p/>
+   * This value is generally reproducible assuming the Tap identifier and the Scheme source and sink Fields remain consistent.
+   *
+   * @param tap
+   * @return
+   */
+  public static synchronized String id( Tap tap )
+    {
+    if( tap.id == null )
+      tap.id = Util.createID( String.format( "%s/%s/%s", tap.getIdentifier(), tap.getScheme().getSourceFields(), tap.getScheme().getSinkFields() ) );
+
+    return tap.id;
+    }
+
   protected Tap()
     {
     }

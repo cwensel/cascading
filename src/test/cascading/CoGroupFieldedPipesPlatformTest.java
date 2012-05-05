@@ -41,6 +41,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Discard;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.pipe.joiner.LeftJoin;
@@ -1113,5 +1114,44 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     assertTrue( actual.contains( new Tuple( "1\t1\t1" ) ) );
     assertTrue( actual.contains( new Tuple( "10\t10\t10" ) ) );
+    }
+
+  @Test
+  public void testCoGroupDiffFieldsSameFile() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceOffsetLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "line" ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "offsetLower", sourceOffsetLower );
+    sources.put( "lower", sourceLower );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "samefiledifffields" ), SinkMode.REPLACE );
+
+    Function splitterLower = new RegexSplitter( new Fields( "numA", "left" ), " " );
+    Function splitterUpper = new RegexSplitter( new Fields( "numB", "right" ), " " );
+
+    Pipe offsetLower = new Pipe( "offsetLower" );
+    offsetLower = new Discard( offsetLower, new Fields( "offset" ) );
+    offsetLower = new Each( offsetLower, new Fields( "line" ), splitterLower );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterUpper );
+
+    Pipe cogroup = new CoGroup( offsetLower, new Fields( "numA" ), pipeLower, new Fields( "numB" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogroup );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> actual = getSinkAsList( flow );
+
+    assertTrue( actual.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
   }

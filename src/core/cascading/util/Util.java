@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -54,8 +55,19 @@ import org.slf4j.LoggerFactory;
 /** Class Util provides reusable operations. */
 public class Util
   {
-  static final String HEXES = "0123456789ABCDEF";
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
+  private static final String HEXES = "0123456789ABCDEF";
+  private static Random random = new Random( LOG.hashCode() );
+
+  public static double getRandomDouble()
+    {
+    return random.nextDouble();
+    }
+
+  public static String createUniqueID( Object object )
+    {
+    return createUniqueID( object == null ? HEXES : object.toString() );
+    }
 
   /**
    * This method creates a globally unique HEX value seeded by the given string.
@@ -65,16 +77,19 @@ public class Util
    */
   public static String createUniqueID( String seed )
     {
-    String base = String.format( "%s%d%.10f", seed, System.currentTimeMillis(), Math.random() );
-
-    return createID( base );
+    return createID( String.format( "%s%d%.10f", seed, System.currentTimeMillis(), getRandomDouble() ) );
     }
 
   public static String createID( String base )
     {
+    return createID( base.getBytes() );
+    }
+
+  public static String createID( byte[] bytes )
+    {
     try
       {
-      return getHex( MessageDigest.getInstance( "MD5" ).digest( base.getBytes() ) );
+      return getHex( MessageDigest.getInstance( "MD5" ).digest( bytes ) );
       }
     catch( NoSuchAlgorithmException exception )
       {

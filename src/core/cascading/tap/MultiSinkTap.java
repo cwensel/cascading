@@ -36,6 +36,7 @@ import cascading.scheme.Scheme;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
   /** Field taps */
   private final Child[] taps;
   /** Field tempPath */
-  private final String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Math.random() ) );
+  private final String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Util.getRandomDouble() ) );
   /** Field childConfigs */
   private List<Map<String, String>> childConfigs;
 
