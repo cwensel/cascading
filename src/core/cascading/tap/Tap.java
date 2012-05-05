@@ -50,11 +50,15 @@ import cascading.util.Util;
  * A Tap takes a {@link Scheme} instance, which is used to identify the type of resource (text file, binary file, etc).
  * A Tap is responsible for how the resource is reached.
  * <p/>
- * A Tap is not given an explicit name by design. This is so a given Tap instance can be
- * re-used in different {@link cascading.flow.Flow}s that may expect a source or sink by a different
- * logical name, but are the same physical resource. If a tap had a name other than its path, which would be
- * used for the tap identity? If the name, then two Tap instances with different names but the same path could
- * interfere with one another.
+ * In Cascading, Tap equality is a function of the {@link #getIdentifier()} and {@link #getScheme()} values. That is,
+ * two Tap instances are the same Tap instance if they sink/source the same resource and sink/source the same fields.
+ * <p/>
+ * Some more advanced taps, like a database tap, may need to extend equality to include any filtering, like the
+ * {@code where} clause in a SQL statement so two taps reading from the same SQL table aren't considered equal.
+ * <p/>
+ * Taps are also used to determine dependencies between two or more {@link Flow} instances when used with a
+ * {@link cascading.cascade.Cascade}. In that case the {@link #getFullIdentifier(Object)} value is used and the Scheme
+ * is ignored.
  */
 public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable
   {
@@ -90,8 +94,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * This value is generally reproducible assuming the Tap identifier and the Scheme source and sink Fields remain consistent.
    *
-   * @param tap
-   * @return
+   * @param tap of type Tap
+   * @return of type String
    */
   public static synchronized String id( Tap tap )
     {
@@ -622,6 +626,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
 
     Tap tap = (Tap) object;
 
+    if( getIdentifier() != null ? !getIdentifier().equals( tap.getIdentifier() ) : tap.getIdentifier() != null )
+      return false;
+
     if( getScheme() != null ? !getScheme().equals( tap.getScheme() ) : tap.getScheme() != null )
       return false;
 
@@ -631,6 +638,19 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   @Override
   public int hashCode()
     {
-    return getScheme() != null ? getScheme().hashCode() : 0;
+    int result = getIdentifier() != null ? getIdentifier().hashCode() : 0;
+
+    result = 31 * result + ( getScheme() != null ? getScheme().hashCode() : 0 );
+
+    return result;
+    }
+
+  @Override
+  public String toString()
+    {
+    if( getIdentifier() != null )
+      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[\"" + Util.sanitizeUrl( getIdentifier() ) + "\"]"; // sanitize
+    else
+      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
     }
   }

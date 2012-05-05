@@ -51,6 +51,10 @@ import static cascading.cascade.CascadeDef.cascadeDef;
  * Note order is not significant when adding passing Flow instances to the {@code connect}
  * method. This connector will order them based on their dependencies, if any.
  * <p/>
+ * One Flow is dependent on another if the first sinks (produces) output that the second Flow sources (consumes) as
+ * input. A sink and source are considered equivalent if the fully qualified identifier, typically {@link Tap#getFullIdentifier(Object)}
+ * from either are {@code equals()}.
+ * <p/>
  * The {@link CascadeDef} is a convenience class for dynamically defining a Cascade that can be passed to the
  * {@link CascadeConnector#connect(CascadeDef)} method.
  * <p/>

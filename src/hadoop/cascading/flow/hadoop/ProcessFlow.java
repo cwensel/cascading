@@ -264,7 +264,6 @@ public class ProcessFlow<P> extends HadoopFlow
 
     public boolean source( FlowProcess flowProcess, SourceCall sourceCall ) throws IOException
       {
-//      collector.add( new Tuple( input ) );
       throw new UnsupportedOperationException( "sourcing is not supported in the scheme" );
       }
 
@@ -339,32 +338,6 @@ public class ProcessFlow<P> extends HadoopFlow
     public String toString()
       {
       return token;
-      }
-
-    @Override
-    public boolean equals( Object object )
-      {
-      if( this == object )
-        return true;
-      if( object == null || getClass() != object.getClass() )
-        return false;
-      if( !super.equals( object ) )
-        return false;
-
-      ProcessTap that = (ProcessTap) object;
-
-      if( token != null ? !token.equals( that.token ) : that.token != null )
-        return false;
-
-      return true;
-      }
-
-    @Override
-    public int hashCode()
-      {
-      int result = super.hashCode();
-      result = 31 * result + ( token != null ? token.hashCode() : 0 );
-      return result;
       }
     }
   }

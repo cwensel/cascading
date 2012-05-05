@@ -553,7 +553,7 @@ public class HadoopPlanner extends FlowPlanner
   protected Tap makeTempTap( String name )
     {
     // must give Taps unique names
-    return new TempHfs( Util.makeTempPath( name ), intermediateSchemeClass );
+    return new TempHfs( jobConf, Util.makeTempPath( name ), intermediateSchemeClass );
     }
 
   private Class getSchemeClass( Tap tap )

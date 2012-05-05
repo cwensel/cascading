@@ -613,7 +613,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( name.isEmpty() )
       name = "temp-path";
 
-    return name.replaceAll( "[\\W\\s]+", "_" ) + Integer.toString( (int) ( 10000000 * Math.random() ) );
+    return name.replaceAll( "[\\W\\s]+", "_" ) + Integer.toString( (int) ( 10000000 * Util.getRandomDouble() ) );
     }
 
   /**
@@ -628,40 +628,5 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
       return;
 
     statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
-    }
-
-  @Override
-  public String toString()
-    {
-    if( stringPath != null )
-      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[\"" + Util.sanitizeUrl( stringPath ) + "\"]"; // sanitize
-    else
-      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
-    }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-    if( !super.equals( object ) )
-      return false;
-
-    Hfs hfs = (Hfs) object;
-
-    if( stringPath != null ? !stringPath.equals( hfs.stringPath ) : hfs.stringPath != null )
-      return false;
-
-    return true;
-    }
-
-  @Override
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result + ( stringPath != null ? stringPath.hashCode() : 0 );
-    return result;
     }
   }

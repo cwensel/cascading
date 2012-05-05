@@ -418,7 +418,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       getSink().sinkConfInit( flowProcess, conf );
 
     if( FileOutputFormat.getOutputPath( conf ) == null )
-      tempSink = new TempHfs( "tmp:/" + new Path( getSink().getIdentifier() ).toUri().getPath(), true );
+      tempSink = new TempHfs( conf, "tmp:/" + new Path( getSink().getIdentifier() ).toUri().getPath(), true );
 
     // tempSink exists because sink is writeDirect
     if( tempSink != null )

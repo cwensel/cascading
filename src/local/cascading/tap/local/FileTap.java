@@ -160,33 +160,6 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream>
     }
 
   @Override
-  public boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( !( object instanceof FileTap ) )
-      return false;
-    if( !super.equals( object ) )
-      return false;
-
-    FileTap fileTap = (FileTap) object;
-
-    if( path != null ? !path.equals( fileTap.path ) : fileTap.path != null )
-      return false;
-
-    return true;
-    }
-
-  @Override
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result + ( path != null ? path.hashCode() : 0 );
-    return result;
-    }
-
-  /** @see Object#toString() */
-  @Override
   public String toString()
     {
     if( path != null )

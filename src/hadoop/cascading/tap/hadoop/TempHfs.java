@@ -21,7 +21,6 @@
 package cascading.tap.hadoop;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Set;
 
 import cascading.CascadingException;
@@ -46,9 +45,8 @@ public class TempHfs extends Hfs
   /** Field name */
   final String name;
   /** Field schemeClass */
-  private Class schemeClass;
+  private Class<? extends Scheme> schemeClass;
   /** Field temporaryPath */
-  private String temporaryPath;
 
   /** Class NullScheme is a noop scheme used as a placeholder */
   private static class NullScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object, Object>
@@ -77,20 +75,6 @@ public class TempHfs extends Hfs
     public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       }
-
-    }
-
-  /**
-   * Constructor TempHfs creates a new TempHfs instance.
-   *
-   * @param name of type String
-   */
-  public TempHfs( String name )
-    {
-    super( new SequenceFile()
-    {
-    } );
-    this.name = name;
     }
 
   /**
@@ -99,12 +83,13 @@ public class TempHfs extends Hfs
    * @param name   of type String
    * @param isNull of type boolean
    */
-  public TempHfs( String name, boolean isNull )
+  public TempHfs( JobConf conf, String name, boolean isNull )
     {
     super( isNull ? new NullScheme() : new SequenceFile()
     {
     } );
     this.name = name;
+    this.stringPath = initTemporaryPath( conf );
     }
 
   /**
@@ -112,7 +97,7 @@ public class TempHfs extends Hfs
    *
    * @param name of type String
    */
-  public TempHfs( String name, Class schemeClass )
+  public TempHfs( JobConf conf, String name, Class<? extends Scheme> schemeClass )
     {
     this.name = name;
 
@@ -120,28 +105,18 @@ public class TempHfs extends Hfs
       this.schemeClass = SequenceFile.class;
     else
       this.schemeClass = schemeClass;
+
+    this.stringPath = initTemporaryPath( conf );
     }
 
-  public Class getSchemeClass()
+  public Class<? extends Scheme> getSchemeClass()
     {
     return schemeClass;
     }
 
-  private void initTemporaryPath( JobConf conf )
+  private String initTemporaryPath( JobConf conf )
     {
-    // init stringPath as path is transient
-    if( stringPath != null )
-      return;
-
-    temporaryPath = makeTemporaryPathDirString( name );
-    stringPath = new Path( getTempPath( conf ), temporaryPath ).toString();
-    }
-
-  @Override
-  public URI getURIScheme( JobConf jobConf )
-    {
-    initTemporaryPath( jobConf );
-    return super.getURIScheme( jobConf );
+    return new Path( getTempPath( conf ), makeTemporaryPathDirString( name ) ).toString();
     }
 
   @Override
@@ -171,29 +146,6 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
-    {
-    initTemporaryPath( conf );
-    super.sourceConfInit( process, conf );
-    }
-
-  @Override
-  public void sinkConfInit( FlowProcess<JobConf> process, JobConf conf )
-    {
-    initTemporaryPath( conf );
-    super.sinkConfInit( process, conf );
-    }
-
-  @Override
-  public boolean deleteResource( JobConf conf ) throws IOException
-    {
-    if( temporaryPath == null ) // never initialized
-      return true;
-
-    return super.deleteResource( conf ) && getFileSystem( conf ).delete( new Path( getTempPath( conf ), temporaryPath ), true );
-    }
-
-  @Override
   public boolean isTemporary()
     {
     return true;
@@ -208,6 +160,8 @@ public class TempHfs extends Hfs
   @Override
   public boolean equals( Object object )
     {
+    // we are only overriding since the path is lazily initialized.
+
     if( this == object )
       return true;
     if( object == null || getClass() != object.getClass() )
