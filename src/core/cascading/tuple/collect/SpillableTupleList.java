@@ -24,9 +24,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
@@ -128,9 +128,9 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   private SpillStrategy spillStrategy;
 
   /** Field files */
-  private final List<File> files = new LinkedList<File>();
+  private final List<File> files = new ArrayList<File>();
   /** Field current */
-  private final List<Tuple> current = new LinkedList<Tuple>();
+  private final List<Object[]> current = new ArrayList<Object[]>( 1000 );
   /** Field size */
   private int size = 0;
   /** Fields listener */
@@ -200,7 +200,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
     private SpilledListIterator()
       {
-      lastIterator = current.iterator();
+      lastIterator = asTupleIterator();
       getNextIterator();
       }
 
@@ -264,10 +264,10 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   @Override
   public boolean add( Tuple tuple )
     {
-    current.add( tuple );
-    size++;
+    doSpill(); // spill if we break over the threshold
 
-    doSpill();
+    current.add( Tuple.elements( tuple ).toArray( new Object[ tuple.size() ] ) );
+    size++;
 
     return true;
     }
@@ -337,14 +337,14 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
     }
 
-  private void writeList( TupleOutputStream dataOutputStream, List<Tuple> list )
+  private void writeList( TupleOutputStream dataOutputStream, List<Object[]> list )
     {
     try
       {
       dataOutputStream.writeLong( list.size() );
 
-      for( Tuple tuple : list )
-        dataOutputStream.writeTuple( tuple );
+      for( Object[] elements : list )
+        dataOutputStream.writeElementArray( elements );
       }
     catch( IOException exception )
       {
@@ -438,9 +438,38 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   public Iterator<Tuple> iterator()
     {
     if( files.isEmpty() )
-      return current.iterator();
+      return asTupleIterator();
 
     return new SpilledListIterator();
+    }
+
+  private Iterator<Tuple> asTupleIterator()
+    {
+    final Tuple tuple = new Tuple();
+    final Iterator<Object[]> iterator = current.iterator();
+
+    return new Iterator<Tuple>()
+    {
+    @Override
+    public boolean hasNext()
+      {
+      return iterator.hasNext();
+      }
+
+    @Override
+    public Tuple next()
+      {
+      tuple.clear();
+      tuple.addAll( iterator.next() );
+
+      return tuple;
+      }
+
+    @Override
+    public void remove()
+      {
+      }
+    };
     }
 
   // collection methods, this class cannot only be added to, so they aren't implemented

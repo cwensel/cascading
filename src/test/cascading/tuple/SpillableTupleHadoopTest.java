@@ -28,7 +28,6 @@ import java.util.Set;
 import cascading.CascadingTestCase;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.collect.SpillableProps;
-import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleMap;
 import org.apache.hadoop.io.Text;
@@ -53,13 +52,13 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    performListTest( 5, 50, null );
-    performListTest( 49, 50, null );
-    performListTest( 50, 50, null );
-    performListTest( 51, 50, null );
-    performListTest( 499, 50, null );
-    performListTest( 500, 50, null );
-    performListTest( 501, 50, null );
+    performListTest( 5, 50, null, 0 );
+    performListTest( 49, 50, null, 0 );
+    performListTest( 50, 50, null, 0 );
+    performListTest( 51, 50, null, 1 );
+    performListTest( 499, 50, null, 9 );
+    performListTest( 500, 50, null, 9 );
+    performListTest( 501, 50, null, 10 );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
@@ -71,18 +70,18 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
     long time = System.currentTimeMillis();
 
-    performListTest( 5, 50, codec );
-    performListTest( 49, 50, codec );
-    performListTest( 50, 50, codec );
-    performListTest( 51, 50, codec );
-    performListTest( 499, 50, codec );
-    performListTest( 500, 50, codec );
-    performListTest( 501, 50, codec );
+    performListTest( 5, 50, codec, 0 );
+    performListTest( 49, 50, codec, 0 );
+    performListTest( 50, 50, codec, 0 );
+    performListTest( 51, 50, codec, 1 );
+    performListTest( 499, 50, codec, 9 );
+    performListTest( 500, 50, codec, 9 );
+    performListTest( 501, 50, codec, 10 );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
 
-  private void performListTest( int size, int threshold, CompressionCodec codec )
+  private void performListTest( int size, int threshold, CompressionCodec codec, int spills )
     {
     HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec, new JobConf() );
 
@@ -95,7 +94,8 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
       }
 
     assertEquals( "not equal: list.size();", size, list.size() );
-    assertEquals( "not equal: list.getNumFiles()", (int) Math.floor( size / threshold ), list.spillCount() );
+
+    assertEquals( "not equal: list.getNumFiles()", spills, list.spillCount() );
 
     int i = -1;
     int count = 0;
@@ -112,7 +112,8 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
     Iterator<Tuple> iterator = list.iterator();
 
-    assertEquals( "not equal: iterator.next().get(0)", "string number 0", iterator.next().get( 1 ) );
+    assertEquals( "not equal: iterator.next().get(1)", "string number 0", iterator.next().get( 1 ) );
+    assertEquals( "not equal: iterator.next().get(1)", "string number 1", iterator.next().get( 1 ) );
     }
 
   @Test
@@ -120,10 +121,12 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    performMapTest( 5, 5, 100, 20, new JobConf() );
-    performMapTest( 5, 50, 100, 20, new JobConf() );
-    performMapTest( 50, 5, 200, 20, new JobConf() );
-    performMapTest( 500, 50, 7000, 20, new JobConf() );
+    JobConf jobConf = new JobConf();
+
+    performMapTest( 5, 5, 100, 20, jobConf );
+    performMapTest( 5, 50, 100, 20, jobConf );
+    performMapTest( 50, 5, 200, 20, jobConf );
+    performMapTest( 500, 50, 7000, 20, jobConf );
 
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
@@ -134,7 +137,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     long time = System.currentTimeMillis();
 
     JobConf jobConf = new JobConf();
-    jobConf.set( SpillableTupleList.SPILL_CODECS, "org.apache.hadoop.io.compress.GzipCodec" );
+    jobConf.set( SpillableProps.SPILL_CODECS, "org.apache.hadoop.io.compress.GzipCodec" );
 
     performMapTest( 5, 5, 100, 20, jobConf );
     performMapTest( 5, 50, 100, 20, jobConf );

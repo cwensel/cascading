@@ -149,19 +149,15 @@ public class HadoopTupleOutputStream extends TupleOutputStream
     super( staticTupleElementWriters, outputStream, elementWriter );
     }
 
-  protected void writeNull() throws IOException
+  @Override
+  protected void writeIntInternal( int value ) throws IOException
     {
-    WritableUtils.writeVInt( this, 0 );
-    }
-
-  protected void writeNumElements( Tuple tuple ) throws IOException
-    {
-    WritableUtils.writeVInt( this, Tuple.elements( tuple ).size() );
+    WritableUtils.writeVInt( this, value );
     }
 
   public void writeIndexTuple( IndexTuple indexTuple ) throws IOException
     {
-    WritableUtils.writeVInt( this, indexTuple.getIndex() );
+    writeIntInternal( indexTuple.getIndex() );
     writeTuple( indexTuple.getTuple() );
     }
   }

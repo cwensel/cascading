@@ -83,29 +83,38 @@ public abstract class TupleOutputStream extends DataOutputStream
     {
     List<Object> elements = Tuple.elements( tuple );
 
-    writeNumElements( tuple );
+    writeIntInternal( elements.size() );
 
     for( Object element : elements )
-      {
-      if( element == null )
-        {
-        writeNull();
-        continue;
-        }
-
-      Class type = element.getClass();
-      TupleElementWriter tupleElementWriter = tupleElementWriters.get( type );
-
-      if( tupleElementWriter != null )
-        tupleElementWriter.write( this, element );
-      else
-        elementWriter.write( this, element );
-      }
+      writeElement( element );
     }
 
-  protected abstract void writeNull() throws IOException;
+  public void writeElementArray( Object[] elements ) throws IOException
+    {
+    writeIntInternal( elements.length );
 
-  protected abstract void writeNumElements( Tuple tuple ) throws IOException;
+    for( Object element : elements )
+      writeElement( element );
+    }
+
+  public final void writeElement( Object element ) throws IOException
+    {
+    if( element == null )
+      {
+      writeIntInternal( 0 );
+      return;
+      }
+
+    Class type = element.getClass();
+    TupleElementWriter tupleElementWriter = tupleElementWriters.get( type );
+
+    if( tupleElementWriter != null )
+      tupleElementWriter.write( this, element );
+    else
+      elementWriter.write( this, element );
+    }
+
+  protected abstract void writeIntInternal( int value ) throws IOException;
 
   @Override
   public void close() throws IOException
