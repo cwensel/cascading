@@ -37,9 +37,10 @@ import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
+import org.apache.hadoop.io.compress.CodecPool;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.CompressionInputStream;
-import org.apache.hadoop.io.compress.CompressionOutputStream;
+import org.apache.hadoop.io.compress.Compressor;
+import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -113,10 +114,32 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       {
       outputStream = new FileOutputStream( file );
 
-      if( codec != null )
-        outputStream = createCodecOutputStream( outputStream );
+      Compressor compressor = null;
 
-      return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() );
+      if( codec != null )
+        {
+        compressor = getCompressor();
+        outputStream = codec.createOutputStream( outputStream, compressor );
+        }
+
+      final Compressor finalCompressor = compressor;
+
+      return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() )
+      {
+      @Override
+      public void close() throws IOException
+        {
+        try
+          {
+          super.close();
+          }
+        finally
+          {
+          if( finalCompressor != null )
+            CodecPool.returnCompressor( finalCompressor );
+          }
+        }
+      };
       }
     catch( IOException exception )
       {
@@ -124,20 +147,20 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       }
     }
 
-  private CompressionOutputStream createCodecOutputStream( OutputStream outputStream ) throws IOException
+  private Compressor getCompressor()
     {
     // some codecs are using direct memory, and the gc for direct memory cannot sometimes keep up
     // so we attempt to force a gc if we see a OOME once.
     try
       {
-      return codec.createOutputStream( outputStream );
+      return CodecPool.getCompressor( codec );
       }
     catch( OutOfMemoryError error )
       {
-      LOG.info( "received OOME when allocating output stream for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
+      LOG.info( "received OOME when allocating compressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
       System.gc();
 
-      return codec.createOutputStream( outputStream );
+      return CodecPool.getCompressor( codec );
       }
     }
 
@@ -150,10 +173,31 @@ public class HadoopSpillableTupleList extends SpillableTupleList
 
       inputStream = new FileInputStream( file );
 
-      if( codec != null )
-        inputStream = createCodecInputStream( inputStream );
+      Decompressor decompressor = null;
 
-      return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() );
+      if( codec != null )
+        {
+        decompressor = getDecompressor();
+        inputStream = codec.createInputStream( inputStream, decompressor );
+        }
+
+      final Decompressor finalDecompressor = decompressor;
+      return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() )
+      {
+      @Override
+      public void close() throws IOException
+        {
+        try
+          {
+          super.close();
+          }
+        finally
+          {
+          if( finalDecompressor != null )
+            CodecPool.returnDecompressor( finalDecompressor );
+          }
+        }
+      };
       }
     catch( IOException exception )
       {
@@ -161,20 +205,20 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       }
     }
 
-  private CompressionInputStream createCodecInputStream( InputStream inputStream ) throws IOException
+  private Decompressor getDecompressor()
     {
     // some codecs are using direct memory, and the gc for direct memory cannot sometimes keep up
     // so we attempt to force a gc if we see a OOME once.
     try
       {
-      return codec.createInputStream( inputStream );
+      return CodecPool.getDecompressor( codec );
       }
     catch( OutOfMemoryError error )
       {
-      LOG.info( "received OOME when allocating input stream for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
+      LOG.info( "received OOME when allocating decompressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
       System.gc();
 
-      return codec.createInputStream( inputStream );
+      return CodecPool.getDecompressor( codec );
       }
     }
   }
