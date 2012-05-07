@@ -58,6 +58,11 @@ import org.slf4j.LoggerFactory;
  */
 public class TemplateTap extends SinkTap<JobConf, OutputCollector>
   {
+  public enum Counters
+    {
+      Paths_Opened, Paths_Closed, Path_Purges
+    }
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TemplateTap.class );
 
@@ -105,6 +110,8 @@ public class TemplateTap extends SinkTap<JobConf, OutputCollector>
         LOG.debug( "creating collector for path: {}", fullPath );
 
         collector = new HadoopTupleEntrySchemeCollector( flowProcess, parent, path );
+
+        flowProcess.increment( Counters.Paths_Opened, 1 );
         }
       catch( IOException exception )
         {
@@ -142,6 +149,8 @@ public class TemplateTap extends SinkTap<JobConf, OutputCollector>
 
       for( String removeKey : removeKeys )
         closeCollector( collectors.remove( removeKey ) );
+
+      flowProcess.increment( Counters.Path_Purges, 1 );
       }
 
     @Override
@@ -168,6 +177,8 @@ public class TemplateTap extends SinkTap<JobConf, OutputCollector>
       try
         {
         ( (TupleEntryCollector) collector ).close();
+
+        flowProcess.increment( Counters.Paths_Closed, 1 );
         }
       catch( Exception exception )
         {
