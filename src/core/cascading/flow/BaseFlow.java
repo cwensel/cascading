@@ -315,7 +315,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public String getID()
     {
     if( id == null )
-      id = Util.createUniqueID( getName() );
+      id = Util.createUniqueID();
 
     return id;
     }

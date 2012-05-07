@@ -47,7 +47,7 @@ import static java.util.Arrays.copyOf;
  */
 public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
-  private final String identifier = "__multisource_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Util.getRandomDouble() ) );
+  private final String identifier = "__multisource_placeholder_" + Util.createUniqueID();
   protected Child[] taps;
 
   private class TupleIterator implements Iterator

@@ -111,7 +111,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   protected BaseFlowStep( String name, int stepNum )
     {
-    this.name = name;
+    setName( name );
     this.stepNum = stepNum;
     }
 
@@ -119,7 +119,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   public String getID()
     {
     if( id == null )
-      id = Util.createUniqueID( getName() );
+      id = Util.createUniqueID();
 
     return id;
     }

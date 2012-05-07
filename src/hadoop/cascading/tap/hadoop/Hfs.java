@@ -602,7 +602,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( name.isEmpty() )
       name = "temp-path";
 
-    return name.replaceAll( "[\\W\\s]+", "_" ) + Integer.toString( (int) ( 10000000 * Util.getRandomDouble() ) );
+    return name.replaceAll( "[\\W\\s]+", "_" ) + Util.createUniqueID();
     }
 
   /**

@@ -54,7 +54,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
   /** Field taps */
   private final Child[] taps;
   /** Field tempPath */
-  private final String tempPath = "__multisink_placeholder" + Integer.toString( (int) ( System.currentTimeMillis() * Util.getRandomDouble() ) );
+  private final String tempPath = "__multisink_placeholder_" + Util.createUniqueID();
   /** Field childConfigs */
   private List<Map<String, String>> childConfigs;
 

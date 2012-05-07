@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -57,32 +57,16 @@ public class Util
   {
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
   private static final String HEXES = "0123456789ABCDEF";
-  private static Random random = new Random( LOG.hashCode() );
 
-  public static double getRandomDouble()
+  /** This method creates a globally unique HEX value seeded by the given string. */
+  public static synchronized String createUniqueID()
     {
-    return random.nextDouble();
+    return createID( UUID.randomUUID().toString() );
     }
 
-  public static String createUniqueID( Object object )
+  public static String createID( String rawID )
     {
-    return createUniqueID( object == null ? HEXES : object.toString() );
-    }
-
-  /**
-   * This method creates a globally unique HEX value seeded by the given string.
-   *
-   * @param seed
-   * @return a String
-   */
-  public static String createUniqueID( String seed )
-    {
-    return createID( String.format( "%s%d%.10f", seed, System.currentTimeMillis(), getRandomDouble() ) );
-    }
-
-  public static String createID( String base )
-    {
-    return createID( base.getBytes() );
+    return createID( rawID.getBytes() );
     }
 
   public static String createID( byte[] bytes )

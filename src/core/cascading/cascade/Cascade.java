@@ -179,7 +179,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   public String getID()
     {
     if( id == null )
-      id = Util.createUniqueID( getName() );
+      id = Util.createUniqueID();
 
     return id;
     }
