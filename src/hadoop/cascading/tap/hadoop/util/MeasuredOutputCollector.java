@@ -29,20 +29,20 @@ import org.apache.hadoop.mapred.OutputCollector;
 /**
  *
  */
-public class TimedOutputCollector implements OutputCollector, Closeable
+public class MeasuredOutputCollector implements OutputCollector, Closeable
   {
   private final FlowProcess flowProcess;
   private final Enum counter;
 
   private OutputCollector outputCollector;
 
-  public TimedOutputCollector( FlowProcess flowProcess, Enum counter )
+  public MeasuredOutputCollector( FlowProcess flowProcess, Enum counter )
     {
     this.flowProcess = flowProcess;
     this.counter = counter;
     }
 
-  public TimedOutputCollector( FlowProcess flowProcess, Enum counter, OutputCollector outputCollector )
+  public MeasuredOutputCollector( FlowProcess flowProcess, Enum counter, OutputCollector outputCollector )
     {
     this.flowProcess = flowProcess;
     this.counter = counter;

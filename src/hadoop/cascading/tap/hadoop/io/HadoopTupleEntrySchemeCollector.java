@@ -18,64 +18,53 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.io;
 
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.util.TimedOutputCollector;
+import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.TupleEntrySchemeCollector;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
 /**
- * Class TapCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
+ * Class HadoopTupleEntrySchemeCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
 public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<JobConf, OutputCollector>
   {
-  private TimedOutputCollector timedOutputCollector;
+  private MeasuredOutputCollector measuredOutputCollector;
 
-  /**
-   * Constructor TapCollector creates a new TapCollector instance.
-   *
-   * @param flowProcess
-   * @param tap         of type Tap  @throws IOException when fails to initialize
-   */
   public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap ) throws IOException
     {
-    this( flowProcess, tap, (String) null );
+    super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, null ), tap.getIdentifier() );
     }
 
-  /**
-   * Constructor TapCollector creates a new TapCollector instance.
-   *
-   * @param flowProcess
-   * @param tap         of type Tap
-   * @param prefix      of type String
-   * @throws IOException when fails to initialize
-   */
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
     {
-    super( flowProcess, tap.getScheme(), new TapOutputCollector( flowProcess, tap, prefix ), tap.getIdentifier() );
+    super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, outputCollector ), tap.getIdentifier() );
     }
 
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector )
+  private static OutputCollector makeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
     {
-    super( flowProcess, tap.getScheme(), outputCollector, tap.getIdentifier() );
+    if( outputCollector != null )
+      return outputCollector;
+
+    return new TapOutputCollector( flowProcess, tap );
     }
 
   @Override
   protected OutputCollector<?, ?> wrapOutput( OutputCollector outputCollector )
     {
-    if( timedOutputCollector == null )
-      timedOutputCollector = new TimedOutputCollector( getFlowProcess(), SliceCounters.Write_Duration );
+    if( measuredOutputCollector == null )
+      measuredOutputCollector = new MeasuredOutputCollector( getFlowProcess(), SliceCounters.Write_Duration );
 
-    timedOutputCollector.setOutputCollector( outputCollector );
+    measuredOutputCollector.setOutputCollector( outputCollector );
 
-    return timedOutputCollector;
+    return measuredOutputCollector;
     }
   }

@@ -39,6 +39,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
+import cascading.tap.hadoop.TemplateTap;
 import cascading.tuple.Fields;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileSystem;
@@ -217,5 +218,17 @@ public class HadoopPlatform extends TestPlatform
   public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
     return new Hfs( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    }
+
+  @Override
+  public Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold )
+    {
+    return new TemplateTap( (Hfs) sink, pathTemplate, openThreshold );
+    }
+
+  @Override
+  public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
+    {
+    return new TemplateTap( (Hfs) sink, pathTemplate, fields, openThreshold );
     }
   }

@@ -36,6 +36,7 @@ import cascading.scheme.local.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.FileTap;
+import cascading.tap.local.TemplateTap;
 import cascading.tuple.Fields;
 
 /**
@@ -114,5 +115,17 @@ public class LocalPlatform extends TestPlatform
   public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
     return new FileTap( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    }
+
+  @Override
+  public Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold )
+    {
+    return new TemplateTap( (FileTap) sink, pathTemplate, openThreshold );
+    }
+
+  @Override
+  public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
+    {
+    return new TemplateTap( (FileTap) sink, pathTemplate, fields, openThreshold );
     }
   }

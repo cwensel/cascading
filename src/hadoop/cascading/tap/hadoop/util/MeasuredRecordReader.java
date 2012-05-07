@@ -28,14 +28,14 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  *
  */
-public class TimedRecordReader implements RecordReader
+public class MeasuredRecordReader implements RecordReader
   {
   private final FlowProcess flowProcess;
   private final Enum counter;
 
   private RecordReader recordReader;
 
-  public TimedRecordReader( FlowProcess flowProcess, Enum counter )
+  public MeasuredRecordReader( FlowProcess flowProcess, Enum counter )
     {
     this.flowProcess = flowProcess;
     this.counter = counter;

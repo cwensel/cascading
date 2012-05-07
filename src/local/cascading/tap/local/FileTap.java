@@ -22,7 +22,6 @@ package cascading.tap.local;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,7 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.tap.TapException;
+import cascading.tap.local.io.TapFileOutputStream;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
@@ -92,20 +91,8 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream>
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, OutputStream output ) throws IOException
     {
-    // ignore the output. will catch the failure downstream if any.
-    // not ignoring the output causes race conditions with other systems writing to the same directory.
-    File parentFile = new File( path ).getAbsoluteFile().getParentFile();
-
-    if( parentFile != null && parentFile.exists() && parentFile.isFile() )
-      throw new TapException( "cannot create parent directory, it already exists as a file: " + parentFile.getAbsolutePath() );
-
-    // don't test for success, just fighting a race condition otherwise
-    // will get caught downstream
-    if( parentFile != null )
-      parentFile.mkdirs();
-
     if( output == null )
-      output = new FileOutputStream( path, isUpdate() ); // append if we are in update mode
+      output = new TapFileOutputStream( path, isUpdate() ); // append if we are in update mode
 
     return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, path );
     }

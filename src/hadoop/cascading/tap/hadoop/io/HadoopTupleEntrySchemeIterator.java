@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.io;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.util.TimedRecordReader;
+import cascading.tap.hadoop.util.MeasuredRecordReader;
 import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.CloseableIterator;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,16 +37,11 @@ import org.apache.hadoop.mapred.RecordReader;
  */
 public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<JobConf, RecordReader>
   {
-  private TimedRecordReader timedRecordReader;
+  private MeasuredRecordReader measuredRecordReader;
 
-  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap, RecordReader recordReader )
+  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException
     {
-    this( flowProcess, parentTap.getScheme(), new RecordReaderIterator( recordReader ) );
-    }
-
-  public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap ) throws IOException
-    {
-    this( flowProcess, parentTap.getScheme(), new MultiRecordReaderIterator( flowProcess, parentTap ) );
+    this( flowProcess, parentTap.getScheme(), makeIterator( flowProcess, parentTap, recordReader ) );
     }
 
   public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
@@ -54,14 +49,22 @@ public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<Job
     super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( "cascading.source.path" ) );
     }
 
+  private static CloseableIterator<RecordReader> makeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException
+    {
+    if( recordReader != null )
+      return new RecordReaderIterator( recordReader );
+
+    return new MultiRecordReaderIterator( flowProcess, parentTap );
+    }
+
   @Override
   protected RecordReader wrapInput( RecordReader recordReader )
     {
-    if( timedRecordReader == null )
-      timedRecordReader = new TimedRecordReader( getFlowProcess(), SliceCounters.Read_Duration );
+    if( measuredRecordReader == null )
+      measuredRecordReader = new MeasuredRecordReader( getFlowProcess(), SliceCounters.Read_Duration );
 
-    timedRecordReader.setRecordReader( recordReader );
+    measuredRecordReader.setRecordReader( recordReader );
 
-    return timedRecordReader;
+    return measuredRecordReader;
     }
   }

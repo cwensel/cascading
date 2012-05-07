@@ -32,6 +32,8 @@ import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
+import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -85,7 +87,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
   public static final String LOCAL_MODE_SCHEME = "cascading.hadoop.localmode.scheme";
 
   /** Field stringPath */
-  String stringPath;
+  protected String stringPath;
   /** Field uriScheme */
   transient URI uriScheme;
   /** Field path */
@@ -398,29 +400,16 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
   @Override
   public TupleEntryIterator openForRead( FlowProcess<JobConf> flowProcess, RecordReader input ) throws IOException
     {
-    // this is only called when, on the client side, a user wants to open a tap for writing on a client
-    // MultiRecordReader will create a new RecordReader instance for use across any file parts
-    // or on the cluster side during accumulation for a Join
-    //
-    // if custom jobConf properties need to be passed down, use the HadoopFlowProcess copy constructor
-    //
-    if( input == null )
-      return new HadoopTupleEntrySchemeIterator( flowProcess, this );
-
-    // this is only called cluster task side when Hadoop is providing a RecordReader instance it owns
-    // during processing of an InputSplit
+    // input may be null when this method is called on the client side or cluster side when accumulating
+    // for a HashJoin
     return new HadoopTupleEntrySchemeIterator( flowProcess, this, input );
     }
 
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<JobConf> flowProcess, OutputCollector output ) throws IOException
     {
-    // this is only called when, on the client side, a user want to open a tap for reading on the client
-    // or cluster side when this tap is being accumulated into a Join pipe
-    if( output == null )
-      return new HadoopTupleEntrySchemeCollector( flowProcess, this );
-
-    // this is only called cluster task side when Hadoop is providing an OutputCollector instance it owns
+    // output may be null when this method is called on the client side or cluster side when creating
+    // side files with the TemplateTap
     return new HadoopTupleEntrySchemeCollector( flowProcess, this, output );
     }
 

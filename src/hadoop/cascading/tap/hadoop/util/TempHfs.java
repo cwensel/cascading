@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.util;
 
 import java.io.IOException;
 import java.util.Set;
@@ -31,6 +31,7 @@ import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.fs.Path;

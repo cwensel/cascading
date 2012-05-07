@@ -27,7 +27,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
@@ -49,13 +48,11 @@ import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
-import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.test.HadoopPlatform;
 import cascading.test.PlatformRunner;
 import cascading.tuple.Fields;
@@ -243,96 +240,6 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     // confirm the tuple iterator can handle nulls from the source
     validateLength( flow.openSource(), 5 );
-    }
-
-  @Test
-  public void testTemplateTap() throws IOException
-    {
-    getPlatform().copyFromLocal( inputFileJoined );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
-
-    Pipe pipe = new Pipe( "test" );
-
-    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
-
-    Tap sink = new Hfs( new TextLine( 1 ), getOutputPath( "testtemplates" ), SinkMode.REPLACE );
-
-    sink = new TemplateTap( (Hfs) sink, "%s-%s", 1 );
-
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    Tap test = new Hfs( new TextLine( 1 ), sink.getIdentifier().toString() + "/1-a" );
-    validateLength( flow.openTapForRead( test ), 1 );
-
-    test = new Hfs( new TextLine( 1 ), sink.getIdentifier().toString() + "/2-b" );
-    validateLength( flow.openTapForRead( test ), 1 );
-
-    String stringPath = sink.getIdentifier().toString() + "/1-a/" + Hadoop18TapUtil.TEMPORARY_PATH;
-    assertFalse( flow.resourceExists( new Hfs( new TextLine( 1 ), stringPath ) ) );
-
-    stringPath = sink.getIdentifier().toString() + "/2-b/" + Hadoop18TapUtil.TEMPORARY_PATH;
-    assertFalse( flow.resourceExists( new Hfs( new TextLine( 1 ), stringPath ) ) );
-    }
-
-  @Test
-  public void testTemplateTapTextDelimited() throws IOException
-    {
-    getPlatform().copyFromLocal( inputFileJoined );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
-
-    Pipe pipe = new Pipe( "test" );
-
-    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
-
-    Tap sink = new Hfs( new TextDelimited( new Fields( "number", "lower", "upper" ), "+" ), getOutputPath( "testdelimitedtemplates" ), SinkMode.REPLACE );
-
-    sink = new TemplateTap( (Hfs) sink, "%s-%s", 1 );
-
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    Tap test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getIdentifier().toString() + "/1-a" );
-    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
-
-    test = new Hfs( new TextLine( new Fields( "line" ) ), sink.getIdentifier().toString() + "/2-b" );
-    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
-    }
-
-  @Test
-  public void testTemplateTapView() throws IOException
-    {
-    getPlatform().copyFromLocal( inputFileJoined );
-
-    Tap source = new Hfs( new TextLine( new Fields( "line" ) ), inputFileJoined );
-
-    Pipe pipe = new Pipe( "test" );
-
-    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
-
-    Tap sink = new Hfs( new SequenceFile( new Fields( "upper" ) ), getOutputPath( "testtemplatesview" ), SinkMode.REPLACE );
-
-    sink = new TemplateTap( (Hfs) sink, "%s-%s", new Fields( "number", "lower" ), 1 );
-
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
-
-    flow.complete();
-
-    Tap test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getIdentifier().toString() + "/1-a" );
-    validateLength( flow.openTapForRead( test ), 1, 1 );
-
-    test = new Hfs( new SequenceFile( new Fields( "upper" ) ), sink.getIdentifier().toString() + "/2-b" );
-    validateLength( flow.openTapForRead( test ), 1, 1 );
-
-    TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b
-
-    assertEquals( "wrong value", "B", input.next().get( 0 ) );
-
-    input.close();
     }
 
   @Test

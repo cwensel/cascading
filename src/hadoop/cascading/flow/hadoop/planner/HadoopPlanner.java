@@ -51,7 +51,7 @@ import cascading.property.AppProps;
 import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
-import cascading.tap.hadoop.TempHfs;
+import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.jgrapht.GraphPath;

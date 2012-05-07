@@ -22,12 +22,14 @@ package cascading.tap;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.test.HadoopPlatform;
 import cascading.test.LocalPlatform;
 import cascading.test.PlatformRunner;
@@ -138,5 +140,98 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     Tap source = new MultiSourceTap( sourceLower, sourceUpper );
 
     validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10 );
+    }
+
+  @Test
+  public void testTemplateTap() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "testtemplates" ), SinkMode.REPLACE );
+
+    sink = getPlatform().getTemplateTap( sink, "%s-%s", 1 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = getPlatform().getTextFile( sink.getIdentifier().toString() + "/1-a" );
+    validateLength( flow.openTapForRead( test ), 1 );
+
+    test = getPlatform().getTextFile( sink.getIdentifier().toString() + "/2-b" );
+    validateLength( flow.openTapForRead( test ), 1 );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      {
+      String stringPath = sink.getIdentifier().toString() + "/1-a/" + Hadoop18TapUtil.TEMPORARY_PATH;
+      assertFalse( flow.resourceExists( getPlatform().getTextFile( stringPath ) ) );
+
+      stringPath = sink.getIdentifier().toString() + "/2-b/" + Hadoop18TapUtil.TEMPORARY_PATH;
+      assertFalse( flow.resourceExists( getPlatform().getTextFile( stringPath ) ) );
+      }
+    }
+
+  @Test
+  public void testTemplateTapTextDelimited() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), "+", getOutputPath( "testdelimitedtemplates" ), SinkMode.REPLACE );
+
+    sink = getPlatform().getTemplateTap( sink, "%s-%s", 1 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = getPlatform().getTextFile( new Fields( "line" ), sink.getIdentifier().toString() + "/1-a" );
+    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+
+    test = getPlatform().getTextFile( new Fields( "line" ), sink.getIdentifier().toString() + "/2-b" );
+    validateLength( flow.openTapForRead( test ), 1, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+    }
+
+  @Test
+  public void testTemplateTapView() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileJoined );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "upper" ), getOutputPath( "testtemplatesview" ), SinkMode.REPLACE );
+
+    sink = getPlatform().getTemplateTap( sink, "%s-%s", new Fields( "number", "lower" ), 1 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tap test = getPlatform().getDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/1-a", SinkMode.KEEP );
+    validateLength( flow.openTapForRead( test ), 1, 1 );
+
+    test = getPlatform().getDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/2-b", SinkMode.KEEP );
+    validateLength( flow.openTapForRead( test ), 1, 1 );
+
+    TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b
+
+    assertEquals( "wrong value", "B", input.next().get( 0 ) );
+
+    input.close();
     }
   }

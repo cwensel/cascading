@@ -129,4 +129,8 @@ public abstract class TestPlatform
   public abstract Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode );
 
   public abstract Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode );
+
+  public abstract Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold );
+
+  public abstract Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold );
   }

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;

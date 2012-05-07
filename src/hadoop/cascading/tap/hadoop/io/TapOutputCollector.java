@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.io;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -62,6 +62,11 @@ public class TapOutputCollector implements OutputCollector, Closeable
   /** Field reporter */
   private final Reporter reporter = Reporter.NULL;
   private final FlowProcess<JobConf> flowProcess;
+
+  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap ) throws IOException
+    {
+    this( flowProcess, tap, null );
+    }
 
   public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {

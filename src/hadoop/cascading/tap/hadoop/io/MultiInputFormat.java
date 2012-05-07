@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.tap.hadoop;
+package cascading.tap.hadoop.io;
 
 import java.io.IOException;
 import java.util.ArrayList;

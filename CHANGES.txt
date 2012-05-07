@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.t.l.TemplateTap for local mode. Refactored out c.t.BaseTemplateTap to simplify support for additional
+  platforms.
+
   Added c.t.l.StdIn, StdOut, and StdErr local mode c.t.Tap types.
 
   Changed c.f.h.HadoopFlowStep to save step state to the Hadoop distributed cache if larger than Short.MAX_VALUE.

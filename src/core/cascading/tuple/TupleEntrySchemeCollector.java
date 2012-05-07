@@ -27,6 +27,7 @@ import java.io.IOException;
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
+import cascading.tap.Tap;
 import cascading.tap.TapException;
 
 /**
@@ -59,6 +60,11 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
   public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output )
     {
     this( flowProcess, scheme, output, null );
+    }
+
+  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap tap, Output output )
+    {
+    this( flowProcess, tap.getScheme(), output, tap.getIdentifier() );
     }
 
   public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output, String identifier )

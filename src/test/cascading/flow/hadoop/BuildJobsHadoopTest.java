@@ -63,7 +63,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
-import cascading.tap.hadoop.TempHfs;
+import cascading.tap.hadoop.util.TempHfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;

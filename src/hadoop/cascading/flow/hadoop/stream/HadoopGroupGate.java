@@ -30,7 +30,7 @@ import cascading.flow.stream.Duct;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
-import cascading.tap.hadoop.util.TimedOutputCollector;
+import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.OutputCollector;
 
@@ -59,7 +59,7 @@ public abstract class HadoopGroupGate extends SpliceGate
   @Override
   public void prepare()
     {
-    collector = new TimedOutputCollector( flowProcess, SliceCounters.Write_Duration, ( (HadoopFlowProcess) flowProcess ).getOutputCollector() );
+    collector = new MeasuredOutputCollector( flowProcess, SliceCounters.Write_Duration, ( (HadoopFlowProcess) flowProcess ).getOutputCollector() );
     }
 
   @Override
