@@ -38,10 +38,9 @@ public class HasherPartitioner extends TupleHasher implements JobConfigurable
   public void configure( JobConf jobConf )
     {
     if( defaultComparator == null )
-      {
       defaultComparator = TupleSerialization.getDefaultComparator( jobConf );
-      comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
-      }
+
+    comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
 
     initialize( defaultComparator, comparators );
     }
