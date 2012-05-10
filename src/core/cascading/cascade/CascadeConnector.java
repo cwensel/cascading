@@ -55,6 +55,9 @@ import static cascading.cascade.CascadeDef.cascadeDef;
  * input. A sink and source are considered equivalent if the fully qualified identifier, typically {@link Tap#getFullIdentifier(Object)}
  * from either are {@code equals()}.
  * <p/>
+ * <p/>
+ * Note that checkpoint sink Taps from an upstream Flow may be the sources to downstream Flow instances.
+ * <p/>
  * The {@link CascadeDef} is a convenience class for dynamically defining a Cascade that can be passed to the
  * {@link CascadeConnector#connect(CascadeDef)} method.
  * <p/>
@@ -184,6 +187,8 @@ public class CascadeConnector
       {
       LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSourcesCollection() );
       LinkedList<Tap> sinks = new LinkedList<Tap>( flow.getSinksCollection() );
+
+      sinks.addAll( flow.getCheckpointsCollection() );
 
       unwrapCompositeTaps( sources );
       unwrapCompositeTaps( sinks );

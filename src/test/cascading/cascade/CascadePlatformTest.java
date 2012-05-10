@@ -28,12 +28,14 @@ import java.util.concurrent.TimeUnit;
 import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowSkipStrategy;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tap.MultiSourceTap;
@@ -88,6 +90,27 @@ public class CascadePlatformTest extends PlatformTestCase
     Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    }
+
+  private Flow thirdCheckpointFlow( Tap source, String path )
+    {
+    Pipe pipe = new Pipe( "third" );
+
+    pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
+
+    pipe = new Checkpoint( "checkpoint", pipe );
+
+    pipe = new Each( pipe, new Identity() );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( "unusedpath" ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( pipe, source )
+      .addTailSink( pipe, sink )
+      .addCheckpoint( "checkpoint", checkpoint );
+
+    return getPlatform().getFlowConnector().connect( flowDef );
     }
 
   private Flow fourthFlow( Tap source, String path )
@@ -266,5 +289,29 @@ public class CascadePlatformTest extends PlatformTestCase
     assertEquals( second.getProperty( "cascading.cascade.id" ), id );
     assertEquals( third.getProperty( "cascading.cascade.id" ), id );
     assertEquals( fourth.getProperty( "cascading.cascade.id" ), id );
+    }
+
+  @Test
+  public void testCheckpointTapCascade() throws IOException
+    {
+    if( getPlatform() instanceof LocalPlatform )
+      return;
+
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "checkpoint";
+
+    Flow first = firstFlow( path + "/first" );
+    Flow second = secondFlow( first.getSink(), path + "/second" );
+    Flow third = thirdCheckpointFlow( second.getSink(), path + "/third" );
+    Flow fourth = fourthFlow( (Tap) third.getCheckpoints().values().iterator().next(), path + "/fourth" );
+
+    Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
+
+    cascade.start();
+
+    cascade.complete();
+
+    validateLength( fourth, 20 );
     }
   }

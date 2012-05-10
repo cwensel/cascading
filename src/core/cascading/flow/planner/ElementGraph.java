@@ -36,6 +36,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.operation.PlannedOperation;
 import cascading.operation.PlannerLevel;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -75,13 +76,27 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   private Map<String, Tap> sinks;
   /** Field traps */
   private Map<String, Tap> traps;
+  /** Field checkpoints */
+  private Map<String, Tap> checkpoints;
   /** Field assertionLevel */
   private PlannerLevel[] plannerLevels;
-
 
   ElementGraph()
     {
     super( Scope.class );
+    }
+
+  public ElementGraph( ElementGraph pipeGraph )
+    {
+    this();
+    this.sources = pipeGraph.sources;
+    this.sinks = pipeGraph.sinks;
+    this.traps = pipeGraph.traps;
+    this.checkpoints = pipeGraph.checkpoints;
+    this.plannerLevels = pipeGraph.plannerLevels;
+
+    Graphs.addAllVertices( this, pipeGraph.vertexSet() );
+    Graphs.addAllEdges( this, pipeGraph, pipeGraph.edgeSet() );
     }
 
   /**
@@ -91,12 +106,13 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
    */
-  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, PlannerLevel... plannerLevels )
+  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, PlannerLevel... plannerLevels )
     {
     super( Scope.class );
     this.sources = sources;
     this.sinks = sinks;
     this.traps = traps;
+    this.checkpoints = checkpoints;
     this.plannerLevels = plannerLevels;
 
     assembleGraph( pipes, sources, sinks );
@@ -117,6 +133,11 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   public Map<String, Tap> getTrapMap()
     {
     return traps;
+    }
+
+  public Map<String, Tap> getCheckpointsMap()
+    {
+    return checkpoints;
     }
 
   public Collection<Tap> getSources()
@@ -481,7 +502,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       {
       FlowElement flowElement = iterator.next();
 
-      if( flowElement.getClass() == Pipe.class || flowElement instanceof SubAssembly || testPlannerLevel( flowElement ) )
+      if( flowElement.getClass() == Pipe.class || flowElement.getClass() == Checkpoint.class ||
+        flowElement instanceof SubAssembly || testPlannerLevel( flowElement ) )
         {
         // Pipe class is guaranteed to have one input
         removeElement( flowElement );

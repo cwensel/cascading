@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.0 [unreleased]
 
+  Added c.p.Checkpoint pipe to force any supported planners to persist the tuple stream at that location. If bound to
+  a checkpoint c.t.Tap via the c.f.FlowDef, this data will not be cleaned up after the c.f.Flow completes. This pipe
+  is useful in conjunction with a c.p.HashJoin to minimize replicated data.
+
   Added c.t.l.TemplateTap for local mode. Refactored out c.t.BaseTemplateTap to simplify support for additional
   platforms.
 

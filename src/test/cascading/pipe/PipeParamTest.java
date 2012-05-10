@@ -175,8 +175,9 @@ public class PipeParamTest extends CascadingTestCase
     Pipe pipe1 = new Pipe( "fifth", ( (SubAssembly) pipe ).getTails()[ 0 ] );
     Pipe pipe2 = new Pipe( "sixth", ( (SubAssembly) pipe ).getTails()[ 1 ] );
 
-    String[] names = Pipe.names( pipe1, pipe2 );
-
-    assertEquals( 6, names.length );
+    assertEquals( 6, Pipe.names( pipe1, pipe2 ).length );
+    assertEquals( 1, Pipe.named( "second", pipe1, pipe2 ).length );
+    assertEquals( 1, Pipe.named( "sixth", pipe1, pipe2 ).length );
+    assertEquals( pipe2, Pipe.named( "sixth", pipe1, pipe2 )[ 0 ] );
     }
   }

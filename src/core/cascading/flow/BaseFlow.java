@@ -96,6 +96,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   protected Map<String, Tap> sinks = Collections.EMPTY_MAP;
   /** Field traps */
   private Map<String, Tap> traps = Collections.EMPTY_MAP;
+  /** Field checkpoints */
+  private Map<String, Tap> checkpoints = Collections.EMPTY_MAP;
   /** Field stopJobsOnExit */
   protected boolean stopJobsOnExit = true;
   /** Field submitPriority */
@@ -162,6 +164,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     setSources( flowDef.getSourcesCopy() );
     setSinks( flowDef.getSinksCopy() );
     setTraps( flowDef.getTrapsCopy() );
+    setCheckpoints( flowDef.getCheckpointsCopy() );
     initFromProperties( properties );
     initFromTaps();
 
@@ -176,12 +179,20 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     initSteps();
 
-    presentSourceFields();
-    presentSinkFields();
-
     this.flowStats = createPrepareFlowStats(); // must be last
 
     initializeNewJobsMap();
+    }
+
+  public ElementGraph updateSchemes( ElementGraph pipeGraph )
+    {
+    presentSourceFields( pipeGraph );
+
+    pipeGraph = new ElementGraph( pipeGraph );
+
+    presentSinkFields( pipeGraph );
+
+    return new ElementGraph( pipeGraph );
     }
 
   /** Force a Scheme to fetch any fields from a meta-data store */
@@ -191,11 +202,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       tap.retrieveSourceFields( getFlowProcess() );
     }
 
-  /** Present the current resolved fields for the Tap */
-  protected void presentSourceFields()
+  /**
+   * Present the current resolved fields for the Tap
+   *
+   * @param pipeGraph
+   */
+  protected void presentSourceFields( ElementGraph pipeGraph )
     {
     for( Tap tap : sources.values() )
-      tap.presentSourceFields( getFlowProcess(), getFieldsFor( tap ) );
+      tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+
+    for( Tap tap : checkpoints.values() )
+      tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
     }
 
   /** Force a Scheme to fetch any fields from a meta-data store */
@@ -205,14 +223,21 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       tap.retrieveSinkFields( getFlowProcess() );
     }
 
-  /** Present the current resolved fields for the Tap */
-  protected void presentSinkFields()
+  /**
+   * Present the current resolved fields for the Tap
+   *
+   * @param pipeGraph
+   */
+  protected void presentSinkFields( ElementGraph pipeGraph )
     {
     for( Tap tap : sinks.values() )
-      tap.presentSinkFields( getFlowProcess(), getFieldsFor( tap ) );
+      tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+
+    for( Tap tap : checkpoints.values() )
+      tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
     }
 
-  private Fields getFieldsFor( Tap tap )
+  private Fields getFieldsFor( ElementGraph pipeGraph, Tap tap )
     {
     return pipeGraph.outgoingEdgesOf( tap ).iterator().next().getOutValuesFields();
     }
@@ -369,6 +394,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.traps = traps;
     }
 
+  protected void setCheckpoints( Map<String, Tap> checkpoints )
+    {
+    addListeners( checkpoints.values() );
+    this.checkpoints = checkpoints;
+    }
+
   protected void setFlowStepGraph( FlowStepGraph flowStepGraph )
     {
     this.flowStepGraph = flowStepGraph;
@@ -512,6 +543,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     }
 
   @Override
+  public Tap getSink()
+    {
+    return sinks.values().iterator().next();
+    }
+
+  @Override
   public Map<String, Tap> getTraps()
     {
     return Collections.unmodifiableMap( traps );
@@ -524,9 +561,15 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     }
 
   @Override
-  public Tap getSink()
+  public Map<String, Tap> getCheckpoints()
     {
-    return sinks.values().iterator().next();
+    return Collections.unmodifiableMap( checkpoints );
+    }
+
+  @Override
+  public Collection<Tap> getCheckpointsCollection()
+    {
+    return getCheckpoints().values();
     }
 
   @Override
@@ -689,6 +732,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       {
       deleteSinksIfNotUpdate();
       deleteTrapsIfNotUpdate();
+      deleteCheckpointsIfNotUpdate();
       }
     catch( IOException exception )
       {
@@ -965,9 +1009,27 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
+  public void deleteCheckpointsIfNotUpdate() throws IOException
+    {
+    for( Tap tap : checkpoints.values() )
+      {
+      if( !tap.isUpdate() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
   public void deleteTrapsIfReplace() throws IOException
     {
     for( Tap tap : traps.values() )
+      {
+      if( tap.isReplace() )
+        tap.deleteResource( getConfig() );
+      }
+    }
+
+  public void deleteCheckpointsIfReplace() throws IOException
+    {
+    for( Tap tap : checkpoints.values() )
       {
       if( tap.isReplace() )
         tap.deleteResource( getConfig() );

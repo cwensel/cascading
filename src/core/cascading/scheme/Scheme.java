@@ -206,7 +206,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    */
   public boolean isSymmetrical()
     {
-    return getSinkFields().equals( getSourceFields() );
+    return getSourceFields().equals( Fields.UNKNOWN ) && getSinkFields().equals( Fields.ALL ) || getSinkFields().equals( getSourceFields() );
     }
 
   /**
@@ -258,7 +258,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    */
   public void presentSourceFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
     {
-
+    if( getSourceFields().equals( Fields.UNKNOWN ) )
+      setSourceFields( fields );
     }
 
   /**
@@ -290,7 +291,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    */
   public void presentSinkFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
     {
-
+    if( getSinkFields().equals( Fields.ALL ) )
+      setSinkFields( fields );
     }
 
   /**

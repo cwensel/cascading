@@ -451,7 +451,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
     stop = true;
 
-    if( !cascadeStats.isFailed() )
+    if( !cascadeStats.isFinished() )
       cascadeStats.markStopped();
 
     internalStopAllFlows();

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.Pipe;
 import cascading.property.UnitOfWorkDef;
 import cascading.tap.Tap;
@@ -46,6 +47,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   protected Map<String, Tap> sources = new HashMap<String, Tap>();
   protected Map<String, Tap> sinks = new HashMap<String, Tap>();
   protected Map<String, Tap> traps = new HashMap<String, Tap>();
+  protected Map<String, Tap> checkpoints = new HashMap<String, Tap>();
 
   protected List<Pipe> tails = new ArrayList<Pipe>();
 
@@ -277,7 +279,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
     }
 
   /**
-   * Method addTraps adds a Map of the named and {@link Tap} pairs.
+   * Method addTraps adds a Map of the names and {@link Tap} pairs.
    *
    * @param traps of Map<String, Tap>
    * @return FlowDef
@@ -288,6 +290,72 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
       {
       for( Map.Entry<String, Tap> entry : traps.entrySet() )
         addTrap( entry.getKey(), entry.getValue() );
+      }
+
+    return this;
+    }
+
+  /**
+   * Method getCheckpoints returns the checkpoint taps of this FlowDef object.
+   *
+   * @return the checkpoints (type Map<String, Tap>) of this FlowDef object.
+   */
+  public Map<String, Tap> getCheckpoints()
+    {
+    return checkpoints;
+    }
+
+  /**
+   * Method getCheckpointsCopy returns a copy of the checkpoint tap Map.
+   *
+   * @return the checkpointsCopy (type Map<String, Tap>) of this FlowDef object.
+   */
+  public Map<String, Tap> getCheckpointsCopy()
+    {
+    return new HashMap<String, Tap>( checkpoints );
+    }
+
+  /**
+   * Method addCheckpoint adds a new named checkpoint {@link Tap} for use in the resulting {@link Flow}.
+   *
+   * @param name       of String
+   * @param checkpoint of Tap
+   * @return FlowDef
+   */
+  public FlowDef addCheckpoint( String name, Tap checkpoint )
+    {
+    if( checkpoints.containsKey( name ) )
+      throw new IllegalArgumentException( "cannot add duplicate checkpoint: " + name );
+
+    checkpoints.put( name, checkpoint );
+    return this;
+    }
+
+  /**
+   * Method addCheckpoint adds a new checkpoint {@link Tap} named after the given {@link Checkpoint} for use in the resulting {@link Flow}.
+   *
+   * @param pipe       of Pipe
+   * @param checkpoint of Tap
+   * @return FlowDef
+   */
+  public FlowDef addCheckpoint( Checkpoint pipe, Tap checkpoint )
+    {
+    addCheckpoint( pipe.getName(), checkpoint );
+    return this;
+    }
+
+  /**
+   * Method addCheckpoints adds a Map of the names and {@link Tap} pairs.
+   *
+   * @param checkpoints of Map<String, Tap>
+   * @return FlowDef
+   */
+  public FlowDef addCheckpoints( Map<String, Tap> checkpoints )
+    {
+    if( checkpoints != null )
+      {
+      for( Map.Entry<String, Tap> entry : checkpoints.entrySet() )
+        addCheckpoint( entry.getKey(), entry.getValue() );
       }
 
     return this;

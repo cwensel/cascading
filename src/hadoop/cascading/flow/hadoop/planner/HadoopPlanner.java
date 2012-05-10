@@ -76,11 +76,6 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
  * <p/>
  * For example, {@code properties.set("mapred.child.java.opts","-Xmx512m");} would convince Hadoop
  * to spawn all child jvms with a heap of 512MB.
- * <p/>
- * <strong>Properties</strong><br/>
- * <ul>
- * <li>cascading.multimapreduceplanner.job.status.pollinterval</li>
- * </ul>
  */
 public class HadoopPlanner extends FlowPlanner
   {
@@ -218,6 +213,8 @@ public class HadoopPlanner extends FlowPlanner
       // generic
       elementGraph.removeUnnecessaryPipes(); // groups must be added before removing pipes
       elementGraph.resolveFields();
+
+      elementGraph = flow.updateSchemes( elementGraph );
 
       // m/r specific
       handleAdjacentTaps( elementGraph );

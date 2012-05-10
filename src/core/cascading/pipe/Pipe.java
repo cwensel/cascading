@@ -22,7 +22,6 @@ package cascading.pipe;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +31,8 @@ import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 import cascading.util.Util;
+
+import static java.util.Arrays.asList;
 
 /**
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
@@ -102,11 +103,31 @@ public class Pipe implements FlowElement, Serializable
     for( Pipe pipe : pipes )
       {
       if( pipe instanceof SubAssembly )
-        names.addAll( Arrays.asList( ( (SubAssembly) pipe ).getTailNames() ) );
+        names.addAll( asList( ( (SubAssembly) pipe ).getTailNames() ) );
       else
         names.add( pipe.getName() );
 
       collectNames( SubAssembly.unwind( pipe.getPrevious() ), names );
+      }
+    }
+
+  public static Pipe[] named( String name, Pipe... tails )
+    {
+    Set<Pipe> pipes = new HashSet<Pipe>();
+
+    collectPipes( name, tails, pipes );
+
+    return pipes.toArray( new Pipe[ pipes.size() ] );
+    }
+
+  private static void collectPipes( String name, Pipe[] tails, Set<Pipe> pipes )
+    {
+    for( Pipe tail : tails )
+      {
+      if( !( tail instanceof SubAssembly ) && tail.getName().equals( name ) )
+        pipes.add( tail );
+
+      collectPipes( name, SubAssembly.unwind( tail.getPrevious() ), pipes );
       }
     }
 

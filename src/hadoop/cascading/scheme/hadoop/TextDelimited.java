@@ -116,6 +116,18 @@ public class TextDelimited extends TextLine
     }
 
   /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   */
+  public TextDelimited()
+    {
+    this( Fields.ALL, null, "\t", null, null );
+    }
+
+  /**
    * Constructor TextDelimited creates a new TextDelimited instance with TAB as the default delimiter.
    *
    * @param fields of type Fields

@@ -21,7 +21,6 @@
 package cascading.pipe;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +37,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 import cascading.tuple.TupleException;
 import cascading.util.Util;
+
+import static java.util.Arrays.asList;
 
 /**
  * The base class for {@link GroupBy}, {@link CoGroup}, {@link Merge}, and {@link HashJoin}. This class should not be used directly.
@@ -266,11 +267,11 @@ public class Splice extends Pipe
     setKind();
     this.spliceName = spliceName;
 
-    int uniques = new HashSet<Pipe>( Arrays.asList( Pipe.resolvePreviousAll( pipes ) ) ).size();
+    int uniques = new HashSet<Pipe>( asList( Pipe.resolvePreviousAll( pipes ) ) ).size();
 
     if( pipes.length > 1 && uniques == 1 )
       {
-      if( new HashSet<Fields>( Arrays.asList( groupFields ) ).size() != 1 )
+      if( new HashSet<Fields>( asList( groupFields ) ).size() != 1 )
         throw new IllegalArgumentException( "all groupFields must be identical" );
 
       addPipe( pipes[ 0 ] );

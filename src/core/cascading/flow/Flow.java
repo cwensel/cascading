@@ -219,6 +219,13 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   Collection<Tap> getSinksCollection();
 
   /**
+   * Method getSink returns the first sink of this Flow object.
+   *
+   * @return the sink (type Tap) of this Flow object.
+   */
+  Tap getSink();
+
+  /**
    * Method getTraps returns the traps of this Flow object.
    *
    * @return the traps (type Map<String, Tap>) of this Flow object.
@@ -233,11 +240,19 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   Collection<Tap> getTrapsCollection();
 
   /**
-   * Method getSink returns the first sink of this Flow object.
+   * Method getCheckpoints returns the checkpoint taps of this Flow object.
    *
-   * @return the sink (type Tap) of this Flow object.
+   * @return the traps (type Map<String, Tap>) of this Flow object.
    */
-  Tap getSink();
+  Map<String, Tap> getCheckpoints();
+
+  /**
+   * Method getCheckpointsCollection returns a {@link Collection} of checkpoint {@link Tap}s for this Flow object.
+   *
+   * @return the trapsCollection (type Collection<Tap>) of this Flow object.
+   */
+  Collection<Tap> getCheckpointsCollection();
+
 
   /**
    * Method getFlowSkipStrategy returns the current {@link cascading.flow.FlowSkipStrategy} used by this Flow.

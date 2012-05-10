@@ -177,6 +177,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
       {
       deleteSinksIfReplace();
       deleteTrapsIfReplace();
+      deleteCheckpointsIfReplace();
       }
     catch( IOException exception )
       {

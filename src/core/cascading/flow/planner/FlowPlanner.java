@@ -21,7 +21,6 @@
 package cascading.flow.planner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,6 +34,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
+import static java.util.Arrays.asList;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
 public abstract class FlowPlanner
@@ -118,8 +119,13 @@ public abstract class FlowPlanner
     verifyTaps( flowDef.getSinks(), false, true );
     verifyTaps( flowDef.getTraps(), false, false );
 
+    // are both sources and sinks
+    verifyTaps( flowDef.getCheckpoints(), true, false );
+    verifyTaps( flowDef.getCheckpoints(), false, false );
+
     verifyPipeAssemblyEndPoints( flowDef );
     verifyTraps( flowDef );
+    verifyCheckpoints( flowDef );
     }
 
   protected ElementGraph createElementGraph( FlowDef flowDef )
@@ -128,10 +134,12 @@ public abstract class FlowPlanner
     Map<String, Tap> sources = flowDef.getSourcesCopy();
     Map<String, Tap> sinks = flowDef.getSinksCopy();
     Map<String, Tap> traps = flowDef.getTrapsCopy();
+    Map<String, Tap> checkpoints = flowDef.getCheckpointsCopy();
+
     AssertionLevel assertionLevel = flowDef.getAssertionLevel() == null ? this.assertionLevel : flowDef.getAssertionLevel();
     DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
 
-    return new ElementGraph( pipes, sources, sinks, traps, assertionLevel, debugLevel );
+    return new ElementGraph( pipes, sources, sinks, traps, checkpoints, assertionLevel, debugLevel );
     }
 
 
@@ -231,7 +239,7 @@ public abstract class FlowPlanner
     // unlike heads, pipes can input to another pipe and simultaneously be a sink
     // so there is no way to know all the intentional tails, so they aren't listed below in the exception
     remainingSinks = new HashSet<String>( flowDef.getSinks().keySet() );
-    remainingSinks.removeAll( Arrays.asList( Pipe.names( flowDef.getTailsArray() ) ) );
+    remainingSinks.removeAll( asList( Pipe.names( flowDef.getTailsArray() ) ) );
 
     if( remainingSinks.size() != 0 )
       throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
@@ -276,11 +284,9 @@ public abstract class FlowPlanner
 
   protected void verifyTraps( FlowDef flowDef )
     {
-    verifyTrapsNotSourcesSinks( flowDef.getTraps(), flowDef.getSources(), flowDef.getSinks() );
+    verifyNotSourcesSinks( flowDef.getTraps(), flowDef.getSources(), flowDef.getSinks(), "trap" );
 
-    Set<String> names = new HashSet<String>();
-
-    Collections.addAll( names, Pipe.names( flowDef.getTailsArray() ) );
+    Set<String> names = new HashSet<String>( asList( Pipe.names( flowDef.getTailsArray() ) ) );
 
     for( String name : flowDef.getTraps().keySet() )
       {
@@ -289,18 +295,47 @@ public abstract class FlowPlanner
       }
     }
 
-  private void verifyTrapsNotSourcesSinks( Map<String, Tap> traps, Map<String, Tap> sources, Map<String, Tap> sinks )
+  protected void verifyCheckpoints( FlowDef flowDef )
+    {
+    verifyNotSourcesSinks( flowDef.getCheckpoints(), flowDef.getSources(), flowDef.getSinks(), "checkpoint" );
+
+    Set<String> names = new HashSet<String>( asList( Pipe.names( flowDef.getTailsArray() ) ) );
+
+    for( String name : flowDef.getCheckpoints().keySet() )
+      {
+      if( !names.contains( name ) )
+        throw new PlannerException( "checkpoint name not found in assembly: '" + name + "'" );
+
+      Set<Pipe> pipes = new HashSet<Pipe>( asList( Pipe.named( name, flowDef.getTailsArray() ) ) );
+
+      int count = 0;
+
+      for( Pipe pipe : pipes )
+        {
+        if( pipe instanceof Checkpoint )
+          count++;
+        }
+
+      if( count == 0 )
+        throw new PlannerException( "no checkpoint with name found in assembly: '" + name + "'" );
+
+      if( count > 1 )
+        throw new PlannerException( "more than one checkpoint with name found in assembly: '" + name + "'" );
+      }
+    }
+
+  private void verifyNotSourcesSinks( Map<String, Tap> taps, Map<String, Tap> sources, Map<String, Tap> sinks, String role )
     {
     Collection<Tap> sourceTaps = sources.values();
     Collection<Tap> sinkTaps = sinks.values();
 
-    for( Tap tap : traps.values() )
+    for( Tap tap : taps.values() )
       {
       if( sourceTaps.contains( tap ) )
-        throw new PlannerException( "tap may not be used as both a trap and a source in the same Flow: " + tap );
+        throw new PlannerException( "tap may not be used as both a " + role + " and a source in the same Flow: " + tap );
 
       if( sinkTaps.contains( tap ) )
-        throw new PlannerException( "tap may not be used as both a trap and a sink in the same Flow: " + tap );
+        throw new PlannerException( "tap may not be used as both a " + role + " and a sink in the same Flow: " + tap );
       }
     }
 
@@ -358,7 +393,7 @@ public abstract class FlowPlanner
 
         for( FlowElement flowElement : flowElements )
           {
-          if( flowElement instanceof Each )
+          if( flowElement instanceof Each || flowElement instanceof Checkpoint )
             throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
 
           if( flowElement instanceof Every )
@@ -524,7 +559,15 @@ public abstract class FlowPlanner
     {
     LOG.debug( "inserting tap after: {}", pipe );
 
-    graph.insertFlowElementAfter( pipe, makeTempTap( pipe.getName() ) );
+    Tap flowElement = graph.getCheckpointsMap().get( pipe.getName() );
+
+    if( flowElement != null )
+      LOG.info( "found checkpoint: {}, using tap: {}", pipe.getName(), flowElement );
+
+    if( flowElement == null )
+      flowElement = makeTempTap( pipe.getName() );
+
+    graph.insertFlowElementAfter( pipe, flowElement );
     }
 
   /**
@@ -581,6 +624,14 @@ public abstract class FlowPlanner
 
           if( !( flowElement instanceof Group ) )
             foundGroup = false;
+          }
+        else if( flowElement instanceof Checkpoint ) // add tap after checkpoint
+          {
+          if( flowElements.get( i + 1 ) instanceof Tap ) // don't keep inserting
+            continue;
+
+          tapInsertions.add( (Pipe) flowElement );
+          foundGroup = false;
           }
         else if( flowElement instanceof Tap )
           {

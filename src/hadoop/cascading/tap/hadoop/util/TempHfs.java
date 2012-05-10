@@ -121,29 +121,40 @@ public class TempHfs extends Hfs
     }
 
   @Override
-  public Scope outgoingScopeFor( Set<Scope> incoming )
+  public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
+    Fields fields = resolveFields( incomingScopes.iterator().next() );
+
+    setSchemeUsing( fields );
+
+    return new Scope( fields );
+
     // if incoming is Each, both value and group fields are the same
     // if incoming is Every, group fields are only those grouped on
     // if incoming is Group, value fields are all the fields
-    Scope scope = incoming.iterator().next();
-    Fields outgoingFields = null;
+//    Scope scope = incomingScopes.iterator().next();
+//    Fields outgoingFields = null;
+//
+//    if( scope.isGroup() )
+//      outgoingFields = scope.getOutValuesFields();
+//    else
+//      outgoingFields = scope.getOutGroupingFields();
+//
+//    setSchemeUsing( outgoingFields );
+//
+//    return new Scope( outgoingFields );
+    }
 
-    if( scope.isGroup() )
-      outgoingFields = scope.getOutValuesFields();
-    else
-      outgoingFields = scope.getOutGroupingFields();
-
+  private void setSchemeUsing( Fields fields )
+    {
     try
       {
-      setScheme( (Scheme) schemeClass.getConstructor( Fields.class ).newInstance( outgoingFields ) );
+      setScheme( (Scheme) schemeClass.getConstructor( Fields.class ).newInstance( fields ) );
       }
     catch( Exception exception )
       {
       throw new CascadingException( "unable to create specified scheme: " + schemeClass.getName(), exception );
       }
-
-    return new Scope( outgoingFields );
     }
 
   @Override

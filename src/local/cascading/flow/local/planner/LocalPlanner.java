@@ -56,7 +56,7 @@ public class LocalPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
-      LocalFlow localFlow = new LocalFlow( properties, null, flowDef );
+      LocalFlow flow = new LocalFlow( properties, null, flowDef );
 
       elementGraph = createElementGraph( flowDef );
 
@@ -70,11 +70,14 @@ public class LocalPlanner extends FlowPlanner
       elementGraph.removeUnnecessaryPipes(); // groups must be added before removing pipes
       elementGraph.resolveFields();
 
+      // used for checkpointing
+//      elementGraph = flow.updateSchemes( elementGraph );
+
       FlowStepGraph flowStepGraph = new LocalStepGraph( flowDef.getName(), elementGraph );
 
-      localFlow.initialize( elementGraph, flowStepGraph );
+      flow.initialize( elementGraph, flowStepGraph );
 
-      return localFlow;
+      return flow;
       }
     catch( Exception exception )
       {

@@ -121,6 +121,11 @@ public abstract class TestPlatform
     return getDelimitedFile( fields, false, "\t", "\"", null, filename, mode );
     }
 
+  public Tap getDelimitedFile( Fields fields, boolean hasHeader, String filename, SinkMode mode )
+    {
+    return getDelimitedFile( fields, hasHeader, "\t", "\"", null, filename, mode );
+    }
+
   public Tap getDelimitedFile( Fields fields, String delimiter, Class[] types, String filename, SinkMode mode )
     {
     return getDelimitedFile( fields, false, delimiter, "", types, filename, mode );
