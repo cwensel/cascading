@@ -25,7 +25,7 @@ import java.util.List;
 import cascading.tuple.Tuple;
 
 /** Class IndexTuple allows for managing an int index value with a Tuple instance. Used internally for co-grouping values. */
-public class IndexTuple extends Tuple implements Comparable
+public class IndexTuple extends Tuple implements Comparable<Object>
   {
   int index;
   Tuple tuple;

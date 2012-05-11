@@ -57,7 +57,7 @@ import cascading.util.Util;
  * @see org.apache.hadoop.io.serializer.Serialization
  * @see cascading.tuple.hadoop.SerializationToken
  */
-public class Tuple implements Comparable, Iterable, Serializable
+public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   {
   /** A constant empty Tuple instance. This instance is immutable. */
   public static final Tuple NULL = Tuples.asUnmodifiable( new Tuple() );
@@ -784,12 +784,6 @@ public class Tuple implements Comparable, Iterable, Serializable
    */
   public void set( Fields declarator, Fields selector, Tuple tuple )
     {
-//    if( declarator.isUnknown() )
-//      {
-//      elements = (ArrayList<Object>) tuple.elements.clone();
-//      return;
-//      }
-
     set( declarator.getPos( selector ), tuple );
     }
 
@@ -798,7 +792,7 @@ public class Tuple implements Comparable, Iterable, Serializable
    *
    * @return Iterator
    */
-  public Iterator iterator()
+  public Iterator<Object> iterator()
     {
     return elements.iterator();
     }
@@ -1091,5 +1085,4 @@ public class Tuple implements Comparable, Iterable, Serializable
     if( isUnmodifiable )
       throw new UnsupportedOperationException( "this tuple is unmodifiable" );
     }
-
   }
