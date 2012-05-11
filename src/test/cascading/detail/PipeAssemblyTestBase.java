@@ -235,7 +235,7 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
       validateLength( flow, resultLength );
 
     TupleEntryIterator iterator = flow.openSink();
-    Comparable result = iterator.next().get( 1 );
+    Object result = iterator.next().getObject( 1 );
 
     if( resultTuple != null )
       assertEquals( "not equal: ", resultTuple.toString(), result );

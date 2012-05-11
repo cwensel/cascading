@@ -58,56 +58,56 @@ public class TupleTest extends CascadingTestCase
   public void testHas()
     {
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
   public void testGet()
     {
     Tuple aTuple = tuple.get( new int[]{0} );
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
   public void testGetNull()
     {
     Tuple aTuple = tuple.get( (int[]) null );
     assertEquals( "not equal: aTuple.size()", 5, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
-    assertEquals( "not equal: aTuple.get( 1 )", "b", aTuple.get( 1 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
+    assertEquals( "not equal: aTuple.get( 1 )", "b", aTuple.getObject( 1 ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
   public void testRemove()
     {
     Tuple aTuple = tuple.remove( new int[]{0} );
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
 
     assertEquals( "not equal: tuple.size()", 4, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 1 ) );
     }
 
   public void testRemove2()
     {
     Tuple aTuple = tuple.remove( new int[]{2, 4} );
     assertEquals( "not equal: aTuple.size()", 2, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "c", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "c", aTuple.getObject( 0 ) );
 
 
     assertEquals( "not equal: tuple.size()", 3, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "d", tuple.get( 2 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "d", tuple.getObject( 2 ) );
     }
 
   public void testLeave()
@@ -115,11 +115,11 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = tuple.leave( new int[]{0} );
 
     assertEquals( "not equal: tuple.size()", 1, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
 
     assertEquals( "not equal: aTuple.size()", 4, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "b", aTuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "c", aTuple.get( 1 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "b", aTuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", aTuple.getObject( 1 ) );
     }
 
   public void testExtractSet()
@@ -127,19 +127,19 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = tuple.extract( new int[]{0} );
 
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", null, tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( 1 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 2 ) );
+    assertEquals( "not equal: tuple.get( 0 )", null, tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 2 ) );
 
     tuple.set( new int[]{0}, new Tuple( "A" ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "A", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( 1 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( 2 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "A", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 2 ) );
     }
 
   public void testEqualPrimitive()
@@ -323,10 +323,10 @@ public class TupleTest extends CascadingTestCase
 
     Tuple results = Tuples.coerce( tuple, new Class[]{int.class, boolean.class, Date.class, String.class} );
 
-    assertEquals( results.get( 0 ), 1 );
-    assertEquals( results.get( 1 ), false );
-    assertEquals( results.get( 2 ), date );
-    assertEquals( results.get( 3 ), date.toString() );
+    assertEquals( results.getObject( 0 ), 1 );
+    assertEquals( results.getObject( 1 ), false );
+    assertEquals( results.getObject( 2 ), date );
+    assertEquals( results.getObject( 3 ), date.toString() );
     }
 
   public void testCoerceInto()
@@ -339,10 +339,10 @@ public class TupleTest extends CascadingTestCase
                                                       String.class}, destination );
 
     assertTrue( results == destination );
-    assertEquals( results.get( 0 ), 1 );
-    assertEquals( results.get( 1 ), false );
-    assertEquals( results.get( 2 ), date );
-    assertEquals( results.get( 3 ), date.toString() );
+    assertEquals( results.getObject( 0 ), 1 );
+    assertEquals( results.getObject( 1 ), false );
+    assertEquals( results.getObject( 2 ), date );
+    assertEquals( results.getObject( 3 ), date.toString() );
     }
 
   public void testSetAll()
@@ -362,9 +362,9 @@ public class TupleTest extends CascadingTestCase
 
     int count = 0;
     for( int i = 0; i < aTuple.size(); i++ )
-      assertEquals( "wrong value on: " + count, aTuple.get( i ), result.get( count++ ) );
+      assertEquals( "wrong value on: " + count, aTuple.getObject( i ), result.getObject( count++ ) );
 
     for( int i = 0; i < tuple.size(); i++ )
-      assertEquals( "wrong value on: " + count, tuple.get( i ), result.get( count++ ) );
+      assertEquals( "wrong value on: " + count, tuple.getObject( i ), result.getObject( count++ ) );
     }
   }

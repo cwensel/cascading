@@ -103,7 +103,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
       {
       int value = tuple.getInteger( 0 );
       assertTrue( "wrong diff", value - i == 1 );
-      assertEquals( "wrong value", "string number " + count, tuple.get( 3 ).toString() );
+      assertEquals( "wrong value", "string number " + count, tuple.getObject( 3 ).toString() );
       i = value;
       count++;
       }
@@ -112,8 +112,8 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
     Iterator<Tuple> iterator = list.iterator();
 
-    assertEquals( "not equal: iterator.next().get(1)", "string number 0", iterator.next().get( 1 ) );
-    assertEquals( "not equal: iterator.next().get(1)", "string number 1", iterator.next().get( 1 ) );
+    assertEquals( "not equal: iterator.next().get(1)", "string number 0", iterator.next().getObject( 1 ) );
+    assertEquals( "not equal: iterator.next().get(1)", "string number 1", iterator.next().getObject( 1 ) );
     }
 
   @Test

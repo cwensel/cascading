@@ -51,8 +51,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testSplitterGenerator() throws IOException
@@ -67,8 +67,8 @@ public class RegexesTest extends CascadingTestCase
 
     Iterator<Tuple> iterator = collector.iterator();
 
-    assertEquals( "not equal: iterator.next().get(0)", "foo", iterator.next().get( 0 ) );
-    assertEquals( "not equal: iterator.next().get(0)", "bar", iterator.next().get( 0 ) );
+    assertEquals( "not equal: iterator.next().get(0)", "foo", iterator.next().getObject( 0 ) );
+    assertEquals( "not equal: iterator.next().get(0)", "bar", iterator.next().getObject( 0 ) );
     }
 
 
@@ -86,7 +86,7 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo-bar", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo-bar", tuple.getObject( 0 ) );
     }
 
   public void testParserDeclared() throws IOException
@@ -103,8 +103,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testParserDeclared2() throws IOException
@@ -121,8 +121,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testParserDeclared3() throws IOException
@@ -140,7 +140,7 @@ public class RegexesTest extends CascadingTestCase
     Tuple tuple = iterator.next();
 
     assertEquals( "wrong tupel size", 1, tuple.size() );
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
     }
 
   public void testParserDeclared4() throws IOException
@@ -158,7 +158,7 @@ public class RegexesTest extends CascadingTestCase
     Tuple tuple = iterator.next();
 
     assertEquals( "wrong tupel size", 1, tuple.size() );
-    assertEquals( "not equal: tuple.get(0)", "foo\tbar", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo\tbar", tuple.getObject( 0 ) );
     }
 
   /** Contributed by gicode */
@@ -177,7 +177,7 @@ public class RegexesTest extends CascadingTestCase
     Tuple tuple = iterator.next();
 
     assertEquals( "wrong tuple size", 1, tuple.size() );
-    assertEquals( "not equal: tuple.get(0)", "z123", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(0)", "z123", tuple.getObject( 0 ) );
     }
 
   public void testParserDeclared6() throws IOException
@@ -195,7 +195,7 @@ public class RegexesTest extends CascadingTestCase
     Tuple tuple = iterator.next();
 
     assertEquals( "wrong tupel size", 1, tuple.size() );
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
     }
 
 
@@ -213,8 +213,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testParserUnknown2() throws IOException
@@ -231,8 +231,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testParserUnknown3() throws IOException
@@ -249,8 +249,8 @@ public class RegexesTest extends CascadingTestCase
 
     Tuple tuple = iterator.next();
 
-    assertEquals( "not equal: tuple.get(0)", "foo", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get(1)", "bar", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
 
   public void testFilter()

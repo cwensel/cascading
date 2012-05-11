@@ -299,7 +299,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
       {
       try
         {
-        getOutputCollector().collect( tupleEntry.get( 0 ), tupleEntry.get( 1 ) );
+        getOutputCollector().collect( tupleEntry.getObject( 0 ), tupleEntry.getObject( 1 ) );
         }
       catch( IOException exception )
         {

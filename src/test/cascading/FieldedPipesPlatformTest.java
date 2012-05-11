@@ -357,9 +357,9 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     TupleEntryIterator iterator = flow.openSink();
 
-    Comparable line = iterator.next().get( 1 );
+    Object line = iterator.next().getObject( 1 );
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\ta" ) );
-    line = iterator.next().get( 1 );
+    line = iterator.next().getObject( 1 );
     assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\tA" ) );
 
     iterator.close();

@@ -255,13 +255,27 @@ public class TupleEntry
 
   /**
    * Method get returns the value in the given position pos.
+   * <p/>
+   * This method is deprecated, use {@link #getObject(int)} instead.
    *
    * @param pos position of the element to return.
    * @return Comparable
    */
+  @Deprecated
   public Comparable get( int pos )
     {
     return tuple.get( pos );
+    }
+
+  /**
+   * Method get returns the value in the given position pos.
+   *
+   * @param pos position of the element to return.
+   * @return Object
+   */
+  public Object getObject( int pos )
+    {
+    return tuple.getObject( pos );
     }
 
   /**
@@ -269,10 +283,13 @@ public class TupleEntry
    * <br/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
+   * <p/>
+   * This method is deprecated, use {@link #getObject(Comparable)} instead.
    *
    * @param fieldName field name or position to return
    * @return Comparable
    */
+  @Deprecated
   public Comparable get( Comparable fieldName )
     {
     return tuple.get( fields.getPos( asFieldName( fieldName ) ) );

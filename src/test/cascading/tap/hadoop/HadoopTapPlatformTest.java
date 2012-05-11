@@ -172,7 +172,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     TupleEntryIterator iterator = flow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "1 a", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1 a", iterator.next().getObject( 1 ) );
 
     iterator.close();
 
@@ -234,7 +234,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     TupleEntryIterator iterator = flow.openSink();
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().get( 1 ) );
+    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().getObject( 1 ) );
 
     iterator.close();
 

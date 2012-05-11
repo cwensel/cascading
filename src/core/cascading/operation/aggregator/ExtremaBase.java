@@ -107,7 +107,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     TupleEntry entry = aggregatorCall.getArguments();
     Context context = aggregatorCall.getContext();
 
-    Comparable arg = entry.get( 0 );
+    Object arg = entry.getObject( 0 );
 
     if( ignoreValues != null && ignoreValues.contains( arg ) )
       return;

@@ -89,14 +89,14 @@ public class HadoopSerializationPlatformTest extends PlatformTestCase
       Tuple tuple = input.readTuple();
       int value = tuple.getInteger( 0 );
       assertTrue( "wrong diff", value - k == 1 );
-      assertTrue( "wrong type", tuple.get( 3 ) instanceof TestText );
-      assertTrue( "wrong type", tuple.get( 4 ) instanceof Tuple );
-      assertTrue( "wrong type", tuple.get( 5 ) instanceof BytesWritable );
+      assertTrue( "wrong type", tuple.getObject( 3 ) instanceof TestText );
+      assertTrue( "wrong type", tuple.getObject( 4 ) instanceof Tuple );
+      assertTrue( "wrong type", tuple.getObject( 5 ) instanceof BytesWritable );
 
-      byte[] bytes = ( (BytesWritable) tuple.get( 5 ) ).getBytes();
+      byte[] bytes = ( (BytesWritable) tuple.getObject( 5 ) ).getBytes();
       String string = new String( bytes, 0, bytes.length > 1 ? bytes.length - 1 : bytes.length, "UTF-8" );
       assertEquals( "wrong value", Integer.parseInt( string ), i );
-      assertTrue( "wrong type", tuple.get( 6 ) instanceof BooleanWritable );
+      assertTrue( "wrong type", tuple.getObject( 6 ) instanceof BooleanWritable );
       k = value;
       }
 

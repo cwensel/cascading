@@ -194,7 +194,7 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
 
     TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
 
-    assertEquals( iterator.next().get( 0 ), "first,second,third,fourth,fifth" );
+    assertEquals( iterator.next().getObject( 0 ), "first,second,third,fourth,fifth" );
 
     iterator.close();
     }

@@ -230,7 +230,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b
 
-    assertEquals( "wrong value", "B", input.next().get( 0 ) );
+    assertEquals( "wrong value", "B", input.next().getObject( 0 ) );
 
     input.close();
     }

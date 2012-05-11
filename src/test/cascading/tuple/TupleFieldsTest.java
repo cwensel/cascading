@@ -48,8 +48,8 @@ public class TupleFieldsTest extends CascadingTestCase
   public void testHas()
     {
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( fields, new Fields( "one" ) ).get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( fields, new Fields( "two" ) ).get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( fields, new Fields( "one" ) ).getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( fields, new Fields( "two" ) ).getObject( 0 ) );
     }
 
   public void testGet()
@@ -58,11 +58,11 @@ public class TupleFieldsTest extends CascadingTestCase
     Tuple aTuple = tuple.get( fields, aFields );
 
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( 1 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
   public void testWildcard()
@@ -71,8 +71,8 @@ public class TupleFieldsTest extends CascadingTestCase
     Tuple aTuple = tuple.get( fields, aFields );
 
     assertEquals( "not equal: aTuple.size()", 5, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( fields, new Fields( "one" ) ).get( 0 ) );
-    assertEquals( "not equal: aTuple.get( 1 )", "b", aTuple.get( fields, new Fields( "two" ) ).get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( fields, new Fields( "one" ) ).getObject( 0 ) );
+    assertEquals( "not equal: aTuple.get( 1 )", "b", aTuple.get( fields, new Fields( "two" ) ).getObject( 0 ) );
     }
 
   public void testRemove()
@@ -80,13 +80,13 @@ public class TupleFieldsTest extends CascadingTestCase
     Fields aFields = new Fields( "one" );
     Tuple aTuple = tuple.remove( fields, aFields );
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
-    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.get( 0 ) );
+    assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
     fields = fields.subtract( aFields );
 
     assertEquals( "not equal: tuple.size()", 4, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( fields, new Fields( "two" ) ).get( 0 ) );
-    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( fields, new Fields( "three" ) ).get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "b", tuple.get( fields, new Fields( "two" ) ).getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( fields, new Fields( "three" ) ).getObject( 0 ) );
     }
 
   public void testPut()
@@ -95,10 +95,10 @@ public class TupleFieldsTest extends CascadingTestCase
     tuple.put( fields, aFields, new Tuple( "ten", "eleven" ) );
 
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
-    assertEquals( "not equal: tuple.get( 0 )", "ten", tuple.get( 0 ) );
-    assertEquals( "not equal: tuple.get( 0 )", "ten", tuple.get( fields, new Fields( "one" ) ).get( 0 ) );
-    assertEquals( "not equal: tuple.get( 0 )", "eleven", tuple.get( 4 ) );
-    assertEquals( "not equal: tuple.get( 0 )", "eleven", tuple.get( fields, new Fields( "five" ) ).get( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "ten", tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "ten", tuple.get( fields, new Fields( "one" ) ).getObject( 0 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "eleven", tuple.getObject( 4 ) );
+    assertEquals( "not equal: tuple.get( 0 )", "eleven", tuple.get( fields, new Fields( "five" ) ).getObject( 0 ) );
     }
 
   public void testSelectComplex()
@@ -110,10 +110,10 @@ public class TupleFieldsTest extends CascadingTestCase
     Tuple result = tuple.get( declarationA, selectA );
 
     assertEquals( "not equal: ", 5, result.size() );
-    assertEquals( "not equal: ", "movie", result.get( 0 ) );
-    assertEquals( "not equal: ", "name1", result.get( 1 ) );
-    assertEquals( "not equal: ", "rate1", result.get( 2 ) );
-    assertEquals( "not equal: ", "name2", result.get( 3 ) );
-    assertEquals( "not equal: ", "rate2", result.get( 4 ) );
+    assertEquals( "not equal: ", "movie", result.getObject( 0 ) );
+    assertEquals( "not equal: ", "name1", result.getObject( 1 ) );
+    assertEquals( "not equal: ", "rate1", result.getObject( 2 ) );
+    assertEquals( "not equal: ", "name2", result.getObject( 3 ) );
+    assertEquals( "not equal: ", "rate2", result.getObject( 4 ) );
     }
   }

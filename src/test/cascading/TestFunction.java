@@ -89,7 +89,7 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
   @Override
   public void cleanup( FlowProcess flowProcess, OperationCall<Integer> operationCall )
     {
-    if( value != null && value.get( 0 ) == null )
+    if( value != null && value.getObject( 0 ) == null )
       throw new RuntimeException( "tuple was modified" );
     }
 

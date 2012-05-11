@@ -204,10 +204,13 @@ public class Tuple implements Comparable, Iterable, Serializable
    * <p/>
    * This method assumes the element implements {@link Comparable} in order to maintain backwards compatibility. See
    * {@link #getObject(int)} for an alternative.
+   * <p/>
+   * This method is deprecated, use {@link #getObject(int)} instead.
    *
    * @param pos of type int
    * @return Comparable
    */
+  @Deprecated
   public Comparable get( int pos )
     {
     return (Comparable) elements.get( pos );
