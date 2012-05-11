@@ -128,6 +128,57 @@ public class TextDelimited extends TextLine
     }
 
   /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimiter
+   */
+  @ConstructorProperties({"hasHeader", "delimiter"})
+  public TextDelimited( boolean hasHeader, String delimiter )
+    {
+    this( Fields.ALL, null, hasHeader, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimiter
+   * @param quote
+   */
+  @ConstructorProperties({"hasHeader", "delimiter", "quote"})
+  public TextDelimited( boolean hasHeader, String delimiter, String quote )
+    {
+    this( Fields.ALL, null, hasHeader, delimiter, quote, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param sinkCompression
+   * @param hasHeader
+   * @param delimiter
+   * @param quote
+   */
+  @ConstructorProperties({"sinkCompression", "hasHeader", "delimiter", "quote"})
+  public TextDelimited( Compress sinkCompression, boolean hasHeader, String delimiter, String quote )
+    {
+    this( Fields.ALL, sinkCompression, hasHeader, delimiter, quote, null );
+    }
+
+  /**
    * Constructor TextDelimited creates a new TextDelimited instance with TAB as the default delimiter.
    *
    * @param fields of type Fields
@@ -163,6 +214,14 @@ public class TextDelimited extends TextLine
     this( fields, null, hasHeader, hasHeader, delimiter, null, null );
     }
 
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   */
   @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter )
     {

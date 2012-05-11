@@ -106,6 +106,39 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimiter
+   */
+  @ConstructorProperties({"hasHeader", "delimiter"})
+  public TextDelimited( boolean hasHeader, String delimiter )
+    {
+    this( Fields.ALL, hasHeader, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimiter
+   * @param quote
+   */
+  @ConstructorProperties({"hasHeader", "delimiter", "quote"})
+  public TextDelimited( boolean hasHeader, String delimiter, String quote )
+    {
+    this( Fields.ALL, hasHeader, delimiter, quote, null );
+    }
+
+  /**
    * Constructor TextDelimited creates a new TextDelimited instance with TAB as the default delimiter.
    *
    * @param fields of type Fields
