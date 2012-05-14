@@ -39,6 +39,7 @@ import org.apache.log4j.Logger;
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
+  public static final String CASCADING_SOURCE_PATH = "cascading.source.path";
   private static final Logger LOG = Logger.getLogger( MultiInputSplit.class );
 
   /** Field jobConf */
@@ -58,7 +59,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
    */
   public static String getCurrentTapSourcePath( JobConf jobConf )
     {
-    return jobConf.get( "cascading.source.path" );
+    return jobConf.get( CASCADING_SOURCE_PATH );
     }
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )
@@ -84,6 +85,11 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
   public String[] getLocations() throws IOException
     {
     return inputSplit.getLocations();
+    }
+
+  public InputSplit getWrappedInputSplit()
+    {
+    return inputSplit;
     }
 
   public void write( DataOutput out ) throws IOException
@@ -132,7 +138,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
 
       if( path != null )
         {
-        jobConf.set( "cascading.source.path", path.toString() );
+        jobConf.set( CASCADING_SOURCE_PATH, path.toString() );
 
         if( LOG.isInfoEnabled() )
           LOG.info( "current split input path: " + path.toString() );
