@@ -262,7 +262,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
 
       LOG.debug( "handling path: {}", stringPath );
 
-      URI uri = new URI( stringPath );
+      URI uri = new Path( stringPath ).toUri(); // safer URI parsing
       String schemeString = uri.getScheme();
       String authority = uri.getAuthority();
 
