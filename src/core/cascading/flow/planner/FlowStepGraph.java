@@ -68,36 +68,40 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
   /**
    * Method getCreateFlowStep ...
    *
-   * @param steps    of type Map<String, FlowStep>
-   * @param sinkName of type String
-   * @param numJobs  of type int
+   * @param steps   of type Map<String, FlowStep>
+   * @param sink    of type String
+   * @param numJobs of type int
    * @return FlowStep
    */
-  protected FlowStep<Config> getCreateFlowStep( Map<String, FlowStep<Config>> steps, String sinkName, int numJobs )
+  protected FlowStep<Config> getCreateFlowStep( Map<Tap, FlowStep<Config>> steps, Tap sink, int numJobs )
     {
-    if( steps.containsKey( sinkName ) )
-      return steps.get( sinkName );
+    if( steps.containsKey( sink ) )
+      return steps.get( sink );
 
-    LOG.debug( "creating step: {}", sinkName );
+    LOG.debug( "creating step: {}", sink );
 
-    String stepName = makeStepName( steps, numJobs, sinkName );
     int stepNum = steps.size() + 1;
+    String stepName = makeStepName( sink, numJobs, stepNum );
     FlowStep<Config> step = createFlowStep( stepName, stepNum );
 
-    steps.put( sinkName, step );
+    steps.put( sink, step );
 
     return step;
     }
 
   protected abstract FlowStep<Config> createFlowStep( String stepName, int stepNum );
 
-  private String makeStepName( Map<String, FlowStep<Config>> steps, int numJobs, String sinkPath )
+  private String makeStepName( Tap sink, int numJobs, int stepNum )
     {
-    // todo make the long form optional via a property
-    if( sinkPath.length() > 75 )
-      sinkPath = String.format( "...%75s", sinkPath.substring( sinkPath.length() - 75 ) );
+    if( sink.isTemporary() )
+      return String.format( "(%d/%d)", stepNum, numJobs );
 
-    return String.format( "(%d/%d) %s", steps.size() + 1, numJobs, sinkPath );
+    String identifier = sink.getIdentifier();
+
+    if( identifier.length() > 25 )
+      identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
+
+    return String.format( "(%d/%d) %s", stepNum, numJobs, identifier );
     }
 
   protected abstract void makeStepGraph( String flowName, ElementGraph elementGraph );

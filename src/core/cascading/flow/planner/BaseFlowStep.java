@@ -188,7 +188,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   @Override
   public String getStepDisplayName()
     {
-    return String.format( "%s[%s]", getFlowName(), getName() );
+    return String.format( "[%s/%s] %s/%s", getFlowID(), getID(), getFlowName(), getName() );
     }
 
   @Override

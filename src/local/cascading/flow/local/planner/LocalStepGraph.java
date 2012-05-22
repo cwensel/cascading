@@ -20,7 +20,6 @@
 
 package cascading.flow.local.planner;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import cascading.flow.FlowStep;
@@ -48,8 +47,7 @@ public class LocalStepGraph extends FlowStepGraph
 
   protected void makeStepGraph( String flowName, ElementGraph elementGraph )
     {
-    Map<String, FlowStep> steps = new LinkedHashMap<String, FlowStep>();
-    LocalFlowStep step = (LocalFlowStep) getCreateFlowStep( steps, "local", 1 );
+    LocalFlowStep step = (LocalFlowStep) createFlowStep( "local", 1 );
 
     addVertex( step );
 

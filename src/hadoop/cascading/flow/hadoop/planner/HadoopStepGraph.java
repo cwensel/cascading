@@ -82,13 +82,13 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
 
     int numJobs = countNumJobs( tapGraph );
 
-    Map<String, FlowStep<JobConf>> steps = new LinkedHashMap<String, FlowStep<JobConf>>();
-    TopologicalOrderIterator<Tap, Integer> topoIterator = new TopologicalOrderIterator<Tap, Integer>( tapGraph );
+    Map<Tap, FlowStep<JobConf>> steps = new LinkedHashMap<Tap, FlowStep<JobConf>>();
+    TopologicalOrderIterator<Tap, Integer> iterator = new TopologicalOrderIterator<Tap, Integer>( tapGraph );
     int count = 0;
 
-    while( topoIterator.hasNext() )
+    while( iterator.hasNext() )
       {
-      Tap source = topoIterator.next();
+      Tap source = iterator.next();
 
       LOG.debug( "handling source: {}", source );
 
@@ -98,12 +98,12 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
         {
         LOG.debug( "handling path: {} -> {}", source, sink );
 
-        HadoopFlowStep step = (HadoopFlowStep) getCreateFlowStep( steps, sink.toString(), numJobs );
+        HadoopFlowStep step = (HadoopFlowStep) getCreateFlowStep( steps, sink, numJobs );
 
         addVertex( step );
 
-        if( steps.containsKey( source.toString() ) )
-          addEdge( steps.get( source.toString() ), step, count++ );
+        if( steps.containsKey( source ) )
+          addEdge( steps.get( source ), step, count++ );
 
         populateStep( elementGraph, source, sink, step );
         }
