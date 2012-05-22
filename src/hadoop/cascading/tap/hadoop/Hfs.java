@@ -22,10 +22,8 @@ package cascading.tap.hadoop;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
@@ -264,7 +262,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
 
       LOG.debug( "handling path: {}", stringPath );
 
-      URI uri = new URI( URLEncoder.encode( stringPath, "UTF-8" ) ); // encoding allows globbing through
+      URI uri = new URI( stringPath );
       String schemeString = uri.getScheme();
       String authority = uri.getAuthority();
 
@@ -286,10 +284,6 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
       return uriScheme;
       }
     catch( URISyntaxException exception )
-      {
-      throw new TapException( "could not determine scheme from path: " + getIdentifier(), exception );
-      }
-    catch( UnsupportedEncodingException exception )
       {
       throw new TapException( "could not determine scheme from path: " + getIdentifier(), exception );
       }
