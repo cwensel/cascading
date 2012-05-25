@@ -474,4 +474,25 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     validateLength( flow, 3, 2, Pattern.compile( "(1\t.)|(.\ta)" ) );
     }
+
+  @Test
+  public void testGroupNoneSortUnknown() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getTextFile( inputFileJoined );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "none-unknown" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( 1 ), new RegexSplitter( "\t" ) );
+
+    pipe = new GroupBy( pipe, Fields.NONE, Fields.FIRST );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+    }
   }

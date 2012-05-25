@@ -65,7 +65,7 @@ public class SparseTupleComparator implements Comparator<Tuple>
     if( defaultComparator == null )
       defaultComparator = DEFAULT;
 
-    int size = valuesFields != null ? valuesFields.size() : sortFields.size();
+    int size = valuesFields != null && !valuesFields.isUnknown() ? valuesFields.size() : sortFields.size();
     comparators = new Comparator[ size ];
 
     Comparator[] sortFieldComparators = sortFields.getComparators(); // returns a copy

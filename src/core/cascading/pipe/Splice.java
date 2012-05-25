@@ -1060,7 +1060,9 @@ public class Splice extends Pipe
 
       Fields incomingFields;
 
-      if( selector.isAll() )
+      if( selector.isNone() )
+        incomingFields = Fields.NONE;
+      else if( selector.isAll() )
         incomingFields = resolveFields( incomingScope );
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
