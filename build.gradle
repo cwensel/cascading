@@ -152,7 +152,7 @@ task javadocAll( type: Javadoc, dependsOn: [ 'src:core:assemble', 'src:local:ass
   source 'src/test/cascading/test/LocalPlatform.java'
   source 'src/test/cascading/test/HadoopPlatform.java'
 
-  copyright = '<i>Copyright &#169; 2007-2011 Concurrent, Inc. All Rights Reserved.</i>'
+  copyright = '<i>Copyright &#169; 2007-2012 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"
 
   classpath = files( nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath } )
