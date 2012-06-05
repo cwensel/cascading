@@ -55,6 +55,7 @@ if( hadoopVersion.startsWith( "1.0." ) )
 if( hadoopVersion.startsWith( "0.20.205." ) )
 {
   dependencies {
+    runtime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
     runtime 'org.codehaus.jackson:jackson-core-asl:1.0.1'
     runtime 'org.codehaus.jackson:jackson-mapper-asl:1.0.1'
 
