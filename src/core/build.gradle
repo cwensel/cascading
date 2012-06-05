@@ -49,13 +49,16 @@ dependencies {
 }
 
 jar.doFirst {
-  new File( buildDir, 'build.number.properties' ).write( "cascading.build.number=${buildNumber}" )
+  if( !System.properties[ 'cascading.release.final' ] )
+    new File( buildDir, 'build.number.properties' ).write( "cascading.build.number=${buildNumber}" )
 }
 
 jar {
   into( 'cascading' ) {
     from '../../version.properties'
-    from "${buildDir}/build.number.properties"
+
+    if( !System.properties[ 'cascading.release.final' ] )
+      from "${buildDir}/build.number.properties"
   }
 }
 

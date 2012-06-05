@@ -71,7 +71,6 @@ public class Version
     String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
     String releaseMinor = versionProperties.getProperty( "cascading.release.minor" );
     String releaseBuild = versionProperties.getProperty( "cascading.build.number" );
-    String platformVersion = versionProperties.getProperty( "cascading.platform.compatible.version" );
 
     String releaseFull = null;
 
@@ -86,11 +85,6 @@ public class Version
       releaseVersion = String.format( "Concurrent, Inc - Cascading %s", releaseFull );
     else
       releaseVersion = String.format( "Concurrent, Inc - Cascading %s-%s", releaseFull, releaseBuild );
-
-    if( platformVersion == null )
-      releaseVersion = String.format( "%s [%s]", releaseVersion, platformVersion );
-    else
-      releaseVersion = String.format( "%s [%s]", releaseVersion, platformVersion );
 
     return releaseVersion;
     }
