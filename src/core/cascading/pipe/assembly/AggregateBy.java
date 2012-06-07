@@ -444,15 +444,15 @@ public class AggregateBy extends SubAssembly
     initialize( groupingFields, pipes, arguments.toArray( new Fields[ arguments.size() ] ), functors.toArray( new Functor[ functors.size() ] ), aggregators.toArray( new Aggregator[ aggregators.size() ] ) );
     }
 
-  protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argument, Functor functor, Aggregator aggregator, int threshold )
+  protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argumentFields, Functor functor, Aggregator aggregator, int threshold )
     {
     this( name, threshold );
-    initialize( groupingFields, pipes, argument, functor, aggregator );
+    initialize( groupingFields, pipes, argumentFields, functor, aggregator );
     }
 
-  protected void initialize( Fields groupingFields, Pipe[] pipes, Fields argument, Functor functor, Aggregator aggregator )
+  protected void initialize( Fields groupingFields, Pipe[] pipes, Fields argumentFields, Functor functor, Aggregator aggregator )
     {
-    initialize( groupingFields, pipes, Fields.fields( argument ),
+    initialize( groupingFields, pipes, Fields.fields( argumentFields ),
       new Functor[]{functor},
       new Aggregator[]{aggregator} );
     }
