@@ -42,13 +42,21 @@ sourceSets {
 dependencies {
   compile group: 'junit', name: 'junit', version: '4.8.+'
   compile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
-  compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
 }
 
 if( hadoopVersion.startsWith( "1.0." ) )
 {
   dependencies {
+    compile group: 'commons-io', name: 'commons-io', version: '2.1'
+
     runtime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
+  }
+}
+
+if( hadoopVersion.startsWith( "0.20." ) )
+{
+  dependencies {
+    compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
   }
 }
 
@@ -58,7 +66,6 @@ if( hadoopVersion.startsWith( "0.20.205." ) )
     runtime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
     runtime 'org.codehaus.jackson:jackson-core-asl:1.0.1'
     runtime 'org.codehaus.jackson:jackson-mapper-asl:1.0.1'
-
   }
 }
 

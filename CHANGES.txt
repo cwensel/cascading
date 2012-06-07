@@ -1,5 +1,9 @@
 Cascading Change Log
 
+2.0.1 [unreleased]
+
+  Updated dependency to Hadoop 1.0.3
+
 2.0.0
 
   Added c.p.Checkpoint pipe to force any supported planners to persist the tuple stream at that location. If bound to
