@@ -172,10 +172,14 @@ public class MultiInputFormat implements InputFormat
 
     for( int i = 0; i < splits.length; i++ )
       {
+      Map<String, String> config = configs.get( i );
+
+      config.remove( "mapred.input.dir" ); // this is a redundant value, will show up cluster side
+
       InputSplit[] split = splits[ i ];
 
       for( int j = 0; j < split.length; j++ )
-        splitsList.add( new MultiInputSplit( split[ j ], configs.get( i ) ) );
+        splitsList.add( new MultiInputSplit( split[ j ], config ) );
       }
 
     return splitsList.toArray( new InputSplit[ splitsList.size() ] );

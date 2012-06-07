@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.1 [unreleased]
 
+  Removed redundant property value kept by c.t.h.i.MultiInputSplit to reduce input split serialized size.
+
   Updated commit and rollback functionality in c.f.BaseFlow and c.f.p.BaseFlowStep to fail the c.f.Flow on a
   c.t.Tap#commitResource failure and to call Tap#rollbackResource on subsequent tap instances. Note this isn't
   intended to provide a 2PC type transactional functionality.
