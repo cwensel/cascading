@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.management.CascadingServices;
@@ -343,14 +343,88 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return null;
     }
 
-  public void commitSinks()
+  protected Throwable commitSinks()
     {
-    ( (BaseFlow<Config>) flow ).commitTaps( sinks.keySet() );
+    Throwable throwable = null;
+
+    for( Tap tap : sinks.keySet() )
+      {
+      if( throwable != null )
+        rollbackResource( tap );
+      else
+        throwable = commitResource( tap );
+      }
+
+    return throwable;
     }
 
-  public void rollbackSinks()
+  private Throwable commitResource( Tap tap )
     {
-    ( (BaseFlow<Config>) flow ).rollbackTaps( sinks.keySet() );
+    Throwable throwable = null;
+
+    try
+      {
+      if( !tap.commitResource( getConfig() ) )
+        {
+        String message = "unable to commit sink: " + tap.getFullIdentifier( getConfig() );
+
+        logError( message, null );
+
+        throwable = new FlowException( message );
+        }
+      }
+    catch( Throwable exception )
+      {
+      String message = "unable to commit sink: " + tap.getFullIdentifier( getConfig() );
+
+      logError( message, exception );
+
+      throwable = new FlowException( message, exception );
+      }
+
+    return throwable;
+    }
+
+  private Throwable rollbackResource( Tap tap )
+    {
+    Throwable throwable = null;
+
+    try
+      {
+      if( !tap.rollbackResource( getConfig() ) )
+        {
+        String message = "unable to rollback sink: " + tap.getFullIdentifier( getConfig() );
+
+        logError( message, null );
+
+        throwable = new FlowException( message );
+        }
+      }
+    catch( Throwable exception )
+      {
+      String message = "unable to rollback sink: " + tap.getFullIdentifier( getConfig() );
+
+      logError( message, exception );
+
+      throwable = new FlowException( message, exception );
+      }
+
+    return throwable;
+    }
+
+  protected Throwable rollbackSinks()
+    {
+    Throwable throwable = null;
+
+    for( Tap tap : sinks.keySet() )
+      {
+      if( throwable != null )
+        rollbackResource( tap );
+      else
+        throwable = rollbackResource( tap );
+      }
+
+    return throwable;
     }
 
   protected abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );

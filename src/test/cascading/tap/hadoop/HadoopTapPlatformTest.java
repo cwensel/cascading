@@ -347,7 +347,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     final int[] count = {0};
-    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "simple" ), SinkMode.REPLACE )
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committap" ), SinkMode.REPLACE )
     {
     @Override
     public boolean commitResource( JobConf conf ) throws IOException
@@ -363,6 +363,44 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     assertEquals( 1, count[ 0 ] );
     validateLength( flow, 8, null );
+    }
+
+  @Test
+  public void testCommitResourceFails() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committapfail" ), SinkMode.REPLACE )
+    {
+    @Override
+    public boolean commitResource( JobConf conf ) throws IOException
+      {
+      throw new IOException( "failed intentionally" );
+      }
+    };
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    try
+      {
+      flow.complete();
+      fail();
+      }
+    catch( Exception exception )
+      {
+      exception.printStackTrace();
+      // success
+      }
     }
 
   @Test

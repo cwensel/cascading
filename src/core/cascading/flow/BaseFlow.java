@@ -872,37 +872,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   private void commitTraps()
     {
-    commitTaps( traps.values() );
-    }
+    // commit all the traps, don't fail on an error
 
-  public void commitTaps( Collection<Tap> taps )
-    {
-    for( Tap tap : taps )
+    for( Tap tap : traps.values() )
       {
       try
         {
         if( !tap.commitResource( getConfig() ) )
-          throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ) );
+          logError( "unable to commit trap: " + tap.getFullIdentifier( getConfig() ), null );
         }
       catch( IOException exception )
         {
-        throw new FlowException( "unable to commit sink: " + tap.getFullIdentifier( getConfig() ), exception );
-        }
-      }
-    }
-
-  public void rollbackTaps( Collection<Tap> taps )
-    {
-    for( Tap tap : taps )
-      {
-      try
-        {
-        if( !tap.rollbackResource( getConfig() ) )
-          throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ) );
-        }
-      catch( IOException exception )
-        {
-        throw new FlowException( "unable to rollback sink: " + tap.getFullIdentifier( getConfig() ), exception );
+        logError( "unable to commit trap: " + tap.getFullIdentifier( getConfig() ), exception );
         }
       }
     }
@@ -1314,6 +1295,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private void logWarn( String message, Throwable throwable )
     {
     LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    }
+
+  private void logError( String message, Throwable throwable )
+    {
+    LOG.error( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
     }
 
   @Override

@@ -420,6 +420,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * This method is invoked once "client side" and not in the cluster, if any.
    * <p/>
+   * If other sink Tap instance in a given Flow fail on commitResource after called on this instance,
+   * rollbackResource will not be called.
+   * <p/>
    * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
    *
    * @param conf

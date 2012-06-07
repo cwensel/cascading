@@ -196,8 +196,12 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       if( internalNonBlockingIsSuccessful() && !flowStepStats.isFinished() )
         {
-        flowStep.commitSinks();
-        flowStepStats.markSuccessful();
+        throwable = flowStep.commitSinks();
+
+        if( throwable != null )
+          flowStepStats.markFailed( throwable );
+        else
+          flowStepStats.markSuccessful();
         }
       }
 
