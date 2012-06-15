@@ -57,7 +57,7 @@ subprojects { subproject ->
     buildDir = "${rootDir}/build"
     group = 'cascading'
     version = releaseVersion
-    platformVersion = releasePlatformVersion
+    ext.platformVersion = releasePlatformVersion
 
     configurations {
       sshAntTask
@@ -75,10 +75,10 @@ subprojects { subproject ->
     }
 
     task repoUpload( dependsOn: jar ) {
-      repoURL = 'repo@conjars.org:'
-      repoPort = '22'
-      repoKeyfile = System.properties[ 'repo.keyfile' ]
-      repoKeyfilePassphrase = ''
+      ext.repoURL = 'repo@conjars.org:'
+      ext.repoPort = '22'
+      ext.repoKeyfile = System.properties[ 'repo.keyfile' ]
+      ext.repoKeyfilePassphrase = ''
     }
 
     repoUpload << {
@@ -152,7 +152,7 @@ task javadocAll( type: Javadoc, dependsOn: [ 'src:core:assemble', 'src:local:ass
   source 'src/test/cascading/test/LocalPlatform.java'
   source 'src/test/cascading/test/HadoopPlatform.java'
 
-  copyright = '<i>Copyright &#169; 2007-2012 Concurrent, Inc. All Rights Reserved.</i>'
+  ext.copyright = '<i>Copyright &#169; 2007-2012 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"
 
   classpath = files( nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath } )
@@ -216,8 +216,8 @@ repoRelease << {
 
 task buildLatestMeta( dependsOn: buildPackage ) {
 
-  latestArchivePath = null
-  latestReleaseTagPath = null
+  ext.latestArchivePath = null
+  ext.latestReleaseTagPath = null
 }
 
 buildLatestMeta << {
@@ -234,13 +234,13 @@ buildLatestMeta << {
 
 task s3Upload( dependsOn: buildLatestMeta ) {
 
-  awsAccessId = System.properties[ 'publish.aws.accessId' ]
-  awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
-  s3Bucket = System.properties[ 'publish.bucket' ]
+  ext.awsAccessId = System.properties[ 'publish.aws.accessId' ]
+  ext.awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
+  ext.s3Bucket = System.properties[ 'publish.bucket' ]
 
-  remotePath = "cascading/${majorVersion}/"
+  ext.remotePath = "cascading/${majorVersion}/"
 
-  archive = buildPackage.archivePath
+  ext.archive = buildPackage.archivePath
 }
 
 s3Upload << {

@@ -20,31 +20,31 @@
 
 apply from: 'testing.gradle'
 
-xmlProject = project('xml')
-hadoopProject = project('hadoop')
-localProject = project('local')
-coreProject = project('core')
-testProject = project('test')
+ext.xmlProject = project( 'xml' )
+ext.hadoopProject = project( 'hadoop' )
+ext.localProject = project( 'local' )
+ext.coreProject = project( 'core' )
+ext.testProject = project( 'test' )
 
 subprojects { subproject ->
   apply plugin: 'java'
   apply plugin: 'maven'
 
-  configure(subproject.jar) {
+  configure( subproject.jar ) {
     manifest.attributes version: project.version
   }
 
-  task sourceJar(type: Jar, dependsOn:classes) {
-      classifier = 'sources'
-      from sourceSets.main.allSource
-    }
+  task sourceJar( type: Jar, dependsOn: classes ) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
 
-  configure(subproject.artifacts) {
+  configure( subproject.artifacts ) {
     archives jar
     archives sourceJar
   }
 
-  configure(install.repositories.mavenInstaller) {
+  configure( install.repositories.mavenInstaller ) {
     pom.artifactId = "cascading-${project.name}"
     pom.whenConfigured { pom ->
       pom.dependencies.findAll { dep ->
@@ -57,7 +57,7 @@ subprojects { subproject ->
 
   if( subproject.name != 'core' )
   {
-    configure(subproject.dependencies) {
+    configure( subproject.dependencies ) {
       compile coreProject
       runtime coreProject
 
@@ -71,13 +71,13 @@ subprojects { subproject ->
 
   if( subproject.name != 'test' )
   {
-    configure(subproject.dependencies) {
+    configure( subproject.dependencies ) {
       testCompile testProject
       testRuntime testProject
     }
   }
 
-  configure(subproject.test) {
+  configure( subproject.test ) {
     workingDir = rootDir
     forkEvery = 1
     jvmArgs '-Xmx756m'

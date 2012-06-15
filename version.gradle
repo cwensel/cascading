@@ -30,7 +30,7 @@ if( System.properties[ 'aws.properties' ] )
   }
 }
 
-currentCommit = System.properties[ 'build.vcs.number' ];
+project.ext.currentCommit = System.properties[ 'build.vcs.number' ];
 
 if( !currentCommit )
 {
@@ -48,23 +48,23 @@ if( !currentCommit )
 def versionProperties = new Properties()
 file( 'version.properties' ).withInputStream { versionProperties.load( it ) }
 
-releasePlatformVersion = versionProperties[ 'cascading.platform.compatible.version' ]
-majorVersion = versionProperties[ 'cascading.release.major' ]
-minorVersion = versionProperties[ 'cascading.release.minor' ]
+ext.releasePlatformVersion = versionProperties[ 'cascading.platform.compatible.version' ]
+ext.majorVersion = versionProperties[ 'cascading.release.major' ]
+ext.minorVersion = versionProperties[ 'cascading.release.minor' ]
 
-buildNumber = System.getProperty( 'build.number', 'dev' )
+ext.buildNumber = System.getProperty( 'build.number', 'dev' )
 
 if( System.properties[ 'cascading.release.private' ] )
   buildNumber = "priv-${buildNumber}"
 else if( !System.properties[ 'cascading.release.final' ] )
   buildNumber = "wip-${buildNumber}"
 
-releaseTag = buildNumber
+ext.releaseTag = buildNumber
 
 if( !System.properties[ 'build.number' ] )
   releaseTag = "wip-${majorVersion}"
 
-releaseVersion = majorVersion
+ext.releaseVersion = majorVersion
 
 if( minorVersion )
   releaseVersion = "${releaseVersion}.${minorVersion}"
