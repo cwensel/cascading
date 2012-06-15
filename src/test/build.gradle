@@ -83,7 +83,7 @@ assemble << {
 
   copy {
     into distDir
-    from configurations.default.allArtifactFiles
+    from configurations.default.allArtifacts.files
   }
 }
 
