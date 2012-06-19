@@ -87,6 +87,10 @@ public class PlatformRunner extends ParentRunner<Runner>
       {
       return type.newInstance();
       }
+    catch( NoClassDefFoundError exception )
+      {
+      return null;
+      }
     catch( InstantiationException exception )
       {
       throw new RuntimeException( exception );
@@ -116,6 +120,11 @@ public class PlatformRunner extends ParentRunner<Runner>
     for( Class<? extends TestPlatform> type : platform.value() )
       {
       final TestPlatform testPlatform = makeInstance( type );
+
+      // test platform dependencies not installed, so skip
+      if( testPlatform == null )
+        continue;
+
       final String platformName = testPlatform.getName();
 
       LOG.info( "installing platform: {}", platformName );

@@ -89,6 +89,11 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
         for( Class<? extends TestPlatform> platformType : platform.value() )
           {
           TestPlatform testPlatform = makeInstance( platformType );
+
+          // test platform dependencies not installed, so skip
+          if( testPlatform == null )
+            continue;
+
           String platformName = testPlatform.getName();
 
           LOG.info( "installing platform: {}", platformName );
