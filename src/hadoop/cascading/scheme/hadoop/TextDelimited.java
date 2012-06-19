@@ -729,7 +729,8 @@ public class TextDelimited extends TextLine
     if( tap instanceof CompositeTap )
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
-    tap = new Hfs( new TextLine( new Fields( "line" ) ), tap.getIdentifier() );
+    // should revert to file:// (Lfs) if tap is Lfs
+    tap = new Hfs( new TextLine( new Fields( "line" ) ), tap.getFullIdentifier( flowProcess.getConfigCopy() ) );
 
     setSourceFields( delimitedParser.parseFirstLine( flowProcess, tap ) );
 

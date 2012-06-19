@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.1 [unreleased]
 
+  Changed c.s.h.TextDelimited to use fully qualified path when reading headers so that the filesystem scheme
+  will be inherited.
+
   Removed redundant property value kept by c.t.h.i.MultiInputSplit to reduce input split serialized size.
 
   Updated commit and rollback functionality in c.f.BaseFlow and c.f.p.BaseFlowStep to fail the c.f.Flow on a
