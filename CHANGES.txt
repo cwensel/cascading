@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.0.2 [unreleased]
+
 2.0.1
 
   Changed c.s.h.TextDelimited to use fully qualified path when reading headers so that the filesystem scheme
