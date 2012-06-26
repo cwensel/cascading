@@ -24,9 +24,10 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
@@ -128,9 +129,9 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   private SpillStrategy spillStrategy;
 
   /** Field files */
-  private final List<File> files = new ArrayList<File>();
+  private List<File> files = Collections.EMPTY_LIST; // lazy init if we do a spill
   /** Field current */
-  private final List<Object[]> current = new ArrayList<Object[]>( 1000 );
+  private final List<Object[]> current = new LinkedList<Object[]>();
   /** Field size */
   private int size = 0;
   /** Fields listener */
@@ -306,6 +307,9 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
 
     spillListener.notifyWriteSpillEnd( this, System.currentTimeMillis() - start );
+
+    if( files == Collections.EMPTY_LIST )
+      files = new LinkedList<File>();
 
     files.add( file );
     current.clear();

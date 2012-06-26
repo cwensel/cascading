@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.2 [unreleased]
 
+  Changed c.t.c.SpillableTupleList to use j.u.LinkedList to reduce memory footprint when backing a
+  c.t.c.SpillableTupleMap.
+
   Fixed issue where c.p.Merge into the streamed side of a c.p.HashJoin would produce an incorrect plan.
 
   Fixed issue where c.p.CoGroup was not properly resolving fields from immediate prior c.p.Every pipes.
