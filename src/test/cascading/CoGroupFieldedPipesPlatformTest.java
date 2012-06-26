@@ -32,6 +32,7 @@ import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowProps;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
@@ -337,6 +338,54 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     pipeUpper = new Every( pipeUpper, new Fields( "char" ), new First(), Fields.ALL );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  /**
+   * Tests that CoGroup properly resolves fields when following an Every
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testCoGroupAfterEveryNoDeclared() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "aftereverynodeclared" ), SinkMode.REPLACE );
+
+    Function splitter1 = new RegexSplitter( new Fields( "num1", "char1" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter1 );
+    pipeLower = new Each( pipeLower, new Insert( new Fields( "one", "two", "three", "four" ), "one", "two", "three", "four" ), Fields.ALL );
+    pipeLower = new GroupBy( pipeLower, new Fields( "num1" ) );
+    pipeLower = new Every( pipeLower, new Fields( "char1" ), new First(), Fields.ALL );
+
+    Function splitter2 = new RegexSplitter( new Fields( "num2", "char2" ), " " );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter2 );
+    pipeUpper = new GroupBy( pipeUpper, new Fields( "num2" ) );
+    pipeUpper = new Every( pipeUpper, new Fields( "char2" ), new First(), Fields.ALL );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num1" ), pipeUpper, new Fields( "num2" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 

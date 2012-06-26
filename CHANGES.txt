@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.2 [unreleased]
 
+  Fixed issue where c.p.CoGroup was not properly resolving fields from immediate prior c.p.Every pipes.
+
 2.0.1
 
   Changed c.s.h.TextDelimited to use fully qualified path when reading headers so that the filesystem scheme

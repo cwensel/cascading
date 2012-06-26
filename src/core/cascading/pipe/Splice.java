@@ -993,25 +993,28 @@ public class Splice extends Pipe
 
   private Fields createJoinFields( Set<Scope> incomingScopes, Map<String, Fields> groupingSelectors, Fields declared )
     {
-    Fields outGroupingFields;
     Map<String, Fields> incomingFields = new HashMap<String, Fields>();
 
     for( Scope scope : incomingScopes )
-      incomingFields.put( scope.getName(), scope.getOutValuesFields() );
+      incomingFields.put( scope.getName(), resolveFields( scope ) );
 
-    outGroupingFields = new Fields();
+    Fields outGroupingFields = new Fields();
 
     int offset = 0;
     for( Pipe pipe : pipes ) // need to retain order of pipes
       {
-      Fields pipeGroupingSelector = groupingSelectors.get( pipe.getName() );
-      Fields fields = incomingFields.get( pipe.getName() ).selectPos( pipeGroupingSelector, offset );
-      Fields select = declared.select( fields );
+      String pipeName = pipe.getName();
+      Fields pipeGroupingSelector = groupingSelectors.get( pipeName );
+      Fields incomingField = incomingFields.get( pipeName );
 
-      outGroupingFields = outGroupingFields.append( select );
+      Fields offsetFields = incomingField.selectPos( pipeGroupingSelector, offset );
+      Fields resolvedSelect = declared.select( offsetFields );
 
-      offset += incomingFields.get( pipe.getName() ).size();
+      outGroupingFields = outGroupingFields.append( resolvedSelect );
+
+      offset += incomingField.size();
       }
+
     return outGroupingFields;
     }
 
