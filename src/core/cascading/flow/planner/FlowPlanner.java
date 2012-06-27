@@ -39,6 +39,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -670,12 +671,17 @@ public abstract class FlowPlanner
       List<HashJoin> joins = new ArrayList<HashJoin>();
 
       FlowElement lastSourceElement = null;
+      Merge lastMerge = null;
 
       for( int i = 0; i < flowElements.size(); i++ )
         {
         FlowElement flowElement = flowElements.get( i );
 
-        if( flowElement instanceof HashJoin )
+        if( flowElement instanceof Merge )
+          {
+          lastMerge = (Merge) flowElement;
+          }
+        else if( flowElement instanceof HashJoin )
           {
           joins.add( (HashJoin) flowElement );
           }
@@ -683,7 +689,24 @@ public abstract class FlowPlanner
           {
           if( joins.size() < 2 )
             {
+
+            // if a Merge is prior to a HashJoin, and its a streamed path, force Merge results to disk
+            if( joins.size() == 1 && lastMerge != null )
+              {
+              HashJoin join = joins.get( 0 );
+              Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );
+
+              boolean isLeftMost = pathCounts.containsKey( 0 );
+
+              if( isLeftMost )
+                {
+                tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
+                break;
+                }
+              }
+
             lastSourceElement = flowElement;
+            lastMerge = null;
             joins.clear();
             continue;
             }

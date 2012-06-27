@@ -20,6 +20,7 @@
 
 package cascading;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
@@ -387,5 +389,61 @@ public class MergePipesPlatformTest extends PlatformTestCase
 //      exception.printStackTrace();
       // ignore
       }
+    }
+
+  @Test
+  public void testMergeIntoHashJoinStreamed() throws Exception
+    {
+    runMergeIntoHashJoin( true );
+    }
+
+  @Test
+  public void testMergeIntoHashJoinAccumulated() throws Exception
+    {
+    runMergeIntoHashJoin( false );
+    }
+
+  private void runMergeIntoHashJoin( boolean streamed ) throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+    Tap sourceLowerOffset = getPlatform().getTextFile( inputFileLowerOffset );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "offset", sourceLowerOffset );
+
+    String name = streamed ? "streamed" : "accumulated";
+    String path = "mergeintohashjoin" + name;
+    Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char2" ), " " ) );
+
+    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
+
+    if( streamed )
+      splice = new HashJoin( splice, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+    else
+      splice = new HashJoin( pipeOffset, new Fields( "num2" ), splice, new Fields( "num1" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+//    flow.writeDOT( name + ".dot" );
+
+    // two jobs, we must put a temp tap between the Merge and HashJoin
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", streamed ? 2 : 1, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 6 );
     }
   }
