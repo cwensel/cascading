@@ -738,6 +738,18 @@ public class TextDelimited extends TextLine
     }
 
   @Override
+  public void presentSourceFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+    {
+    presentSourceFieldsInternal( fields );
+    }
+
+  @Override
+  public void presentSinkFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+    {
+    presentSinkFieldsInternal( fields );
+    }
+
+  @Override
   public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();

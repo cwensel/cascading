@@ -125,6 +125,18 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     }
 
   @Override
+  public void presentSourceFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+    {
+    // do nothing
+    }
+
+  @Override
+  public void presentSinkFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+    {
+    // do nothing
+    }
+
+  @Override
   public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }

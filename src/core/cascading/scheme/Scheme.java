@@ -258,6 +258,11 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    */
   public void presentSourceFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
     {
+    presentSourceFieldsInternal( fields );
+    }
+
+  protected void presentSourceFieldsInternal( Fields fields )
+    {
     if( getSourceFields().equals( Fields.UNKNOWN ) )
       setSourceFields( fields );
     }
@@ -290,6 +295,11 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * @param fields      of type Fields
    */
   public void presentSinkFields( FlowProcess<Config> flowProcess, Tap tap, Fields fields )
+    {
+    presentSinkFieldsInternal( fields );
+    }
+
+  protected void presentSinkFieldsInternal( Fields fields )
     {
     if( getSinkFields().equals( Fields.ALL ) )
       setSinkFields( fields );

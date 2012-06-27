@@ -261,6 +261,18 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
+  public void presentSourceFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+    {
+    // do nothing to change TextLine state
+    }
+
+  @Override
+  public void presentSinkFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+    {
+    // do nothing to change TextLine state
+    }
+
+  @Override
   public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
     if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )

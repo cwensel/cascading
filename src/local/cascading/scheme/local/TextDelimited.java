@@ -349,7 +349,6 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     this( fields, hasHeader, delimiter, quote, null, true );
     }
 
-
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
@@ -422,6 +421,19 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
 
     return getSourceFields();
+    }
+
+  @Override
+  public void presentSourceFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+    {
+    // do nothing
+    }
+
+  @Override
+  public void presentSinkFields( FlowProcess<Properties> flowProcess, Tap tap, Fields fields )
+    {
+    if( writeHeader )
+      presentSinkFieldsInternal( fields );
     }
 
   @Override
