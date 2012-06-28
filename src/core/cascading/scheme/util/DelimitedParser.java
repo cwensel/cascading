@@ -286,7 +286,7 @@ public class DelimitedParser implements Serializable
           }
         catch( Exception exception )
           {
-          String message = "field " + sourceFields.get( i ) + " cannot be coerced from : " + result[ i ] + " to: " + types[ i ].getName();
+          String message = "field " + sourceFields.get( i ) + " cannot be coerced from : " + split[ i ] + " to: " + types[ i ].getName();
 
           result[ i ] = null;
 

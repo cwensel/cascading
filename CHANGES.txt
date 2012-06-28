@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.2 [unreleased]
 
+  Fixed error message in c.s.u.DelimitedParser where parsed value was not being reported.
+
   Updated c.s.h.TextLine and c.s.l.TextLine to ignore planner presented fields to allow instances to be re-used.
 
   Changed c.t.c.SpillableTupleList to use j.u.LinkedList to reduce memory footprint when backing a
