@@ -263,25 +263,6 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple < aTuple", bTuple.compareTo( aTuple ) > 0 );
     }
 
-
-  public void testParse()
-    {
-    assertTuple( new Tuple( 0 ) );
-    assertTuple( new Tuple( 0, 1 ) );
-    assertTuple( new Tuple( "value" ) );
-    assertTuple( new Tuple( "value", "value" ) );
-    assertTuple( new Tuple( "value", "value", "value" ) );
-    assertTuple( new Tuple( "value", "value", 0 ) );
-    assertTuple( new Tuple( "value", "value", -1 ) );
-    assertTuple( new Tuple( "value", "value", 66.9900d ) );
-    }
-
-  private void assertTuple( Tuple value )
-    {
-    assertEquals( "not same tuple: " + value.print(), value, Tuple.parse( value.print() ) );
-//    assertEquals( "not same tuple: "+ value.print(), value, Tuple.parse( value.toString() ) );
-    }
-
   public void testWritableCompareReadWrite() throws IOException
     {
     Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0", true );
