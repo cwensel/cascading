@@ -157,7 +157,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
 
     // perform last so init above will pass to tasks
-    conf.set( "cascading.version", Version.getVersionString() );
+    String versionString = Version.getVersionString();
+
+    if( versionString != null )
+      conf.set( "cascading.version", versionString );
+
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
 
