@@ -38,8 +38,8 @@ import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
-import cascading.tap.hadoop.util.TempHfs;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tap.hadoop.util.TempHfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
@@ -54,6 +54,7 @@ import cascading.tuple.hadoop.util.ReverseTupleComparator;
 import cascading.tuple.hadoop.util.TupleComparator;
 import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
+import cascading.util.Version;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -156,6 +157,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
 
     // perform last so init above will pass to tasks
+    conf.set( "cascading.version", Version.getVersionString() );
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
 

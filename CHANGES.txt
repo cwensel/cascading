@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.2 [unreleased]
 
+  Added cascading.version property to Hadoop job configuration.
+
   Removed tests for deprecated method c.t.Tuple#parse().
 
   Fixed error message in c.s.u.DelimitedParser where parsed value was not being reported.
