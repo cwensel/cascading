@@ -689,9 +689,11 @@ public abstract class FlowPlanner
           {
           if( joins.size() < 2 )
             {
-
             // if a Merge is prior to a HashJoin, and its a streamed path, force Merge results to disk
-            if( joins.size() == 1 && lastMerge != null )
+            int joinPos = joins.isEmpty() ? 0 : flowElements.indexOf( joins.get( 0 ) );
+            int mergePos = lastMerge == null ? 0 : flowElements.indexOf( lastMerge );
+
+            if( joins.size() == 1 && lastMerge != null && joinPos > mergePos )
               {
               HashJoin join = joins.get( 0 );
               Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );

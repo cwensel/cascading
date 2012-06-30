@@ -37,6 +37,7 @@ import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
+import cascading.pipe.assembly.Retain;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.test.HadoopPlatform;
@@ -445,5 +446,64 @@ public class MergePipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 6 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinStreamed() throws Exception
+    {
+    runHashJoinIntoMergeIntoHashJoin( true );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinAccumulated() throws Exception
+    {
+    runHashJoinIntoMergeIntoHashJoin( false );
+    }
+
+  private void runHashJoinIntoMergeIntoHashJoin( boolean streamed ) throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+    Tap sourceLowerOffset = getPlatform().getTextFile( inputFileLowerOffset );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "offset", sourceLowerOffset );
+
+    String name = streamed ? "streamed" : "accumulated";
+    String path = "hashjoinintomergeintohashjoin" + name;
+    Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char2" ), " " ) );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+
+    splice = new Retain( splice, new Fields( "num1", "char1" ) );
+
+    splice = new Merge( "merge", splice, pipeUpper );
+
+    if( streamed )
+      splice = new HashJoin( splice, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+    else
+      splice = new HashJoin( pipeOffset, new Fields( "num2" ), splice, new Fields( "num1" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+//    flow.writeDOT( name + ".dot" );
+
+    if( getPlatform() instanceof HadoopPlatform )
+      assertEquals( "wrong num jobs", 2, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 8 );
     }
   }
