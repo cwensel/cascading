@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.0.3 [unreleased]
+
 2.0.2
 
   Added cascading.version property to Hadoop job configuration.
