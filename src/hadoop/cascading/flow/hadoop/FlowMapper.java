@@ -74,7 +74,7 @@ public class FlowMapper implements MapRunnable
       if( stepState == null )
         stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
 
-      HadoopFlowStep step = (HadoopFlowStep) deserializeBase64( stepState );
+      HadoopFlowStep step = deserializeBase64( stepState, jobConf, HadoopFlowStep.class );
       Tap source = step.getTapForID( step.getSources(), jobConf.get( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, step, source );

@@ -20,23 +20,16 @@
 
 package cascading.flow.hadoop.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import cascading.flow.FlowException;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -50,6 +43,7 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -64,6 +58,9 @@ import org.slf4j.LoggerFactory;
 public class HadoopUtil
   {
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
+  public static final String ENCODING = "US-ASCII";
+  public static final String SERIALIZATION_FACTORY_KEY = "cascading.flow.serializer";
+  public static final Class<?> DEFAULT_FLOW_SERIALIZER = JavaFlowSerializer.class;
 
   public static void initLog4j( JobConf jobConf )
     {
@@ -162,171 +159,90 @@ public class HadoopUtil
     return null;
     }
 
-  public static String serializeMapBase64( Map<String, String> map, boolean compress ) throws IOException
-    {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
-
-    try
-      {
-      out.writeInt( map.size() );
-
-      for( Map.Entry<String, String> entry : map.entrySet() )
-        writeKeyValue( out, entry.getKey(), entry.getValue() );
-      }
-    finally
-      {
-      out.close();
-      }
-
-    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
-    }
-
-  public static Map<String, String> deserializeMapBase64( String string, boolean decompress ) throws IOException
-    {
-    if( string == null || string.length() == 0 )
-      return null;
-
-    ObjectInputStream in = null;
-
-    try
-      {
-      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
-
-      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
-
-      int mapSize = in.readInt();
-      Map<String, String> map = new HashMap<String, String>( mapSize );
-
-      for( int j = 0; j < mapSize; j++ )
-        map.put( in.readUTF(), readStringAsObject( in ) );
-
-      return map;
-      }
-    finally
-      {
-      if( in != null )
-        in.close();
-      }
-    }
-
-  public static String serializeListMapBase64( List<Map<String, String>> listMap, boolean compress ) throws IOException
-    {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
-    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
-
-    try
-      {
-      out.writeInt( listMap.size() );
-
-      for( Map<String, String> map : listMap )
-        {
-        out.writeInt( map.size() );
-
-        for( Map.Entry<String, String> entry : map.entrySet() )
-          writeKeyValue( out, entry.getKey(), entry.getValue() );
-        }
-      }
-    finally
-      {
-      out.close();
-      }
-
-    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
-    }
-
-  private static void writeKeyValue( ObjectOutputStream out, String key, String value ) throws IOException
+  public static String encodeBytes(byte[] bytes)
     {
     try
       {
-      out.writeUTF( key );
-      // we must writeObject as it knows how to handle large Strings larger than Short max value
-      out.writeObject( value );
+      return new String(Base64.encodeBase64(bytes), ENCODING);
       }
-    catch( IOException exception )
+    catch (UnsupportedEncodingException e)
       {
-      LOG.error( "could not write key/value: " + key + "/" + value, exception );
-      throw exception;
+      throw new RuntimeException(e);
       }
     }
 
-  public static List<Map<String, String>> deserializeListMapBase64( String string, boolean decompress ) throws IOException
-    {
-    if( string == null || string.length() == 0 )
-      return null;
-
-    ObjectInputStream in = null;
-
-    try
-      {
-      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
-
-      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes );
-
-      int listSize = in.readInt();
-      List<Map<String, String>> list = new ArrayList<Map<String, String>>( listSize );
-
-      for( int i = 0; i < listSize; i++ )
-        {
-        int mapSize = in.readInt();
-
-        Map<String, String> map = new HashMap<String, String>( mapSize );
-
-        for( int j = 0; j < mapSize; j++ )
-          map.put( in.readUTF(), readStringAsObject( in ) );
-
-        list.add( map );
-        }
-
-      return list;
-      }
-    finally
-      {
-      if( in != null )
-        in.close();
-      }
-    }
-
-  private static String readStringAsObject( ObjectInputStream in ) throws IOException
+  public static byte[] decodeBytes(String str)
     {
     try
       {
-      return (String) in.readObject();
+      byte[] bytes = str.getBytes(ENCODING);
+      return Base64.decodeBase64(bytes);
       }
-    catch( ClassNotFoundException exception )
+    catch (UnsupportedEncodingException e)
       {
-      throw new FlowException( "could not read string", exception );
+      throw new RuntimeException(e);
       }
     }
 
-  /**
-   * This method serializes the given Object instance and retunrs a String Base64 representation.
-   *
-   * @param object to be serialized
-   * @return String
-   */
-  public static String serializeBase64( Object object ) throws IOException
+  public static <T> FlowSerializer instantiateSerializer(Configuration conf, Class<T> klass)
+    throws ClassNotFoundException
     {
-    return serializeBase64( object, true );
-    }
+    Class<FlowSerializer> flowSerializerClass;
 
-  public static String serializeBase64( Object object, boolean compress ) throws IOException
-    {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    String serializerClassName = conf.get(SERIALIZATION_FACTORY_KEY);
 
-    ObjectOutputStream out = new ObjectOutputStream( compress ? new GZIPOutputStream( bytes ) : bytes );
+    if (serializerClassName == null || serializerClassName.length() == 0)
+      {
+      flowSerializerClass = (Class<FlowSerializer>) DEFAULT_FLOW_SERIALIZER;
+      }
+    else
+      {
+      flowSerializerClass = (Class<FlowSerializer>) Class.forName(serializerClassName);
+      }
+
+    FlowSerializer flowSerializer;
 
     try
       {
-      out.writeObject( object );
-      }
-    finally
-      {
-      out.close();
+      flowSerializer = flowSerializerClass.newInstance();
+
+      if (Configured.class.isAssignableFrom(flowSerializerClass))
+        ((Configured) flowSerializer).setConf(conf);
       }
 
-    return new String( Base64.encodeBase64( bytes.toByteArray() ) );
+    catch (Exception e)
+      {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unable to instantiate serializer \""
+        + flowSerializerClass.getName()
+        + "\" for class: "
+        + klass.getName());
+      }
+
+    if (!flowSerializer.accepts(klass))
+      throw new IllegalArgumentException(serializerClassName + " won't accept objects of class " + klass.toString());
+
+    return flowSerializer;
+    }
+
+  public static <T> String serializeBase64( T object, JobConf conf ) throws IOException
+    {
+    return serializeBase64( object, conf, true );
+    }
+
+  public static <T> String serializeBase64( T object, JobConf conf, boolean compress ) throws IOException
+    {
+    FlowSerializer flowSerializer;
+    try
+      {
+      flowSerializer = instantiateSerializer(conf, object.getClass());
+      }
+    catch (ClassNotFoundException e)
+      {
+      throw new IOException(e);
+      }
+
+    return encodeBytes(flowSerializer.serialize(object, compress));
     }
 
   /**
@@ -335,49 +251,28 @@ public class HadoopUtil
    * @param string
    * @return an Object
    */
-  public static Object deserializeBase64( String string ) throws IOException
+  public static <T> T deserializeBase64( String string, Configuration conf, Class<T> klass) throws IOException
     {
-    return deserializeBase64( string, true );
+    return deserializeBase64( string, conf, klass, true );
     }
 
-  public static Object deserializeBase64( String string, boolean decompress ) throws IOException
+  public static  <T> T deserializeBase64( String string, Configuration conf, Class<T> klass, boolean decompress ) throws IOException
     {
     if( string == null || string.length() == 0 )
       return null;
 
-    ObjectInputStream in = null;
+    FlowSerializer flowSerializer;
 
     try
       {
-      ByteArrayInputStream bytes = new ByteArrayInputStream( Base64.decodeBase64( string.getBytes() ) );
+      flowSerializer = instantiateSerializer(conf, klass);
+      }
+    catch (ClassNotFoundException e)
+      {
+      throw new IOException(e);
+      }
 
-      in = new ObjectInputStream( decompress ? new GZIPInputStream( bytes ) : bytes )
-      {
-      @Override
-      protected Class<?> resolveClass( ObjectStreamClass desc ) throws IOException, ClassNotFoundException
-        {
-        try
-          {
-          return Class.forName( desc.getName(), false, Thread.currentThread().getContextClassLoader() );
-          }
-        catch( ClassNotFoundException exception )
-          {
-          return super.resolveClass( desc );
-          }
-        }
-      };
-
-      return in.readObject();
-      }
-    catch( ClassNotFoundException exception )
-      {
-      throw new FlowException( "unable to deserialize data", exception );
-      }
-    finally
-      {
-      if( in != null )
-        in.close();
-      }
+    return flowSerializer.deserialize(decodeBytes(string), klass, decompress);
     }
 
   public static Class findMainClass( Class defaultType )

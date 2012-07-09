@@ -82,7 +82,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       if( stepState == null )
         stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
 
-      HadoopFlowStep step = (HadoopFlowStep) deserializeBase64( stepState );
+      HadoopFlowStep step = deserializeBase64( stepState, jobConf, HadoopFlowStep.class );
 
       streamGraph = new HadoopReduceStreamGraph( currentProcess, step );
 
