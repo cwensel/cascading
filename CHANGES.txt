@@ -17,6 +17,10 @@ Cascading Change Log
 
   Fixed issue where c.p.CoGroup was not properly resolving fields from immediate prior c.p.Every pipes.
 
+  Flow Serialization is now customizable. To override the default c.f.h.util.JavaFlowSerializer, specify the name of
+  a class that implements c.f.h.u.FlowSerializer (and optionally extends org.apache.hadoop.conf.Configured) via the
+  "cascading.flow.serializer" JobConf property.
+
 2.0.1
 
   Changed c.s.h.TextDelimited to use fully qualified path when reading headers so that the filesystem scheme

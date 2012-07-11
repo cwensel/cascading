@@ -100,10 +100,10 @@ public class HadoopMapStreamGraph extends StepStreamGraph
 
   private JobConf getSourceConf( HadoopFlowProcess flowProcess, JobConf conf, String property )
     {
-    Map<String, String> priorConf = null;
+    Map<String, String> priorConf;
     try
       {
-      priorConf = HadoopUtil.deserializeMapBase64( property, true );
+      priorConf = (Map<String,String>) HadoopUtil.deserializeBase64(property, conf, Map.class, true );
       }
     catch( IOException exception )
       {

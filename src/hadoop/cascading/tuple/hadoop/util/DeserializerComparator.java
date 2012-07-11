@@ -20,9 +20,6 @@
 
 package cascading.tuple.hadoop.util;
 
-import java.io.IOException;
-import java.util.Comparator;
-
 import cascading.CascadingException;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tuple.Fields;
@@ -34,6 +31,9 @@ import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.RawComparator;
+
+import java.io.IOException;
+import java.util.Comparator;
 
 /** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
@@ -85,7 +85,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     try
       {
-      return ( (Fields) HadoopUtil.deserializeBase64( value ) ).getComparators();
+      return HadoopUtil.deserializeBase64( value, conf, Fields.class ).getComparators();
       }
     catch( IOException exception )
       {

@@ -20,26 +20,17 @@
 
 package cascading.tap.hadoop.io;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import cascading.CascadingException;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.util.Util;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.*;
 import org.jets3t.service.S3ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Class MultiInputFormat accepts multiple InputFormat class declarations allowing a single MR job
@@ -77,7 +68,7 @@ public class MultiInputFormat implements InputFormat
 
     try
       {
-      toJob.set( "cascading.multiinputformats", HadoopUtil.serializeListMapBase64( configs, true ) );
+      toJob.set( "cascading.multiinputformats", HadoopUtil.serializeBase64( configs, toJob, true ) );
       }
     catch( IOException exception )
       {
@@ -100,7 +91,8 @@ public class MultiInputFormat implements InputFormat
 
   private List<Map<String, String>> getConfigs( JobConf job ) throws IOException
     {
-    return (List<Map<String, String>>) HadoopUtil.deserializeListMapBase64( job.get( "cascading.multiinputformats" ), true );
+    return (List<Map<String, String>>)
+        HadoopUtil.deserializeBase64( job.get( "cascading.multiinputformats" ), job, List.class, true );
     }
 
   public void validateInput( JobConf job ) throws IOException
