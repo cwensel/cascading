@@ -59,7 +59,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 
-import static cascading.flow.hadoop.util.HadoopUtil.*;
+import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
+import static cascading.flow.hadoop.util.HadoopUtil.writeStateToDistCache;
 
 /**
  *
@@ -165,7 +166,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
 
-    String stepState = pack( this );
+    String stepState = pack( this, conf );
 
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;
@@ -182,14 +183,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     return "local".equals( conf.get( "mapred.job.tracker" ) );
     }
 
-  private String pack( Object object )
+  private String pack( Object object, JobConf conf )
     {
     try
       {
-      if( object instanceof Map )
-        return serializeMapBase64( (Map<String, String>) object, true );
-
-      return serializeBase64( object );
+      return serializeBase64( object, conf, true );
       }
     catch( IOException exception )
       {
@@ -288,7 +286,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     if( fields.hasComparators() )
       {
-      conf.set( property, pack( fields ) );
+      conf.set( property, pack( fields, conf ) );
       return;
       }
 
@@ -341,7 +339,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       JobConf accumulatedJob = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, accumulatedJob );
       Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
-      conf.set( "cascading.step.accumulated.source.conf." + Tap.id( tap ), pack( map ) );
+      conf.set( "cascading.step.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
       }
 
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last

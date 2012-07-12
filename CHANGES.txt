@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.0.3 [unreleased]
 
+  Added c.f.h.u.ObjectSerializer to allow for custom state serializers. To override the default
+  c.f.h.u.JavaObjectSerializer, specify the name of a class that implements ObjectSerializer (and optionally
+  implements o.a.h.c.Configurable) via the "cascading.util.serializer" property.
+
 2.0.2
 
   Added cascading.version property to Hadoop job configuration.

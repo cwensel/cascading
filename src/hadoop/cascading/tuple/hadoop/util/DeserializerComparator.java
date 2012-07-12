@@ -85,7 +85,7 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     try
       {
-      return ( (Fields) HadoopUtil.deserializeBase64( value ) ).getComparators();
+      return HadoopUtil.deserializeBase64( value, conf, Fields.class ).getComparators();
       }
     catch( IOException exception )
       {
