@@ -4,7 +4,7 @@ Cascading Change Log
 
   Added c.f.h.u.ObjectSerializer to allow for custom state serializers. To override the default
   c.f.h.u.JavaObjectSerializer, specify the name of a class that implements ObjectSerializer (and optionally
-  implements o.a.h.c.Configurable) via the "cascading.util.serializer" property.
+  implements o.a.h.c.Configurable) via the "cascading.util.serializer" property. @sritchie
 
 2.0.2
 

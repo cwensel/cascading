@@ -101,7 +101,7 @@ public class MultiInputFormat implements InputFormat
   private List<Map<String, String>> getConfigs( JobConf job ) throws IOException
     {
     return (List<Map<String, String>>)
-      HadoopUtil.deserializeBase64( job.get( "cascading.multiinputformats" ), job, List.class, true );
+      HadoopUtil.deserializeBase64( job.get( "cascading.multiinputformats" ), job, ArrayList.class, true );
     }
 
   public void validateInput( JobConf job ) throws IOException
