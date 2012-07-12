@@ -103,7 +103,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     Map<String, String> priorConf;
     try
       {
-      priorConf = (Map<String, String>) HadoopUtil.deserializeBase64( property, conf, Map.class, true );
+      priorConf = (Map<String, String>) HadoopUtil.deserializeBase64( property, conf, HashMap.class, true );
       }
     catch( IOException exception )
       {
