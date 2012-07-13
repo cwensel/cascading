@@ -167,7 +167,7 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
           }
 
         String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getIdentifier() + "]";
-        String groupName = flowStep.getGroup() == null ? "" : flowStep.getGroup().getName();
+        String groupName = flowStep.getGroups().size() != 1 ? "" : flowStep.getGroup().getName();
 
         String name = "[" + flowStep.getName() + "]";
 

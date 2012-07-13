@@ -30,6 +30,7 @@ import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -74,11 +75,21 @@ public class RegressionMiscPlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Debug() );
 
+    pipe = new GroupBy( pipe, Fields.ALL );
+
+    pipe = new GroupBy( pipe, Fields.ALL );
+
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     String outputPath = getOutputPath( "writedot.dot" );
 
     flow.writeDOT( outputPath );
+
+    assertTrue( new File( outputPath ).exists() );
+
+    outputPath = getOutputPath( "writestepdot.dot" );
+
+    flow.writeStepsDOT( outputPath );
 
     assertTrue( new File( outputPath ).exists() );
     }
