@@ -251,4 +251,42 @@ public class CheckpointPlatformTest extends PlatformTestCase
       // do nothing
       }
     }
+
+  @Test
+  public void testFailCheckpointDeclaredFields() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Checkpoint( "checkpoint", pipe );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "failcheckpointdeclared/sink" ), SinkMode.REPLACE );
+
+    Tap checkpoint = getPlatform().getTextFile( getOutputPath( "failcheckpointdeclared/tap" ), SinkMode.REPLACE );
+
+    FlowDef flowDef = flowDef()
+      .addSource( pipe, source )
+      .addTailSink( pipe, sink )
+      .addCheckpoint( "checkpoint", checkpoint );
+
+    try
+      {
+      Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+      fail();
+      }
+    catch( Exception exception )
+      {
+//      exception.printStackTrace();
+      // do nothing
+      }
+    }
   }

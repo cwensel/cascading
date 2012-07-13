@@ -103,7 +103,7 @@ public class CascadePlatformTest extends PlatformTestCase
     pipe = new Each( pipe, new Identity() );
 
     Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( "unusedpath" ), SinkMode.REPLACE );
-    Tap checkpoint = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( path ), SinkMode.REPLACE );
 
     FlowDef flowDef = FlowDef.flowDef()
       .addSource( pipe, source )

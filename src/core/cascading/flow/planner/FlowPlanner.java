@@ -45,8 +45,10 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.property.PropertyUtil;
+import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tuple.Fields;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -299,6 +301,16 @@ public abstract class FlowPlanner
   protected void verifyCheckpoints( FlowDef flowDef )
     {
     verifyNotSourcesSinks( flowDef.getCheckpoints(), flowDef.getSources(), flowDef.getSinks(), "checkpoint" );
+
+    for( Tap checkpointTap : flowDef.getCheckpoints().values() )
+      {
+      Scheme scheme = checkpointTap.getScheme();
+
+      if( scheme.getSourceFields().equals( Fields.UNKNOWN ) && scheme.getSinkFields().equals( Fields.ALL ) )
+        continue;
+
+      throw new PlannerException( "checkpoint tap scheme must be undeclared, source fields must be UNKNOWN, and sink fields ALL, got: " + scheme.toString() );
+      }
 
     Set<String> names = new HashSet<String>( asList( Pipe.names( flowDef.getTailsArray() ) ) );
 

@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.3 [unreleased]
 
+  Fixed issue where the c.f.p.FlowPlanner would allow declared fields in a checkpoint c.t.Tap instance.
+
   Fixed issue where c.f.Flow#writeStepsDot() would fail if the Flow was planned by the local mode planner.
 
   Added c.f.h.u.ObjectSerializer to allow for custom state serializers. To override the default
