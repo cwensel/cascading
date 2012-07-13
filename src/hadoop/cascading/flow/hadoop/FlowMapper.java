@@ -67,6 +67,9 @@ public class FlowMapper implements MapRunnable
       {
       HadoopUtil.initLog4j( jobConf );
 
+      LOG.info( "cascading version: {}", jobConf.get( "cascading.version", "" ) );
+      LOG.info( "child jvm opts: {}", jobConf.get( "mapred.child.java.opts", "" ) );
+
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, true );
 
       String stepState = jobConf.getRaw( "cascading.flow.step" );

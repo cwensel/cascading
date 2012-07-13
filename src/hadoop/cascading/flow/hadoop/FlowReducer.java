@@ -73,6 +73,10 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       super.configure( jobConf );
       HadoopUtil.initLog4j( jobConf );
+
+      LOG.info( "cascading version: {}", jobConf.get( "cascading.version", "" ) );
+      LOG.info( "child jvm opts: {}", jobConf.get( "mapred.child.java.opts", "" ) );
+
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, false );
 
       timedIterator = new TimedIterator( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
