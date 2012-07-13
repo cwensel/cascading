@@ -101,8 +101,14 @@ public abstract class TupleEntryCollector
   protected abstract void collect( TupleEntry tupleEntry ) throws IOException;
 
   /**
-   * Method close closes the underlying resource being written to. This method should be called when no more {@link Tuple}
-   * instances will be written out.
+   * Method close closes the underlying resource being written to.
+   * <p/>
+   * This method should be called when when an instance is returned via
+   * {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess)}
+   * and no more {@link Tuple} instances will be written out.
+   * <p/>
+   * This method must not be called when an instance is returned from {@code getOutputCollector()} from any of
+   * the relevant {@link cascading.operation.OperationCall} implementations (inside a Function, Aggregator, or Buffer).
    */
   public void close()
     {
