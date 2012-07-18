@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.0.4 [unreleased]
+
 2.0.3
 
   Fixed issue where the c.f.p.FlowPlanner would allow declared fields in a checkpoint c.t.Tap instance.
