@@ -211,7 +211,7 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     verify( sourceFields );
     }
 
-  private void verify( Fields sourceFields )
+  protected void verify( Fields sourceFields )
     {
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
       throw new IllegalArgumentException( "this scheme requires either one or two source fields, given [" + sourceFields + "]" );
