@@ -2,7 +2,9 @@ Cascading Change Log
 
 2.0.4 [unreleased]
 
-  Made the #verify() methods on c.s.l.TextLine and c.s.h.TextLine protected.
+  Updated c.t.h.Hfs internal methods call #getPath() instead of #getIdentifier() so sub-classes can override.
+
+  Updated the #verify() methods on c.s.l.TextLine and c.s.h.TextLine to be protected.
 
 2.0.3
 
