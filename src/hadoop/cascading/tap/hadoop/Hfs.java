@@ -285,7 +285,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
       }
     catch( URISyntaxException exception )
       {
-      throw new TapException( "could not determine scheme from path: " + getIdentifier(), exception );
+      throw new TapException( "could not determine scheme from path: " + getPath(), exception );
       }
     }
 
@@ -419,7 +419,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( LOG.isDebugEnabled() )
       LOG.debug( "making dirs: {}", getFullIdentifier( conf ) );
 
-    return getFileSystem( conf ).mkdirs( new Path( getIdentifier() ) );
+    return getFileSystem( conf ).mkdirs( getPath() );
     }
 
   @Override
@@ -436,7 +436,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
 
     try
       {
-      return fileSystem.delete( new Path( getIdentifier() ), true );
+      return fileSystem.delete( getPath() , true );
       }
     catch( NullPointerException exception )
       {
@@ -451,7 +451,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
   @Override
   public boolean resourceExists( JobConf conf ) throws IOException
     {
-    return getFileSystem( conf ).exists( new Path( getIdentifier() ) );
+    return getFileSystem( conf ).exists( getPath() );
     }
 
   /**
@@ -467,7 +467,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return false;
 
-    return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).isDir();
+    return getFileSystem( conf ).getFileStatus(  getPath()  ).isDir();
     }
 
   /**
@@ -482,12 +482,12 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus(  getPath() );
 
     if( fileStatus.isDir() )
       return 0;
 
-    return getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) ).getLen();
+    return getFileSystem( conf ).getFileStatus( getPath() ).getLen();
     }
 
   /**
@@ -502,7 +502,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
 
     if( fileStatus.isDir() )
       return 0;
@@ -523,7 +523,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
 
     if( fileStatus.isDir() )
       return 0;
@@ -545,7 +545,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ), new OutputLogFilter() );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( getPath() , new OutputLogFilter() );
 
     String[] children = new String[ statuses.length ];
 
@@ -561,7 +561,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( new Path( getIdentifier() ) );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
 
     if( !fileStatus.isDir() )
       return fileStatus.getModificationTime();
@@ -616,6 +616,6 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( statuses != null )
       return;
 
-    statuses = getFileSystem( conf ).listStatus( new Path( getIdentifier() ) );
+    statuses = getFileSystem( conf ).listStatus( getPath() );
     }
   }
