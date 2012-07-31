@@ -98,5 +98,6 @@ public class TestBuffer extends BaseOperation implements Buffer
     if( insertFooter )
       bufferCall.getOutputCollector().add( new Tuple( value ) );
 
+    iterator.hasNext(); // regression
     }
   }
