@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.4 [unreleased]
 
+  Fixed issue where c.f.s.SparseTupleComparator would not properly sort with re-ordered sort fields.
+
   Fixed issue where c.t.TupleEntryChainIterator#hasNext() would fail if called more than once.
 
   Updated c.t.h.Hfs internal methods call #getPath() instead of #getIdentifier() so sub-classes can override.

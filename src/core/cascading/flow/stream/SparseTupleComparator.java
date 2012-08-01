@@ -49,6 +49,7 @@ public class SparseTupleComparator implements Comparator<Tuple>
     }
 
   final Comparator[] comparators;
+  final Integer[] posMap;
 
   public SparseTupleComparator( Fields valuesField, Fields sortFields )
     {
@@ -67,6 +68,7 @@ public class SparseTupleComparator implements Comparator<Tuple>
 
     int size = valuesFields != null && !valuesFields.isUnknown() ? valuesFields.size() : sortFields.size();
     comparators = new Comparator[ size ];
+    posMap = new Integer[ size ];
 
     Comparator[] sortFieldComparators = sortFields.getComparators(); // returns a copy
 
@@ -75,10 +77,11 @@ public class SparseTupleComparator implements Comparator<Tuple>
       Comparable field = sortFields.get( i );
       int pos = valuesFields != null ? valuesFields.getPos( field ) : i;
 
-      comparators[ pos ] = sortFieldComparators[ i ];
+      comparators[ i ] = sortFieldComparators[ i ];
+      posMap[ i ] = pos;
 
-      if( comparators[ pos ] == null )
-        comparators[ pos ] = defaultComparator;
+      if( comparators[ i ] == null )
+        comparators[ i ] = defaultComparator;
       }
     }
 
@@ -97,7 +100,8 @@ public class SparseTupleComparator implements Comparator<Tuple>
       if( comparator == null )
         continue;
 
-      int c = comparator.compare( lhs.getObject( i ), rhs.getObject( i ) );
+      Integer pos = posMap[ i ];
+      int c = comparator.compare( lhs.getObject( pos ), rhs.getObject( pos ) );
 
       if( c != 0 )
         return c;
