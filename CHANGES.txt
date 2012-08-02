@@ -1,5 +1,9 @@
 Cascading Change Log
 
+2.1 [unreleased]
+
+  Updated build and tests to simplify development of alternative planners.
+
 2.0.5
 
   Updated c.f.p.ElementGraphException messages to name disconnected elements.

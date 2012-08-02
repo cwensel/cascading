@@ -22,156 +22,176 @@
   Using:
 
   To run a single test:
-    > gradle -Dtest.single=CoGroupFieldedPipesPlatformTest :src:local:test
+    > gradle -Dest.single=LocalTapPlatformTest :cascading-local:test -i
+
+  To run a single platform test:
+    > gradle -DplatformTest.single=CoGroupFieldedPipesPlatformTest :cascading-local:platformTest -i
 
   To remotely debug use
     -Dtest.debug
 
  */
 
-apply from: 'version.gradle'
+apply from: 'etc/version.gradle'
 
 configurations {
-  sshAntTask
   s3AntTask
 }
 
 dependencies {
-  sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
   s3AntTask 'thirdparty:awstasks:0.3'
 }
 
-repositories {
-  mavenLocal()
-  mavenCentral()
-  mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
-  mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
-}
+allprojects {
 
-subprojects { subproject ->
-  if( subproject.name != 'src' )
-  {
-    apply plugin: 'java'
-    apply plugin: 'maven'
+  apply plugin: 'java'
 
-    buildDir = "${rootDir}/build"
-    group = 'cascading'
-    version = releaseVersion
-    ext.platformVersion = releasePlatformVersion
-
-    configurations {
-      sshAntTask
-    }
-
-    repositories {
-      mavenLocal()
-      mavenCentral()
-      mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
-      mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
-    }
-
-    dependencies {
-      sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
-    }
-
-    task repoUpload( dependsOn: jar ) {
-      ext.repoURL = 'repo@conjars.org:'
-      ext.repoPort = '22'
-      ext.repoKeyfile = System.properties[ 'repo.keyfile' ]
-      ext.repoKeyfilePassphrase = ''
-    }
-
-    repoUpload << {
-
-      pom {
-        artifactId = "cascading-${artifactId}"
-
-        whenConfigured { pom ->
-          pom.dependencies.findAll { dep ->
-            dep.groupId == 'cascading'
-          }.each { dep ->
-            dep.artifactId = "cascading-${dep.artifactId}"
-          }
-        }
-
-        project {
-          licenses {
-            license {
-              name 'The Apache Software License, Version 2.0'
-              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-              distribution 'repo'
-            }
-          }
-        }
-      }.writeTo( "${buildDir}/poms/${project.name}/pom.xml" )
-
-      ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-              classpath: configurations.sshAntTask.asPath )
-
-      assert repoKeyfile
-
-      // conjars expects to see no directories, just files
-      ant.scp( todir: repoURL,
-              keyfile: repoKeyfile, passphrase: repoKeyfilePassphrase, port: repoPort, trust: 'true' ) {
-
-        fileset( dir: "${buildDir}/poms/${project.name}" ) {
-          name = "pom.xml"
-        }
-
-        fileset( dir: "${buildDir}/libs/" ) {
-          name = "cascading-${project.name}-${releaseVersion}.jar"
-        }
-
-        fileset( dir: "${buildDir}/libs/" ) {
-          name = "cascading-${project.name}-${releaseVersion}-sources.jar"
-        }
-      }
-    }
-
-    task ideLibs( type: Sync ) {
-      description = 'Copies the dependencies to the lib folder for use in an ide.'
-      from {
-        configurations.runtime.files { dep -> !( dep instanceof ProjectDependency ) }
-      }
-      into "${rootDir}/lib/${subproject.name}"
-    }
-
-    javadoc.onlyIf { false }
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
+    mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
   }
 }
 
-task javadocAll( type: Javadoc, dependsOn: [ 'src:core:assemble', 'src:local:assemble', 'src:hadoop:assemble', 'src:xml:assemble', 'src:test:assemble' ] ) {
+subprojects {
 
-  def nonSrcSubprojects = subprojects.findAll { ![ 'src', 'test' ].contains( it.name ) }
-  source nonSrcSubprojects.collect { it.sourceSets.main.allJava }
+  apply plugin: 'maven'
+  apply plugin: 'idea'
 
-  source 'src/test/cascading/CascadingTestCase.java'
-  source 'src/test/cascading/PlatformTestCase.java'
-  source 'src/test/cascading/tuple/TupleListCollector.java'
-  source 'src/test/cascading/test/TestPlatform.java'
-  source 'src/test/cascading/test/LocalPlatform.java'
-  source 'src/test/cascading/test/HadoopPlatform.java'
+  apply from: '../etc/testing.gradle'
+
+  group = 'cascading'
+  version = releaseVersion
+
+  dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.8.+'
+  }
+
+  configurations {
+    testArtifacts {
+      extendsFrom testRuntime
+    }
+  }
+
+  task sourcesJar( type: Jar, dependsOn: classes ) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+  }
+
+  task javadocJar( type: Jar, dependsOn: javadoc ) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  task testsJar( type: Jar, dependsOn: testClasses ) {
+    from sourceSets.test.output
+    classifier = 'tests'
+  }
+
+  artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+    archives testsJar
+    testArtifacts testsJar
+  }
+
+  test {
+    include '**/*Test.class'
+  }
+
+  assemble << {
+
+    if( project.name.equals( 'cascading-platform' ) )
+      return
+
+    copy {
+      into "${distDir}/lib/${archivesBaseName}"
+      from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+        !dep.name.contains( 'cascading' ) && !dep.name.contains( 'hadoop' )
+      }.collect { dep ->
+        dep.moduleArtifacts.collect { it.file }
+      } )
+    }
+
+    copy {
+      into distDir
+      from configurations.default.allArtifacts.files
+    }
+  }
+
+  uploadArchives {
+
+    repositories.mavenDeployer {
+      configuration = configurations.archives
+
+      repository( url: repoUrl ) {
+        authentication( userName: repoUserName, password: repoPassword )
+      }
+
+      pom.project {
+        description 'An API for data management, analytics, and machine learning on parallel computing clusters.'
+        inceptionYear '2007'
+        url 'http://cascading.org/'
+        scm {
+          url 'https://github.com/Cascading/cascading.git'
+        }
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+          }
+        }
+      }
+    }
+  }
+}
+
+task javadocAll( type: Javadoc ) {
 
   ext.copyright = '<i>Copyright &#169; 2007-2012 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"
 
-  classpath = files( nonSrcSubprojects.collect { subproject -> subproject.sourceSets.main.compileClasspath } )
-  classpath = files( childProjects[ 'src' ].childProjects[ 'test' ].sourceSets.main.compileClasspath )
+  source subprojects.collect { project ->
+    project.sourceSets.main.allJava
+  }
 
-  destinationDir = new File( rootDir, 'build/docs/javadoc' )
+  source 'cascading-core/src/test/java/cascading/CascadingTestCase.java'
+  source 'cascading-core/src/test/java/cascading/tuple/TupleListCollector.java'
+  source 'cascading-local/src/test/java/cascading/test/LocalPlatform.java'
+  source 'cascading-hadoop/src/test/java/cascading/test/HadoopPlatform.java'
+  source 'cascading-platform/src/test/java/cascading/PlatformTestCase.java'
+  source 'cascading-platform/src/test/java/cascading/platform/TestPlatform.java'
+  source 'cascading-platform/src/test/java/cascading/platform/PlatformRunner.java'
+
+  destinationDir = new File( buildDir, 'javadoc' )
+
+  classpath = files( subprojects.collect { project ->
+    project.sourceSets.test.compileClasspath
+  } )
 
   configure( options ) {
     encoding = "UTF8"
     bottom = copyright
     links = [
-            'http://java.sun.com/javase/6/docs/api/',
+            'http://docs.oracle.com/javase/6/docs/api/',
             'http://dist.codehaus.org/janino/javadoc/',
-            'http://hadoop.apache.org/common/docs/r0.20.2/api/'
+            'http://hadoop.apache.org/common/docs/r1.0.3/api/',
+            'http://junit.sourceforge.net/javadoc/'
     ]
   }
 }
 
-task buildDist( dependsOn: javadocAll ) << {
+task prepareRelease( dependsOn: [ 'cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-xml:build', 'cascading-platform:build' ] )
+
+prepareRelease << {
+  logger.info( 'built all artifacts' )
+}
+
+task buildDist( dependsOn: [ prepareRelease, javadocAll ] ) << {
+
   def distDir = mkdir( "${rootDir}/build/dist" )
 
   copy {
@@ -188,10 +208,11 @@ task buildDist( dependsOn: javadocAll ) << {
   }
 }
 
-task buildPackage( type: Tar, dependsOn: buildDist ) {
-  description = "package current build, does not run tests"
+ext.distDir = mkdir( "${rootDir}/build/dist" )
 
-  def distDir = mkdir( "${rootDir}/build/dist" )
+task buildPackage( type: Tar, dependsOn: buildDist ) {
+
+  description = "package current build, does not run tests"
 
   destinationDir = buildDir
   baseName = "cascading-${releaseVersion}"
@@ -202,18 +223,6 @@ task buildPackage( type: Tar, dependsOn: buildDist ) {
   }
 }
 
-task prepareRelease( dependsOn: [ 'src:core:build', 'src:local:build', 'src:hadoop:build', 'src:xml:build', 'src:test:build' ] )
-
-prepareRelease << {
-  logger.info( 'built all artifacts' )
-}
-
-task repoRelease( dependsOn: [ prepareRelease, 'src:core:repoUpload', 'src:local:repoUpload', 'src:hadoop:repoUpload', 'src:xml:repoUpload', 'src:test:repoUpload' ] )
-
-repoRelease << {
-  logger.info( 'uploaded all artifacts' )
-}
-
 task buildLatestMeta( dependsOn: buildPackage ) {
 
   ext.latestArchivePath = null
@@ -222,55 +231,28 @@ task buildLatestMeta( dependsOn: buildPackage ) {
 
 buildLatestMeta << {
 
-  def publishBucket = System.properties[ 'publish.bucket' ]
   def releaseTar = buildPackage.archivePath.name
 
   latestArchivePath = new File( buildDir, 'latest.txt' )
-  latestArchivePath.write( "http://${publishBucket}/cascading/${majorVersion}/${releaseTar}" )
+  latestArchivePath.write( "http://${s3Bucket}/cascading/${majorVersion}/${releaseTar}" )
 
   latestReleaseTagPath = new File( buildDir, 'latest-tag.txt' )
   latestReleaseTagPath.write( "${releaseTag}" )
 }
 
-task s3Upload( dependsOn: buildLatestMeta ) {
+task s3Upload( dependsOn: buildLatestMeta ) << {
 
-  ext.awsAccessId = System.properties[ 'publish.aws.accessId' ]
-  ext.awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
-  ext.s3Bucket = System.properties[ 'publish.bucket' ]
-
-  ext.remotePath = "cascading/${majorVersion}/"
-
-  ext.archive = buildPackage.archivePath
-}
-
-s3Upload << {
+  def remotePath = "cascading/${majorVersion}/"
 
   ant.taskdef( name: 's3Upload', classname: 'dak.ant.taskdefs.S3Upload',
           classpath: configurations.s3AntTask.asPath )
 
   ant.s3Upload( verbose: 'true', accessId: awsAccessId, secretKey: awsSecretKey,
           bucket: s3Bucket, prefix: remotePath, publicRead: 'true' ) {
-    fileset( file: archive )
+
+    fileset( file: buildPackage.archivePath )
+
     fileset( file: buildLatestMeta.latestArchivePath )
     fileset( file: buildLatestMeta.latestReleaseTagPath )
   }
-}
-
-task sitePublish( dependsOn: s3Upload ) << {
-
-  ant.taskdef( name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-          classpath: configurations.sshAntTask.asPath )
-
-  def publishDownloadPath = System.properties[ 'publish.download.path' ]
-  def publishPort = !System.properties[ 'publish.port' ] ? '22' : System.properties[ 'publish.port' ]
-  def publishKeyFile = System.properties[ 'publish.keyfile' ]
-
-  def remoteToLatestFile = "${publishDownloadPath}/cascading/${majorVersion}/latest.txt"
-  def remoteToLatestReleaseTagFile = "${publishDownloadPath}/cascading/${majorVersion}/latest-tag.txt"
-
-  ant.scp( file: buildLatestMeta.latestArchivePath, remoteToFile: remoteToLatestFile,
-          keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true' )
-
-  ant.scp( file: buildLatestMeta.latestReleaseTagPath, remoteToFile: remoteToLatestReleaseTagFile,
-          keyfile: publishKeyFile, passphrase: '', port: publishPort, trust: 'true' )
 }

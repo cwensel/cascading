@@ -18,4 +18,29 @@
  * limitations under the License.
  */
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop', 'cascading-platform'
+package cascading.management;
+
+import cascading.CascadingException;
+
+/** Exception DocumentServiceException is thrown from within a {@link DocumentService} instance. */
+public class DocumentServiceException extends CascadingException
+  {
+  public DocumentServiceException()
+    {
+    }
+
+  public DocumentServiceException( String string )
+    {
+    super( string );
+    }
+
+  public DocumentServiceException( String string, Throwable throwable )
+    {
+    super( string, throwable );
+    }
+
+  public DocumentServiceException( Throwable throwable )
+    {
+    super( throwable );
+    }
+  }

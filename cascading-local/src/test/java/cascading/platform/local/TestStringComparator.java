@@ -18,4 +18,39 @@
  * limitations under the License.
  */
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop', 'cascading-platform'
+package cascading.platform.local;
+
+import java.io.Serializable;
+import java.util.Comparator;
+
+import cascading.tuple.Hasher;
+
+/**
+ *
+ */
+public class TestStringComparator implements Hasher<String>, Comparator<String>, Serializable
+  {
+  boolean reverse = true;
+
+  public TestStringComparator()
+    {
+    }
+
+  public TestStringComparator( boolean reverse )
+    {
+    this.reverse = reverse;
+    }
+
+  @Override
+  public int compare( String o1, String o2 )
+    {
+    return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
+    }
+
+
+  @Override
+  public int hashCode( String value )
+    {
+    return value.hashCode();
+    }
+  }

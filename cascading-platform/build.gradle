@@ -18,4 +18,26 @@
  * limitations under the License.
  */
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop', 'cascading-platform'
+dependencies {
+
+  compile project( ':cascading-core' )
+
+  testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
+
+  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+}
+
+test {
+  dependsOn << ':cascading-local:platformTest'
+  dependsOn << ':cascading-hadoop:platformTest'
+
+  includes.clear()
+
+  include '**/ComparePlatformsTest.class'
+
+  doFirst() {
+    systemProperties[ 'test.output.roots' ] = rootProject.ext.testRoots.join( "," )
+  }
+}
+
+platformTest.enabled = false

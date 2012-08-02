@@ -4,22 +4,23 @@ Thanks for using Cascading.
 
 ## General Information:
 
-Project and contact information: http://www.cascading.org/
+Project and contact information: [cascading.org](http://cascading.org/)
 
 This distribution includes six Cascading jar files:
 
-* cascading-x.y.z.jar      - all relevant Cascading class files and libraries, with a 'lib' folder
-* cascading-core-x.y.z.jar - all Cascading Core class files
-* cascading-local-x.y.z.jar - all Cascading Local mode class files
-* cascading-hadoop-x.y.z.jar - all Cascading Hadoop mode class files
-* cascading-xml-x.y.z.jar  - all Cascading XML operations class files
-* cascading-test-x.y.z.jar - all Cascading tests and test utilities
+* cascading-core-x.y.z.jar     - all Cascading Core class files
+* cascading-xml-x.y.z.jar      - all Cascading XML operations class files
+* cascading-local-x.y.z.jar    - all Cascading Local mode class files
+* cascading-hadoop-x.y.z.jar   - all Cascading Hadoop mode class files
+* cascading-platform-x.y.z.jar - all Cascading platform tests and test utilities
 
-These jars are all available via www.conjars.org.
+These jars are all available via the [Conjars.org](http://conjars.org) Maven repository.
 
 Hadoop mode is where the Cascading application should run on a Hadoop cluster.
 
 Local mode is where the Cascading application will run locally in memory without any Hadoop dependenices.
+
+The Platform jar only includes tests common across all supported platforms, currently only Local and Hadoop modes.
 
 ## Building:
 
@@ -31,19 +32,19 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading currently requires Gradle 1.0 to build.
+Cascading currently requires Gradle 1.0.
 
-To use an IDE like IntelliJ, run the following to get all jar dependencies:
+To use an IDE like IntelliJ, run the following to get create IntelliJ module files:
 
 ```bash
-> gradle ideLibs
+> gradle ideaModule
 ```
 
 ## Using with Apache Hadoop:
 
-To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop`, (optionally) `cascading-xml` jarfiles and all third-party libs (optionally retrieved by calling `gradle ideLibs`) into the `lib` folder of your job jar and executing your job via `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
-
-Note you do not need to put the lib/hadoop jars in your jar as they are already present in your cluster.
+To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop`, (optionally) `cascading-xml`
+jarfiles and all third-party libs into the `lib` folder of your job jar and executing your job via
+`$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
 For example, your job jar would look like this (via: `jar -t your.jar`)
 

@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: './etc/properties.gradle'
+
+project.ext.currentCommit = System.properties[ 'build.vcs.number' ];
+
+if( !currentCommit )
+{
+  def commitPath = File.createTempFile( "commit", "tmp" )
+
+  ant.exec( dir: '.', executable: "git", output: commitPath ) {
+    arg( line: 'rev-parse HEAD' )
+  }
+
+  currentCommit = commitPath.readLines().get( 0 )
+
+  commitPath.delete()
+}
+
+def versionProperties = new Properties()
+file( 'version.properties' ).withInputStream { versionProperties.load( it ) }
+
+ext.majorVersion = versionProperties[ 'cascading.release.major' ]
+ext.minorVersion = versionProperties[ 'cascading.release.minor' ]
+
+ext.buildNumber = System.getProperty( 'build.number', 'dev' )
+
+if( System.properties[ 'cascading.release.private' ] )
+  buildNumber = "priv-${buildNumber}"
+else if( !System.properties[ 'cascading.release.final' ] )
+  buildNumber = "wip-${buildNumber}"
+
+ext.releaseTag = buildNumber
+
+if( !System.properties[ 'build.number' ] )
+  releaseTag = "wip-${majorVersion}"
+
+ext.releaseVersion = majorVersion
+
+if( minorVersion )
+  releaseVersion = "${releaseVersion}.${minorVersion}"
+
+if( !System.properties[ 'cascading.release.final' ] )
+  releaseVersion = "${releaseVersion}-${buildNumber}"

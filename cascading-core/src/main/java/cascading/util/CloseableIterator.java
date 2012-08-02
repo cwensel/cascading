@@ -18,4 +18,12 @@
  * limitations under the License.
  */
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop', 'cascading-platform'
+package cascading.util;
+
+import java.io.Closeable;
+import java.util.Iterator;
+
+/** Interface CloseableIterator is a helper interface granting an Iterator a close method. */
+public interface CloseableIterator<V> extends Iterator<V>, Closeable
+  {
+  }
