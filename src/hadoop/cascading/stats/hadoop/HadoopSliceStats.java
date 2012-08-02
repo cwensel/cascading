@@ -174,9 +174,6 @@ public class HadoopSliceStats
 
   public CascadingStats.Status getStatus()
     {
-    if( getParentStatus() == STOPPED )
-      return STOPPED;
-
     CascadingStats.Status status = null;
 
     switch( taskReport.getCurrentStatus() )
