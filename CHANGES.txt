@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.4 [unreleased]
 
+  Added missing #equals() method to c.t.TupleEntry that will honor field j.u.Comparator instances.
+
   Fixed issue where c.f.s.SparseTupleComparator would not properly sort with re-ordered sort fields.
 
   Fixed issue where c.t.TupleEntryChainIterator#hasNext() would fail if called more than once.
