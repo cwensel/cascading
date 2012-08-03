@@ -318,7 +318,10 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
       throw new FlowException( "Tap may not have more than one incoming Scope" );
 
     // this allows the incoming to be passed through to the outgoing
-    Fields incomingFields = resolveFields( incomingScopes.iterator().next() );
+    Fields incomingFields = null;
+    if (incomingScopes != null && 
+        !incomingScopes.isEmpty())
+      incomingFields = resolveFields( incomingScopes.iterator().next() );
 
     if( incomingFields != null &&
       ( isSource() && getSourceFields().equals( Fields.UNKNOWN ) ||
