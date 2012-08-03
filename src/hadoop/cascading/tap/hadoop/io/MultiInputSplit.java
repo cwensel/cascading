@@ -34,13 +34,14 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
   public static final String CASCADING_SOURCE_PATH = "cascading.source.path";
-  private static final Logger LOG = Logger.getLogger( MultiInputSplit.class );
+  private static final Logger LOG = LoggerFactory.getLogger( MultiInputSplit.class );
 
   /** Field jobConf */
   private transient JobConf jobConf;
@@ -140,8 +141,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
         {
         jobConf.set( CASCADING_SOURCE_PATH, path.toString() );
 
-        if( LOG.isInfoEnabled() )
-          LOG.info( "current split input path: " + path.toString() );
+        LOG.info( "current split input path: {}" + path );
         }
       }
     }

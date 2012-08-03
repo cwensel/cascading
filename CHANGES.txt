@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.4 [unreleased]
 
+  Removed remnant log4j dependency in c.t.h.i.MultiInputSplit.
+
   Fixed issue where c.t.Tap may fail resolving outgoing fields.
 
   Added missing #equals() method to c.t.TupleEntry that will honor field j.u.Comparator instances.
