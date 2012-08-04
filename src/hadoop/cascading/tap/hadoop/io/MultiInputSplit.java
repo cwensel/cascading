@@ -141,7 +141,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
         {
         jobConf.set( CASCADING_SOURCE_PATH, path.toString() );
 
-        LOG.info( "current split input path: {}" + path );
+        LOG.info( "current split input path: {}", path );
         }
       }
     }
