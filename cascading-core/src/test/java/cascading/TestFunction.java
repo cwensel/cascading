@@ -71,12 +71,12 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
   public void operate( FlowProcess flowProcess, FunctionCall<Integer> functionCall )
     {
     if( value == null )
-      throw new RuntimeException( "function failed" );
+      throw new RuntimeException( "function failed intentionally" );
 
     try
       {
       if( functionCall.getContext() == failon )
-        throw new RuntimeException( "function failed" );
+        throw new RuntimeException( "function failed intentionally on tuple number: " + failon );
       }
     finally
       {

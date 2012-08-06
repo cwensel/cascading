@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1 [unreleased]
 
+  Added support for restartable checkpoint c.f.Flow instances by providing a runID to identify run attempts.
+
   Updated build and tests to simplify development of alternative planners.
 
 2.0.5

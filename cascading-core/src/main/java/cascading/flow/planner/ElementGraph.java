@@ -70,6 +70,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   public static final Extent tail = new Extent( "tail" );
   /** Field resolved */
   private boolean resolved;
+
   /** Field sources */
   private Map<String, Tap> sources;
   /** Field sinks */
@@ -78,6 +79,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   private Map<String, Tap> traps;
   /** Field checkpoints */
   private Map<String, Tap> checkpoints;
+  /** Field requireUniqueCheckpoints */
+  private boolean requireUniqueCheckpoints;
   /** Field assertionLevel */
   private PlannerLevel[] plannerLevels;
 
@@ -86,17 +89,18 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     super( Scope.class );
     }
 
-  public ElementGraph( ElementGraph pipeGraph )
+  public ElementGraph( ElementGraph elementGraph )
     {
     this();
-    this.sources = pipeGraph.sources;
-    this.sinks = pipeGraph.sinks;
-    this.traps = pipeGraph.traps;
-    this.checkpoints = pipeGraph.checkpoints;
-    this.plannerLevels = pipeGraph.plannerLevels;
+    this.sources = elementGraph.sources;
+    this.sinks = elementGraph.sinks;
+    this.traps = elementGraph.traps;
+    this.checkpoints = elementGraph.checkpoints;
+    this.plannerLevels = elementGraph.plannerLevels;
+    this.requireUniqueCheckpoints = elementGraph.requireUniqueCheckpoints;
 
-    Graphs.addAllVertices( this, pipeGraph.vertexSet() );
-    Graphs.addAllEdges( this, pipeGraph, pipeGraph.edgeSet() );
+    Graphs.addAllVertices( this, elementGraph.vertexSet() );
+    Graphs.addAllEdges( this, elementGraph, elementGraph.edgeSet() );
     }
 
   /**
@@ -106,13 +110,14 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
    */
-  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, PlannerLevel... plannerLevels )
+  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, boolean requireUniqueCheckpoints, PlannerLevel... plannerLevels )
     {
     super( Scope.class );
     this.sources = sources;
     this.sinks = sinks;
     this.traps = traps;
     this.checkpoints = checkpoints;
+    this.requireUniqueCheckpoints = requireUniqueCheckpoints;
     this.plannerLevels = plannerLevels;
 
     assembleGraph( pipes, sources, sinks );
@@ -172,6 +177,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     if( vertexSet().isEmpty() )
       return;
 
+    Set<String> checkpointNames = new HashSet<String>();
+
     // need to verify that only Extent instances are origins in this graph. Otherwise a Tap was not properly connected
     TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
 
@@ -189,6 +196,16 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
           new ElementGraphException( "unable to traverse to the first element" );
 
         throw new ElementGraphException( flowElement, "unable to traverse to the next element after " + flowElement );
+        }
+
+      if( requireUniqueCheckpoints && flowElement instanceof Checkpoint )
+        {
+        String name = ( (Checkpoint) flowElement ).getName();
+
+        if( checkpointNames.contains( name ) )
+          throw new ElementGraphException( (Pipe) flowElement, "may not have duplicate checkpoint names in assembly, found: " + name );
+
+        checkpointNames.add( name );
         }
 
       if( incomingEdgesOf( flowElement ).size() != 0 && outgoingEdgesOf( flowElement ).size() != 0 )

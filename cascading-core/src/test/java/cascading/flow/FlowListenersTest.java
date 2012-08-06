@@ -90,7 +90,7 @@ public class FlowListenersTest extends TestCase
       }
 
     @Override
-    protected void internalClean( boolean force )
+    protected void internalClean( boolean stop )
       {
       }
 

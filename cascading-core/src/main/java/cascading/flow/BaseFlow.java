@@ -51,7 +51,6 @@ import cascading.management.state.ClientState;
 import cascading.property.AppProps;
 import cascading.property.PropertyUtil;
 import cascading.stats.FlowStats;
-import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
@@ -82,6 +81,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private String id;
   /** Field name */
   private String name;
+  /** Fields runID */
+  private String runID;
   /** Field tags */
   private String tags;
   /** Field listeners */
@@ -159,6 +160,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     {
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
+    this.runID = flowDef.getRunID();
+
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
     setSources( flowDef.getSourcesCopy() );
@@ -622,7 +625,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     try
       {
-      sourceModified = getSourceModified( confCopy, values, sinkModified );
+      sourceModified = Util.getSourceModified( confCopy, values, sinkModified );
 
       if( sinkModified < sourceModified )
         return true;
@@ -636,49 +639,10 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
-  private long getSourceModified( Config confCopy, Iterator<Tap> values, long sinkModified ) throws IOException
-    {
-    long sourceModified = 0;
-
-    while( values.hasNext() )
-      {
-      Tap source = values.next();
-
-      if( source instanceof MultiSourceTap )
-        return getSourceModified( confCopy, ( (MultiSourceTap) source ).getChildTaps(), sinkModified );
-
-      sourceModified = source.getModifiedTime( confCopy );
-
-      // source modified returns zero if does not exist
-      // this should minimize number of times we touch any file meta-data server
-      if( sourceModified == 0 && !source.resourceExists( confCopy ) )
-        throw new FlowException( "source does not exist: " + source );
-
-      if( sinkModified < sourceModified )
-        return sourceModified;
-      }
-
-    return sourceModified;
-    }
-
   @Override
   public long getSinkModified() throws IOException
     {
-    Config confCopy = getConfigCopy();
-    long sinkModified = Long.MAX_VALUE;
-
-    for( Tap sink : sinks.values() )
-      {
-      if( sink.isReplace() || sink.isUpdate() )
-        sinkModified = -1L;
-      else
-        {
-        if( !sink.resourceExists( confCopy ) )
-          sinkModified = 0L;
-        else
-          sinkModified = Math.min( sinkModified, sink.getModifiedTime( confCopy ) ); // return youngest mod date
-        }
-      }
+    long sinkModified = Util.getSinkModified( getConfigCopy(), sinks.values() );
 
     if( LOG.isInfoEnabled() )
       {
@@ -801,7 +765,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
-  protected abstract void internalClean( boolean force );
+  protected abstract void internalClean( boolean stop );
 
   @Override
   @ProcessComplete
@@ -1098,12 +1062,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     finally
       {
-      internalClean( stop );
-
       handleThrowableAndMarkFailed();
 
       if( !stop && !flowStats.isFinished() )
         flowStats.markSuccessful();
+
+      internalClean( stop ); // cleaning temp taps may be determined by success/failure
 
       try
         {
@@ -1341,6 +1305,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public String getCascadeID()
     {
     return getProperty( "cascading.cascade.id" );
+    }
+
+  @Override
+  public String getRunID()
+    {
+    return runID;
     }
 
   @Override

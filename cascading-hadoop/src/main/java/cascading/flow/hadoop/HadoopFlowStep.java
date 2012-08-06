@@ -238,7 +238,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         }
       }
 
-    if( getSink() instanceof TempHfs )
+    if( getSink() instanceof TempHfs &&
+      ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
       {
       try
         {
@@ -252,22 +253,22 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
     else
       {
-      cleanTap( config, getSink() );
+      cleanTapMetaData( config, getSink() );
       }
 
     for( Tap tap : getMapperTraps().values() )
-      cleanTap( config, tap );
+      cleanTapMetaData( config, tap );
 
     for( Tap tap : getReducerTraps().values() )
-      cleanTap( config, tap );
+      cleanTapMetaData( config, tap );
 
     }
 
-  private void cleanTap( JobConf jobConf, Tap tap )
+  private void cleanTapMetaData( JobConf jobConf, Tap tap )
     {
     try
       {
-      Hadoop18TapUtil.cleanupTap( jobConf, tap );
+      Hadoop18TapUtil.cleanupTapMetaData( jobConf, tap );
       }
     catch( IOException exception )
       {

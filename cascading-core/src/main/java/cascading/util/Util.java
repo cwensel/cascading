@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
@@ -573,6 +575,50 @@ public class Util
     return split[ 0 ];
     }
 
+  public static long getSourceModified( Object confCopy, Iterator<Tap> values, long sinkModified ) throws IOException
+    {
+    long sourceModified = 0;
+
+    while( values.hasNext() )
+      {
+      Tap source = values.next();
+
+      if( source instanceof MultiSourceTap )
+        return getSourceModified( confCopy, ( (MultiSourceTap) source ).getChildTaps(), sinkModified );
+
+      sourceModified = source.getModifiedTime( confCopy );
+
+      // source modified returns zero if does not exist
+      // this should minimize number of times we touch any file meta-data server
+      if( sourceModified == 0 && !source.resourceExists( confCopy ) )
+        throw new FlowException( "source does not exist: " + source );
+
+      if( sinkModified < sourceModified )
+        return sourceModified;
+      }
+
+    return sourceModified;
+    }
+
+  public static long getSinkModified( Object config, Collection<Tap> sinks ) throws IOException
+    {
+    long sinkModified = Long.MAX_VALUE;
+
+    for( Tap sink : sinks )
+      {
+      if( sink.isReplace() || sink.isUpdate() )
+        sinkModified = -1L;
+      else
+        {
+        if( !sink.resourceExists( config ) )
+          sinkModified = 0L;
+        else
+          sinkModified = Math.min( sinkModified, sink.getModifiedTime( config ) ); // return youngest mod date
+        }
+      }
+    return sinkModified;
+    }
+
   public interface RetryOperator<T>
     {
     T operate() throws Exception;
@@ -653,13 +699,32 @@ public class Util
       }
     }
 
+  @Deprecated
   public static String makeTempPath( String name )
     {
     if( name == null || name.isEmpty() )
       throw new IllegalArgumentException( "name may not be null or empty " );
 
-    name = name.substring( 0, name.length() < 25 ? name.length() : 25 ).replaceAll( "\\s+|\\*|\\+", "_" );
+    name = cleansePathName( name.substring( 0, name.length() < 25 ? name.length() : 25 ) );
 
     return name + "/" + (int) ( Math.random() * 100000 ) + "/";
+    }
+
+  public static String makePath( String prefix, String name )
+    {
+    if( name == null || name.isEmpty() )
+      throw new IllegalArgumentException( "name may not be null or empty " );
+
+    if( prefix == null || prefix.isEmpty() )
+      prefix = Long.toString( (long) ( Math.random() * 10000000000L ) );
+
+    name = cleansePathName( name.substring( 0, name.length() < 25 ? name.length() : 25 ) );
+
+    return prefix + "/" + name + "/";
+    }
+
+  public static String cleansePathName( String name )
+    {
+    return name.replaceAll( "\\s+|\\*|\\+|/+", "_" );
     }
   }

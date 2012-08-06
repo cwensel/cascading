@@ -54,6 +54,8 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   protected AssertionLevel assertionLevel;
   protected DebugLevel debugLevel;
 
+  protected String runID;
+
   /**
    * Creates a new instance of a FlowDef.
    *
@@ -447,5 +449,34 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   public DebugLevel getDebugLevel()
     {
     return debugLevel;
+    }
+
+  /**
+   * Method setRunID sets the checkpoint run or execution ID to be used to find prior failed runs against
+   * this runID.
+   * <p/>
+   * When given, and a {@link Flow} fails to execute, a subsequent attempt to run the same Flow with the same
+   * runID will allow the Flow instance to start where it left off.
+   * <p/>
+   * Not all planners support this feature.
+   * <p/>
+   * A Flow name is required when using a runID.
+   *
+   * @param runID
+   * @return
+   */
+  public FlowDef setRunID( String runID )
+    {
+    if( runID != null && runID.isEmpty() )
+      return this;
+
+    this.runID = runID;
+
+    return this;
+    }
+
+  public String getRunID()
+    {
+    return runID;
     }
   }

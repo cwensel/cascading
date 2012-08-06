@@ -86,7 +86,7 @@ public class LocalPlanner extends FlowPlanner
     }
 
   @Override
-  protected Tap makeTempTap( String name )
+  protected Tap makeTempTap( String prefix, String name )
     {
     return null;
     }

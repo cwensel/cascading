@@ -20,12 +20,15 @@
 
 package cascading.flow.planner;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +100,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>(); // all sinks
 
   /** Field tempSink */
-  protected Tap tempSink; // used if we need to bypass
+  protected Tap tempSink; // used if we need to bypass the filesystem
 
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
@@ -206,6 +209,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     this.submitPriority = submitPriority;
     }
 
+  @Override
   public FlowStepStats getFlowStepStats()
     {
     return flowStepJob.getStepStats();
@@ -341,6 +345,57 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       }
 
     return null;
+    }
+
+  boolean allSourcesExist() throws IOException
+    {
+    for( Tap tap : sources.keySet() )
+      {
+      if( !tap.resourceExists( getConfig() ) )
+        return false;
+      }
+
+    return true;
+    }
+
+  boolean areSourcesNewer( long sinkModified ) throws IOException
+    {
+    Config config = getConfig();
+    Iterator<Tap> values = sources.keySet().iterator();
+
+    long sourceModified = 0;
+
+    try
+      {
+      sourceModified = Util.getSourceModified( config, values, sinkModified );
+
+      if( sinkModified < sourceModified )
+        return true;
+
+      return false;
+      }
+    finally
+      {
+      if( LOG.isInfoEnabled() )
+        logInfo( "source modification date at: " + new Date( sourceModified ) ); // not oldest, we didnt check them all
+      }
+    }
+
+  long getSinkModified() throws IOException
+    {
+    long sinkModified = Util.getSinkModified( getConfig(), sinks.keySet() );
+
+    if( LOG.isInfoEnabled() )
+      {
+      if( sinkModified == -1L )
+        logInfo( "at least one sink is marked for delete" );
+      if( sinkModified == 0L )
+        logInfo( "at least one sink does not exist" );
+      else
+        logInfo( "sink oldest modified date: " + new Date( sinkModified ) );
+      }
+
+    return sinkModified;
     }
 
   protected Throwable commitSinks()

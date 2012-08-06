@@ -180,7 +180,7 @@ public class Hadoop18TapUtil
    * @param conf
    * @throws IOException
    */
-  public static void cleanupTap( JobConf conf, Tap tap ) throws IOException
+  public static void cleanupTapMetaData( JobConf conf, Tap tap ) throws IOException
     {
     cleanTempPath( conf, new Path( tap.getIdentifier() ) );
     }

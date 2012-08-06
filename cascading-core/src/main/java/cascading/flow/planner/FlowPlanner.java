@@ -67,6 +67,8 @@ public abstract class FlowPlanner
   /** Field properties */
   protected Map<Object, Object> properties;
 
+  protected String checkpointRootPath = null;
+
   /** Field assertionLevel */
   protected AssertionLevel assertionLevel;
   /** Field debugLevel */
@@ -141,8 +143,23 @@ public abstract class FlowPlanner
 
     AssertionLevel assertionLevel = flowDef.getAssertionLevel() == null ? this.assertionLevel : flowDef.getAssertionLevel();
     DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
+    checkpointRootPath = makeCheckpointRootPath( flowDef );
 
-    return new ElementGraph( pipes, sources, sinks, traps, checkpoints, assertionLevel, debugLevel );
+    return new ElementGraph( pipes, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
+    }
+
+  private String makeCheckpointRootPath( FlowDef flowDef )
+    {
+    String flowName = flowDef.getName();
+    String runID = flowDef.getRunID();
+
+    if( runID == null )
+      return null;
+
+    if( runID != null && flowName == null )
+      throw new PlannerException( "flow name is required when providing a run id" );
+
+    return flowName + "/" + runID;
     }
 
 
@@ -572,24 +589,29 @@ public abstract class FlowPlanner
     {
     LOG.debug( "inserting tap after: {}", pipe );
 
-    Tap flowElement = graph.getCheckpointsMap().get( pipe.getName() );
+    Tap checkpointTap = graph.getCheckpointsMap().get( pipe.getName() );
 
-    if( flowElement != null )
-      LOG.info( "found checkpoint: {}, using tap: {}", pipe.getName(), flowElement );
+    if( checkpointTap != null )
+      LOG.info( "found checkpoint: {}, using tap: {}", pipe.getName(), checkpointTap );
 
-    if( flowElement == null )
-      flowElement = makeTempTap( pipe.getName() );
+    if( checkpointTap == null )
+      {
+      // only restart from a checkpoint pipe or checkpoint tap below
+      if( pipe instanceof Checkpoint )
+        checkpointTap = makeTempTap( checkpointRootPath, pipe.getName() );
+      else
+        checkpointTap = makeTempTap( pipe.getName() );
+      }
 
-    graph.insertFlowElementAfter( pipe, flowElement );
+    graph.insertFlowElementAfter( pipe, checkpointTap );
     }
 
-  /**
-   * Method makeTemp ...
-   *
-   * @param name
-   * @return Tap
-   */
-  protected abstract Tap makeTempTap( String name );
+  protected Tap makeTempTap( String name )
+    {
+    return makeTempTap( null, name );
+    }
+
+  protected abstract Tap makeTempTap( String prefix, String name );
 
   /**
    * Inserts a temporary Tap between logical MR jobs.

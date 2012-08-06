@@ -243,10 +243,10 @@ public class HadoopFlow extends BaseFlow<JobConf>
       hdfsShutdown = HadoopUtil.getHDFSShutdownHook();
     }
 
-  protected void internalClean( boolean force )
+  protected void internalClean( boolean stop )
     {
     if( !isPreserveTemporaryFiles() )
-      cleanTemporaryFiles( force ); // force cleanup
+      cleanTemporaryFiles( stop );
     }
 
   protected void internalShutdown()

@@ -114,7 +114,7 @@ public class LocalFlow extends BaseFlow<Properties>
     }
 
   @Override
-  protected void internalClean( boolean force )
+  protected void internalClean( boolean stop )
     {
     }
 

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
+import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
 
 /**
@@ -135,4 +136,6 @@ public interface FlowStep<Config>
    * @return
    */
   boolean containsPipeNamed( String pipeName );
+
+  FlowStepStats getFlowStepStats();
   }

@@ -90,7 +90,7 @@ public class TempHfs extends Hfs
     {
     } );
     this.name = name;
-    this.stringPath = initTemporaryPath( conf );
+    this.stringPath = initTemporaryPath( conf, true );
     }
 
   /**
@@ -100,6 +100,11 @@ public class TempHfs extends Hfs
    */
   public TempHfs( JobConf conf, String name, Class<? extends Scheme> schemeClass )
     {
+    this( conf, name, schemeClass, true );
+    }
+
+  public TempHfs( JobConf conf, String name, Class<? extends Scheme> schemeClass, boolean unique )
+    {
     this.name = name;
 
     if( schemeClass == null )
@@ -107,7 +112,7 @@ public class TempHfs extends Hfs
     else
       this.schemeClass = schemeClass;
 
-    this.stringPath = initTemporaryPath( conf );
+    this.stringPath = initTemporaryPath( conf, unique );
     }
 
   public Class<? extends Scheme> getSchemeClass()
@@ -115,9 +120,11 @@ public class TempHfs extends Hfs
     return schemeClass;
     }
 
-  private String initTemporaryPath( JobConf conf )
+  private String initTemporaryPath( JobConf conf, boolean unique )
     {
-    return new Path( getTempPath( conf ), makeTemporaryPathDirString( name ) ).toString();
+    String child = unique ? makeTemporaryPathDirString( name ) : name;
+
+    return new Path( getTempPath( conf ), child ).toString();
     }
 
   @Override

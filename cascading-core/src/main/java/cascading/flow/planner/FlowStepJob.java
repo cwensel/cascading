@@ -128,6 +128,16 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     {
     try
       {
+      if( isSkipFlowStep() )
+        {
+        markSkipped();
+
+        if( flowStep.isInfoEnabled() )
+          flowStep.logInfo( "skipping step: " + stepName );
+
+        return;
+        }
+
       flowStepStats.markStarted();
 
       blockOnPredecessors();
@@ -161,6 +171,11 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       predecessorSteps.add( predecessor.flowStep );
 
     flowStepStrategy.apply( flowStep.getFlow(), predecessorSteps, flowStep );
+    }
+
+  protected boolean isSkipFlowStep() throws IOException
+    {
+    return flowStep.allSourcesExist() && !flowStep.areSourcesNewer( flowStep.getSinkModified() );
     }
 
   protected void blockOnJob() throws IOException
@@ -267,6 +282,18 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     {
     flowStepStats.markRunning();
 
+    markFlowRunning();
+    }
+
+  private void markSkipped()
+    {
+    flowStepStats.markSkipped();
+
+    markFlowRunning();
+    }
+
+  private void markFlowRunning()
+    {
     Flow flow = flowStep.getFlow();
 
     if( flow == null )
@@ -325,7 +352,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       latch.await();
 
       if( wasSuccessful == null )
-        wasSuccessful = internalNonBlockingIsSuccessful();
+        wasSuccessful = internalNonBlockingIsSuccessful() || getStepStats().isSkipped();
       }
     catch( InterruptedException exception )
       {

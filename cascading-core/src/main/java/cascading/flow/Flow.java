@@ -436,6 +436,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   String getCascadeID();
 
+  String getRunID();
+
   /**
    * Method jobsAreLocal returns true if all jobs are executed in-process as a single map and reduce task.
    *
