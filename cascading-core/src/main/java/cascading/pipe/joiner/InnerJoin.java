@@ -23,6 +23,7 @@ package cascading.pipe.joiner;
 import java.util.Iterator;
 
 import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,8 @@ public class InnerJoin implements Joiner
     final JoinerClosure closure;
     Iterator[] iterators;
     Comparable[] lastValues;
+
+    Tuple result = new Tuple();
 
     public JoinIterator( JoinerClosure closure )
       {
@@ -130,7 +133,8 @@ public class InnerJoin implements Joiner
 
     private Tuple makeResult( Comparable[] lastValues )
       {
-      Tuple result = new Tuple();
+      Tuples.asModifiable( result );
+      result.clear();
 
       // flatten the results into one Tuple
       for( Comparable lastValue : lastValues )
