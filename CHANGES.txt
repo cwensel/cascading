@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.0.4 [unreleased]
+2.0.4
 
   Removed remnant log4j dependency in c.t.h.i.MultiInputSplit.
 
