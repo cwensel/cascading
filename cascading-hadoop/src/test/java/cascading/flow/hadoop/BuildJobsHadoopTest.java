@@ -331,7 +331,11 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    List<FlowStep> steps = new HadoopFlowConnector().connect( sources, sinks, left, right ).getFlowSteps();
+    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "safesplit.dot" );
+
+    List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 2, steps.size() );
     }
@@ -438,7 +442,6 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
 
-
     List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "not equal: steps.size()", 4, steps.size() );
@@ -482,6 +485,8 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "right", sink2 );
 
     Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+
+//    flow.writeDOT( "splitcomplex.dot" );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -769,7 +774,11 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
 
-  /** Tests the case where the same source is split, then re-merged */
+  /**
+   * Tests the case where the same source is split, then re-merged
+   * <p/>
+   * todo: planner should keep as a single mr job
+   */
   @Test
   public void testMergeSameSourceSplit()
     {
@@ -788,9 +797,11 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Flow flow = new HadoopFlowConnector().connect( source, sink, merge );
 
+//    flow.writeDOT( "splitmerge.dot" );
+
     List<FlowStep> steps = flow.getFlowSteps();
 
-    assertEquals( "not equal: steps.size()", 2, steps.size() );
+    assertEquals( "not equal: steps.size()", 2, steps.size() ); // todo: should be a single job
     }
 
   @Test
@@ -1083,8 +1094,6 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Pipe pipeUpper1 = new Pipe( "upper1" );
 
     Pipe pipeLower2 = new Each( pipeLower1, new Identity() );
-    pipeLower2 = new Each( pipeLower1, new Identity() );
-    pipeLower2 = new Each( pipeLower1, new Identity() );
     pipeLower2 = new GroupBy( pipeLower2, new Fields( "num", "char" ) );
     pipeLower2 = new Every( pipeLower2, new Fields( "num", "char" ), new Count(), new Fields( "num", "char" ) );
 

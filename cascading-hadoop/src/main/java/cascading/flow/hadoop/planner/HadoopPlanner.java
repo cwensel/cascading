@@ -233,9 +233,9 @@ public class HadoopPlanner extends FlowPlanner
 
   private void handleWarnEquivalentPaths( ElementGraph elementGraph )
     {
-    List<CoGroup> joins = elementGraph.findAllJoinGroups();
+    List<CoGroup> coGroups = elementGraph.findAllCoGroups();
 
-    for( CoGroup coGroup : joins )
+    for( CoGroup coGroup : coGroups )
       {
       List<GraphPath<FlowElement, Scope>> graphPaths = elementGraph.getAllShortestPathsTo( coGroup );
 
@@ -374,7 +374,7 @@ public class HadoopPlanner extends FlowPlanner
         // we are at the root of a split here
 
         // do any split paths converge on a single Group?
-        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndMergeJoin( flowElement );
+        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndGroupingMergeJoin( flowElement );
         if( maxPaths <= 1 && lastInsertable instanceof Tap )
           continue;
 

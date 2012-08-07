@@ -43,6 +43,7 @@ import cascading.pipe.Every;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -638,7 +639,17 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return findAllOfType( 2, 1, Group.class, new LinkedList<Group>() );
     }
 
-  public List<CoGroup> findAllJoinGroups()
+  /**
+   * Finds all splices that merge/join streams. returned in topological order.
+   *
+   * @return a List fo Group instances
+   */
+  public List<Splice> findAllMergeJoinSplices()
+    {
+    return findAllOfType( 2, 1, Splice.class, new LinkedList<Splice>() );
+    }
+
+  public List<CoGroup> findAllCoGroups()
     {
     return findAllOfType( 2, 1, CoGroup.class, new LinkedList<CoGroup>() );
     }
@@ -780,7 +791,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     return tapGraph;
     }
 
-  public int getMaxNumPathsBetweenElementAndMergeJoin( FlowElement flowElement )
+  public int getMaxNumPathsBetweenElementAndGroupingMergeJoin( FlowElement flowElement )
     {
     List<Group> groups = findAllMergeJoinGroups();
 

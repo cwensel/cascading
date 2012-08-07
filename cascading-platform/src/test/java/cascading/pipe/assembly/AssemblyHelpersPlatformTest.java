@@ -629,6 +629,8 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
   /**
    * Tests chained merge + AggregateBy, which really tests the complete() calls within the pipeline. when failing
    * the map side functor function will fail during a flush
+   * <p/>
+   * todo: push merge upstream
    *
    * @throws IOException
    */
@@ -661,6 +663,8 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     Map<String, Tap> tapMap = Cascades.tapsMap( sourcePipe, source );
 
     Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, countPipe );
+
+//    flow.writeDOT( "pushmerge.dot" );
 
     flow.complete();
 
