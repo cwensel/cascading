@@ -413,7 +413,12 @@ public class TupleSerialization extends Configured implements Serialization
     {
     try
       {
-      return getSerializationFactory().getSerializer( type );
+      Serializer serializer = getSerializationFactory().getSerializer( type );
+
+      if( serializer == null )
+        throw new CascadingException( "unable to load serializer for: " + type.getName() + " from: " + getSerializationFactory().getClass().getName() );
+
+      return serializer;
       }
     catch( NullPointerException exception )
       {
@@ -425,7 +430,12 @@ public class TupleSerialization extends Configured implements Serialization
     {
     try
       {
-      return getSerializationFactory().getDeserializer( getClass( className ) );
+      Deserializer deserializer = getSerializationFactory().getDeserializer( getClass( className ) );
+
+      if( deserializer == null )
+        throw new CascadingException( "unable to load deserializer for: " + className + " from: " + getSerializationFactory().getClass().getName() );
+
+      return deserializer;
       }
     catch( NullPointerException exception )
       {

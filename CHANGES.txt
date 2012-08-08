@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.5 [unreleased]
 
+  Improved error message when Hadoop serializer for a given type cannot be found in some cases.
+
 2.0.4
 
   Removed remnant log4j dependency in c.t.h.i.MultiInputSplit.
