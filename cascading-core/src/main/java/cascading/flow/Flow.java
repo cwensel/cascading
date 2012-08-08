@@ -50,7 +50,12 @@ import cascading.tuple.TupleEntryIterator;
  * Flows are submitted in order of dependency when used with a {@link cascading.cascade.Cascade}. If two or more steps do not share the
  * same dependencies and all can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines
  * the order in which all steps will be submitted for execution. The default submit priority is 5.
+ * <p/>
+ * Use the {@link FlowListener} to receive any events on the life-cycle of the Flow as it executes. Any
+ * {@link Tap} instances owned by the Flow also implementing FlowListener will automatically be added to the
+ * set of listeners.
  *
+ * @see FlowListener
  * @see cascading.flow.FlowConnector
  */
 public interface Flow<Config> extends UnitOfWork<FlowStats>

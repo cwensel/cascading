@@ -22,24 +22,13 @@ package cascading.cascade;
 
 import java.beans.ConstructorProperties;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 import cascading.cascade.planner.FlowGraph;
-import cascading.cascade.planner.TapGraph;
-import cascading.flow.BaseFlow;
+import cascading.cascade.planner.IdentifierGraph;
 import cascading.flow.Flow;
-import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,15 +136,10 @@ public class CascadeConnector
 
   public Cascade connect( CascadeDef cascadeDef )
     {
-    TapGraph tapGraph = new TapGraph();
-    FlowGraph flowGraph = new FlowGraph();
+    IdentifierGraph identifierGraph = new IdentifierGraph( cascadeDef.getFlowsArray() );
+    FlowGraph flowGraph = new FlowGraph( identifierGraph );
 
-    makeTapGraph( tapGraph, cascadeDef.getFlowsArray() );
-    makeFlowGraph( flowGraph, tapGraph );
-
-    verifyNoCycles( flowGraph );
-
-    return new Cascade( cascadeDef, properties, flowGraph, tapGraph );
+    return new Cascade( cascadeDef, properties, flowGraph, identifierGraph );
     }
 
   private String makeName( Flow[] flows )
@@ -166,122 +150,5 @@ public class CascadeConnector
       names[ i ] = flows[ i ].getName();
 
     return Util.join( names, "+" );
-    }
-
-  private void verifyNoCycles( SimpleDirectedGraph<Flow, Integer> flowGraph )
-    {
-    Set<Flow> flows = new HashSet<Flow>();
-
-    TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( flowGraph );
-
-    while( topoIterator.hasNext() )
-      flows.add( topoIterator.next() );
-
-    if( flows.size() != flowGraph.vertexSet().size() )
-      throw new CascadeException( "there are likely cycles in the set of given flows, topological iterator cannot traverse flows with cycles" );
-    }
-
-  private void makeTapGraph( SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph, Flow[] flows )
-    {
-    for( Flow flow : flows )
-      {
-      LinkedList<Tap> sources = new LinkedList<Tap>( flow.getSourcesCollection() );
-      LinkedList<Tap> sinks = new LinkedList<Tap>( flow.getSinksCollection() );
-
-      sinks.addAll( flow.getCheckpointsCollection() );
-
-      unwrapCompositeTaps( sources );
-      unwrapCompositeTaps( sinks );
-
-      for( Tap source : sources )
-        tapGraph.addVertex( getFullPath( flow, source ) );
-
-      for( Tap sink : sinks )
-        tapGraph.addVertex( getFullPath( flow, sink ) );
-
-      for( Tap source : sources )
-        {
-        for( Tap sink : sinks )
-          addEdgeFor( tapGraph, flow, source, sink );
-        }
-      }
-    }
-
-  private void addEdgeFor( SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph, Flow flow, Tap source, Tap sink )
-    {
-    try
-      {
-      tapGraph.addEdge( getFullPath( flow, source ), getFullPath( flow, sink ), ( (BaseFlow) flow ).getHolder() );
-      }
-    catch( IllegalArgumentException exception )
-      {
-      throw new CascadeException( "no loops allowed in cascade, flow: " + flow.getName() + ", source: " + source + ", sink: " + sink );
-      }
-    }
-
-  private String getFullPath( Flow flow, Tap tap )
-    {
-    return tap.getFullIdentifier( flow.getConfig() );
-    }
-
-  private void unwrapCompositeTaps( LinkedList<Tap> taps )
-    {
-    ListIterator<Tap> iterator = taps.listIterator();
-
-    while( iterator.hasNext() )
-      {
-      Tap tap = iterator.next();
-
-      if( tap instanceof CompositeTap )
-        {
-        iterator.remove();
-
-        Iterator<Tap> childTaps = ( (CompositeTap) tap ).getChildTaps();
-
-        while( childTaps.hasNext() )
-          {
-          iterator.add( childTaps.next() );
-          iterator.previous(); // force cursor backward
-          }
-        }
-      }
-    }
-
-  private void makeFlowGraph( SimpleDirectedGraph<Flow, Integer> jobGraph, SimpleDirectedGraph<String, BaseFlow.FlowHolder> tapGraph )
-    {
-    Set<String> identifiers = tapGraph.vertexSet();
-
-    int count = 0;
-
-    for( String source : identifiers )
-      {
-      if( LOG.isDebugEnabled() )
-        LOG.debug( "handling flow source: {}", source );
-
-      List<String> sinks = Graphs.successorListOf( tapGraph, source );
-
-      for( String sink : sinks )
-        {
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "handling flow path: {} -> {}", source, sink );
-
-        Flow flow = tapGraph.getEdge( source, sink ).flow;
-
-        jobGraph.addVertex( flow );
-
-        Set<BaseFlow.FlowHolder> previous = tapGraph.incomingEdgesOf( source );
-
-        for( BaseFlow.FlowHolder previousFlow : previous )
-          {
-          jobGraph.addVertex( previousFlow.flow );
-
-          if( jobGraph.getEdge( previousFlow.flow, flow ) != null )
-            continue;
-
-          if( !jobGraph.addEdge( previousFlow.flow, flow, count++ ) )
-            throw new CascadeException( "unable to add path between: " + previousFlow.flow.getName() + " and: " + flow.getName() );
-          }
-        }
-      }
     }
   }

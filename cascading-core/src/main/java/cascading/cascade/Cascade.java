@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.cascade.planner.FlowGraph;
+import cascading.cascade.planner.IdentifierGraph;
 import cascading.cascade.planner.TapGraph;
 import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
@@ -79,13 +80,18 @@ import static cascading.property.PropertyUtil.getProperty;
  * The concept of 'stale' is pluggable, see the {@link cascading.flow.FlowSkipStrategy} class.
  * <p/>
  * When a Cascade starts up, if first verifies which Flow instances have stale sinks, if the sinks are not stale, the
- * method {@link cascading.flow.BaseFlow#deleteSinksIfNotUpdate()} is called. Before appends were supported (logically)
+ * method {@link cascading.flow.BaseFlow#deleteSinksIfNotUpdate()} is called. Before appends/updates were supported (logically)
  * the Cascade deleted all the sinks in a Flow.
  * <p/>
  * The new consequence of this is if the Cascade fails, but does complete a Flow that appended or updated data, re-running
  * the Cascade (and the successful append/update Flow) will re-update data to the source. Some systems may be idempotent and
  * may not have any side-effects. So plan accordingly.
+ * <p/>
+ * Use the {@link CascadeListener} to receive any events on the life-cycle of the Cascade as it executes. Any
+ * {@link Tap} instances owned by managed Flows also implementing CascadeListener will automatically be added to the
+ * set of listeners.
  *
+ * @see CascadeListener
  * @see cascading.flow.Flow
  * @see cascading.flow.FlowSkipStrategy
  */
@@ -102,10 +108,12 @@ public class Cascade implements UnitOfWork<CascadeStats>
   private String tags;
   /** Field properties */
   private final Map<Object, Object> properties;
+  /** Fields listeners */
+  private List<SafeCascadeListener> listeners;
   /** Field jobGraph */
   private final FlowGraph flowGraph;
   /** Field tapGraph */
-  private final TapGraph tapGraph;
+  private final IdentifierGraph identifierGraph;
   /** Field cascadeStats */
   private final CascadeStats cascadeStats;
   /** Field cascadingServices */
@@ -126,6 +134,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
   /** Field maxConcurrentFlows */
   private int maxConcurrentFlows = 0;
 
+  /** Field tapGraph * */
+  private transient TapGraph tapGraph;
+
   static int getMaxConcurrentFlows( Map<Object, Object> properties, int maxConcurrentFlows )
     {
     if( maxConcurrentFlows != -1 ) // CascadeDef is -1 by default
@@ -134,16 +145,29 @@ public class Cascade implements UnitOfWork<CascadeStats>
     return Integer.parseInt( getProperty( properties, CascadeProps.MAX_CONCURRENT_FLOWS, "0" ) );
     }
 
-  Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, FlowGraph flowGraph, TapGraph tapGraph )
+  /** for testing */
+  protected Cascade()
+    {
+    this.name = null;
+    this.tags = null;
+    this.properties = null;
+    this.flowGraph = null;
+    this.identifierGraph = null;
+    this.cascadeStats = null;
+    }
+
+  Cascade( CascadeDef cascadeDef, Map<Object, Object> properties, FlowGraph flowGraph, IdentifierGraph identifierGraph )
     {
     this.name = cascadeDef.getName();
     this.tags = cascadeDef.getTags();
     this.properties = properties;
     this.flowGraph = flowGraph;
-    this.tapGraph = tapGraph;
+    this.identifierGraph = identifierGraph;
     this.cascadeStats = createPrepareCascadeStats();
     setIDOnFlow();
     this.maxConcurrentFlows = cascadeDef.getMaxConcurrentFlows();
+
+    addListeners( getAllTaps() );
     }
 
   private CascadeStats createPrepareCascadeStats()
@@ -195,6 +219,91 @@ public class Cascade implements UnitOfWork<CascadeStats>
     return tags;
     }
 
+  void addListeners( Collection listeners )
+    {
+    for( Object listener : listeners )
+      {
+      if( listener instanceof CascadeListener )
+        addListener( (CascadeListener) listener );
+      }
+    }
+
+  List<SafeCascadeListener> getListeners()
+    {
+    if( listeners == null )
+      listeners = new LinkedList<SafeCascadeListener>();
+
+    return listeners;
+    }
+
+  public boolean hasListeners()
+    {
+    return listeners != null && !listeners.isEmpty();
+    }
+
+  public void addListener( CascadeListener flowListener )
+    {
+    getListeners().add( new SafeCascadeListener( flowListener ) );
+    }
+
+  public boolean removeListener( CascadeListener flowListener )
+    {
+    return getListeners().remove( new SafeCascadeListener( flowListener ) );
+    }
+
+  private void fireOnCompleted()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onCompleted event: " + getListeners().size() );
+
+      for( CascadeListener cascadeListener : getListeners() )
+        cascadeListener.onCompleted( this );
+      }
+    }
+
+  private void fireOnThrowable()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onThrowable event: " + getListeners().size() );
+
+      boolean isHandled = false;
+
+      for( CascadeListener cascadeListener : getListeners() )
+        isHandled = cascadeListener.onThrowable( this, throwable ) || isHandled;
+
+      if( isHandled )
+        throwable = null;
+      }
+    }
+
+  protected void fireOnStopping()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStopping event: " + getListeners().size() );
+
+      for( CascadeListener cascadeListener : getListeners() )
+        cascadeListener.onStopping( this );
+      }
+    }
+
+  protected void fireOnStarting()
+    {
+    if( hasListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStarting event: " + getListeners().size() );
+
+      for( CascadeListener cascadeListener : getListeners() )
+        cascadeListener.onStarting( this );
+      }
+    }
+
   private CascadingServices getCascadingServices()
     {
     if( cascadingServices == null )
@@ -235,9 +344,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
     return flowGraph;
     }
 
-  protected TapGraph getTapGraph()
+  protected IdentifierGraph getIdentifierGraph()
     {
-    return tapGraph;
+    return identifierGraph;
     }
 
   /**
@@ -277,6 +386,163 @@ public class Cascade implements UnitOfWork<CascadeStats>
     }
 
   /**
+   * Method getHeadFlows returns all Flow instances that are at the "head" of the flow graph.
+   * <p/>
+   * That is, they are the first to execute and have no Tap source dependencies with Flow instances in the this Cascade
+   * instance.
+   *
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> getHeadFlows()
+    {
+    Set<Flow> flows = new HashSet<Flow>();
+
+    for( Flow flow : flowGraph.vertexSet() )
+      {
+      if( flowGraph.inDegreeOf( flow ) == 0 )
+        flows.add( flow );
+      }
+
+    return flows;
+    }
+
+  /**
+   * Method getTailFlows returns all Flow instances that are at the "tail" of the flow graph.
+   * <p/>
+   * That is, they are the last to execute and have no Tap sink dependencies with Flow instances in the this Cascade
+   * instance.
+   *
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> getTailFlows()
+    {
+    Set<Flow> flows = new HashSet<Flow>();
+
+    for( Flow flow : flowGraph.vertexSet() )
+      {
+      if( flowGraph.outDegreeOf( flow ) == 0 )
+        flows.add( flow );
+      }
+
+    return flows;
+    }
+
+  /**
+   * Method getIntermediateFlows returns all Flow instances that are neither at the "tail" or "tail" of the flow graph.
+   *
+   * @return Collection<Flow>
+   */
+  public Collection<Flow> getIntermediateFlows()
+    {
+    Set<Flow> flows = new HashSet<Flow>( flowGraph.vertexSet() );
+
+    flows.removeAll( getHeadFlows() );
+    flows.removeAll( getTailFlows() );
+
+    return flows;
+    }
+
+  protected TapGraph getTapGraph()
+    {
+    if( tapGraph == null )
+      tapGraph = new TapGraph( flowGraph.vertexSet() );
+
+    return tapGraph;
+    }
+
+  /**
+   * Method getSourceTaps returns all source Tap instances in this Cascade instance.
+   * <p/>
+   * That is, none of returned Tap instances are the sinks of other Flow instances in this Cascade.
+   * <p/>
+   * All {@link cascading.tap.CompositeTap} instances are unwound if addressed directly by a managed Flow instance.
+   *
+   * @return Collection<Tap>
+   */
+  public Collection<Tap> getSourceTaps()
+    {
+    TapGraph tapGraph = getTapGraph();
+    Set<Tap> taps = new HashSet<Tap>();
+
+    for( Tap tap : tapGraph.vertexSet() )
+      {
+      if( tapGraph.inDegreeOf( tap ) == 0 )
+        taps.add( tap );
+      }
+
+    return taps;
+    }
+
+  /**
+   * Method getSinkTaps returns all sink Tap instances in this Cascade instance.
+   * <p/>
+   * That is, none of returned Tap instances are the sources of other Flow instances in this Cascade.
+   * <p/>
+   * All {@link cascading.tap.CompositeTap} instances are unwound if addressed directly by a managed Flow instance.
+   * <p/>
+   * This method will return checkpoint Taps managed by Flow instances if not used as a source by other Flow instances.
+   *
+   * @return Collection<Tap>
+   */
+  public Collection<Tap> getSinkTaps()
+    {
+    TapGraph tapGraph = getTapGraph();
+    Set<Tap> taps = new HashSet<Tap>();
+
+    for( Tap tap : tapGraph.vertexSet() )
+      {
+      if( tapGraph.outDegreeOf( tap ) == 0 )
+        taps.add( tap );
+      }
+
+    return taps;
+    }
+
+  /**
+   * Method getCheckpointTaps returns all checkpoint Tap instances from all the Flow instances in this Cascade instance.
+   *
+   * @return Collection<Tap>
+   */
+  public Collection<Tap> getCheckpointsTaps()
+    {
+    Set<Tap> taps = new HashSet<Tap>();
+
+    for( Flow flow : getFlows() )
+      taps.addAll( flow.getCheckpointsCollection() );
+
+    return taps;
+    }
+
+  /**
+   * Method getIntermediateTaps returns all Tap instances that are neither at the source or sink of the flow graph.
+   * <p/>
+   * This method does consider checkpoint Taps managed by Flow instances in this Cascade instance.
+   *
+   * @return Collection<Flow>
+   */
+  public Collection<Tap> getIntermediateTaps()
+    {
+    TapGraph tapGraph = getTapGraph();
+    Set<Tap> taps = new HashSet<Tap>( tapGraph.vertexSet() );
+
+    taps.removeAll( getSourceTaps() );
+    taps.removeAll( getSinkTaps() );
+
+    return taps;
+    }
+
+  /**
+   * Method getAllTaps returns all source, sink, and checkpoint Tap instances associated with the managed
+   * Flow instances in this Cascade instance.
+   *
+   * @return Collection<Tap>
+   */
+  public Collection<Tap> getAllTaps()
+    {
+    return new HashSet<Tap>( getTapGraph().vertexSet() );
+    }
+
+  /**
    * Method getSuccessorFlows returns a Collection of all the Flow instances that will be
    * executed after the given Flow instance.
    *
@@ -310,7 +576,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     try
       {
-      return unwrapFlows( tapGraph.outgoingEdgesOf( identifier ) );
+      return unwrapFlows( identifierGraph.outgoingEdgesOf( identifier ) );
       }
     catch( Exception exception )
       {
@@ -328,7 +594,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     try
       {
-      return unwrapFlows( tapGraph.incomingEdgesOf( identifier ) );
+      return unwrapFlows( identifierGraph.incomingEdgesOf( identifier ) );
       }
     catch( Exception exception )
       {
@@ -451,6 +717,8 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
     stop = true;
 
+    fireOnStopping();
+
     if( !cascadeStats.isFinished() )
       cascadeStats.markStopped();
 
@@ -479,6 +747,8 @@ public class Cascade implements UnitOfWork<CascadeStats>
       {
       // mark started, not submitted
       cascadeStats.markStartedThenRunning();
+
+      fireOnStarting();
 
       initializeNewJobsMap();
 
@@ -512,7 +782,10 @@ public class Cascade implements UnitOfWork<CascadeStats>
           cascadeStats.markFailed( throwable );
 
           if( !stop )
+            {
             internalStopAllFlows();
+            fireOnThrowable();
+            }
 
           handleExecutorShutdown();
           break;
@@ -528,7 +801,14 @@ public class Cascade implements UnitOfWork<CascadeStats>
       if( !cascadeStats.isFinished() )
         cascadeStats.markSuccessful();
 
-      deregisterShutdownHook();
+      try
+        {
+        fireOnCompleted();
+        }
+      finally
+        {
+        deregisterShutdownHook();
+        }
       }
     }
 
@@ -653,7 +933,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
    */
   public void writeDOT( String filename )
     {
-    printElementGraph( filename, tapGraph );
+    printElementGraph( filename, identifierGraph );
     }
 
   protected void printElementGraph( String filename, SimpleDirectedGraph<String, BaseFlow.FlowHolder> graph )
@@ -689,6 +969,11 @@ public class Cascade implements UnitOfWork<CascadeStats>
   public String toString()
     {
     return getName();
+    }
+
+  private void logDebug( String message )
+    {
+    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
     }
 
   private void logInfo( String message )
@@ -831,5 +1116,98 @@ public class Cascade implements UnitOfWork<CascadeStats>
   public void setSpawnStrategy( UnitOfWorkSpawnStrategy spawnStrategy )
     {
     this.spawnStrategy = spawnStrategy;
+    }
+
+  /**
+   * Class SafeFlowListener safely calls a wrapped FlowListener.
+   * <p/>
+   * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
+   * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
+   * which in turn is run in a new Thread.
+   */
+  private class SafeCascadeListener implements CascadeListener
+    {
+    /** Field flowListener */
+    final CascadeListener cascadeListener;
+    /** Field throwable */
+    Throwable throwable;
+
+    private SafeCascadeListener( CascadeListener cascadeListener )
+      {
+      this.cascadeListener = cascadeListener;
+      }
+
+    public void onStarting( Cascade cascade )
+      {
+      try
+        {
+        cascadeListener.onStarting( null );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onStopping( Cascade cascade )
+      {
+      try
+        {
+        cascadeListener.onStopping( null );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onCompleted( Cascade cascade )
+      {
+      try
+        {
+        cascadeListener.onCompleted( null );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public boolean onThrowable( Cascade cascade, Throwable flowThrowable )
+      {
+      try
+        {
+        return cascadeListener.onThrowable( null, flowThrowable );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+
+      return false;
+      }
+
+    private void handleThrowable( Throwable throwable )
+      {
+      this.throwable = throwable;
+
+      logWarn( String.format( "flow listener %s threw throwable", cascadeListener ), throwable );
+
+      // stop this flow
+      stop();
+      }
+
+    public boolean equals( Object object )
+      {
+      if( object instanceof SafeCascadeListener )
+        return cascadeListener.equals( ( (SafeCascadeListener) object ).cascadeListener );
+
+      return cascadeListener.equals( object );
+      }
+
+    public int hashCode()
+      {
+      return cascadeListener.hashCode();
+      }
     }
   }

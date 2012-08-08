@@ -165,6 +165,12 @@ public class CascadePlatformTest extends PlatformTestCase
     cascade.complete();
 
     validateLength( fourth, 20 );
+
+    assertTrue( cascade.getHeadFlows().contains( first ) );
+    assertTrue( cascade.getSourceTaps().containsAll( first.getSourcesCollection() ) );
+
+    assertTrue( cascade.getTailFlows().contains( fourth ) );
+    assertTrue( cascade.getSinkTaps().containsAll( fourth.getSinksCollection() ) );
     }
 
   @Test
@@ -230,16 +236,21 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow third = thirdFlow( second.getSink(), path + "/third" + ComparePlatformsTest.NONDETERMINISTIC );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" + ComparePlatformsTest.NONDETERMINISTIC );
 
-    LockingFlowListener listener = new LockingFlowListener();
+    LockingCascadeListener cascadeListener = new LockingCascadeListener();
+    LockingFlowListener flowListener = new LockingFlowListener();
 
-    first.addListener( listener );
+    first.addListener( flowListener );
 
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+
+    cascade.addListener( cascadeListener );
 
     System.out.println( "calling start" );
     cascade.start();
 
-    assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not start", flowListener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    assertTrue( "cascade did not start", cascadeListener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
 
     while( true )
       {
@@ -263,8 +274,11 @@ public class CascadePlatformTest extends PlatformTestCase
 
     cascade.stop();
 
-    assertTrue( "did not stop", listener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
-    assertTrue( "did not complete", listener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not stop", flowListener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "did not complete", flowListener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
+
+    assertTrue( "cascade did not stop", cascadeListener.stopped.tryAcquire( 60, TimeUnit.SECONDS ) );
+    assertTrue( "cascade did not complete", cascadeListener.completed.tryAcquire( 60, TimeUnit.SECONDS ) );
     }
 
   @Test
@@ -310,5 +324,14 @@ public class CascadePlatformTest extends PlatformTestCase
     cascade.complete();
 
     validateLength( fourth, 20 );
+
+    assertTrue( cascade.getHeadFlows().contains( first ) );
+    assertTrue( cascade.getSourceTaps().containsAll( first.getSourcesCollection() ) );
+
+    assertTrue( cascade.getIntermediateTaps().containsAll( third.getCheckpointsCollection() ) );
+    assertTrue( cascade.getCheckpointsTaps().containsAll( third.getCheckpointsCollection() ) );
+
+    assertTrue( cascade.getTailFlows().contains( fourth ) );
+    assertTrue( cascade.getSinkTaps().containsAll( fourth.getSinksCollection() ) );
     }
   }

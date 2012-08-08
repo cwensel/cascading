@@ -20,16 +20,28 @@
 
 package cascading.cascade.planner;
 
-import cascading.flow.BaseFlow;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import java.util.Collection;
+
+import cascading.flow.Flow;
+import cascading.tap.Tap;
 
 /**
  *
  */
-public class TapGraph extends SimpleDirectedGraph<String, BaseFlow.FlowHolder>
+public class TapGraph extends TopologyGraph<Tap>
   {
-  public TapGraph()
+  public TapGraph( Collection<Flow> flows )
     {
-    super( BaseFlow.FlowHolder.class );
+    super( flows.toArray( new Flow[ flows.size() ] ) );
+    }
+
+  public TapGraph( Flow... flows )
+    {
+    super( flows );
+    }
+
+  protected Tap getVertex( Flow flow, Tap tap )
+    {
+    return tap;
     }
   }

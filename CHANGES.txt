@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1 [unreleased]
 
+  Added support for c.c.CascadeListener on c.c.Cascade instances.
+
   Updated c.p.j.InnerJoin.JoinIterator and sub-classes to re-use c.t.Tuple instances.
 
   Added support for restartable checkpoint c.f.Flow instances by providing a runID to identify run attempts.

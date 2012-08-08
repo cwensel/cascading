@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.cascade.planner.FlowGraph;
-import cascading.cascade.planner.TapGraph;
+import cascading.cascade.planner.IdentifierGraph;
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
@@ -100,8 +100,8 @@ public class Cascades
     return cascade.getFlowGraph();
     }
 
-  public static TapGraph getTapGraphFrom( Cascade cascade )
+  public static IdentifierGraph getTapGraphFrom( Cascade cascade )
     {
-    return cascade.getTapGraph();
+    return cascade.getIdentifierGraph();
     }
   }
