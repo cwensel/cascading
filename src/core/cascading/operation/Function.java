@@ -22,7 +22,14 @@ package cascading.operation;
 
 import cascading.flow.FlowProcess;
 
-/** Interface Function marks a given {@link BaseOperation} as a function, as opposed to being a {@link Filter}. */
+/**
+ * Interface Function marks a given {@link Operation} as a function, as opposed to being a {@link Filter}.
+ * <p/>
+ * A Function is responsible for taking Tuple arguments and returning one or more result Tuples.
+ * <p/>
+ * To implement a Function, (optionally) sub-class {@link BaseOperation} and have the new sub-class {@code implement}
+ * this interface.
+ */
 public interface Function<Context> extends Operation<Context>
   {
   /**

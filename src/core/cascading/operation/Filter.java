@@ -22,7 +22,14 @@ package cascading.operation;
 
 import cascading.flow.FlowProcess;
 
-/** Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}. */
+/**
+ * Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}.
+ * <p/>
+ * A Filter is responsible for testing a Tuple to see if it should be removed from the tuple stream.
+ * <p/>
+ * To implement a Filter, (optionally) sub-class {@link BaseOperation} and have the new sub-class {@code implement}
+ * this interface.
+ */
 public interface Filter<Context> extends Operation<Context>
   {
   /**
