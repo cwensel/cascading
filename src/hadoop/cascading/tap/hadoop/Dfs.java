@@ -46,6 +46,7 @@ public class Dfs extends Hfs
    * @param uri    of type URI
    */
   @ConstructorProperties({"fields", "uri"})
+  @Deprecated
   public Dfs( Fields fields, URI uri )
     {
     super( fields, uri.getPath() );
@@ -61,6 +62,7 @@ public class Dfs extends Hfs
    * @param replace of type boolean
    */
   @ConstructorProperties({"fields", "uri", "replace"})
+  @Deprecated
   public Dfs( Fields fields, URI uri, boolean replace )
     {
     super( fields, uri.getPath(), replace );
@@ -76,6 +78,7 @@ public class Dfs extends Hfs
    * @param sinkMode of type SinkMode
    */
   @ConstructorProperties({"fields", "uri", "sinkMode"})
+  @Deprecated
   public Dfs( Fields fields, URI uri, SinkMode sinkMode )
     {
     super( fields, uri.getPath(), sinkMode );
@@ -90,6 +93,7 @@ public class Dfs extends Hfs
    * @param stringPath of type String
    */
   @ConstructorProperties({"fields", "stringPath"})
+  @Deprecated
   public Dfs( Fields fields, String stringPath )
     {
     super( fields, stringPath );
@@ -103,6 +107,7 @@ public class Dfs extends Hfs
    * @param replace    of type boolean
    */
   @ConstructorProperties({"fields", "stringPath", "replace"})
+  @Deprecated
   public Dfs( Fields fields, String stringPath, boolean replace )
     {
     super( fields, stringPath, replace );
@@ -116,6 +121,7 @@ public class Dfs extends Hfs
    * @param sinkMode   of type SinkMode
    */
   @ConstructorProperties({"fields", "stringPath", "sinkMode"})
+  @Deprecated
   public Dfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( fields, stringPath, sinkMode );
@@ -149,6 +155,7 @@ public class Dfs extends Hfs
    * @param replace of type boolean
    */
   @ConstructorProperties({"scheme", "uri", "replace"})
+  @Deprecated
   public Dfs( Scheme scheme, URI uri, boolean replace )
     {
     super( scheme, uri.getPath(), replace );
@@ -191,6 +198,7 @@ public class Dfs extends Hfs
    * @param replace    of type boolean
    */
   @ConstructorProperties({"scheme", "stringPath", "replace"})
+  @Deprecated
   public Dfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
