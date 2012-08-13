@@ -63,14 +63,12 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     {
     if( !taps.isEmpty() )
       {
-      Properties confCopy = flowProcess.copyConfig( conf );
-
       for( Tap tap : taps )
         {
         if( isSink )
-          tap.sinkConfInit( flowProcess, confCopy );
+          tap.sinkConfInit( flowProcess, conf );
         else
-          tap.sourceConfInit( flowProcess, confCopy );
+          tap.sourceConfInit( flowProcess, conf );
         }
       }
     }
