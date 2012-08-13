@@ -156,7 +156,6 @@ public class AppProps extends Props
     {
     if( appID == null )
       {
-      String appName = properties == null ? "appnameseed" : getApplicationName( properties );
       appID = Util.createUniqueID();
       LOG.info( "using app.id: {}", appID );
       }
