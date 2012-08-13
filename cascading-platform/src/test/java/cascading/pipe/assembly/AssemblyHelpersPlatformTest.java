@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -473,40 +474,85 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testParallelAggregates() throws IOException
+  public void testFirstBy() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
 
     Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum", "count", "average", "average2" ), "\t",
-      new Class[]{
-        String.class,
-        Integer.TYPE,
-        Integer.TYPE,
-        Double.TYPE,
-        Double.TYPE}, getOutputPath( "multi" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "char" ), "\t",
+      new Class[]{Integer.TYPE, String.class}, getOutputPath( "firstn" ), SinkMode.REPLACE );
 
-    Pipe pipe = new Pipe( "multi" );
+    Pipe pipe = new Pipe( "first" );
 
-    SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
-    CountBy countPipe = new CountBy( new Fields( "count" ) );
-    AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
-    AverageBy averagePipe2 = new AverageBy( new Fields( "num" ), new Fields( "average2" ) );
+    Fields charFields = new Fields( "char" );
+    charFields.setComparator( "char", Collections.reverseOrder() );
 
-    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe, averagePipe2 );
+    pipe = new FirstBy( pipe, new Fields( "num" ), charFields, 2 );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 5, 5, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+\\s[\\d.]+$" ) );
+    Tuple[] results = new Tuple[]{
+      new Tuple( 1, "c" ),
+      new Tuple( 2, "d" ),
+      new Tuple( 3, "c" ),
+      new Tuple( 4, "d" ),
+      new Tuple( 5, "e" )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    assertTrue( !iterator.hasNext() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testParallelAggregates() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum", "count", "average", "average2", "first" ), "\t",
+      new Class[]{
+        String.class,
+        Integer.TYPE,
+        Integer.TYPE,
+        Double.TYPE,
+        Double.TYPE,
+        Integer.TYPE}, getOutputPath( "multi" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "multi" );
+
+    Fields num = new Fields( "num" );
+
+    num.setComparator( "num", Collections.reverseOrder() );
+
+    SumBy sumPipe = new SumBy( num, new Fields( "sum" ), long.class );
+    CountBy countPipe = new CountBy( new Fields( "count" ) );
+    AverageBy averagePipe = new AverageBy( num, new Fields( "average" ) );
+    AverageBy averagePipe2 = new AverageBy( num, new Fields( "average2" ) );
+    FirstBy firstBy = new FirstBy( num, new Fields( "first" ) );
+
+    pipe = new AggregateBy( "name", Pipe.pipes( pipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe, averagePipe2, firstBy );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 6, Pattern.compile( "^\\w+\\s\\d+\\s\\d+\\s[\\d.]+\\s[\\d.]+\\s\\d+$" ) );
 
     Tuple[] results = new Tuple[]{
-      new Tuple( "a", 6, 2, (double) 6 / 2, (double) 6 / 2 ),
-      new Tuple( "b", 12, 4, (double) 12 / 4, (double) 12 / 4 ),
-      new Tuple( "c", 10, 4, (double) 10 / 4, (double) 10 / 4 ),
-      new Tuple( "d", 6, 2, (double) 6 / 2, (double) 6 / 2 ),
-      new Tuple( "e", 5, 1, (double) 5 / 1, (double) 5 / 1 ),
+      new Tuple( "a", 6, 2, (double) 6 / 2, (double) 6 / 2, 5 ),
+      new Tuple( "b", 12, 4, (double) 12 / 4, (double) 12 / 4, 5 ),
+      new Tuple( "c", 10, 4, (double) 10 / 4, (double) 10 / 4, 4 ),
+      new Tuple( "d", 6, 2, (double) 6 / 2, (double) 6 / 2, 4 ),
+      new Tuple( "e", 5, 1, (double) 5 / 1, (double) 5 / 1, 5 )
     };
 
     TupleEntryIterator iterator = flow.openSink();

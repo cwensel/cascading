@@ -68,5 +68,4 @@ public class Last extends ExtentBase
     {
     context[ 0 ] = new Tuple( entry.getTuple() );
     }
-
   }

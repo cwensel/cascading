@@ -20,6 +20,8 @@
 
 package cascading.operation.aggregator;
 
+import java.util.Iterator;
+
 import cascading.CascadingTestCase;
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
@@ -84,6 +86,25 @@ public class AggregatorsTest extends CascadingTestCase
     Tuple tuple = resultEntryCollector.iterator().next();
 
     assertEquals( "got expected value after aggregate", 1.0, tuple.getDouble( 0 ), 0.0d );
+    }
+
+  public void testFirstN()
+    {
+    Aggregator aggregator = new First( 3 );
+
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
+
+    Fields resultFields = new Fields( "field" );
+
+    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
+
+    Iterator<Tuple> iterator = resultEntryCollector.iterator();
+
+    assertEquals( "got expected value after aggregate", 1.0, iterator.next().getDouble( 0 ), 0.0d );
+    assertEquals( "got expected value after aggregate", 3.0, iterator.next().getDouble( 0 ), 0.0d );
+    assertEquals( "got expected value after aggregate", 2.0, iterator.next().getDouble( 0 ), 0.0d );
     }
 
   public void testLast()

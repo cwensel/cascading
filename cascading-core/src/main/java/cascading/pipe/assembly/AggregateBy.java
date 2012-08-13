@@ -76,6 +76,12 @@ import org.slf4j.LoggerFactory;
  * {@link Functor} for use on the Map side. Multiple Functor instances are managed by the {@link CompositeFunction}
  * class allowing them all to share the same LRU value map for more efficiency.
  * <p/>
+ * AggregateBy instances return {@code argumentFields} which are used internally to control the values passed to
+ * internal Functor instances. If any argumentFields also have {@link java.util.Comparator}s, they will be used
+ * to for secondary sorting (see {@link GroupBy} {@code sortFields}. This feature is used by {@link FirstBy} to
+ * control which Tuple is seen first for a grouping.
+ * <p/>
+ * <p/>
  * To tune the LRU, set the {@code threshold} value to a high enough value to utilize available memory. Or set a
  * default value via the {@link #AGGREGATE_BY_THRESHOLD} property. The current default ({@link CompositeFunction#DEFAULT_THRESHOLD})
  * is {@code 10, 000} unique keys. Note "flushes" from the LRU will be logged in threshold increments along with memory
@@ -84,8 +90,7 @@ import org.slf4j.LoggerFactory;
  * Note using a AggregateBy instance automatically inserts a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
  * <p/>
- * Also note that {@link Unique} is not a CompositeAggregator as it makes no sense to combine it with other aggregators,
- * and so is slightly more optimized internally.
+ * Also note that {@link Unique} is not a CompositeAggregator and is slightly more optimized internally.
  *
  * @see SumBy
  * @see CountBy
@@ -465,7 +470,8 @@ public class AggregateBy extends SubAssembly
 
     verify();
 
-    Fields argumentSelector = Fields.merge( groupingFields, Fields.merge( argumentFields ) );
+    Fields sortFields = Fields.copyComparators( Fields.merge( argumentFields ), argumentFields );
+    Fields argumentSelector = Fields.merge( groupingFields, sortFields );
 
     Pipe[] functions = new Pipe[ pipes.length ];
 
@@ -474,7 +480,7 @@ public class AggregateBy extends SubAssembly
     for( int i = 0; i < functions.length; i++ )
       functions[ i ] = new Each( pipes[ i ], argumentSelector, function, Fields.RESULTS );
 
-    groupBy = new GroupBy( name, functions, groupingFields );
+    groupBy = new GroupBy( name, functions, groupingFields, sortFields.hasComparators() ? sortFields : null );
 
     Pipe pipe = groupBy;
 

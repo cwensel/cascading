@@ -22,22 +22,46 @@ package cascading.operation.aggregator;
 
 import java.beans.ConstructorProperties;
 
+import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
+import cascading.operation.AggregatorCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered.
+ * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered in a grouping.
  * <p/>
  * By default, it returns the first Tuple of {@link Fields#ARGS} found.
+ * <p/>
+ * If {@code firstN} is given, Tuples with each of the first N number of Tuples encountered are returned. That is,
+ * this Aggregator will return at maximum N tuples per grouping.
+ * <p/>
+ * Be sure to set the {@link cascading.pipe.GroupBy} {@code sortFields} to control which Tuples are seen first.
  */
 public class First extends ExtentBase
   {
+  private final int firstN;
+
   /** Selects and returns the first argument Tuple encountered. */
   public First()
     {
     super( Fields.ARGS );
+
+    this.firstN = 1;
+    }
+
+  /**
+   * Selects and returns the first N argument Tuples encountered.
+   *
+   * @param firstN
+   */
+  @ConstructorProperties({"firstN"})
+  public First( int firstN )
+    {
+    super( Fields.ARGS );
+
+    this.firstN = firstN;
     }
 
   /**
@@ -49,6 +73,21 @@ public class First extends ExtentBase
   public First( Fields fieldDeclaration )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
+
+    this.firstN = 1;
+    }
+
+  /**
+   * Selects and returns the first N argument Tuples encountered.
+   *
+   * @param fieldDeclaration of type Fields
+   */
+  @ConstructorProperties({"fieldDeclaration", "firstN"})
+  public First( Fields fieldDeclaration, int firstN )
+    {
+    super( fieldDeclaration.size(), fieldDeclaration );
+
+    this.firstN = firstN;
     }
 
   /**
@@ -62,12 +101,28 @@ public class First extends ExtentBase
   public First( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
     super( fieldDeclaration, ignoreTuples );
+
+    this.firstN = 1;
     }
 
   protected void performOperation( Tuple[] context, TupleEntry entry )
     {
     if( context[ 0 ] == null )
-      context[ 0 ] = new Tuple( entry.getTuple() );
+      context[ 0 ] = new Tuple();
+
+    if( context[ 0 ].size() < firstN )
+      context[ 0 ].add( entry.getTupleCopy() );
     }
 
+  @Override
+  public void complete( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
+    {
+    Tuple context = aggregatorCall.getContext()[ 0 ];
+
+    if( context == null )
+      return;
+
+    for( Object tuple : context )
+      aggregatorCall.getOutputCollector().add( (Tuple) tuple );
+    }
   }

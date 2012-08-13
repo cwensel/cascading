@@ -237,6 +237,22 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return new Fields( elements.toArray( new Comparable[ elements.size() ] ) );
     }
 
+  public static Fields copyComparators( Fields toFields, Fields... fromFields )
+    {
+    for( Fields fromField : fromFields )
+      {
+      for( Comparable field : fromField )
+        {
+        Comparator comparator = fromField.getComparator( field );
+
+        if( comparator != null )
+          toFields.setComparator( field, comparator );
+        }
+      }
+
+    return toFields;
+    }
+
   /**
    * Method offsetSelector is a factory that makes new instances of Fields the given size but offset by startPos.
    * The result Fields instance can only be used as a selector.
@@ -1344,6 +1360,21 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     return fieldName;
+    }
+
+  protected Comparator getComparator( Comparable fieldName )
+    {
+    if( comparators == null )
+      return null;
+
+    try
+      {
+      return comparators[ getPos( asFieldName( fieldName ) ) ];
+      }
+    catch( FieldsResolverException exception )
+      {
+      return null;
+      }
     }
 
   /**

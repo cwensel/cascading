@@ -2,6 +2,13 @@ Cascading Change Log
 
 2.1 [unreleased]
 
+  Added c.p.a.FirstBy partial aggregator to allow for capturing first seen c.t.Tuple in a Tuple stream. Argument
+  c.f.Fields j.u.Comparators are honored for secondary sorting.
+
+  Updated c.p.a.AggregateBy to honor argumentField c.f.Fields j.u.Comparator instances for secondary sorting.
+
+  Updated c.o.a.First to accumulate the first N seen c.t.Tuple instances.
+
   Added support for c.c.CascadeListener on c.c.Cascade instances.
 
   Updated c.p.j.InnerJoin.JoinIterator and sub-classes to re-use c.t.Tuple instances.
