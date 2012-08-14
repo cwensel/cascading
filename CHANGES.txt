@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1 [unreleased]
 
+  Added c.p.Props#buildProperties( Iterable<Map.Entry<String, String>> defaultProperties ) to allow for re-using
+  and existing o.a.h.m.JobConf instances as default properties.
+
   Added c.p.a.FirstBy partial aggregator to allow for capturing first seen c.t.Tuple in a Tuple stream. Argument
   c.f.Fields j.u.Comparators are honored for secondary sorting.
 

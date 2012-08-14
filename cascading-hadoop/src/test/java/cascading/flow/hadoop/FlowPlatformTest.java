@@ -23,6 +23,7 @@ package cascading.flow.hadoop;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
@@ -48,12 +49,15 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.platform.hadoop.HadoopPlatform;
+import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
+import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
 
 import static data.InputData.inputFileLower;
@@ -151,7 +155,7 @@ public class FlowPlatformTest extends PlatformTestCase
   public void testStop() throws Exception
     {
     // introduces race condition if run without cluster
-    if(!getPlatform().isUseCluster())
+    if( !getPlatform().isUseCluster() )
       return;
 
     getPlatform().copyFromLocal( inputFileLower );
@@ -436,5 +440,27 @@ public class FlowPlatformTest extends PlatformTestCase
     Flow flow2 = new HadoopFlowConnector( props ).connect( source, sink, pipe );
 
     assertTrue( "same id", !flow1.getID().equalsIgnoreCase( flow2.getID() ) );
+    }
+
+  @Test
+  public void testCopyConfig() throws Exception
+    {
+    Tap source = new Lfs( new TextLine(), "input/path" );
+    Tap sink = new Hfs( new TextLine(), "output/path", true );
+
+    Pipe pipe = new Pipe( "test" );
+
+    JobConf conf = ( (HadoopPlatform) getPlatform() ).getJobConf();
+
+    conf.set( AppProps.APP_NAME, "testname" );
+
+    AppProps props = AppProps.appProps().setVersion( "1.2.3" );
+
+    Properties properties = props.buildProperties( conf ); // convert job conf to properties instance
+
+    Flow flow = new HadoopFlowConnector( properties ).connect( source, sink, pipe );
+
+    assertEquals( "testname", flow.getProperty( AppProps.APP_NAME ) );
+    assertEquals( "1.2.3", flow.getProperty( AppProps.APP_VERSION ) );
     }
   }

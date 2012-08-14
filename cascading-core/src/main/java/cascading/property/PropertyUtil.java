@@ -64,6 +64,16 @@ public class PropertyUtil
       properties.put( key, value );
     }
 
+  public static Properties createProperties( Iterable<Map.Entry<String, String>> defaultProperties )
+    {
+    Properties properties = new Properties();
+
+    for( Map.Entry<String, String> property : defaultProperties )
+      properties.setProperty( property.getKey(), property.getValue() );
+
+    return properties;
+    }
+
   public static Properties createProperties( Map<Object, Object> properties, Properties defaultProperties )
     {
     Properties results = defaultProperties == null ? new Properties() : new Properties( defaultProperties );

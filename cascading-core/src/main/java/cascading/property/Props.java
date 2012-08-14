@@ -58,6 +58,19 @@ public abstract class Props
 
   /**
    * Method buildProperties returns a new {@link Properties} instance with all property values for this type
+   * using the given Iterable<Map.Entry<String, String>> of property values as defaults. The given Iterable will not be modified.
+   * <p/>
+   * If no values have been set, all default properties and values will be returned.
+   *
+   * @return a new Properties instance
+   */
+  public Properties buildProperties( Iterable<Map.Entry<String, String>> defaultProperties )
+    {
+    return buildProperties( PropertyUtil.createProperties( defaultProperties ) );
+    }
+
+  /**
+   * Method buildProperties returns a new {@link Properties} instance with all property values for this type
    * using the given Properties instance of property values as defaults. The given Map will not be modified.
    * <p/>
    * If no values have been set, all default properties and values will be returned.
