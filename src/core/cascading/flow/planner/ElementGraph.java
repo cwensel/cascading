@@ -588,7 +588,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
 
-    if( LOG.isDebugEnabled() )
+    if( LOG.isDebugEnabled() && outgoingScope != null )
       {
       LOG.debug( "for modifier: " + source );
       if( outgoingScope.getArgumentsSelector() != null )
