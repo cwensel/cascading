@@ -108,5 +108,4 @@ public class DateFormatter extends DateOperation implements Function<Pair<Simple
 
     functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
     }
-
   }

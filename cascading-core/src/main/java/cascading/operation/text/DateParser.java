@@ -139,7 +139,15 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
 
     try
       {
-      Date date = functionCall.getContext().getLhs().parse( (String) functionCall.getArguments().getObject( 0 ) );
+      String value = functionCall.getArguments().getString( 0 );
+
+      if( value == null ) // if null, return null for the field
+        {
+        output.set( 0, null ); // safe to call set, tuple is size of 1
+        return;
+        }
+
+      Date date = functionCall.getContext().getLhs().parse( value );
 
       if( calendarFields == null )
         output.set( 0, date.getTime() ); // safe to call set, tuple is size of 1
