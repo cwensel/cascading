@@ -34,9 +34,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
-import org.codehaus.janino.CompileException;
+import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
-import org.codehaus.janino.Parser;
 import org.codehaus.janino.Scanner;
 
 /**
@@ -118,17 +117,13 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
       {
       parameterNames = ExpressionEvaluator.guessParameterNames( new Scanner( "expressionEval", new StringReader( expression ) ) );
       }
-    catch( Parser.ParseException exception )
-      {
-      throw new OperationException( "could not parse expression: " + expression, exception );
-      }
-    catch( Scanner.ScanException exception )
-      {
-      throw new OperationException( "could not scan expression: " + expression, exception );
-      }
     catch( IOException exception )
       {
       throw new OperationException( "could not read expression: " + expression, exception );
+      }
+    catch( CompileException exception )
+      {
+      throw new OperationException( "could not compile expression: " + expression, exception );
       }
 
     return parameterNames;
@@ -165,14 +160,6 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
     catch( CompileException exception )
       {
       throw new OperationException( "could not compile expression: " + expression, exception );
-      }
-    catch( Parser.ParseException exception )
-      {
-      throw new OperationException( "could not parse expression: " + expression, exception );
-      }
-    catch( Scanner.ScanException exception )
-      {
-      throw new OperationException( "could not scan expression: " + expression, exception );
       }
     }
 

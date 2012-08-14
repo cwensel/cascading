@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1 [unreleased]
 
+  Updated janino to version 2.6.1.
+
   Updated c.s.l.TextLine, c.s.l.TextDelimited, c.s.h.TextLine, and c.s.h.TextDelimited to encode/decode any supported
   j.n.c.Charset.
 
