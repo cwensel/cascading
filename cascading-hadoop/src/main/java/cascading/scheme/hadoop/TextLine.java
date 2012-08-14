@@ -22,6 +22,7 @@ package cascading.scheme.hadoop;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
@@ -63,6 +64,9 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * for the compression value, it will remain disabled.
  * <p/>
  * If any of the input files end with ".zip", an error will be thrown.
+ * * <p/>
+ * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
+ * argument.
  */
 public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]>
   {
@@ -71,6 +75,8 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
       DEFAULT, ENABLE, DISABLE
     }
 
+  public static final String DEFAULT_CHARSET = "UTF-8";
+
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
   /** Field DEFAULT_SOURCE_FIELDS */
@@ -78,6 +84,8 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
 
   /** Field sinkCompression */
   Compress sinkCompression = Compress.DISABLE;
+
+  String charsetName = DEFAULT_CHARSET;
 
   /**
    * Creates a new TextLine instance that sources "offset" and "line" fields, and sinks all incoming fields, where
@@ -135,6 +143,25 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
    *
    * @param sourceFields the source fields for this scheme
    * @param sinkFields   the sink fields for this scheme
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "charsetName"})
+  public TextLine( Fields sourceFields, Fields sinkFields, String charsetName )
+    {
+    super( sourceFields, sinkFields );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields the source fields for this scheme
+   * @param sinkFields   the sink fields for this scheme
    * @param numSinkParts of type int
    */
   @ConstructorProperties({"sourceFields", "sinkFields", "numSinkParts"})
@@ -158,7 +185,29 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     {
     super( sourceFields, sinkFields );
 
-    this.sinkCompression = sinkCompression;
+    setSinkCompression( sinkCompression );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Constructor TextLine creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields    of type Fields
+   * @param sinkFields      of type Fields
+   * @param sinkCompression of type Compress
+   * @param charsetName     of type String
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "sinkCompression", "charsetName"})
+  public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression, String charsetName )
+    {
+    super( sourceFields, sinkFields );
+
+    setSinkCompression( sinkCompression );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
 
     verify( sourceFields );
     }
@@ -183,6 +232,29 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   /**
+   * Constructor TextLine creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields    of type Fields
+   * @param sinkFields      of type Fields
+   * @param sinkCompression of type Compress
+   * @param numSinkParts    of type int
+   * @param charsetName     of type String
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "sinkCompression", "numSinkParts", "charsetName"})
+  public TextLine( Fields sourceFields, Fields sinkFields, Compress sinkCompression, int numSinkParts, String charsetName )
+    {
+    super( sourceFields, sinkFields, numSinkParts );
+
+    setSinkCompression( sinkCompression );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  /**
    * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
    * subsequent tuples.
    *
@@ -192,6 +264,24 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields the source fields for this scheme
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "charsetName"})
+  public TextLine( Fields sourceFields, String charsetName )
+    {
+    super( sourceFields );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
 
     verify( sourceFields );
     }
@@ -209,6 +299,14 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     super( sourceFields, numSinkParts );
 
     verify( sourceFields );
+    }
+
+  private void setCharsetName( String charsetName )
+    {
+    if( charsetName != null )
+      this.charsetName = charsetName;
+
+    Charset.forName( this.charsetName );
     }
 
   protected void verify( Fields sourceFields )
@@ -291,10 +389,11 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
   @Override
   public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
-    sourceCall.setContext( new Object[ 2 ] );
+    sourceCall.setContext( new Object[ 3 ] );
 
     sourceCall.getContext()[ 0 ] = (Writable) sourceCall.getInput().createKey();
     sourceCall.getContext()[ 1 ] = (Writable) sourceCall.getInput().createValue();
+    sourceCall.getContext()[ 2 ] = Charset.forName( charsetName );
     }
 
   @Override
@@ -325,7 +424,13 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     if( getSourceFields().size() == 2 )
       tuple.set( index++, ( (LongWritable) context[ 0 ] ).get() );
 
-    tuple.set( index, ( (Text) context[ 1 ] ).toString() );
+    tuple.set( index, makeEncodedString( context ) );
+    }
+
+  protected String makeEncodedString( Object[] context )
+    {
+    Text text = (Text) context[ 1 ];
+    return new String( text.getBytes(), 0, text.getLength(), (Charset) context[ 2 ] );
     }
 
   @Override
@@ -335,9 +440,24 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
+  public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    {
+    sinkCall.setContext( new Object[ 2 ] );
+
+    sinkCall.getContext()[ 0 ] = new Text();
+    sinkCall.getContext()[ 1 ] = Charset.forName( charsetName );
+    }
+
+  @Override
   public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
+    Text text = (Text) sinkCall.getContext()[ 0 ];
+    Charset charset = (Charset) sinkCall.getContext()[ 1 ];
+    String line = sinkCall.getOutgoingEntry().getTuple().toString();
+
+    text.set( line.getBytes( charset ) );
+
     // it's ok to use NULL here so the collector does not write anything
-    sinkCall.getOutput().collect( null, sinkCall.getOutgoingEntry().getTuple().toString() );
+    sinkCall.getOutput().collect( null, text );
     }
   }

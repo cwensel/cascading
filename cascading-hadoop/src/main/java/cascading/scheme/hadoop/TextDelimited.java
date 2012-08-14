@@ -22,8 +22,7 @@ package cascading.scheme.hadoop;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.Charset;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.SinkCall;
@@ -36,6 +35,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -81,39 +81,23 @@ import org.apache.hadoop.mapred.RecordReader;
  * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
  * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
  * either, so all values will be returned as Strings.
+ * <p/>
+ * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
+ * argument.
  *
  * @see TextLine
  */
 public class TextDelimited extends TextLine
   {
+  public static final String DEFAULT_CHARSET = "UTF-8";
+
   /** Field delimitedParser */
   protected final DelimitedParser delimitedParser;
   /** Field skipHeader */
   private boolean skipHeader;
   private final boolean writeHeader;
 
-  /** Class DecoratorTuple just wraps a Tuple. */
-  private static class DecoratorTuple extends Tuple
-    {
-    String string;
-
-    private DecoratorTuple()
-      {
-      super( (List<Object>) null );
-      }
-
-    public void set( Tuple tuple, String string )
-      {
-      this.elements = (ArrayList<Object>) Tuple.elements( tuple );
-      this.string = string;
-      }
-
-    @Override
-    public String toString()
-      {
-      return string;
-      }
-    }
+  private String charsetName = DEFAULT_CHARSET;
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
@@ -140,7 +124,7 @@ public class TextDelimited extends TextLine
   @ConstructorProperties({"hasHeader", "delimiter"})
   public TextDelimited( boolean hasHeader, String delimiter )
     {
-    this( Fields.ALL, null, hasHeader, delimiter, null, null );
+    this( Fields.ALL, null, hasHeader, delimiter, null, (Class[]) null );
     }
 
   /**
@@ -157,7 +141,7 @@ public class TextDelimited extends TextLine
   @ConstructorProperties({"hasHeader", "delimiter", "quote"})
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
     {
-    this( Fields.ALL, null, hasHeader, delimiter, quote, null );
+    this( Fields.ALL, null, hasHeader, delimiter, quote, (Class[]) null );
     }
 
   /**
@@ -175,7 +159,7 @@ public class TextDelimited extends TextLine
   @ConstructorProperties({"sinkCompression", "hasHeader", "delimiter", "quote"})
   public TextDelimited( Compress sinkCompression, boolean hasHeader, String delimiter, String quote )
     {
-    this( Fields.ALL, sinkCompression, hasHeader, delimiter, quote, null );
+    this( Fields.ALL, sinkCompression, hasHeader, delimiter, quote, (Class[]) null );
     }
 
   /**
@@ -350,6 +334,23 @@ public class TextDelimited extends TextLine
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
    * @param fields      of type Fields
+   * @param hasHeader   of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types", "safe", "charsetName"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe, String charsetName )
+    {
+    this( fields, null, hasHeader, hasHeader, delimiter, true, quote, types, safe, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
    * @param skipHeader  of type boolean
    * @param writeHeader of type boolean
    * @param delimiter   of type String
@@ -486,6 +487,23 @@ public class TextDelimited extends TextLine
    *
    * @param fields          of type Fields
    * @param sinkCompression of type Compress
+   * @param hasHeader       of type boolean
+   * @param delimiter       of type String
+   * @param types           of type Class[]
+   * @param safe            of type boolean
+   * @param charsetName     of type String
+   */
+  @ConstructorProperties({"fields", "sinkCompression", "hasHeader", "delimiter", "types", "safe", "charsetName"})
+  public TextDelimited( Fields fields, Compress sinkCompression, boolean hasHeader, String delimiter, Class[] types, boolean safe, String charsetName )
+    {
+    this( fields, sinkCompression, hasHeader, hasHeader, delimiter, true, (String) null, types, safe, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param sinkCompression of type Compress
    * @param skipHeader      of type boolean
    * @param writeHeader     of type boolean
    * @param delimiter       of type String
@@ -568,6 +586,22 @@ public class TextDelimited extends TextLine
   public TextDelimited( Fields fields, Compress sinkCompression, boolean hasHeader, String delimiter, String quote )
     {
     this( fields, sinkCompression, hasHeader, hasHeader, delimiter, true, quote, null, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param sinkCompression of type Compress
+   * @param hasHeader       of type boolean
+   * @param delimiter       of type String
+   * @param quote           of type String
+   * @param charsetName     of type String
+   */
+  @ConstructorProperties({"fields", "sinkCompression", "hasHeader", "delimiter", "quote", "charsetName"})
+  public TextDelimited( Fields fields, Compress sinkCompression, boolean hasHeader, String delimiter, String quote, String charsetName )
+    {
+    this( fields, sinkCompression, hasHeader, hasHeader, delimiter, true, quote, null, true, charsetName );
     }
 
   /**
@@ -701,6 +735,26 @@ public class TextDelimited extends TextLine
   @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "delimiter", "strict", "quote", "types", "safe"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
+    this( fields, sinkCompression, skipHeader, writeHeader, delimiter, strict, quote, types, safe, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param sinkCompression of type Compress
+   * @param skipHeader      of type boolean
+   * @param delimiter       of type String
+   * @param strict          of type boolean
+   * @param quote           of type String
+   * @param types           of type Class[]
+   * @param safe            of type boolean
+   * @param charsetName     of type String
+   */
+  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "delimiter", "strict", "quote", "types", "safe",
+                          "charsetName"})
+  public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
+    {
     super( sinkCompression );
 
     // normalizes ALL and UNKNOWN
@@ -709,6 +763,12 @@ public class TextDelimited extends TextLine
 
     this.skipHeader = skipHeader;
     this.writeHeader = writeHeader;
+
+    if( charsetName != null )
+      this.charsetName = charsetName;
+
+    // throws an exception if not found
+    Charset.forName( this.charsetName );
 
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
@@ -730,7 +790,7 @@ public class TextDelimited extends TextLine
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
     // should revert to file:// (Lfs) if tap is Lfs
-    tap = new Hfs( new TextLine( new Fields( "line" ) ), tap.getFullIdentifier( flowProcess.getConfigCopy() ) );
+    tap = new Hfs( new TextLine( new Fields( "line" ), charsetName ), tap.getFullIdentifier( flowProcess.getConfigCopy() ) );
 
     setSourceFields( delimitedParser.parseFirstLine( flowProcess, tap ) );
 
@@ -763,7 +823,7 @@ public class TextDelimited extends TextLine
         return false;
       }
 
-    Object[] split = delimitedParser.parseLine( context[ 1 ].toString() );
+    Object[] split = delimitedParser.parseLine( makeEncodedString( context ) );
     Tuple tuple = sourceCall.getIncomingEntry().getTuple();
 
     tuple.clear();
@@ -776,20 +836,17 @@ public class TextDelimited extends TextLine
   @Override
   public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
-    sinkCall.setContext( new Object[]{new DecoratorTuple(), new StringBuilder( 4 * 1024 )} );
+    sinkCall.setContext( new Object[ 3 ] );
+
+    sinkCall.getContext()[ 0 ] = new Text();
+    sinkCall.getContext()[ 1 ] = new StringBuilder( 4 * 1024 );
+    sinkCall.getContext()[ 2 ] = Charset.forName( charsetName );
 
     if( writeHeader )
       {
       Fields fields = sinkCall.getOutgoingEntry().getFields();
-      StringBuilder line = (StringBuilder) delimitedParser.joinLine( fields, (StringBuilder) sinkCall.getContext()[ 1 ] );
 
-      DecoratorTuple decoratorTuple = (DecoratorTuple) sinkCall.getContext()[ 0 ];
-
-      decoratorTuple.set( Tuple.NULL, line.toString() );
-
-      line.setLength( 0 );
-
-      sinkCall.getOutput().collect( null, decoratorTuple );
+      write( sinkCall, fields );
       }
     }
 
@@ -797,15 +854,23 @@ public class TextDelimited extends TextLine
   public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
-    StringBuilder line = (StringBuilder) delimitedParser.joinLine( tuple, (StringBuilder) sinkCall.getContext()[ 1 ] );
 
-    DecoratorTuple decoratorTuple = (DecoratorTuple) sinkCall.getContext()[ 0 ];
+    write( sinkCall, tuple );
+    }
 
-    decoratorTuple.set( tuple, line.toString() );
+  private void write( SinkCall<Object[], OutputCollector> sinkCall, Iterable value ) throws IOException
+    {
+    Text text = (Text) sinkCall.getContext()[ 0 ];
+    StringBuilder line = (StringBuilder) sinkCall.getContext()[ 1 ];
+    Charset charset = (Charset) sinkCall.getContext()[ 2 ];
+
+    line = (StringBuilder) delimitedParser.joinLine( value, line );
+
+    text.set( line.toString().getBytes( charset ) );
+
+    sinkCall.getOutput().collect( null, text );
 
     line.setLength( 0 );
-
-    sinkCall.getOutput().collect( null, decoratorTuple );
     }
   }
 

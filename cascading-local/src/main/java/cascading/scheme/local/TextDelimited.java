@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
@@ -84,14 +85,20 @@ import cascading.tuple.Tuple;
  * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
  * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
  * either, so all values will be returned as Strings.
+ * <p/>
+ * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
+ * argument.
  *
  * @see TextLine
  */
 public class TextDelimited extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
+  public static final String DEFAULT_CHARSET = "UTF-8";
+
   private final boolean skipHeader;
   private final boolean writeHeader;
   private final DelimitedParser delimitedParser;
+  private String charsetName = DEFAULT_CHARSET;
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
@@ -118,7 +125,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @ConstructorProperties({"hasHeader", "delimiter"})
   public TextDelimited( boolean hasHeader, String delimiter )
     {
-    this( Fields.ALL, hasHeader, delimiter, null, null );
+    this( Fields.ALL, hasHeader, delimiter, null, (Class[]) null );
     }
 
   /**
@@ -135,7 +142,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @ConstructorProperties({"hasHeader", "delimiter", "quote"})
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
     {
-    this( Fields.ALL, hasHeader, delimiter, quote, null );
+    this( Fields.ALL, hasHeader, delimiter, quote, (Class[]) null );
     }
 
   /**
@@ -309,6 +316,23 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
    * @param fields      of type Fields
+   * @param hasHeader   of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types", "safe", "charsetName"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe, String charsetName )
+    {
+    this( fields, hasHeader, hasHeader, delimiter, true, quote, types, safe, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
    * @param skipHeader  of type boolean
    * @param writeHeader of type boolean
    * @param delimiter   of type String
@@ -353,6 +377,21 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
    * @param fields      of type Fields
+   * @param hasHeader   of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "charsetName"})
+  public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, String charsetName )
+    {
+    this( fields, hasHeader, delimiter, quote, null, true, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
    * @param skipHeader  of type boolean
    * @param writeHeader of type boolean
    * @param delimiter   of type String
@@ -364,6 +403,26 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
+    this( fields, skipHeader, writeHeader, delimiter, strict, quote, types, safe, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param strict      of type boolean
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe",
+                          "charsetName"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
+    {
     super( fields, fields );
 
     // normalizes ALL and UNKNOWN
@@ -374,13 +433,19 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     this.writeHeader = writeHeader;
 
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
+
+    if( charsetName != null )
+      this.charsetName = charsetName;
+
+    // throws an exception if not found
+    Charset.forName( this.charsetName );
     }
 
   public LineNumberReader createInput( InputStream inputStream )
     {
     try
       {
-      return new LineNumberReader( new InputStreamReader( inputStream, "UTF-8" ) );
+      return new LineNumberReader( new InputStreamReader( inputStream, charsetName ) );
       }
     catch( UnsupportedEncodingException exception )
       {
@@ -392,7 +457,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     {
     try
       {
-      return new PrintWriter( new OutputStreamWriter( outputStream, "UTF-8" ) );
+      return new PrintWriter( new OutputStreamWriter( outputStream, charsetName ) );
       }
     catch( UnsupportedEncodingException exception )
       {
@@ -416,7 +481,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     if( tap instanceof CompositeTap )
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
-    tap = new FileTap( new TextLine( new Fields( "line" ) ), tap.getIdentifier() );
+    tap = new FileTap( new TextLine( new Fields( "line" ), charsetName ), tap.getIdentifier() );
 
     setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
 

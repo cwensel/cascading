@@ -20,6 +20,7 @@
 
 package cascading.scheme.local;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
@@ -55,9 +57,16 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
  * writing out the line.
+ * <p/>
+ * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
+ * argument.
  */
 public class TextLine extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
+  public static final String DEFAULT_CHARSET = "UTF-8";
+
+  private String charsetName = DEFAULT_CHARSET;
+
   /**
    * Creates a new TextLine instance that sources "num" and "line" fields, and sinks all incoming fields, where
    * "num" is the line number of the line in the input file.
@@ -73,6 +82,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    *
    * @param sourceFields of Fields
    */
+  @ConstructorProperties({"sourceFields"})
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
@@ -85,13 +95,59 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * subsequent tuples.
    *
    * @param sourceFields of Fields
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "charsetName"})
+  public TextLine( Fields sourceFields, String charsetName )
+    {
+    super( sourceFields );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
    * @param sinkFields   of Fields
    */
+  @ConstructorProperties({"sourceFields", "sinkFields"})
   public TextLine( Fields sourceFields, Fields sinkFields )
     {
     super( sourceFields, sinkFields );
 
     verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param sinkFields   of Fields
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "charsetName"})
+  public TextLine( Fields sourceFields, Fields sinkFields, String charsetName )
+    {
+    super( sourceFields, sinkFields );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  private void setCharsetName( String charsetName )
+    {
+    if( charsetName != null )
+      this.charsetName = charsetName;
+
+    Charset.forName( this.charsetName );
     }
 
   protected void verify( Fields sourceFields )
@@ -104,7 +160,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     {
     try
       {
-      return new LineNumberReader( new InputStreamReader( inputStream, "UTF-8" ) );
+      return new LineNumberReader( new InputStreamReader( inputStream, charsetName ) );
       }
     catch( UnsupportedEncodingException exception )
       {
@@ -116,7 +172,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     {
     try
       {
-      return new PrintWriter( new OutputStreamWriter( outputStream, "UTF-8" ) );
+      return new PrintWriter( new OutputStreamWriter( outputStream, charsetName ) );
       }
     catch( UnsupportedEncodingException exception )
       {
