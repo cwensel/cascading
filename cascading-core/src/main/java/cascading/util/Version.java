@@ -34,14 +34,18 @@ public class Version
   {
   private static final Logger LOG = LoggerFactory.getLogger( Version.class );
 
+  private static boolean printedVersion = false;
+
   /** Field versionProperties */
   public static Properties versionProperties;
 
   public static synchronized void printBanner()
     {
     // only print once
-    if( versionProperties != null )
+    if( printedVersion )
       return;
+
+    printedVersion = true;
 
     String version = getVersionString();
 
@@ -72,14 +76,14 @@ public class Version
     String releaseMinor = versionProperties.getProperty( "cascading.release.minor" );
     String releaseBuild = versionProperties.getProperty( "cascading.build.number" );
 
-    String releaseFull = null;
+    String releaseFull;
 
     if( releaseMinor == null || releaseMinor.isEmpty() )
       releaseFull = releaseMajor;
     else
       releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
 
-    String releaseVersion = null;
+    String releaseVersion;
 
     if( releaseBuild == null || releaseBuild.isEmpty() )
       releaseVersion = String.format( "Concurrent, Inc - Cascading %s", releaseFull );
