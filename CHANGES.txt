@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.5 [unreleased]
 
+  Added missing setter methods on c.p.AppProps for application jar path and class values.
+
   Fix for possible NPE when debug logging is enabled during planning.
 
   Improved error message when Hadoop serializer for a given type cannot be found in some cases.
