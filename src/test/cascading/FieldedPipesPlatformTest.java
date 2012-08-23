@@ -336,6 +336,27 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testUnGroupAnon() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getTextFile( inputFileJoined );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "ungroupedanon" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ) ) );
+
+    pipe = new Each( pipe, new UnGroup( new Fields( "num" ), Fields.fields( new Fields( "lower" ), new Fields( "upper" ) ) ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  @Test
   public void testUnGroupBySize() throws Exception
     {
     getPlatform().copyFromLocal( inputFileJoinedExtra );
