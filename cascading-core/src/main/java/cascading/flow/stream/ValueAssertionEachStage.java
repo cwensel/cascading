@@ -25,6 +25,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.ValueAssertion;
 import cascading.pipe.Each;
 import cascading.pipe.OperatorException;
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -40,6 +41,18 @@ public class ValueAssertionEachStage extends EachStage
     }
 
   @Override
+  protected Fields getIncomingPassThroughFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingFunctionPassThroughFields();
+    }
+
+  @Override
+  protected Fields getIncomingArgumentsFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingFunctionArgumentFields();
+    }
+
+  @Override
   public void initialize()
     {
     super.initialize();
@@ -50,7 +63,7 @@ public class ValueAssertionEachStage extends EachStage
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    argumentsEntry.setTuple( incomingEntry.selectTuple( argumentsSelector ) );
+    argumentsEntry.setTuple( argumentsBuilder.makeResult( incomingEntry.getTuple(), null ) );
 
     try
       {

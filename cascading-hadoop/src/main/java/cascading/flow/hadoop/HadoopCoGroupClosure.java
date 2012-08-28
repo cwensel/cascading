@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -34,6 +35,7 @@ import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory;
 import cascading.tuple.io.IndexTuple;
+import cascading.tuple.util.TupleViews;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +105,11 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
   Collection<Tuple>[] collections;
   private final int numSelfJoins;
 
+  private Tuple[] joinedTuplesArray;
   private final Tuple emptyTuple;
-  private final Tuple joinedTuple;
+  private TupleBuilder joinedBuilder;
+  private Tuple joinedTuple = new Tuple(); // is discarded
+
   private final TupleCollectionFactory<JobConf> tupleCollectionFactory;
 
   public HadoopCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
@@ -113,7 +118,6 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     this.numSelfJoins = numSelfJoins;
 
     this.emptyTuple = Tuple.size( groupingFields[ 0 ].size() );
-    this.joinedTuple = new Tuple();
 
     FactoryLoader loader = FactoryLoader.getInstance();
 
@@ -125,7 +129,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
   @Override
   public int size()
     {
-    return collections.length;
+    return Math.max( joinFields.length, numSelfJoins + 1 );
     }
 
   @Override
@@ -141,10 +145,11 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
   public Tuple getGroupTuple( Tuple keysTuple )
     {
     Tuples.asModifiable( joinedTuple );
-    joinedTuple.clear();
 
-    for( Collection collection : collections )
-      joinedTuple.addAll( collection.isEmpty() ? emptyTuple : keysTuple );
+    for( int i = 0; i < collections.length; i++ )
+      joinedTuplesArray[ i ] = collections[ i ].isEmpty() ? emptyTuple : keysTuple;
+
+    joinedTuple = joinedBuilder.makeResult( joinedTuplesArray );
 
     return joinedTuple;
     }
@@ -180,7 +185,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
         break;
         }
 
-      collections[ pos ].add( (Tuple) current.getTuple() ); // get the value tuple for this cogroup
+      collections[ pos ].add( current.getTuple() ); // get the value tuple for this cogroup
       }
     }
 
@@ -197,27 +202,47 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
 
   private void initLists()
     {
-    int numPipes = joinFields.length;
+    collections = new Collection[ size() ];
 
     // handle self joins
     if( numSelfJoins != 0 )
       {
-      collections = new Collection[ numSelfJoins + 1 ];
-
-      collections[ 0 ] = createTupleCollection( joinFields[ 0 ] );
-
-      for( int i = 1; i < numSelfJoins + 1; i++ )
-        collections[ i ] = collections[ 0 ];
+      Arrays.fill( collections, createTupleCollection( joinFields[ 0 ] ) );
       }
     else
       {
-      collections = new Collection[ numPipes ];
-
       collections[ 0 ] = new FalseCollection(); // we iterate this only once per grouping
 
-      for( int i = 1; i < numPipes; i++ )
+      for( int i = 1; i < joinFields.length; i++ )
         collections[ i ] = createTupleCollection( joinFields[ i ] );
       }
+
+    joinedBuilder = makeJoinedBuilder( joinFields );
+    joinedTuplesArray = new Tuple[ collections.length ];
+    }
+
+  static interface TupleBuilder
+    {
+    Tuple makeResult( Tuple[] tuples );
+    }
+
+  private TupleBuilder makeJoinedBuilder( final Fields[] joinFields )
+    {
+    final Fields[] fields = isSelfJoin() ? new Fields[ size() ] : joinFields;
+
+    if( isSelfJoin() )
+      Arrays.fill( fields, 0, fields.length, joinFields[ 0 ] );
+
+    return new TupleBuilder()
+    {
+    Tuple result = TupleViews.createComposite( fields );
+
+    @Override
+    public Tuple makeResult( Tuple[] tuples )
+      {
+      return TupleViews.reset( result, tuples );
+      }
+    };
     }
 
   private Collection<Tuple> createTupleCollection( Fields joinField )
@@ -253,7 +278,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
       Tuple result = value.getTuple();
 
       if( values.hasNext() )
-        value = (IndexTuple) values.next();
+        value = values.next();
       else
         value = null;
 

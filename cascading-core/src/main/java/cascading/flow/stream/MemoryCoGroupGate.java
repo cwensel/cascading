@@ -21,6 +21,7 @@
 package cascading.flow.stream;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import cascading.flow.FlowProcess;
 import cascading.pipe.Splice;
@@ -51,10 +52,10 @@ public class MemoryCoGroupGate extends MemorySpliceGate
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    int pos = (int) posMap.get( previous );
+    int pos = posMap.get( previous );
 
-    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ pos ] );
     Tuple valuesTuple = incomingEntry.getTupleCopy();
+    Tuple groupTuple = keyBuilder[ pos ].makeResult( valuesTuple, null ); // view on valuesTuple
 
     groupTuple = getDelegatedTuple( groupTuple ); // wrap so hasher/comparator is honored
 
@@ -76,8 +77,15 @@ public class MemoryCoGroupGate extends MemorySpliceGate
 
       for( Tuple keysTuple : keys )
         {
+        // if key does not exist, #get will create an empty array list,
+        // and store the key, which is not a copy
         for( int i = 0; i < keyValues.length; i++ )
-          collections[ i ] = keyValues[ i ].get( keysTuple );
+          {
+          if( keyValues[ i ].containsKey( keysTuple ) )
+            collections[ i ] = keyValues[ i ].get( keysTuple );
+          else
+            collections[ i ] = Collections.EMPTY_LIST;
+          }
 
         closure.reset( collections );
 

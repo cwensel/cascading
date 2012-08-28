@@ -130,26 +130,11 @@ public class TempHfs extends Hfs
   @Override
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
-    Fields fields = resolveFields( incomingScopes.iterator().next() );
+    Fields fields = incomingScopes.iterator().next().getIncomingTapFields();
 
     setSchemeUsing( fields );
 
     return new Scope( fields );
-
-    // if incoming is Each, both value and group fields are the same
-    // if incoming is Every, group fields are only those grouped on
-    // if incoming is Group, value fields are all the fields
-//    Scope scope = incomingScopes.iterator().next();
-//    Fields outgoingFields = null;
-//
-//    if( scope.isGroup() )
-//      outgoingFields = scope.getOutValuesFields();
-//    else
-//      outgoingFields = scope.getOutGroupingFields();
-//
-//    setSchemeUsing( outgoingFields );
-//
-//    return new Scope( outgoingFields );
     }
 
   private void setSchemeUsing( Fields fields )

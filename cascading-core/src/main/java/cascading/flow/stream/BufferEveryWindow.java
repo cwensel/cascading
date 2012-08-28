@@ -54,12 +54,12 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
 
     buffer = every.getBuffer();
 
-    outputCollector = new TupleEntryCollector( outgoingScopes.get( 0 ).getDeclaredFields() )
+    outputCollector = new TupleEntryCollector( getOperationDeclaredFields() )
     {
     @Override
     protected void collect( TupleEntry resultEntry ) throws IOException
       {
-      Tuple outgoing = every.makeResult( incomingEntry, argumentsSelector, remainderFields, resultEntry, outgoingSelector, resultEntry.getTuple() );
+      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
 
       outgoingEntry.setTuple( outgoing );
 
@@ -73,6 +73,18 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
         }
       }
     };
+    }
+
+  @Override
+  protected Fields getIncomingPassThroughFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingBufferPassThroughFields();
+    }
+
+  @Override
+  protected Fields getIncomingArgumentsFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingBufferArgumentFields();
     }
 
   @Override
@@ -117,7 +129,7 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
 
       public TupleEntry next()
         {
-        argumentsEntry.setTuple( grouping.iterator.next().selectTuple( argumentsSelector ) );
+        argumentsEntry.setTuple( argumentsBuilder.makeResult( grouping.iterator.next().getTuple(), null ) );
 
         return argumentsEntry;
         }

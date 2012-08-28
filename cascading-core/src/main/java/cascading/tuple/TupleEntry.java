@@ -515,14 +515,7 @@ public class TupleEntry
     if( selector.isNone() )
       return TupleEntry.NULL;
 
-    try
-      {
-      return new TupleEntry( Fields.asDeclaration( selector ), tuple.get( this.fields, selector ) );
-      }
-    catch( Exception exception )
-      {
-      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
-      }
+    return new TupleEntry( Fields.asDeclaration( selector ), tuple.get( this.fields, selector ) );
     }
 
   /**
@@ -539,14 +532,7 @@ public class TupleEntry
     if( selector.isNone() )
       return Tuple.NULL;
 
-    try
-      {
-      return tuple.get( fields, selector );
-      }
-    catch( Exception exception )
-      {
-      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
-      }
+    return tuple.get( fields, selector );
     }
 
   /**
@@ -563,14 +549,7 @@ public class TupleEntry
       return;
       }
 
-    try
-      {
-      this.tuple.set( fields, selector, tuple );
-      }
-    catch( Exception exception )
-      {
-      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + selector.print(), exception );
-      }
+    this.tuple.set( fields, selector, tuple );
     }
 
   /**
@@ -581,14 +560,7 @@ public class TupleEntry
    */
   public void set( TupleEntry tupleEntry )
     {
-    try
-      {
-      this.tuple.set( fields, tupleEntry.getFields(), tupleEntry.getTuple() );
-      }
-    catch( Exception exception )
-      {
-      throw new TupleException( "unable to select from: " + this.fields.print() + ", using selector: " + tupleEntry.getFields().print(), exception );
-      }
+    this.tuple.set( fields, tupleEntry.getFields(), tupleEntry.getTuple() );
     }
 
   /**

@@ -34,7 +34,6 @@ import cascading.flow.stream.StreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
 import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
 
@@ -75,9 +74,9 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     {
     Integer pos = posMap.get( previous );
 
-    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ pos ] );
-    Tuple sortTuple = sortFields == null ? null : incomingEntry.selectTuple( sortFields[ pos ] );
-    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, keyFields[ pos ] );
+    Tuple groupTuple = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+    Tuple sortTuple = sortFields == null ? null : sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+    Tuple valuesTuple = valuesBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
 
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 

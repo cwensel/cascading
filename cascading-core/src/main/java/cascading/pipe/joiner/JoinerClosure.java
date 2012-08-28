@@ -59,6 +59,11 @@ public abstract class JoinerClosure
     return valueFields;
     }
 
+  public boolean isSelfJoin()
+    {
+    return valueFields.length == 1 && size() != valueFields.length;
+    }
+
   public abstract int size();
 
   public abstract Iterator<Tuple> getIterator( int pos );

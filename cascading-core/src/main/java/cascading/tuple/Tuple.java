@@ -68,7 +68,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   /** Field isUnmodifiable */
   protected boolean isUnmodifiable = false;
   /** Field elements */
-  protected ArrayList<Object> elements;
+  protected List<Object> elements;
 
   /**
    * Method size returns a new Tuple instance of the given size with nulls as its element values.
@@ -90,17 +90,12 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public static Tuple size( int size, Comparable value )
     {
-    Tuple result = new Tuple( createElements( size ) );
+    Tuple result = new Tuple( new ArrayList<Object>( size ) );
 
     for( int i = 0; i < size; i++ )
       result.add( value );
 
     return result;
-    }
-
-  private static ArrayList<Object> createElements( int size )
-    {
-    return new ArrayList<Object>( size );
     }
 
   /**
@@ -154,7 +149,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     return tuple.elements;
     }
 
-  protected Tuple( ArrayList<Object> elements )
+  protected Tuple( List<Object> elements )
     {
     this.elements = elements;
     }
@@ -173,8 +168,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   @ConstructorProperties({"tuple"})
   public Tuple( Tuple tuple )
     {
-    this();
-    elements.addAll( tuple.elements );
+    this( new ArrayList<Object>( tuple.elements ) );
     }
 
   /**
@@ -185,7 +179,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   @ConstructorProperties({"values"})
   public Tuple( Object... values )
     {
-    this();
+    this( new ArrayList<Object>( values.length ) );
     Collections.addAll( elements, values );
     }
 
@@ -334,10 +328,22 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public Tuple get( Fields declarator, Fields selector )
     {
+    try
+      {
+      return get( getPos( declarator, selector ) );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to select from: " + declarator.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  public int[] getPos( Fields declarator, Fields selector )
+    {
     if( !declarator.isUnknown() && elements.size() != declarator.size() )
       throw new TupleException( "field declaration: " + declarator.print() + ", does not match tuple: " + print() );
 
-    return get( declarator.getPos( selector, size() ) );
+    return declarator.getPos( selector, size() );
     }
 
   /**
@@ -352,7 +358,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
     Tuple results = remove( pos );
 
-    ArrayList<Object> temp = results.elements;
+    List<Object> temp = results.elements;
     results.elements = this.elements;
     this.elements = temp;
 
@@ -677,7 +683,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     {
     verifyModifiable();
 
-    int[] pos = declarator.getPos( fields, size() );
+    int[] pos = getPos( declarator, fields );
 
     for( int i = 0; i < pos.length; i++ )
       internalSet( pos[ i ], tuple.getObject( i ) );
@@ -725,7 +731,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public Tuple remove( Fields declarator, Fields selector )
     {
-    return remove( declarator.getPos( selector, size() ) );
+    return remove( getPos( declarator, selector ) );
     }
 
   /**
@@ -784,7 +790,14 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public void set( Fields declarator, Fields selector, Tuple tuple )
     {
-    set( declarator.getPos( selector ), tuple );
+    try
+      {
+      set( declarator.getPos( selector ), tuple );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to set into: " + declarator.print() + ", using selector: " + selector.print(), exception );
+      }
     }
 
   /**

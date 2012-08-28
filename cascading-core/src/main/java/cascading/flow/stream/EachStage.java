@@ -22,6 +22,7 @@ package cascading.flow.stream;
 
 import cascading.flow.FlowProcess;
 import cascading.pipe.Each;
+import cascading.pipe.Operator;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
@@ -36,6 +37,12 @@ public abstract class EachStage extends OperatorStage<TupleEntry> implements Map
     {
     super( flowProcess, each );
     this.each = each;
+    }
+
+  @Override
+  public Operator getOperator()
+    {
+    return each;
     }
 
   @Override

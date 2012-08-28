@@ -29,7 +29,6 @@ import cascading.flow.stream.DuctException;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
 import cascading.tuple.io.TuplePair;
 
 /**
@@ -55,9 +54,9 @@ public class HadoopGroupByGate extends HadoopGroupGate
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
     // always use pos == 0 since all key/value/sort fields are guaranteed to be the same
-    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ 0 ] );
-    Tuple sortTuple = sortFields == null ? null : incomingEntry.selectTuple( sortFields[ 0 ] );
-    Tuple valuesTuple = Tuples.nulledCopy( incomingEntry, keyFields[ 0 ] );
+    Tuple groupTuple = keyBuilder[ 0 ].makeResult( incomingEntry.getTuple(), null );
+    Tuple sortTuple = sortFields == null ? null : sortBuilder[ 0 ].makeResult( incomingEntry.getTuple(), null );
+    Tuple valuesTuple = valuesBuilder[ 0 ].makeResult( incomingEntry.getTuple(), null ); // nulls out the dupe values
 
     Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
 
@@ -83,6 +82,6 @@ public class HadoopGroupByGate extends HadoopGroupGate
   @Override
   protected Tuple unwrapGrouping( Tuple key )
     {
-    return sortFields == null ? (Tuple) key : ( (TuplePair) key ).getLhs();
+    return sortFields == null ? key : ( (TuplePair) key ).getLhs();
     }
   }

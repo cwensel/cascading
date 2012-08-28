@@ -72,7 +72,7 @@ public class TupleEntryChainIterator extends TupleEntryIterator
     {
     hasNext(); // force roll to next iterator
 
-    entry.setTuple( (Tuple) iterators[ currentIterator ].next() );
+    entry.setTuple( iterators[ currentIterator ].next() );
 
     return entry;
     }

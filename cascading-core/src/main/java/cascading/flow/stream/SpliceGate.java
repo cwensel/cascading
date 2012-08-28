@@ -30,11 +30,16 @@ import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.tuple.util.TupleViews.*;
 
 /**
  *
@@ -62,6 +67,10 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   protected Fields[] keyFields;
   protected Fields[] sortFields;
   protected Fields[] valuesFields;
+
+  protected TupleBuilder[] keyBuilder;
+  protected TupleBuilder[] valuesBuilder;
+  protected TupleBuilder[] sortBuilder;
 
   protected Grouping<TupleEntry, TupleEntryIterator> grouping;
   protected TupleEntryChainIterator tupleEntryIterator;
@@ -116,6 +125,102 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     trapHandler.handleException( exception, tupleEntry );
     }
 
+  protected TupleBuilder createNarrowBuilder( final Fields incomingFields, final Fields narrowFields )
+    {
+    if( narrowFields.isNone() )
+      return new TupleBuilder()
+      {
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return Tuple.NULL;
+        }
+      };
+
+    if( incomingFields.isUnknown() )
+      return new TupleBuilder()
+      {
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return input.get( incomingFields, narrowFields );
+        }
+      };
+
+    if( narrowFields.isAll() ) // dubious this is ever reached
+      return new TupleBuilder()
+      {
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return input;
+        }
+      };
+
+    return createDefaultNarrowBuilder( incomingFields, narrowFields );
+    }
+
+  protected TupleBuilder createDefaultNarrowBuilder( final Fields incomingFields, final Fields narrowFields )
+    {
+    return new TupleBuilder()
+    {
+    Tuple result = createNarrow( incomingFields.getPos( narrowFields ) );
+
+    @Override
+    public Tuple makeResult( Tuple input, Tuple output )
+      {
+      return reset( result, input );
+      }
+    };
+    }
+
+  protected TupleBuilder createNulledBuilder( final Fields incomingFields, final Fields keyField )
+    {
+    if( incomingFields.isUnknown() )
+      return new TupleBuilder()
+      {
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return Tuples.nulledCopy( incomingFields, input, keyField );
+        }
+      };
+
+    if( keyField.isNone() )
+      return new TupleBuilder()
+      {
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return input;
+        }
+      };
+
+    if( keyField.isAll() )
+      return new TupleBuilder()
+      {
+      Tuple nullTuple = Tuple.size( incomingFields.size() );
+
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return nullTuple;
+        }
+      };
+
+    return new TupleBuilder()
+    {
+    Tuple nullTuple = Tuple.size( keyField.size() );
+    Tuple result = createOverride( incomingFields, keyField );
+
+    @Override
+    public Tuple makeResult( Tuple baseTuple, Tuple output )
+      {
+      return reset( result, baseTuple, nullTuple );
+      }
+    };
+    }
+
   @Override
   public void initialize()
     {
@@ -127,22 +232,40 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     if( outgoingScopes.size() == 0 )
       throw new IllegalStateException( "outgoing scope may not be empty" );
 
-    keyFields = new Fields[ incomingScopes.size() ];
-    valuesFields = new Fields[ incomingScopes.size() ];
+    int size = splice.isGroupBy() ? 1 : incomingScopes.size();
+
+    keyFields = new Fields[ size ];
+    valuesFields = new Fields[ size ];
+
+    keyBuilder = new TupleBuilder[ size ];
+    valuesBuilder = new TupleBuilder[ size ];
 
     if( splice.isSorted() )
-      sortFields = new Fields[ incomingScopes.size() ];
-
-    for( Scope incomingScope : incomingScopes )
       {
+      sortFields = new Fields[ size ];
+      sortBuilder = new TupleBuilder[ size ];
+      }
+
+    Scope outgoingScope = outgoingScopes.get( 0 );
+
+    for( int i = 0; i < size; i++ )
+      {
+      Scope incomingScope = incomingScopes.get( i );
+
       // for GroupBy, incoming may have same name, but guaranteed to have same key/value/sort fields for merge
       int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
 
-      keyFields[ pos ] = outgoingScopes.get( 0 ).getKeySelectors().get( incomingScope.getName() );
-      valuesFields[ pos ] = incomingScope.isEvery() ? incomingScope.getOutGroupingFields() : incomingScope.getOutValuesFields();
+      keyFields[ pos ] = outgoingScope.getKeySelectors().get( incomingScope.getName() );
+      valuesFields[ pos ] = incomingScope.getIncomingSpliceFields();
+
+      keyBuilder[ pos ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ pos ] );
+      valuesBuilder[ pos ] = createNulledBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ pos ] );
 
       if( sortFields != null )
-        sortFields[ pos ] = outgoingScopes.get( 0 ).getSortingSelectors().get( incomingScope.getName() );
+        {
+        sortFields[ pos ] = outgoingScope.getSortingSelectors().get( incomingScope.getName() );
+        sortBuilder[ pos ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), sortFields[ pos ] );
+        }
 
       if( LOG.isDebugEnabled() )
         {
@@ -158,8 +281,8 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     if( role == Role.sink )
       return;
 
-    keyEntry = new TupleEntry( outgoingScopes.get( 0 ).getOutGroupingFields(), true );
-    tupleEntryIterator = new TupleEntryChainIterator( outgoingScopes.get( 0 ).getOutValuesFields() );
+    keyEntry = new TupleEntry( outgoingScope.getOutGroupingFields(), true );
+    tupleEntryIterator = new TupleEntryChainIterator( outgoingScope.getOutValuesFields() );
 
     grouping = new Grouping<TupleEntry, TupleEntryIterator>();
     grouping.key = keyEntry;

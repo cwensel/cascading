@@ -103,7 +103,7 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
 
   protected Fields getOutgoingFields()
     {
-    return unwind( next ).getFlowElement().resolveFields( outgoingScopes.get( 0 ) );
+    return unwind( next ).getFlowElement().resolveIncomingOperationPassThroughFields( outgoingScopes.get( 0 ) );
     }
 
   private ElementDuct unwind( Duct next )

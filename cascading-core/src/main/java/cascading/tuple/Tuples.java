@@ -20,6 +20,8 @@
 
 package cascading.tuple;
 
+import java.util.List;
+
 import cascading.operation.OperationException;
 
 /**
@@ -284,6 +286,11 @@ public class Tuples
     return tupleEntry.tuple.nulledCopy( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
     }
 
+  public static Tuple nulledCopy( Fields declarator, Tuple tuple, Fields selector )
+    {
+    return tuple.nulledCopy( declarator.getPos( selector, declarator.size() ) );
+    }
+
   public static Tuple setOnEmpty( TupleEntry baseEntry, TupleEntry valuesEntry )
     {
     Tuple emptyTuple = Tuple.size( baseEntry.getFields().size() );
@@ -317,5 +324,10 @@ public class Tuples
     tuple.isUnmodifiable = false;
 
     return tuple;
+    }
+
+  public static Tuple create( List<Object> arrayList )
+    {
+    return new Tuple( arrayList );
     }
   }

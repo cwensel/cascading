@@ -297,7 +297,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     int count = 0;
     for( Scope incomingScope : incomingScopes )
       {
-      Fields incomingFields = resolveFields( incomingScope );
+      Fields incomingFields = incomingScope.getIncomingTapFields();
 
       if( incomingFields != null )
         {
@@ -318,7 +318,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
       throw new FlowException( "Tap may not have more than one incoming Scope" );
 
     // this allows the incoming to be passed through to the outgoing
-    Fields incomingFields = incomingScopes.size() == 0 ? null : resolveFields( incomingScopes.iterator().next() );
+    Fields incomingFields = incomingScopes.size() == 0 ? null : incomingScopes.iterator().next().getIncomingTapFields();
 
     if( incomingFields != null &&
       ( isSource() && getSourceFields().equals( Fields.UNKNOWN ) ||
@@ -363,23 +363,15 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     }
 
   @Override
-  public Fields resolveIncomingOperationFields( Scope incomingScope )
+  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {
-    return getFieldsFor( incomingScope );
+    return incomingScope.getIncomingTapFields();
     }
 
   @Override
-  public Fields resolveFields( Scope scope )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    return getFieldsFor( scope );
-    }
-
-  private Fields getFieldsFor( Scope incomingScope )
-    {
-    if( incomingScope.isEvery() )
-      return incomingScope.getOutGroupingFields();
-    else
-      return incomingScope.getOutValuesFields();
+    return incomingScope.getIncomingTapFields();
     }
 
   /**

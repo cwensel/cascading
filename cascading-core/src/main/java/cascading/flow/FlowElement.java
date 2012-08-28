@@ -42,21 +42,22 @@ public interface FlowElement extends Serializable
   Scope outgoingScopeFor( Set<Scope> incomingScopes );
 
   /**
-   * Method resolveIncomingOperationFields resolves the incoming scopes to the actual incoming operation field names.
+   * Method resolveIncomingOperationArgumentFields returns the Fields outgoing from the previous FlowElement that
+   * are consumable by this FlowElement when preparing Operation arguments.
    *
    * @param incomingScope of type Scope
    * @return Fields
    */
-  Fields resolveIncomingOperationFields( Scope incomingScope );
+  Fields resolveIncomingOperationArgumentFields( Scope incomingScope );
 
   /**
-   * Method resolveFields returns the actual field names represented by the given Scope. The scope may be incoming
-   * or outgoing in relation to this FlowElement instance.
+   * Method resolveIncomingOperationPassThroughFields returns the Fields outgoing from the previous FlowElement that
+   * are consumable by this FlowElement when preparing the Pipe outgoing tuple.
    *
-   * @param scope of type Scope
+   * @param incomingScope of type Scope
    * @return Fields
    */
-  Fields resolveFields( Scope scope ); // todo: consider moving this functionality to Scope
+  Fields resolveIncomingOperationPassThroughFields( Scope incomingScope );
 
   boolean isEquivalentTo( FlowElement element );
 

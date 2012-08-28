@@ -17,6 +17,7 @@ package data;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 public interface InputData
   {
   public static final String TEST_DATA_PATH = "test.data.path";

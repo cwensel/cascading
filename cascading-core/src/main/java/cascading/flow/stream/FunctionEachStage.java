@@ -27,6 +27,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.pipe.Each;
 import cascading.pipe.OperatorException;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -45,6 +46,18 @@ public class FunctionEachStage extends EachStage
     }
 
   @Override
+  protected Fields getIncomingPassThroughFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingFunctionPassThroughFields();
+    }
+
+  @Override
+  protected Fields getIncomingArgumentsFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingFunctionArgumentFields();
+    }
+
+  @Override
   public void initialize()
     {
     super.initialize();
@@ -53,12 +66,12 @@ public class FunctionEachStage extends EachStage
 
     operationCall.setArguments( argumentsEntry );
 
-    operationCall.setOutputCollector( new TupleEntryCollector( outgoingScopes.get( 0 ).getDeclaredFields() )
+    operationCall.setOutputCollector( new TupleEntryCollector( getOperationDeclaredFields() )
     {
     @Override
     protected void collect( TupleEntry input ) throws IOException
       {
-      Tuple outgoing = each.makeResult( incomingEntry, argumentsSelector, remainderFields, input, outgoingSelector, input.getTuple() );
+      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), input.getTuple() );
 
       outgoingEntry.setTuple( outgoing );
 
@@ -79,7 +92,7 @@ public class FunctionEachStage extends EachStage
     {
     this.incomingEntry = incomingEntry;
 
-    argumentsEntry.setTuple( incomingEntry.selectTuple( argumentsSelector ) );
+    argumentsEntry.setTuple( argumentsBuilder.makeResult( incomingEntry.getTuple(), null ) );
 
     try
       {

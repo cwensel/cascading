@@ -335,15 +335,15 @@ public class Pipe implements FlowElement, Serializable
     }
 
   @Override
-  public Fields resolveIncomingOperationFields( Scope incomingScope )
+  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {
     throw new IllegalStateException( "resolveIncomingOperationFields should never be called" );
     }
 
   @Override
-  public Fields resolveFields( Scope scope )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    throw new IllegalStateException( "resolveFields should never be called" );
+    throw new IllegalStateException( "resolveIncomingOperationPassThroughFields should never be called" );
     }
 
   /**

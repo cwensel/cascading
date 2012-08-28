@@ -22,6 +22,7 @@ package cascading.flow.stream;
 
 import cascading.flow.FlowProcess;
 import cascading.pipe.Every;
+import cascading.pipe.Operator;
 
 /**
  *
@@ -34,5 +35,11 @@ public abstract class EveryStage<Incoming> extends OperatorStage<Incoming>
     {
     super( flowProcess, every );
     this.every = every;
+    }
+
+  @Override
+  public Operator getOperator()
+    {
+    return every;
     }
   }

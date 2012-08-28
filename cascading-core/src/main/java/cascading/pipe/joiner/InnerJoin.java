@@ -20,10 +20,13 @@
 
 package cascading.pipe.joiner;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +53,10 @@ public class InnerJoin implements Joiner
     {
     final JoinerClosure closure;
     Iterator[] iterators;
-    Comparable[] lastValues;
+    Tuple[] lastValues;
 
-    Tuple result = new Tuple();
+    TupleBuilder resultBuilder;
+    Tuple result = new Tuple(); // will be replaced
 
     public JoinIterator( JoinerClosure closure )
       {
@@ -69,6 +73,54 @@ public class InnerJoin implements Joiner
 
       for( int i = 0; i < closure.size(); i++ )
         iterators[ i ] = getIterator( i );
+
+      boolean isUnknown = false;
+
+      for( Fields fields : closure.getValueFields() )
+        isUnknown |= fields.isUnknown();
+
+      if( isUnknown )
+        resultBuilder = new TupleBuilder()
+        {
+        Tuple result = new Tuple(); // is re-used
+
+        @Override
+        public Tuple makeResult( Tuple[] tuples )
+          {
+          result.clear();
+
+          // flatten the results into one Tuple
+          for( Tuple lastValue : tuples )
+            result.addAll( lastValue );
+
+          return result;
+          }
+        };
+      else
+        resultBuilder = new TupleBuilder()
+        {
+        Tuple result;
+
+        {
+        // handle self join.
+        Fields[] fields = closure.getValueFields();
+
+        if( closure.isSelfJoin() )
+          {
+          fields = new Fields[ closure.size() ];
+
+          Arrays.fill( fields, closure.getValueFields()[ 0 ] );
+          }
+
+        result = TupleViews.createComposite( fields );
+        }
+
+        @Override
+        public Tuple makeResult( Tuple[] tuples )
+          {
+          return TupleViews.reset( result, tuples );
+          }
+        };
       }
 
     protected Iterator getIterator( int i )
@@ -76,12 +128,12 @@ public class InnerJoin implements Joiner
       return closure.getIterator( i );
       }
 
-    private Comparable[] initLastValues()
+    private Tuple[] initLastValues()
       {
-      lastValues = new Comparable[ iterators.length ];
+      lastValues = new Tuple[ iterators.length ];
 
       for( int i = 0; i < iterators.length; i++ )
-        lastValues[ i ] = (Comparable) iterators[ i ].next();
+        lastValues[ i ] = (Tuple) iterators[ i ].next();
 
       return lastValues;
       }
@@ -119,26 +171,23 @@ public class InnerJoin implements Joiner
         {
         if( iterators[ i ].hasNext() )
           {
-          lastValues[ i ] = (Comparable) iterators[ i ].next();
+          lastValues[ i ] = (Tuple) iterators[ i ].next();
           break;
           }
 
         // reset to first
         iterators[ i ] = getIterator( i );
-        lastValues[ i ] = (Comparable) iterators[ i ].next();
+        lastValues[ i ] = (Tuple) iterators[ i ].next();
         }
 
       return makeResult( lastValues );
       }
 
-    private Tuple makeResult( Comparable[] lastValues )
+    private Tuple makeResult( Tuple[] lastValues )
       {
       Tuples.asModifiable( result );
-      result.clear();
 
-      // flatten the results into one Tuple
-      for( Comparable lastValue : lastValues )
-        result.addAll( lastValue );
+      result = resultBuilder.makeResult( lastValues );
 
       if( LOG.isTraceEnabled() )
         LOG.trace( "tuple: {}", result.print() );
@@ -150,5 +199,10 @@ public class InnerJoin implements Joiner
       {
       // unsupported
       }
+    }
+
+  static interface TupleBuilder
+    {
+    Tuple makeResult( Tuple[] tuples );
     }
   }

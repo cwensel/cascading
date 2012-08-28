@@ -53,12 +53,12 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
 
     aggregator = every.getAggregator();
 
-    outputCollector = new TupleEntryCollector( outgoingScopes.get( 0 ).getDeclaredFields() )
+    outputCollector = new TupleEntryCollector( getOperationDeclaredFields() )
     {
     @Override
     protected void collect( TupleEntry resultEntry ) throws IOException
       {
-      Tuple outgoing = every.makeResult( incomingEntry, argumentsSelector, remainderFields, resultEntry, outgoingSelector, resultEntry.getTuple() );
+      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
 
       outgoingEntry.setTuple( outgoing );
 
@@ -74,6 +74,18 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
     };
 
     reducing = (Reducing) getNext();
+    }
+
+  @Override
+  protected Fields getIncomingPassThroughFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingAggregatorPassThroughFields();
+    }
+
+  @Override
+  protected Fields getIncomingArgumentsFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingAggregatorArgumentFields();
     }
 
   @Override
@@ -110,7 +122,7 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
     {
     try
       {
-      argumentsEntry.setTuple( tupleEntry.selectTuple( argumentsSelector ) );
+      argumentsEntry.setTuple( argumentsBuilder.makeResult( tupleEntry.getTuple(), null ) );
       operationCall.setArguments( argumentsEntry );
 
       aggregator.aggregate( flowProcess, operationCall );

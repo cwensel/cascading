@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
+
+import static cascading.tuple.Fields.asDeclaration;
 
 /** Class Scope is an internal representation of the linkages between operations. */
 public class Scope implements Serializable
@@ -41,16 +42,18 @@ public class Scope implements Serializable
   private String name;
   /** Field kind */
   private Kind kind;
-  /** Field remainderFields */
-  private Fields remainderFields;
+  /** Field incomingPassThroughFields */
+  private Fields incomingPassThroughFields;
+  /** Field remainderPassThroughFields */
+  private Fields remainderPassThroughFields;
+
   /** Field argumentSelector */
-  private Fields argumentFields;
+  private Fields operationArgumentFields;
   /** Field declaredFields */
-  private Fields declaredFields; // fields declared by the operation
+  private Fields operationDeclaredFields; // fields declared by the operation
   /** Field isGroupBy */
   private boolean isGroupBy;
-  /** Field isMerge */
-  private boolean isMerge;
+
   /** Field groupingSelectors */
   private Map<String, Fields> keySelectors;
   /** Field sortingSelectors */
@@ -65,11 +68,6 @@ public class Scope implements Serializable
   private Fields outValuesSelector;
   /** Field outValuesFields */
   private Fields outValuesFields; // all value fields, includes keys
-
-  /** Field argumentsEntry */
-  private transient TupleEntry argumentsEntry; // caches entry
-  /** Field declaredEntry */
-  private transient TupleEntry declaredEntry; // caches entry
 
   /** Default constructor. */
   public Scope()
@@ -106,21 +104,22 @@ public class Scope implements Serializable
   /**
    * Constructor Scope creates a new Scope instance. Used by classes Each and Every.
    *
-   * @param name              of type String
-   * @param kind              of type Kind
-   * @param remainderFields   of type Fields
-   * @param argumentFields    of type Fields
-   * @param declaredFields    of type Fields
-   * @param outGroupingFields of type Fields
-   * @param outValuesFields   of type Fields
+   * @param name                      of type String
+   * @param kind                      of type Kind
+   * @param incomingPassThroughFields //   * @param remainderPassThroughFields   of type Fields
+   * @param operationArgumentFields   of type Fields
+   * @param operationDeclaredFields   of type Fields
+   * @param outGroupingFields         of type Fields
+   * @param outValuesFields           of type Fields
    */
-  public Scope( String name, Kind kind, Fields remainderFields, Fields argumentFields, Fields declaredFields, Fields outGroupingFields, Fields outValuesFields )
+  public Scope( String name, Kind kind, Fields incomingPassThroughFields, Fields remainderPassThroughFields, Fields operationArgumentFields, Fields operationDeclaredFields, Fields outGroupingFields, Fields outValuesFields )
     {
     this.name = name;
     this.kind = kind;
-    this.remainderFields = remainderFields;
-    this.argumentFields = argumentFields;
-    this.declaredFields = declaredFields;
+    this.incomingPassThroughFields = incomingPassThroughFields;
+    this.remainderPassThroughFields = remainderPassThroughFields;
+    this.operationArgumentFields = operationArgumentFields;
+    this.operationDeclaredFields = operationDeclaredFields;
 
     if( outGroupingFields == null )
       throw new IllegalArgumentException( "grouping may not be null" );
@@ -130,15 +129,17 @@ public class Scope implements Serializable
 
     if( kind == Kind.EACH )
       {
-      this.outGroupingFields = Fields.asDeclaration( outGroupingFields );
+      this.outGroupingSelector = outGroupingFields;
+      this.outGroupingFields = asDeclaration( outGroupingFields );
       this.outValuesSelector = outValuesFields;
-      this.outValuesFields = Fields.asDeclaration( outValuesFields );
+      this.outValuesFields = asDeclaration( outValuesFields );
       }
     else if( kind == Kind.EVERY )
       {
       this.outGroupingSelector = outGroupingFields;
-      this.outGroupingFields = Fields.asDeclaration( outGroupingFields );
-      this.outValuesFields = outValuesFields;
+      this.outGroupingFields = asDeclaration( outGroupingFields );
+      this.outValuesSelector = outValuesFields;
+      this.outValuesFields = asDeclaration( outValuesFields );
       }
     else
       {
@@ -149,15 +150,15 @@ public class Scope implements Serializable
   /**
    * Constructor Scope creates a new Scope instance. Used by the Group class.
    *
-   * @param name              of type String
-   * @param declaredFields    of type Fields
-   * @param outGroupingFields of type Fields
-   * @param keySelectors      of type Map<String, Fields>
-   * @param sortingSelectors  of type Fields
-   * @param outValuesFields   of type Fields
-   * @param isGroupBy         of type boolean
+   * @param name                    of type String
+   * @param operationDeclaredFields of type Fields
+   * @param outGroupingFields       of type Fields
+   * @param keySelectors            of type Map<String, Fields>
+   * @param sortingSelectors        of type Fields
+   * @param outValuesFields         of type Fields
+   * @param isGroupBy               of type boolean
    */
-  public Scope( String name, Fields declaredFields, Fields outGroupingFields, Map<String, Fields> keySelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
+  public Scope( String name, Fields operationDeclaredFields, Fields outGroupingFields, Map<String, Fields> keySelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
     {
     this.name = name;
     this.kind = Kind.GROUP;
@@ -169,22 +170,11 @@ public class Scope implements Serializable
     if( outValuesFields == null )
       throw new IllegalArgumentException( "values may not be null" );
 
-    this.declaredFields = declaredFields;
-    this.outGroupingFields = outGroupingFields;
+    this.operationDeclaredFields = operationDeclaredFields;
+    this.outGroupingFields = asDeclaration( outGroupingFields );
     this.keySelectors = keySelectors;
     this.sortingSelectors = sortingSelectors; // null ok
-    this.outValuesFields = outValuesFields;
-    }
-
-  public Scope( String name, Fields declaredFields, Map<String, Fields> keySelectors, boolean isMerge )
-    {
-    this.name = name;
-    this.keySelectors = keySelectors;
-    this.kind = Kind.SPLICE;
-    this.isMerge = isMerge;
-
-    this.declaredFields = declaredFields;
-    this.outValuesFields = declaredFields;
+    this.outValuesFields = asDeclaration( outValuesFields );
     }
 
   /**
@@ -262,9 +252,9 @@ public class Scope implements Serializable
    *
    * @return the remainderFields (type Fields) of this Scope object.
    */
-  public Fields getRemainderFields()
+  public Fields getRemainderPassThroughFields()
     {
-    return remainderFields;
+    return remainderPassThroughFields;
     }
 
   /**
@@ -274,7 +264,7 @@ public class Scope implements Serializable
    */
   public Fields getArgumentsSelector()
     {
-    return argumentFields;
+    return operationArgumentFields;
     }
 
   /**
@@ -284,37 +274,7 @@ public class Scope implements Serializable
    */
   public Fields getArgumentsDeclarator()
     {
-    return Fields.asDeclaration( argumentFields );
-    }
-
-  /**
-   * Method getArgumentsEntry returns the argumentsEntry of this Scope object.
-   *
-   * @return the argumentsEntry (type TupleEntry) of this Scope object.
-   */
-  public TupleEntry getArgumentsEntry()
-    {
-    if( argumentsEntry != null )
-      return argumentsEntry;
-
-    argumentsEntry = new TupleEntry( getArgumentsDeclarator(), true );
-
-    return argumentsEntry;
-    }
-
-  /**
-   * Method getArgumentsEntry returns a cached {@link TupleEntry} for the declared arguments of this scope.
-   *
-   * @param input of type TupleEntry
-   * @return TupleEntry
-   */
-  public TupleEntry getArgumentsEntry( TupleEntry input )
-    {
-    TupleEntry entry = getArgumentsEntry();
-
-    entry.setTuple( input.selectTuple( getArgumentsSelector() ) );
-
-    return entry;
+    return asDeclaration( operationArgumentFields );
     }
 
   /**
@@ -322,24 +282,9 @@ public class Scope implements Serializable
    *
    * @return the declaredFields (type Fields) of this Scope object.
    */
-  public Fields getDeclaredFields()
+  public Fields getOperationDeclaredFields()
     {
-    return declaredFields;
-    }
-
-  /**
-   * Method getDeclaredEntry returns the declaredEntry of this Scope object.
-   *
-   * @return the declaredEntry (type TupleEntry) of this Scope object.
-   */
-  public TupleEntry getDeclaredEntry()
-    {
-    if( declaredEntry != null )
-      return declaredEntry;
-
-    declaredEntry = new TupleEntry( getDeclaredFields() );
-
-    return declaredEntry;
+    return operationDeclaredFields;
     }
 
   /**
@@ -370,6 +315,70 @@ public class Scope implements Serializable
   public Fields getOutGroupingSelector()
     {
     return outGroupingSelector;
+    }
+
+  public Fields getIncomingTapFields()
+    {
+    if( isEvery() )
+      return getOutGroupingFields();
+    else
+      return getOutValuesFields();
+    }
+
+  public Fields getIncomingFunctionArgumentFields()
+    {
+    if( isEvery() )
+      return getOutGroupingFields();
+    else
+      return getOutValuesFields();
+    }
+
+  public Fields getIncomingFunctionPassThroughFields()
+    {
+    if( isEvery() )
+      return getOutGroupingFields();
+    else
+      return getOutValuesFields();
+    }
+
+  public Fields getIncomingAggregatorArgumentFields()
+    {
+    if( isEach() || isTap() )
+      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
+
+    return getOutValuesFields();
+    }
+
+  public Fields getIncomingAggregatorPassThroughFields()
+    {
+    if( isEach() || isTap() )
+      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
+
+    return getOutGroupingFields();
+    }
+
+  public Fields getIncomingBufferArgumentFields()
+    {
+    if( isEach() || isTap() )
+      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
+
+    return getOutValuesFields();
+    }
+
+  public Fields getIncomingBufferPassThroughFields()
+    {
+    if( isEach() || isTap() )
+      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
+
+    return getOutValuesFields();
+    }
+
+  public Fields getIncomingSpliceFields()
+    {
+    if( isEvery() )
+      return getOutGroupingFields();
+    else
+      return getOutValuesFields();
     }
 
   /**
@@ -405,6 +414,11 @@ public class Scope implements Serializable
     return Fields.size( first.size() );
     }
 
+  public Fields getOutGroupingValueFields()
+    {
+    return getOutValuesFields().subtract( getOutGroupingFields() );
+    }
+
   /**
    * Method getOutValuesSelector returns the outValuesSelector of this Scope object.
    *
@@ -434,9 +448,10 @@ public class Scope implements Serializable
     {
     this.kind = scope.kind;
     this.isGroupBy = scope.isGroupBy;
-    this.remainderFields = scope.remainderFields;
-    this.argumentFields = scope.argumentFields;
-    this.declaredFields = scope.declaredFields;
+    this.incomingPassThroughFields = scope.incomingPassThroughFields;
+    this.remainderPassThroughFields = scope.remainderPassThroughFields;
+    this.operationArgumentFields = scope.operationArgumentFields;
+    this.operationDeclaredFields = scope.operationDeclaredFields;
     this.keySelectors = scope.keySelectors;
     this.sortingSelectors = scope.sortingSelectors;
     this.outGroupingSelector = scope.outGroupingSelector;

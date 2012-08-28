@@ -20,6 +20,7 @@
 
 package cascading.flow.stream;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -28,6 +29,7 @@ import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleViews;
 
 /**
  *
@@ -37,14 +39,19 @@ public class MemoryCoGroupClosure extends JoinerClosure
   private Collection<Tuple>[] collections;
   private final int numSelfJoins;
   private final Tuple emptyTuple;
-  private final Tuple joinedTuple;
+  private Tuple joinedTuple = new Tuple(); // is discarded
+
+  private Tuple[] joinedTuplesArray;
+  private TupleBuilder joinedBuilder;
 
   public MemoryCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
     super( flowProcess, groupingFields, valueFields );
     this.numSelfJoins = numSelfJoins;
     this.emptyTuple = Tuple.size( groupingFields[ 0 ].size() );
-    this.joinedTuple = new Tuple();
+
+    this.joinedTuplesArray = new Tuple[ size() ];
+    this.joinedBuilder = makeJoinedBuilder( groupingFields );
     }
 
   @Override
@@ -80,11 +87,36 @@ public class MemoryCoGroupClosure extends JoinerClosure
   public Tuple getGroupTuple( Tuple keysTuple )
     {
     Tuples.asModifiable( joinedTuple );
-    joinedTuple.clear();
 
-    for( Collection collection : collections )
-      joinedTuple.addAll( collection.isEmpty() ? emptyTuple : keysTuple );
+    for( int i = 0; i < collections.length; i++ )
+      joinedTuplesArray[ i ] = collections[ i ].isEmpty() ? emptyTuple : keysTuple;
+
+    joinedTuple = joinedBuilder.makeResult( joinedTuplesArray );
 
     return joinedTuple;
+    }
+
+  static interface TupleBuilder
+    {
+    Tuple makeResult( Tuple[] tuples );
+    }
+
+  private TupleBuilder makeJoinedBuilder( final Fields[] joinFields )
+    {
+    final Fields[] fields = isSelfJoin() ? new Fields[ size() ] : joinFields;
+
+    if( isSelfJoin() )
+      Arrays.fill( fields, 0, fields.length, joinFields[ 0 ] );
+
+    return new TupleBuilder()
+    {
+    Tuple result = TupleViews.createComposite( fields );
+
+    @Override
+    public Tuple makeResult( Tuple[] tuples )
+      {
+      return TupleViews.reset( result, tuples );
+      }
+    };
     }
   }

@@ -61,7 +61,7 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
 
       if( sink.getSinkFields().isAll() )
         {
-        Fields fields = sink.resolveFields( getIncomingScopes().get( 0 ) );
+        Fields fields = getIncomingScopes().get( 0 ).getIncomingTapFields();
         collector.setFields( fields );
         }
       }

@@ -37,9 +37,11 @@ public class EveryEveryPipeAssemblyPlatformTest extends PipeAssemblyTestBase
 
     Properties properties = loadProperties( "op.op.properties" );
 
-    Map<String, Pipe> pipes = buildOpPipes( properties, null, new Pipe( "every.every" ), new EachAssemblyFactory(), LHS_ARGS_FIELDS, LHS_DECL_FIELDS, LHS_SELECT_FIELDS, LHS_VALUE );
+    String runOnly = runOnly( properties );
+
+    Map<String, Pipe> pipes = buildOpPipes( null, new Pipe( "every.every" ), new EachAssemblyFactory(), LHS_ARGS_FIELDS, LHS_DECL_FIELDS, LHS_SELECT_FIELDS, LHS_VALUE, null );
     for( String name : pipes.keySet() )
-      makeSuites( testPlatform, properties, buildOpPipes( properties, name, pipes.get( name ), new EachAssemblyFactory(), RHS_ARGS_FIELDS, RHS_DECL_FIELDS, RHS_SELECT_FIELDS, RHS_VALUE ), suite, EveryEveryPipeAssemblyPlatformTest.class );
+      makeSuites( testPlatform, properties, buildOpPipes( name, pipes.get( name ), new EachAssemblyFactory(), RHS_ARGS_FIELDS, RHS_DECL_FIELDS, RHS_SELECT_FIELDS, RHS_VALUE, runOnly ), suite, EveryEveryPipeAssemblyPlatformTest.class );
 
     return suite;
     }

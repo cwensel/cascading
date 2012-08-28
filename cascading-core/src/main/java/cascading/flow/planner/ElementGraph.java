@@ -617,8 +617,8 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       LOG.debug( "for modifier: " + source );
       if( outgoingScope.getArgumentsSelector() != null )
         LOG.debug( "setting outgoing arguments: " + outgoingScope.getArgumentsSelector() );
-      if( outgoingScope.getDeclaredFields() != null )
-        LOG.debug( "setting outgoing declared: " + outgoingScope.getDeclaredFields() );
+      if( outgoingScope.getOperationDeclaredFields() != null )
+        LOG.debug( "setting outgoing declared: " + outgoingScope.getOperationDeclaredFields() );
       if( outgoingScope.getKeySelectors() != null )
         LOG.debug( "setting outgoing group: " + outgoingScope.getKeySelectors() );
       if( outgoingScope.getOutValuesSelector() != null )

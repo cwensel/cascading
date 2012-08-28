@@ -34,7 +34,9 @@ import cascading.operation.DebugLevel;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.Sum;
 import cascading.operation.assertion.AssertSizeMoreThan;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.And;
 import cascading.operation.filter.Not;
 import cascading.operation.filter.Or;
@@ -44,6 +46,7 @@ import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
@@ -173,7 +176,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     // emits Fields.UNKNOWN
     pipe = new Each( pipe, new Fields( 1 ), new RegexSplitter( "\t" ), Fields.ALL );
 
-    // accepts Fields.UNKOWN
+    // accepts Fields.UNKNOWN
     pipe = new Each( pipe, new UnGroup( Fields.size( 2 ), new Fields( 0 ), Fields.fields( new Fields( 1 ), new Fields( 2 ) ) ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
@@ -491,5 +494,52 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 5 );
+    }
+
+  @Test
+  public void testDeepPipeline() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache200 );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileApache200 );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "deeppipline" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipeline" );
+
+    Function function = new ExpressionFunction( new Fields( "count" ), "line.split( \"\\s\").length", String.class );
+    pipe = new Each( pipe, new Fields( "line" ), function, Fields.ALL );
+
+    int depth = 50;
+
+    for( int i = 0; i < depth; i++ )
+      {
+      pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( 0 ) ), Fields.ALL );
+      pipe = new Each( pipe, new Fields( "count" ), new Identity( new Fields( 0 ) ), Fields.ALL );
+      pipe = new Each( pipe, new Fields( "line" ), new Identity(), Fields.REPLACE );
+      pipe = new Each( pipe, new Fields( "count" ), new Identity(), Fields.REPLACE );
+      pipe = new Each( pipe, new Fields( "line", "count" ), new Identity() );
+      pipe = new Each( pipe, new Fields( "line", "count" ), new Identity( new Fields( "line2", "count2" ) ), new Fields( "line", "count2" ) );
+      pipe = new Each( pipe, new Fields( "count2" ), new Identity( new Fields( "count" ) ), new Fields( "line", "count" ) );
+      }
+
+    int modulo = 1000000;
+
+    pipe = new Each( pipe, new Fields( "line" ), new ExpressionFunction( new Fields( "hash" ), "line.hashCode() % " + modulo, String.class ), Fields.ALL ); // want some collisions
+
+    pipe = new GroupBy( pipe, new Fields( "hash" ) );
+
+    for( int i = 0; i < depth; i++ )
+      pipe = new Every( pipe, new Fields( "count" ), new Sum( new Fields( "sum" + ( i + 1 ) ) ) );
+
+    for( int i = 0; i < depth; i++ )
+      {
+      pipe = new Each( pipe, new Fields( "hash" ), new Identity( new Fields( 0 ) ), Fields.ALL );
+      pipe = new Each( pipe, new Fields( "sum1" ), new Identity( new Fields( 0 ) ), Fields.ALL );
+      pipe = new Each( pipe, new Fields( "hash", "sum1" ), new Identity(), Fields.SWAP );
+      }
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
     }
   }

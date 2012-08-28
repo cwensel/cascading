@@ -996,7 +996,7 @@ public class Splice extends Pipe
     Map<String, Fields> incomingFields = new HashMap<String, Fields>();
 
     for( Scope scope : incomingScopes )
-      incomingFields.put( scope.getName(), resolveFields( scope ) );
+      incomingFields.put( scope.getName(), scope.getIncomingSpliceFields() );
 
     Fields outGroupingFields = new Fields();
 
@@ -1066,13 +1066,13 @@ public class Splice extends Pipe
       if( selector.isNone() )
         incomingFields = Fields.NONE;
       else if( selector.isAll() )
-        incomingFields = resolveFields( incomingScope );
+        incomingFields = incomingScope.getIncomingSpliceFields();
       else if( selector.isGroup() )
         incomingFields = incomingScope.getOutGroupingFields();
       else if( selector.isValues() )
         incomingFields = incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
       else
-        incomingFields = resolveFields( incomingScope ).select( selector );
+        incomingFields = incomingScope.getIncomingSpliceFields().select( selector );
 
       resolvedFields.put( incomingScope.getName(), incomingFields );
       }
@@ -1100,12 +1100,9 @@ public class Splice extends Pipe
     }
 
   @Override
-  public Fields resolveFields( Scope scope )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    if( scope.isEvery() )
-      return scope.getOutGroupingFields();
-    else
-      return scope.getOutValuesFields();
+    return incomingScope.getIncomingSpliceFields();
     }
 
   Fields resolveDeclared( Set<Scope> incomingScopes )
@@ -1126,7 +1123,7 @@ public class Splice extends Pipe
 
         for( Scope incomingScope : incomingScopes )
           {
-          Fields fields = resolveFields( incomingScope );
+          Fields fields = incomingScope.getIncomingSpliceFields();
 
           foundUnknown = foundUnknown || fields.isUnknown();
           size += fields.size();
@@ -1153,7 +1150,7 @@ public class Splice extends Pipe
 
         for( Scope incomingScope : incomingScopes )
           {
-          Fields fields = resolveFields( incomingScope );
+          Fields fields = incomingScope.getIncomingSpliceFields();
 
           if( commonFields == null )
             commonFields = fields;
@@ -1173,7 +1170,7 @@ public class Splice extends Pipe
         List<Fields> appendableFields = new ArrayList<Fields>();
 
         for( Pipe pipe : pipes )
-          appendableFields.add( resolveFields( scopesMap.get( pipe.getName() ) ) );
+          appendableFields.add( scopesMap.get( pipe.getName() ).getIncomingSpliceFields() );
 
         Fields appendedFields = new Fields();
 

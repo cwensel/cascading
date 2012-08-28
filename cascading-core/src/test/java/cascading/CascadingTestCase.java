@@ -52,7 +52,6 @@ import junit.framework.TestCase;
  */
 public class CascadingTestCase extends TestCase implements Serializable
   {
-
   public CascadingTestCase()
     {
     }

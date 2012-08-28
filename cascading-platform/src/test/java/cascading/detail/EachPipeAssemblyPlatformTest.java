@@ -35,7 +35,7 @@ public class EachPipeAssemblyPlatformTest extends PipeAssemblyTestBase
     TestSuite suite = new TestSuite();
 
     Properties properties = loadProperties( "op.properties" );
-    makeSuites( testPlatform, properties, buildOpPipes( properties, null, new Pipe( "each" ), new EachAssemblyFactory(), OP_ARGS_FIELDS, OP_DECL_FIELDS, OP_SELECT_FIELDS, OP_VALUE ), suite, EachPipeAssemblyPlatformTest.class );
+    makeSuites( testPlatform, properties, buildOpPipes( null, new Pipe( "each" ), new EachAssemblyFactory(), OP_ARGS_FIELDS, OP_DECL_FIELDS, OP_SELECT_FIELDS, OP_VALUE, runOnly( properties ) ), suite, EachPipeAssemblyPlatformTest.class );
 
     return suite;
     }

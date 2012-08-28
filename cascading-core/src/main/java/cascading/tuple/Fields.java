@@ -180,6 +180,11 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public static Fields join( Fields... fields )
     {
+    return join( false, fields );
+    }
+
+  public static Fields join( boolean maskDuplicateNames, Fields... fields )
+    {
     int size = 0;
 
     for( Fields field : fields )
@@ -191,6 +196,21 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     Comparable[] elements = join( size, fields );
+
+    if( maskDuplicateNames )
+      {
+      Set<String> names = new HashSet<String>();
+
+      for( int i = elements.length - 1; i >= 0; i-- )
+        {
+        Comparable element = elements[ i ];
+
+        if( names.contains( element ) )
+          elements[ i ] = i;
+        else if( element instanceof String )
+          names.add( (String) element );
+        }
+      }
 
     return new Fields( elements );
     }
@@ -207,6 +227,26 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     return elements;
+    }
+
+  public static Fields mask( Fields fields, Fields mask )
+    {
+    Comparable[] elements = expand( fields.size(), 0 );
+
+    System.arraycopy( fields.fields, 0, elements, 0, elements.length );
+
+    for( int i = elements.length - 1; i >= 0; i-- )
+      {
+      Comparable element = elements[ i ];
+
+      if( element instanceof Integer )
+        continue;
+
+      if( mask.getIndex().containsKey( element ) )
+        elements[ i ] = i;
+      }
+
+    return new Fields( elements );
     }
 
   /**
@@ -418,6 +458,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public static Fields asDeclaration( Fields fields )
     {
+    if( fields == null )
+      return null;
+
     if( fields.isNone() )
       return fields;
 
@@ -740,7 +783,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return pos;
     }
 
-  final int[] getPos( Fields fields )
+  public final int[] getPos( Fields fields )
     {
     return getPos( fields, -1 );
     }
@@ -942,10 +985,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public Fields subtract( Fields fields )
     {
-    Fields minus = new Fields();
-
     if( fields.isAll() )
-      return minus;
+      return Fields.NONE;
 
     List<Comparable> list = new LinkedList<Comparable>();
     Collections.addAll( list, this.get() );
@@ -956,9 +997,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Util.removeAllNulls( list );
 
-    minus.fields = list.toArray( new Comparable[ list.size() ] );
-
-    return minus;
+    return new Fields( list.toArray( new Comparable[ list.size() ] ) );
     }
 
   /**

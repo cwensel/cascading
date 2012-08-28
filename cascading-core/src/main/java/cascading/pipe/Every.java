@@ -227,37 +227,34 @@ public class Every extends Operator
     }
 
   @Override
-  public Fields resolveIncomingOperationFields( Scope incomingScope )
+  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {
-    if( incomingScope.isEach() || incomingScope.isTap() )
-      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
-
-    return incomingScope.getOutValuesFields();
+    if( isBuffer() )
+      return incomingScope.getIncomingBufferArgumentFields();
+    else
+      return incomingScope.getIncomingAggregatorArgumentFields();
     }
 
   @Override
-  public Fields resolveFields( Scope scope )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    if( scope.isEach() || scope.isTap() )
-      throw new IllegalStateException( "Every cannot follow a Tap or an Each" );
-
     if( isBuffer() )
-      return scope.getOutValuesFields();
+      return incomingScope.getIncomingBufferPassThroughFields();
     else
-      return scope.getOutGroupingFields();
+      return incomingScope.getIncomingAggregatorPassThroughFields();
     }
 
+  @Override
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
     Fields argumentFields = resolveArgumentSelector( incomingScopes );
 
     verifyArguments( argumentFields );
 
-    // we currently don't support using result from a previous Every in the current Every
-    Scope scope = getFirst( incomingScopes );
+    Scope incomingScope = getFirst( incomingScopes );
 
-    if( scope.isEvery() && argumentFields.contains( scope.getDeclaredFields() ) )
-      throw new OperatorException( this, "arguments may not select a declared field from a previous Every" );
+    // we currently don't support using result from a previous Every in the current Every
+    verifyAggregatorArguments( argumentFields, incomingScope );
 
     Fields declaredFields = resolveDeclared( incomingScopes, argumentFields );
 
@@ -267,11 +264,19 @@ public class Every extends Operator
 
     verifyOutputSelector( outgoingGroupingFields );
 
-    Fields outgoingValuesFields = resolveOutgoingValues( incomingScopes );
+    Fields outgoingValuesFields = incomingScope.getOutValuesFields();
 
+    // the incoming fields eligible to be outgoing, for Every only the grouping fields.
+    Fields passThroughFields = resolveIncomingOperationPassThroughFields( incomingScope );
     Fields remainderFields = resolveRemainderFields( incomingScopes, argumentFields );
 
-    return new Scope( getName(), Scope.Kind.EVERY, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
+    return new Scope( getName(), Scope.Kind.EVERY, passThroughFields, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
+    }
+
+  private void verifyAggregatorArguments( Fields argumentFields, Scope incomingScope )
+    {
+    if( ( !isBuffer() ) && incomingScope.isEvery() && argumentFields.contains( incomingScope.getOperationDeclaredFields() ) )
+      throw new OperatorException( this, "arguments may not select a declared field from a previous Every" );
     }
 
   Fields resolveOutgoingGroupingSelector( Set<Scope> incomingScopes, Fields argumentSelector, Fields declared )
@@ -289,19 +294,6 @@ public class Every extends Operator
         throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
       else
         throw new OperatorException( this, "could not resolve outgoing grouping selector in: " + this, exception );
-      }
-    }
-
-  Fields resolveOutgoingValues( Set<Scope> incomingScopes )
-    {
-    // Every never modifies the value stream, just the grouping stream
-    try
-      {
-      return getFirst( incomingScopes ).getOutValuesFields();
-      }
-    catch( Exception exception )
-      {
-      throw new OperatorException( this, "could not resolve outgoing values selector in: " + this, exception );
       }
     }
   }

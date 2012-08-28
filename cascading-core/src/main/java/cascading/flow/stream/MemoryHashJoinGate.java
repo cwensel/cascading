@@ -60,7 +60,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     {
     super.prepare();
 
-    streamedCollection = new ArrayList<Tuple>( Arrays.asList( new Tuple() ) );
+    streamedCollection = new ArrayList<Tuple>( Arrays.asList( new Tuple() ) ); // placeholder in collection
     collections = new Collection[ orderedPrevious.length ];
     collections[ 0 ] = streamedCollection;
     }
@@ -70,13 +70,15 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     {
     int pos = posMap.get( previous );
 
-    Tuple keyTuple = incomingEntry.selectTuple( keyFields[ pos ] );
+    Tuple incomingTuple = pos != 0 ? incomingEntry.getTupleCopy() : incomingEntry.getTuple();
+    Tuple keyTuple = keyBuilder[ pos ].makeResult( incomingTuple, null ); // view in incomingTuple
+
     keyTuple = getDelegatedTuple( keyTuple );
 
     if( pos != 0 )
       {
       keys.add( keyTuple );
-      keyValues[ pos ].get( keyTuple ).add( incomingEntry.getTupleCopy() );
+      keyValues[ pos ].get( keyTuple ).add( incomingTuple ); // always a copy
       return;
       }
 
@@ -84,7 +86,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
 
     keys.remove( keyTuple );
 
-    streamedCollection.set( 0, incomingEntry.getTuple() ); // no need to copy, temp setting
+    streamedCollection.set( 0, incomingTuple ); // no need to copy, temp setting
 
     performJoinWith( keyTuple );
     }
@@ -93,7 +95,14 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     {
     // never replace the first array, pos == 0
     for( int i = 1; i < keyValues.length; i++ )
-      collections[ i ] = keyValues[ i ].get( keyTuple );
+      {
+      // if key does not exist, #get will create an empty array list,
+      // and store the key, which is not a copy
+      if( keyValues[ i ].containsKey( keyTuple ) )
+        collections[ i ] = keyValues[ i ].get( keyTuple );
+      else
+        collections[ i ] = Collections.EMPTY_LIST;
+      }
 
     closure.reset( collections );
 

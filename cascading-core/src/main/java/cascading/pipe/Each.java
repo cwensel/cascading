@@ -359,15 +359,15 @@ public class Each extends Operator
     }
 
   @Override
-  public Fields resolveIncomingOperationFields( Scope incomingScope )
+  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {
-    return getFieldsFor( incomingScope );
+    return incomingScope.getIncomingFunctionArgumentFields();
     }
 
   @Override
-  public Fields resolveFields( Scope scope )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    return getFieldsFor( scope );
+    return incomingScope.getIncomingFunctionPassThroughFields();
     }
 
   @Override
@@ -387,9 +387,11 @@ public class Each extends Operator
 
     Fields outgoingGroupingFields = Fields.asDeclaration( outgoingValuesFields );
 
+    // the incoming fields eligible to be outgoing
+    Fields passThroughFields = resolveIncomingOperationPassThroughFields( getFirst( incomingScopes ) );
     Fields remainderFields = resolveRemainderFields( incomingScopes, argumentFields );
 
-    return new Scope( getName(), Scope.Kind.EACH, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
+    return new Scope( getName(), Scope.Kind.EACH, passThroughFields, remainderFields, argumentFields, declaredFields, outgoingGroupingFields, outgoingValuesFields );
     }
 
   Fields resolveOutgoingValuesSelector( Set<Scope> incomingScopes, Fields argumentFields, Fields declaredFields )

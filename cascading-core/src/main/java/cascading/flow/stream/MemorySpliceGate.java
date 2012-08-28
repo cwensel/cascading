@@ -37,7 +37,10 @@ import cascading.flow.planner.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.util.TupleBuilder;
 import cascading.tuple.util.TupleHasher;
+
+import static cascading.tuple.util.TupleViews.createNarrow;
 
 /**
  *
@@ -74,6 +77,21 @@ public abstract class MemorySpliceGate extends SpliceGate
     orderDucts( streamGraph );
     }
 
+  // we must make a new Tuple instance to wrap the incoming copy
+  protected TupleBuilder createDefaultNarrowBuilder( final Fields incomingFields, final Fields narrowFields )
+    {
+    return new TupleBuilder()
+    {
+    int[] pos = incomingFields.getPos( narrowFields );
+
+    @Override
+    public Tuple makeResult( Tuple input, Tuple output )
+      {
+      return createNarrow( pos, input );
+      }
+    };
+    }
+
   @Override
   public void initialize()
     {
@@ -86,9 +104,13 @@ public abstract class MemorySpliceGate extends SpliceGate
     if( splice.isSorted() )
       valueComparators = new Comparator[ orderedPrevious.length ];
 
-    for( Scope incomingScope : incomingScopes )
+    int size = splice.isGroupBy() ? 1 : incomingScopes.size();
+
+    for( int i = 0; i < size; i++ )
       {
-      int pos = splice.getPipePos().get( incomingScope.getName() );
+      Scope incomingScope = incomingScopes.get( i );
+
+      int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
 
       // we want the comparators
       Fields groupFields = splice.getKeySelectors().get( incomingScope.getName() );
@@ -102,7 +124,7 @@ public abstract class MemorySpliceGate extends SpliceGate
 
       if( sortFields != null )
         {
-        // we want the comparators
+        // we want the comparators, so don't use sortFields array
         Fields sortFields = splice.getSortingSelectors().get( incomingScope.getName() );
         valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields, defaultComparator );
 
@@ -214,7 +236,7 @@ public abstract class MemorySpliceGate extends SpliceGate
     public DelegatedTuple( Tuple wrapped )
       {
       // pass it in to prevent one being allocated
-      super( (ArrayList<Object>) Tuple.elements( wrapped ) );
+      super( Tuple.elements( wrapped ) );
       }
 
     @Override

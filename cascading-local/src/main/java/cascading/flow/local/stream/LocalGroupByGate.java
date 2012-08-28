@@ -53,7 +53,7 @@ public class LocalGroupByGate extends MemorySpliceGate
 
   private ListMultimap<Tuple, Tuple> initNewValueMap()
     {
-    return (ListMultimap<Tuple, Tuple>) Multimaps.synchronizedListMultimap( ArrayListMultimap.<Tuple, Tuple>create() );
+    return Multimaps.synchronizedListMultimap( ArrayListMultimap.<Tuple, Tuple>create() );
     }
 
   @Override
@@ -73,8 +73,8 @@ public class LocalGroupByGate extends MemorySpliceGate
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    Tuple groupTuple = incomingEntry.selectTuple( keyFields[ 0 ] );
     Tuple valuesTuple = incomingEntry.getTupleCopy();
+    Tuple groupTuple = keyBuilder[ 0 ].makeResult( valuesTuple, null ); // view on valuesTuple
 
     keys.add( groupTuple );
     valueMap.put( groupTuple, valuesTuple );

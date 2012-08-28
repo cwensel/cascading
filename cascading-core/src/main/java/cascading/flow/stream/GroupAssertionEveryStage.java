@@ -42,6 +42,24 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
     }
 
   @Override
+  protected Fields getIncomingPassThroughFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingAggregatorPassThroughFields();
+    }
+
+  @Override
+  protected Fields getIncomingArgumentsFields()
+    {
+    return incomingScopes.get( 0 ).getIncomingAggregatorArgumentFields();
+    }
+
+  @Override
+  protected Fields getOutgoingSelector()
+    {
+    return outgoingScopes.get( 0 ).getOutGroupingSelector();
+    }
+
+  @Override
   public void initialize()
     {
     super.initialize();
@@ -49,12 +67,6 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
     groupAssertion = every.getGroupAssertion();
 
     reducing = (Reducing) getNext();
-    }
-
-  @Override
-  protected Fields getOutgoingSelector()
-    {
-    return outgoingScopes.get( 0 ).getOutGroupingSelector();
     }
 
   @Override
@@ -85,7 +97,7 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
     {
     try
       {
-      argumentsEntry.setTuple( tupleEntry.selectTuple( argumentsSelector ) );
+      argumentsEntry.setTuple( argumentsBuilder.makeResult( tupleEntry.getTuple(), null ) );
       operationCall.setArguments( argumentsEntry );
 
       groupAssertion.aggregate( flowProcess, operationCall );

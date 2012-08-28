@@ -110,7 +110,7 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
     return properties;
     }
 
-  private static String runOnly( Properties properties )
+  static String runOnly( Properties properties )
     {
     return properties.getProperty( "run.only" );
     }
@@ -120,11 +120,9 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
     return !properties.containsKey( name + ".ERROR" ) && !properties.containsKey( name + ".tuple" );
     }
 
-  public static Map<String, Pipe> buildOpPipes( Properties properties, String prefix, Pipe pipe, AssemblyFactory assemblyFactory, Fields[] args_fields, Fields[] decl_fields, Fields[] select_fields, String functionValue )
+  public static Map<String, Pipe> buildOpPipes( String prefix, Pipe pipe, AssemblyFactory assemblyFactory, Fields[] args_fields, Fields[] decl_fields, Fields[] select_fields, String functionValue, String runOnly )
     {
     Map<String, Pipe> pipes = new LinkedHashMap<String, Pipe>();
-
-    String runOnly = runOnly( properties );
 
     for( int arg = 0; arg < args_fields.length; arg++ )
       {

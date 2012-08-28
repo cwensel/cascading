@@ -32,8 +32,6 @@ import cascading.operation.PlannedOperation;
 import cascading.operation.PlannerLevel;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleException;
 
 /**
@@ -255,45 +253,11 @@ public abstract class Operator extends Pipe
     return plannerLevel != null;
     }
 
-  public Tuple makeResult( TupleEntry inputEntry, Fields argumentSelector, Fields remainderFields, TupleEntry declaredEntry, Fields outgoingSelector, Tuple output )
-    {
-    if( getOutputSelector().isResults() )
-      return output;
-
-    if( getOutputSelector().isAll() )
-      return inputEntry.getTuple().append( output );
-
-    if( getOutputSelector().isReplace() )
-      {
-      Tuple result = new Tuple( inputEntry.getTuple() );
-
-      // handle case where operation is declaring the argument fields, and they are positional
-      if( getFieldDeclaration().isArguments() )
-        result.set( inputEntry.getFields(), argumentSelector, output );
-      else
-        result.set( inputEntry.getFields(), declaredEntry.getFields(), output );
-
-      return result;
-      }
-
-    if( getOutputSelector().isSwap() )
-      {
-      if( remainderFields.size() == 0 ) // the same as Fields.RESULTS
-        return output;
-      else
-        return inputEntry.selectTuple( remainderFields ).append( output );
-      }
-
-    declaredEntry.setTuple( output );
-
-    return TupleEntry.select( outgoingSelector, inputEntry, declaredEntry );
-    }
-
   // FIELDS
 
   protected Fields resolveRemainderFields( Set<Scope> incomingScopes, Fields argumentFields )
     {
-    Fields fields = resolveIncomingOperationFields( getFirst( incomingScopes ) );
+    Fields fields = resolveIncomingOperationArgumentFields( getFirst( incomingScopes ) );
 
     if( fields.isUnknown() )
       return fields;
@@ -339,10 +303,9 @@ public abstract class Operator extends Pipe
       return incomingScope.getOutGroupingFields();
 
     if( outputSelector.isValues() )
-      return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
+      return incomingScope.getOutGroupingValueFields();
 
-    // resolveFields returns the proper incoming fields
-    Fields incomingFields = resolveFields( incomingScope );
+    Fields incomingFields = resolveIncomingOperationPassThroughFields( incomingScope );
 
     // not part of resolve as we need the argumentFields
     if( outputSelector.isSwap() )
@@ -367,15 +330,15 @@ public abstract class Operator extends Pipe
       Scope incomingScope = getFirst( incomingScopes );
 
       if( argumentSelector.isAll() )
-        return resolveIncomingOperationFields( incomingScope );
+        return resolveIncomingOperationArgumentFields( incomingScope );
 
       if( argumentSelector.isGroup() )
         return incomingScope.getOutGroupingFields();
 
       if( argumentSelector.isValues() )
-        return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
+        return incomingScope.getOutGroupingValueFields();
 
-      return resolveIncomingOperationFields( incomingScope ).select( argumentSelector );
+      return resolveIncomingOperationArgumentFields( incomingScope ).select( argumentSelector );
       }
     catch( FieldsResolverException exception )
       {
@@ -413,14 +376,14 @@ public abstract class Operator extends Pipe
         return Fields.asDeclaration( arguments );
 
       if( fieldDeclaration.isAll() )
-        return resolveFields( incomingScope );
+        return resolveIncomingOperationPassThroughFields( incomingScope );
 
       if( fieldDeclaration.isGroup() )
         return incomingScope.getOutGroupingFields();
 
       // VALUES is the diff between all fields and group fields
       if( fieldDeclaration.isValues() )
-        return incomingScope.getOutValuesFields().subtract( incomingScope.getOutGroupingFields() );
+        return incomingScope.getOutGroupingValueFields();
 
       }
     catch( Exception exception )

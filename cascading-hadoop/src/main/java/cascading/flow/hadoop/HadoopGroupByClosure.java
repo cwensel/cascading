@@ -26,6 +26,8 @@ import cascading.flow.FlowProcess;
 import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.util.TupleBuilder;
+import cascading.tuple.util.TupleViews;
 
 /** Class GroupClosure is used internally to represent groups of tuples during grouping. */
 public class HadoopGroupByClosure extends JoinerClosure
@@ -68,6 +70,38 @@ public class HadoopGroupByClosure extends JoinerClosure
     return new Iterator<Tuple>()
     {
     final int cleanPos = valueFields.length == 1 ? 0 : pos; // support repeated pipes
+    TupleBuilder[] valueBuilder = new TupleBuilder[ valueFields.length ];
+
+    {
+    for( int i = 0; i < valueFields.length; i++ )
+      valueBuilder[ i ] = makeBuilder( valueFields[ i ], joinFields[ i ] );
+    }
+
+    private TupleBuilder makeBuilder( final Fields valueField, final Fields joinField )
+      {
+      if( valueField.isUnknown() || joinField.isNone() )
+        return new TupleBuilder()
+        {
+        @Override
+        public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+          {
+          valueTuple.set( valueFields[ cleanPos ], joinFields[ cleanPos ], groupTuple );
+
+          return valueTuple;
+          }
+        };
+
+      return new TupleBuilder()
+      {
+      Tuple result = TupleViews.createOverride( valueField, joinField );
+
+      @Override
+      public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+        {
+        return TupleViews.reset( result, valueTuple, groupTuple );
+        }
+      };
+      }
 
     public boolean hasNext()
       {
@@ -78,10 +112,7 @@ public class HadoopGroupByClosure extends JoinerClosure
       {
       Tuple tuple = (Tuple) values.next();
 
-      // todo: cache pos
-      tuple.set( valueFields[ cleanPos ], joinFields[ cleanPos ], grouping );
-
-      return tuple;
+      return valueBuilder[ cleanPos ].makeResult( tuple, grouping );
       }
 
     public void remove()

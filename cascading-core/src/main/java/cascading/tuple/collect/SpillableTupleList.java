@@ -35,6 +35,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
+import cascading.tuple.util.TupleViews;
 import cascading.util.CloseableIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -449,7 +450,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
   private Iterator<Tuple> asTupleIterator()
     {
-    final Tuple tuple = new Tuple();
+    final Tuple tuple = TupleViews.createObjectArray();
     final Iterator<Object[]> iterator = current.iterator();
 
     return new Iterator<Tuple>()
@@ -463,10 +464,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     @Override
     public Tuple next()
       {
-      tuple.clear();
-      tuple.addAll( iterator.next() );
-
-      return tuple;
+      return TupleViews.reset( tuple, iterator.next() );
       }
 
     @Override
