@@ -51,7 +51,7 @@ public class DelimitedParser implements Serializable
   /** Field SPECIAL_REGEX_CHARS */
   static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
   /** Field QUOTED_REGEX_FORMAT */
-  static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s%2$s]%2$s[^%1$s])+%1$s)";
+  static final String QUOTED_REGEX_FORMAT = "%2$s(?=(?:[^%1$s]*%1$s[^%1$s]*[^%1$s%2$s]*%1$s)*(?![^%1$s]*%1$s))";
   /** Field CLEAN_REGEX_FORMAT */
   static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
   /** Field ESCAPE_REGEX_FORMAT */

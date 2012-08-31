@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.5 [unreleased]
 
+  Fix for c.s.u.DelimitedParser to support delimiter as last char in quoted field.
+
   Fix for c.o.f.UnGroup constructor failing against correct constructor values.
 
   Added missing setter methods on c.p.AppProps for application jar path and class values.
