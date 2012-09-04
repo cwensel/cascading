@@ -81,6 +81,12 @@ public class DelimitedParser implements Serializable
 
   public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
     {
+    if( delimiter == null || delimiter.isEmpty() )
+      throw new IllegalArgumentException( "delimiter may not be null or empty" );
+
+    if( delimiter.equals( quote ) )
+      throw new IllegalArgumentException( "delimiter and quote character may not be the same value, got: '" + delimiter + "'" );
+
     this.delimiter = delimiter;
     this.strict = strict;
     this.safe = safe;
