@@ -62,7 +62,6 @@ public class CascadingServices
   static Properties defaultProperties;
   static URL libraryURL;
   static String[] exclusions;
-  static ServiceLoader serviceLoader;
 
   Map<Object, Object> properties;
 
@@ -112,11 +111,7 @@ public class CascadingServices
 
   private synchronized ServiceLoader getServiceUtil()
     {
-    // allows for a system property to disable the container
-    if( serviceLoader == null )
-      serviceLoader = ServiceLoader.getInstance( enableContainer ? libraryURL : null, exclusions );
-
-    return serviceLoader;
+    return ServiceLoader.getInstance( enableContainer ? libraryURL : null, exclusions );
     }
 
   public CascadingServices( Map<Object, Object> properties )
