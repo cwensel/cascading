@@ -40,6 +40,9 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   /** Field mapperTraps */
   private final Map<String, Tap> traps = new HashMap<String, Tap>();
 
+  /** Map of Properties modified by each Tap's sourceConfInit/sinkConfInit */
+  private final Map<Tap, Properties> tapProperties = new HashMap<Tap, Properties>();
+
   public LocalFlowStep( String name, int id )
     {
     super( name, id );
@@ -63,10 +66,11 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     {
     if( !taps.isEmpty() )
       {
-      Properties confCopy = flowProcess.copyConfig( conf );
-
       for( Tap tap : taps )
         {
+        Properties confCopy = flowProcess.copyConfig( conf );
+        tapProperties.put( tap, confCopy ); // todo: store the diff, not the copy
+
         if( isSink )
           tap.sinkConfInit( flowProcess, confCopy );
         else
@@ -138,6 +142,11 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   public Map<String, Tap> getTrapMap()
     {
     return traps;
+    }
+
+  public Map<Tap, Properties> getPropertiesMap()
+    {
+    return tapProperties;
     }
 
   @Override

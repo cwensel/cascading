@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.5 [unreleased]
 
+  Properly scope c.t.Tap properties to c.f.l.LocalFlowStep and then pass them to source/sink stages in
+  c.f.l.s.LocalStepStreamGraph. @mrwalker
+
   Fix for c.s.u.DelimitedParser to support delimiter as last char in quoted field.
 
   Fix for c.o.f.UnGroup constructor failing against correct constructor values.
