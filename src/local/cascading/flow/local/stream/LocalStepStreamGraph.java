@@ -20,15 +20,18 @@
 
 package cascading.flow.local.stream;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryCoGroupGate;
+import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
 import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
@@ -59,7 +62,7 @@ public class LocalStepStreamGraph extends StepStreamGraph
     {
     for( Object rhsElement : step.getSources() )
       {
-      Duct rhsDuct = new SourceStage( flowProcess, (Tap) rhsElement );
+      Duct rhsDuct = new SourceStage( tapFlowProcess( (Tap) rhsElement ), (Tap) rhsElement );
 
       addHead( rhsDuct );
 
@@ -83,6 +86,26 @@ public class LocalStepStreamGraph extends StepStreamGraph
     return new SyncMergeStage( flowProcess, merge );
     }
 
+  @Override
+  protected SinkStage createSinkStage( Tap element )
+    {
+    return new SinkStage( tapFlowProcess( (Tap) element ), (Tap) element );
+    }
+
+  private LocalFlowProcess tapFlowProcess(Tap tap)
+    {
+    Properties priorConfig = ( (LocalFlowStep) step ).getPropertiesMap().get(tap);
+    Properties tapProperties = ( (LocalFlowProcess) flowProcess ).getConfigCopy();
+
+    Enumeration<?> keys = priorConfig.propertyNames();
+    while ( keys.hasMoreElements() )
+      {
+      String key = (String) keys.nextElement();
+      tapProperties.setProperty( key, (String) priorConfig.getProperty( key ) );
+      }
+
+    return new LocalFlowProcess( (LocalFlowProcess) flowProcess, tapProperties );
+    }
 
   protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )
     {

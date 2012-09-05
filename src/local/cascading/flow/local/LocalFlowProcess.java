@@ -58,6 +58,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     this.config = config;
     }
 
+  public LocalFlowProcess( LocalFlowProcess flowProcess, Properties properties )
+    {
+      super( flowProcess.getCurrentSession() );
+      this.config = properties;
+      this.stepStats = flowProcess.stepStats;
+    }
+
   public void setStepStats( LocalStepStats stepStats )
     {
     this.stepStats = stepStats;
