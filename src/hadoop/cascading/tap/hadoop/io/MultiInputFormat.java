@@ -191,7 +191,18 @@ public class MultiInputFormat implements InputFormat
     InputSplit[][] inputSplits = new InputSplit[ inputFormats.length ][];
 
     for( int i = 0; i < inputFormats.length; i++ )
+      {
       inputSplits[ i ] = inputFormats[ i ].getSplits( jobConfs[ i ], numSplits[ i ] );
+
+      if( inputSplits[ i ] == null || inputSplits[ i ].length == 0 )
+        throw new IllegalStateException( "input format: " + inputFormats[ i ].getClass().getName() + ", returned a null or empty split array" );
+
+      for( int j = 0; j < inputSplits[ i ].length; j++ )
+        {
+        if( inputSplits[ i ][ j ] == null )
+          throw new IllegalStateException( "input format: " + inputFormats[ i ].getClass().getName() + ", returned a split array with nulls" );
+        }
+      }
 
     return inputSplits;
     }

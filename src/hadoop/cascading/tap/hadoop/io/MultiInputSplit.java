@@ -65,10 +65,20 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )
     {
+    if( inputSplit == null )
+      throw new IllegalArgumentException( "input split may not be null" );
+
+    if( config == null )
+      throw new IllegalArgumentException( "config may not be null" );
+
     this.inputSplit = inputSplit;
     this.config = config;
     }
 
+  /**
+   * This constructor is used internally by Hadoop. it is expected {@link #configure(org.apache.hadoop.mapred.JobConf)}
+   * and {@link #readFields(java.io.DataInput)} are called to properly initialize.
+   */
   public MultiInputSplit()
     {
     }
