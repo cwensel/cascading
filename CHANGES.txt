@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.5 [unreleased]
 
+  Updated c.f.p.ElementGraphException messages to name disconnected elements.
+
   Properly scope c.t.Tap properties to c.f.l.LocalFlowStep and then pass them to source/sink stages in
   c.f.l.s.LocalStepStreamGraph. @mrwalker
 
