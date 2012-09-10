@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.0.5 [unreleased]
+2.0.5
 
   Updated c.f.p.ElementGraphException messages to name disconnected elements.
 
