@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.1 [unreleased]
+2.1.0 [unreleased]
 
   Updated all tuple stream permutations to minimize new c.t.Tuple instantiations and maximize upstream Tuple reuse.
 
