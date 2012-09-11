@@ -58,3 +58,7 @@ task platformTest( type: Test, dependsOn: test ) {
     setTestClassesDir( file( project( ':cascading-platform' ).sourceSets.test.output.classesDir ) )
   }
 }
+
+check {
+  dependsOn << platformTest
+}
