@@ -25,3 +25,5 @@ dependencies {
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
 }
+
+platformTest.enabled = false
