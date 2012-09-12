@@ -318,9 +318,9 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * before use. And {@link #sourceCleanup(cascading.flow.FlowProcess, SourceCall)} if resources must be
    * destroyed after use.
    *
-   * @param flowProcess
+   * @param flowProcess of type FlowProcess
    * @param tap         of type Tap
-   * @param conf        of type JobConf   @throws IOException on initialization failure
+   * @param conf        of type Config
    */
   public abstract void sourceConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf );
 
@@ -337,9 +337,9 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * before use. And {@link #sinkCleanup(cascading.flow.FlowProcess, SinkCall)} if resources must be
    * destroyed after use.
    *
-   * @param flowProcess
+   * @param flowProcess of type FlowProcess
    * @param tap         of type Tap
-   * @param conf        of type JobConf   @throws IOException on initialization failure
+   * @param conf        of type Config
    */
   public abstract void sinkConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf );
 
@@ -350,8 +350,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Be sure to place any initialized objects in the {@link SourceContext} so each instance
    * will remain threadsafe.
    *
-   * @param flowProcess of Process
-   * @param sourceCall  of SourceCall<SourceContext, Input>
+   * @param flowProcess of type FlowProcess
+   * @param sourceCall  of type SourceCall<SourceContext, Input>
    */
   public void sourcePrepare( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
@@ -371,7 +371,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * instance of data. If the payload Tuple is set on the TapException, that Tuple will be written to
    * any applicable failure trap Tap.
    *
-   * @param flowProcess of Process
+   * @param flowProcess of type FlowProcess
    * @param sourceCall  of SourceCall
    * @return returns {@code true} when a Tuple was successfully read
    */
@@ -382,7 +382,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * {@link #sourcePrepare(cascading.flow.FlowProcess, SourceCall)}.
    *
    * @param flowProcess of Process
-   * @param sourceCall  of SourceCall<SourceContext, Input>
+   * @param sourceCall  of type SourceCall<SourceContext, Input>
    */
   public void sourceCleanup( FlowProcess<Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
@@ -395,8 +395,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Be sure to place any initialized objects in the {@link SinkContext} so each instance
    * will remain threadsafe.
    *
-   * @param flowProcess of Process
-   * @param sinkCall    of SinkCall<SinkContext, Output>
+   * @param flowProcess of type FlowProcess
+   * @param sinkCall    of type SinkCall<SinkContext, Output>
    */
   public void sinkPrepare( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
@@ -419,8 +419,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sinkCleanup is used to destroy resources created by
    * {@link #sinkPrepare(cascading.flow.FlowProcess, SinkCall)}.
    *
-   * @param flowProcess of Process
-   * @param sinkCall    of SinkCall<SinkContext, Output>
+   * @param flowProcess of type FlowProcess
+   * @param sinkCall    of type SinkCall<SinkContext, Output>
    */
   public void sinkCleanup( FlowProcess<Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {

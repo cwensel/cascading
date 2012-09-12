@@ -50,8 +50,9 @@ import cascading.util.Util;
  * A Tap takes a {@link Scheme} instance, which is used to identify the type of resource (text file, binary file, etc).
  * A Tap is responsible for how the resource is reached.
  * <p/>
- * In Cascading, Tap equality is a function of the {@link #getIdentifier()} and {@link #getScheme()} values. That is,
- * two Tap instances are the same Tap instance if they sink/source the same resource and sink/source the same fields.
+ * By default when planning a Flow, Tap equality is a function of the {@link #getIdentifier()} and {@link #getScheme()}
+ * values. That is, two Tap instances are the same Tap instance if they sink/source the same resource and sink/source
+ * the same fields.
  * <p/>
  * Some more advanced taps, like a database tap, may need to extend equality to include any filtering, like the
  * {@code where} clause in a SQL statement so two taps reading from the same SQL table aren't considered equal.
@@ -161,7 +162,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     }
 
   /**
-   * Method sourceInit initializes this instance as a source.
+   * Method sourceConfInit initializes this instance as a source.
    * <p/>
    * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
@@ -169,9 +170,11 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
+   * <p/>
+   * Note that no resources or services should be modified by this method.
    *
-   * @param flowProcess
-   * @param conf        of type JobConf  @throws IOException on resource initialization failure.
+   * @param flowProcess of type FlowProcess
+   * @param conf        of type Config
    */
   public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
@@ -179,7 +182,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     }
 
   /**
-   * Method sinkInit initializes this instance as a sink.
+   * Method sinkConfInit initializes this instance as a sink.
    * <p/>
    * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
@@ -189,9 +192,12 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
+   * <p/>
+   * Note that no resources or services should be modified by this method. If this Tap instance returns true for
+   * {@link #isReplace()}, then {@link #deleteResource(Object)} will be called by the parent Flow.
    *
-   * @param flowProcess
-   * @param conf        of type JobConf  @throws IOException on resource initialization failure.
+   * @param flowProcess of type FlowProcess
+   * @param conf        of type Config
    */
   public void sinkConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
@@ -241,9 +247,10 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.
    *
-   * @param flowProcess
-   * @param input
-   * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
+   * @param flowProcess of type FlowProcess
+   * @param input       of type Input
+   * @return TupleEntryIterator
+   * @throws java.io.IOException when the resource cannot be opened
    */
   public abstract TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException;
 
@@ -254,8 +261,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.
    *
-   * @param flowProcess
-   * @return TupleEntryIterator  @throws java.io.IOException when the resource cannot be opened
+   * @param flowProcess of type FlowProcess
+   * @return TupleEntryIterator
+   * @throws java.io.IOException when the resource cannot be opened
    */
   public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess ) throws IOException
     {
@@ -269,19 +277,19 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * via {@link Scheme#sinkConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
    * output type and instantiate it before calling {@code super.openForWrite()}.
    *
-   * @param flowProcess
-   * @param output
+   * @param flowProcess of type FlowProcess
+   * @param output      of type Output
    * @return TupleEntryCollector
-   * @throws java.io.IOException when
+   * @throws java.io.IOException when the resource cannot be opened
    */
   public abstract TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance.
    *
-   * @param flowProcess
+   * @param flowProcess of type FlowProcess
    * @return TupleEntryCollector
-   * @throws java.io.IOException when
+   * @throws java.io.IOException when the resource cannot be opened
    */
   public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess ) throws IOException
     {
@@ -334,8 +342,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * A hook for allowing a Scheme to lazily retrieve its source fields.
    *
-   * @param flowProcess
-   * @return
+   * @param flowProcess of type FlowProcess
+   * @return the found Fields
    */
   public Fields retrieveSourceFields( FlowProcess<Config> flowProcess )
     {
@@ -350,7 +358,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * A hook for allowing a Scheme to lazily retrieve its sink fields.
    *
-   * @return
+   * @param flowProcess of type FlowProcess
+   * @return the found Fields
    */
   public Fields retrieveSinkFields( FlowProcess<Config> flowProcess )
     {
@@ -378,7 +387,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * Method getFullIdentifier returns a fully qualified resource identifier.
    *
    * @param conf of type Config
-   * @return Path
+   * @return String
    */
   public String getFullIdentifier( Config conf )
     {
@@ -388,7 +397,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method createResource creates the underlying resource.
    *
-   * @param conf of type JobConf
+   * @param conf of type Config
    * @return boolean
    * @throws IOException when there is an error making directories
    */
@@ -397,7 +406,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method deleteResource deletes the resource represented by this instance.
    *
-   * @param conf of type JobConf
+   * @param conf of type Config
    * @return boolean
    * @throws IOException when the resource cannot be deleted
    */
@@ -416,7 +425,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
    *
-   * @param conf
+   * @param conf of type Config
    * @return returns true if successful
    * @throws IOException
    */
@@ -435,7 +444,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
    *
-   * @param conf
+   * @param conf of type Config
    * @return returns true if successful
    * @throws IOException
    */
@@ -447,7 +456,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method resourceExists returns true if the path represented by this instance exists.
    *
-   * @param conf of type JobConf
+   * @param conf of type Config
    * @return true if the underlying resource already exists
    * @throws IOException when the status cannot be determined
    */
@@ -496,7 +505,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
 
   /**
    * Method isUpdate indicates whether the resource represented by this instance should be updated if it already
-   * exists. Otherwise a new resource will be created when the Flow is started..
+   * exists. Otherwise a new resource will be created, via {@link #createResource(Object)}, when the Flow is started.
    *
    * @return boolean
    */
