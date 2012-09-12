@@ -48,7 +48,7 @@ if( System.properties[ 'cascading.release.private' ] )
 else if( !System.properties[ 'cascading.release.final' ] )
   buildNumber = "wip-${buildNumber}"
 
-ext.releaseTag = buildNumber
+ext.releaseTag = "${majorVersion}-${buildNumber}"
 
 if( !System.properties[ 'build.number' ] )
   releaseTag = "wip-${majorVersion}"
