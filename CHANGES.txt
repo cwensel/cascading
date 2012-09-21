@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.6 [unreleased]
 
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.IllegalStateException on an empty child o.a.h.m.InputSplit array.
+
   Fix for j.l.IndexOutOfBoundsException thrown on an empty c.c.Cascade.
 
   Fix for c.t.c.SpillableProps#SPILL_COMPRESS not being honored if set to false.
