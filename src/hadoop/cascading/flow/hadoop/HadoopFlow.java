@@ -155,7 +155,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     }
 
   @Override
-  public FlowProcess getFlowProcess()
+  public FlowProcess<JobConf> getFlowProcess()
     {
     return new HadoopFlowProcess( getFlowSession(), getConfig() );
     }
