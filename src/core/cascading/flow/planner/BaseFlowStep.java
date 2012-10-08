@@ -553,6 +553,12 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return false;
     }
 
+  public void clean()
+    {
+    // use step config by default
+    clean( getConfig() );
+    }
+
   public abstract void clean( Config config );
 
   @Override
