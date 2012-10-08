@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.0.6 [unreleased]
 
+  Fixed issue where c.f.Flow#writeStepsDot() would fail if a Flow c.f.FlowStep had multiple sinks.
+
   Fix for c.t.h.i.MultiInputFormat throwing j.l.java.lang.ArrayIndexOutOfBoundsException when there aren't any
   actual o.a.h.m.FileInputFormat input paths.
 
