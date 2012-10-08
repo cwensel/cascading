@@ -73,7 +73,8 @@ public class MultiInputFormat implements InputFormat
         isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
       }
 
-    FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[ allPaths.size() ] ) );
+    if( !allPaths.isEmpty() ) // it's possible there aren't any
+      FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[ allPaths.size() ] ) );
 
     try
       {
