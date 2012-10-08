@@ -436,7 +436,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
 
     try
       {
-      return fileSystem.delete( getPath() , true );
+      return fileSystem.delete( getPath(), true );
       }
     catch( NullPointerException exception )
       {
@@ -467,7 +467,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return false;
 
-    return getFileSystem( conf ).getFileStatus(  getPath()  ).isDir();
+    return getFileSystem( conf ).getFileStatus( getPath() ).isDir();
     }
 
   /**
@@ -482,7 +482,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus(  getPath() );
+    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
 
     if( fileStatus.isDir() )
       return 0;
@@ -545,7 +545,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( getPath() , new OutputLogFilter() );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( getPath(), new OutputLogFilter() );
 
     String[] children = new String[ statuses.length ];
 

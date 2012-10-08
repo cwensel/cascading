@@ -61,6 +61,8 @@ public class AppProps extends Props
   protected String name;
   protected String version;
   protected Set<String> tags = new TreeSet<String>();
+  protected Class jarClass;
+  protected String jarPath;
 
   public static AppProps appProps()
     {
@@ -255,6 +257,38 @@ public class AppProps extends Props
     return this;
     }
 
+  /**
+   * Method setJarClass is used to set the application jar file.
+   * </p>
+   * All cluster executed Cascading applications
+   * need to call setApplicationJarClass(java.util.Map, Class) or
+   * {@link #setApplicationJarPath(java.util.Map, String)}, otherwise ClassNotFound exceptions are likely.
+   *
+   * @param jarClass of type Class
+   */
+  public AppProps setJarClass( Class jarClass )
+    {
+    this.jarClass = jarClass;
+
+    return this;
+    }
+
+  /**
+   * Method setJarPath is used to set the application jar file.
+   * </p>
+   * All cluster executed Cascading applications
+   * need to call {@link #setJarClass(Class)} or
+   * setJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.
+   *
+   * @param jarPath of type String
+   */
+  public AppProps setJarPath( String jarPath )
+    {
+    this.jarPath = jarPath;
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -262,5 +296,7 @@ public class AppProps extends Props
     setApplicationName( properties, name );
     setApplicationVersion( properties, version );
     addApplicationTag( properties, getTags() );
+    setApplicationJarClass( properties, jarClass );
+    setApplicationJarPath( properties, jarPath );
     }
   }

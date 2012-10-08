@@ -51,7 +51,7 @@ public class DelimitedParser implements Serializable
   /** Field SPECIAL_REGEX_CHARS */
   static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
   /** Field QUOTED_REGEX_FORMAT */
-  static final String QUOTED_REGEX_FORMAT = "%2$s(?!(?:[^%1$s%2$s]|[^%1$s%2$s]%2$s[^%1$s])+%1$s)";
+  static final String QUOTED_REGEX_FORMAT = "%2$s(?=(?:[^%1$s]*%1$s[^%1$s]*[^%1$s%2$s]*%1$s)*(?![^%1$s]*%1$s))";
   /** Field CLEAN_REGEX_FORMAT */
   static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
   /** Field ESCAPE_REGEX_FORMAT */
@@ -81,6 +81,12 @@ public class DelimitedParser implements Serializable
 
   public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
     {
+    if( delimiter == null || delimiter.isEmpty() )
+      throw new IllegalArgumentException( "delimiter may not be null or empty" );
+
+    if( delimiter.equals( quote ) )
+      throw new IllegalArgumentException( "delimiter and quote character may not be the same value, got: '" + delimiter + "'" );
+
     this.delimiter = delimiter;
     this.strict = strict;
     this.safe = safe;

@@ -34,13 +34,14 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
   public static final String CASCADING_SOURCE_PATH = "cascading.source.path";
-  private static final Logger LOG = Logger.getLogger( MultiInputSplit.class );
+  private static final Logger LOG = LoggerFactory.getLogger( MultiInputSplit.class );
 
   /** Field jobConf */
   private transient JobConf jobConf;
@@ -64,10 +65,20 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )
     {
+    if( inputSplit == null )
+      throw new IllegalArgumentException( "input split may not be null" );
+
+    if( config == null )
+      throw new IllegalArgumentException( "config may not be null" );
+
     this.inputSplit = inputSplit;
     this.config = config;
     }
 
+  /**
+   * This constructor is used internally by Hadoop. it is expected {@link #configure(org.apache.hadoop.mapred.JobConf)}
+   * and {@link #readFields(java.io.DataInput)} are called to properly initialize.
+   */
   public MultiInputSplit()
     {
     }
@@ -119,6 +130,13 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     for( int i = 0; i < keys.length; i++ )
       config.put( keys[ i ], values[ i ] );
 
+    if( LOG.isDebugEnabled() )
+      {
+      LOG.debug( "current split config diff:" );
+      for( Map.Entry<String, String> entry : config.entrySet() )
+        LOG.debug( "key: {}, value: {}", entry.getKey(), entry.getValue() );
+      }
+
     JobConf currentConf = HadoopUtil.mergeConf( jobConf, config, false );
 
     try
@@ -140,8 +158,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
         {
         jobConf.set( CASCADING_SOURCE_PATH, path.toString() );
 
-        if( LOG.isInfoEnabled() )
-          LOG.info( "current split input path: " + path.toString() );
+        LOG.info( "current split input path: {}", path );
         }
       }
     }

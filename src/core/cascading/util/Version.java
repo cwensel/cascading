@@ -74,14 +74,14 @@ public class Version
 
     String releaseFull = null;
 
-    if( releaseMinor == null )
+    if( releaseMinor == null || releaseMinor.isEmpty() )
       releaseFull = releaseMajor;
     else
       releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
 
     String releaseVersion = null;
 
-    if( releaseBuild == null )
+    if( releaseBuild == null || releaseBuild.isEmpty() )
       releaseVersion = String.format( "Concurrent, Inc - Cascading %s", releaseFull );
     else
       releaseVersion = String.format( "Concurrent, Inc - Cascading %s-%s", releaseFull, releaseBuild );

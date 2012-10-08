@@ -1,8 +1,48 @@
 Cascading Change Log
 
-2.0.4 [unreleased]
+2.0.6 [unreleased]
 
-  Made the #verify() methods on c.s.l.TextLine and c.s.h.TextLine protected.
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.java.lang.ArrayIndexOutOfBoundsException when there aren't any
+  actual o.a.h.m.FileInputFormat input paths.
+
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.IllegalStateException on an empty child o.a.h.m.InputSplit array.
+
+  Fix for j.l.IndexOutOfBoundsException thrown on an empty c.c.Cascade.
+
+  Fix for c.t.c.SpillableProps#SPILL_COMPRESS not being honored if set to false.
+
+2.0.5
+
+  Updated c.f.p.ElementGraphException messages to name disconnected elements.
+
+  Properly scope c.t.Tap properties to c.f.l.LocalFlowStep and then pass them to source/sink stages in
+  c.f.l.s.LocalStepStreamGraph. @mrwalker
+
+  Fix for c.s.u.DelimitedParser to support delimiter as last char in quoted field.
+
+  Fix for c.o.f.UnGroup constructor failing against correct constructor values.
+
+  Added missing setter methods on c.p.AppProps for application jar path and class values.
+
+  Fix for possible NPE when debug logging is enabled during planning.
+
+  Improved error message when Hadoop serializer for a given type cannot be found in some cases.
+
+2.0.4
+
+  Removed remnant log4j dependency in c.t.h.i.MultiInputSplit.
+
+  Fixed issue where c.t.Tap may fail resolving outgoing fields.
+
+  Added missing #equals() method to c.t.TupleEntry that will honor field j.u.Comparator instances.
+
+  Fixed issue where c.f.s.SparseTupleComparator would not properly sort with re-ordered sort fields.
+
+  Fixed issue where c.t.TupleEntryChainIterator#hasNext() would fail if called more than once.
+
+  Updated c.t.h.Hfs internal methods call #getPath() instead of #getIdentifier() so sub-classes can override.
+
+  Updated the #verify() methods on c.s.l.TextLine and c.s.h.TextLine to be protected.
 
 2.0.3
 

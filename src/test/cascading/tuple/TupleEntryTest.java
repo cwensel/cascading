@@ -20,13 +20,15 @@
 
 package cascading.tuple;
 
+import java.io.Serializable;
+import java.util.Comparator;
+
 import cascading.CascadingTestCase;
 
 public class TupleEntryTest extends CascadingTestCase
   {
   public TupleEntryTest()
     {
-    super();
     }
 
   public void testSelect()
@@ -181,6 +183,37 @@ public class TupleEntryTest extends CascadingTestCase
     catch( Exception exception )
       {
       // do nothing
+      }
+    }
+
+  public void testEquals()
+    {
+    assertEquals(
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "b" ) ),
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "b" ) ) );
+
+    Fields fields = new Fields( "a", "b" );
+    fields.setComparator( "b", new StringComparator() );
+
+    assertEquals(
+      new TupleEntry( fields, new Tuple( "a", "b" ) ),
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "B" ) ) );
+
+    assertNotSame(
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "B" ) ),
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "b" ) ) );
+
+    assertNotSame(
+      new TupleEntry( new Fields( "a", "B" ), new Tuple( "a", "b" ) ),
+      new TupleEntry( new Fields( "a", "b" ), new Tuple( "a", "b" ) ) );
+    }
+
+  private static class StringComparator implements Comparator<String>, Serializable
+    {
+    @Override
+    public int compare( String lhs, String rhs )
+      {
+      return lhs.compareToIgnoreCase( rhs );
       }
     }
   }

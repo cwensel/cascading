@@ -44,7 +44,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- * Class TextDelimited is a sub-class of {@link TextLine}. It provides direct support for delimited text files, like
+ * Class TextDelimited provides direct support for delimited text files, like
  * TAB (\t) or COMMA (,) delimited files. It also optionally allows for quoted values.
  * <p/>
  * TextDelimited may also be used to skip the "header" in a file, where the header is defined as the very first line

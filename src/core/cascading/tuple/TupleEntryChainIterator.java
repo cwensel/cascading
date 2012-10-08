@@ -46,7 +46,7 @@ public class TupleEntryChainIterator extends TupleEntryIterator
    */
   public boolean hasNext()
     {
-    if( iterators.length == 0 )
+    if( iterators.length < currentIterator + 1 )
       return false;
 
     if( iterators[ currentIterator ].hasNext() )

@@ -34,9 +34,7 @@ import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
-/**
- * Class LocalFlowProcess is the local mode implementation of {@link FlowProcess}.
- */
+/** Class LocalFlowProcess is the local mode implementation of {@link FlowProcess}. */
 public class LocalFlowProcess extends FlowProcess<Properties>
   {
   private final Properties config;
@@ -56,6 +54,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     {
     super( flowSession );
     this.config = config;
+    }
+
+  public LocalFlowProcess( LocalFlowProcess flowProcess, Properties properties )
+    {
+    super( flowProcess.getCurrentSession() );
+    this.config = properties;
+    this.stepStats = flowProcess.stepStats;
     }
 
   public void setStepStats( LocalStepStats stepStats )

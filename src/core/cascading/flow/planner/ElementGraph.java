@@ -198,9 +198,15 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         continue;
 
       if( flowElement instanceof Pipe )
-        throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to Pipe, possible ambiguous branching, try explicitly naming tails" );
-      else if( flowElement instanceof Tap )
-        throw new ElementGraphException( (Tap) flowElement, "no Pipe connected to Tap" );
+        {
+        if( incomingEdgesOf( flowElement ).size() == 0 )
+          throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to head Pipe: " + flowElement + ", possible ambiguous branching, try explicitly naming tails" );
+        else
+          throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to tail Pipe: " + flowElement + ", possible ambiguous branching, try explicitly naming tails" );
+        }
+
+      if( flowElement instanceof Tap )
+        throw new ElementGraphException( (Tap) flowElement, "no Pipe connected to Tap: " + flowElement );
       else
         throw new ElementGraphException( flowElement, "unknown element type: " + flowElement );
       }
@@ -588,7 +594,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
 
-    if( LOG.isDebugEnabled() )
+    if( LOG.isDebugEnabled() && outgoingScope != null )
       {
       LOG.debug( "for modifier: " + source );
       if( outgoingScope.getArgumentsSelector() != null )

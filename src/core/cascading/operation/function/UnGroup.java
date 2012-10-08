@@ -77,17 +77,20 @@ public class UnGroup extends BaseOperation implements Function
   @ConstructorProperties({"groupSelector", "valueSelectors"})
   public UnGroup( Fields groupSelector, Fields[] valueSelectors )
     {
-    int size = 0;
+    if( valueSelectors == null || valueSelectors.length == 1 )
+      throw new IllegalArgumentException( "value selectors may not be empty" );
 
-    for( Fields resultFieldSelector : valueSelectors )
+    int size = valueSelectors[ 0 ].size();
+
+    for( int i = 1; i < valueSelectors.length; i++ )
       {
-      size = resultFieldSelector.size();
-      numArgs = groupSelector.size() + size;
+      if( valueSelectors[ 0 ].size() != valueSelectors[ i ].size() )
+        throw new IllegalArgumentException( "all value selectors must be the same size" );
 
-      if( fieldDeclaration.size() != numArgs )
-        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+      size = valueSelectors[ i ].size();
       }
 
+    this.numArgs = groupSelector.size() + size * valueSelectors.length;
     this.groupFieldSelector = groupSelector;
     this.resultFieldSelectors = Arrays.copyOf( valueSelectors, valueSelectors.length );
     this.fieldDeclaration = Fields.size( groupSelector.size() + size );
@@ -105,6 +108,9 @@ public class UnGroup extends BaseOperation implements Function
     {
     super( fieldDeclaration );
 
+    if( valueSelectors == null || valueSelectors.length == 1 )
+      throw new IllegalArgumentException( "value selectors may not be empty" );
+
     numArgs = groupSelector.size();
     int selectorSize = -1;
 
@@ -114,12 +120,12 @@ public class UnGroup extends BaseOperation implements Function
       int fieldSize = groupSelector.size() + resultFieldSelector.size();
 
       if( selectorSize != -1 && selectorSize != resultFieldSelector.size() )
-        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException( "all value selectors must be the same size, and this size plus group selector size must equal the declared field size" );
 
       selectorSize = resultFieldSelector.size();
 
       if( fieldDeclaration.size() != fieldSize )
-        throw new IllegalArgumentException( "all field selectors must be the same size, and this size plus group selector size must equal the declared field size" );
+        throw new IllegalArgumentException( "all value selectors must be the same size, and this size plus group selector size must equal the declared field size" );
       }
 
     this.groupFieldSelector = groupSelector;

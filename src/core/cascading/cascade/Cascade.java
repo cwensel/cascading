@@ -567,6 +567,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
   private boolean isStopJobsOnExit()
     {
+    if( getFlows().isEmpty() )
+      return false; // don't bother registering hook
+
     return getFlows().get( 0 ).isStopJobsOnExit();
     }
 

@@ -84,7 +84,8 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
       {"foo", null, null, null, 8L},
       {null, null, null, null, 9L},
       {"f", null, null, null, 10L}, // this one is quoted, single char
-      {"f", null, null, ",bin", 11L}
+      {"f", null, null, ",bin", 11L},
+      {"f", null, null, "bin,", 11L}
     };
 
     if( useAll )
@@ -158,7 +159,7 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    validateLength( flow, 10, 5 );
+    validateLength( flow, 11, 5 );
     }
 
   @Test
@@ -175,7 +176,7 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    validateLength( flow, 10, 5 );
+    validateLength( flow, 11, 5 );
     }
 
   @Test

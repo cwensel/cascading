@@ -20,10 +20,6 @@
 
 package cascading.tap.local;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Properties;
-
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
@@ -31,47 +27,45 @@ import cascading.tap.SinkTap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntrySchemeCollector;
 
-/** Class StdErrTap provides a local mode tap for reading data from the {@code stderr} stream. */
-public class StdErrTap extends SinkTap<Properties, OutputStream>
-  {
-  public StdErrTap( Scheme<Properties, ?, OutputStream, ?, ?> scheme )
-    {
-    super( scheme, SinkMode.UPDATE );
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Properties;
+
+/**
+ * Class StdErrTap provides a local mode tap for writing data to the {@code stderr} stream.
+ */
+public class StdErrTap extends SinkTap<Properties, OutputStream> {
+    public StdErrTap(Scheme<Properties, ?, OutputStream, ?, ?> scheme) {
+        super(scheme, SinkMode.UPDATE);
     }
 
-  @Override
-  public String getIdentifier()
-    {
-    return "stdErr";
+    @Override
+    public String getIdentifier() {
+        return "stdErr";
     }
 
-  @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, OutputStream output ) throws IOException
-    {
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), System.err );
+    @Override
+    public TupleEntryCollector openForWrite(FlowProcess<Properties> flowProcess, OutputStream output) throws IOException {
+        return new TupleEntrySchemeCollector<Properties, OutputStream>(flowProcess, getScheme(), System.err);
     }
 
-  @Override
-  public boolean createResource( Properties conf ) throws IOException
-    {
-    return true;
+    @Override
+    public boolean createResource(Properties conf) throws IOException {
+        return true;
     }
 
-  @Override
-  public boolean deleteResource( Properties conf ) throws IOException
-    {
-    return false;
+    @Override
+    public boolean deleteResource(Properties conf) throws IOException {
+        return false;
     }
 
-  @Override
-  public boolean resourceExists( Properties conf ) throws IOException
-    {
-    return true;
+    @Override
+    public boolean resourceExists(Properties conf) throws IOException {
+        return true;
     }
 
-  @Override
-  public long getModifiedTime( Properties conf ) throws IOException
-    {
-    return 0;
+    @Override
+    public long getModifiedTime(Properties conf) throws IOException {
+        return 0;
     }
-  }
+}

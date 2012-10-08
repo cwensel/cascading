@@ -37,10 +37,11 @@ import cascading.util.Util;
  * </p>
  * Specific examples of Operations are {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer},
  * and {@link Assertion}.
+ * <p/>
+ * By default, {@link #isSafe()} returns {@code true}.
  */
 public abstract class BaseOperation<Context> implements Serializable, Operation<Context>
   {
-
   /** Field fieldDeclaration */
   protected Fields fieldDeclaration;
   /** Field numArgs */

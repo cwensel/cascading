@@ -608,6 +608,35 @@ public class TupleEntry
     }
 
   @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+
+    if( !( object instanceof TupleEntry ) )
+      return false;
+
+    TupleEntry that = (TupleEntry) object;
+
+    if( fields != null ? !fields.equals( that.fields ) : that.fields != null )
+      return false;
+
+    // use comparators if in the this side fields instance
+    if( tuple != null ? fields.compare( tuple, that.tuple ) != 0 : that.tuple != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = fields != null ? fields.hashCode() : 0;
+    result = 31 * result + ( tuple != null ? tuple.hashCode() : 0 );
+    return result;
+    }
+
+  @Override
   public String toString()
     {
     if( fields == null )
@@ -617,5 +646,4 @@ public class TupleEntry
     else
       return "fields: " + fields.print() + " tuple: " + tuple.print();
     }
-
   }

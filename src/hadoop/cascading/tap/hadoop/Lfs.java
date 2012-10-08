@@ -54,6 +54,7 @@ public class Lfs extends Hfs
    * @param stringPath of type String
    */
   @ConstructorProperties({"fields", "stringPath"})
+  @Deprecated
   public Lfs( Fields fields, String stringPath )
     {
     super( fields, stringPath );
@@ -79,6 +80,7 @@ public class Lfs extends Hfs
    * @param replace    of type boolean
    */
   @ConstructorProperties({"scheme", "stringPath", "replace"})
+  @Deprecated
   public Lfs( Scheme scheme, String stringPath, boolean replace )
     {
     super( scheme, stringPath, replace );
@@ -92,6 +94,7 @@ public class Lfs extends Hfs
    * @param sinkMode   of type SinkMode
    */
   @ConstructorProperties({"fields", "stringPath", "sinkMode"})
+  @Deprecated
   public Lfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( fields, stringPath, sinkMode );
