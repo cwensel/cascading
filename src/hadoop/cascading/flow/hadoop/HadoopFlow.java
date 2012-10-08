@@ -199,7 +199,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
       return;
 
     for( FlowStep<JobConf> step : getFlowSteps() )
-      ( (BaseFlowStep<JobConf>) step ).clean( getConfig() );
+      ( (BaseFlowStep<JobConf>) step ).clean( step.getConfig() );
     }
 
   private static synchronized void registerHadoopShutdownHook( Flow flow )
