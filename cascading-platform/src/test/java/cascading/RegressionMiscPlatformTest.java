@@ -34,6 +34,8 @@ import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
@@ -133,5 +135,29 @@ public class RegressionMiscPlatformTest extends PlatformTestCase
 
     assertFalse( iterator.hasNext() );
     assertEquals( 10, count );
+    }
+
+  @Test
+  public void testTapReplaceOnWrite() throws IOException
+    {
+    String tapPath = getOutputPath( "tapreplace" );
+
+    Tap tap = getPlatform().getTextFile( tapPath, SinkMode.KEEP );
+
+    TupleEntryCollector collector = tap.openForWrite( getPlatform().getFlowProcess() ); // casting for test
+
+    for( int i = 0; i < 100; i++ )
+      collector.add( new Tuple( "string", "" + i, i ) );
+
+    collector.close();
+
+    tap = getPlatform().getTextFile( tapPath, SinkMode.REPLACE );
+
+    collector = tap.openForWrite( getPlatform().getFlowProcess() ); // casting for test
+
+    for( int i = 0; i < 100; i++ )
+      collector.add( new Tuple( "string", "" + i, i ) );
+
+    collector.close();
     }
   }

@@ -76,7 +76,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
         Tap tap = taps[ i ];
         LOG.info( "opening for write: {}", tap.toString() );
 
-        collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ) );
+        collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ), null );
         }
       }
 

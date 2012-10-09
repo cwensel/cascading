@@ -237,7 +237,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     }
 
   /**
-   * Method openForRead opens the resource represented by this Tap instance.
+   * Method openForRead opens the resource represented by this Tap instance for reading.
    * <p/>
    * {@code input} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
    * via {@link Scheme#sourceConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
@@ -255,7 +255,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public abstract TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException;
 
   /**
-   * Method openForRead opens the resource represented by this Tap instance.
+   * Method openForRead opens the resource represented by this Tap instance for reading.
    * <p/>
    * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
@@ -271,7 +271,10 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     }
 
   /**
-   * Method openForWrite opens the resource represented by this Tap instance.
+   * Method openForWrite opens the resource represented by this Tap instance for writing.
+   * <p/>
+   * This method is used internally and does not honor the {@link SinkMode} setting. If SinkMode is
+   * {@link SinkMode#REPLACE}, this call may fail. See {@link #openForWrite(cascading.flow.FlowProcess)}.
    * <p/>
    * {@code output} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
    * via {@link Scheme#sinkConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
@@ -285,7 +288,12 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public abstract TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException;
 
   /**
-   * Method openForWrite opens the resource represented by this Tap instance.
+   * Method openForWrite opens the resource represented by this Tap instance for writing.
+   * <p/>
+   * This method is for user application use and does honor the {@link SinkMode#REPLACE} settings. That is, if
+   * SinkMode is set to {@link SinkMode#REPLACE} the underlying resource will be deleted.
+   * <p/>
+   * Note if {@link SinkMode#UPDATE} is set, the resource will not be deleted.
    *
    * @param flowProcess of type FlowProcess
    * @return TupleEntryCollector
@@ -293,6 +301,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess ) throws IOException
     {
+    if( isReplace() )
+      deleteResource( flowProcess.getConfigCopy() );
+
     return openForWrite( flowProcess, null );
     }
 

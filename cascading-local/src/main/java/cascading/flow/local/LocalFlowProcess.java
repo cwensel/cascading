@@ -156,13 +156,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( this );
+    return tap.openForWrite( this, null );
     }
 
   @Override
   public TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException
     {
-    return trap.openForWrite( this );
+    return trap.openForWrite( this, null );
     }
 
   @Override
