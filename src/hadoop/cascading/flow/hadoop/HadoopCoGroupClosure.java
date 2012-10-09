@@ -22,6 +22,7 @@ package cascading.flow.hadoop;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.FalseCollection;
@@ -167,6 +168,9 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     {
     clearGroups();
 
+    if( collections[ 0 ] instanceof FalseCollection ) // force reset on FalseCollection
+      ( (FalseCollection) collections[ 0 ] ).setIterator( null );
+
     while( values.hasNext() )
       {
       IndexTuple current = (IndexTuple) values.next();
@@ -250,6 +254,9 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     @Override
     public Tuple next()
       {
+      if( value == null && !values.hasNext() )
+        throw new NoSuchElementException();
+
       Tuple result = value.getTuple();
 
       if( values.hasNext() )
