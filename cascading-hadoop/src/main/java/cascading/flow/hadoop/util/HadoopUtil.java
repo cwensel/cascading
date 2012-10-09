@@ -24,15 +24,19 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import cascading.flow.FlowException;
 import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.planner.PlatformInfo;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.hadoop.Hfs;
@@ -60,6 +64,7 @@ public class HadoopUtil
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
   private static final String ENCODING = "US-ASCII";
   private static final Class<?> DEFAULT_OBJECT_SERIALIZER = JavaObjectSerializer.class;
+  private static PlatformInfo platformInfo;
 
   public static void initLog4j( JobConf jobConf )
     {
@@ -432,5 +437,50 @@ public class HadoopUtil
       {
       reader.close();
       }
+    }
+
+  public static PlatformInfo getPlatformInfo()
+    {
+    if( platformInfo == null )
+      platformInfo = getPlatformInfoInternal();
+
+    return platformInfo;
+    }
+
+  private static PlatformInfo getPlatformInfoInternal()
+    {
+    URL url = JobConf.class.getResource( JobConf.class.getSimpleName() + ".class" );
+
+    if( url == null || !url.toString().startsWith( "jar" ) )
+      return new PlatformInfo( "Hadoop", null, null );
+
+    String path = url.toString();
+    String manifestPath = path.substring( 0, path.lastIndexOf( "!" ) + 1 ) + "/META-INF/MANIFEST.MF";
+
+    Manifest manifest;
+
+    try
+      {
+      manifest = new Manifest( new URL( manifestPath ).openStream() );
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to get manifest from {}", manifestPath, exception );
+
+      return new PlatformInfo( "Hadoop", null, null );
+      }
+
+    Attributes attributes = manifest.getAttributes( "org/apache/hadoop" );
+
+    if( attributes == null )
+      {
+      LOG.debug( "unable to get Hadoop manifest attributes" );
+      new PlatformInfo( "Hadoop", null, null );
+      }
+
+    String vendor = attributes.getValue( "Implementation-Vendor" );
+    String version = attributes.getValue( "Implementation-Version" );
+
+    return new PlatformInfo( "Hadoop", vendor, version );
     }
   }

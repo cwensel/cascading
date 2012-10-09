@@ -28,6 +28,7 @@ import cascading.flow.BaseFlow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
+import cascading.flow.planner.PlatformInfo;
 
 /**
  * Class LocalFlow is the local mode specific implementation of a {@link cascading.flow.Flow}.
@@ -40,9 +41,9 @@ public class LocalFlow extends BaseFlow<Properties>
   {
   private Properties config;
 
-  public LocalFlow( Map<Object, Object> properties, Properties config, FlowDef flowDef )
+  public LocalFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Properties config, FlowDef flowDef )
     {
-    super( properties, config, flowDef );
+    super( platformInfo, properties, config, flowDef );
     }
 
   @Override

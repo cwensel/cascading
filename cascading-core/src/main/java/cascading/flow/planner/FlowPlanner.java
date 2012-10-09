@@ -74,7 +74,6 @@ public abstract class FlowPlanner
   /** Field debugLevel */
   protected DebugLevel debugLevel;
 
-
   /**
    * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
    *
@@ -100,6 +99,8 @@ public abstract class FlowPlanner
 
     return DebugLevel.valueOf( debugLevel );
     }
+
+  public abstract PlatformInfo getPlatformInfo();
 
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
     {

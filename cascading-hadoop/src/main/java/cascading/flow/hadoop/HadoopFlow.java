@@ -31,6 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.PlatformInfo;
 import cascading.property.PropertyUtil;
 import cascading.tap.hadoop.io.HttpFileSystem;
 import cascading.util.ShutdownUtil;
@@ -77,14 +78,14 @@ public class HadoopFlow extends BaseFlow<JobConf>
     return jobConf.getInt( MAX_CONCURRENT_STEPS, 0 );
     }
 
-  protected HadoopFlow( Map<Object, Object> properties, JobConf jobConf, String name )
+  protected HadoopFlow( PlatformInfo platformInfo, Map<Object, Object> properties, JobConf jobConf, String name )
     {
-    super( properties, jobConf, name );
+    super( platformInfo, properties, jobConf, name );
     }
 
-  public HadoopFlow( Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef )
+  public HadoopFlow( PlatformInfo platformInfo, Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef )
     {
-    super( properties, jobConf, flowDef );
+    super( platformInfo, properties, jobConf, flowDef );
     }
 
   protected void initFromProperties( Map<Object, Object> properties )

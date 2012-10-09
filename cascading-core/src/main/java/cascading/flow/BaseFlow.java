@@ -44,6 +44,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.PlatformInfo;
 import cascading.management.CascadingServices;
 import cascading.management.UnitOfWorkExecutorStrategy;
 import cascading.management.UnitOfWorkSpawnStrategy;
@@ -56,6 +57,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.ShutdownUtil;
+import cascading.util.Update;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -76,6 +78,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
+
+  private PlatformInfo platformInfo;
 
   /** Field id */
   private String id;
@@ -146,8 +150,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.flowStats = createPrepareFlowStats();
     }
 
-  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, String name )
+  protected BaseFlow(PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name )
     {
+    this.platformInfo = platformInfo;
     this.name = name;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -156,8 +161,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.flowStats = createPrepareFlowStats(); // must be last
     }
 
-  protected BaseFlow( Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
+  protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
     {
+    this.platformInfo = platformInfo;
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
     this.runID = flowDef.getRunID();
@@ -173,6 +179,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     retrieveSourceFields();
     retrieveSinkFields();
+    }
+
+  public PlatformInfo getPlatformInfo()
+    {
+    return platformInfo;
     }
 
   public void initialize( ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
@@ -1006,6 +1017,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
 
     Version.printBanner();
+    Update.checkForUpdate( getPlatformInfo() );
 
     try
       {

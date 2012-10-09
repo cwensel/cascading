@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import cascading.flow.planner.PlatformInfo;
 import cascading.management.UnitOfWork;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
@@ -442,6 +443,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   String getCascadeID();
 
   String getRunID();
+
+  PlatformInfo getPlatformInfo();
 
   /**
    * Method jobsAreLocal returns true if all jobs are executed in-process as a single map and reduce task.

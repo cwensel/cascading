@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.planner.HadoopStepGraph;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.scheme.NullScheme;
 import cascading.tap.Tap;
@@ -117,7 +118,7 @@ public class MapReduceFlow extends HadoopFlow
   @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"})
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
-    super( new Properties(), jobConf, name );
+    super( HadoopUtil.getPlatformInfo(), new Properties(), jobConf, name );
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 

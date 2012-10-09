@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -75,7 +76,7 @@ public class ProcessFlow<P> extends HadoopFlow
   @ConstructorProperties({"properties", "name", "process"})
   public ProcessFlow( Map<Object, Object> properties, String name, P process )
     {
-    super( properties, null, name );
+    super( HadoopUtil.getPlatformInfo(), properties, null, name );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
 

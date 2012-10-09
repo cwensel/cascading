@@ -227,6 +227,7 @@ task buildLatestMeta( dependsOn: buildPackage ) {
 
   ext.latestArchivePath = null
   ext.latestReleaseTagPath = null
+  ext.latestPropertiesPath = null
 }
 
 buildLatestMeta << {
@@ -238,6 +239,15 @@ buildLatestMeta << {
 
   latestReleaseTagPath = new File( buildDir, 'latest-tag.txt' )
   latestReleaseTagPath.write( "${releaseTag}" )
+
+  latestPropertiesPath = new File( buildDir, 'latest.properties' )
+  latestPropertiesPath.write( "cascading.release.version=${releaseVersion}\n" +
+          "cascading.release.major=${majorVersion}\n" +
+          "cascading.release.minor=${minorVersion}\n" +
+          "cascading.release.build=${buildNumber}\n" +
+          "cascading.release.commit=${currentCommit}\n" +
+          "cascading.release.tag=${releaseTag}"
+  )
 }
 
 task s3Upload( dependsOn: buildLatestMeta ) << {
@@ -254,5 +264,6 @@ task s3Upload( dependsOn: buildLatestMeta ) << {
 
     fileset( file: buildLatestMeta.latestArchivePath )
     fileset( file: buildLatestMeta.latestReleaseTagPath )
+    fileset( file: buildLatestMeta.latestPropertiesPath )
   }
 }

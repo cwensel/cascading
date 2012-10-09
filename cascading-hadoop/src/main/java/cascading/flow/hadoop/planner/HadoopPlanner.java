@@ -42,6 +42,7 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.Scope;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Every;
@@ -157,6 +158,12 @@ public class HadoopPlanner extends FlowPlanner
     }
 
   @Override
+  public PlatformInfo getPlatformInfo()
+    {
+    return HadoopUtil.getPlatformInfo();
+    }
+
+  @Override
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
     {
     super.initialize( flowConnector, properties );
@@ -190,7 +197,7 @@ public class HadoopPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
-      HadoopFlow flow = new HadoopFlow( properties, jobConf, flowDef );
+      HadoopFlow flow = new HadoopFlow( getPlatformInfo(), properties, jobConf, flowDef );
 
       elementGraph = createElementGraph( flowDef );
 

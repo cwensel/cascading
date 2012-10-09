@@ -29,6 +29,7 @@ import cascading.flow.local.LocalFlow;
 import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.PlatformInfo;
 import cascading.tap.Tap;
 
 /**
@@ -38,6 +39,12 @@ public class LocalPlanner extends FlowPlanner
   {
   public LocalPlanner()
     {
+    }
+
+  @Override
+  public PlatformInfo getPlatformInfo()
+    {
+    return new PlatformInfo( "local", null, null );
     }
 
   @Override
@@ -56,7 +63,7 @@ public class LocalPlanner extends FlowPlanner
       // generic
       verifyAssembly( flowDef );
 
-      LocalFlow flow = new LocalFlow( properties, null, flowDef );
+      LocalFlow flow = new LocalFlow( getPlatformInfo(), properties, null, flowDef );
 
       elementGraph = createElementGraph( flowDef );
 

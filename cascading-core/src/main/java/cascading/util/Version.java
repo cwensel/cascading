@@ -36,8 +36,33 @@ public class Version
 
   private static boolean printedVersion = false;
 
-  /** Field versionProperties */
+  public static final String CASCADING_RELEASE_MAJOR = "cascading.release.major";
+  public static final String CASCADING_RELEASE_MINOR = "cascading.release.minor";
+  public static final String CASCADING_BUILD_NUMBER = "cascading.build.number";
+  public static final String CASCADING = "Cascading";
+
   public static Properties versionProperties;
+
+  private static synchronized Properties getVersionProperties()
+    {
+    try
+      {
+      if( versionProperties == null )
+        {
+        versionProperties = loadVersionProperties();
+
+        if( versionProperties.isEmpty() )
+          LOG.warn( "unable to load version information" );
+        }
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to load version information", exception );
+      versionProperties = new Properties();
+      }
+
+    return versionProperties;
+    }
 
   public static synchronized void printBanner()
     {
@@ -55,42 +80,54 @@ public class Version
 
   public static String getVersionString()
     {
-    try
-      {
-      if( versionProperties == null )
-        versionProperties = loadVersionProperties();
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "unable to load version information", exception );
+    if( getVersionProperties().isEmpty() )
       return null;
-      }
-
-    if( versionProperties.isEmpty() )
-      {
-      LOG.warn( "unable to load version information" );
-      return null;
-      }
-
-    String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
-    String releaseMinor = versionProperties.getProperty( "cascading.release.minor" );
-    String releaseBuild = versionProperties.getProperty( "cascading.build.number" );
-
-    String releaseFull;
-
-    if( releaseMinor == null || releaseMinor.isEmpty() )
-      releaseFull = releaseMajor;
-    else
-      releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
 
     String releaseVersion;
 
-    if( releaseBuild == null || releaseBuild.isEmpty() )
-      releaseVersion = String.format( "Concurrent, Inc - Cascading %s", releaseFull );
+    if( getReleaseBuild() == null || getReleaseBuild().isEmpty() )
+      releaseVersion = String.format( "Concurrent, Inc - %s %s", CASCADING, getReleaseFull() );
     else
-      releaseVersion = String.format( "Concurrent, Inc - Cascading %s-%s", releaseFull, releaseBuild );
+      releaseVersion = String.format( "Concurrent, Inc - %s %s-%s", CASCADING, getReleaseFull(), getReleaseBuild() );
 
     return releaseVersion;
+    }
+
+  public static String getReleaseFull()
+    {
+    String releaseFull;
+
+    if( getReleaseMinor() == null || getReleaseMinor().isEmpty() )
+      releaseFull = getReleaseMajor();
+    else
+      releaseFull = String.format( "%s.%s", getReleaseMajor(), getReleaseMinor() );
+
+    return releaseFull;
+    }
+
+  public static boolean hasMajorMinorVersionInfo()
+    {
+    return !Util.isEmpty( getReleaseMinor() ) && !Util.isEmpty( getReleaseMajor() );
+    }
+
+  public static boolean hasAllVersionInfo()
+    {
+    return !Util.isEmpty( getReleaseBuild() ) && hasMajorMinorVersionInfo();
+    }
+
+  public static String getReleaseBuild()
+    {
+    return getVersionProperties().getProperty( CASCADING_BUILD_NUMBER );
+    }
+
+  public static String getReleaseMinor()
+    {
+    return getVersionProperties().getProperty( CASCADING_RELEASE_MINOR );
+    }
+
+  public static String getReleaseMajor()
+    {
+    return getVersionProperties().getProperty( CASCADING_RELEASE_MAJOR );
     }
 
   public static Properties loadVersionProperties() throws IOException

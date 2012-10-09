@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.0 [unreleased]
 
+  Added version update check to print out latest available release. Use system property cascading.update.skip=true
+  to disable.
+
   Updated all tuple stream permutations to minimize new c.t.Tuple instantiations and maximize upstream Tuple reuse.
 
   Updated janino to version 2.6.1.
