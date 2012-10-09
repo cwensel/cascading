@@ -62,8 +62,8 @@ public class TupleElementStreamComparator implements StreamComparator<HadoopTupl
       if( rhsToken == HadoopTupleOutputStream.WRITABLE_TOKEN )
         rhsStream.readString();
 
-      InputStream lhs = lhsToken == 0 ? null : (InputStream) lhsStream.getInputStream();
-      InputStream rhs = rhsToken == 0 ? null : (InputStream) rhsStream.getInputStream();
+      InputStream lhs = lhsToken == 0 ? null : lhsStream.getInputStream();
+      InputStream rhs = rhsToken == 0 ? null : rhsStream.getInputStream();
 
       return comparator.compare( lhs, rhs );
       }

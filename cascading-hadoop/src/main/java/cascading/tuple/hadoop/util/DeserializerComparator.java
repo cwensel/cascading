@@ -123,7 +123,17 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     for( int i = 0; i < lhsLen; i++ )
       {
       // hack to support comparators array length of 1
-      c = comparators[ i % comparators.length ].compare( lhs.getObject( i ), rhs.getObject( i ) );
+      Object lhsObject = lhs.getObject( i );
+      Object rhsObject = rhs.getObject( i );
+
+      try
+        {
+        c = comparators[ i % comparators.length ].compare( lhsObject, rhsObject );
+        }
+      catch( Exception exception )
+        {
+        throw new CascadingException( "unable to compare object elements in position: " + i + " lhs: '" + lhsObject + "' rhs: '" + rhsObject + "'", exception );
+        }
 
       if( c != 0 )
         return c;
@@ -145,7 +155,14 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     for( int i = 0; i < lhsLen; i++ )
       {
       // hack to support comparators array length of 1
-      c = ( (StreamComparator) comparators[ i % comparators.length ] ).compare( lhsStream, rhsStream );
+      try
+        {
+        c = ( (StreamComparator) comparators[ i % comparators.length ] ).compare( lhsStream, rhsStream );
+        }
+      catch( Exception exception )
+        {
+        throw new CascadingException( "unable to compare stream elements in position: " + i, exception );
+        }
 
       if( c != 0 )
         return c;

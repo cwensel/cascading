@@ -20,6 +20,7 @@
 
 package cascading.tuple.hadoop.util;
 
+import java.io.IOException;
 import java.util.Comparator;
 
 import cascading.CascadingException;
@@ -68,17 +69,27 @@ public class TupleElementComparator implements StreamComparator<TupleInputStream
   @Override
   public int compare( TupleInputStream lhsStream, TupleInputStream rhsStream )
     {
+    Object lhs;
+    Object rhs;
+
     try
       {
-      Object lhs = lhsStream.getNextElement();
-      Object rhs = rhsStream.getNextElement();
+      lhs = lhsStream.getNextElement();
+      rhs = rhsStream.getNextElement();
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( "unable to read element from underlying stream", exception );
+      }
 
+    try
+      {
       return comparator.compare( lhs, rhs );
       }
     catch( Exception exception )
       {
       throw new CascadingException( "unable to compare Tuples, likely a CoGroup is being attempted on fields of " +
-        "different types or custom comparators are incorrectly set on Fields", exception );
+        "different types or custom comparators are incorrectly set on Fields, lhs: '" + lhs + "' rhs: '" + rhs + "'", exception );
       }
     }
   }
