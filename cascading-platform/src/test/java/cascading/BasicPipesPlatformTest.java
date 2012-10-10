@@ -50,17 +50,12 @@ import org.junit.Test;
 
 import static data.InputData.*;
 
-//import cascading.test.HadoopPlatform;
-//import cascading.test.LocalPlatform;
-//import cascading.test.PlatformRunner;
-
 /**
  * These tests execute basic function using field positions, not names. so there will be duplicates with
  * FieldedPipesPlatformTest
  */
 public class BasicPipesPlatformTest extends PlatformTestCase
   {
-
   public BasicPipesPlatformTest()
     {
     }

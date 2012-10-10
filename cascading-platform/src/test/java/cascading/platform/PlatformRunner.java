@@ -26,8 +26,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.PlatformTestCase;
 import cascading.detail.PipeAssemblyTestBase;
@@ -100,7 +102,7 @@ public class PlatformRunner extends ParentRunner<Runner>
 
     runners = new ArrayList<Runner>();
 
-    List<Class<? extends TestPlatform>> classes = getPlatformClass( javaClass.getClassLoader() );
+    Set<Class<? extends TestPlatform>> classes = getPlatformClass( javaClass.getClassLoader() );
 
     for( Class<? extends TestPlatform> platformClass : classes )
       addPlatform( javaClass, platformClass );
@@ -108,9 +110,9 @@ public class PlatformRunner extends ParentRunner<Runner>
     return runners;
     }
 
-  public static List<Class<? extends TestPlatform>> getPlatformClass( ClassLoader classLoader ) throws IOException, ClassNotFoundException
+  public static Set<Class<? extends TestPlatform>> getPlatformClass( ClassLoader classLoader ) throws IOException, ClassNotFoundException
     {
-    List<Class<? extends TestPlatform>> classes = new ArrayList<Class<? extends TestPlatform>>();
+    Set<Class<? extends TestPlatform>> classes = new HashSet<Class<? extends TestPlatform>>();
     Properties properties = new Properties();
 
     LOG.info( "classloader: {}", classLoader );
