@@ -45,6 +45,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -52,8 +53,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HadoopUtil
   {
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
   private static final String ENCODING = "US-ASCII";
   private static final Class<?> DEFAULT_OBJECT_SERIALIZER = JavaObjectSerializer.class;
   private static PlatformInfo platformInfo;
@@ -73,14 +73,31 @@ public class HadoopUtil
     if( values == null || values.length() == 0 )
       return;
 
+    if( !Util.hasClass( "org.apache.log4j.Logger" ) )
+      {
+      LOG.info( "org.apache.log4j.Logger is not in the current CLASSPATH, not setting log4j.logger properties" );
+      return;
+      }
+
     String[] elements = values.split( "," );
 
     for( String element : elements )
-      {
-      String[] logger = element.split( "=" );
+      setLogLevel( element.split( "=" ) );
+    }
 
-      Logger.getLogger( logger[ 0 ] ).setLevel( Level.toLevel( logger[ 1 ] ) );
-      }
+  private static void setLogLevel( String[] logger )
+    {
+    // removing logj4 dependency
+    // org.apache.log4j.Logger.getLogger( logger[ 0 ] ).setLevel( org.apache.log4j.Level.toLevel( logger[ 1 ] ) );
+
+    Object loggerObject = Util.invokeStaticMethod( "org.apache.log4j.Logger", "getLogger",
+      new Object[]{logger[ 0 ]}, new Class[]{String.class} );
+
+    Object levelObject = Util.invokeStaticMethod( "org.apache.log4j.Level", "toLevel",
+      new Object[]{logger[ 1 ]}, new Class[]{String.class} );
+
+    Util.invokeInstanceMethod( loggerObject, "setLevel",
+      new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
     }
 
   public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )

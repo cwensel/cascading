@@ -29,8 +29,6 @@ dependencies {
 
   compile project( ':cascading-core' )
 
-  compile group: 'log4j', name: 'log4j', version: '1.2.16' // used in hadoop util
-
   providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
     exclude group: 'ant'
     exclude group: 'junit'

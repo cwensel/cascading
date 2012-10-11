@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.Scope;
@@ -683,6 +684,34 @@ public class Util
       }
     }
 
+  public static boolean hasClass( String typeString )
+    {
+    try
+      {
+      Util.class.getClassLoader().loadClass( typeString );
+
+      return true;
+      }
+    catch( ClassNotFoundException exception )
+      {
+      return false;
+      }
+    }
+
+  public static Object invokeStaticMethod( String typeString, String methodName, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Class type = Util.class.getClassLoader().loadClass( typeString );
+
+      return invokeStaticMethod( type, methodName, parameters, parameterTypes );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + typeString, exception );
+      }
+    }
+
   public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )
     {
     try
@@ -695,7 +724,23 @@ public class Util
       }
     catch( Exception exception )
       {
-      throw new FlowException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      throw new CascadingException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      }
+    }
+
+  public static Object invokeInstanceMethod( Object target, String methodName, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Method method = target.getClass().getMethod( methodName, parameterTypes );
+
+      method.setAccessible( true );
+
+      return method.invoke( target, parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to invoke instance method: " + target.getClass().getName() + "." + methodName, exception );
       }
     }
 
