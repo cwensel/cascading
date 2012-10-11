@@ -31,15 +31,13 @@ dependencies {
 
   compile group: 'log4j', name: 'log4j', version: '1.2.16' // used in hadoop util
 
-  compile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
     exclude group: 'ant'
     exclude group: 'junit'
   }
 
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
-}
 
-dependencies {
   testCompile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
 }
 

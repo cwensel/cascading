@@ -64,13 +64,25 @@ subprojects {
   group = 'cascading'
   version = releaseVersion
 
-  dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.8.+'
-  }
-
   configurations {
+    providedCompile
+
     testArtifacts {
       extendsFrom testRuntime
+    }
+  }
+
+  sourceSets {
+    main.compileClasspath += configurations.providedCompile
+  }
+
+  task mappings {
+    conf2ScopeMappings.addMapping( 0, configurations.providedCompile, Conf2ScopeMappingContainer.PROVIDED )
+  }
+
+  idea {
+    module {
+      scopes.PROVIDED.plus += configurations.providedCompile
     }
   }
 
@@ -97,6 +109,10 @@ subprojects {
     testArtifacts testsJar
   }
 
+  dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.8.+'
+  }
+
   test {
     include '**/*Test.class'
   }
@@ -109,7 +125,7 @@ subprojects {
     copy {
       into "${distDir}/lib/${archivesBaseName}"
       from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
-        !dep.name.contains( 'cascading' ) && !dep.name.contains( 'hadoop' )
+        !dep.name.contains( 'cascading' )
       }.collect { dep ->
         dep.moduleArtifacts.collect { it.file }
       } )
