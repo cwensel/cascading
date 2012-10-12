@@ -22,6 +22,8 @@ dependencies {
 
   compile project( ':cascading-core' )
 
+  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
+
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )

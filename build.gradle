@@ -86,6 +86,10 @@ subprojects {
     }
   }
 
+  javadoc {
+    classpath += configurations.providedCompile
+  }
+
   task sourcesJar( type: Jar, dependsOn: classes ) {
     from sourceSets.main.allSource
     classifier = 'sources'
