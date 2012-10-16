@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.0.6 [unreleased]
 
+  Added "cascading.step.display.id.truncate" property to allow simple truncation of flow and step ID values in
+  the step display name.
+
   Fixed issue where attempting to iterate the left most side of a join more than once would silently fail on the
   Hadoop platform.
 

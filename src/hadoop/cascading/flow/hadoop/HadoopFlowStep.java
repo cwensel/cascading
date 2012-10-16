@@ -54,6 +54,7 @@ import cascading.tuple.hadoop.util.ReverseTupleComparator;
 import cascading.tuple.hadoop.util.TupleComparator;
 import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
+import cascading.util.Util;
 import cascading.util.Version;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -84,7 +85,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
 
-    conf.setJobName( getStepDisplayName() );
+    conf.setJobName( getStepDisplayName( conf.getInt( "cascading.step.display.id.truncate", Util.ID_LENGTH ) ) );
 
     conf.setOutputKeyClass( Tuple.class );
     conf.setOutputValueClass( Tuple.class );

@@ -55,6 +55,8 @@ import org.slf4j.LoggerFactory;
 /** Class Util provides reusable operations. */
 public class Util
   {
+  public static int ID_LENGTH = 32;
+
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
   private static final String HEXES = "0123456789ABCDEF";
 
