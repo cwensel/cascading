@@ -44,6 +44,10 @@ import org.apache.hadoop.mapred.OutputCollector;
  * <p/>
  * {@code openTapsThreshold} limits the number of open files to be output to. This value defaults to 300 files.
  * Each time the threshold is exceeded, 10% of the least recently used open files will be closed.
+ * <p/>
+ * Though Hadoop has no mechanism to prevent simultaneous writes to a directory from multiple jobs, it doesn't mean
+ * its safe to do so. Same is true with the TemplateTap. Interleaving writes to a common parent (root) directory
+ * across multiple flows will very likely lead to data loss.
  */
 public class TemplateTap extends BaseTemplateTap<JobConf, OutputCollector>
   {
