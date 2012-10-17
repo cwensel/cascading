@@ -18,9 +18,11 @@
  * limitations under the License.
  */
 
+
+
 //ext.hadoopVersion = '0.20.2'
 //ext.hadoopVersion = '0.20.205.0' // missing maven deps
-ext.hadoopVersion = '1.0.3'  // missing maven deps
+ext.hadoopVersion = '1.0.4'  // missing maven deps
 
 if( System.properties[ 'hadoop.release.final' ] )
   hadoopVersion = System.properties[ 'hadoop.release.final' ]
@@ -40,6 +42,7 @@ dependencies {
 
   testCompile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
 
+  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
   testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 

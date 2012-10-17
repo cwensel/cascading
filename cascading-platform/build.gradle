@@ -20,6 +20,8 @@
 
 
 
+
+
 dependencies {
 
   compile project( ':cascading-core' )
@@ -28,9 +30,6 @@ dependencies {
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
-
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
-  testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
 test {
