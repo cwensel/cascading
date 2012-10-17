@@ -86,7 +86,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
   protected static Class getCodecClass( FlowProcess flowProcess, String defaultCodecs, Class subClass )
     {
-    String compress = (String) flowProcess.getProperty( SpillableProps.LIST_THRESHOLD );
+    String compress = (String) flowProcess.getProperty( SpillableProps.SPILL_COMPRESS );
 
     if( compress != null && !Boolean.parseBoolean( compress ) )
       return null;

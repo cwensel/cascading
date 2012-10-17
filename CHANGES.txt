@@ -34,6 +34,27 @@ Cascading Change Log
 
   Updated build and tests to simplify development of alternative planners.
 
+2.0.6
+
+  Added "cascading.step.display.id.truncate" property to allow simple truncation of flow and step ID values in
+  the step display name.
+
+  Fixed issue where attempting to iterate the left most side of a join more than once would silently fail on the
+  Hadoop platform.
+
+  Fixed issue where step state was not properly removed from the Hadoop distributed cache during cleanup.
+
+  Fixed issue where c.f.Flow#writeStepsDot() would fail if a Flow c.f.FlowStep had multiple sinks.
+
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.java.lang.ArrayIndexOutOfBoundsException when there aren't any
+  actual o.a.h.m.FileInputFormat input paths.
+
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.IllegalStateException on an empty child o.a.h.m.InputSplit array.
+
+  Fix for j.l.IndexOutOfBoundsException thrown on an empty c.c.Cascade.
+
+  Fix for c.t.c.SpillableProps#SPILL_COMPRESS not being honored if set to false.
+
 2.0.5
 
   Updated c.f.p.ElementGraphException messages to name disconnected elements.

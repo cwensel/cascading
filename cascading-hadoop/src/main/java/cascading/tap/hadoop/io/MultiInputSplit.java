@@ -130,6 +130,13 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
     for( int i = 0; i < keys.length; i++ )
       config.put( keys[ i ], values[ i ] );
 
+    if( LOG.isDebugEnabled() )
+      {
+      LOG.debug( "current split config diff:" );
+      for( Map.Entry<String, String> entry : config.entrySet() )
+        LOG.debug( "key: {}, value: {}", entry.getKey(), entry.getValue() );
+      }
+
     JobConf currentConf = HadoopUtil.mergeConf( jobConf, config, false );
 
     try

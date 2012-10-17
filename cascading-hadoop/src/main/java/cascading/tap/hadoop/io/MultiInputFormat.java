@@ -73,7 +73,8 @@ public class MultiInputFormat implements InputFormat
         isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
       }
 
-    FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[ allPaths.size() ] ) );
+    if( !allPaths.isEmpty() ) // it's possible there aren't any
+      FileInputFormat.setInputPaths( toJob, (Path[]) allPaths.toArray( new Path[ allPaths.size() ] ) );
 
     try
       {
@@ -194,8 +195,9 @@ public class MultiInputFormat implements InputFormat
       {
       inputSplits[ i ] = inputFormats[ i ].getSplits( jobConfs[ i ], numSplits[ i ] );
 
-      if( inputSplits[ i ] == null || inputSplits[ i ].length == 0 )
-        throw new IllegalStateException( "input format: " + inputFormats[ i ].getClass().getName() + ", returned a null or empty split array" );
+      // it's reasonable the split array is empty, but really shouldn't be null
+      if( inputSplits[ i ] == null )
+        inputSplits[ i ] = new InputSplit[ 0 ];
 
       for( int j = 0; j < inputSplits[ i ].length; j++ )
         {

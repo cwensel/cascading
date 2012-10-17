@@ -95,7 +95,7 @@ public class LocalFlow extends BaseFlow<Properties>
     }
 
   @Override
-  public FlowProcess getFlowProcess()
+  public FlowProcess<Properties> getFlowProcess()
     {
     return new LocalFlowProcess( getFlowSession(), config );
     }

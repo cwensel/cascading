@@ -31,10 +31,12 @@ import cascading.tuple.Tuple;
  */
 public class FalseCollection implements Collection<Tuple>
   {
+  boolean returnedIterator = false;
   Iterator<Tuple> iterator;
 
   public void setIterator( Iterator<Tuple> iterator )
     {
+    this.returnedIterator = false;
     this.iterator = iterator;
     }
 
@@ -59,10 +61,20 @@ public class FalseCollection implements Collection<Tuple>
   @Override
   public Iterator<Tuple> iterator()
     {
-    if( iterator == null )
-      return Collections.EMPTY_LIST.iterator();
+    if( returnedIterator )
+      throw new IllegalStateException( "may not iterate this tuple stream more than once" );
 
-    return iterator;
+    try
+      {
+      if( iterator == null )
+        return Collections.EMPTY_LIST.iterator();
+
+      return iterator;
+      }
+    finally
+      {
+      returnedIterator = true;
+      }
     }
 
   @Override

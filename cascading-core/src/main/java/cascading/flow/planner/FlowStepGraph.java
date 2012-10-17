@@ -27,9 +27,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
+import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;
@@ -166,19 +168,30 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
           sourceName += "[" + source.getIdentifier() + "]";
           }
 
-        String sinkName = flowStep.getSink().isTemporary() ? "" : "[" + flowStep.getSink().getIdentifier() + "]";
-        String groupName = flowStep.getGroups().size() != 1 ? "" : flowStep.getGroup().getName();
-
         String name = "[" + flowStep.getName() + "]";
 
         if( sourceName.length() != 0 )
           name += "\\nsrc:" + sourceName;
 
-        if( groupName.length() != 0 )
-          name += "\\ngrp:" + groupName;
 
-        if( sinkName.length() != 0 )
-          name += "\\nsnk:" + sinkName;
+        List<Group> groups = flowStep.getGroups();
+
+        for( Group group : groups )
+          {
+          String groupName = group.getName();
+
+          if( groupName.length() != 0 )
+            name += "\\ngrp:" + groupName;
+          }
+
+        Set<Tap> sinks = flowStep.getSinks();
+
+        for( Tap sink : sinks )
+          {
+          String sinkName = sink.isTemporary() ? "" : "[" + sink.getIdentifier() + "]";
+          if( sinkName.length() != 0 )
+            name += "\\nsnk:" + sinkName;
+          }
 
         return name.replaceAll( "\"", "\'" );
         }

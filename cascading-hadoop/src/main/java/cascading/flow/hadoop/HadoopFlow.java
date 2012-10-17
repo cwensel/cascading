@@ -156,7 +156,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     }
 
   @Override
-  public FlowProcess getFlowProcess()
+  public FlowProcess<JobConf> getFlowProcess()
     {
     return new HadoopFlowProcess( getFlowSession(), getConfig() );
     }
@@ -199,8 +199,9 @@ public class HadoopFlow extends BaseFlow<JobConf>
     if( stop ) // unstable to call fs operations during shutdown
       return;
 
+    // use step config so cascading.flow.step.path property is properly used
     for( FlowStep<JobConf> step : getFlowSteps() )
-      ( (BaseFlowStep<JobConf>) step ).clean( getConfig() );
+      ( (BaseFlowStep<JobConf>) step ).clean();
     }
 
   private static synchronized void registerHadoopShutdownHook( Flow flow )
