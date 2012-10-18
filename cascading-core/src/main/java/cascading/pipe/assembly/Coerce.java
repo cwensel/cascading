@@ -32,6 +32,9 @@ import cascading.tuple.Fields;
  * Class Coerce is a {@link SubAssembly} that will coerce all incoming {@link cascading.tuple.Tuple} values to
  * the given types.
  * <p/>
+ * If the given type is a primitive ({@code long}), and the tuple value is null, {@code 0} is returned.
+ * If the type is an Object ({@code java.lang.Long}), and the tuple value is {@code null}, {@code null} is returned.
+ * <p/>
  * Coerce encapsulates the {@link Identity} function.
  *
  * @see cascading.pipe.SubAssembly

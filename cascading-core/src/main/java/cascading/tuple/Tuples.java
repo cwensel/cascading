@@ -88,6 +88,10 @@ public class Tuples
 
   /**
    * Method coerce returns the value in the tuple at the given position to the requested type.
+   * <p/>
+   * If the given type is a primitive (long), and the tuple value is null, 0 is returned.
+   * <p/>
+   * If the type is an Object (Long), and the tuple value is null, null is returned.
    *
    * @param tuple of type Tuple
    * @param pos   of type int
@@ -112,23 +116,41 @@ public class Tuples
     if( type == String.class )
       return toString( value );
 
-    if( type == Integer.class || type == int.class )
+    if( type == int.class )
       return toInteger( value );
 
-    if( type == Long.class || type == long.class )
+    if( type == long.class )
       return toLong( value );
 
-    if( type == Double.class || type == double.class )
+    if( type == double.class )
       return toDouble( value );
 
-    if( type == Float.class || type == float.class )
+    if( type == float.class )
       return toFloat( value );
 
-    if( type == Short.class || type == short.class )
+    if( type == short.class )
       return toShort( value );
 
-    if( type == Boolean.class || type == boolean.class )
+    if( type == boolean.class )
       return toBoolean( value );
+
+    if( type == Integer.class )
+      return toIntegerObject( value );
+
+    if( type == Long.class )
+      return toLongObject( value );
+
+    if( type == Double.class )
+      return toDoubleObject( value );
+
+    if( type == Float.class )
+      return toFloatObject( value );
+
+    if( type == Short.class )
+      return toShortObject( value );
+
+    if( type == Boolean.class )
+      return toBooleanObject( value );
 
     if( type != null )
       throw new OperationException( "could not coerce value, " + value + " to type: " + type.getName() );
@@ -200,6 +222,66 @@ public class Tuples
       return ( (Boolean) value ).booleanValue();
     else if( value == null )
       return false;
+    else
+      return Boolean.parseBoolean( value.toString() );
+    }
+
+  public static final Integer toIntegerObject( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).intValue();
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Integer.parseInt( value.toString() );
+    }
+
+  public static final Long toLongObject( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).longValue();
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Long.parseLong( value.toString() );
+    }
+
+  public static final Double toDoubleObject( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).doubleValue();
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Double.parseDouble( value.toString() );
+    }
+
+  public static final Float toFloatObject( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).floatValue();
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Float.parseFloat( value.toString() );
+    }
+
+  public static final Short toShortObject( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).shortValue();
+    else if( value == null || value.toString().isEmpty() )
+      return 0;
+    else
+      return Short.parseShort( value.toString() );
+    }
+
+  public static final Boolean toBooleanObject( Object value )
+    {
+    if( value instanceof Boolean )
+      return (Boolean) value;
+    else if( value == null || value.toString().isEmpty() )
+      return null;
     else
       return Boolean.parseBoolean( value.toString() );
     }
