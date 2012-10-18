@@ -187,9 +187,12 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    validateLength( flow, 11, 5 );
+    Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, output.getIdentifier(), SinkMode.REPLACE ) );
 
-    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
+    validateLength( iterator, 13, 5 );
+
+    iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
 
     assertEquals( iterator.next().getObject( 0 ), "first,second,third,fourth,fifth" );
 

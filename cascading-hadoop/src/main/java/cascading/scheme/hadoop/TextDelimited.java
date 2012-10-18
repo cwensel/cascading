@@ -780,6 +780,24 @@ public class TextDelimited extends TextLine
     }
 
   @Override
+  public void setSinkFields( Fields sinkFields )
+    {
+    super.setSinkFields( sinkFields );
+
+    if( delimitedParser != null )
+      delimitedParser.reset( getSourceFields(), getSinkFields() );
+    }
+
+  @Override
+  public void setSourceFields( Fields sourceFields )
+    {
+    super.setSourceFields( sourceFields );
+
+    if( delimitedParser != null )
+      delimitedParser.reset( getSourceFields(), getSinkFields() );
+    }
+
+  @Override
   public Fields retrieveSourceFields( FlowProcess<JobConf> flowProcess, Tap tap )
     {
     if( !skipHeader || !getSourceFields().isUnknown() )

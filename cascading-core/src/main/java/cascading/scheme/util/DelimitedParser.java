@@ -58,7 +58,7 @@ public class DelimitedParser implements Serializable
   static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
 
   /** Field sourceFields */
-  private final Fields sourceFields;
+  private Fields sourceFields;
 
   /** Field splitPattern */
   protected Pattern splitPattern;
@@ -67,19 +67,33 @@ public class DelimitedParser implements Serializable
   /** Field escapePattern */
   protected Pattern escapePattern;
   /** Field delimiter * */
-  final String delimiter;
+  String delimiter;
   /** Field quote */
   String quote;
   /** Field strict */
-  boolean strict = true;
+  boolean strict = true; // need to cache value across resets
+  /** Field enforceStrict */
+  boolean enforceStrict = true;
   /** Field numValues */
-  final int numValues;
+  int numValues;
   /** Field types */
   Class[] types;
   /** Field safe */
   boolean safe = true;
+  /** skipHeader */
+  boolean skipHeader;
 
   public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
+    {
+    reset( delimiter, quote, types, strict, safe, skipHeader, sourceFields, sinkFields );
+    }
+
+  public void reset( Fields sourceFields, Fields sinkFields )
+    {
+    reset( delimiter, quote, types, strict, safe, skipHeader, sourceFields, sinkFields );
+    }
+
+  public void reset( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
     {
     if( delimiter == null || delimiter.isEmpty() )
       throw new IllegalArgumentException( "delimiter may not be null or empty" );
@@ -90,11 +104,14 @@ public class DelimitedParser implements Serializable
     this.delimiter = delimiter;
     this.strict = strict;
     this.safe = safe;
+    this.skipHeader = skipHeader;
     this.sourceFields = sourceFields;
-    this.numValues = sinkFields.size();
+    this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero
+
+    this.enforceStrict = this.strict;
 
     if( !skipHeader && sourceFields.isUnknown() )
-      this.strict = false;
+      this.enforceStrict = false;
 
     if( !sinkFields.isAll() && numValues == 0 )
       throw new IllegalArgumentException( "may not be zero declared fields, found: " + sinkFields.printVerbose() );
@@ -266,7 +283,7 @@ public class DelimitedParser implements Serializable
       {
       String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
 
-      if( strict )
+      if( enforceStrict )
         throw new TapException( message, new Tuple( line ) ); // trap actual line data
 
       LOG.warn( message );

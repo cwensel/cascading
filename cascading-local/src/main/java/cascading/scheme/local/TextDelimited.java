@@ -466,6 +466,24 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
+  public void setSinkFields( Fields sinkFields )
+    {
+    super.setSinkFields( sinkFields );
+
+    if( delimitedParser != null )
+      delimitedParser.reset( getSourceFields(), getSinkFields() );
+    }
+
+  @Override
+  public void setSourceFields( Fields sourceFields )
+    {
+    super.setSourceFields( sourceFields );
+
+    if( delimitedParser != null )
+      delimitedParser.reset( getSourceFields(), getSinkFields() );
+    }
+
+  @Override
   public boolean isSymmetrical()
     {
     return super.isSymmetrical() && skipHeader == writeHeader;
