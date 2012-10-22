@@ -23,6 +23,8 @@ Cascading Change Log
 
 2.1.0
 
+  Added c.t.t.FileType interface to mark specific platform c.t.Tap classes as representing a file like interface.
+
   Fixed issue where c.p.a.Coerce would coerce a null value to 0 if the coerce type was a j.l.Number
   instead of a numeric primitive, or false if the coerce type was j.l.Boolean instead of boolean.
 

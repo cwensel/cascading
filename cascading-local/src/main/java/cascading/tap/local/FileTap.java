@@ -32,6 +32,7 @@ import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.io.TapFileOutputStream;
+import cascading.tap.type.FileType;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
@@ -44,7 +45,7 @@ import cascading.util.Util;
  * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
  * {@link cascading.flow.Flow} instances that run in "local" mode.
  */
-public class FileTap extends Tap<Properties, InputStream, OutputStream>
+public class FileTap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>
   {
   private final String path;
 
@@ -144,6 +145,30 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream>
   public long getModifiedTime( Properties conf ) throws IOException
     {
     return new File( path ).lastModified();
+    }
+
+  @Override
+  public boolean isDirectory( Properties conf ) throws IOException
+    {
+    return new File( path ).isDirectory();
+    }
+
+  @Override
+  public String[] getChildIdentifiers( Properties conf ) throws IOException
+    {
+    if( !resourceExists( conf ) )
+      return new String[ 0 ];
+
+    File file = new File( path );
+    String[] paths = file.list();
+
+    if( paths == null )
+      return new String[ 0 ];
+
+    for( int i = 0; i < paths.length; i++ )
+      paths[ i ] = new File( file, paths[ i ] ).getPath();
+
+    return paths;
     }
 
   @Override

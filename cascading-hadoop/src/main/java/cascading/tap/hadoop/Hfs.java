@@ -34,6 +34,7 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
+import cascading.tap.type.FileType;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -75,7 +76,7 @@ import org.slf4j.LoggerFactory;
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
  */
-public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
+public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
@@ -454,14 +455,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     return getFileSystem( conf ).exists( getPath() );
     }
 
-  /**
-   * Method isDirectory returns true if the underlying resource represents a directory or folder instead
-   * of an individual file.
-   *
-   * @param conf of JobConf
-   * @return boolean
-   * @throws IOException when
-   */
+  @Override
   public boolean isDirectory( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
@@ -531,15 +525,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector>
     return fileStatus.getReplication();
     }
 
-  /**
-   * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
-   * <p/>
-   * This method will skip Hadoop log directories ({@code _log}).
-   *
-   * @param conf of JobConf
-   * @return String[]
-   * @throws IOException when
-   */
+  @Override
   public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
