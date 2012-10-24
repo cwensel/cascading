@@ -53,8 +53,6 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   protected List<FlowStepJob<Config>> predecessors;
   /** Field latch */
   private final CountDownLatch latch = new CountDownLatch( 1 );
-  /** Field wasSuccessful */
-  private Boolean wasSuccessful = null;
   /** Field stop */
   private boolean stop = false;
   /** Field flowStep */
@@ -322,28 +320,20 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     {
     try
       {
-      latch.await();
+      latch.await(); // freed after step completes in #start()
 
-      if( wasSuccessful == null )
-        wasSuccessful = internalNonBlockingIsSuccessful();
+      return flowStepStats.isSuccessful();
       }
     catch( InterruptedException exception )
       {
       flowStep.logWarn( "latch interrupted", exception );
-      }
-    catch( IOException exception )
-      {
-      flowStep.logWarn( "error querying job", exception );
+
+      return false;
       }
     catch( NullPointerException exception )
       {
       throw new FlowException( "Hadoop is not keeping a large enough job history, please increase the \'mapred.jobtracker.completeuserjobs.maximum\' property", exception );
       }
-
-    if( wasSuccessful != null )
-      return wasSuccessful;
-    else
-      return false;
     }
 
   /**
