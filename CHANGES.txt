@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.0.7 [unreleased]
+
 2.0.6
 
   Added "cascading.step.display.id.truncate" property to allow simple truncation of flow and step ID values in
