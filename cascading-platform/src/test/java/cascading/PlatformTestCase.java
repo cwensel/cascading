@@ -151,7 +151,7 @@ public class PlatformTestCase extends CascadingTestCase
     }
 
   @Before
-  public void setUp() throws IOException
+  public void setUp() throws Exception
     {
     getPlatform().setUp();
     }
@@ -175,7 +175,7 @@ public class PlatformTestCase extends CascadingTestCase
     }
 
   @After
-  public void tearDown() throws IOException
+  public void tearDown() throws Exception
     {
     try
       {
