@@ -27,6 +27,7 @@ import java.util.Map;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
+import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -161,6 +162,8 @@ public abstract class TestPlatform
   public abstract Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode );
 
   public abstract Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode );
+
+  public abstract Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode );
 
   public abstract Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold );
 

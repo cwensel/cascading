@@ -35,6 +35,8 @@ import cascading.platform.TestPlatform;
 import cascading.scheme.Scheme;
 import cascading.scheme.local.TextDelimited;
 import cascading.scheme.local.TextLine;
+import cascading.scheme.util.DelimitedParser;
+import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.FileTap;
@@ -118,6 +120,12 @@ public class LocalPlatform extends TestPlatform
   public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
     return new FileTap( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    }
+
+  @Override
+  public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
+    {
+    return new FileTap( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
     }
 
   @Override

@@ -1,5 +1,11 @@
 Cascading Change Log
 
+2.2.0 [unreleased]
+
+  Updated c.s.l.TextDelimited and c.s.h.TextDelimited to take c.s.u.DelimitedParser on the constructor to allow
+  for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
+  permutations during source and sink, and type inference from field names.
+
 2.1.1
 
   Fixed issue where c.s.h.TextDelimited would not honor charsetName.

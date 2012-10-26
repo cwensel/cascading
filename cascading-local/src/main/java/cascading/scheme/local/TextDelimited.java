@@ -88,6 +88,9 @@ import cascading.tuple.Tuple;
  * <p/>
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
+ * <p/>
+ * To override field and line parsing behaviors, sub-class {@link DelimitedParser} or provide a
+ * {@link cascading.scheme.util.FieldTypeResolver} implementation.
  *
  * @see TextLine
  */
@@ -143,6 +146,39 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
     {
     this( Fields.ALL, hasHeader, delimiter, quote, (Class[]) null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"hasHeader", "delimitedParser"})
+  public TextDelimited( boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, hasHeader, hasHeader, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   * <p/>
+   * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
+   *
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"delimitedParser"})
+  public TextDelimited( DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, true, true, delimitedParser );
     }
 
   /**
@@ -230,7 +266,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter   of type String
    * @param types       of type Class[]
    */
-  @ConstructorProperties({"fields", "skipHeader", "delimiter", "types"})
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "types"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, Class[] types )
     {
     this( fields, skipHeader, writeHeader, delimiter, null, types );
@@ -423,16 +459,57 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
                           "charsetName"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
     {
+    this( fields, skipHeader, writeHeader, charsetName, new DelimitedParser( delimiter, quote, types, strict, safe ) );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param writeHeader     of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, skipHeader, writeHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param hasHeader       of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, hasHeader, hasHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param writeHeader     of type boolean
+   * @param charsetName     of type String
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
+    {
     super( fields, fields );
 
+    this.delimitedParser = delimitedParser;
+
     // normalizes ALL and UNKNOWN
-    setSinkFields( fields );
+    // calls reset on delimitedParser
     setSourceFields( fields );
+    setSinkFields( fields );
 
     this.skipHeader = skipHeader;
     this.writeHeader = writeHeader;
-
-    delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
 
     if( charsetName != null )
       this.charsetName = charsetName;
@@ -594,7 +671,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     if( writeHeader )
       {
       Fields fields = sinkCall.getOutgoingEntry().getFields();
-      delimitedParser.joinLine( fields, sinkCall.getContext() );
+      delimitedParser.joinFirstLine( fields, sinkCall.getContext() );
 
       sinkCall.getContext().println();
       }

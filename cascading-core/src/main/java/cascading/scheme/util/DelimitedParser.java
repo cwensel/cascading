@@ -22,7 +22,9 @@ package cascading.scheme.util;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
@@ -38,10 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class DelimitedParser is not to be used directly but by platform specific {@link cascading.scheme.Scheme} implementations.
- *
- * @see cascading.scheme.hadoop.TextDelimited
- * @see cascading.scheme.local.TextDelimited
+ * Class DelimitedParser is a base class for parsing text delimited files.
+ * <p/>
+ * It maybe sub-classed to change its behavior.
+ * <p/>
+ * The interface {@link FieldTypeResolver} maybe used to clean and prepare field names
+ * for data columns, and to infer type information from column names.
  */
 public class DelimitedParser implements Serializable
   {
@@ -58,7 +62,7 @@ public class DelimitedParser implements Serializable
   static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
 
   /** Field sourceFields */
-  private Fields sourceFields;
+  protected Fields sourceFields;
 
   /** Field splitPattern */
   protected Pattern splitPattern;
@@ -67,33 +71,58 @@ public class DelimitedParser implements Serializable
   /** Field escapePattern */
   protected Pattern escapePattern;
   /** Field delimiter * */
-  String delimiter;
+  protected String delimiter;
   /** Field quote */
-  String quote;
+  protected String quote;
   /** Field strict */
-  boolean strict = true; // need to cache value across resets
+  protected boolean strict = true; // need to cache value across resets
   /** Field enforceStrict */
-  boolean enforceStrict = true;
+  protected boolean enforceStrict = true;
   /** Field numValues */
-  int numValues;
+  protected int numValues;
   /** Field types */
-  Class[] types;
+  protected Class[] types;
   /** Field safe */
-  boolean safe = true;
-  /** skipHeader */
-  boolean skipHeader;
+  protected boolean safe = true;
+  /** fieldTypeResolver */
+  protected FieldTypeResolver fieldTypeResolver;
 
-  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
+  public DelimitedParser( String delimiter, String quote, Class[] types )
     {
-    reset( delimiter, quote, types, strict, safe, skipHeader, sourceFields, sinkFields );
+    reset( delimiter, quote, types, strict, safe, null, null, null );
+    }
+
+  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe )
+    {
+    reset( delimiter, quote, types, strict, safe, null, null, null );
+    }
+
+  public DelimitedParser( String delimiter, String quote, FieldTypeResolver fieldTypeResolver )
+    {
+    reset( delimiter, quote, null, strict, safe, null, null, fieldTypeResolver );
+    }
+
+  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, FieldTypeResolver fieldTypeResolver )
+    {
+    reset( delimiter, quote, types, strict, safe, null, null, fieldTypeResolver );
+    }
+
+  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields )
+    {
+    reset( delimiter, quote, types, strict, safe, sourceFields, sinkFields, null );
+    }
+
+  public DelimitedParser( String delimiter, String quote, Class[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields, FieldTypeResolver fieldTypeResolver )
+    {
+    reset( delimiter, quote, types, strict, safe, sourceFields, sinkFields, fieldTypeResolver );
     }
 
   public void reset( Fields sourceFields, Fields sinkFields )
     {
-    reset( delimiter, quote, types, strict, safe, skipHeader, sourceFields, sinkFields );
+    reset( delimiter, quote, types, strict, safe, sourceFields, sinkFields, fieldTypeResolver );
     }
 
-  public void reset( String delimiter, String quote, Class[] types, boolean strict, boolean safe, boolean skipHeader, Fields sourceFields, Fields sinkFields )
+  public void reset( String delimiter, String quote, Class[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields, FieldTypeResolver fieldTypeResolver )
     {
     if( delimiter == null || delimiter.isEmpty() )
       throw new IllegalArgumentException( "delimiter may not be null or empty" );
@@ -104,30 +133,37 @@ public class DelimitedParser implements Serializable
     this.delimiter = delimiter;
     this.strict = strict;
     this.safe = safe;
-    this.skipHeader = skipHeader;
-    this.sourceFields = sourceFields;
-    this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero
-
-    this.enforceStrict = this.strict;
-
-    if( !skipHeader && sourceFields.isUnknown() )
-      this.enforceStrict = false;
-
-    if( !sinkFields.isAll() && numValues == 0 )
-      throw new IllegalArgumentException( "may not be zero declared fields, found: " + sinkFields.printVerbose() );
+    this.fieldTypeResolver = fieldTypeResolver;
 
     if( quote != null && !quote.isEmpty() ) // if empty, leave null
       this.quote = quote;
-
-    splitPattern = createSplitPatternFor( this.delimiter, this.quote );
-    cleanPattern = createCleanPatternFor( this.quote );
-    escapePattern = createEscapePatternFor( this.quote );
 
     if( types != null && types.length == 0 )
       this.types = null;
 
     if( types != null )
       this.types = Arrays.copyOf( types, types.length );
+
+    if( sourceFields == null || sinkFields == null )
+      return;
+
+    this.sourceFields = sourceFields;
+    this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero
+
+    this.enforceStrict = this.strict;
+
+    if( sourceFields.isUnknown() )
+      this.enforceStrict = false;
+
+    if( !sinkFields.isAll() && numValues == 0 )
+      throw new IllegalArgumentException( "may not be zero declared fields, found: " + sinkFields.printVerbose() );
+
+    splitPattern = createSplitPatternFor( this.delimiter, this.quote );
+    cleanPattern = createCleanPatternFor( this.quote );
+    escapePattern = createEscapePatternFor( this.quote );
+
+    if( this.types != null && this.fieldTypeResolver != null )
+      throw new IllegalArgumentException( "may not provide types array if using type inference" );
 
     if( this.types != null && sinkFields.isAll() )
       throw new IllegalArgumentException( "when using Fields.ALL, field types may not be used" );
@@ -204,7 +240,7 @@ public class DelimitedParser implements Serializable
    * @param numValues    of type int
    * @return String[]
    */
-  public static String[] createSplit( String value, Pattern splitPattern, int numValues )
+  public String[] createSplit( String value, Pattern splitPattern, int numValues )
     {
     return splitPattern.split( value, numValues );
     }
@@ -222,7 +258,7 @@ public class DelimitedParser implements Serializable
    * @param quote         of type String
    * @return Object[] as a convenience
    */
-  public static Object[] cleanSplit( Object[] split, Pattern cleanPattern, Pattern escapePattern, String quote )
+  public Object[] cleanSplit( Object[] split, Pattern cleanPattern, Pattern escapePattern, String quote )
     {
     if( cleanPattern != null )
       {
@@ -259,9 +295,18 @@ public class DelimitedParser implements Serializable
       if( entry == null )
         throw new TapException( "unable to read fields from tap: " + tap + ", is empty" );
 
-      Object[] result = parseLine( entry.getTuple().getString( 0 ) );
+      Object[] result = onlyParseLine( entry.getTuple().getString( 0 ) ); // don't coerce if type info is avail
+
+      result = cleanParsedLine( result );
+
+      Class[] inferred = inferTypes( result ); // infer type from field name, after removing quotes/escapes
+
+      result = cleanFields( result ); // clean field names to remove any meta-data or manage case
 
       sourceFields = new Fields( Arrays.copyOf( result, result.length, Comparable[].class ) );
+
+      if( inferred != null )
+        sourceFields.setTypes( inferred );
       }
     catch( IOException exception )
       {
@@ -281,32 +326,26 @@ public class DelimitedParser implements Serializable
           }
         }
       }
+
     return sourceFields;
     }
 
-
   public Object[] parseLine( String line )
     {
-    Object[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
+    Object[] split = onlyParseLine( line );
 
-    if( numValues != 0 && split.length != numValues )
-      {
-      String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
+    split = cleanParsedLine( split );
 
-      if( enforceStrict )
-        throw new TapException( message, new Tuple( line ) ); // trap actual line data
+    return coerceParsedLine( line, split );
+    }
 
-      LOG.warn( message );
+  protected Object[] cleanParsedLine( Object[] split )
+    {
+    return cleanSplit( split, cleanPattern, escapePattern, quote );
+    }
 
-      Object[] array = new Object[ Math.max( numValues, split.length ) ];
-      Arrays.fill( array, "" );
-      System.arraycopy( split, 0, array, 0, split.length );
-
-      split = array;
-      }
-
-    cleanSplit( split, cleanPattern, escapePattern, quote );
-
+  protected Object[] coerceParsedLine( String line, Object[] split )
+    {
     if( types != null ) // forced null in ctor
       {
       Object[] result = new Object[ split.length ];
@@ -336,6 +375,36 @@ public class DelimitedParser implements Serializable
     return split;
     }
 
+  protected Object[] onlyParseLine( String line )
+    {
+    Object[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
+
+    if( numValues != 0 && split.length != numValues )
+      {
+      String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
+
+      if( enforceStrict )
+        throw new TapException( message, new Tuple( line ) ); // trap actual line data
+
+      LOG.warn( message );
+
+      Object[] array = new Object[ numValues ];
+      Arrays.fill( array, "" );
+      System.arraycopy( split, 0, array, 0, split.length );
+
+      split = array;
+      }
+
+    return split;
+    }
+
+  public Appendable joinFirstLine( Iterable iterable, Appendable buffer )
+    {
+    iterable = prepareFields( iterable );
+
+    return joinLine( iterable, buffer );
+    }
+
   public Appendable joinLine( Iterable iterable, Appendable buffer )
     {
     try
@@ -351,7 +420,7 @@ public class DelimitedParser implements Serializable
       }
     }
 
-  private Appendable joinWithQuote( Iterable tuple, Appendable buffer ) throws IOException
+  protected Appendable joinWithQuote( Iterable tuple, Appendable buffer ) throws IOException
     {
     int count = 0;
 
@@ -379,7 +448,7 @@ public class DelimitedParser implements Serializable
     return buffer;
     }
 
-  private Appendable joinNoQuote( Iterable tuple, Appendable buffer ) throws IOException
+  protected Appendable joinNoQuote( Iterable tuple, Appendable buffer ) throws IOException
     {
     int count = 0;
 
@@ -397,4 +466,59 @@ public class DelimitedParser implements Serializable
     return buffer;
     }
 
+  protected Class[] inferTypes( Object[] result )
+    {
+    if( fieldTypeResolver == null )
+      return null;
+
+    Class[] inferred = new Class[ result.length ];
+
+    for( int i = 0; i < result.length; i++ )
+      {
+      String field = (String) result[ i ];
+
+      inferred[ i ] = fieldTypeResolver.inferTypeFrom( i, field );
+      }
+
+    return inferred;
+    }
+
+  protected Iterable prepareFields( Iterable fields )
+    {
+    if( fieldTypeResolver == null )
+      return fields;
+
+    List result = new ArrayList();
+
+    int i = 0;
+    for( Object field : fields )
+      {
+      Class type = types != null ? types[ i ] : null;
+      String value = fieldTypeResolver.prepareField( i, (String) field, type );
+
+      if( value != null && !value.isEmpty() )
+        field = value;
+
+      result.add( field );
+      }
+
+    return result;
+    }
+
+  protected Object[] cleanFields( Object[] result )
+    {
+    if( fieldTypeResolver == null )
+      return result;
+
+    for( int i = 0; i < result.length; i++ )
+      {
+      Class type = types != null ? types[ i ] : null;
+      String value = fieldTypeResolver.cleanField( i, (String) result[ i ], type );
+
+      if( value != null && !value.isEmpty() )
+        result[ i ] = value;
+      }
+
+    return result;
+    }
   }

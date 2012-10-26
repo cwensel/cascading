@@ -84,6 +84,9 @@ import org.apache.hadoop.mapred.RecordReader;
  * <p/>
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
+ * <p/>
+ * To override field and line parsing behaviors, sub-class {@link DelimitedParser} or provide a
+ * {@link cascading.scheme.util.FieldTypeResolver} implementation.
  *
  * @see TextLine
  */
@@ -140,6 +143,73 @@ public class TextDelimited extends TextLine
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
     {
     this( Fields.ALL, null, hasHeader, delimiter, quote, (Class[]) null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param hasHeader
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"hasHeader", "delimitedParser"})
+  public TextDelimited( boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, null, hasHeader, hasHeader, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   * <p/>
+   * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
+   *
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"delimitedParser"})
+  public TextDelimited( DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, null, true, true, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param sinkCompression
+   * @param hasHeader
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"sinkCompression", "hasHeader", "delimitedParser"})
+  public TextDelimited( Compress sinkCompression, boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, sinkCompression, hasHeader, hasHeader, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p/>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   * <p/>
+   * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
+   *
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"sinkCompression", "delimitedParser"})
+  public TextDelimited( Compress sinkCompression, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, sinkCompression, true, true, delimitedParser );
     }
 
   /**
@@ -541,7 +611,6 @@ public class TextDelimited extends TextLine
     this( fields, null, hasHeader, hasHeader, delimiter, quote );
     }
 
-
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
@@ -753,7 +822,63 @@ public class TextDelimited extends TextLine
                           "charsetName"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
     {
+    this( fields, sinkCompression, skipHeader, writeHeader, charsetName, new DelimitedParser( delimiter, quote, types, strict, safe ) );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param writeHeader     of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, null, skipHeader, writeHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param hasHeader       of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "hasHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, null, hasHeader, hasHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param writeHeader     of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, sinkCompression, skipHeader, writeHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields
+   * @param sinkCompression
+   * @param skipHeader
+   * @param writeHeader
+   * @param charsetName
+   * @param delimitedParser
+   */
+  public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
+    {
     super( sinkCompression );
+
+    this.delimitedParser = delimitedParser;
 
     // normalizes ALL and UNKNOWN
     setSinkFields( fields );
@@ -764,8 +889,6 @@ public class TextDelimited extends TextLine
 
     // throws an exception if not found
     setCharsetName( charsetName );
-
-    delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
 
   /**
@@ -797,6 +920,7 @@ public class TextDelimited extends TextLine
   @Override
   public void setSinkFields( Fields sinkFields )
     {
+    super.setSourceFields( sinkFields );
     super.setSinkFields( sinkFields );
 
     if( delimitedParser != null )
@@ -807,6 +931,7 @@ public class TextDelimited extends TextLine
   public void setSourceFields( Fields sourceFields )
     {
     super.setSourceFields( sourceFields );
+    super.setSinkFields( sourceFields );
 
     if( delimitedParser != null )
       delimitedParser.reset( getSourceFields(), getSinkFields() );
@@ -876,11 +1001,24 @@ public class TextDelimited extends TextLine
     sinkCall.getContext()[ 2 ] = Charset.forName( charsetName );
 
     if( writeHeader )
-      {
-      Fields fields = sinkCall.getOutgoingEntry().getFields();
+      writeHeader( sinkCall );
+    }
 
-      write( sinkCall, fields );
-      }
+  protected void writeHeader( SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    {
+    Fields fields = sinkCall.getOutgoingEntry().getFields();
+
+    Text text = (Text) sinkCall.getContext()[ 0 ];
+    StringBuilder line = (StringBuilder) sinkCall.getContext()[ 1 ];
+    Charset charset = (Charset) sinkCall.getContext()[ 2 ];
+
+    line = (StringBuilder) delimitedParser.joinFirstLine( fields, line );
+
+    text.set( line.toString().getBytes( charset ) );
+
+    sinkCall.getOutput().collect( null, text );
+
+    line.setLength( 0 );
     }
 
   @Override
@@ -888,16 +1026,11 @@ public class TextDelimited extends TextLine
     {
     Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
 
-    write( sinkCall, tuple );
-    }
-
-  private void write( SinkCall<Object[], OutputCollector> sinkCall, Iterable value ) throws IOException
-    {
     Text text = (Text) sinkCall.getContext()[ 0 ];
     StringBuilder line = (StringBuilder) sinkCall.getContext()[ 1 ];
     Charset charset = (Charset) sinkCall.getContext()[ 2 ];
 
-    line = (StringBuilder) delimitedParser.joinLine( value, line );
+    line = (StringBuilder) delimitedParser.joinLine( tuple, line );
 
     text.set( line.toString().getBytes( charset ) );
 

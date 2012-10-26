@@ -132,6 +132,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   boolean isOrdered = true;
   /** Field kind */
   Kind kind;
+
+  /** Field types */
+  Class[] types;
   /** Field comparators */
   Comparator[] comparators;
 
@@ -1340,8 +1343,70 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
+   * Method setTypes should be used to associate a {@link java.lang.Class} with a given field name or position.
+   * <p/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
+   *
+   * @param fieldName of type Comparable
+   * @param type      of type Class
+   */
+  public void setTypes( Comparable fieldName, Class type )
+    {
+    if( type == null )
+      throw new IllegalArgumentException( "given type must not be null" );
+
+    if( types == null )
+      types = new Class[ size() ];
+
+    try
+      {
+      types[ getPos( asFieldName( fieldName ) ) ] = type;
+      }
+    catch( FieldsResolverException exception )
+      {
+      throw new IllegalArgumentException( "given field name was not found: " + fieldName, exception );
+      }
+    }
+
+  /**
+   * Method setTypes sets all the class types of this Fields object. The Class array
+   * must be the same length as the number for fields in this instance.
+   *
+   * @param types the comparators of this Fields object.
+   */
+  public void setTypes( Class... types )
+    {
+    if( types.length != size() )
+      throw new IllegalArgumentException( "given number of class instances must match fields size" );
+
+    for( Class type : types )
+      {
+      if( type == null )
+        throw new IllegalArgumentException( "type must not be null" );
+      }
+
+    this.types = types;
+    }
+
+  public Class[] getTypes()
+    {
+    Class[] copy = new Class[ size() ];
+
+    if( types != null )
+      System.arraycopy( types, 0, copy, 0, size() );
+
+    return copy;
+    }
+
+  public boolean hasTypes()
+    {
+    return types != null;
+    }
+
+  /**
    * Method setComparator should be used to associate a {@link java.util.Comparator} with a given field name or position.
-   * <br/>
+   * <p/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -1367,10 +1432,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method setComparators sets all the comparators of this FieldsComparator object. The Comparator array
+   * Method setComparators sets all the comparators of this Fields object. The Comparator array
    * must be the same length as the number for fields in this instance.
    *
-   * @param comparators the comparators of this FieldsComparator object.
+   * @param comparators the comparators of this Fields object.
    */
   public void setComparators( Comparator... comparators )
     {
