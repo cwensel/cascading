@@ -565,6 +565,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @Override
   public void setSinkFields( Fields sinkFields )
     {
+    super.setSourceFields( sinkFields );
     super.setSinkFields( sinkFields );
 
     if( delimitedParser != null )
@@ -575,6 +576,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   public void setSourceFields( Fields sourceFields )
     {
     super.setSourceFields( sourceFields );
+    super.setSinkFields( sourceFields );
 
     if( delimitedParser != null )
       delimitedParser.reset( getSourceFields(), getSinkFields() );

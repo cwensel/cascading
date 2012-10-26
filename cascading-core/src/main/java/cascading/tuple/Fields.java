@@ -158,6 +158,16 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return fields;
     }
 
+  public static Comparable[] names( Comparable... names )
+    {
+    return names;
+    }
+
+  public static Class[] types( Class... types )
+    {
+    return types;
+    }
+
   /**
    * Method size is a factory that makes new instances of Fields the given size.
    *
@@ -177,6 +187,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * Method join joins all given Fields instances into a new Fields instance.
    * <p/>
    * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
+   * <p/>
+   * If the resulting set of fields and ordinals is length zero, {@link Fields#NONE} will be returned.
    *
    * @param fields of type Fields
    * @return Fields
@@ -198,6 +210,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       size += field.size();
       }
 
+    if( size == 0 )
+      return Fields.NONE;
+
     Comparable[] elements = join( size, fields );
 
     if( maskDuplicateNames )
@@ -215,7 +230,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         }
       }
 
-    return new Fields( elements );
+    Class[] types = joinTypes( size, fields );
+
+    if( types == null )
+      return new Fields( elements );
+    else
+      return new Fields( elements, types );
     }
 
   private static Comparable[] join( int size, Fields... fields )
@@ -226,6 +246,26 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     for( Fields field : fields )
       {
       System.arraycopy( field.fields, 0, elements, pos, field.size() );
+      pos += field.size();
+      }
+
+    return elements;
+    }
+
+  private static Class[] joinTypes( int size, Fields... fields )
+    {
+    Class[] elements = new Class[ size ];
+
+    int pos = 0;
+    for( Fields field : fields )
+      {
+      if( field.isNone() )
+        continue;
+
+      if( field.types == null )
+        return null;
+
+      System.arraycopy( field.types, 0, elements, pos, field.size() );
       pos += field.size();
       }
 
@@ -440,7 +480,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   private static Comparable handleFound( Set<String> found, Comparable field )
     {
-    if( found.contains( (String) field ) )
+    if( found.contains( field ) )
       throw new TupleException( "field name already exists: " + field );
 
     found.add( (String) field );
@@ -477,6 +517,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     copy( null, result, fields, 0 );
 
+    result.types = copyTypes( fields.types, result.size() );
     result.comparators = fields.comparators;
 
     return result;
@@ -517,6 +558,24 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       this.kind = Kind.NONE;
     else
       this.fields = validate( fields );
+    }
+
+  public Fields( Comparable field, Class type )
+    {
+    this( names( field ), types( type ) );
+    }
+
+  public Fields( Comparable[] fields, Class[] types )
+    {
+    this( fields );
+
+    if( isDefined() && types != null )
+      {
+      if( this.fields.length != types.length )
+        throw new IllegalArgumentException( "given types array must be same length as fields" );
+
+      this.types = copyTypes( types, this.fields.length );
+      }
     }
 
   /**
@@ -932,17 +991,37 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields result = size( selector.size() );
 
-    // todo: this can be cleaned up i think
     for( int i = 0; i < selector.size(); i++ )
       {
       Comparable field = selector.get( i );
 
       if( field instanceof String )
+        {
         result.set( i, get( indexOf( field ) ) );
-      else if( this.get( translatePos( (Integer) field ) ) instanceof String )
-        result.set( i, get( translatePos( (Integer) field ) ) );
+        continue;
+        }
+
+      int pos = translatePos( (Integer) field );
+
+      if( this.get( pos ) instanceof String )
+        result.set( i, this.get( pos ) );
       else
-        result.set( i, translatePos( (Integer) field ) ); // use absolute position if no field name
+        result.set( i, pos ); // use absolute position if no field name
+      }
+
+    if( this.types != null )
+      {
+      result.types = new Class[ result.size() ];
+
+      for( int i = 0; i < selector.size(); i++ )
+        {
+        Comparable field = selector.get( i );
+
+        if( field instanceof String )
+          result.setType( i, getType( indexOf( field ) ) );
+        else
+          result.setType( i, getType( translatePos( (Integer) field ) ) );
+        }
       }
 
     return result;
@@ -1000,17 +1079,35 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Util.removeAllNulls( list );
 
-    return new Fields( list.toArray( new Comparable[ list.size() ] ) );
+    Class[] newTypes = null;
+
+    if( this.types != null )
+      {
+      List<Class> classes = new LinkedList<Class>();
+      Collections.addAll( classes, this.types );
+
+      for( int i : pos )
+        classes.set( i, null );
+
+      Util.removeAllNulls( classes );
+
+      newTypes = classes.toArray( new Class[ classes.size() ] );
+      }
+
+    return new Fields( list.toArray( new Comparable[ list.size() ] ), newTypes );
     }
 
   /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
    * <p/>
    * See {@link #subtract(Fields)} for removing field names.
+   * <p/>
+   * This method has been deprecated, see {@link #join(Fields...)}
    *
    * @param fields of type Fields[]
    * @return Fields
    */
+  @Deprecated
   public Fields append( Fields[] fields )
     {
     if( fields.length == 0 )
@@ -1060,6 +1157,16 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( this.isUnknown() || fields.isUnknown() )
       result.kind = Kind.UNKNOWN;
 
+    if( ( this.isNone() || this.types != null ) && fields.types != null )
+      {
+      result.types = new Class[ this.size() + fields.size() ];
+
+      if( this.types != null ) // supports appending to NONE
+        System.arraycopy( this.types, 0, result.types, 0, this.size() );
+
+      System.arraycopy( fields.types, 0, result.types, this.size(), fields.size() );
+      }
+
     return result;
     }
 
@@ -1094,7 +1201,17 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     for( int i = 0; i < pos.length; i++ )
       newFields[ pos[ i ] ] = to.fields[ i ];
 
-    return new Fields( newFields );
+    Class[] newTypes = null;
+
+    if( this.types != null && to.types != null )
+      {
+      newTypes = copyTypes( this.types, this.size() );
+
+      for( int i = 0; i < pos.length; i++ )
+        newTypes[ pos[ i ] ] = to.types[ i ];
+      }
+
+    return new Fields( newFields, newTypes );
     }
 
   /**
@@ -1135,7 +1252,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
       if( names != null )
         {
-        if( names.contains( (String) field ) )
+        if( names.contains( field ) )
           throw new TupleException( "field name already exists: " + field );
 
         names.add( (String) field );
@@ -1343,7 +1460,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method setTypes should be used to associate a {@link java.lang.Class} with a given field name or position.
+   * Method setType should be used to associate a {@link java.lang.Class} with a given field name or position.
+   * A new instance of Fields will be returned, this instance will not be modified.
    * <p/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
@@ -1351,32 +1469,43 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * @param fieldName of type Comparable
    * @param type      of type Class
    */
-  public void setTypes( Comparable fieldName, Class type )
+  public Fields applyType( Comparable fieldName, Class type )
     {
     if( type == null )
       throw new IllegalArgumentException( "given type must not be null" );
 
-    if( types == null )
-      types = new Class[ size() ];
+    int pos;
 
     try
       {
-      types[ getPos( asFieldName( fieldName ) ) ] = type;
+      pos = getPos( asFieldName( fieldName ) );
       }
     catch( FieldsResolverException exception )
       {
       throw new IllegalArgumentException( "given field name was not found: " + fieldName, exception );
       }
+
+    Fields results = new Fields( fields );
+
+    results.types = this.types == null ? new Class[ size() ] : this.types;
+    results.types[ pos ] = type;
+
+    return results;
     }
 
   /**
-   * Method setTypes sets all the class types of this Fields object. The Class array
-   * must be the same length as the number for fields in this instance.
+   * Method applyTypes returns a new Fields instance with the given types.
+   * <p/>
+   * The Class array must be the same length as the number for fields in this instance.
    *
-   * @param types the comparators of this Fields object.
+   * @param types the class types of this Fields object.
+   * @return returns a new instance of Fields with this instances field names and the given types
    */
-  public void setTypes( Class... types )
+  public Fields applyTypes( Class... types )
     {
+    if( this.types != null )
+      throw new IllegalStateException( "may not overwrite types" );
+
     if( types.length != size() )
       throw new IllegalArgumentException( "given number of class instances must match fields size" );
 
@@ -1386,19 +1515,62 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         throw new IllegalArgumentException( "type must not be null" );
       }
 
-    this.types = types;
+    Fields result = new Fields( fields );
+
+    result.types = types;
+
+    return result;
     }
 
+  public Class getType( int i )
+    {
+    if( !hasTypes() )
+      return null;
+
+    return this.types[ i ];
+    }
+
+  protected void setType( int i, Class type )
+    {
+    if( type == null )
+      throw new IllegalArgumentException( "type may not be null" );
+
+    this.types[ i ] = type;
+    }
+
+  /**
+   * Returns a copy of the current types Class[] if any, else null.
+   *
+   * @return
+   */
   public Class[] getTypes()
     {
-    Class[] copy = new Class[ size() ];
+    return copyTypes( types, size() );
+    }
+
+  private static Class[] copyTypes( Class[] types, int size )
+    {
+    if( types == null )
+      return null;
+
+    Class[] copy = new Class[ size ];
 
     if( types != null )
-      System.arraycopy( types, 0, copy, 0, size() );
+      {
+      if( types.length != size )
+        throw new IllegalArgumentException( "types array must be same size as fields array" );
+
+      System.arraycopy( types, 0, copy, 0, size );
+      }
 
     return copy;
     }
 
+  /**
+   * Returns true if there are types associated with this instance.
+   *
+   * @return
+   */
   public boolean hasTypes()
     {
     return types != null;
@@ -1522,7 +1694,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields fields1 = (Fields) object;
 
-    return this.kind == fields1.kind && Arrays.equals( get(), fields1.get() );
+    return this.kind == fields1.kind && Arrays.equals( get(), fields1.get() ) && Arrays.equals( types, fields1.types );
     }
 
   @Override

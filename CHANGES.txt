@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.t.Fields to accept type information and to propagate type values along with fields.
+
   Updated c.s.l.TextDelimited and c.s.h.TextDelimited to take c.s.u.DelimitedParser on the constructor to allow
   for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
   permutations during source and sink, and type inference from field names.

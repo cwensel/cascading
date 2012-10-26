@@ -22,6 +22,9 @@ package cascading.tuple;
 
 import cascading.CascadingTestCase;
 
+import static cascading.tuple.Fields.names;
+import static cascading.tuple.Fields.types;
+
 public class FieldsTest extends CascadingTestCase
   {
   public FieldsTest()
@@ -810,5 +813,85 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "B", results.get( 0 ) );
     assertEquals( "not equal: ", "D", results.get( 1 ) );
     assertEquals( "not equal: ", "F", results.get( 2 ) );
+    }
+
+  public void testTypedAppendToNone()
+    {
+    Fields fieldA = Fields.NONE;
+    Fields fieldB = new Fields( names( "a" ), types( String.class ) );
+
+    Fields appended = fieldA.append( fieldB );
+
+    assertEquals( "not equal: ", 1, appended.size() );
+    assertEquals( "not equal: ", "a", appended.get( 0 ) );
+
+    assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
+    }
+
+  public void testTypedAppendNamed()
+    {
+    Fields fieldA = new Fields( names( 0, 1 ), types( int.class, int.class ) );
+    Fields fieldB = new Fields( names( "a" ), types( String.class ) );
+
+    Fields appended = fieldA.append( fieldB );
+
+    assertEquals( "not equal: ", 3, appended.size() );
+    assertEquals( "not equal: ", 0, appended.get( 0 ) );
+    assertEquals( "not equal: ", 1, appended.get( 1 ) );
+    assertEquals( "not equal: ", "a", appended.get( 2 ) );
+
+    assertEquals( "not equal: ", int.class, appended.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
+    assertEquals( "not equal: ", String.class, appended.getType( 2 ) );
+    }
+
+  public void testTypedRename()
+    {
+    Fields fields = new Fields( names( "a", "b", "c", "d" ), types( int.class, int.class, int.class, int.class ) );
+    Fields from = new Fields( "a", "b" );
+    Fields to = new Fields( names( "A", "B" ), types( String.class, String.class ) );
+
+    Fields renamed = fields.rename( from, to );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", String.class, renamed.getType( 0 ) );
+    assertEquals( "not equal: ", String.class, renamed.getType( 1 ) );
+    assertEquals( "not equal: ", int.class, renamed.getType( 2 ) );
+    assertEquals( "not equal: ", int.class, renamed.getType( 3 ) );
+    }
+
+  public void testTypedSelect()
+    {
+    Fields declarationA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
+    Fields selectA = new Fields( "a", "b" );
+
+    Fields got = declarationA.select( selectA );
+
+    assertEquals( "not equal: ", 2, got.size() );
+    assertEquals( "not equal: ", int.class, got.getType( 0 ) );
+    assertEquals( "not equal: ", String.class, got.getType( 1 ) );
+    }
+
+  public void testTypedSelect2()
+    {
+    Fields declarationA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
+    Fields selectA = new Fields( "b", "a" );
+
+    Fields got = declarationA.select( selectA );
+
+    assertEquals( "not equal: ", 2, got.size() );
+    assertEquals( "not equal: ", String.class, got.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, got.getType( 1 ) );
+    }
+
+  public void testTypedDiff()
+    {
+    Fields fieldA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
+    Fields fieldB = new Fields( "a" );
+
+    Fields diff = fieldA.subtract( fieldB );
+
+    assertEquals( "not equal: ", 1, diff.size() );
+    assertEquals( "not equal: ", String.class, diff.getType( 0 ) );
     }
   }

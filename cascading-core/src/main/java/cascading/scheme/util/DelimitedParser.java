@@ -147,6 +147,9 @@ public class DelimitedParser implements Serializable
     if( sourceFields == null || sinkFields == null )
       return;
 
+    if( types == null && sourceFields.hasTypes() )
+      this.types = sourceFields.getTypes(); // gets a copy
+
     this.sourceFields = sourceFields;
     this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero
 
@@ -161,9 +164,6 @@ public class DelimitedParser implements Serializable
     splitPattern = createSplitPatternFor( this.delimiter, this.quote );
     cleanPattern = createCleanPatternFor( this.quote );
     escapePattern = createEscapePatternFor( this.quote );
-
-    if( this.types != null && this.fieldTypeResolver != null )
-      throw new IllegalArgumentException( "may not provide types array if using type inference" );
 
     if( this.types != null && sinkFields.isAll() )
       throw new IllegalArgumentException( "when using Fields.ALL, field types may not be used" );
@@ -306,7 +306,7 @@ public class DelimitedParser implements Serializable
       sourceFields = new Fields( Arrays.copyOf( result, result.length, Comparable[].class ) );
 
       if( inferred != null )
-        sourceFields.setTypes( inferred );
+        sourceFields = sourceFields.applyTypes( inferred );
       }
     catch( IOException exception )
       {
@@ -490,11 +490,11 @@ public class DelimitedParser implements Serializable
 
     List result = new ArrayList();
 
-    int i = 0;
     for( Object field : fields )
       {
-      Class type = types != null ? types[ i ] : null;
-      String value = fieldTypeResolver.prepareField( i, (String) field, type );
+      int index = result.size();
+      Class type = types != null ? types[ index ] : null;
+      String value = fieldTypeResolver.prepareField( index, (String) field, type );
 
       if( value != null && !value.isEmpty() )
         field = value;
