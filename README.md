@@ -4,30 +4,31 @@ Thanks for using Cascading.
 
 ## General Information:
 
-Project and contact information: [cascading.org](http://cascading.org/)
+For project documentation and community support, visit: [cascading.org](http://cascading.org/)
 
-This distribution includes six Cascading jar files:
+This distribution includes five Cascading jar files:
 
 * cascading-core-x.y.z.jar     - all Cascading Core class files
 * cascading-xml-x.y.z.jar      - all Cascading XML operations class files
 * cascading-local-x.y.z.jar    - all Cascading Local mode class files
 * cascading-hadoop-x.y.z.jar   - all Cascading Hadoop mode class files
-* cascading-platform-x.y.z.jar - all Cascading platform tests and test utilities
+* cascading-platform-x.y.z.jar - all Cascading common platform tests and test utilities
 
-These jars are all available via the [Conjars.org](http://conjars.org) Maven repository.
+These class jars, along with source and javadoc jars, are all available via the [Conjars.org](http://conjars.org)
+Maven repository.
 
 Hadoop mode is where the Cascading application should run on a Hadoop cluster.
 
 Local mode is where the Cascading application will run locally in memory without any Hadoop dependenices.
 
-The Platform jar only includes tests common across all supported platforms, currently only Local and Hadoop modes.
+The Platform jar only includes tests common across all supported platforms.
 
 ## Building:
 
 To build Cascading, run the following in the shell:
 
 ```bash
-> git clone https://github.com/cwensel/cascading.git
+> git clone https://github.com/cascading/cascading.git
 > cd cascading
 > gradle build
 ```
@@ -57,5 +58,3 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 ```
 
 Hadoop will unpack the jar locally and remotely (in the cluster) and add any libraries in `lib` to the classpath. This is a feature specific to Hadoop.
-
-The cascading-x.y.z.jar file is typically used with scripting languages and is completely self contained, but it cannot be added to a jar `lib` folder as Hadoop will not recursively unjar jars.
