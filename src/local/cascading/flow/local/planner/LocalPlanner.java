@@ -71,7 +71,7 @@ public class LocalPlanner extends FlowPlanner
       elementGraph.resolveFields();
 
       // used for checkpointing
-//      elementGraph = flow.updateSchemes( elementGraph );
+      elementGraph = flow.updateSchemes( elementGraph );
 
       FlowStepGraph flowStepGraph = new LocalStepGraph( flowDef.getName(), elementGraph );
 
