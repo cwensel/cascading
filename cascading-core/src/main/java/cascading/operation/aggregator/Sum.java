@@ -29,6 +29,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 import cascading.util.Pair;
 
@@ -50,6 +51,8 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   /**
    * Constructs a new instance that returns the fields declared in fieldDeclaration and accepts
    * only 1 argument.
+   * <p/>
+   * If the given {@code fieldDeclaration} has a type, it will be used to coerce the result value.
    *
    * @param fieldDeclaration of type Fields
    */
@@ -60,6 +63,9 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
 
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+
+    if( fieldDeclaration.hasTypes() )
+      this.type = fieldDeclaration.getType( 0 );
     }
 
   /**
@@ -79,19 +85,28 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Pair<Double[], Tuple>> operationCall )
     {
-    operationCall.setContext( new Pair<Double[], Tuple>( new Double[]{0.0D}, Tuple.size( 1 ) ) );
+    operationCall.setContext( new Pair<Double[], Tuple>( new Double[]{null}, Tuple.size( 1 ) ) );
     }
 
   @Override
   public void start( FlowProcess flowProcess, AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext().getLhs()[ 0 ] = 0.0D;
+    aggregatorCall.getContext().getLhs()[ 0 ] = null;
+    aggregatorCall.getContext().getRhs().set( 0, null );
     }
 
   @Override
   public void aggregate( FlowProcess flowProcess, AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext().getLhs()[ 0 ] += aggregatorCall.getArguments().getDouble( 0 );
+    TupleEntry arguments = aggregatorCall.getArguments();
+
+    if( arguments.getObject( 0 ) == null )
+      return;
+
+    Double[] sum = aggregatorCall.getContext().getLhs();
+
+    double value = sum[ 0 ] == null ? 0 : sum[ 0 ];
+    sum[ 0 ] = value + arguments.getDouble( 0 );
     }
 
   @Override

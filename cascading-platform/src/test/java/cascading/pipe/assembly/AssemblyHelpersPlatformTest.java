@@ -424,6 +424,46 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testSumByNulls() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum" ), "\t",
+      new Class[]{String.class, Integer.class}, getOutputPath( "sumnulls" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "sum" );
+
+    ExpressionFunction function = new ExpressionFunction( Fields.ARGS, "5 == $0 ? null : $0", Integer.class );
+    pipe = new Each( pipe, new Fields( "num" ), function, Fields.REPLACE );
+
+    // Long.class denotes return null for null, not zero
+    pipe = new SumBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), Integer.class, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s(\\d+|null)$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 1 ),
+      new Tuple( "b", 7 ),
+      new Tuple( "c", 10 ),
+      new Tuple( "d", 6 ),
+      new Tuple( "e", null ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
   public void testSumMerge() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
@@ -467,7 +507,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testAverage() throws IOException
+  public void testAverageBy() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
 
@@ -489,6 +529,45 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "a", (double) 6 / 2 ),
       new Tuple( "b", (double) 12 / 4 ),
       new Tuple( "c", (double) 10 / 4 ),
+      new Tuple( "d", (double) 6 / 2 ),
+      new Tuple( "e", (double) 5 / 1 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testAverageByNull() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "average" ), "\t",
+      new Class[]{String.class, Double.TYPE}, getOutputPath( "averagenull" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "average" );
+
+    ExpressionFunction function = new ExpressionFunction( Fields.ARGS, "3 == $0 ? null : $0", Integer.class );
+    pipe = new Each( pipe, new Fields( "num" ), function, Fields.REPLACE );
+
+    pipe = new AverageBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), true, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s[\\d.]+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", (double) 6 / 2 ),
+      new Tuple( "b", (double) 12 / 4 ),
+      new Tuple( "c", (double) 7 / 3 ),
       new Tuple( "d", (double) 6 / 2 ),
       new Tuple( "e", (double) 5 / 1 ),
     };

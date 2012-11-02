@@ -36,6 +36,9 @@ import cascading.tuple.Tuples;
  * Typically finding the sum of field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum}
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
+ * If all the values to be summed are all {@code null}, the result value is a function of how null is coerced by the
+ * given {@code sumType}. If a primitive type, {@code 0} will be returned. Otherwise {@code null}.
+ * <p/>
  * This SubAssembly also uses the {@link SumBy.SumPartials} {@link AggregateBy.Functor}
  * to sum field values before the GroupBy operator to reduce IO over the network.
  * <p/>
@@ -49,6 +52,9 @@ import cascading.tuple.Tuples;
  */
 public class SumBy extends AggregateBy
   {
+  /** DEFAULT_THRESHOLD */
+  public static final int DEFAULT_THRESHOLD = 10000;
+
   /**
    * Class SumPartials is a {@link AggregateBy.Functor} that is used to sum observed duplicates from the tuple stream.
    * <p/>
@@ -64,6 +70,19 @@ public class SumBy extends AggregateBy
     private final Class sumType;
 
     /** Constructor SumPartials creates a new SumPartials instance. */
+    public SumPartials( Fields declaredFields )
+      {
+      this.declaredFields = declaredFields;
+
+      if( !declaredFields.hasTypes() )
+        throw new IllegalArgumentException( "result type must be declared " );
+
+      this.sumType = declaredFields.getType( 0 );
+
+      if( declaredFields.size() != 1 )
+        throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );
+      }
+
     public SumPartials( Fields declaredFields, Class sumType )
       {
       this.declaredFields = declaredFields;
@@ -83,9 +102,11 @@ public class SumBy extends AggregateBy
     public Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context )
       {
       if( context == null )
-        context = args.getTupleCopy();
-      else
-        context.set( 0, context.getDouble( 0 ) + args.getDouble( 0 ) );
+        return args.getTupleCopy();
+      else if( args.getObject( 0 ) == null )
+        return context;
+
+      context.set( 0, context.getDouble( 0 ) + args.getDouble( 0 ) );
 
       return context;
       }
@@ -93,11 +114,148 @@ public class SumBy extends AggregateBy
     @Override
     public Tuple complete( FlowProcess flowProcess, Tuple context )
       {
-      context.set( 0, Tuples.coerce( context.getDouble( 0 ), sumType ) );
+      context.set( 0, Tuples.coerce( context.getObject( 0 ), sumType ) );
 
       return context;
       }
     }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance. Use this constructor when used with a {@link AggregateBy}
+   * instance.
+   *
+   * @param valueField of type Fields
+   * @param sumField   of type Fields
+   */
+  @ConstructorProperties({"valueField", "sumField"})
+  public SumBy( Fields valueField, Fields sumField )
+    {
+    super( valueField, new SumPartials( sumField ), new Sum( sumField ) );
+    }
+
+  //////////////
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param pipe           of type Pipe
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   */
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField"})
+  public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField )
+    {
+    this( null, pipe, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param pipe           of type Pipe
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   * @param threshold      of type int
+   */
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField", "threshold"})
+  public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, int threshold )
+    {
+    this( null, pipe, groupingFields, valueField, sumField, threshold );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param name           of type String
+   * @param pipe           of type Pipe
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   */
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField"})
+  public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField )
+    {
+    this( name, pipe, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param name           of type String
+   * @param pipe           of type Pipe
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   * @param threshold      of type int
+   */
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField", "threshold"})
+  public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, int threshold )
+    {
+    this( name, Pipe.pipes( pipe ), groupingFields, valueField, sumField, threshold );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param pipes          of type Pipe[]
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField"})
+  public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField )
+    {
+    this( null, pipes, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param pipes          of type Pipe[]
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   * @param threshold      of type int
+   */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "threshold"})
+  public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, int threshold )
+    {
+    this( null, pipes, groupingFields, valueField, sumField, threshold );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param name           of type String
+   * @param pipes          of type Pipe[]
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField"})
+  public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField )
+    {
+    this( name, pipes, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    }
+
+  /**
+   * Constructor SumBy creates a new SumBy instance.
+   *
+   * @param name           of type String
+   * @param pipes          of type Pipe[]
+   * @param groupingFields of type Fields
+   * @param valueField     of type Fields
+   * @param sumField       of type Fields
+   * @param threshold      of type int
+   */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "threshold"})
+  public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, int threshold )
+    {
+    super( name, pipes, groupingFields, valueField, new SumPartials( sumField ), new Sum( sumField ), threshold );
+    }
+
+///////////
 
   /**
    * Constructor SumBy creates a new SumBy instance. Use this constructor when used with a {@link AggregateBy}
@@ -113,7 +271,7 @@ public class SumBy extends AggregateBy
     super( valueField, new SumPartials( sumField, sumType ), new Sum( sumField, sumType ) );
     }
 
-  //////////////
+//////////////
 
   /**
    * Constructor SumBy creates a new SumBy instance.
@@ -127,7 +285,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( null, pipe, groupingFields, valueField, sumField, sumType, 10000 );
+    this( null, pipe, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
     }
 
   /**
@@ -159,7 +317,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( name, pipe, groupingFields, valueField, sumField, sumType, 10000 );
+    this( name, pipe, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
     }
 
   /**
@@ -191,7 +349,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( null, pipes, groupingFields, valueField, sumField, sumType, 10000 );
+    this( null, pipes, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
     }
 
   /**
@@ -223,7 +381,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( name, pipes, groupingFields, valueField, sumField, sumType, 10000 );
+    this( name, pipes, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
     }
 
   /**
