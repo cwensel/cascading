@@ -388,7 +388,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testSum() throws IOException
+  public void testSumBy() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
 
@@ -934,6 +934,78 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 1 ),
       new Tuple( "d", 1 ),
       new Tuple( "e", 1 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testMinBy() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "min" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "min" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "min" );
+
+    pipe = new MinBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "min" ), long.class, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 1 ),
+      new Tuple( "b", 1 ),
+      new Tuple( "c", 1 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 5 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testMaxBy() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "max" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "max" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "max" );
+
+    pipe = new MaxBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "max" ), long.class, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 5 ),
+      new Tuple( "b", 5 ),
+      new Tuple( "c", 4 ),
+      new Tuple( "d", 4 ),
+      new Tuple( "e", 5 ),
     };
 
     TupleEntryIterator iterator = flow.openSink();

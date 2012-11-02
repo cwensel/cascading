@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively. If the given
+  result fields declare a type, the result will be coerced to that type.
+
   Updated c.p.a.SumBy and c.p.a.AverageBy to honor result fields type declaration by coercing the result to the
   declared type.
 
