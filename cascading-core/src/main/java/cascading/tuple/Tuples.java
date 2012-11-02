@@ -20,6 +20,7 @@
 
 package cascading.tuple;
 
+import java.util.Collections;
 import java.util.List;
 
 import cascading.operation.OperationException;
@@ -84,6 +85,34 @@ public class Tuples
       destination[ i ] = coerce( tuple, i, types[ i ] );
 
     return destination;
+    }
+
+  /**
+   * Method frequency behaves the same as {@link Collections#frequency(java.util.Collection, Object)}.
+   * <p/>
+   * This method is a convenient way to test for all null values in a tuple.
+   *
+   * @param tuple
+   * @param value
+   * @return
+   */
+  public static int frequency( Tuple tuple, Object value )
+    {
+    return Collections.frequency( tuple.elements, value );
+    }
+
+  /**
+   * Method frequency behaves the same as {@link Collections#frequency(java.util.Collection, Object)}.
+   * <p/>
+   * This method is a convenient way to test for all null values in a tuple.
+   *
+   * @param tupleEntry
+   * @param value
+   * @return
+   */
+  public static int frequency( TupleEntry tupleEntry, Object value )
+    {
+    return Collections.frequency( tupleEntry.getTuple().elements, value );
     }
 
   /**

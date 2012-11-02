@@ -473,6 +473,9 @@ public class AggregateBy extends SubAssembly
     Fields sortFields = Fields.copyComparators( Fields.merge( argumentFields ), argumentFields );
     Fields argumentSelector = Fields.merge( groupingFields, sortFields );
 
+    if( argumentSelector.equals( Fields.NONE ) )
+      argumentSelector = Fields.ALL;
+
     Pipe[] functions = new Pipe[ pipes.length ];
 
     CompositeFunction function = new CompositeFunction( groupingFields, argumentFields, functors, threshold );

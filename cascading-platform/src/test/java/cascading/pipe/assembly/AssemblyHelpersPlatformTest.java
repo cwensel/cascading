@@ -273,6 +273,78 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testCountAll() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "count" ), "\t",
+      new Class[]{Integer.TYPE}, getOutputPath( "countall" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    CountBy countBy = new CountBy( new Fields( "char" ), new Fields( "count" ) );
+
+    pipe = new AggregateBy( pipe, Fields.NONE, 2, countBy );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 1, Pattern.compile( "^\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 13 )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testCountNullNotNull() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "notnull", "null" ), "\t",
+      new Class[]{Integer.TYPE, Integer.TYPE}, getOutputPath( "countnullnotnull" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    ExpressionFunction function = new ExpressionFunction( Fields.ARGS, "\"c\".equals($0) ? null : $0", String.class );
+    pipe = new Each( pipe, new Fields( "char" ), function, Fields.REPLACE );
+
+    CountBy countNotNull = new CountBy( new Fields( "char" ), new Fields( "notnull" ), CountBy.Include.NO_NULLS );
+    CountBy countNull = new CountBy( new Fields( "char" ), new Fields( "null" ), CountBy.Include.ONLY_NULLS );
+
+    pipe = new AggregateBy( pipe, Fields.NONE, 2, countNotNull, countNull );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 2, Pattern.compile( "^\\d+\t\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 9, 4 )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
   public void testCountMerge() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );

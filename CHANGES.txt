@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.a.CountBy to count all value occurrences, non-null values, or only null values, within a grouping. Using
+  grouping Fields.NONE provides an efficient count for a set of columns. Counting distinct values is not supported.
+
   Updated c.t.Fields to accept type information and to propagate type values along with fields.
 
   Updated c.s.l.TextDelimited and c.s.h.TextDelimited to take c.s.u.DelimitedParser on the constructor to allow
