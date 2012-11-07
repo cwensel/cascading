@@ -56,18 +56,34 @@ import org.slf4j.LoggerFactory;
  */
 public class PlatformRunner extends ParentRunner<Runner>
   {
+  public static final String PLATFORM_INCLUDES = "platform.includes";
   public static final String PLATFORM_RESOURCE = "cascading/platform/platform.properties";
   public static final String PLATFORM_CLASSNAME = "platform.classname";
 
   private static final Logger LOG = LoggerFactory.getLogger( PlatformRunner.class );
 
+  private Set<String> includes = new HashSet<String>();
   private List<Runner> runners;
 
   public PlatformRunner( Class<PlatformTestCase> testClass ) throws Throwable
     {
     super( testClass );
 
+    setIncludes();
     makeRunners();
+    }
+
+  private void setIncludes()
+    {
+    String includesString = System.getProperty( PLATFORM_INCLUDES );
+
+    if( includesString == null || includesString.isEmpty() )
+      return;
+
+    String[] split = includesString.split( "," );
+
+    for( String include : split )
+      includes.add( include.trim().toLowerCase() );
     }
 
   public static TestPlatform makeInstance( Class<? extends TestPlatform> type )
@@ -157,6 +173,12 @@ public class PlatformRunner extends ParentRunner<Runner>
       return;
 
     final String platformName = testPlatform.getName();
+
+    if( !includes.isEmpty() && !includes.contains( platformName.toLowerCase() ) )
+      {
+      LOG.info( "ignoring platform: {}", platformName );
+      return;
+      }
 
     LOG.info( "installing platform: {}", platformName );
     LOG.info( "running test: {}", javaClass.getName() );
