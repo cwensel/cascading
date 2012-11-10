@@ -214,7 +214,7 @@ public class ExpressionOperation extends BaseOperation<ExpressionOperation.Conte
       }
     catch( InvocationTargetException exception )
       {
-      throw new OperationException( "could not evaluate expression: " + expression, exception );
+      throw new OperationException( "could not evaluate expression: " + expression, exception.getTargetException() );
       }
     }
 
