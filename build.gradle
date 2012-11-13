@@ -18,21 +18,19 @@
  * limitations under the License.
  */
 
-
-
 /*
-  Using:
+ Using:
 
-  To run a single test:
-    > gradle -Dest.single=LocalTapPlatformTest :cascading-local:test -i
+ To run a single test:
+   > gradle -Dest.single=LocalTapPlatformTest :cascading-local:test -i
 
-  To run a single platform test:
-    > gradle -DplatformTest.single=CoGroupFieldedPipesPlatformTest :cascading-local:platformTest -i
+ To run a single platform test:
+   > gradle -DplatformTest.single=CoGroupFieldedPipesPlatformTest :cascading-local:platformTest -i
 
-  To remotely debug use
-    -Dtest.debug
+ To remotely debug use
+   -Dtest.debug
 
- */
+*/
 
 apply from: 'etc/version.gradle'
 
@@ -60,6 +58,7 @@ subprojects {
 
   apply plugin: 'maven'
   apply plugin: 'idea'
+  apply plugin: 'eclipse'
 
   apply from: '../etc/testing.gradle'
 
