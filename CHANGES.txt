@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.a.Unique to optionally filter out null values.
+
   Added c.o.e.ScriptFunction and c.o.e.ScriptFilter operations to allow for more expressive Java scripts.
 
   Added "platform.includes" system property so tests can be limited to specified platforms.

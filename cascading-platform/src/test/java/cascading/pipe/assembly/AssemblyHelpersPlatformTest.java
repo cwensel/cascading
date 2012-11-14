@@ -556,7 +556,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     ExpressionFunction function = new ExpressionFunction( Fields.ARGS, "3 == $0 ? null : $0", Integer.class );
     pipe = new Each( pipe, new Fields( "num" ), function, Fields.REPLACE );
 
-    pipe = new AverageBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), true, 2 );
+    pipe = new AverageBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), AverageBy.Include.NO_NULLS, 2 );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
