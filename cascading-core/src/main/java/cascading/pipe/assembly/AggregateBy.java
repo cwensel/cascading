@@ -104,6 +104,7 @@ public class AggregateBy extends SubAssembly
 
   private String name;
   private int threshold;
+  private Fields groupingFields;
   private Fields[] argumentFields;
   private Functor[] functors;
   private Aggregator[] aggregators;
@@ -464,6 +465,7 @@ public class AggregateBy extends SubAssembly
 
   protected void initialize( Fields groupingFields, Pipe[] pipes, Fields[] argumentFields, Functor[] functors, Aggregator[] aggregators )
     {
+    this.groupingFields = groupingFields;
     this.argumentFields = argumentFields;
     this.functors = functors;
     this.aggregators = aggregators;
@@ -497,6 +499,34 @@ public class AggregateBy extends SubAssembly
   protected void verify()
     {
 
+    }
+
+  /**
+   * Method getGroupingFields returns the Fields this instances will be grouping against.
+   *
+   * @return the current grouping fields
+   */
+  public Fields getGroupingFields()
+    {
+    return groupingFields;
+    }
+
+  /**
+   * Method getFieldDeclarations returns an array of Fields where each Field element in the array corresponds to the
+   * field declaration of the given Aggregator operations.
+   * <p/>
+   * Note the actual Fields values are returned, not planner resolved Fields.
+   *
+   * @return and array of Fields
+   */
+  public Fields[] getFieldDeclarations()
+    {
+    Fields[] fields = new Fields[ this.aggregators.length ];
+
+    for( int i = 0; i < aggregators.length; i++ )
+      fields[ i ] = aggregators[ i ].getFieldDeclaration();
+
+    return fields;
     }
 
   protected Fields[] getArgumentFields()
