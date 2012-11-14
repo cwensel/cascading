@@ -87,6 +87,6 @@ public class AssertExpression extends ExpressionOperation implements ValueAssert
     TupleEntry input = assertionCall.getArguments();
 
     if( !(Boolean) evaluate( assertionCall.getContext(), input ) )
-      BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), expression );
+      BaseAssertion.throwFail( "argument tuple: %s did not evaluate to true with expression: %s", input.getTuple().print(), block );
     }
   }

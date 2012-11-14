@@ -44,7 +44,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class ExpressionFunction extends ExpressionOperation implements Function<ExpressionOperation.Context>
+public class ExpressionFunction extends ExpressionOperation implements Function<ScriptOperation.Context>
   {
   /**
    * Constructor ExpressionFunction creates a new ExpressionFunction instance.

@@ -94,7 +94,7 @@ public class ExpressionTest extends CascadingTestCase
       }
     }
 
-  private Comparable evaluate( String expression, TupleEntry tupleEntry )
+  private Object evaluate( String expression, TupleEntry tupleEntry )
     {
     ExpressionFunction function = getFunction( expression );
 
@@ -104,7 +104,7 @@ public class ExpressionTest extends CascadingTestCase
     return function.evaluate( call.getContext(), tupleEntry );
     }
 
-  private Comparable evaluate( String expression, Class type, TupleEntry tupleEntry )
+  private Object evaluate( String expression, Class type, TupleEntry tupleEntry )
     {
     ExpressionFunction function = getFunction( expression, type );
 
@@ -114,7 +114,7 @@ public class ExpressionTest extends CascadingTestCase
     return function.evaluate( call.getContext(), tupleEntry );
     }
 
-  private Comparable evaluate( String expression, String[] names, Class[] types, TupleEntry tupleEntry )
+  private Object evaluate( String expression, String[] names, Class[] types, TupleEntry tupleEntry )
     {
     ExpressionFunction function = getFunction( expression, names, types );
 

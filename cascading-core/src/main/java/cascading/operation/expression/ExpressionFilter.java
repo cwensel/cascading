@@ -44,7 +44,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
  */
-public class ExpressionFilter extends ExpressionOperation implements Filter<ExpressionOperation.Context>
+public class ExpressionFilter extends ExpressionOperation implements Filter<ScriptOperation.Context>
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
