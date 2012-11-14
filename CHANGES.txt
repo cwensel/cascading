@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.0.7 [unreleased]
+2.0.7
 
   Fixed issue where c.t.Tap instances were not presented resolved c.t.Fields instances in local mode during planning.
 
