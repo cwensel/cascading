@@ -339,7 +339,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   protected abstract void dumpDebugInfo();
 
   /**
-   * Method isSuccessful returns true if this step completed successfully.
+   * Method isSuccessful returns true if this step completed successfully or was skipped.
    *
    * @return the successful (type boolean) of this FlowStepJob object.
    */
@@ -349,7 +349,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       latch.await(); // freed after step completes in #start()
 
-      return flowStepStats.isSuccessful();
+      return flowStepStats.isSuccessful() || flowStepStats.isSkipped();
       }
     catch( InterruptedException exception )
       {

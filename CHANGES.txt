@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Fixed issue where a c.f.FlowStep being skipped was not considered successful after 2.0.7 merge.
+
 2.1.0
 
   Fixed issue where c.p.a.Coerce would coerce a null value to 0 if the coerce type was a j.l.Number
