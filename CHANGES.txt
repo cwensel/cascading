@@ -41,6 +41,13 @@ Cascading Change Log
 
   Updated build and tests to simplify development of alternative planners.
 
+2.0.7
+
+  Fixed issue where c.t.Tap instances were not presented resolved c.t.Fields instances in local mode during planning.
+
+  Fixed issue where Hadoop forgets past job completion status of a job during very long running c.f.Flows and
+  throws a NPE when queried for the result.
+
 2.0.6
 
   Added "cascading.step.display.id.truncate" property to allow simple truncation of flow and step ID values in

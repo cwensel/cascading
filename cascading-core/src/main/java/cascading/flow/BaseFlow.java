@@ -202,8 +202,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     {
     presentSourceFields( pipeGraph );
 
-    pipeGraph = new ElementGraph( pipeGraph );
-
     presentSinkFields( pipeGraph );
 
     return new ElementGraph( pipeGraph );
@@ -224,10 +222,16 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   protected void presentSourceFields( ElementGraph pipeGraph )
     {
     for( Tap tap : sources.values() )
-      tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      {
+      if( pipeGraph.containsVertex( tap ) )
+        tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      }
 
     for( Tap tap : checkpoints.values() )
-      tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      {
+      if( pipeGraph.containsVertex( tap ) )
+        tap.presentSourceFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      }
     }
 
   /** Force a Scheme to fetch any fields from a meta-data store */
@@ -245,13 +249,19 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   protected void presentSinkFields( ElementGraph pipeGraph )
     {
     for( Tap tap : sinks.values() )
-      tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      {
+      if( pipeGraph.containsVertex( tap ) )
+        tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      }
 
     for( Tap tap : checkpoints.values() )
-      tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      {
+      if( pipeGraph.containsVertex( tap ) )
+        tap.presentSinkFields( getFlowProcess(), getFieldsFor( pipeGraph, tap ) );
+      }
     }
 
-  private Fields getFieldsFor( ElementGraph pipeGraph, Tap tap )
+  protected Fields getFieldsFor( ElementGraph pipeGraph, Tap tap )
     {
     return pipeGraph.outgoingEdgesOf( tap ).iterator().next().getOutValuesFields();
     }
