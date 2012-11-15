@@ -998,7 +998,7 @@ public class Splice extends Pipe
     for( Scope scope : incomingScopes )
       incomingFields.put( scope.getName(), scope.getIncomingSpliceFields() );
 
-    Fields outGroupingFields = new Fields();
+    Fields outGroupingFields = Fields.NONE;
 
     int offset = 0;
     for( Pipe pipe : pipes ) // need to retain order of pipes
@@ -1007,10 +1007,13 @@ public class Splice extends Pipe
       Fields pipeGroupingSelector = groupingSelectors.get( pipeName );
       Fields incomingField = incomingFields.get( pipeName );
 
-      Fields offsetFields = incomingField.selectPos( pipeGroupingSelector, offset );
-      Fields resolvedSelect = declared.select( offsetFields );
+      if( !pipeGroupingSelector.isNone() )
+        {
+        Fields offsetFields = incomingField.selectPos( pipeGroupingSelector, offset );
+        Fields resolvedSelect = declared.select( offsetFields );
 
-      outGroupingFields = outGroupingFields.append( resolvedSelect );
+        outGroupingFields = outGroupingFields.append( resolvedSelect );
+        }
 
       offset += incomingField.size();
       }
