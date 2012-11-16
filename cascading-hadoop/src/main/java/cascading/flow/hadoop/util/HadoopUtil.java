@@ -492,7 +492,7 @@ public class HadoopUtil
     if( attributes == null )
       {
       LOG.debug( "unable to get Hadoop manifest attributes" );
-      new PlatformInfo( "Hadoop", null, null );
+      return new PlatformInfo( "Hadoop", null, null );
       }
 
     String vendor = attributes.getValue( "Implementation-Vendor" );
