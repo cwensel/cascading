@@ -441,6 +441,26 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     Charset.forName( this.charsetName );
     }
 
+  /**
+   * Method getDelimiter returns the delimiter used to parse fields from the current line of text.
+   *
+   * @return a String
+   */
+  public String getDelimiter()
+    {
+    return delimitedParser.getDelimiter();
+    }
+
+  /**
+   * Method getQuote returns the quote string, if any, used to encapsulate each field in a line to delimited text.
+   *
+   * @return a String
+   */
+  public String getQuote()
+    {
+    return delimitedParser.getQuote();
+    }
+
   public LineNumberReader createInput( InputStream inputStream )
     {
     try

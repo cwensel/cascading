@@ -136,6 +136,16 @@ public class DelimitedParser implements Serializable
       throw new IllegalArgumentException( "num of types must equal number of fields: " + sinkFields.printVerbose() + ", found: " + types.length );
     }
 
+  public String getDelimiter()
+    {
+    return delimiter;
+    }
+
+  public String getQuote()
+    {
+    return quote;
+    }
+
   /**
    * Method createEscapePatternFor creates a regex {@link java.util.regex.Pattern} cleaning quote escapes from a String.
    * <p/>

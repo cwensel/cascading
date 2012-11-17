@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Added quote and delimiter getters to c.s.l.TextDelimited and c.s.h.TextDelimited.
+
   Fixed issue where a c.f.FlowStep being skipped was not considered successful after 2.0.7 merge.
 
 2.1.0

@@ -773,6 +773,26 @@ public class TextDelimited extends TextLine
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
 
+  /**
+   * Method getDelimiter returns the delimiter used to parse fields from the current line of text.
+   *
+   * @return a String
+   */
+  public String getDelimiter()
+    {
+    return delimitedParser.getDelimiter();
+    }
+
+  /**
+   * Method getQuote returns the quote string, if any, used to encapsulate each field in a line to delimited text.
+   *
+   * @return a String
+   */
+  public String getQuote()
+    {
+    return delimitedParser.getQuote();
+    }
+
   @Override
   public boolean isSymmetrical()
     {
