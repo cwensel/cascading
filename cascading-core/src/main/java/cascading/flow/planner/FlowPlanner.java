@@ -112,7 +112,8 @@ public abstract class FlowPlanner
   /**
    * Method buildFlow renders the actual Flow instance.
    *
-   * @param flowDef@return Flow
+   * @param flowDef
+   * @return Flow
    */
   public abstract Flow buildFlow( FlowDef flowDef );
 
