@@ -216,6 +216,12 @@ public class HadoopPlatform extends TestPlatform
     }
 
   @Override
+  public boolean remoteRemove( String outputFile, boolean recursive ) throws IOException
+    {
+    return fileSys.delete( new Path( outputFile ), recursive );
+    }
+
+  @Override
   public Tap getTap( Scheme scheme, String filename, SinkMode mode )
     {
     return new Hfs( scheme, filename, mode );

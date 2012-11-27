@@ -101,6 +101,8 @@ public abstract class TestPlatform
 
   public abstract boolean remoteExists( String outputFile ) throws IOException;
 
+  public abstract boolean remoteRemove( String outputFile, boolean recursive ) throws IOException;
+
   public abstract FlowProcess getFlowProcess();
 
   public abstract FlowConnector getFlowConnector( Map<Object, Object> properties );

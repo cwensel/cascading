@@ -42,6 +42,7 @@ import cascading.tap.Tap;
 import cascading.tap.local.FileTap;
 import cascading.tap.local.TemplateTap;
 import cascading.tuple.Fields;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Class LocalPlatform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
@@ -81,6 +82,29 @@ public class LocalPlatform extends TestPlatform
   public boolean remoteExists( String outputFile ) throws IOException
     {
     return new File( outputFile ).exists();
+    }
+
+  @Override
+  public boolean remoteRemove( String outputFile, boolean recursive ) throws IOException
+    {
+    if( !remoteExists( outputFile ) )
+      return true;
+
+    File file = new File( outputFile );
+
+    if( !recursive || !file.isDirectory() )
+      return file.delete();
+
+    try
+      {
+      FileUtils.deleteDirectory( file );
+      }
+    catch( IOException exception )
+      {
+      return false;
+      }
+
+    return !file.exists();
     }
 
   @Override
