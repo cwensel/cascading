@@ -22,6 +22,7 @@ package cascading.scheme;
 
 import java.io.IOException;
 
+import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.pipe.Pipe;
@@ -197,5 +198,28 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
     assertEquals( iterator.next().getObject( 0 ), "first,second,third,fourth,fifth" );
 
     iterator.close();
+    }
+
+  @Test
+  public void testStrict() throws IOException
+    {
+    Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
+
+    Tap input = getPlatform().getDelimitedFile( fields, false, false, ",", "\"", null, testDelimitedExtraField, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( fields, false, false, ",", "\"", null, getOutputPath( "strict" + ComparePlatformsTest.NONDETERMINISTIC ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipe" );
+
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
+
+    try
+      {
+      flow.complete();
+      fail( "should fail on too many fields" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
     }
   }

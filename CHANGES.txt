@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Fix for c.s.u.DelimitedParser not fully honoring the default strict parsing policy. This resolution may cause
+  some text delimited files to fail if they have arbitrary numbers of fields.
+
   Added quote and delimiter getters to c.s.l.TextDelimited and c.s.h.TextDelimited.
 
   Fixed issue where a c.f.FlowStep being skipped was not considered successful after 2.0.7 merge.

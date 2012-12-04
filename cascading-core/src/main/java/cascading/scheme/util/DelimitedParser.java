@@ -287,7 +287,7 @@ public class DelimitedParser implements Serializable
 
   public Object[] parseLine( String line )
     {
-    Object[] split = createSplit( line, splitPattern, numValues );
+    Object[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
 
     if( numValues != 0 && split.length != numValues )
       {
@@ -298,7 +298,7 @@ public class DelimitedParser implements Serializable
 
       LOG.warn( message );
 
-      Object[] array = new Object[ numValues ];
+      Object[] array = new Object[ Math.max( numValues, split.length ) ];
       Arrays.fill( array, "" );
       System.arraycopy( split, 0, array, 0, split.length );
 
