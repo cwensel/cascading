@@ -26,12 +26,16 @@ import cascading.management.CascadingServices;
 import cascading.management.DocumentService;
 import cascading.management.MetricsService;
 import cascading.provider.CascadingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class BaseState implements CascadingService
   {
+  private static final Logger LOG = LoggerFactory.getLogger( BaseState.class );
+
   private String id;
 
   MetricsService metricsService = new CascadingServices.NullMetricsService();
@@ -63,10 +67,29 @@ public abstract class BaseState implements CascadingService
     documentService = cascadingServices.getDocumentService();
     }
 
-  public void startService()
+  /** May be called more than once. Each internal service should be idempotent. */
+  public synchronized void startService()
     {
-    metricsService.startService();
-    documentService.startService();
+    if( !safelyStartService( metricsService ) )
+      metricsService = new CascadingServices.NullMetricsService();
+
+    if( !safelyStartService( documentService ) )
+      documentService = new CascadingServices.NullDocumentService();
+    }
+
+  private boolean safelyStartService( CascadingService service )
+    {
+    try
+      {
+      service.startService();
+      return true;
+      }
+    catch( Throwable throwable )
+      {
+      LOG.warn( "unable to start cascading service: {}, with message: {}", service.getClass().getName(), throwable.getMessage() );
+      LOG.debug( "with exception", throwable );
+      return false;
+      }
     }
 
   public void stopService()
