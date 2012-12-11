@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.0.8 [unreleased]
+2.0.8
 
   Updated c.m.CascadingServices to more robustly load optional services. Service agent jar may now be optionally defined
   in a cascading-service.properties file from the CLASSPATH with the "cascading.management.service.jar" property.
