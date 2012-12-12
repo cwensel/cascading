@@ -561,6 +561,9 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     if( skipHeader && sourceCall.getContext().getLineNumber() == 1 ) // todo: optimize this away
       line = sourceCall.getContext().readLine();
 
+    if( line == null )
+      return false;
+
     Object[] split = delimitedParser.parseLine( line );
 
     // assumption it is better to re-use than to construct new

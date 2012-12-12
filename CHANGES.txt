@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Fixed NPE with c.s.l.TextDelimited when line after header was null.
+
   Fix for c.s.u.DelimitedParser not fully honoring the default strict parsing policy. This resolution may cause
   some text delimited files to fail if they have arbitrary numbers of fields.
 
