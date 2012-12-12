@@ -50,6 +50,11 @@ Cascading Change Log
 
   Updated build and tests to simplify development of alternative planners.
 
+2.0.8
+
+  Updated c.m.CascadingServices to more robustly load optional services. Service agent jar may now be optionally defined
+  in a cascading-service.properties file from the CLASSPATH with the "cascading.management.service.jar" property.
+
 2.0.7
 
   Fixed issue where c.t.Tap instances were not presented resolved c.t.Fields instances in local mode during planning.

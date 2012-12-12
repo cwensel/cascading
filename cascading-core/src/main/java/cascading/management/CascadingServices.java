@@ -22,7 +22,9 @@ package cascading.management;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,19 +43,27 @@ import org.slf4j.LoggerFactory;
  * Class CascadingServices is the root class for pluggable services Cascading can call out to for distributed
  * monitoring and management systems.
  * <p/>
- * Be default all services will be loaded from the jar {@link #DEFAULT_PROPERTIES} resource is found in. If the
+ * Be default all services will be loaded from the jar {@code cascading/management/service.properties}
+ * ({@link #DEFAULT_PROPERTIES}) resource is found in. If the
  * property {@link #CONTAINER_ENABLED} value is {@code false}, a ClassLoader container will not be created.
  * <p/>
  * For this to work, all service implementation and dependencies must be archived into a single jar.
  * <p/>
  * If any packages in the jar should be excluded, set a comma delimited list of names via the {@link #CONTAINER_EXCLUDE}
  * property.
+ * <p/>
+ * If the file {@code cascading-service.properties} ({@link CascadingServices#CASCADING_SERVICES}) is found in the
+ * CLASSPATH, the {@code cascading.management.service.jar} property value will be used to search for
+ * {@code cascading/management/service.properties} resource.
  *
  * @see CascadingService
  */
 public class CascadingServices
   {
   private static final Logger LOG = LoggerFactory.getLogger( CascadingServices.class );
+
+  public static final String CASCADING_SERVICES = "cascading-service.properties";
+  public static final String CASCADING_SERVICES_JAR = "cascading.management.service.jar";
 
   public static final String DEFAULT_PROPERTIES = "cascading/management/service.properties";
   public static final String CONTAINER_ENABLED = "cascading.management.container.enabled";
@@ -71,21 +81,29 @@ public class CascadingServices
 
   static
     {
-    defaultProperties = new Properties();
+    ClassLoader classLoader = CascadingServices.class.getClassLoader();
 
-    InputStream input = CascadingServices.class.getClassLoader().getResourceAsStream( DEFAULT_PROPERTIES );
+    // load all properties from cascading-services.properties
+    defaultProperties = loadProperties( new Properties(), CASCADING_SERVICES, classLoader );
 
-    try
-      {
-      if( input != null )
-        defaultProperties.load( input );
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "unable to load properties from {}", DEFAULT_PROPERTIES, exception );
-      }
+    libraryURL = getLibraryURL();
 
-    URL url = CascadingServices.class.getClassLoader().getResource( DEFAULT_PROPERTIES );
+    if( libraryURL != null )
+      classLoader = new URLClassLoader( new URL[]{libraryURL} );
+
+    // load additional, if only, properties from file in resource jar
+    defaultProperties = loadProperties( new Properties( defaultProperties ), DEFAULT_PROPERTIES, classLoader );
+
+    // if resources jar is on primary classpath, find the jar so we can isolate it when loading services
+    if( libraryURL == null )
+      libraryURL = parseLibraryURL( classLoader, DEFAULT_PROPERTIES );
+
+    exclusions = Util.removeNulls( defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," ) );
+    }
+
+  private static URL parseLibraryURL( ClassLoader classLoader, String resource )
+    {
+    URL url = classLoader.getResource( resource );
 
     if( url != null )
       {
@@ -98,7 +116,7 @@ public class CascadingServices
           path = path.substring( 0, endIndex );
 
         if( path.endsWith( ".jar" ) )
-          libraryURL = new URL( path );
+          return new URL( path );
         }
       catch( Exception exception )
         {
@@ -106,7 +124,57 @@ public class CascadingServices
         }
       }
 
-    exclusions = Util.removeNulls( defaultProperties.getProperty( CONTAINER_EXCLUDE, "" ).split( "," ) );
+    return null;
+    }
+
+  private static URL getLibraryURL()
+    {
+    String property = defaultProperties.getProperty( CASCADING_SERVICES_JAR );
+
+    if( property == null )
+      return null;
+
+    try
+      {
+      URI uri = URI.create( property );
+
+      if( !uri.isAbsolute() )
+        uri = new URI( "file", uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getFragment() );
+
+      return uri.toURL();
+      }
+    catch( Exception exception )
+      {
+      LOG.warn( "property: {}, has invalid URL value: {}", CASCADING_SERVICES_JAR, property );
+      }
+
+    return null;
+    }
+
+  private static Properties loadProperties( Properties properties, String resource, ClassLoader classLoader )
+    {
+    InputStream input = classLoader.getResourceAsStream( resource );
+
+    try
+      {
+      if( input != null )
+        {
+        URL url = parseLibraryURL( classLoader, resource );
+
+        if( url != null )
+          LOG.info( "loading properties: {}, from jar: {}", resource, url );
+        else
+          LOG.info( "loading properties: {}", resource );
+
+        properties.load( input );
+        }
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to load properties from {}", resource, exception );
+      }
+
+    return properties;
     }
 
   private synchronized ServiceLoader getServiceUtil()
@@ -116,7 +184,7 @@ public class CascadingServices
 
   public CascadingServices( Map<Object, Object> properties )
     {
-    this.properties = properties;
+    this.properties = PropertyUtil.createProperties( properties, defaultProperties );
     this.enableContainer = PropertyUtil.getProperty( properties, CONTAINER_ENABLED, defaultProperties.getProperty( CONTAINER_ENABLED, "false" ) ).equalsIgnoreCase( "true" );
     }
 
@@ -205,6 +273,7 @@ public class CascadingServices
         }
       catch( Throwable throwable )
         {
+        // safe to throw exception here so message is logged
         LOG.error( "failed stopping cascading service", throwable );
         throw new CascadeException( "failed stopping cascading service", throwable );
         }
