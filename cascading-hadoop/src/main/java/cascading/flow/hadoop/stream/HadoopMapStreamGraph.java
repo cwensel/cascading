@@ -90,7 +90,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
       String property = conf.getRaw( "cascading.step.accumulated.source.conf." + Tap.id( (Tap) source ) );
 
       if( property == null )
-        throw new IllegalStateException( "accumulated source conf property missing" );
+        throw new IllegalStateException( "accumulated source conf property missing for: " + ( (Tap) source ).getIdentifier() );
 
       conf = getSourceConf( hadoopProcess, conf, property );
       flowProcess = new HadoopFlowProcess( hadoopProcess, conf );
