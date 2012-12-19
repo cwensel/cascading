@@ -21,6 +21,7 @@
 package cascading.operation.aggregator;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
@@ -40,7 +41,7 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   public static final String FIELD_NAME = "sum";
 
   /** Field type */
-  private Class type = double.class;
+  private Type type = double.class;
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()

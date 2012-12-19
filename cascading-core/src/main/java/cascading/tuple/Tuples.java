@@ -20,6 +20,7 @@
 
 package cascading.tuple;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
@@ -124,6 +125,25 @@ public class Tuples
    *
    * @param tuple of type Tuple
    * @param pos   of type int
+   * @param type  of type Type
+   * @return returns the value coerced
+   */
+  public static Object coerce( Tuple tuple, int pos, Type type )
+    {
+    Object value = tuple.getObject( pos );
+
+    return coerce( value, type );
+    }
+
+  /**
+   * Method coerce returns the value in the tuple at the given position to the requested type.
+   * <p/>
+   * If the given type is a primitive (long), and the tuple value is null, 0 is returned.
+   * <p/>
+   * If the type is an Object (Long), and the tuple value is null, null is returned.
+   *
+   * @param tuple of type Tuple
+   * @param pos   of type int
    * @param type  of type Class
    * @return returns the value coerced
    */
@@ -135,6 +155,11 @@ public class Tuples
     }
 
   public static Object coerce( Object value, Class type )
+    {
+    return coerce( value, (Type) type );
+    }
+
+  public static Object coerce( Object value, Type type )
     {
     if( value != null && type == value.getClass() )
       return value;
@@ -182,7 +207,10 @@ public class Tuples
       return toBooleanObject( value );
 
     if( type != null )
-      throw new OperationException( "could not coerce value, " + value + " to type: " + type.getName() );
+      {
+      String name = type instanceof Class ? ( (Class) type ).getName() : type.toString();
+      throw new OperationException( "could not coerce value, " + value + " to type: " + name );
+      }
 
     return null;
     }

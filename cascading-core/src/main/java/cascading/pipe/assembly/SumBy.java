@@ -77,7 +77,7 @@ public class SumBy extends AggregateBy
       if( !declaredFields.hasTypes() )
         throw new IllegalArgumentException( "result type must be declared " );
 
-      this.sumType = declaredFields.getType( 0 );
+      this.sumType = declaredFields.getTypeClass( 0 );
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );

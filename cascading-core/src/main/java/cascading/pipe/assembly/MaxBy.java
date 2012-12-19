@@ -76,7 +76,7 @@ public class MaxBy extends AggregateBy
       if( !declaredFields.hasTypes() )
         throw new IllegalArgumentException( "result type must be declared " );
 
-      this.type = declaredFields.getType( 0 );
+      this.type = declaredFields.getTypeClass( 0 );
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );

@@ -141,7 +141,7 @@ public class AverageBy extends AggregateBy
       public Context( Fields fieldDeclaration )
         {
         if( fieldDeclaration.hasTypes() )
-          this.type = fieldDeclaration.getType( 0 );
+          this.type = fieldDeclaration.getTypeClass( 0 );
         }
 
       public Context reset()

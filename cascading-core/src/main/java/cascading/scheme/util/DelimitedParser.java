@@ -22,6 +22,7 @@ package cascading.scheme.util;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -148,7 +149,7 @@ public class DelimitedParser implements Serializable
       return;
 
     if( types == null && sourceFields.hasTypes() )
-      this.types = sourceFields.getTypes(); // gets a copy
+      this.types = sourceFields.getTypesClasses(); // gets a copy
 
     this.sourceFields = sourceFields;
     this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero

@@ -22,6 +22,7 @@ package cascading.tuple;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,7 +135,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   Kind kind;
 
   /** Field types */
-  Class[] types;
+  Type[] types;
   /** Field comparators */
   Comparator[] comparators;
 
@@ -163,7 +164,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return names;
     }
 
-  public static Class[] types( Class... types )
+  public static Type[] types( Type... types )
     {
     return types;
     }
@@ -560,12 +561,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       this.fields = validate( fields );
     }
 
-  public Fields( Comparable field, Class type )
+  public Fields( Comparable field, Type type )
     {
     this( names( field ), types( type ) );
     }
 
-  public Fields( Comparable[] fields, Class[] types )
+  public Fields( Comparable[] fields, Type[] types )
     {
     this( fields );
 
@@ -1083,7 +1084,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     if( this.types != null )
       {
-      List<Class> classes = new LinkedList<Class>();
+      List<Type> classes = new LinkedList<Type>();
       Collections.addAll( classes, this.types );
 
       for( int i : pos )
@@ -1201,7 +1202,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     for( int i = 0; i < pos.length; i++ )
       newFields[ pos[ i ] ] = to.fields[ i ];
 
-    Class[] newTypes = null;
+    Type[] newTypes = null;
 
     if( this.types != null && to.types != null )
       {
@@ -1522,38 +1523,65 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return result;
     }
 
-  public Class getType( int i )
+  public Type getType( int pos )
     {
     if( !hasTypes() )
       return null;
 
-    return this.types[ i ];
+    return this.types[ pos ];
     }
 
-  protected void setType( int i, Class type )
+  /**
+   * Returns the Class for the given position value.
+   *
+   * @param pos
+   * @return
+   */
+  public Class getTypeClass( int pos )
+    {
+    return (Class) getType( pos );
+    }
+
+  protected void setType( int pos, Type type )
     {
     if( type == null )
       throw new IllegalArgumentException( "type may not be null" );
 
-    this.types[ i ] = type;
+    this.types[ pos ] = type;
+    }
+
+  /**
+   * Returns a copy of the current types Type[] if any, else null.
+   *
+   * @return
+   */
+  public Type[] getTypes()
+    {
+    return copyTypes( types, size() );
     }
 
   /**
    * Returns a copy of the current types Class[] if any, else null.
    *
+   * May fail if all types are not an instance of {@link Class}.
+   *
    * @return
    */
-  public Class[] getTypes()
-    {
-    return copyTypes( types, size() );
-    }
-
-  private static Class[] copyTypes( Class[] types, int size )
+  public Class[] getTypesClasses()
     {
     if( types == null )
       return null;
 
-    Class[] copy = new Class[ size ];
+    Type[] local = copyTypes( types, size() );
+    return Arrays.copyOfRange( local, 0, local.length, Class[].class );
+    }
+
+  private static Type[] copyTypes( Type[] types, int size )
+    {
+    if( types == null )
+      return null;
+
+    Type[] copy = new Type[ size ];
 
     if( types != null )
       {
