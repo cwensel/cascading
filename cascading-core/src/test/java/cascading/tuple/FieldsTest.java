@@ -51,6 +51,58 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  public void testAppendArray()
+    {
+    Fields fieldA = new Fields(0);
+    Fields[] fieldArray = {new Fields(0), new Fields(1)};
+
+    Fields appended = fieldA.append(fieldArray);
+
+    assertEquals("not equal: ", 3, appended.size());
+    assertEquals("not equal: ", 0, appended.get(0));
+    assertEquals("not equal: ", 1, appended.get(1));
+    assertEquals("not equal: ", 2, appended.get(2));
+    }
+
+  public void testAppendArray2()
+    {
+    Fields fieldA = new Fields(0);
+    Fields [] fieldArray = {new Fields(1),new Fields(2)};
+
+    Fields appended = fieldA.append( fieldArray );
+
+    assertEquals("not equal: ", 3, appended.size());
+    assertEquals("not equal: ", 0, appended.get(0));
+    assertEquals("not equal: ", 1, appended.get(1));
+    assertEquals("not equal: ", 2, appended.get(2));
+    }
+
+  public void testAppendArrayNamed()
+    {
+    Fields fieldA = new Fields("a");
+    Fields[] fieldArray = {new Fields("b"), new Fields("c")};
+
+    Fields appended = fieldA.append(fieldArray);
+
+    assertEquals("not equal: ", 3, appended.size());
+    assertEquals("not equal: ", "a", appended.get(0));
+    assertEquals("not equal: ", "b", appended.get(1));
+    assertEquals("not equal: ", "c", appended.get(2));
+    }
+
+  public void testAppendArrayNamed2()
+    {
+    Fields fieldA = new Fields("a");
+    Fields[] fieldArray = {new Fields(0), new Fields(1)};
+
+    Fields appended = fieldA.append(fieldArray);
+
+    assertEquals("not equal: ", 3, appended.size());
+    assertEquals("not equal: ", "a", appended.get(0));
+    assertEquals("not equal: ", 1, appended.get(1));
+    assertEquals("not equal: ", 2, appended.get(2));
+    }
+
   public void testAppend()
     {
     Fields fieldA = new Fields( 0, 1 );
