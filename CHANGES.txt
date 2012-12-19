@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Fixed issue where subsequent c.p.Merge pipes in a pipeline path would obscure prior Merges preventing a c.t.Tap
+  insertion during planning resulting in a missing Tap configuration resource property.
+
   Fixed NPE with c.s.l.TextDelimited when line after header was null.
 
   Fix for c.s.u.DelimitedParser not fully honoring the default strict parsing policy. This resolution may cause

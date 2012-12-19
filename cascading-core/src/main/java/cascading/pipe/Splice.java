@@ -1290,12 +1290,15 @@ public class Splice extends Pipe
       {
       buffer.append( "[by:" );
 
-      for( String name : map.keySet() )
+      // important to retain incoming pipe order
+      for( Map.Entry<String, Fields> entry : keyFieldsMap.entrySet() )
         {
+        String name = entry.getKey();
+
         if( map.size() > 1 )
           buffer.append( name ).append( ":" );
 
-        buffer.append( map.get( name ).print() );
+        buffer.append( map.get( name ).print() ); // get resolved keys
         }
 
       if( isSelfJoin() )

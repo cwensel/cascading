@@ -151,9 +151,11 @@ public class StreamGraph
     while( iterator.hasNext() )
       iterator.next().bind( this );
 
+    iterator = getReversedTopologicalOrderIterator();
+
     // initialize all the ducts
-    for( Duct duct : getAllDucts() )
-      duct.initialize();
+    while( iterator.hasNext() )
+      iterator.next().initialize();
     }
 
   /** Calls prepare starting at the tail and working backwards */

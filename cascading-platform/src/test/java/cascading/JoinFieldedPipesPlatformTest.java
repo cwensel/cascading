@@ -1004,6 +1004,8 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   /**
    * Same source as rightmost
    *
+   * should be a single job as the same file accumulates into the joins
+   *
    * @throws Exception
    */
   @Test
@@ -1036,6 +1038,8 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe splice2 = new HashJoin( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
+
+//    flow.writeDOT( "joinaroundrightmost.dot" );
 
     if( getPlatform().isMapReduce() )
       assertEquals( "wrong number of steps", 1, flow.getFlowSteps().size() );
@@ -1086,8 +1090,10 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
+//    flow.writeDOT( "joinaroundleftmost.dot" );
+
     if( getPlatform().isMapReduce() )
-      assertEquals( "wrong number of steps", 1, flow.getFlowSteps().size() );
+      assertEquals( "wrong number of steps", 2, flow.getFlowSteps().size() );
 
     flow.complete();
 
@@ -1197,6 +1203,23 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( actual.contains( new Tuple( "2\tb\t2\tB\t2\tb\tB" ) ) );
     }
 
+  /**
+   *
+   * here the same file is fed into the same HashJoin.
+   *
+   * This is three jobs.
+   *
+   * a temp tap is inserted before the accumulated branch for two reasons on the common HashJoin
+   *
+   * it is assumed the accumulated side is filtered down, so pushing to disk will preserve io
+   * if accumulated side was streamed instead via a fork, only part of the file will accumulate into the HashJoin
+   *
+   *   /-T-\ <-- accumulated
+   * T      HJ
+   *   \---/ <-- streamed
+   *
+   * @throws Exception
+   */
   @Test
   public void testJoinSameSourceIntoJoin() throws Exception
     {
@@ -1228,8 +1251,10 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
+//    flow.writeDOT( "joinsamesourceintojoin.dot" );
+
     if( getPlatform().isMapReduce() )
-      assertEquals( "wrong number of steps", 2, flow.getFlowSteps().size() );
+      assertEquals( "wrong number of steps", 3, flow.getFlowSteps().size() );
 
     flow.complete();
 

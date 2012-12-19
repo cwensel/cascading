@@ -45,8 +45,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
-import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
+import static cascading.flow.planner.ElementGraphs.*;
 
 /**
  *
@@ -156,9 +155,14 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
 
           Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( elementGraph, source, (Splice) rhs );
 
-          if( sourcePaths.containsKey( 0 ) )
+          boolean isStreamed = isOnlyStreamedPath( sourcePaths );
+          boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
+          boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
+
+          if( isStreamed || isBoth )
             step.addStreamedSourceFor( (HashJoin) rhs, source );
-          else
+
+          if( isAccumulated || isBoth )
             step.addAccumulatedSourceFor( (HashJoin) rhs, source );
           }
         else if( rhs instanceof Pipe ) // add relevant traps to step

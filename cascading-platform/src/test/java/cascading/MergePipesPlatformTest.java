@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.flow.planner.PlannerException;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
@@ -438,7 +439,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
 
     // two jobs, we must put a temp tap between the Merge and HashJoin
     if( getPlatform().isMapReduce() )
-      assertEquals( "wrong num jobs", streamed ? 2 : 1, flow.getFlowSteps().size() );
+      assertEquals( "wrong num jobs", !streamed ? 2 : 1, flow.getFlowSteps().size() );
 
     flow.complete();
 
@@ -502,5 +503,113 @@ public class MergePipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 8 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinStreamedStreamedMerge() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( true, true, true, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinAccumulatedAccumulatedMerge() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( false, false, true, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinStreamedAccumulatedMerge() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( true, false, true, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinAccumulatedStreamedMerge() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( false, true, true, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinStreamedStreamed() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( true, true, false, 2 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinAccumulatedAccumulated() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( false, false, false, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinStreamedAccumulated() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( true, false, false, 3 );
+    }
+
+  @Test
+  public void testHashJoinMergeIntoHashJoinAccumulatedStreamed() throws Exception
+    {
+    runMultiHashJoinIntoMergeIntoHashJoin( false, true, false, 3 );
+    }
+
+  private void runMultiHashJoinIntoMergeIntoHashJoin( boolean firstStreamed, boolean secondStreamed, boolean interMerge, int expectedSteps ) throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+    Tap sourceLowerOffset = getPlatform().getTextFile( inputFileLowerOffset );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "offset", sourceLowerOffset );
+
+    String name = firstStreamed ? "firstStreamed" : "firstAccumulated";
+    name += secondStreamed ? "secondStreamed" : "secondAccumulated";
+    name += interMerge ? "interMerge" : "noInterMerge";
+
+    String path = "multihashjoinintomergeintohashjoin" + name;
+    Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new RegexSplitter( new Fields( "num1", "char1" ), " " ) );
+    Pipe pipeOffset = new Each( new Pipe( "offset" ), new Fields( "line" ), new RegexSplitter( new Fields( "num2", "char2" ), " " ) );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+
+    splice = new Retain( splice, new Fields( "num1", "char1" ) );
+
+    splice = new Merge( "merge1", splice, pipeUpper );
+
+    if( firstStreamed )
+      splice = new HashJoin( splice, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+    else
+      splice = new HashJoin( pipeOffset, new Fields( "num2" ), splice, new Fields( "num1" ) );
+
+    splice = new Retain( splice, new Fields( "num1", "char1" ) );
+
+    if( interMerge )
+      splice = new Merge( "merge2", splice, pipeUpper );
+
+    if( secondStreamed )
+      splice = new HashJoin( splice, new Fields( "num1" ), pipeOffset, new Fields( "num2" ) );
+    else
+      splice = new HashJoin( pipeOffset, new Fields( "num2" ), splice, new Fields( "num1" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+//    flow.writeDOT( name + ".dot" );
+
+    if( getPlatform().isMapReduce() )
+      assertEquals( "wrong num jobs", expectedSteps, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, interMerge ? 17 : 14 );
     }
   }

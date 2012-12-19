@@ -30,7 +30,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,6 +46,7 @@ import cascading.management.state.ClientState;
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
@@ -551,6 +554,8 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   public Set<Tap> getJoinTributariesBetween( FlowElement from, FlowElement to )
     {
     Set<HashJoin> joins = new HashSet<HashJoin>();
+    Set<Merge> merges = new HashSet<Merge>();
+
     List<GraphPath<FlowElement, Scope>> paths = getPathsBetween( from, to );
 
     for( GraphPath<FlowElement, Scope> path : paths )
@@ -559,6 +564,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         {
         if( flowElement instanceof HashJoin )
           joins.add( (HashJoin) flowElement );
+
+        if( flowElement instanceof Merge )
+          merges.add( (Merge) flowElement );
         }
       }
 
@@ -568,7 +576,19 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       {
       for( Tap source : sources.keySet() )
         {
-        if( !getPathsBetween( source, join ).isEmpty() )
+        List<GraphPath<FlowElement, Scope>> joinPaths = new LinkedList( getPathsBetween( source, join ) );
+
+        ListIterator<GraphPath<FlowElement, Scope>> iterator = joinPaths.listIterator();
+
+        while( iterator.hasNext() )
+          {
+          GraphPath<FlowElement, Scope> joinPath = iterator.next();
+
+          if( !Collections.disjoint( Graphs.getPathVertexList( joinPath ), merges ) )
+            iterator.remove();
+          }
+
+        if( !joinPaths.isEmpty() )
           tributaries.add( source );
         }
       }

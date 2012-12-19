@@ -103,6 +103,29 @@ public class ElementGraphs
     return results;
     }
 
+  public static int countTypesBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to, Class type )
+    {
+    List<GraphPath<FlowElement, Scope>> paths = getAllDirectPathsBetween( graph, from, to );
+
+    int count = 0;
+
+    for( GraphPath<FlowElement, Scope> path : paths )
+      {
+      if( hasIntermediateTap( path, from ) )
+        continue;
+
+      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+
+      for( FlowElement flowElement : flowElements )
+        {
+        if( type.isInstance( flowElement ) && flowElement != to )
+          count++;
+        }
+      }
+
+    return count;
+    }
+
   /**
    * for every incoming stream to the splice, gets the count of paths.
    * <p/>
@@ -116,23 +139,85 @@ public class ElementGraphs
    */
   public static Map<Integer, Integer> countOrderedDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to )
     {
+    return countOrderedDirectPathsBetween( graph, from, to, false );
+    }
+
+  public static Map<Integer, Integer> countOrderedDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to, boolean skipTaps )
+    {
     List<GraphPath<FlowElement, Scope>> paths = getAllDirectPathsBetween( graph, from, to );
 
     Map<Integer, Integer> results = new HashMap<Integer, Integer>();
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
-      List<Scope> scopes = path.getEdgeList();
+      if( skipTaps && hasIntermediateTap( path, from ) )
+        continue;
 
-      Scope lastScope = scopes.get( scopes.size() - 1 );
-
-      Integer pos = to.getPipePos().get( lastScope.getName() );
-
-      if( results.containsKey( pos ) )
-        results.put( pos, results.get( pos ) + 1 );
-      else
-        results.put( pos, 1 );
+      pathPositionInto( results, path, to );
       }
+
+    return results;
+    }
+
+  public static boolean isBothAccumulatedAndStreamedPath( Map<Integer, Integer> pathCounts )
+    {
+    return pathCounts.size() > 1 && pathCounts.containsKey( 0 );
+    }
+
+  public static boolean isOnlyStreamedPath( Map<Integer, Integer> pathCounts )
+    {
+    return pathCounts.size() == 1 && pathCounts.containsKey( 0 );
+    }
+
+  public static boolean isOnlyAccumulatedPath( Map<Integer, Integer> pathCounts )
+    {
+    return pathCounts.size() >= 1 && !pathCounts.containsKey( 0 );
+    }
+
+  public static int countPaths( Map<Integer, Integer> pathCounts )
+    {
+    int count = 0;
+
+    for( Integer integer : pathCounts.values() )
+      count += integer;
+
+    return count;
+    }
+
+  private static boolean hasIntermediateTap( GraphPath<FlowElement, Scope> path, FlowElement from )
+    {
+    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+
+    for( FlowElement flowElement : flowElements )
+      {
+      if( flowElement instanceof Tap && flowElement != from )
+        return true;
+      }
+
+    return false;
+    }
+
+  public static int pathPositionInto( GraphPath<FlowElement, Scope> path, Splice to )
+    {
+    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
+    List<Scope> scopes = path.getEdgeList();
+    int index = flowElements.indexOf( to );
+
+    return to.getPipePos().get( scopes.get( index - 1 ).getName() );
+    }
+
+  private static Map<Integer, Integer> pathPositionInto( Map<Integer, Integer> results, GraphPath<FlowElement, Scope> path, Splice to )
+    {
+    List<Scope> scopes = path.getEdgeList();
+
+    Scope lastScope = scopes.get( scopes.size() - 1 );
+
+    Integer pos = to.getPipePos().get( lastScope.getName() );
+
+    if( results.containsKey( pos ) )
+      results.put( pos, results.get( pos ) + 1 );
+    else
+      results.put( pos, 1 );
 
     return results;
     }

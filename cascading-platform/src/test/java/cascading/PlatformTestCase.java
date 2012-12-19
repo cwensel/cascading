@@ -33,6 +33,8 @@ import cascading.platform.TestPlatform;
 import cascading.util.Util;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,9 @@ public class PlatformTestCase extends CascadingTestCase
 
   private String rootPath;
   Set<String> currentPaths = new HashSet<String>();
+
+  @Rule
+  public transient TestName name = new TestName();
 
   private transient TestPlatform platform = null;
 
@@ -89,6 +94,11 @@ public class PlatformTestCase extends CascadingTestCase
   public TestPlatform getPlatform()
     {
     return platform;
+    }
+
+  public String getTestName()
+    {
+    return name.getMethodName();
     }
 
   protected String getRootPath()

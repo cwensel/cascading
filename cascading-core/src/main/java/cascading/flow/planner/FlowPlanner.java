@@ -55,7 +55,7 @@ import org.jgrapht.Graphs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.countOrderedDirectPathsBetween;
+import static cascading.flow.planner.ElementGraphs.*;
 import static java.util.Arrays.asList;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
@@ -699,14 +699,19 @@ public abstract class FlowPlanner
 
   private boolean internalJoins( ElementGraph elementGraph )
     {
-    for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetweenExtents() )
+    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetweenExtents();
+
+    // large to small
+    Collections.reverse( paths );
+
+    for( GraphPath<FlowElement, Scope> path : paths )
       {
       List<FlowElement> flowElements = Graphs.getPathVertexList( path );
       List<Pipe> tapInsertions = new ArrayList<Pipe>();
       List<HashJoin> joins = new ArrayList<HashJoin>();
+      List<Merge> merges = new ArrayList<Merge>();
 
       FlowElement lastSourceElement = null;
-      Merge lastMerge = null;
 
       for( int i = 0; i < flowElements.size(); i++ )
         {
@@ -714,59 +719,98 @@ public abstract class FlowPlanner
 
         if( flowElement instanceof Merge )
           {
-          lastMerge = (Merge) flowElement;
+          merges.add( (Merge) flowElement );
           }
         else if( flowElement instanceof HashJoin )
           {
-          joins.add( (HashJoin) flowElement );
-          }
-        else if( flowElement instanceof Tap || flowElement instanceof Group )
-          {
-          if( joins.size() < 2 )
+          HashJoin join = (HashJoin) flowElement;
+
+          Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join, true );
+
+          // is this path streamed
+          int pathPosition = pathPositionInto( path, join );
+          boolean thisPathIsStreamed = pathPosition == 0;
+
+          boolean isAccumulatedAndStreamed = isBothAccumulatedAndStreamedPath( pathCounts ); // has streamed and accumulated paths
+          int pathCount = countPaths( pathCounts );
+
+          int priorJoins = countTypesBetween( elementGraph, lastSourceElement, join, HashJoin.class );
+
+          if( priorJoins == 0 )
             {
-            // if a Merge is prior to a HashJoin, and its a streamed path, force Merge results to disk
-            int joinPos = joins.isEmpty() ? 0 : flowElements.indexOf( joins.get( 0 ) );
-            int mergePos = lastMerge == null ? 0 : flowElements.indexOf( lastMerge );
-
-            if( joins.size() == 1 && lastMerge != null && joinPos > mergePos )
+            // if same source is leading into the hashjoin, insert tap on the accumulated side
+            if( pathCount == 2 && isAccumulatedAndStreamed && !thisPathIsStreamed )
               {
-              HashJoin join = joins.get( 0 );
-              Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );
+              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
+              break;
+              }
 
-              boolean isLeftMost = pathCounts.containsKey( 0 );
+            // if more than one path into streamed and accumulated branches, insert tap on streamed side
+            if( pathCount > 2 && isAccumulatedAndStreamed && thisPathIsStreamed )
+              {
+              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
+              break;
+              }
+            }
 
-              if( isLeftMost )
+          if( !merges.isEmpty() )
+            {
+            // if a Merge is prior to a HashJoin, and its an accumulated path, force Merge results to disk
+            int joinPos = flowElements.indexOf( join );
+            int mergePos = nearest( flowElements, joinPos, merges );
+
+            if( mergePos != -1 && joinPos > mergePos )
+              {
+              // if all paths are accumulated and streamed, insert
+              // else if just if this path is accumulated
+              if( ( isAccumulatedAndStreamed && thisPathIsStreamed ) || !thisPathIsStreamed )
                 {
                 tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
                 break;
                 }
               }
-
-            lastSourceElement = flowElement;
-            lastMerge = null;
-            joins.clear();
-            continue;
             }
 
+          joins.add( (HashJoin) flowElement );
+          }
+        else if( flowElement instanceof Tap || flowElement instanceof Group )
+          {
           for( int j = 0; j < joins.size(); j++ )
             {
             HashJoin join = joins.get( j );
 
-            Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join );
+            int pathPosition = pathPositionInto( path, join );
+            boolean thisPathIsStreamed = pathPosition == 0;
 
-            boolean isLeftMost = pathCounts.containsKey( 0 );
+            Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join, true );
 
-            if( isLeftMost )
+            boolean isAccumulatedAndStreamed = isBothAccumulatedAndStreamedPath( pathCounts ); // has streamed and accumulated paths
+            int pathCount = countPaths( pathCounts );
+
+            if( pathCount >= 2 && isAccumulatedAndStreamed && thisPathIsStreamed )
+              {
+              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
+              break;
+              }
+
+            if( thisPathIsStreamed )
               continue;
 
-            if( j == 0 ) // is rightmost on first join
+            if( j == 0 ) // is accumulated on first join
               break;
 
+            // prevent a streamed path from being accumulated by injecting a tap before the
+            // current HashJoin
             tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
             break;
             }
 
+          if( !tapInsertions.isEmpty() )
+            break;
+
           lastSourceElement = flowElement;
+          merges.clear();
+          joins.clear();
           }
         }
 
@@ -778,5 +822,20 @@ public abstract class FlowPlanner
       }
 
     return true;
+    }
+
+  private int nearest( List<FlowElement> flowElements, int index, List<Merge> merges )
+    {
+    List<Merge> reversed = new ArrayList<Merge>( merges );
+    Collections.reverse( reversed );
+
+    for( Merge merge : reversed )
+      {
+      int pos = flowElements.indexOf( merge );
+      if( pos < index )
+        return pos;
+      }
+
+    return -1;
     }
   }

@@ -79,8 +79,9 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     FlowElement tail = step.getGroup() != null ? step.getGroup() : step.getSink();
     Set<Tap> tributaries = step.getJoinTributariesBetween( this.source, tail );
 
-    tributaries.remove( this.source );
+    tributaries.remove( this.source ); // we cannot stream and accumulate the same source
 
+    // accumulated paths
     for( Object source : tributaries )
       {
       HadoopFlowProcess hadoopProcess = (HadoopFlowProcess) flowProcess;
