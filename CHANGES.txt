@@ -2,9 +2,11 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
-  Fix issue where c.t.BaseTemplateTap would lose parent fields if they were declared as Fields.ALL.
+  Fixed issue where c.s.h.TextDelimited would not honor charsetName.
 
-  Fix issue where c.t.Fields#append would not include current Fields instance when appending an array of Fields
+  Fixed issue where c.t.BaseTemplateTap would lose parent fields if they were declared as Fields.ALL.
+
+  Fixed issue where c.t.Fields#append would not include current Fields instance when appending an array of Fields
   instances.
 
   Fixed issue where subsequent c.p.Merge pipes in a pipeline path would obscure prior Merges preventing a c.t.Tap

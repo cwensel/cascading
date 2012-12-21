@@ -301,7 +301,7 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     verify( sourceFields );
     }
 
-  private void setCharsetName( String charsetName )
+  protected void setCharsetName( String charsetName )
     {
     if( charsetName != null )
       this.charsetName = charsetName;

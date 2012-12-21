@@ -97,8 +97,6 @@ public class TextDelimited extends TextLine
   private boolean skipHeader;
   private final boolean writeHeader;
 
-  private String charsetName = DEFAULT_CHARSET;
-
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using TAB as the default delimiter.
@@ -764,11 +762,8 @@ public class TextDelimited extends TextLine
     this.skipHeader = skipHeader;
     this.writeHeader = writeHeader;
 
-    if( charsetName != null )
-      this.charsetName = charsetName;
-
     // throws an exception if not found
-    Charset.forName( this.charsetName );
+    setCharsetName( charsetName );
 
     delimitedParser = new DelimitedParser( delimiter, quote, types, strict, safe, skipHeader, getSourceFields(), getSinkFields() );
     }
