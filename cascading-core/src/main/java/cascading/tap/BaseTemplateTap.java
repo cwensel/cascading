@@ -385,7 +385,7 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
 
     public Fields getSinkFields()
       {
-      if( pathFields == null )
+      if( pathFields == null || scheme.getSinkFields().isAll() )
         return scheme.getSinkFields();
 
       return Fields.merge( scheme.getSinkFields(), pathFields );

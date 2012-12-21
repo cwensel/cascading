@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.1 [unreleased]
 
+  Fix issue where c.t.BaseTemplateTap would lose parent fields if they were declared as Fields.ALL.
+
   Fix issue where c.t.Fields#append would not include current Fields instance when appending an array of Fields
   instances.
 
