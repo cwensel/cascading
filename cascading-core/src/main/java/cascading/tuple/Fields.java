@@ -1013,10 +1013,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( fields.length == 0 )
       return null;
 
-    Fields field = fields[ 0 ];
+    Fields field = this;
 
-    for( int i = 1; i < fields.length; i++ )
-      field = field.append( fields[ i ] );
+    for( Fields current : fields )
+      field = field.append( current );
 
     return field;
     }
