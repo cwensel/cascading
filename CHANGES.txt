@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.1.1 [unreleased]
+2.1.1
 
   Fixed issue where c.s.h.TextDelimited would not honor charsetName.
 
