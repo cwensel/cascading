@@ -1358,7 +1358,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public String printVerbose()
     {
-    return "[{" + ( isDefined() ? size() : "?" ) + "}:" + toString() + "]";
+    String fieldsString = toString();
+
+    if( types != null )
+      fieldsString += " | " + Util.join( Tuples.typeNames( types ), ", " );
+
+    return "[{" + ( isDefined() ? size() : "?" ) + "}:" + fieldsString + "]";
     }
 
 
@@ -1562,7 +1567,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Returns a copy of the current types Class[] if any, else null.
-   *
+   * <p/>
    * May fail if all types are not an instance of {@link Class}.
    *
    * @return
@@ -1720,9 +1725,21 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( object == null || getClass() != object.getClass() )
       return false;
 
-    Fields fields1 = (Fields) object;
+    Fields fields = (Fields) object;
 
-    return this.kind == fields1.kind && Arrays.equals( get(), fields1.get() ) && Arrays.equals( types, fields1.types );
+    return equalsFields( fields ) && Arrays.equals( types, fields.types );
+    }
+
+  /**
+   * Method equalsFields compares only the internal field names and postions only between this and the given Fields
+   * instance. Type information is ignored.
+   *
+   * @param fields
+   * @return true if this and the given instance have the same positions and/or field names.
+   */
+  public boolean equalsFields( Fields fields )
+    {
+    return fields != null && this.kind == fields.kind && Arrays.equals( get(), fields.get() );
     }
 
   @Override

@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.Splice to fail during planning if grouping or merging fields do not share the same field types, unless
+  the field in question has a j.u.Comparator to handle the incompatible comparisons.
+
   Fixed issue where a c.p.CoGroup join on Fields.NONE would fail during planning.
 
   Updated c.p.a.Unique to optionally filter out null values.

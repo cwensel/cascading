@@ -469,4 +469,21 @@ public class Tuples
     {
     return new Tuple( arrayList );
     }
+
+  public static String[] typeNames( Type[] types )
+    {
+    String[] names = new String[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      {
+      Type type = types[ i ];
+
+      if( type instanceof Class )
+        names[ i ] = ( (Class) type ).getCanonicalName();
+      else
+        names[ i ] = type.toString();
+      }
+
+    return names;
+    }
   }
