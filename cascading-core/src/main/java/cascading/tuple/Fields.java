@@ -1473,9 +1473,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * be considered.
    *
    * @param fieldName of type Comparable
-   * @param type      of type Class
+   * @param type      of type Type
    */
-  public Fields applyType( Comparable fieldName, Class type )
+  public Fields applyType( Comparable fieldName, Type type )
     {
     if( type == null )
       throw new IllegalArgumentException( "given type must not be null" );
@@ -1493,7 +1493,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields results = new Fields( fields );
 
-    results.types = this.types == null ? new Class[ size() ] : this.types;
+    results.types = this.types == null ? new Type[ size() ] : this.types;
     results.types[ pos ] = type;
 
     return results;
@@ -1507,7 +1507,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * @param types the class types of this Fields object.
    * @return returns a new instance of Fields with this instances field names and the given types
    */
-  public Fields applyTypes( Class... types )
+  public Fields applyTypes( Type... types )
     {
     if( this.types != null )
       throw new IllegalStateException( "may not overwrite types" );
@@ -1515,7 +1515,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( types.length != size() )
       throw new IllegalArgumentException( "given number of class instances must match fields size" );
 
-    for( Class type : types )
+    for( Type type : types )
       {
       if( type == null )
         throw new IllegalArgumentException( "type must not be null" );
