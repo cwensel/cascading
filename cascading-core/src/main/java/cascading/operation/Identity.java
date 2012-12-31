@@ -21,6 +21,7 @@
 package cascading.operation;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
@@ -28,7 +29,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.Tuples;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
@@ -40,7 +40,7 @@ import cascading.tuple.Tuples;
 public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
   {
   /** Field types */
-  private Class[] types = null;
+  private Type[] types = null;
 
   /**
    * Constructor Identity creates a new Identity instance that will pass the argument values to its output. Use this
@@ -77,6 +77,8 @@ public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
   public Identity( Fields fieldDeclaration )
     {
     super( fieldDeclaration ); // don't need to set size, default is ANY
+
+    this.types = fieldDeclaration.getTypes();
     }
 
   /**
@@ -112,7 +114,7 @@ public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
     if( types == null )
       outputCollector.add( input.getTuple() );
     else
-      outputCollector.add( Tuples.coerce( input.getTuple(), types, functionCall.getContext() ) );
+      outputCollector.add( input.getCoercedTuple( types, functionCall.getContext() ) );
     }
 
   @Override

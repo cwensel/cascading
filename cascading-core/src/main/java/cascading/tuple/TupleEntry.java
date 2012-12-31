@@ -299,6 +299,40 @@ public class TupleEntry
     }
 
   /**
+   * Method getCoercedTuple is a helper method for copying the current tuple elements into a new Tuple,
+   * of the same size, as the requested coerced types.
+   *
+   * @param types of type Type[]
+   * @return returns the a new Tuple instance with coerced values
+   */
+  public Tuple getCoercedTuple( Type[] types )
+    {
+    return getCoercedTuple( types, Tuple.size( types.length ) );
+    }
+
+  /**
+   * Method getCoercedTuple is a helper method for copying the current tuple elements into the new Tuple,
+   * of the same size, as the requested coerced types.
+   *
+   * @param types of type Type[]
+   * @param into  of type Tuple
+   * @return returns the given into Tuple instance with coerced values
+   */
+  public Tuple getCoercedTuple( Type[] types, Tuple into )
+    {
+    if( coercions.length != types.length || types.length != into.size() )
+      throw new IllegalArgumentException( "current entry and given tuple and types must be same length" );
+
+    for( int i = 0; i < coercions.length; i++ )
+      {
+      Object element = tuple.getObject( i );
+      into.set( i, coercions[ i ].coerce( element, types[ i ] ) );
+      }
+
+    return into;
+    }
+
+  /**
    * Method setTuple sets the tuple of this TupleEntry object.
    *
    * @param tuple the tuple of this TupleEntry object.
@@ -693,12 +727,14 @@ public class TupleEntry
   /**
    * Method set sets the values from the given tupleEntry into this TupleEntry instance based on the given
    * tupleEntry field names.
+   * <p/>
+   * If type information is given, each incoming value will be coerced from its canonical type to the given types.
    *
    * @param tupleEntry of type TupleEntry
    */
   public void set( TupleEntry tupleEntry )
     {
-    this.tuple.set( fields, tupleEntry.getFields(), tupleEntry.getTuple() );
+    this.tuple.set( fields, tupleEntry.getFields(), tupleEntry.getTuple(), tupleEntry.coercions );
     }
 
   /**

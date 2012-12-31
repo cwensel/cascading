@@ -412,6 +412,21 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       if( !fields[ 0 ].contains( fields[ 1 ] ) )
         throw new TupleException( "could not find all fields to be replaced, available: " + fields[ 0 ].printVerbose() + ",  declared: " + fields[ 1 ].printVerbose() );
 
+      Type[] types = fields[ 0 ].getTypes();
+
+      if( types != null )
+        {
+        for( int i = 1; i < fields.length; i++ )
+          {
+          Type[] fieldTypes = fields[ i ].getTypes();
+          if( fieldTypes == null )
+            continue;
+
+          for( int j = 0; j < fieldTypes.length; j++ )
+            fields[ 0 ] = fields[ 0 ].applyType( fields[ i ].get( j ), fieldTypes[ j ] );
+          }
+        }
+
       return fields[ 0 ];
       }
 
@@ -426,15 +441,23 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( hasUnknowns )
       size = -1;
 
+    Type[] types = null;
+
+    if( size != -1 )
+      types = new Type[ size ];
+
     int offset = 0;
     for( Fields current : fields )
       {
       if( current.isNone() )
         continue;
 
-      resolveInto( notFound, found, selector, current, result, offset, size );
+      resolveInto( notFound, found, selector, current, result, types, offset, size );
       offset += current.size();
       }
+
+    if( types != null && !Util.containsNull( types ) ) // don't apply types if any are null
+      result = result.applyTypes( types );
 
     notFound.removeAll( found );
 
@@ -447,7 +470,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return result;
     }
 
-  private static void resolveInto( Set<String> notFound, Set<String> found, Fields selector, Fields current, Fields result, int offset, int size )
+  private static void resolveInto( Set<String> notFound, Set<String> found, Fields selector, Fields current, Fields result, Type[] types, int offset, int size )
     {
     for( int i = 0; i < selector.size(); i++ )
       {
@@ -462,6 +485,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         else
           result.set( i, handleFound( found, field ) );
 
+        if( index != -1 && types != null && current.getType( index ) != null )
+          types[ i ] = current.getType( index );
+
         continue;
         }
 
@@ -471,6 +497,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         continue;
 
       Comparable thisField = current.get( pos );
+
+      if( types != null && current.getType( pos ) != null )
+        types[ i ] = current.getType( pos );
 
       if( thisField instanceof String )
         result.set( i, handleFound( found, thisField ) );
@@ -1227,7 +1256,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( fields == null )
       return this;
 
-    Fields results = size( fields.size() );
+    Fields results = size( fields.size() ).applyTypes( fields.getTypes() );
 
     for( int i = 0; i < fields.fields.length; i++ )
       {
@@ -1500,7 +1529,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method applyTypes returns a new Fields instance with the given types.
+   * Method applyTypes returns a new Fields instance with the given types, replacing any existing type
+   * information within the new instance.
    * <p/>
    * The Class array must be the same length as the number for fields in this instance.
    *
@@ -1509,8 +1539,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public Fields applyTypes( Type... types )
     {
-    if( this.types != null )
-      throw new IllegalStateException( "may not overwrite types" );
+    Fields result = new Fields( fields );
+
+    if( types == null ) // allows for type erasure
+      return result;
 
     if( types.length != size() )
       throw new IllegalArgumentException( "given number of class instances must match fields size" );
@@ -1520,8 +1552,6 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       if( type == null )
         throw new IllegalArgumentException( "type must not be null" );
       }
-
-    Fields result = new Fields( fields );
 
     result.types = copyTypes( types, types.length ); // make copy as Class[] could be passed in
 

@@ -641,6 +641,17 @@ public class Util
     return names;
     }
 
+  public static boolean containsNull( Object... values )
+    {
+    for( Object value : values )
+      {
+      if( value == null )
+        return true;
+      }
+
+    return false;
+    }
+
   public interface RetryOperator<T>
     {
     T operate() throws Exception;

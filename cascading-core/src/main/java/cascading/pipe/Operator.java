@@ -359,7 +359,7 @@ public abstract class Operator extends Pipe
       if( arguments.isDefined() && fieldDeclaration.isDefined() && arguments.size() != fieldDeclaration.size() )
         throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
 
-      if( fieldDeclaration.isArguments() )
+      if( fieldDeclaration.isArguments() ) // there is no type info, so inherit it
         return arguments;
 
       return arguments.project( fieldDeclaration );

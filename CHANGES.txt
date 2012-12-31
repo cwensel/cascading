@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.o.Identity and c.p.a.Coerce to uses field type information during coercion.
+
   Added c.t.t.CoercibleType interface to allow for customization of individual field data types and formats. Also
   added the c.t.t.DateType implementation for managing string formatted dates to and from a long timestamp.
 

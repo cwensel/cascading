@@ -68,4 +68,24 @@ public class Coerce extends SubAssembly
     {
     setTails( new Each( previous, coerceFields, new Identity( types ), Fields.REPLACE ) );
     }
+
+  /**
+   * Constructor Coerce creates a new Coerce instance that will only coerce the given coerceFields Tuple values.
+   * <p/>
+   * The given {@code coerceFields} instance must contain field type information, otherwise an
+   * {@link IllegalArgumentException} will be thrown.
+   * <p/>
+   * Note the resulting output Tuple will contain all the original incoming Fields.
+   *
+   * @param previous     of type Pipe
+   * @param coerceFields of type Fields
+   */
+  @ConstructorProperties({"previous", "coerceFields"})
+  public Coerce( Pipe previous, Fields coerceFields )
+    {
+    setTails( new Each( previous, coerceFields, new Identity( coerceFields ), Fields.REPLACE ) );
+
+    if( coerceFields.getTypes().length == 0 )
+      throw new IllegalArgumentException( "number of types must not be zero" );
+    }
   }

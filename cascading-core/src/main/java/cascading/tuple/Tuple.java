@@ -23,6 +23,7 @@ package cascading.tuple;
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import java.util.Scanner;
 import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
 import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
 /**
@@ -783,6 +785,25 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
       elements.set( i, tuple.elements.get( count++ ) );
     }
 
+  private void set( int[] pos, Type[] types, Tuple tuple, CoercibleType[] coercions )
+    {
+    verifyModifiable();
+
+    if( pos.length != tuple.size() )
+      throw new TupleException( "given tuple not same size as position array: " + pos.length + ", tuple: " + tuple.print() );
+
+    int count = 0;
+
+    for( int i : pos )
+      {
+      Object element = tuple.elements.get( count );
+      Type type = types[ count++ ];
+      element = coercions[ i ].coerce( element, type );
+
+      elements.set( i, element );
+      }
+    }
+
   /**
    * Method set sets the values in the given selector positions to the values from the given Tuple.
    *
@@ -795,6 +816,18 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     try
       {
       set( declarator.getPos( selector ), tuple );
+      }
+    catch( Exception exception )
+      {
+      throw new TupleException( "unable to set into: " + declarator.print() + ", using selector: " + selector.print(), exception );
+      }
+    }
+
+  protected void set( Fields declarator, Fields selector, Tuple tuple, CoercibleType[] coercions )
+    {
+    try
+      {
+      set( declarator.getPos( selector ), declarator.getTypes(), tuple, coercions );
       }
     catch( Exception exception )
       {

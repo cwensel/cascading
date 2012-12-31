@@ -28,8 +28,10 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.assertion.AssertExpression;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
@@ -68,6 +70,34 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     pipe = new Each( pipe, new Fields( "line" ), splitter );
 
     pipe = new Coerce( pipe, new Fields( "num" ), Integer.class );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+$" ) );
+    }
+
+  @Test
+  public void testCoerceFields() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( inputFileLower );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), new Fields( "num", "char" ), getOutputPath( "coercefields" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "coerce" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ).applyTypes( String.class, String.class ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    pipe = new Coerce( pipe, new Fields( "num" ).applyTypes( Integer.class ) );
+
+    pipe = new Each( pipe, new Fields( "num" ), AssertionLevel.STRICT, new AssertExpression( "num instanceof Integer", Object.class ) );
+
+    pipe = new Coerce( pipe, new Fields( "num" ).applyTypes( String.class ) );
+
+    pipe = new Each( pipe, new Fields( "num" ), AssertionLevel.STRICT, new AssertExpression( "num instanceof String", Object.class ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
