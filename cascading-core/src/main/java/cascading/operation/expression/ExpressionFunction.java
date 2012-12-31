@@ -108,7 +108,7 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<ExpressionOperation.Context> functionCall )
     {
-    functionCall.getContext().tuple.set( 0, evaluate( functionCall.getContext(), functionCall.getArguments() ) );
-    functionCall.getOutputCollector().add( functionCall.getContext().tuple );
+    functionCall.getContext().result.set( 0, evaluate( functionCall.getContext(), functionCall.getArguments() ) );
+    functionCall.getOutputCollector().add( functionCall.getContext().result );
     }
   }

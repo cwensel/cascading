@@ -20,7 +20,6 @@
 
 package cascading.tuple;
 
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,6 +91,17 @@ public class Tuples
     return destination;
     }
 
+  public static Object[] asArray( Tuple tuple, CoercibleType[] coercions, Class[] types, Object[] destination )
+    {
+    if( tuple.size() != types.length )
+      throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match number of coercion types: " + types.length );
+
+    for( int i = 0; i < types.length; i++ )
+      destination[ i ] = coercions[ i ].coerce( tuple.getObject( i ), types[ i ] );
+
+    return destination;
+    }
+
   /**
    * Method frequency behaves the same as {@link Collections#frequency(java.util.Collection, Object)}.
    * <p/>
@@ -143,25 +153,7 @@ public class Tuples
   @Deprecated
   public static Object coerce( Object value, Class type )
     {
-    return coerce( value, (Type) type );
-    }
-
-  @Deprecated
-  public static Object coerce( Object value, Type type )
-    {
-    return coerce( null, value, type );
-    }
-
-  @Deprecated
-  public static Object coerce( Type from, Object value, Type to )
-    {
-    if( ( value != null && to == value.getClass() ) || to == Object.class )
-      return value;
-
-    if( CoercibleType.class.isInstance( from ) )
-      return ( (CoercibleType) from ).coerce( value, to );
-
-    return Coercions.coerce( value, to );
+    return Coercions.coerce( value, type );
     }
 
   public static final String toString( Object value )

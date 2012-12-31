@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import cascading.tuple.Fields;
 import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
@@ -103,9 +104,14 @@ public final class Coercions
     Coerce<T> coerce = coercionsPrivate.get( type );
 
     if( coerce == null )
-      throw new IllegalArgumentException( "could not coerce value, " + value + " to type: " + Util.getTypeName( type ) );
+      return (T) OBJECT.coerce( value );
 
     return coerce.coerce( value );
+    }
+
+  public static CoercibleType[] coercibleArray( Fields fields )
+    {
+    return coercibleArray( fields.size(), fields.getTypes() );
     }
 
   public static CoercibleType[] coercibleArray( int size, Type[] types )
@@ -122,5 +128,13 @@ public final class Coercions
       coercions[ i ] = coercibleTypeFor( types[ i ] );
 
     return coercions;
+    }
+
+  public static Class asClass( Type type )
+    {
+    if( type instanceof Class )
+      return (Class) type;
+
+    return Object.class;
     }
   }

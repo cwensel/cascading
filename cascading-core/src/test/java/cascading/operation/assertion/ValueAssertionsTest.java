@@ -60,7 +60,7 @@ public class ValueAssertionsTest extends CascadingTestCase
 
   private ConcreteCall getOperationCall( TupleEntry tupleEntry )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( tupleEntry.getFields() );
     operationCall.setArguments( tupleEntry );
     return operationCall;
     }

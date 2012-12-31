@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.aggregator.Sum;
@@ -28,7 +29,8 @@ import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class SumBy is used to sum values associated with duplicate keys in a tuple stream.
@@ -67,7 +69,8 @@ public class SumBy extends AggregateBy
   public static class SumPartials implements Functor
     {
     private final Fields declaredFields;
-    private final Class sumType;
+    private final Type sumType;
+    private final CoercibleType canonical;
 
     /** Constructor SumPartials creates a new SumPartials instance. */
     public SumPartials( Fields declaredFields )
@@ -77,10 +80,12 @@ public class SumBy extends AggregateBy
       if( !declaredFields.hasTypes() )
         throw new IllegalArgumentException( "result type must be declared " );
 
-      this.sumType = declaredFields.getTypeClass( 0 );
+      this.sumType = declaredFields.getType( 0 );
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );
+
+      this.canonical = Coercions.coercibleTypeFor( this.sumType );
       }
 
     public SumPartials( Fields declaredFields, Class sumType )
@@ -90,6 +95,8 @@ public class SumBy extends AggregateBy
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );
+
+      this.canonical = Coercions.coercibleTypeFor( this.sumType );
       }
 
     @Override
@@ -114,7 +121,7 @@ public class SumBy extends AggregateBy
     @Override
     public Tuple complete( FlowProcess flowProcess, Tuple context )
       {
-      context.set( 0, Tuples.coerce( context.getObject( 0 ), sumType ) );
+      context.set( 0, canonical.canonical( context.getObject( 0 ) ) );
 
       return context;
       }

@@ -80,7 +80,7 @@ public class ScriptTest extends CascadingTestCase
     {
     ScriptFunction function = getFunction( expression, returnType, names, types );
 
-    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>();
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields() );
     function.prepare( FlowProcess.NULL, call );
 
     return function.evaluate( call.getContext(), tupleEntry );

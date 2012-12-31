@@ -31,6 +31,8 @@ import org.codehaus.janino.ExpressionEvaluator;
 import org.codehaus.janino.Scanner;
 import org.codehaus.janino.ScriptEvaluator;
 
+import static cascading.tuple.coerce.Coercions.asClass;
+
 /**
  * Class ExpressionOperation is the base class for {@link ExpressionFunction}, {@link ExpressionFilter},
  * {@link cascading.operation.assertion.AssertExpression}.
@@ -46,13 +48,14 @@ public class ExpressionOperation extends ScriptOperation
   @ConstructorProperties({"fieldDeclaration", "expression", "parameterType"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression, Class parameterType )
     {
-    super( 1, fieldDeclaration, expression, Object.class, null, new Class[]{parameterType} );
+    super( 1, fieldDeclaration, expression, asClass( fieldDeclaration.getType( 0 ) ), null,
+      new Class[]{parameterType} );
     }
 
   @ConstructorProperties({"fieldDeclaration", "expression", "parameterNames", "parameterTypes"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression, String[] parameterNames, Class[] parameterTypes )
     {
-    super( parameterTypes.length, fieldDeclaration, expression, Object.class, parameterNames, parameterTypes );
+    super( parameterTypes.length, fieldDeclaration, expression, asClass( fieldDeclaration.getType( 0 ) ), parameterNames, parameterTypes );
     }
 
   @ConstructorProperties({"expression", "parameterType"})

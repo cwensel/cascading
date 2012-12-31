@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
@@ -31,7 +32,8 @@ import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class AverageBy is used to average values associated with duplicate keys in a tuple stream.
@@ -134,14 +136,17 @@ public class AverageBy extends AggregateBy
       long nulls = 0L;
       double sum = 0.0D;
       long count = 0L;
-      Class type = Double.class;
+      Type type = Double.class;
+      CoercibleType canonical;
 
       Tuple tuple = Tuple.size( 1 );
 
       public Context( Fields fieldDeclaration )
         {
         if( fieldDeclaration.hasTypes() )
-          this.type = fieldDeclaration.getTypeClass( 0 );
+          this.type = fieldDeclaration.getType( 0 );
+
+        this.canonical = Coercions.coercibleTypeFor( this.type );
         }
 
       public Context reset()
@@ -160,7 +165,7 @@ public class AverageBy extends AggregateBy
         if( count == 0 && nulls != 0 )
           return tuple;
 
-        tuple.set( 0, Tuples.coerce( sum / count, type ) );
+        tuple.set( 0, canonical.canonical( sum / count ) );
 
         return tuple;
         }

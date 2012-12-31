@@ -31,7 +31,8 @@ import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 import cascading.util.Pair;
 
 /** Class Sum is an {@link Aggregator} that returns the sum of all numeric values in the current group. */
@@ -42,11 +43,14 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
 
   /** Field type */
   private Type type = double.class;
+  private CoercibleType canonical;
+
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()
     {
     super( 1, new Fields( FIELD_NAME ) );
+    this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
   /**
@@ -67,6 +71,8 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
 
     if( fieldDeclaration.hasTypes() )
       this.type = fieldDeclaration.getType( 0 );
+
+    this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
   /**
@@ -81,6 +87,7 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
     {
     this( fieldDeclaration );
     this.type = type;
+    this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
   @Override
@@ -118,7 +125,7 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
 
   protected Tuple getResult( AggregatorCall<Pair<Double[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext().getRhs().set( 0, Tuples.coerce( aggregatorCall.getContext().getLhs()[ 0 ], type ) );
+    aggregatorCall.getContext().getRhs().set( 0, canonical.canonical( aggregatorCall.getContext().getLhs()[ 0 ] ) );
 
     return aggregatorCall.getContext().getRhs();
     }

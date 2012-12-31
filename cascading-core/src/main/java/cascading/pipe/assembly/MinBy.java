@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.aggregator.Min;
@@ -29,7 +30,8 @@ import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class MinBy is used to find the minimum value in a grouping.
@@ -65,7 +67,8 @@ public class MinBy extends AggregateBy
   public static class MinPartials implements Functor
     {
     private final Fields declaredFields;
-    private final Class type;
+    private final Type type;
+    private final CoercibleType canonical;
 
     /** Constructor MinPartials creates a new MinPartials instance. */
     public MinPartials( Fields declaredFields )
@@ -75,10 +78,12 @@ public class MinBy extends AggregateBy
       if( !declaredFields.hasTypes() )
         throw new IllegalArgumentException( "result type must be declared " );
 
-      this.type = declaredFields.getTypeClass( 0 );
+      this.type = declaredFields.getType( 0 );
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );
+
+      this.canonical = Coercions.coercibleTypeFor( this.type );
       }
 
     public MinPartials( Fields declaredFields, Class type )
@@ -88,6 +93,8 @@ public class MinBy extends AggregateBy
 
       if( declaredFields.size() != 1 )
         throw new IllegalArgumentException( "declared fields may only have one field, got: " + declaredFields );
+
+      this.canonical = Coercions.coercibleTypeFor( this.type );
       }
 
     @Override
@@ -112,7 +119,7 @@ public class MinBy extends AggregateBy
     @Override
     public Tuple complete( FlowProcess flowProcess, Tuple context )
       {
-      context.set( 0, Tuples.coerce( context.getObject( 0 ), type ) );
+      context.set( 0, canonical.canonical( context.getObject( 0 ) ) );
 
       return context;
       }

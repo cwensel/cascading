@@ -32,6 +32,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
+import cascading.tuple.util.TupleViews;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ScriptEvaluator;
 
@@ -158,11 +161,16 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
     Context context = operationCall.getContext();
 
+    Fields argumentFields = operationCall.getArgumentFields();
+
     context.parameterNames = getParameterNames();
-    context.parameterFields = getParameterFields();
+    context.parameterFields = argumentFields.select( getParameterFields() ); // inherit argument types
+    context.parameterCoercions = Coercions.coercibleArray( context.parameterFields );
     context.parameterTypes = getParameterTypes();
+    context.parameterArray = new Object[ context.parameterTypes.length ]; // re-use object array
     context.scriptEvaluator = getEvaluator( getReturnType(), context.parameterNames, context.parameterTypes );
-    context.tuple = Tuple.size( 1 );
+    context.intermediate = TupleViews.createNarrow( argumentFields.getPos( context.parameterFields ) );
+    context.result = Tuple.size( 1 ); // re-use the output tuple
     }
 
   protected Class getReturnType()
@@ -174,7 +182,8 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
    * Performs the actual expression evaluation.
    *
    * @param context
-   * @param input   of type TupleEntry @return Comparable
+   * @param input   of type TupleEntry
+   * @return Comparable
    */
   protected Object evaluate( Context context, TupleEntry input )
     {
@@ -183,9 +192,10 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       if( context.parameterTypes.length == 0 )
         return context.scriptEvaluator.evaluate( null );
 
-      Tuple parameterTuple = input.selectTuple( context.parameterFields );
+      Tuple parameterTuple = TupleViews.reset( context.intermediate, input.getTuple() );
+      Object[] arguments = Tuples.asArray( parameterTuple, context.parameterCoercions, context.parameterTypes, context.parameterArray );
 
-      return context.scriptEvaluator.evaluate( Tuples.asArray( parameterTuple, context.parameterTypes ) );
+      return context.scriptEvaluator.evaluate( arguments );
       }
     catch( InvocationTargetException exception )
       {
@@ -230,7 +240,10 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     private Class[] parameterTypes;
     private ScriptEvaluator scriptEvaluator;
     private Fields parameterFields;
+    private CoercibleType[] parameterCoercions;
     private String[] parameterNames;
-    protected Tuple tuple;
+    private Object[] parameterArray;
+    private Tuple intermediate;
+    protected Tuple result;
     }
   }

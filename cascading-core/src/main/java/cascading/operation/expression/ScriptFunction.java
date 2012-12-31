@@ -27,6 +27,8 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 
+import static cascading.tuple.coerce.Coercions.asClass;
+
 /**
  * Class ScriptFunction dynamically resolves a given expression using argument {@link cascading.tuple.Tuple} values.
  * This {@link cascading.operation.Function} is based on the <a href="http://www.janino.net/">Janino</a> compiler.
@@ -83,7 +85,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
   @ConstructorProperties({"fieldDeclaration", "script", "parameterNames", "parameterTypes"})
   public ScriptFunction( Fields fieldDeclaration, String script, String[] parameterNames, Class[] parameterTypes )
     {
-    super( parameterTypes.length, fieldDeclaration, script, Object.class, parameterNames, parameterTypes );
+    super( parameterTypes.length, fieldDeclaration, script, asClass( fieldDeclaration.getType( 0 ) ), parameterNames, parameterTypes );
 
     verify( fieldDeclaration );
     }
@@ -97,7 +99,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {
-    functionCall.getContext().tuple.set( 0, evaluate( functionCall.getContext(), functionCall.getArguments() ) );
-    functionCall.getOutputCollector().add( functionCall.getContext().tuple );
+    functionCall.getContext().result.set( 0, evaluate( functionCall.getContext(), functionCall.getArguments() ) );
+    functionCall.getOutputCollector().add( functionCall.getContext().result );
     }
   }
