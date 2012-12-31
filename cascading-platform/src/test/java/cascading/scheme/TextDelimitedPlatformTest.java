@@ -21,16 +21,22 @@
 package cascading.scheme;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
+import cascading.TestConstants;
 import cascading.flow.Flow;
+import cascading.operation.AssertionLevel;
+import cascading.operation.assertion.AssertExpression;
+import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.type.DateType;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -221,5 +227,43 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
       {
       // ignore
       }
+    }
+
+  @Test
+  public void testFieldCoercion() throws IOException
+    {
+    // 75.185.76.245 - - [01/Sep/2007:00:01:03 +0000] "POST /mt-tb.cgi/235 HTTP/1.1" 403 174 "-" "Opera/9.10 (Windows NT 5.1; U; ru)" "-"
+
+    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT );
+
+    Type[] types = new Type[]{
+      String.class, // ip
+      String.class, // -
+      String.class, // -
+      dateType, // date
+      String.class, // request
+      int.class, // code
+      long.class, // bytes
+      String.class, // -
+      String.class, // agent
+      String.class // -
+    };
+
+    Fields fields = new Fields( "ip", "client", "user", "date", "request", "code", "bytes", "referrer", "agent", "na" );
+
+    fields = fields.applyTypes( types );
+
+    Tap input = getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, inputFileApacheClean, SinkMode.KEEP );
+    Tap output = getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, getOutputPath( getTestName() ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "pipe" );
+
+    pipe = new Each( pipe, new Fields( "date" ), AssertionLevel.STRICT, new AssertExpression( "date instanceof Long", Object.class ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( input, output, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 9, 10 );
     }
   }

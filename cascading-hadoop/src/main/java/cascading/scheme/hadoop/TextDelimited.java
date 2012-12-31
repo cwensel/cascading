@@ -34,6 +34,7 @@ import cascading.tap.TapException;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -1024,13 +1025,15 @@ public class TextDelimited extends TextLine
   @Override
   public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
-    Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
+    TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 
     Text text = (Text) sinkCall.getContext()[ 0 ];
     StringBuilder line = (StringBuilder) sinkCall.getContext()[ 1 ];
     Charset charset = (Charset) sinkCall.getContext()[ 2 ];
 
-    line = (StringBuilder) delimitedParser.joinLine( tuple, line );
+    Iterable<String> strings = tupleEntry.asIterableOf( String.class );
+
+    line = (StringBuilder) delimitedParser.joinLine( strings, line );
 
     text.set( line.toString().getBytes( charset ) );
 

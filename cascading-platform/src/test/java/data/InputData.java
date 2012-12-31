@@ -45,6 +45,7 @@ public interface InputData
   String inputPath = System.getProperty( TEST_DATA_PATH, "../cascading-platform/src/test/resources/data/" );
 
   String inputFileApache = inputPath + "apache.10.txt";
+  String inputFileApacheClean = inputPath + "apache-clean.10.txt";
   String inputFileApache200 = inputPath + "apache.200.txt";
   String inputFileIps = inputPath + "ips.20.txt";
   String inputFileNums20 = inputPath + "nums.20.txt";

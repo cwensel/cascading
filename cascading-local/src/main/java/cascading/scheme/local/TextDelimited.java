@@ -43,6 +43,7 @@ import cascading.tap.TapException;
 import cascading.tap.local.FileTap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 
 /**
  * Class TextDelimited provides direct support for delimited text files, like
@@ -682,9 +683,11 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @Override
   public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
-    Tuple tuple = sinkCall.getOutgoingEntry().getTuple();
+    TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 
-    delimitedParser.joinLine( tuple, sinkCall.getContext() );
+    Iterable<String> strings = tupleEntry.asIterableOf( String.class );
+
+    delimitedParser.joinLine( strings, sinkCall.getContext() );
 
     sinkCall.getContext().println();
     }

@@ -35,7 +35,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
-import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,9 @@ public class DelimitedParser implements Serializable
   /** Field numValues */
   protected int numValues;
   /** Field types */
-  protected Class[] types;
+  protected Type[] types;
+  /** Fields coercibles */
+  protected CoercibleType[] coercibles;
   /** Field safe */
   protected boolean safe = true;
   /** fieldTypeResolver */
@@ -123,7 +126,7 @@ public class DelimitedParser implements Serializable
     reset( delimiter, quote, types, strict, safe, sourceFields, sinkFields, fieldTypeResolver );
     }
 
-  public void reset( String delimiter, String quote, Class[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields, FieldTypeResolver fieldTypeResolver )
+  public void reset( String delimiter, String quote, Type[] types, boolean strict, boolean safe, Fields sourceFields, Fields sinkFields, FieldTypeResolver fieldTypeResolver )
     {
     if( delimiter == null || delimiter.isEmpty() )
       throw new IllegalArgumentException( "delimiter may not be null or empty" );
@@ -149,7 +152,7 @@ public class DelimitedParser implements Serializable
       return;
 
     if( types == null && sourceFields.hasTypes() )
-      this.types = sourceFields.getTypesClasses(); // gets a copy
+      this.types = sourceFields.getTypes(); // gets a copy
 
     this.sourceFields = sourceFields;
     this.numValues = Math.max( sourceFields.size(), sinkFields.size() ); // if asymmetrical, one is zero
@@ -171,6 +174,8 @@ public class DelimitedParser implements Serializable
 
     if( this.types != null && this.types.length != sinkFields.size() )
       throw new IllegalArgumentException( "num of types must equal number of fields: " + sinkFields.printVerbose() + ", found: " + types.length );
+
+    coercibles = Coercions.coercibleArray( this.numValues, this.types );
     }
 
   public String getDelimiter()
@@ -300,7 +305,7 @@ public class DelimitedParser implements Serializable
 
       result = cleanParsedLine( result );
 
-      Class[] inferred = inferTypes( result ); // infer type from field name, after removing quotes/escapes
+      Type[] inferred = inferTypes( result ); // infer type from field name, after removing quotes/escapes
 
       result = cleanFields( result ); // clean field names to remove any meta-data or manage case
 
@@ -355,11 +360,11 @@ public class DelimitedParser implements Serializable
         {
         try
           {
-          result[ i ] = Tuples.coerce( split[ i ], types[ i ] );
+          result[ i ] = coercibles[ i ].canonical( split[ i ] );
           }
         catch( Exception exception )
           {
-          String message = "field " + sourceFields.get( i ) + " cannot be coerced from : " + split[ i ] + " to: " + types[ i ].getName();
+          String message = "field " + sourceFields.get( i ) + " cannot be coerced from : " + split[ i ] + " to: " + Util.getTypeName( types[ i ] );
 
           result[ i ] = null;
 
@@ -467,12 +472,12 @@ public class DelimitedParser implements Serializable
     return buffer;
     }
 
-  protected Class[] inferTypes( Object[] result )
+  protected Type[] inferTypes( Object[] result )
     {
     if( fieldTypeResolver == null )
       return null;
 
-    Class[] inferred = new Class[ result.length ];
+    Type[] inferred = new Type[ result.length ];
 
     for( int i = 0; i < result.length; i++ )
       {
@@ -494,7 +499,7 @@ public class DelimitedParser implements Serializable
     for( Object field : fields )
       {
       int index = result.size();
-      Class type = types != null ? types[ index ] : null;
+      Type type = types != null ? types[ index ] : null;
       String value = fieldTypeResolver.prepareField( index, (String) field, type );
 
       if( value != null && !value.isEmpty() )
@@ -513,7 +518,7 @@ public class DelimitedParser implements Serializable
 
     for( int i = 0; i < result.length; i++ )
       {
-      Class type = types != null ? types[ i ] : null;
+      Type type = types != null ? types[ i ] : null;
       String value = fieldTypeResolver.cleanField( i, (String) result[ i ], type );
 
       if( value != null && !value.isEmpty() )

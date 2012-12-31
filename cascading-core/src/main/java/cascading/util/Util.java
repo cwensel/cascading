@@ -28,6 +28,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -620,6 +621,24 @@ public class Util
         }
       }
     return sinkModified;
+    }
+
+  public static String getTypeName( Type type )
+    {
+    if( type == null )
+      return null;
+
+    return type instanceof Class ? ( (Class) type ).getCanonicalName() : type.toString();
+    }
+
+  public static String[] typeNames( Type[] types )
+    {
+    String[] names = new String[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      names[ i ] = getTypeName( types[ i ] );
+
+    return names;
     }
 
   public interface RetryOperator<T>

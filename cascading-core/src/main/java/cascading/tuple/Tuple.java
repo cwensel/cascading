@@ -33,6 +33,7 @@ import java.util.Scanner;
 
 import cascading.operation.Aggregator;
 import cascading.pipe.Pipe;
+import cascading.tuple.coerce.Coercions;
 import cascading.util.Util;
 
 /**
@@ -53,7 +54,6 @@ import cascading.util.Util;
  * must be registered with Hadoop. For further performance improvements, see the
  * {@link cascading.tuple.hadoop.SerializationToken} Java annotation.
  *
- * @see Comparable
  * @see org.apache.hadoop.io.serializer.Serialization
  * @see cascading.tuple.hadoop.SerializationToken
  */
@@ -211,10 +211,12 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     }
 
   /**
-   * Method get returns the element at the given position i.
+   * Method get returns the element at the given position.
+   * <p/>
+   * This method will perform no coercion on the element.
    *
    * @param pos of type int
-   * @return Comparable
+   * @return Object
    */
   public Object getObject( int pos )
     {
@@ -222,69 +224,69 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     }
 
   /**
-   * Method getString returns the element at the given position i as a String.
+   * Method getString returns the element at the given position as a String.
    *
    * @param pos of type int
    * @return String
    */
   public String getString( int pos )
     {
-    return Tuples.toString( getObject( pos ) );
+    return Coercions.STRING.coerce( getObject( pos ) );
     }
 
   /**
-   * Method getFloat returns the element at the given position i as a float. Zero if null.
+   * Method getFloat returns the element at the given position as a float. Zero if null.
    *
    * @param pos of type int
    * @return float
    */
   public float getFloat( int pos )
     {
-    return Tuples.toFloat( getObject( pos ) );
+    return Coercions.FLOAT.coerce( getObject( pos ) );
     }
 
   /**
-   * Method getDouble returns the element at the given position i as a double. Zero if null.
+   * Method getDouble returns the element at the given position as a double. Zero if null.
    *
    * @param pos of type int
    * @return double
    */
   public double getDouble( int pos )
     {
-    return Tuples.toDouble( getObject( pos ) );
+    return Coercions.DOUBLE.coerce( getObject( pos ) );
     }
 
   /**
-   * Method getInteger returns the element at the given position i as an int. Zero if null.
+   * Method getInteger returns the element at the given position as an int. Zero if null.
    *
    * @param pos of type int
    * @return int
    */
   public int getInteger( int pos )
     {
-    return Tuples.toInteger( getObject( pos ) );
+    return Coercions.INTEGER.coerce( getObject( pos ) );
     }
 
   /**
-   * Method getLong returns the element at the given position i as an long. Zero if null.
+   * Method getLong returns the element at the given position as an long. Zero if null.
    *
    * @param pos of type int
    * @return long
    */
   public long getLong( int pos )
     {
-    return Tuples.toLong( getObject( pos ) );
+    return Coercions.LONG.coerce( getObject( pos ) );
     }
 
   /**
-   * Method getShort returns the element at the given position i as an short. Zero if null.
+   * Method getShort returns the element at the given position as an short. Zero if null.
    *
    * @param pos of type int
    * @return long
    */
   public short getShort( int pos )
     {
-    return Tuples.toShort( getObject( pos ) );
+    return Coercions.SHORT.coerce( getObject( pos ) );
     }
 
   /**
@@ -296,7 +298,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public boolean getBoolean( int pos )
     {
-    return Tuples.toBoolean( getObject( pos ) );
+    return Coercions.BOOLEAN.coerce( getObject( pos ) );
     }
 
   /**

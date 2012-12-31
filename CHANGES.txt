@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.t.t.CoercibleType interface to allow for customization of individual field data types and formats. Also
+  added the c.t.t.DateType implementation for managing string formatted dates to and from a long timestamp.
+
   Updated c.p.Splice to fail during planning if grouping or merging fields do not share the same field types, unless
   the field in question has a j.u.Comparator to handle the incompatible comparisons.
 

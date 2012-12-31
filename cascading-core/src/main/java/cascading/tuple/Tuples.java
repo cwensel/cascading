@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 
 import cascading.operation.OperationException;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class Tuples is a helper class providing common methods to manipulate {@link Tuple} and {@link TupleEntry} instances.
@@ -63,6 +65,7 @@ public class Tuples
    * @param types of type Class[]
    * @return Object[]
    */
+  @Deprecated
   public static Object[] asArray( Tuple tuple, Class[] types )
     {
     return asArray( tuple, types, new Object[ tuple.size() ] );
@@ -77,6 +80,7 @@ public class Tuples
    * @param destination of type Object[]
    * @return Object[]
    */
+  @Deprecated
   public static Object[] asArray( Tuple tuple, Class[] types, Object[] destination )
     {
     if( tuple.size() != types.length )
@@ -125,28 +129,10 @@ public class Tuples
    *
    * @param tuple of type Tuple
    * @param pos   of type int
-   * @param type  of type Type
-   * @return returns the value coerced
-   */
-  public static Object coerce( Tuple tuple, int pos, Type type )
-    {
-    Object value = tuple.getObject( pos );
-
-    return coerce( value, type );
-    }
-
-  /**
-   * Method coerce returns the value in the tuple at the given position to the requested type.
-   * <p/>
-   * If the given type is a primitive (long), and the tuple value is null, 0 is returned.
-   * <p/>
-   * If the type is an Object (Long), and the tuple value is null, null is returned.
-   *
-   * @param tuple of type Tuple
-   * @param pos   of type int
    * @param type  of type Class
    * @return returns the value coerced
    */
+  @Deprecated
   public static Object coerce( Tuple tuple, int pos, Class type )
     {
     Object value = tuple.getObject( pos );
@@ -154,193 +140,93 @@ public class Tuples
     return coerce( value, type );
     }
 
+  @Deprecated
   public static Object coerce( Object value, Class type )
     {
     return coerce( value, (Type) type );
     }
 
+  @Deprecated
   public static Object coerce( Object value, Type type )
     {
-    if( value != null && type == value.getClass() )
+    return coerce( null, value, type );
+    }
+
+  @Deprecated
+  public static Object coerce( Type from, Object value, Type to )
+    {
+    if( ( value != null && to == value.getClass() ) || to == Object.class )
       return value;
 
-    if( type == Object.class )
-      return value;
+    if( CoercibleType.class.isInstance( from ) )
+      return ( (CoercibleType) from ).coerce( value, to );
 
-    if( type == String.class )
-      return toString( value );
-
-    if( type == int.class )
-      return toInteger( value );
-
-    if( type == long.class )
-      return toLong( value );
-
-    if( type == double.class )
-      return toDouble( value );
-
-    if( type == float.class )
-      return toFloat( value );
-
-    if( type == short.class )
-      return toShort( value );
-
-    if( type == boolean.class )
-      return toBoolean( value );
-
-    if( type == Integer.class )
-      return toIntegerObject( value );
-
-    if( type == Long.class )
-      return toLongObject( value );
-
-    if( type == Double.class )
-      return toDoubleObject( value );
-
-    if( type == Float.class )
-      return toFloatObject( value );
-
-    if( type == Short.class )
-      return toShortObject( value );
-
-    if( type == Boolean.class )
-      return toBooleanObject( value );
-
-    if( type != null )
-      {
-      String name = type instanceof Class ? ( (Class) type ).getName() : type.toString();
-      throw new OperationException( "could not coerce value, " + value + " to type: " + name );
-      }
-
-    return null;
+    return Coercions.coerce( value, to );
     }
 
   public static final String toString( Object value )
     {
-    if( value == null )
-      return null;
-
-    return value.toString();
+    return Coercions.STRING.coerce( value );
     }
 
   public static final int toInteger( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).intValue();
-    else if( value == null )
-      return 0;
-    else
-      return Integer.parseInt( value.toString() );
+    return Coercions.INTEGER.coerce( value );
     }
 
   public static final long toLong( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).longValue();
-    else if( value == null )
-      return 0;
-    else
-      return Long.parseLong( value.toString() );
+    return Coercions.LONG.coerce( value );
     }
 
   public static final double toDouble( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).doubleValue();
-    else if( value == null )
-      return 0;
-    else
-      return Double.parseDouble( value.toString() );
+    return Coercions.DOUBLE.coerce( value );
     }
 
   public static final float toFloat( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).floatValue();
-    else if( value == null )
-      return 0;
-    else
-      return Float.parseFloat( value.toString() );
+    return Coercions.FLOAT.coerce( value );
     }
 
   public static final short toShort( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).shortValue();
-    else if( value == null )
-      return 0;
-    else
-      return Short.parseShort( value.toString() );
+    return Coercions.SHORT.coerce( value );
     }
 
   public static final boolean toBoolean( Object value )
     {
-    if( value instanceof Boolean )
-      return ( (Boolean) value ).booleanValue();
-    else if( value == null )
-      return false;
-    else
-      return Boolean.parseBoolean( value.toString() );
+    return Coercions.BOOLEAN.coerce( value );
     }
 
   public static final Integer toIntegerObject( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).intValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Integer.parseInt( value.toString() );
+    return Coercions.INTEGER_OBJECT.coerce( value );
     }
 
   public static final Long toLongObject( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).longValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Long.parseLong( value.toString() );
+    return Coercions.LONG_OBJECT.coerce( value );
     }
 
   public static final Double toDoubleObject( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).doubleValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Double.parseDouble( value.toString() );
+    return Coercions.DOUBLE_OBJECT.coerce( value );
     }
 
   public static final Float toFloatObject( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).floatValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Float.parseFloat( value.toString() );
+    return Coercions.FLOAT_OBJECT.coerce( value );
     }
 
   public static final Short toShortObject( Object value )
     {
-    if( value instanceof Number )
-      return ( (Number) value ).shortValue();
-    else if( value == null || value.toString().isEmpty() )
-      return 0;
-    else
-      return Short.parseShort( value.toString() );
+    return Coercions.SHORT_OBJECT.coerce( value );
     }
 
   public static final Boolean toBooleanObject( Object value )
     {
-    if( value instanceof Boolean )
-      return (Boolean) value;
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Boolean.parseBoolean( value.toString() );
+    return Coercions.BOOLEAN_OBJECT.coerce( value );
     }
 
   /**
@@ -350,6 +236,7 @@ public class Tuples
    * @param types of type Class[]
    * @return Tuple
    */
+  @Deprecated
   public static Tuple coerce( Tuple tuple, Class[] types )
     {
     return new Tuple( (Object[]) asArray( tuple, types, new Object[ types.length ] ) );
@@ -365,6 +252,7 @@ public class Tuples
    * @param destination of type Tuple
    * @return Tuple
    */
+  @Deprecated
   public static Tuple coerce( Tuple tuple, Class[] types, Tuple destination )
     {
     if( tuple.size() != types.length )
@@ -393,7 +281,7 @@ public class Tuples
       {
       Tuple result = tupleEntry.tuple;
 
-      tupleEntry.tuple = Tuple.size( result.size() );
+      tupleEntry.setTuple( Tuple.size( result.size() ) );
 
       return result;
       }
@@ -404,7 +292,7 @@ public class Tuples
       }
     catch( Exception exception )
       {
-      throw new TupleException( "unable to select from: " + tupleEntry.fields.print() + ", using selector: " + selector.print(), exception );
+      throw new TupleException( "unable to select from: " + tupleEntry.getFields().printVerbose() + ", using selector: " + selector.printVerbose(), exception );
       }
     }
 
@@ -417,12 +305,12 @@ public class Tuples
    */
   public static Tuple extract( TupleEntry tupleEntry, Fields selector )
     {
-    return tupleEntry.tuple.extract( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
+    return tupleEntry.tuple.extract( tupleEntry.getFields().getPos( selector, tupleEntry.getFields().size() ) );
     }
 
   public static Tuple nulledCopy( TupleEntry tupleEntry, Fields selector )
     {
-    return tupleEntry.tuple.nulledCopy( tupleEntry.fields.getPos( selector, tupleEntry.fields.size() ) );
+    return tupleEntry.tuple.nulledCopy( tupleEntry.getFields().getPos( selector, tupleEntry.getFields().size() ) );
     }
 
   public static Tuple nulledCopy( Fields declarator, Tuple tuple, Fields selector )
@@ -468,22 +356,5 @@ public class Tuples
   public static Tuple create( List<Object> arrayList )
     {
     return new Tuple( arrayList );
-    }
-
-  public static String[] typeNames( Type[] types )
-    {
-    String[] names = new String[ types.length ];
-
-    for( int i = 0; i < types.length; i++ )
-      {
-      Type type = types[ i ];
-
-      if( type instanceof Class )
-        names[ i ] = ( (Class) type ).getCanonicalName();
-      else
-        names[ i ] = type.toString();
-      }
-
-    return names;
     }
   }

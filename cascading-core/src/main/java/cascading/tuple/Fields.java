@@ -231,7 +231,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         }
       }
 
-    Class[] types = joinTypes( size, fields );
+    Type[] types = joinTypes( size, fields );
 
     if( types == null )
       return new Fields( elements );
@@ -253,9 +253,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return elements;
     }
 
-  private static Class[] joinTypes( int size, Fields... fields )
+  private static Type[] joinTypes( int size, Fields... fields )
     {
-    Class[] elements = new Class[ size ];
+    Type[] elements = new Type[ size ];
 
     int pos = 0;
     for( Fields field : fields )
@@ -1012,7 +1012,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     if( this.types != null )
       {
-      result.types = new Class[ result.size() ];
+      result.types = new Type[ result.size() ];
 
       for( int i = 0; i < selector.size(); i++ )
         {
@@ -1080,19 +1080,19 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Util.removeAllNulls( list );
 
-    Class[] newTypes = null;
+    Type[] newTypes = null;
 
     if( this.types != null )
       {
-      List<Type> classes = new LinkedList<Type>();
-      Collections.addAll( classes, this.types );
+      List<Type> types = new LinkedList<Type>();
+      Collections.addAll( types, this.types );
 
       for( int i : pos )
-        classes.set( i, null );
+        types.set( i, null );
 
-      Util.removeAllNulls( classes );
+      Util.removeAllNulls( types );
 
-      newTypes = classes.toArray( new Class[ classes.size() ] );
+      newTypes = types.toArray( new Type[ types.size() ] );
       }
 
     return new Fields( list.toArray( new Comparable[ list.size() ] ), newTypes );
@@ -1160,7 +1160,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     if( ( this.isNone() || this.types != null ) && fields.types != null )
       {
-      result.types = new Class[ this.size() + fields.size() ];
+      result.types = new Type[ this.size() + fields.size() ];
 
       if( this.types != null ) // supports appending to NONE
         System.arraycopy( this.types, 0, result.types, 0, this.size() );
@@ -1361,7 +1361,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     String fieldsString = toString();
 
     if( types != null )
-      fieldsString += " | " + Util.join( Tuples.typeNames( types ), ", " );
+      fieldsString += " | " + Util.join( Util.typeNames( types ), ", " );
 
     return "[{" + ( isDefined() ? size() : "?" ) + "}:" + fieldsString + "]";
     }
@@ -1523,7 +1523,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields result = new Fields( fields );
 
-    result.types = types;
+    result.types = copyTypes( types, types.length ); // make copy as Class[] could be passed in
 
     return result;
     }
@@ -1577,8 +1577,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( types == null )
       return null;
 
-    Type[] local = copyTypes( types, size() );
-    return Arrays.copyOfRange( local, 0, local.length, Class[].class );
+    Class[] classes = new Class[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      classes[ i ] = (Class) types[ i ]; // this throws a more helpful exception vs arraycopy
+
+    return classes;
     }
 
   private static Type[] copyTypes( Type[] types, int size )
@@ -1588,13 +1592,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Type[] copy = new Type[ size ];
 
-    if( types != null )
-      {
-      if( types.length != size )
-        throw new IllegalArgumentException( "types array must be same size as fields array" );
+    if( types.length != size )
+      throw new IllegalArgumentException( "types array must be same size as fields array" );
 
-      System.arraycopy( types, 0, copy, 0, size );
-      }
+    System.arraycopy( types, 0, copy, 0, size );
 
     return copy;
     }
@@ -1604,7 +1605,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @return
    */
-  public boolean hasTypes()
+  public final boolean hasTypes()
     {
     return types != null;
     }

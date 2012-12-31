@@ -30,7 +30,7 @@ import java.util.Iterator;
 public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closeable
   {
   /** Field entry */
-  final TupleEntry entry = new TupleEntry( true );
+  final TupleEntry entry;
 
   /**
    * Constructor TupleEntryIterator creates a new TupleEntryIterator instance.
@@ -39,8 +39,7 @@ public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closea
    */
   public TupleEntryIterator( Fields fields )
     {
-    this.entry.fields = fields;
-    this.entry.tuple = Tuple.size( fields.size() );
+    this.entry = new TupleEntry( fields, Tuple.size( fields.size() ) );
     }
 
   /**
@@ -50,7 +49,7 @@ public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closea
    */
   public Fields getFields()
     {
-    return entry.fields;
+    return entry.getFields();
     }
 
   /**

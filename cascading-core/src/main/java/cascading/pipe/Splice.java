@@ -1201,7 +1201,7 @@ public class Splice extends Pipe
         int i = 0;
         for( Fields appendableField : appendableFields )
           {
-          Class[] types = appendableField.getTypesClasses();
+          Type[] types = appendableField.getTypes();
 
           if( types == null )
             {
@@ -1209,7 +1209,7 @@ public class Splice extends Pipe
             continue;
             }
 
-          for( Class type : types )
+          for( Type type : types )
             {
             if( type != null )
               declaredFields = declaredFields.applyType( i, type );

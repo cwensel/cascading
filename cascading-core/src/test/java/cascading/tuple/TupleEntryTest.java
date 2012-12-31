@@ -21,9 +21,14 @@
 package cascading.tuple;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.TimeZone;
 
 import cascading.CascadingTestCase;
+import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.DateType;
 
 public class TupleEntryTest extends CascadingTestCase
   {
@@ -215,5 +220,103 @@ public class TupleEntryTest extends CascadingTestCase
       {
       return lhs.compareToIgnoreCase( rhs );
       }
+    }
+
+  public void testCoerceCanonical()
+    {
+    final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
+    Date date = new Date();
+    String stringDate = dateFormat.format( date );
+
+    CoercibleType coercible = new DateType( "dd/MMM/yyyy:HH:mm:ss:SSS Z", TimeZone.getDefault() );
+
+    Fields fields = Fields.size( 2 ).applyTypes( coercible, long.class );
+    Tuple tuple = new Tuple( date.getTime(), date.getTime() );
+
+    TupleEntry results = new TupleEntry( fields, tuple );
+
+    assertEquals( date.getTime(), results.getObject( 0 ) );
+    assertEquals( date.getTime(), results.getLong( 0 ) );
+    assertEquals( stringDate, results.getString( 0 ) );
+
+    assertEquals( date.getTime(), results.getObject( 1 ) );
+    assertEquals( date.getTime(), results.getLong( 1 ) );
+    assertEquals( Long.toString( date.getTime() ), results.getString( 1 ) );
+    }
+
+  public void testCoerceOnSet()
+    {
+    final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
+    Date date = new Date();
+    String stringDate = dateFormat.format( date );
+
+    CoercibleType coercible = new DateType( "dd/MMM/yyyy:HH:mm:ss:SSS Z", TimeZone.getDefault() );
+
+    Fields fields = Fields.size( 5 ).applyTypes( coercible, coercible, coercible, coercible, long.class );
+    Tuple tuple = Tuple.size( 5 );
+
+    TupleEntry results = new TupleEntry( fields, tuple );
+
+    // tests all four elements
+    results.setLong( 0, date.getTime() );
+    results.setString( 1, stringDate );
+    results.setObject( 2, date );
+    results.setRaw( 3, date ); // performs no coercion
+    results.setString( 4, Long.toString( date.getTime() ) );
+
+    assertTrue( results.getObject( 0 ) instanceof Long );
+    assertTrue( results.getObject( 1 ) instanceof Long );
+    assertTrue( results.getObject( 2 ) instanceof Long );
+    assertTrue( results.getObject( 3 ) instanceof Date );
+    assertTrue( results.getObject( 4 ) instanceof Long );
+
+    assertEquals( date.getTime(), results.getObject( 0 ) );
+    assertEquals( date.getTime(), results.getLong( 0 ) );
+    assertEquals( stringDate, results.getString( 0 ) );
+
+    assertEquals( date.getTime(), results.getObject( 1 ) );
+    assertEquals( date.getTime(), results.getLong( 1 ) );
+    assertEquals( stringDate, results.getString( 1 ) );
+
+    assertEquals( date.getTime(), results.getObject( 2 ) );
+    assertEquals( date.getTime(), results.getLong( 2 ) );
+    assertEquals( stringDate, results.getString( 2 ) );
+
+    assertEquals( date, results.getObject( 3 ) );
+
+    assertEquals( date.getTime(), results.getObject( 4 ) );
+    assertEquals( date.getTime(), results.getLong( 4 ) );
+    assertEquals( (int) date.getTime(), results.getInteger( 4 ) );
+    assertEquals( Long.toString( date.getTime() ), results.getString( 4 ) );
+    }
+
+  public void testCoerceIterable()
+    {
+    final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
+
+    CoercibleType coercible = new DateType( "dd/MMM/yyyy:HH:mm:ss:SSS Z", TimeZone.getDefault() );
+
+    Date date = new Date();
+    String stringDate = dateFormat.format( date );
+    Tuple tuple = Tuple.size( 4 );
+
+    Fields fields = Fields.size( 4 ).applyTypes( coercible, coercible, coercible, String.class );
+    TupleEntry results = new TupleEntry( fields, tuple );
+
+    results.setObject( 0, date );
+    results.setLong( 1, date.getTime() );
+    results.setString( 2, stringDate );
+    results.setString( 3, stringDate );
+
+    Iterable<String> iterable = results.asIterableOf( String.class );
+
+    int count = 0;
+    for( String s : iterable )
+      {
+      assertEquals( stringDate, s );
+      count++;
+      }
+
+    assertEquals( count, results.size() );
     }
   }

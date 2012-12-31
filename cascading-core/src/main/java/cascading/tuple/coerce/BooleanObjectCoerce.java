@@ -18,19 +18,35 @@
  * limitations under the License.
  */
 
-package cascading.scheme.util;
+package cascading.tuple.coerce;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  *
  */
-public interface FieldTypeResolver extends Serializable
+public class BooleanObjectCoerce extends Coercions.Coerce<Boolean>
   {
-  Type inferTypeFrom( int ordinal, String fieldName );
+  protected BooleanObjectCoerce( Map<Type, Coercions.Coerce> map )
+    {
+    super( map );
+    }
 
-  String cleanField( int ordinal, String fieldName, Type type );
+  @Override
+  protected Class<Boolean> getType()
+    {
+    return Boolean.class;
+    }
 
-  String prepareField( int i, String fieldName, Type type );
+  @Override
+  public Boolean coerce( Object value )
+    {
+    if( value instanceof Boolean )
+      return (Boolean) value;
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Boolean.parseBoolean( value.toString() );
+    }
   }

@@ -18,19 +18,19 @@
  * limitations under the License.
  */
 
-package cascading.scheme.util;
+package cascading.util;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-
-/**
- *
- */
-public interface FieldTypeResolver extends Serializable
+/** The ForeverValueIterator class will iterate over a single value forever. */
+public class ForeverValueIterator<Value> extends SingleValueIterator<Value>
   {
-  Type inferTypeFrom( int ordinal, String fieldName );
+  public ForeverValueIterator( Value value )
+    {
+    super( value );
+    }
 
-  String cleanField( int ordinal, String fieldName, Type type );
-
-  String prepareField( int i, String fieldName, Type type );
+  @Override
+  public Value next()
+    {
+    return value;
+    }
   }

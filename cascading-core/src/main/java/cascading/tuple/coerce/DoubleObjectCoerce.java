@@ -18,19 +18,35 @@
  * limitations under the License.
  */
 
-package cascading.scheme.util;
+package cascading.tuple.coerce;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  *
  */
-public interface FieldTypeResolver extends Serializable
+public class DoubleObjectCoerce extends Coercions.Coerce<Double>
   {
-  Type inferTypeFrom( int ordinal, String fieldName );
+  protected DoubleObjectCoerce( Map<Type, Coercions.Coerce> map )
+    {
+    super( map );
+    }
 
-  String cleanField( int ordinal, String fieldName, Type type );
+  @Override
+  protected Class<Double> getType()
+    {
+    return Double.class;
+    }
 
-  String prepareField( int i, String fieldName, Type type );
+  @Override
+  public Double coerce( Object value )
+    {
+    if( value instanceof Number )
+      return ( (Number) value ).doubleValue();
+    else if( value == null || value.toString().isEmpty() )
+      return null;
+    else
+      return Double.parseDouble( value.toString() );
+    }
   }
