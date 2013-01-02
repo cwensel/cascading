@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated provided c.s.Scheme subclasses to honor field type information.
+
   Updated c.o.expression, c.o.aggregator, and c.p.assembly operations to honor field type information.
 
   Updated c.o.Identity and c.p.a.Coerce to uses field type information during coercion.

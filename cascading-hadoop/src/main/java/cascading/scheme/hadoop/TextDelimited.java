@@ -35,6 +35,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.util.TupleViews;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -969,6 +970,14 @@ public class TextDelimited extends TextLine
     }
 
   @Override
+  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+    {
+    super.sourcePrepare( flowProcess, sourceCall );
+
+    sourceCall.getIncomingEntry().setTuple( TupleViews.createObjectArray() );
+    }
+
+  @Override
   public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();
@@ -982,12 +991,11 @@ public class TextDelimited extends TextLine
         return false;
       }
 
+    // delegate coercion to delimitedParser for robustness
     Object[] split = delimitedParser.parseLine( makeEncodedString( context ) );
     Tuple tuple = sourceCall.getIncomingEntry().getTuple();
 
-    tuple.clear();
-
-    tuple.addAll( split );
+    TupleViews.reset( tuple, split );
 
     return true;
     }

@@ -37,7 +37,7 @@ import cascading.tuple.TupleEntryCollector;
  * During coercion, if the given type is a primitive ({@code long}), and the tuple value is null, {@code 0} is returned.
  * If the type is an Object ({@code java.lang.Long}), and the tuple value is {@code null}, {@code null} is returned.
  */
-public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
+public class Identity extends BaseOperation<Identity.Functor> implements Function<Identity.Functor>
   {
   /** Field types */
   private Type[] types = null;
@@ -99,22 +99,49 @@ public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Tuple> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Functor> operationCall )
     {
+    Functor functor;
+
     if( types != null )
-      operationCall.setContext( Tuple.size( types.length ) );
+      {
+      functor = new Functor()
+      {
+      Tuple result = Tuple.size( types.length );
+
+      @Override
+      public void operate( FunctionCall<Functor> functionCall )
+        {
+        TupleEntry input = functionCall.getArguments();
+        TupleEntryCollector outputCollector = functionCall.getOutputCollector();
+
+        outputCollector.add( input.getCoercedTuple( types, result ) );
+        }
+      };
+      }
+    else
+      {
+      functor = new Functor()
+      {
+      @Override
+      public void operate( FunctionCall<Functor> functionCall )
+        {
+        TupleEntryCollector outputCollector = functionCall.getOutputCollector();
+
+        outputCollector.add( functionCall.getArguments().getTuple() );
+        }
+      };
+      operationCall.setContext( functor );
+      }
+
+    operationCall.setContext( functor );
+
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Functor> functionCall )
     {
-    TupleEntry input = functionCall.getArguments();
-    TupleEntryCollector outputCollector = functionCall.getOutputCollector();
-
-    if( types == null )
-      outputCollector.add( input.getTuple() );
-    else
-      outputCollector.add( input.getCoercedTuple( types, functionCall.getContext() ) );
+    functionCall.getContext().operate( functionCall );
     }
 
   @Override
@@ -141,5 +168,10 @@ public class Identity extends BaseOperation<Tuple> implements Function<Tuple>
     int result = super.hashCode();
     result = 31 * result + ( types != null ? Arrays.hashCode( types ) : 0 );
     return result;
+    }
+
+  interface Functor
+    {
+    void operate( FunctionCall<Functor> functionCall );
     }
   }

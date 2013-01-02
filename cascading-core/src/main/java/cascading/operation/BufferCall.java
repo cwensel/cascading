@@ -22,6 +22,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 
@@ -43,6 +44,12 @@ public interface BufferCall<C> extends OperationCall<C>
    */
   Iterator<TupleEntry> getArgumentsIterator();
 
+  /**
+   * Return the resolved {@link cascading.tuple.Fields} declared by the current {@link Operation}.
+   *
+   * @return Fields
+   */
+  Fields getDeclaredFields();
 
   /**
    * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values. Zero or more entries may be emitted.

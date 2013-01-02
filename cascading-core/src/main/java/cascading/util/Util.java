@@ -641,7 +641,7 @@ public class Util
     return names;
     }
 
-  public static boolean containsNull( Object... values )
+  public static boolean containsNull( Object[] values )
     {
     for( Object value : values )
       {

@@ -1633,7 +1633,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Returns true if there are types associated with this instance.
    *
-   * @return
+   * @return boolean
    */
   public final boolean hasTypes()
     {

@@ -30,6 +30,7 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -76,7 +77,10 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
   @Override
   public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
-    Object[] pair = new Object[]{sourceCall.getInput().createKey(), sourceCall.getInput().createValue()};
+    Object[] pair = new Object[]{
+      sourceCall.getInput().createKey(),
+      sourceCall.getInput().createValue()
+    };
 
     sourceCall.setContext( pair );
     }
@@ -91,19 +95,12 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
     if( !result )
       return false;
 
-    // todo: wrap tuples and defer the addAll
-    Tuple tuple = sourceCall.getIncomingEntry().getTuple();
+    TupleEntry entry = sourceCall.getIncomingEntry();
 
-    // key is always null/empty, so don't bother
-    if( sourceCall.getIncomingEntry().getFields().isDefined() )
-      {
-      tuple.setAll( value );
-      }
+    if( entry.hasTypes() )
+      entry.setCanonicalTuple( value );
     else
-      {
-      tuple.clear();
-      tuple.addAll( value );
-      }
+      entry.setTuple( value );
 
     return true;
     }

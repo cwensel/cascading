@@ -222,12 +222,12 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
 
     if( getSourceFields().size() == 1 )
       {
-      incomingEntry.set( 0, line );
+      incomingEntry.setObject( 0, line );
       }
     else
       {
-      incomingEntry.set( 0, lineNumber );
-      incomingEntry.set( 1, line );
+      incomingEntry.setInteger( 0, lineNumber );
+      incomingEntry.setString( 1, line );
       }
 
     return true;

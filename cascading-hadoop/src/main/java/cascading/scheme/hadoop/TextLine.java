@@ -32,10 +32,10 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -389,10 +389,11 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
   @Override
   public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
-    sourceCall.setContext( new Object[ 3 ] );
+    if( sourceCall.getContext() == null )
+      sourceCall.setContext( new Object[ 3 ] );
 
-    sourceCall.getContext()[ 0 ] = (Writable) sourceCall.getInput().createKey();
-    sourceCall.getContext()[ 1 ] = (Writable) sourceCall.getInput().createValue();
+    sourceCall.getContext()[ 0 ] = sourceCall.getInput().createKey();
+    sourceCall.getContext()[ 1 ] = sourceCall.getInput().createValue();
     sourceCall.getContext()[ 2 ] = Charset.forName( charsetName );
     }
 
@@ -410,21 +411,22 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
   private boolean sourceReadInput( SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();
+
     return sourceCall.getInput().next( context[ 0 ], context[ 1 ] );
     }
 
   protected void sourceHandleInput( SourceCall<Object[], RecordReader> sourceCall )
     {
-    Tuple tuple = sourceCall.getIncomingEntry().getTuple();
+    TupleEntry result = sourceCall.getIncomingEntry();
 
     int index = 0;
-
     Object[] context = sourceCall.getContext();
 
+    // coerce into canonical forms
     if( getSourceFields().size() == 2 )
-      tuple.set( index++, ( (LongWritable) context[ 0 ] ).get() );
+      result.setLong( index++, ( (LongWritable) context[ 0 ] ).get() );
 
-    tuple.set( index, makeEncodedString( context ) );
+    result.setString( index, makeEncodedString( context ) );
     }
 
   protected String makeEncodedString( Object[] context )

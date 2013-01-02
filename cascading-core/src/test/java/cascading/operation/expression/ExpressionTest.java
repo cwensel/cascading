@@ -98,7 +98,7 @@ public class ExpressionTest extends CascadingTestCase
     {
     ExpressionFunction function = getFunction( expression );
 
-    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields() );
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields(), function.getFieldDeclaration() );
     function.prepare( FlowProcess.NULL, call );
 
     return function.evaluate( call.getContext(), tupleEntry );
@@ -108,7 +108,7 @@ public class ExpressionTest extends CascadingTestCase
     {
     ExpressionFunction function = getFunction( expression, type );
 
-    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields() );
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields(), function.getFieldDeclaration() );
     function.prepare( FlowProcess.NULL, call );
 
     return function.evaluate( call.getContext(), tupleEntry );
@@ -118,7 +118,7 @@ public class ExpressionTest extends CascadingTestCase
     {
     ExpressionFunction function = getFunction( expression, names, types );
 
-    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields() );
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields(), function.getFieldDeclaration() );
     function.prepare( FlowProcess.NULL, call );
 
     return function.evaluate( call.getContext(), tupleEntry );

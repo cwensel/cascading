@@ -279,6 +279,16 @@ public class TupleEntry
     }
 
   /**
+   * Returns true if there are types associated with this instance.
+   *
+   * @return boolean
+   */
+  public boolean hasTypes()
+    {
+    return fields.hasTypes();
+    }
+
+  /**
    * Method getTuple returns the tuple of this TupleEntry object.
    *
    * @return the tuple (type Tuple) of this TupleEntry object.
@@ -345,6 +355,22 @@ public class TupleEntry
       this.tuple = tuple;
 
     setCoercions();
+    }
+
+  public void setCanonicalTuple( Tuple tuple )
+    {
+    if( isUnmodifiable )
+      tuple = Tuples.asUnmodifiable( tuple );
+
+    if( fields.size() != tuple.size() )
+      throw new IllegalArgumentException( "current entry and given tuple must be same length" );
+
+    for( int i = 0; i < coercions.length; i++ )
+      {
+      Object element = tuple.getObject( i );
+
+      tuple.set( i, coercions[ i ].canonical( element ) ); // force read type to the expected type
+      }
     }
 
   /**
@@ -681,7 +707,7 @@ public class TupleEntry
    */
   public TupleEntry selectEntry( Fields selector )
     {
-    if( selector == null || selector.isAll() )
+    if( selector == null || selector.isAll() || fields == selector )
       return this;
 
     if( selector.isNone() )
@@ -698,7 +724,7 @@ public class TupleEntry
    */
   public Tuple selectTuple( Fields selector )
     {
-    if( selector == null || selector.isAll() )
+    if( selector == null || selector.isAll() || fields == selector )
       return this.tuple;
 
     if( selector.isNone() )

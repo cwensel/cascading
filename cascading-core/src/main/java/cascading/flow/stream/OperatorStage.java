@@ -232,7 +232,7 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
     {
     Scope outgoingScope = outgoingScopes.get( 0 );
 
-    operationCall = new ConcreteCall( outgoingScope.getArgumentsDeclarator() );
+    operationCall = new ConcreteCall( outgoingScope.getArgumentsDeclarator(), outgoingScope.getOperationDeclaredFields() );
 
     argumentsSelector = outgoingScope.getArgumentsSelector();
     remainderFields = outgoingScope.getRemainderPassThroughFields();

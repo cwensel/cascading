@@ -20,6 +20,7 @@
 
 package cascading.operation;
 
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 
@@ -50,6 +51,13 @@ public interface AggregatorCall<C> extends OperationCall<C>
    * @return TupleEntry
    */
   TupleEntry getArguments();
+
+  /**
+   * Return the resolved {@link cascading.tuple.Fields} declared by the current {@link Operation}.
+   *
+   * @return Fields
+   */
+  Fields getDeclaredFields();
 
   /**
    * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values.

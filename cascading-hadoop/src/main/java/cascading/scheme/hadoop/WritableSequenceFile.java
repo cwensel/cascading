@@ -119,15 +119,14 @@ public class WritableSequenceFile extends SequenceFile
     if( !result )
       return false;
 
-    // todo: wrap tuples and defer the addAll
-    Tuple tuple = sourceCall.getIncomingEntry().getTuple();
-    tuple.clear();
+    int count = 0;
+    TupleEntry entry = sourceCall.getIncomingEntry();
 
     if( keyType != null )
-      tuple.add( key );
+      entry.setObject( count++, key );
 
     if( valueType != null )
-      tuple.add( value );
+      entry.setObject( count, value );
 
     return true;
     }

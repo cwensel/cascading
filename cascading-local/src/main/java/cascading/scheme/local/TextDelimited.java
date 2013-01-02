@@ -44,6 +44,7 @@ import cascading.tap.local.FileTap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.util.TupleViews;
 
 /**
  * Class TextDelimited provides direct support for delimited text files, like
@@ -628,6 +629,8 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( createInput( sourceCall.getInput() ) );
+
+    sourceCall.getIncomingEntry().setTuple( TupleViews.createObjectArray() );
     }
 
   @Override
@@ -649,8 +652,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     // assumption it is better to re-use than to construct new
     Tuple tuple = sourceCall.getIncomingEntry().getTuple();
 
-    tuple.clear();
-    tuple.addAll( split );
+    TupleViews.reset( tuple, split );
 
     return true;
     }

@@ -63,7 +63,7 @@ public abstract class TupleEntryCollector
     Fields expectedFields = this.tupleEntry.getFields();
     TupleEntry outgoingEntry = this.tupleEntry;
 
-    if( expectedFields.isUnknown() )
+    if( expectedFields.isUnknown() || expectedFields.equals( tupleEntry.getFields() ) )
       outgoingEntry = tupleEntry;
     else
       outgoingEntry.setTuple( tupleEntry.selectTuple( expectedFields ) );

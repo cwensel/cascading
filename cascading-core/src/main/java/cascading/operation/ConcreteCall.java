@@ -42,6 +42,8 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   private TupleEntry arguments;
   /** Field argumentsIterator */
   private Iterator<TupleEntry> argumentsIterator;
+  /** Field declaredFields */
+  private Fields declaredFields;
   /** Field outputCollector */
   private TupleEntryCollector outputCollector;
 
@@ -58,6 +60,18 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public ConcreteCall( Fields argumentFields )
     {
     this.argumentFields = argumentFields;
+    }
+
+  /**
+   * Constructor ConcreteCall creates a new ConcreteCall instance.
+   *
+   * @param argumentFields of type Fields
+   * @param declaredFields of type Fields
+   */
+  public ConcreteCall( Fields argumentFields, Fields declaredFields )
+    {
+    this.argumentFields = argumentFields;
+    this.declaredFields = declaredFields;
     }
 
   /**
@@ -119,6 +133,11 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public void setArguments( TupleEntry arguments )
     {
     this.arguments = arguments;
+    }
+
+  public Fields getDeclaredFields()
+    {
+    return declaredFields;
     }
 
   /** @see FunctionCall#getOutputCollector() */
