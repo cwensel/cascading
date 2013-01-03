@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.2 [unreleased]
 
+  Fixed issue where NPE could be thrown by c.s.CascadingStats#getCounterValue if given counter had no value.
+
 2.1.1
 
   Fixed issue where c.s.h.TextDelimited would not honor charsetName.
