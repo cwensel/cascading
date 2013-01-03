@@ -27,6 +27,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
@@ -48,6 +55,7 @@ public abstract class HadoopStepStats extends FlowStepStats
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
+  public static final int TIMEOUT_MAX = 3;
 
   private Map<TaskID, String> idCache = new HashMap<TaskID, String>( 4999 ); // nearest prime, caching for ids
 
@@ -55,6 +63,13 @@ public abstract class HadoopStepStats extends FlowStepStats
   int numMapTasks;
   /** Field numReducerTasks */
   int numReduceTasks;
+
+  /** Fields counters */
+  private Counters cachedCounters = null;
+
+  /** Fields timeouts */
+  private int timeouts;
+
   /** Field taskStats */
   Map<String, HadoopSliceStats> taskStats = (Map<String, HadoopSliceStats>) Collections.EMPTY_MAP;
 
@@ -143,24 +158,12 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public Collection<String> getCounterGroups()
     {
-    try
-      {
-      RunningJob runningJob = getRunningJob();
+    Counters counters = cachedCounters();
 
-      if( runningJob == null )
-        return Collections.emptySet();
+    if( counters == null )
+      return Collections.emptySet();
 
-      Counters counters = runningJob.getCounters();
-
-      if( counters == null )
-        return Collections.emptySet();
-
-      return Collections.unmodifiableCollection( counters.getGroupNames() );
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to get remote counter groups" );
-      }
+    return Collections.unmodifiableCollection( counters.getGroupNames() );
     }
 
   /**
@@ -172,32 +175,20 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public Collection<String> getCounterGroupsMatching( String regex )
     {
-    try
+    Counters counters = cachedCounters();
+
+    if( counters == null )
+      return Collections.emptySet();
+
+    Set<String> results = new HashSet<String>();
+
+    for( String counter : counters.getGroupNames() )
       {
-      RunningJob runningJob = getRunningJob();
-
-      if( runningJob == null )
-        return Collections.emptySet();
-
-      Counters counters = runningJob.getCounters();
-
-      if( counters == null )
-        return Collections.emptySet();
-
-      Set<String> results = new HashSet<String>();
-
-      for( String counter : counters.getGroupNames() )
-        {
-        if( counter.matches( regex ) )
-          results.add( counter );
-        }
-
-      return Collections.unmodifiableCollection( results );
+      if( counter.matches( regex ) )
+        results.add( counter );
       }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to get remote counter groups" );
-      }
+
+    return Collections.unmodifiableCollection( results );
     }
 
   /**
@@ -209,29 +200,17 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public Collection<String> getCountersFor( String group )
     {
-    try
-      {
-      RunningJob runningJob = getRunningJob();
+    Counters counters = cachedCounters();
 
-      if( runningJob == null )
-        return Collections.emptySet();
+    if( counters == null )
+      return Collections.emptySet();
 
-      Counters counters = runningJob.getCounters();
+    Set<String> results = new HashSet<String>();
 
-      if( counters == null )
-        return Collections.emptySet();
+    for( Counters.Counter counter : counters.getGroup( group ) )
+      results.add( counter.getName() );
 
-      Set<String> results = new HashSet<String>();
-
-      for( Counters.Counter counter : counters.getGroup( group ) )
-        results.add( counter.getName() );
-
-      return Collections.unmodifiableCollection( results );
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to get remote counter groups" );
-      }
+    return Collections.unmodifiableCollection( results );
     }
 
   /**
@@ -243,24 +222,12 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public long getCounterValue( Enum counter )
     {
-    try
-      {
-      RunningJob runningJob = getRunningJob();
+    Counters counters = cachedCounters();
 
-      if( runningJob == null )
-        return 0;
+    if( counters == null )
+      return 0;
 
-      Counters counters = runningJob.getCounters();
-
-      if( counters == null )
-        return 0;
-
-      return counters.getCounter( counter );
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to get remote counter values" );
-      }
+    return counters.getCounter( counter );
     }
 
   /**
@@ -273,36 +240,108 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public long getCounterValue( String group, String counter )
     {
+    Counters counters = cachedCounters();
+
+    if( counters == null )
+      return 0;
+
+    Counters.Group counterGroup = counters.getGroup( group );
+
+    if( group == null )
+      return 0;
+
+    // geCounter actually searches the display name, wtf
+    // in theory this is lazily created if does not exist, but don't rely on it
+    Counters.Counter counterValue = counterGroup.getCounterForName( counter );
+
+    if( counter == null )
+      return 0;
+
+    return counterValue.getValue();
+    }
+
+  protected Counters cachedCounters()
+    {
+    return cachedCounters( false );
+    }
+
+  protected synchronized Counters cachedCounters( boolean force )
+    {
+    if( ( !force && isFinished() ) || timeouts >= TIMEOUT_MAX )
+      return cachedCounters;
+
+    RunningJob runningJob = getRunningJob();
+
+    if( runningJob == null )
+      return cachedCounters;
+
+    FutureTask<Counters> future = runFuture( runningJob );
+
     try
       {
-      RunningJob runningJob = getRunningJob();
+      Counters fetched = future.get( 5, TimeUnit.SECONDS );
 
-      if( runningJob == null )
-        return 0;
-
-      Counters counters = runningJob.getCounters();
-
-      if( counters == null )
-        return 0;
-
-      Counters.Group counterGroup = counters.getGroup( group );
-
-      if( group == null )
-        return 0;
-
-      // geCounter actually searches the display name, wtf
-      // in theory this is lazily created if does not exist, but don't rely on it
-      Counters.Counter counterValue = counterGroup.getCounterForName( counter );
-
-      if( counter == null )
-        return 0;
-
-      return counterValue.getValue();
+      if( fetched != null )
+        cachedCounters = fetched;
       }
-    catch( IOException exception )
+    catch( InterruptedException exception )
       {
-      throw new FlowException( "unable to get remote counter values" );
+      LOG.warn( "fetching counters was interrupted" );
       }
+    catch( ExecutionException exception )
+      {
+      if( cachedCounters != null )
+        {
+        LOG.error( "unable to get remote counters, returning cached values", exception.getCause() );
+
+        return cachedCounters;
+        }
+
+      LOG.error( "unable to get remote counters, no cached values, throwing exception", exception.getCause() );
+
+      if( exception.getCause() instanceof FlowException )
+        throw (FlowException) exception.getCause();
+
+      throw new FlowException( exception.getCause() );
+      }
+    catch( TimeoutException exception )
+      {
+      timeouts++;
+
+      if( timeouts >= TIMEOUT_MAX )
+        LOG.warn( "fetching counters timed out final time: {}", timeouts );
+      else
+        LOG.warn( "fetching counters timed out: {}", timeouts );
+      }
+
+    return cachedCounters;
+    }
+
+  // hardcoded at one thread to force serialization across all requesters in the jvm
+  // this likely prevents the deadlocks the futures are safeguards against
+  private static ExecutorService futuresPool = Executors.newFixedThreadPool( 1 );
+
+  private FutureTask<Counters> runFuture( final RunningJob runningJob )
+    {
+    FutureTask<Counters> task = new FutureTask<Counters>( new Callable<Counters>()
+    {
+    @Override
+    public Counters call() throws Exception
+      {
+      try
+        {
+        return runningJob.getCounters();
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to get remote counter values" );
+        }
+      }
+    } );
+
+    futuresPool.submit( task );
+
+    return task;
     }
 
   /**
@@ -383,6 +422,15 @@ public abstract class HadoopStepStats extends FlowStepStats
   @Override
   public synchronized void recordChildStats()
     {
+    try
+      {
+      cachedCounters( true );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      }
+
     // if null instance don't bother capturing detail
     if( !clientState.isEnabled() )
       return;

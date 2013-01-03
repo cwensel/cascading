@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.1.2 [unreleased]
 
+  Fixed issue where fetching remote Hadoop counter values could block indefinitely. Fetching remote counters is now
+  serialized across jobs to prevent deadlocks inside the Hadoop API and counter values are now cached with a final
+  refresh on job completion.
+
   Fixed issue where NPE could be thrown by c.s.CascadingStats#getCounterValue if given counter had no value.
 
 2.1.1
