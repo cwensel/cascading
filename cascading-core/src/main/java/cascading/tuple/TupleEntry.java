@@ -357,6 +357,15 @@ public class TupleEntry
     setCoercions();
     }
 
+  /**
+   * Method setCanonicalTuple replaces each value of the current tuple with the given tuple elements after
+   * they are coerced.
+   * <p/>
+   * This method will modify the existing Tuple wrapped by this TupleEntry instance even
+   * if it is marked as unmodifiable.
+   *
+   * @param tuple to replace the current wrapped Tuple instance
+   */
   public void setCanonicalTuple( Tuple tuple )
     {
     if( isUnmodifiable )
@@ -369,7 +378,7 @@ public class TupleEntry
       {
       Object element = tuple.getObject( i );
 
-      tuple.set( i, coercions[ i ].canonical( element ) ); // force read type to the expected type
+      this.tuple.set( i, coercions[ i ].canonical( element ) ); // force read type to the expected type
       }
     }
 

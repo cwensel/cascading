@@ -288,6 +288,30 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( date.getTime(), results.getLong( 4 ) );
     assertEquals( (int) date.getTime(), results.getInteger( 4 ) );
     assertEquals( Long.toString( date.getTime() ), results.getString( 4 ) );
+
+    results.setTuple( Tuple.size( 5 ) ); // clear prior results
+
+    Tuple expected = Tuple.size( 5 );
+    expected.setLong( 0, date.getTime() );
+    expected.setString( 1, stringDate );
+    expected.set( 2, date );
+    expected.set( 3, date );
+    expected.setString( 4, Long.toString( date.getTime() ) );
+
+    results.setCanonicalTuple( expected );
+
+    assertTrue( results.getObject( 0 ) instanceof Long );
+    assertTrue( results.getObject( 1 ) instanceof Long );
+    assertTrue( results.getObject( 2 ) instanceof Long );
+    assertTrue( results.getObject( 3 ) instanceof Long );
+    assertTrue( results.getObject( 4 ) instanceof Long );
+
+    assertEquals( date.getTime(), results.getObject( 0 ) );
+    assertEquals( date.getTime(), results.getObject( 1 ) );
+    assertEquals( date.getTime(), results.getObject( 2 ) );
+    assertEquals( date.getTime(), results.getObject( 3 ) );
+    assertEquals( date.getTime(), results.getObject( 4 ) );
+
     }
 
   public void testCoerceIterable()
