@@ -173,7 +173,11 @@ public class Tuples
     else if( value == null )
       return 0;
     else
-      return Integer.parseInt( value.toString() );
+      try {
+        return Integer.parseInt( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).intValue();
+      }
     }
 
   public static final long toLong( Object value )
@@ -183,7 +187,11 @@ public class Tuples
     else if( value == null )
       return 0;
     else
-      return Long.parseLong( value.toString() );
+      try {
+        return Long.parseLong( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).longValue();
+      }
     }
 
   public static final double toDouble( Object value )
@@ -213,7 +221,11 @@ public class Tuples
     else if( value == null )
       return 0;
     else
-      return Short.parseShort( value.toString() );
+      try {
+        return Short.parseShort( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).shortValue();
+      }
     }
 
   public static final boolean toBoolean( Object value )
@@ -233,7 +245,11 @@ public class Tuples
     else if( value == null || value.toString().isEmpty() )
       return null;
     else
-      return Integer.parseInt( value.toString() );
+      try {
+        return Integer.parseInt( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).intValue();
+      }
     }
 
   public static final Long toLongObject( Object value )
@@ -243,7 +259,11 @@ public class Tuples
     else if( value == null || value.toString().isEmpty() )
       return null;
     else
-      return Long.parseLong( value.toString() );
+      try {
+        return Long.parseLong( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).longValue();
+      }
     }
 
   public static final Double toDoubleObject( Object value )
@@ -273,7 +293,11 @@ public class Tuples
     else if( value == null || value.toString().isEmpty() )
       return 0;
     else
-      return Short.parseShort( value.toString() );
+      try {
+        return Short.parseShort( value.toString() );
+      } catch (NumberFormatException e) {
+        return Double.valueOf( value.toString() ).shortValue();
+      }
     }
 
   public static final Boolean toBooleanObject( Object value )
