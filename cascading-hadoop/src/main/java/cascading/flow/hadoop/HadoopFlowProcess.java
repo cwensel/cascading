@@ -268,7 +268,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   @Override
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( this, outputCollector );
+    return tap.openForWrite( this, null ); // do not honor sinkmode as this may be opened across tasks
     }
 
   @Override
@@ -286,7 +286,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
 
     jobConf.set( "cascading.tapcollector.partname", "%s%spart" + partname + "%05d" );
 
-    return trap.openForWrite( new HadoopFlowProcess( this, jobConf ), null );
+    return trap.openForWrite( new HadoopFlowProcess( this, jobConf ), null ); // do not honor sinkmode as this may be opened across tasks
     }
 
   @Override

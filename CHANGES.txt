@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.2 [unreleased]
 
+  Fixed issue where c.f.FlowProcess#openForWrite on Hadoop would re-use the existing o.a.h.m.OutputCollector instance
+  as that used in the current task.
+
   Fixed issue where fetching remote Hadoop counter values could block indefinitely. Fetching remote counters is now
   serialized across jobs to prevent deadlocks inside the Hadoop API and counter values are now cached with a final
   refresh on job completion.

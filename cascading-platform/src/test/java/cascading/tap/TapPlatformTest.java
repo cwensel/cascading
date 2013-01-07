@@ -22,14 +22,19 @@ package cascading.tap;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
+import cascading.TestBuffer;
 import cascading.flow.Flow;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
@@ -42,7 +47,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
   {
   public TapPlatformTest()
     {
-    super( true );
+    super( true, 4, 1 );
     }
 
   @Test
@@ -228,5 +233,46 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     assertEquals( "wrong value", "B", input.next().getObject( 0 ) );
 
     input.close();
+    }
+
+  @Test
+  public void testSideFileCollector() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sidefile/direct" ), SinkMode.REPLACE );
+
+    Tap sideFile = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sidefile/indirect" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower" ), "\\s" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "num" ) );
+
+    pipe = new Every( pipe, new TestBuffer( sideFile, new Fields( "next" ), 2, true, true, "next" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 23, null );
+
+    List<Tuple> results = getSinkAsList( flow );
+
+    assertTrue( results.contains( new Tuple( "1\tnull\tnext" ) ) );
+    assertTrue( results.contains( new Tuple( "1\ta\tnext" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tb\tnext" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tc\tnext" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tnull\tnext" ) ) );
+
+    results = asList( flow, sideFile );
+
+    assertEquals( 13, results.size() );
+
+    assertTrue( results.contains( new Tuple( "1\ta" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tb" ) ) );
+    assertTrue( results.contains( new Tuple( "1\tc" ) ) );
     }
   }
