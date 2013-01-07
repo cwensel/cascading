@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
-import cascading.flow.planner.PlannerException;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexFilter;
