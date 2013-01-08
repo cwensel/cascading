@@ -23,15 +23,27 @@ package cascading.tuple.coerce;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import cascading.cascade.CascadeException;
 import cascading.tuple.Fields;
 import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
 /**
+ * Coercions class is a helper class for managing primitive value coercions.
+ * <p/>
+ * The {@link Coerce} constants are the default coercions for the specified type.
+ * <p/>
+ * To override the behavior, you must create a new {@link CoercibleType} and assign it to the {@link Fields}
+ * field position/name the custom behavior should apply.
+ * <p/>
+ * Coercions are always used if {@link cascading.tuple.Tuple} elements are accessed via a {@link cascading.tuple.TupleEntry}
+ * wrapper instance.
  *
+ * @see CoercibleType
  */
 public final class Coercions
   {
@@ -63,8 +75,10 @@ public final class Coercions
     }
 
   private static final Map<Type, Coerce> coercionsPrivate = new IdentityHashMap<Type, Coerce>();
-
   public static final Map<Type, Coerce> coercions = Collections.unmodifiableMap( coercionsPrivate );
+
+  private static final Map<String, Type> typesPrivate = new HashMap<String, Type>();
+  public static final Map<String, Type> types = Collections.unmodifiableMap( typesPrivate );
 
   public static final Coerce<Object> OBJECT = new ObjectCoerce( coercionsPrivate );
   public static final Coerce<String> STRING = new StringCoerce( coercionsPrivate );
@@ -83,6 +97,24 @@ public final class Coercions
   public static final Coerce<Boolean> BOOLEAN = new BooleanCoerce( coercionsPrivate );
   public static final Coerce<Boolean> BOOLEAN_OBJECT = new BooleanObjectCoerce( coercionsPrivate );
 
+  static
+    {
+    for( Type type : coercionsPrivate.keySet() )
+      typesPrivate.put( Util.getTypeName( type ), type );
+    }
+
+  /**
+   * Method coercibleTypeFor returns the {@link CoercibleType} for the given {@link Type} instance.
+   * <p/>
+   * If type is null, the {@link #OBJECT} CoercibleType is returned.
+   * <p/>
+   * If type is an instance of CoercibleType, the given type is returned.
+   * <p/>
+   * If no mapping is found, an {@link IllegalStateException} will be thrown.
+   *
+   * @param type the type to look up
+   * @return a CoercibleType for the given type
+   */
   public static CoercibleType coercibleTypeFor( Type type )
     {
     if( type == null )
@@ -99,6 +131,16 @@ public final class Coercions
     return coerce;
     }
 
+  /**
+   * Method coerce will coerce the given value to the given type using any {@link CoercibleType} mapping available.
+   * <p/>
+   * If no mapping is found, the {@link #OBJECT} CoercibleType will be use.
+   *
+   * @param value the value to coerce, may be null.
+   * @param type  the type to coerce to via any mapped CoercibleType
+   * @param <T>   the type expected
+   * @return the coerced value
+   */
   public static final <T> T coerce( Object value, Type type )
     {
     Coerce<T> coerce = coercionsPrivate.get( type );
@@ -109,11 +151,28 @@ public final class Coercions
     return coerce.coerce( value );
     }
 
+  /**
+   * Method coercibleArray will return an array of {@link CoercibleType} instances based on the
+   * given field type information. Each element of {@link cascading.tuple.Fields#getTypes()}
+   * will be used to lookup the corresponding CoercibleType.
+   *
+   * @param fields an instance of Fields with optional type information.
+   * @return array of CoercibleType
+   */
   public static CoercibleType[] coercibleArray( Fields fields )
     {
     return coercibleArray( fields.size(), fields.getTypes() );
     }
 
+  /**
+   * Method coercibleArray will return an array of {@link CoercibleType} instances based on the
+   * given type array. Each element of the type array
+   * will be used to lookup the corresponding CoercibleType.
+   *
+   * @param size  the size of the expected array, must equal {@code types.length} if {@code types != null}
+   * @param types an array of types to lookup
+   * @return array of CoercibleType
+   */
   public static CoercibleType[] coercibleArray( int size, Type[] types )
     {
     CoercibleType[] coercions = new CoercibleType[ size ];
@@ -130,11 +189,66 @@ public final class Coercions
     return coercions;
     }
 
+  /**
+   * Method asClass is a convenience method for casting the given type to a {@link Class} if an instance of Class
+   * or to {@link Object} if not.
+   *
+   * @param type
+   * @return
+   */
   public static Class asClass( Type type )
     {
-    if( type instanceof Class )
+    if( Class.class.isInstance( type ) )
       return (Class) type;
 
     return Object.class;
+    }
+
+  /**
+   * Method asType is a convenience method for looking up a type name (like {@code "int"} or {@code "java.lang.String"}
+   * to its corresponding {@link Class} or instance of CoercibleType.
+   * <p/>
+   * If the name is not in the {@link #types} map, the classname will be loaded from the current {@link ClassLoader}.
+   *
+   * @param typeName a string class or type nam.
+   * @return an instance of the requested type class.
+   */
+  public static Type asType( String typeName )
+    {
+    Type type = typesPrivate.get( typeName );
+
+    if( type != null )
+      return type;
+
+    Class typeClass = getType( typeName );
+
+    if( CoercibleType.class.isAssignableFrom( typeClass ) )
+      return getInstance( typeClass );
+
+    return type;
+    }
+
+  private static CoercibleType getInstance( Class<CoercibleType> typeClass )
+    {
+    try
+      {
+      return typeClass.newInstance();
+      }
+    catch( Exception exception )
+      {
+      throw new CascadeException( "unable to instantiate class: " + Util.getTypeName( typeClass ) );
+      }
+    }
+
+  private static Class<?> getType( String typeName )
+    {
+    try
+      {
+      return Coercions.class.getClassLoader().loadClass( typeName );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadeException( "unable to load class: " + typeName );
+      }
     }
   }
