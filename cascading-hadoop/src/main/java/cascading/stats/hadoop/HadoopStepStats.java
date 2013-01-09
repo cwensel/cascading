@@ -31,7 +31,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -275,7 +276,7 @@ public abstract class HadoopStepStats extends FlowStepStats
     if( runningJob == null )
       return cachedCounters;
 
-    FutureTask<Counters> future = runFuture( runningJob );
+    Future<Counters> future = runFuture( runningJob );
 
     try
       {
@@ -319,11 +320,22 @@ public abstract class HadoopStepStats extends FlowStepStats
 
   // hardcoded at one thread to force serialization across all requesters in the jvm
   // this likely prevents the deadlocks the futures are safeguards against
-  private static ExecutorService futuresPool = Executors.newFixedThreadPool( 1 );
-
-  private FutureTask<Counters> runFuture( final RunningJob runningJob )
+  private static ExecutorService futuresPool = Executors.newSingleThreadExecutor( new ThreadFactory()
+  {
+  @Override
+  public Thread newThread( Runnable runnable )
     {
-    FutureTask<Counters> task = new FutureTask<Counters>( new Callable<Counters>()
+    Thread thread = new Thread( runnable, "stats-futures" );
+
+    thread.setDaemon( true );
+
+    return thread;
+    }
+  } );
+
+  private Future<Counters> runFuture( final RunningJob runningJob )
+    {
+    Callable<Counters> task = new Callable<Counters>()
     {
     @Override
     public Counters call() throws Exception
@@ -337,11 +349,9 @@ public abstract class HadoopStepStats extends FlowStepStats
         throw new FlowException( "unable to get remote counter values" );
         }
       }
-    } );
+    };
 
-    futuresPool.submit( task );
-
-    return task;
+    return futuresPool.submit( task );
     }
 
   /**
