@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.1.2 [unreleased]
+2.1.2
 
   Fixed issue where c.f.FlowProcess#openForWrite on Hadoop would re-use the existing o.a.h.m.OutputCollector instance
   as that used in the current task.
