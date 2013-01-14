@@ -225,7 +225,7 @@ public final class Coercions
     if( CoercibleType.class.isAssignableFrom( typeClass ) )
       return getInstance( typeClass );
 
-    return type;
+    return typeClass;
     }
 
   private static CoercibleType getInstance( Class<CoercibleType> typeClass )
