@@ -193,8 +193,8 @@ public final class Coercions
    * Method asClass is a convenience method for casting the given type to a {@link Class} if an instance of Class
    * or to {@link Object} if not.
    *
-   * @param type
-   * @return
+   * @param type of type Type
+   * @return of type Class
    */
   public static Class asClass( Type type )
     {

@@ -112,7 +112,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private Duct createDuctFor( FlowElement element )
     {
-    Duct rhsDuct = null;
+    Duct rhsDuct;
 
     if( element instanceof Each )
       {
@@ -165,7 +165,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   protected SinkStage createSinkStage( Tap element )
     {
-    return new SinkStage( flowProcess, (Tap) element );
+    return new SinkStage( flowProcess, element );
     }
 
   protected abstract Gate createCoGroupGate( CoGroup element );
@@ -221,7 +221,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private int getNumImmediateBranches( FlowElement tap, HashJoin join )
     {
-    return getAllShortestPathsBetween( step.getGraph(), (FlowElement) tap, join ).size();
+    return getAllShortestPathsBetween( step.getGraph(), tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )

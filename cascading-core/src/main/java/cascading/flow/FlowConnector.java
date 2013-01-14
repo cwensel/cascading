@@ -115,7 +115,7 @@ public abstract class FlowConnector
   public Class getIntermediateSchemeClass( Map<Object, Object> properties )
     {
     // supporting stuffed classes to overcome classloading issue
-    Object type = PropertyUtil.getProperty( properties, FlowConnectorProps.INTERMEDIATE_SCHEME_CLASS, (Object) null );
+    Object type = PropertyUtil.getProperty( properties, FlowConnectorProps.INTERMEDIATE_SCHEME_CLASS, null );
 
     if( type == null )
       return getDefaultIntermediateSchemeClass();

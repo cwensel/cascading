@@ -173,7 +173,7 @@ public class DelimitedParser implements Serializable
       throw new IllegalArgumentException( "when using Fields.ALL, field types may not be used" );
 
     if( this.types != null && this.types.length != sinkFields.size() )
-      throw new IllegalArgumentException( "num of types must equal number of fields: " + sinkFields.printVerbose() + ", found: " + types.length );
+      throw new IllegalArgumentException( "num of types must equal number of fields: " + sinkFields.printVerbose() + ", found: " + this.types.length );
 
     coercibles = Coercions.coercibleArray( this.numValues, this.types );
     }

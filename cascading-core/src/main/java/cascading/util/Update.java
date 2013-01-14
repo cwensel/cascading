@@ -50,7 +50,7 @@ public class Update extends TimerTask
   public static final String UPDATE_CHECK_SKIP = "cascading.update.skip";
   public static final String UPDATE_URL = "cascading.update.url";
 
-  private static Set<PlatformInfo> platformInfoSet = Collections.synchronizedSet( new TreeSet<PlatformInfo>() );
+  private static final Set<PlatformInfo> platformInfoSet = Collections.synchronizedSet( new TreeSet<PlatformInfo>() );
   private static Timer timer;
 
   public static synchronized void checkForUpdate( PlatformInfo platformInfo )

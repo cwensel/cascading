@@ -158,7 +158,7 @@ public abstract class FlowPlanner
     if( runID == null )
       return null;
 
-    if( runID != null && flowName == null )
+    if( flowName == null )
       throw new PlannerException( "flow name is required when providing a run id" );
 
     return flowName + "/" + runID;

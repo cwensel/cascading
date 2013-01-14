@@ -194,7 +194,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       catch( IllegalArgumentException exception )
         {
         if( flowElement == null )
-          new ElementGraphException( "unable to traverse to the first element" );
+          throw new ElementGraphException( "unable to traverse to the first element" );
 
         throw new ElementGraphException( flowElement, "unable to traverse to the next element after " + flowElement );
         }
@@ -268,7 +268,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
     for( String sink : sinks.keySet() )
       {
-      Scope scope = null;
+      Scope scope;
 
       try
         {
@@ -816,7 +816,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
 
   public List<FlowElement> getAllSuccessors( FlowElement element )
     {
-    return (List<FlowElement>) Graphs.successorListOf( this, element );
+    return Graphs.successorListOf( this, element );
     }
 
   public void replaceElementWith( FlowElement element, FlowElement replacement )
@@ -888,7 +888,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
     for( FlowElement successor : successors )
       {
       if( type != successor.getClass() )
-        allSuccessors.add( (FlowElement) successor );
+        allSuccessors.add( successor );
       else
         getAllChildrenNotExactlyType( allSuccessors, successor, type );
       }

@@ -112,7 +112,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     if( ignoreValues != null && ignoreValues.contains( arg ) )
       return;
 
-    Number rhs = null;
+    Number rhs;
 
     if( arg instanceof Number )
       rhs = (Number) arg;

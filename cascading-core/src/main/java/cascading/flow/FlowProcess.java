@@ -175,7 +175,7 @@ public abstract class FlowProcess<Config>
   /**
    * Method getID() returns the current
    *
-   * @return
+   * @return of type String
    */
   public String getID()
     {

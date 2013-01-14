@@ -175,7 +175,7 @@ public abstract class MemorySpliceGate extends SpliceGate
   /**
    * This lets us just replace an old map and let the gc cleanup, vs clearing each map
    *
-   * @return
+   * @return of type Map
    */
   protected Map<Tuple, Collection<Tuple>>[] createKeyValuesArray()
     {

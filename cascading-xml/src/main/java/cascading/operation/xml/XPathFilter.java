@@ -74,7 +74,7 @@ public class XPathFilter extends XPathOperation implements Filter<Pair<DocumentB
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Pair<DocumentBuilder, Tuple>> filterCall )
     {
-    String argument = (String) filterCall.getArguments().getString( 0 );
+    String argument = filterCall.getArguments().getString( 0 );
     Document document = parseDocument( filterCall.getContext().getLhs(), argument );
     XPathExpression expression = getExpressions().get( 0 );
 

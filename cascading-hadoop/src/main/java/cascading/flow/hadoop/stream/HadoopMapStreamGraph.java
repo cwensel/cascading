@@ -134,12 +134,12 @@ public class HadoopMapStreamGraph extends StepStreamGraph
 
   protected Gate createCoGroupGate( CoGroup element )
     {
-    return new HadoopCoGroupGate( flowProcess, (CoGroup) element, SpliceGate.Role.sink );
+    return new HadoopCoGroupGate( flowProcess, element, SpliceGate.Role.sink );
     }
 
   protected Gate createGroupByGate( GroupBy element )
     {
-    return new HadoopGroupByGate( flowProcess, (GroupBy) element, SpliceGate.Role.sink );
+    return new HadoopGroupByGate( flowProcess, element, SpliceGate.Role.sink );
     }
 
   @Override

@@ -31,14 +31,14 @@ public interface CascadeListener
   /**
    * The onStarting event is fired when a Cascade instance receives the start() message.
    *
-   * @param cascade
+   * @param cascade the current Cascade
    */
   void onStarting( Cascade cascade );
 
   /**
    * The onStopping event is fired when a Cascade instance receives the stop() message.
    *
-   * @param cascade
+   * @param cascade the current Cascade
    */
   void onStopping( Cascade cascade );
 
@@ -46,7 +46,7 @@ public interface CascadeListener
    * The onCompleted event is fired when a Cascade instance has completed all work whether if was success or failed. If
    * there was a thrown exception, onThrowable will be fired before this event.
    *
-   * @param cascade
+   * @param cascade the current Cascade
    */
   void onCompleted( Cascade cascade );
 
@@ -55,8 +55,8 @@ public interface CascadeListener
    * as an argument to the event. This event method should return true if the given throwable was handled and should
    * not be rethrown from the {@link cascading.cascade.Cascade#complete()} method.
    *
-   * @param cascade
-   * @param throwable
+   * @param cascade   the current Cascade
+   * @param throwable the current error
    * @return returns true if this listener has handled the given throwable
    */
   boolean onThrowable( Cascade cascade, Throwable throwable );

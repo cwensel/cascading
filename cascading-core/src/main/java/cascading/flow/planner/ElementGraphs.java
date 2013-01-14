@@ -77,7 +77,7 @@ public class ElementGraphs
    * @param graph
    * @param from
    * @param to
-   * @return
+   * @return of type List
    */
   public static List<GraphPath<FlowElement, Scope>> getAllDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, FlowElement to )
     {
@@ -90,7 +90,7 @@ public class ElementGraphs
 
       for( int i = 1; i < pathVertexList.size(); i++ ) // skip the from, its a Tap or Group
         {
-        FlowElement flowElement = (FlowElement) pathVertexList.get( i );
+        FlowElement flowElement = pathVertexList.get( i );
 
         if( flowElement instanceof Tap || flowElement instanceof Group )
           {
@@ -135,7 +135,7 @@ public class ElementGraphs
    * @param graph
    * @param from
    * @param to
-   * @return
+   * @return of type Map
    */
   public static Map<Integer, Integer> countOrderedDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to )
     {

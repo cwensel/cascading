@@ -82,7 +82,7 @@ public class AverageBy extends AggregateBy
     /**
      * Constructor AveragePartials creates a new AveragePartials instance.
      *
-     * @param declaredFields
+     * @param declaredFields of type Fields
      */
     public AveragePartials( Fields declaredFields )
       {

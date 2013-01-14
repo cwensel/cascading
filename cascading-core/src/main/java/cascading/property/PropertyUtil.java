@@ -43,7 +43,7 @@ public class PropertyUtil
     if( properties == null )
       return defaultValue;
 
-    A value = null;
+    A value;
 
     if( properties instanceof Properties )
       value = (A) ( (Properties) properties ).getProperty( key );

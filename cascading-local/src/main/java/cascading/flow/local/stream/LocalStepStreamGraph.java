@@ -36,7 +36,6 @@ import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
-import cascading.pipe.Splice;
 import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
 
@@ -72,12 +71,12 @@ public class LocalStepStreamGraph extends StepStreamGraph
 
   protected Gate createCoGroupGate( CoGroup element )
     {
-    return new MemoryCoGroupGate( flowProcess, (Splice) element );
+    return new MemoryCoGroupGate( flowProcess, element );
     }
 
   protected Gate createGroupByGate( GroupBy element )
     {
-    return new LocalGroupByGate( flowProcess, (Splice) element );
+    return new LocalGroupByGate( flowProcess, element );
     }
 
   @Override

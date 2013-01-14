@@ -182,6 +182,6 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
   @Override
   public Config mergeMapIntoConfig( Config defaultConfig, Map<String, String> map )
     {
-    return (Config) delegate.mergeMapIntoConfig( defaultConfig, map );
+    return delegate.mergeMapIntoConfig( defaultConfig, map );
     }
   }

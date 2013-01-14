@@ -55,7 +55,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
   @Override
   public Properties getConfig()
     {
-    return ( (LocalFlowStep) flowStep ).getConfig();
+    return flowStep.getConfig();
     }
 
   @Override

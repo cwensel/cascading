@@ -84,7 +84,7 @@ public class Count extends BaseOperation<Pair<Long[], Tuple>> implements Aggrega
 
   protected Tuple getResult( AggregatorCall<Pair<Long[], Tuple>> aggregatorCall )
     {
-    aggregatorCall.getContext().getRhs().set( 0, (Comparable) aggregatorCall.getContext().getLhs()[ 0 ] );
+    aggregatorCall.getContext().getRhs().set( 0, aggregatorCall.getContext().getLhs()[ 0 ] );
 
     return aggregatorCall.getContext().getRhs();
     }

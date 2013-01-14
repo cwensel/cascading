@@ -833,9 +833,8 @@ public class TupleEntry
    * This method honors any {@link cascading.tuple.type.CoercibleType} instances on the internal
    * Fields instance for the specified Tuple element.
    *
-   * @param type
-   * @param <T>
-   * @return
+   * @param type of type Class
+   * @return an Iterable
    */
   public <T> Iterable<T> asIterableOf( final Class<T> type )
     {

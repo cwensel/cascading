@@ -107,9 +107,9 @@ public class Tuples
    * <p/>
    * This method is a convenient way to test for all null values in a tuple.
    *
-   * @param tuple
-   * @param value
-   * @return
+   * @param tuple of type Tuple
+   * @param value of type Object
+   * @return an int
    */
   public static int frequency( Tuple tuple, Object value )
     {
@@ -121,9 +121,9 @@ public class Tuples
    * <p/>
    * This method is a convenient way to test for all null values in a tuple.
    *
-   * @param tupleEntry
-   * @param value
-   * @return
+   * @param tupleEntry of type TupleEntry
+   * @param value      of type Object
+   * @return an int
    */
   public static int frequency( TupleEntry tupleEntry, Object value )
     {

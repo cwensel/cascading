@@ -40,10 +40,10 @@ public class TupleElementComparator implements StreamComparator<TupleInputStream
     if( lhs == null && rhs == null )
       return 0;
 
-    if( lhs == null && rhs != null )
+    if( lhs == null )
       return -1;
 
-    if( lhs != null && rhs == null )
+    if( rhs == null )
       return 1;
 
     return lhs.compareTo( rhs ); // guaranteed to not be null

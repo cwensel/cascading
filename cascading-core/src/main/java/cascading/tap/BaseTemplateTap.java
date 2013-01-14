@@ -142,7 +142,7 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
 
       try
         {
-        ( (TupleEntryCollector) collector ).close();
+        collector.close();
 
         flowProcess.increment( Counters.Paths_Closed, 1 );
         }

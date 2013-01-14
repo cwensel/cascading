@@ -132,8 +132,8 @@ public interface FlowStep<Config>
   /**
    * Returns true if this FlowStep contains a pipe/branch with the given name.
    *
-   * @param pipeName
-   * @return
+   * @param pipeName the name of the Pipe
+   * @return a boolean
    */
   boolean containsPipeNamed( String pipeName );
 

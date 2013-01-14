@@ -90,7 +90,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
 
   private Pattern getPattern()
     {
-    Pattern pattern = null;
+    Pattern pattern;
 
     if( patternString == null )
       pattern = Pattern.compile( ".*" );
@@ -135,7 +135,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
   @Override
   public void aggregate( FlowProcess flowProcess, GroupAssertionCall<Context> assertionCall )
     {
-    Long groupSize = (Long) assertionCall.getContext().count;
+    Long groupSize = assertionCall.getContext().count;
 
     // didn't match, so skip
     if( groupSize != null )

@@ -66,7 +66,7 @@ public abstract class CascadingStats implements Serializable
    * Method setStatsStoreInterval sets the interval time between store operations against the underlying
    * document storage services. This affects the rate at which metrics and status information is updated.
    *
-   * @param properties
+   * @param properties of type Properties
    * @param intervalMs milliseconds between storage calls
    */
   public static void setStatsStoreInterval( Map<Object, Object> properties, long intervalMs )

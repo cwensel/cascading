@@ -77,7 +77,7 @@ public class FlowSession
   /**
    * Method getID returns the parent {@link Flow} ID value.
    *
-   * @return
+   * @return of type String
    */
   public String getID()
     {

@@ -299,8 +299,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     if( fields.size() != 0 ) // allows fields.UNKNOWN to be used
       conf.setInt( property + ".size", fields.size() );
-
-    return;
     }
 
   private void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf, Map<String, Tap> traps )

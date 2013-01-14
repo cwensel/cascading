@@ -39,12 +39,12 @@ public class SparseTupleComparator implements Comparator<Tuple>
       {
       if( lhs == null && rhs == null )
         return 0;
-      else if( lhs == null && rhs != null )
+      else if( lhs == null )
         return -1;
-      else if( lhs != null && rhs == null )
+      else if( rhs == null )
         return 1;
       else
-        return ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
+        return ( (Comparable) lhs ).compareTo( rhs ); // guaranteed to not be null
       }
     }
 

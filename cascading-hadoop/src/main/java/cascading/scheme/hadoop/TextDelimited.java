@@ -121,8 +121,8 @@ public class TextDelimited extends TextLine
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
-   * @param hasHeader
-   * @param delimiter
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
    */
   @ConstructorProperties({"hasHeader", "delimiter"})
   public TextDelimited( boolean hasHeader, String delimiter )
@@ -137,9 +137,9 @@ public class TextDelimited extends TextLine
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
-   * @param hasHeader
-   * @param delimiter
-   * @param quote
+   * @param hasHeader of type boolean
+   * @param delimiter of type String
+   * @param quote     of type String
    */
   @ConstructorProperties({"hasHeader", "delimiter", "quote"})
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
@@ -154,8 +154,8 @@ public class TextDelimited extends TextLine
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
-   * @param hasHeader
-   * @param delimitedParser
+   * @param hasHeader       of type boolean
+   * @param delimitedParser of type DelimitedParser
    */
   @ConstructorProperties({"hasHeader", "delimitedParser"})
   public TextDelimited( boolean hasHeader, DelimitedParser delimitedParser )
@@ -172,7 +172,7 @@ public class TextDelimited extends TextLine
    * <p/>
    * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
    *
-   * @param delimitedParser
+   * @param delimitedParser of type DelimitedParser
    */
   @ConstructorProperties({"delimitedParser"})
   public TextDelimited( DelimitedParser delimitedParser )
@@ -187,9 +187,9 @@ public class TextDelimited extends TextLine
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
-   * @param sinkCompression
-   * @param hasHeader
-   * @param delimitedParser
+   * @param sinkCompression of type Compress
+   * @param hasHeader       of type boolean
+   * @param delimitedParser of type DelimitedParser
    */
   @ConstructorProperties({"sinkCompression", "hasHeader", "delimitedParser"})
   public TextDelimited( Compress sinkCompression, boolean hasHeader, DelimitedParser delimitedParser )
@@ -206,7 +206,7 @@ public class TextDelimited extends TextLine
    * <p/>
    * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
    *
-   * @param delimitedParser
+   * @param delimitedParser of type DelimitedParser
    */
   @ConstructorProperties({"sinkCompression", "delimitedParser"})
   public TextDelimited( Compress sinkCompression, DelimitedParser delimitedParser )
@@ -221,10 +221,10 @@ public class TextDelimited extends TextLine
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
-   * @param sinkCompression
-   * @param hasHeader
-   * @param delimiter
-   * @param quote
+   * @param sinkCompression of type Compress
+   * @param hasHeader       of type boolean
+   * @param delimiter       of type String
+   * @param quote           of type String
    */
   @ConstructorProperties({"sinkCompression", "hasHeader", "delimiter", "quote"})
   public TextDelimited( Compress sinkCompression, boolean hasHeader, String delimiter, String quote )
@@ -566,7 +566,7 @@ public class TextDelimited extends TextLine
   @ConstructorProperties({"fields", "sinkCompression", "hasHeader", "delimiter", "types", "safe", "charsetName"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean hasHeader, String delimiter, Class[] types, boolean safe, String charsetName )
     {
-    this( fields, sinkCompression, hasHeader, hasHeader, delimiter, true, (String) null, types, safe, charsetName );
+    this( fields, sinkCompression, hasHeader, hasHeader, delimiter, true, null, types, safe, charsetName );
     }
 
   /**
@@ -869,12 +869,12 @@ public class TextDelimited extends TextLine
   /**
    * Constructor TextDelimited creates a new TextDelimited instance.
    *
-   * @param fields
-   * @param sinkCompression
-   * @param skipHeader
-   * @param writeHeader
-   * @param charsetName
-   * @param delimitedParser
+   * @param fields          of type Fields
+   * @param sinkCompression of type Compress
+   * @param skipHeader      of type boolean
+   * @param writeHeader     of type boolean
+   * @param charsetName     of type String
+   * @param delimitedParser of type DelimitedParser
    */
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
     {

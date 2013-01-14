@@ -54,7 +54,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
 
     public Tuple result()
       {
-      tuple.set( 0, (Double) sum / count );
+      tuple.set( 0, sum / count );
 
       return tuple;
       }

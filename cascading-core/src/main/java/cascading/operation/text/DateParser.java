@@ -170,6 +170,7 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
     calendar.setTime( date );
 
     for( int i = 0; i < calendarFields.length; i++ )
+    //noinspection MagicConstant
       output.add( calendar.get( calendarFields[ i ] ) );
     }
 

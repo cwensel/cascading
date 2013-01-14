@@ -141,7 +141,7 @@ public class TempHfs extends Hfs
     {
     try
       {
-      setScheme( (Scheme) schemeClass.getConstructor( Fields.class ).newInstance( fields ) );
+      setScheme( schemeClass.getConstructor( Fields.class ).newInstance( fields ) );
       }
     catch( Exception exception )
       {

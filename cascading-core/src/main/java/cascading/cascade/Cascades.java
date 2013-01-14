@@ -42,7 +42,7 @@ public class Cascades
    *
    * @param name of type String
    * @param tap  of type Tap
-   * @return Map<String,Tap>
+   * @return Map
    */
   public static Map<String, Tap> tapsMap( String name, Tap tap )
     {
@@ -54,7 +54,7 @@ public class Cascades
    *
    * @param names of type String[]
    * @param taps  of type Tap[]
-   * @return Map<String, Tap>
+   * @return Map
    */
   public static Map<String, Tap> tapsMap( String[] names, Tap[] taps )
     {
@@ -71,7 +71,7 @@ public class Cascades
    *
    * @param pipe of type Pipe
    * @param tap  of type Tap
-   * @return Map<String, Tap>
+   * @return Map
    */
   public static Map<String, Tap> tapsMap( Pipe pipe, Tap tap )
     {
@@ -83,7 +83,7 @@ public class Cascades
    *
    * @param pipes of type Pipe[]
    * @param taps  of type Tap[]
-   * @return Map<String, Tap>
+   * @return Map
    */
   public static Map<String, Tap> tapsMap( Pipe[] pipes, Tap[] taps )
     {

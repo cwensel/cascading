@@ -144,7 +144,7 @@ public class ConfigDef implements Serializable
     if( updateValue == null )
       return currentValue;
 
-    if( updateValue != null && currentValue == null )
+    if( currentValue == null )
       return updateValue;
 
     return getter.update( key, updateValue );

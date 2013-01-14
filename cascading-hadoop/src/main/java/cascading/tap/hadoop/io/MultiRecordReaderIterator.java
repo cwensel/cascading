@@ -102,10 +102,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     splits = inputFormat.getSplits( conf, 1 );
 
     if( splits.length == 0 )
-      {
       complete = true;
-      return;
-      }
     }
 
   private RecordReader makeReader( int currentSplit ) throws IOException

@@ -59,7 +59,7 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     {
     Group group = step.getGroup();
 
-    Duct rhsDuct = null;
+    Duct rhsDuct;
 
     if( group.isGroupBy() )
       rhsDuct = new HadoopGroupByGate( flowProcess, (GroupBy) group, SpliceGate.Role.source );

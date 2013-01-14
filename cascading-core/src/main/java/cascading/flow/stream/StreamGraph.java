@@ -296,8 +296,8 @@ public class StreamGraph
    * Paths all unique paths are counted, minus any immediate prior GroupGates as they
    * block incoming paths into a single path
    *
-   * @param duct
-   * @return
+   * @param duct of type Duct
+   * @return an int
    */
   public int countAllEventingPathsTo( Duct duct )
     {

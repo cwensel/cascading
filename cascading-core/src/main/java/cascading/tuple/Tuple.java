@@ -944,9 +944,9 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
       if( lhs == null && rhs == null )
         continue;
 
-      if( lhs == null && rhs != null )
+      if( lhs == null )
         return -1;
-      else if( lhs != null && rhs == null )
+      else if( rhs == null )
         return 1;
 
       int c = lhs.compareTo( rhs ); // guaranteed to not be null
@@ -976,18 +976,18 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
       Object lhs = this.elements.get( i );
       Object rhs = other.elements.get( i );
 
-      int c = 0;
+      int c;
 
       if( comparators[ i ] != null )
         c = comparators[ i ].compare( lhs, rhs );
       else if( lhs == null && rhs == null )
         c = 0;
-      else if( lhs == null && rhs != null )
+      else if( lhs == null )
         return -1;
-      else if( lhs != null && rhs == null )
+      else if( rhs == null )
         return 1;
       else
-        c = ( (Comparable) lhs ).compareTo( (Comparable) rhs ); // guaranteed to not be null
+        c = ( (Comparable) lhs ).compareTo( rhs ); // guaranteed to not be null
 
       if( c != 0 )
         return c;

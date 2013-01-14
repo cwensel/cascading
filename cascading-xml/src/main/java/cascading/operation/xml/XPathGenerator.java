@@ -70,7 +70,7 @@ public class XPathGenerator extends XPathOperation implements Function<Pair<Docu
     if( input.getObject( 0 ) == null || !( input.getObject( 0 ) instanceof String ) )
       return;
 
-    String value = (String) input.getString( 0 );
+    String value = input.getString( 0 );
 
     if( value.length() == 0 ) // intentionally not trim()ing this value
       return;

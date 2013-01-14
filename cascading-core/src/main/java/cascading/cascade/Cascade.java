@@ -856,7 +856,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   /**
    * If the number of flows that are local is greater than one, force the Cascade to run without parallelization.
    *
-   * @return
+   * @return of type int
    */
   private int numLocalFlows()
     {

@@ -259,7 +259,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     {
     try
       {
-      URI uriScheme = null;
+      URI uriScheme;
 
       LOG.debug( "handling path: {}", stringPath );
 

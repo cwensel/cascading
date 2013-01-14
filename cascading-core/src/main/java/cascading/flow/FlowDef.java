@@ -462,8 +462,8 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
    * <p/>
    * A Flow name is required when using a runID.
    *
-   * @param runID
-   * @return
+   * @param runID of type String
+   * @return FlowDef
    */
   public FlowDef setRunID( String runID )
     {

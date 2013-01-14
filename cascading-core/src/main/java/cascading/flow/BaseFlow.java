@@ -433,8 +433,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
    * This method creates a new internal Config with the parentConfig as defaults using the properties to override
    * the defaults.
    *
-   * @param properties
-   * @param parentConfig
+   * @param properties   of type Map
+   * @param parentConfig of type Config
    */
   protected abstract void initConfig( Map<Object, Object> properties, Config parentConfig );
 
@@ -704,7 +704,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     steps = new ArrayList<FlowStep<Config>>();
 
     while( topoIterator.hasNext() )
-      steps.add( (FlowStep<Config>) topoIterator.next() );
+      steps.add( topoIterator.next() );
 
     return steps;
     }
@@ -1152,7 +1152,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
 
       for( Object flowStep : predecessorListOf( flowStepGraph, step ) )
-        predecessors.add( (FlowStepJob<Config>) jobsMap.get( ( (FlowStep<Config>) flowStep ).getName() ) );
+        predecessors.add( jobsMap.get( ( (FlowStep<Config>) flowStep ).getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
 

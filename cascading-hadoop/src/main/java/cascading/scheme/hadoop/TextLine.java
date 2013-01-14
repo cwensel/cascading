@@ -373,7 +373,7 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
   @Override
   public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
     {
-    if( tap.getFullIdentifier( conf ).toString().endsWith( ".zip" ) )
+    if( tap.getFullIdentifier( conf ).endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
 
     if( getSinkCompression() == Compress.DISABLE )

@@ -75,7 +75,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
 
       while( iterator.hasNext() )
         {
-        TupleEntry tupleEntry = null;
+        TupleEntry tupleEntry;
 
         try
           {

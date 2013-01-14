@@ -43,15 +43,15 @@ import java.lang.reflect.Type;
 public interface CoercibleType<Canonical> extends Type, Serializable
   {
   /**
-   * @param value
-   * @return
+   * @param value of type Object
+   * @return the value coerced into its canonical type
    */
   Canonical canonical( Object value );
 
   /**
-   * @param value
-   * @param to
-   * @return
+   * @param value of type Object
+   * @param to    of type Type
+   * @return the value coerced into the requested type
    */
   <Coerce> Coerce coerce( Object value, Type to );
   }

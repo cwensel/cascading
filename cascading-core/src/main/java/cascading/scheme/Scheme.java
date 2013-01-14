@@ -235,7 +235,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * <p/>
    * The {@code FlowProcess} presents all known properties resolved by the current planner.
    * <p/>
-   * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
+   * The {@code tap} instance is the parent {@link Tap} for this Scheme instance.
    *
    * @param flowProcess of type FlowProcess
    * @param tap         of type Tap
@@ -273,7 +273,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * <p/>
    * The {@code FlowProcess} presents all known properties resolved by the current planner.
    * <p/>
-   * The {@tap} instance is the parent {@link Tap} for this Scheme instance.
+   * The {@code tap} instance is the parent {@link Tap} for this Scheme instance.
    *
    * @param flowProcess of type FlowProcess
    * @param tap         of type Tap
@@ -347,7 +347,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sourcePrepare is used to initialize resources needed during each call of
    * {@link #source(cascading.flow.FlowProcess, SourceCall)}.
    * <p/>
-   * Be sure to place any initialized objects in the {@link SourceContext} so each instance
+   * Be sure to place any initialized objects in the {@code SourceContext} so each instance
    * will remain threadsafe.
    *
    * @param flowProcess of type FlowProcess
@@ -392,7 +392,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sinkPrepare is used to initialize resources needed during each call of
    * {@link #sink(cascading.flow.FlowProcess, SinkCall)}.
    * <p/>
-   * Be sure to place any initialized objects in the {@link SinkContext} so each instance
+   * Be sure to place any initialized objects in the {@code SinkContext} so each instance
    * will remain threadsafe.
    *
    * @param flowProcess of type FlowProcess

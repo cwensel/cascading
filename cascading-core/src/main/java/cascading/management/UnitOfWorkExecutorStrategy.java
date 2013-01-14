@@ -52,7 +52,7 @@ public class UnitOfWorkExecutorStrategy implements UnitOfWorkSpawnStrategy
   @Override
   public boolean isCompleted( UnitOfWork unitOfWork )
     {
-    return executor != null ? executor.isTerminated() : true;
+    return executor == null || executor.isTerminated();
     }
 
   @Override

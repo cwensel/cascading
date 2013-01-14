@@ -1569,8 +1569,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Returns the Class for the given position value.
    *
-   * @param pos
-   * @return
+   * @param pos of type int
+   * @return type Class
    */
   public Class getTypeClass( int pos )
     {
@@ -1588,7 +1588,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Returns a copy of the current types Type[] if any, else null.
    *
-   * @return
+   * @return of type Type[]
    */
   public Type[] getTypes()
     {
@@ -1600,7 +1600,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * <p/>
    * May fail if all types are not an instance of {@link Class}.
    *
-   * @return
+   * @return of type Class
    */
   public Class[] getTypesClasses()
     {
@@ -1765,7 +1765,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * Method equalsFields compares only the internal field names and postions only between this and the given Fields
    * instance. Type information is ignored.
    *
-   * @param fields
+   * @param fields of type int
    * @return true if this and the given instance have the same positions and/or field names.
    */
   public boolean equalsFields( Fields fields )

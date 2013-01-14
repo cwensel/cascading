@@ -197,13 +197,13 @@ public class TupleSerialization extends Configured implements Serialization
 
     try
       {
-      Class<Comparator> type = (Class<Comparator>) TupleSerialization.class.getClassLoader().loadClass( typeName.toString() );
+      Class<Comparator> type = (Class<Comparator>) TupleSerialization.class.getClassLoader().loadClass( typeName );
 
       return ReflectionUtils.newInstance( type, jobConf );
       }
     catch( ClassNotFoundException exception )
       {
-      throw new CascadingException( "unable to load class: " + typeName.toString(), exception );
+      throw new CascadingException( "unable to load class: " + typeName, exception );
       }
     }
 
@@ -322,8 +322,6 @@ public class TupleSerialization extends Configured implements Serialization
       }
 
     tokensSize = tokenClassesMap.size();
-
-    return;
     }
 
   private void addToken( Class type, int token, String className )
@@ -593,7 +591,7 @@ public class TupleSerialization extends Configured implements Serialization
       Deserializer deserializer = getDeserializerFor( inputStream, className );
 
       Object foundObject = null;
-      Object object = null;
+      Object object;
 
       try
         {

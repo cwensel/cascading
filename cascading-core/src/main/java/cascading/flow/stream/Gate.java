@@ -42,8 +42,8 @@ public abstract class Gate<Incoming, Outgoing> extends Duct<Incoming, Outgoing>
   /**
    * the actual previous in this context, not necessarily the declared previous
    *
-   * @param streamGraph
-   * @return
+   * @param streamGraph of type StreamGraph
+   * @return of type Duct[]
    */
   protected Duct[] getAllPreviousFor( StreamGraph streamGraph )
     {

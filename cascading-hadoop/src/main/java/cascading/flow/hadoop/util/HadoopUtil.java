@@ -145,7 +145,7 @@ public class HadoopUtil
 
   public static Thread getHDFSShutdownHook()
     {
-    Exception caughtException = null;
+    Exception caughtException;
 
     try
       {
@@ -452,7 +452,8 @@ public class HadoopUtil
       }
     finally
       {
-      reader.close();
+      if( reader != null )
+        reader.close();
       }
     }
 

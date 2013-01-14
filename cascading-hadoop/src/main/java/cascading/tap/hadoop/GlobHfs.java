@@ -120,7 +120,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
 
   private Hfs[] makeTaps( JobConf conf ) throws IOException
     {
-    FileStatus[] statusList = null;
+    FileStatus[] statusList;
 
     Path path = new Path( pathPattern );
 
