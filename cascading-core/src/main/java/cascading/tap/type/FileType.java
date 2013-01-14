@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,7 +31,7 @@ public interface FileType<Config>
    *
    * @param conf of JobConf
    * @return boolean
-   * @throws java.io.IOException when
+   * @throws java.io.IOException
    */
   boolean isDirectory( Config conf ) throws IOException;
 
@@ -42,7 +42,16 @@ public interface FileType<Config>
    *
    * @param conf of JobConf
    * @return String[]
-   * @throws java.io.IOException when
+   * @throws java.io.IOException
    */
   String[] getChildIdentifiers( Config conf ) throws IOException;
+
+  /**
+   * Method getSize returns the size of the file referenced by this tap.
+   *
+   * @param conf of type Config
+   * @return The size of the file reference by this tap.
+   * @throws java.io.IOException
+   */
+  long getSize( Config conf ) throws IOException;
   }

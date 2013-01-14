@@ -98,13 +98,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, path );
     }
 
-  /**
-   * Method getSize returns the size of the file referenced by this tap.
-   *
-   * @param conf of type Properties
-   * @return The size of the file reference by this tap.
-   * @throws IOException
-   */
+  @Override
   public long getSize( Properties conf ) throws IOException
     {
     File file = new File( path );

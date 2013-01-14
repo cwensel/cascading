@@ -464,13 +464,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return getFileSystem( conf ).getFileStatus( getPath() ).isDir();
     }
 
-  /**
-   * Method getSize returns the size of the file referenced by this tap.
-   *
-   * @param conf of type Properties
-   * @return The size of the file reference by this tap.
-   * @throws IOException
-   */
+  @Override
   public long getSize( JobConf conf ) throws IOException
     {
     if( !resourceExists( conf ) )
