@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -20,25 +20,40 @@
 
 package cascading;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
 import cascading.operation.BufferCall;
+import cascading.operation.OperationCall;
+import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 
 /**
  *
  */
-public class TestBuffer extends BaseOperation implements Buffer
+public class TestBuffer extends BaseOperation<TupleEntryCollector> implements Buffer<TupleEntryCollector>
   {
+  private Tap path;
   private int expectedSize = -1;
   private boolean insertHeader;
   private boolean insertFooter;
   private Comparable value;
+
+  public TestBuffer( Tap path, Fields fieldDeclaration, int expectedSize, boolean insertHeader, boolean insertFooter, String value )
+    {
+    super( fieldDeclaration );
+    this.path = path;
+    this.expectedSize = expectedSize;
+    this.insertHeader = insertHeader;
+    this.insertFooter = insertFooter;
+    this.value = value;
+    }
 
   public TestBuffer( Fields fieldDeclaration, int expectedSize, boolean insertHeader, boolean insertFooter, String value )
     {
@@ -75,7 +90,32 @@ public class TestBuffer extends BaseOperation implements Buffer
     super( fieldDeclaration );
     }
 
-  public void operate( FlowProcess flowProcess, BufferCall bufferCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<TupleEntryCollector> operationCall )
+    {
+    if( path == null )
+      return;
+
+    try
+      {
+      operationCall.setContext( flowProcess.openTapForWrite( path ) );
+      }
+    catch( IOException exception )
+      {
+      exception.printStackTrace();
+      }
+    }
+
+  @Override
+  public void cleanup( FlowProcess flowProcess, OperationCall<TupleEntryCollector> operationCall )
+    {
+    if( path == null )
+      return;
+
+    operationCall.getContext().close();
+    }
+
+  public void operate( FlowProcess flowProcess, BufferCall<TupleEntryCollector> bufferCall )
     {
     if( insertHeader )
       bufferCall.getOutputCollector().add( new Tuple( value ) );
@@ -88,6 +128,9 @@ public class TestBuffer extends BaseOperation implements Buffer
 
       if( expectedSize != -1 && arguments.size() != expectedSize )
         throw new RuntimeException( "arguments wrong size" );
+
+      if( path != null )
+        bufferCall.getContext().add( arguments );
 
       if( value != null )
         bufferCall.getOutputCollector().add( new Tuple( value ) );

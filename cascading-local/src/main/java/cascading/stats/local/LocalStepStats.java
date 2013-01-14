@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -88,10 +88,12 @@ public class LocalStepStats extends FlowStepStats
     {
     Map<String, Long> counterMap = counters.get( counter.getDeclaringClass().getName() );
 
-    if( counterMap == null )
+    String counterString = counter.toString();
+
+    if( counterMap == null || !counterMap.containsKey( counterString ) )
       return 0;
 
-    return counterMap.get( counter.toString() );
+    return counterMap.get( counterString );
     }
 
   @Override
@@ -99,7 +101,7 @@ public class LocalStepStats extends FlowStepStats
     {
     Map<String, Long> counterMap = counters.get( group );
 
-    if( counterMap == null )
+    if( counterMap == null || !counterMap.containsKey( counter ) )
       return 0;
 
     return counterMap.get( counter );

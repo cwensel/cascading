@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -156,13 +156,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public TupleEntryCollector openTapForWrite( Tap tap ) throws IOException
     {
-    return tap.openForWrite( this, null );
+    return tap.openForWrite( this, null ); // do not honor sinkmode as this may be opened across tasks
     }
 
   @Override
   public TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException
     {
-    return trap.openForWrite( this, null );
+    return trap.openForWrite( this, null ); // do not honor sinkmode as this may be opened across tasks
     }
 
   @Override

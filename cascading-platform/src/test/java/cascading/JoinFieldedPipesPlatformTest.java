@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -1003,7 +1003,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * Same source as rightmost
-   *
+   * <p/>
    * should be a single job as the same file accumulates into the joins
    *
    * @throws Exception
@@ -1204,19 +1204,18 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     }
 
   /**
-   *
    * here the same file is fed into the same HashJoin.
-   *
+   * <p/>
    * This is three jobs.
-   *
+   * <p/>
    * a temp tap is inserted before the accumulated branch for two reasons on the common HashJoin
-   *
+   * <p/>
    * it is assumed the accumulated side is filtered down, so pushing to disk will preserve io
    * if accumulated side was streamed instead via a fork, only part of the file will accumulate into the HashJoin
-   *
-   *   /-T-\ <-- accumulated
+   * <p/>
+   * /-T-\ <-- accumulated
    * T      HJ
-   *   \---/ <-- streamed
+   * \---/ <-- streamed
    *
    * @throws Exception
    */

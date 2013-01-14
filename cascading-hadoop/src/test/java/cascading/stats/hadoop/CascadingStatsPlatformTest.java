@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,7 +45,7 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
   {
   enum TestEnum
     {
-      FIRST, SECOND
+      FIRST, SECOND, THIRD
     }
 
   public CascadingStatsPlatformTest()
@@ -96,12 +96,20 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
     assertEquals( 40, cascadeStats.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 20, cascadeStats.getCounterValue( TestEnum.SECOND ) );
 
+    // should not throw npe
+    assertEquals( 0, cascadeStats.getCounterValue( TestEnum.THIRD ) );
+    assertEquals( 0, cascadeStats.getCounterValue( "FOO", "BAR" ) );
+
     FlowStats flowStats1 = flow1.getFlowStats();
 
     assertNotNull( flowStats1.getID() );
 
     assertEquals( 20, flowStats1.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 10, flowStats1.getCounterValue( TestEnum.SECOND ) );
+
+    // should not throw npe
+    assertEquals( 0, flowStats1.getCounterValue( TestEnum.THIRD ) );
+    assertEquals( 0, flowStats1.getCounterValue( "FOO", "BAR" ) );
 
     FlowStats flowStats2 = flow2.getFlowStats();
 
