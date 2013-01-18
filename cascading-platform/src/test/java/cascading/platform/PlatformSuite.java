@@ -18,30 +18,24 @@
  * limitations under the License.
  */
 
-dependencies {
+package cascading.platform;
 
-  compile project( ':cascading-core' )
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
-  testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
-
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
-
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
-  testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
-}
-
-test {
-  dependsOn << ':cascading-local:platformTest'
-  dependsOn << ':cascading-hadoop:platformTest'
-
-  includes.clear()
-
-  include '**/ComparePlatformsTest.class'
-
-  doFirst() {
-    systemProperties[ 'test.output.roots' ] = rootProject.ext.testRoots.join( "," )
+/**
+ * Annotation PlatformSuite marks any PlatformTestCase as having a
+ * {@code static junit.framework.Test suite(TestPlatform platform)} method.
+ * <p/>
+ * The method name can be overridden by setting the {@link #method()} value.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface PlatformSuite
+  {
+  String method() default "suite";
   }
-}
-
-platformTest.enabled = false

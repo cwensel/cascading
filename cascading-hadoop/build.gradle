@@ -39,9 +39,6 @@ dependencies {
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
   testCompile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
-
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
-  testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
 if( hadoopVersion.startsWith( "1.0." ) )

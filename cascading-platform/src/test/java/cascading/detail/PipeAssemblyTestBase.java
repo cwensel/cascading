@@ -30,6 +30,7 @@ import java.util.Properties;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.pipe.Pipe;
+import cascading.platform.PlatformSuite;
 import cascading.platform.TestPlatform;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@RunWith(SuiteMethod.class)
+@PlatformSuite
 public abstract class PipeAssemblyTestBase extends PlatformTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PipeAssemblyTestBase.class );
@@ -138,12 +140,18 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
 
           String name;
           if( prefix != null )
+            {
             name = prefix + "." + Util.join( Fields.fields( argFields, declFields, selectFields ), "_" );
+            }
           else
+            {
             name = Util.join( Fields.fields( argFields, declFields, selectFields ), "_" );
+            }
 
           if( runOnly != null && !runOnly.equalsIgnoreCase( name ) )
+            {
             continue;
+            }
 
           pipes.put( name, assemblyFactory.createAssembly( pipe, argFields, declFields, functionValue, selectFields ) );
           }
@@ -204,30 +212,44 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
       flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
       if( isWriteDOT() )
+        {
         flow.writeDOT( getName() + ".dot" ); // use display name
+        }
 
       flow.complete();
 
       if( isError() )
+        {
         fail( "did not throw asserted error" );
+        }
       }
     catch( Exception exception )
       {
       if( isError() )
+        {
         return;
+        }
       else
+        {
         throw exception;
+        }
       }
 
     if( resultLength != -1 )
+      {
       validateLength( flow, resultLength );
+      }
 
     TupleEntryIterator iterator = flow.openSink();
     Object result = iterator.next().getObject( 1 );
 
     if( resultTuple != null )
+      {
       assertEquals( "not equal: ", resultTuple.toString(), result );
+      }
     else if( resultTuple == null )
+      {
       fail( "no result assertion made for:" + getName() + " with result: " + result );
+      }
     }
   }
