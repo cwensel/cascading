@@ -106,12 +106,19 @@ subprojects {
     classifier = 'tests'
   }
 
+  task testSourcesJar( type: Jar, dependsOn: classes ) {
+    from sourceSets.test.allSource
+    classifier = 'test-sources'
+  }
+
   artifacts {
     archives jar
     archives sourcesJar
     archives javadocJar
     archives testsJar
+    archives testSourcesJar
     testArtifacts testsJar
+    testArtifacts testSourcesJar
   }
 
   dependencies {
@@ -205,13 +212,13 @@ task javadocAll( type: Javadoc ) {
   }
 }
 
-task prepareRelease( dependsOn: [ 'cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-xml:build', 'cascading-platform:build' ] )
+task prepareRelease( dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-xml:build', 'cascading-platform:build'] )
 
 prepareRelease << {
   logger.info( 'built all artifacts' )
 }
 
-task buildDist( dependsOn: [ prepareRelease, javadocAll ] ) << {
+task buildDist( dependsOn: [prepareRelease, javadocAll] ) << {
 
   def distDir = mkdir( "${rootDir}/build/dist" )
 
