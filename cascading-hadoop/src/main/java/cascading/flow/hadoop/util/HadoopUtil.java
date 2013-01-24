@@ -137,6 +137,9 @@ public class HadoopUtil
     {
     Map<Object, Object> properties = new HashMap<Object, Object>();
 
+    if( jobConf == null )
+      return properties;
+
     for( Map.Entry<String, String> entry : jobConf )
       properties.put( entry.getKey(), entry.getValue() );
 

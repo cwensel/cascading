@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.3 [unreleased]
 
+  Fix for NPE if c.f.FlowProcess returns null config.
+
   Fixed issue where a c.f.FlowStep would attempt to detect if it should be skipped regardless of whether the "runID"
   had been set or not on the c.f.Flow enabling restartable flows.
 
