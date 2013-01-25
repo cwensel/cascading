@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.3 [unreleased]
 
+  Fix for c.f.FlowProcess#getNumProcessSlices() incorrectly returning zero in local mode, should be 1.
+
   Fix for c.p.a.AggregateBy not honoring the global system property threshold value if not overridden on the ctor.
 
   Fix for NPE if c.f.FlowProcess returns null config.
