@@ -378,7 +378,7 @@ public class AggregateBy extends SubAssembly
    */
   public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
     {
-    this( null, Pipe.pipes( pipe ), groupingFields, CompositeFunction.DEFAULT_THRESHOLD, assemblies );
+    this( null, Pipe.pipes( pipe ), groupingFields, 0, assemblies );
     }
 
   /**
@@ -417,7 +417,7 @@ public class AggregateBy extends SubAssembly
    */
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
     {
-    this( name, pipes, groupingFields, CompositeFunction.DEFAULT_THRESHOLD, assemblies );
+    this( name, pipes, groupingFields, 0, assemblies );
     }
 
   /**
