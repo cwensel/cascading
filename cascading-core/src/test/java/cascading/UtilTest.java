@@ -96,4 +96,10 @@ public class UtilTest
       assertEquals( paths[ i ], versions[ i ], Util.findVersion( paths[ i ] ) );
       }
     }
+      
+    @Test
+    public void testSanitizeUrl ()
+    {
+      assertEquals ( "file://localhost/myFile.txt", Util.sanitizeUrl ( "file://username:password@localhost/myFile.txt" ) );
+    }
   }

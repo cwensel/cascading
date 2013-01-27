@@ -303,7 +303,7 @@ public class Util
     if( url == null )
       return null;
 
-    return url.replaceAll( "(?<=//).*:.*@", "" ) + "\"]";
+    return url.replaceAll( "(?<=//).*:.*@", "" );
     }
 
   /**
