@@ -33,7 +33,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * returns true for the given expression will be removed from the stream. This {@link Filter}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifically this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifially this filter uses the Janino <a href="http://dist.codehaus.org/janino/javadoc/org/codehaus/janino/ExpressionEvaluator.html" target="_blank">ExpressionEvaluator</a>, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
@@ -43,6 +43,9 @@ import org.codehaus.janino.ExpressionEvaluator;
  * <p/>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
+ * <p/>
+ * Field names used in the expression should be valid Java variable names; for example, '+' or '-' are not allowed.
+ * Also the use of a field name that begins with an upper-case character is likely to fail and should be avoided.
  */
 public class ExpressionFilter extends ExpressionOperation implements Filter<ExpressionOperation.Context>
   {
