@@ -37,7 +37,6 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
-import cascading.util.Util;
 
 /**
  * Class FileTap is a {@link Tap} sub-class that allows for direct local file access.
@@ -84,24 +83,24 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, InputStream input ) throws IOException
     {
     if( input == null )
-      input = new FileInputStream( path );
+      input = new FileInputStream( getIdentifier() );
 
-    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), input, path );
+    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), input, getIdentifier() );
     }
 
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, OutputStream output ) throws IOException
     {
     if( output == null )
-      output = new TapFileOutputStream( path, isUpdate() ); // append if we are in update mode
+      output = new TapFileOutputStream( getIdentifier(), isUpdate() ); // append if we are in update mode
 
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, path );
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, getIdentifier() );
     }
 
   @Override
   public long getSize( Properties conf ) throws IOException
     {
-    File file = new File( path );
+    File file = new File( getIdentifier() );
 
     if( file.isDirectory() )
       return 0;
@@ -112,7 +111,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean createResource( Properties conf ) throws IOException
     {
-    File parentFile = new File( path ).getParentFile();
+    File parentFile = new File( getIdentifier() ).getParentFile();
 
     return parentFile.exists() || parentFile.mkdirs();
     }
@@ -120,7 +119,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean deleteResource( Properties conf ) throws IOException
     {
-    return new File( path ).delete();
+    return new File( getIdentifier() ).delete();
     }
 
   @Override
@@ -132,19 +131,19 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean resourceExists( Properties conf ) throws IOException
     {
-    return new File( path ).exists();
+    return new File( getIdentifier() ).exists();
     }
 
   @Override
   public long getModifiedTime( Properties conf ) throws IOException
     {
-    return new File( path ).lastModified();
+    return new File( getIdentifier() ).lastModified();
     }
 
   @Override
   public boolean isDirectory( Properties conf ) throws IOException
     {
-    return new File( path ).isDirectory();
+    return new File( getIdentifier() ).isDirectory();
     }
 
   @Override
@@ -153,7 +152,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    File file = new File( path );
+    File file = new File( getIdentifier() );
     String[] paths = file.list();
 
     if( paths == null )
@@ -163,14 +162,5 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
       paths[ i ] = new File( file, paths[ i ] ).getPath();
 
     return paths;
-    }
-
-  @Override
-  public String toString()
-    {
-    if( path != null )
-      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[\"" + Util.sanitizeUrl( path ) + "\"]"; // sanitize
-    else
-      return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[not initialized]";
     }
   }

@@ -173,6 +173,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
   protected boolean isSkipFlowStep() throws IOException
     {
+    // if runID is not set, never skip a step
+    if( flowStep.getFlow().getRunID() == null )
+      return false;
+
     return flowStep.allSourcesExist() && !flowStep.areSourcesNewer( flowStep.getSinkModified() );
     }
 

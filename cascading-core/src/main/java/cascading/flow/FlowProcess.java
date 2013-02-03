@@ -102,7 +102,7 @@ public abstract class FlowProcess<Config>
     @Override
     public int getNumProcessSlices()
       {
-      return 0;
+      return 1;
       }
 
     @Override
@@ -216,6 +216,8 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getCurrentSliceNum returns an integer representing which slice instance currently running.
+   *
+   * {@code 0} (zero) is the first slice instance.
    *
    * @return an int
    */

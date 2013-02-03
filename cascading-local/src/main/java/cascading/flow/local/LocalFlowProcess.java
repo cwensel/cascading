@@ -71,7 +71,7 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public int getNumProcessSlices()
     {
-    return 0;
+    return 1;
     }
 
   @Override
