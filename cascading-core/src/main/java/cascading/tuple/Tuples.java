@@ -156,66 +156,79 @@ public class Tuples
     return Coercions.coerce( value, type );
     }
 
+  @Deprecated
   public static final String toString( Object value )
     {
     return Coercions.STRING.coerce( value );
     }
 
+  @Deprecated
   public static final int toInteger( Object value )
     {
     return Coercions.INTEGER.coerce( value );
     }
 
+  @Deprecated
   public static final long toLong( Object value )
     {
     return Coercions.LONG.coerce( value );
     }
 
+  @Deprecated
   public static final double toDouble( Object value )
     {
     return Coercions.DOUBLE.coerce( value );
     }
 
+  @Deprecated
   public static final float toFloat( Object value )
     {
     return Coercions.FLOAT.coerce( value );
     }
 
+  @Deprecated
   public static final short toShort( Object value )
     {
     return Coercions.SHORT.coerce( value );
     }
 
+  @Deprecated
   public static final boolean toBoolean( Object value )
     {
     return Coercions.BOOLEAN.coerce( value );
     }
 
+  @Deprecated
   public static final Integer toIntegerObject( Object value )
     {
     return Coercions.INTEGER_OBJECT.coerce( value );
     }
 
+  @Deprecated
   public static final Long toLongObject( Object value )
     {
     return Coercions.LONG_OBJECT.coerce( value );
     }
 
+  @Deprecated
   public static final Double toDoubleObject( Object value )
     {
     return Coercions.DOUBLE_OBJECT.coerce( value );
     }
 
+  @Deprecated
   public static final Float toFloatObject( Object value )
     {
     return Coercions.FLOAT_OBJECT.coerce( value );
     }
 
+  @Deprecated
   public static final Short toShortObject( Object value )
     {
     return Coercions.SHORT_OBJECT.coerce( value );
     }
 
+  @Deprecated
   public static final Boolean toBooleanObject( Object value )
     {
     return Coercions.BOOLEAN_OBJECT.coerce( value );

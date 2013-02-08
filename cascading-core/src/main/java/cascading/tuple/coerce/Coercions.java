@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,7 @@
 package cascading.tuple.coerce;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,6 +97,7 @@ public final class Coercions
   public static final Coerce<Float> FLOAT_OBJECT = new FloatObjectCoerce( coercionsPrivate );
   public static final Coerce<Boolean> BOOLEAN = new BooleanCoerce( coercionsPrivate );
   public static final Coerce<Boolean> BOOLEAN_OBJECT = new BooleanObjectCoerce( coercionsPrivate );
+  public static final Coerce<BigDecimal> BIG_DECIMAL = new BigDecimalCoerce( coercionsPrivate );
 
   static
     {
