@@ -23,7 +23,7 @@ dependencies {
 
   compile group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: '1.2'
 
-  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
+  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
 }

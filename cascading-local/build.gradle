@@ -24,7 +24,7 @@ dependencies {
   compile project( ':cascading-core' )
 
   compile group: 'com.google.guava', name: 'guava', version: '13.0'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
 
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'

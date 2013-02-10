@@ -29,7 +29,7 @@ dependencies {
 
   compile project( ':cascading-core' )
 
-  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
+  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
 
   providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
     exclude group: 'ant'

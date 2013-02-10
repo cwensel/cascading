@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Update slf4j to version 1.7.2.
+
   Added coercion support for j.m.BigDecimal.
 
   Added c.p.PlatformSuite annotation allowing a c.PlatformTestCase sub-class to be marked as being a JUnit suite
