@@ -214,7 +214,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    * Method get returns the element at the given position i.
    *
    * @param pos of type int
-   * @return Comparable
+   * @return Object
    */
   public Object getObject( int pos )
     {
