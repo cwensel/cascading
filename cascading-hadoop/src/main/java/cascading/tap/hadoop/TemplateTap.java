@@ -45,6 +45,11 @@ import org.apache.hadoop.mapred.OutputCollector;
  * {@code openTapsThreshold} limits the number of open files to be output to. This value defaults to 300 files.
  * Each time the threshold is exceeded, 10% of the least recently used open files will be closed.
  * <p/>
+ * TemplateTap will populate a given {@code pathTemplate} without regard to case of the values being used. Thus
+ * the resulting paths {@code 2012/June/} and {@code 2012/june/} will likely result in two open files into the same
+ * location. Forcing the case to be consistent with an upstream {@link Function} is recommended, see
+ * {@link cascading.operation.expression.ExpressionFunction}.
+ * <p/>
  * Though Hadoop has no mechanism to prevent simultaneous writes to a directory from multiple jobs, it doesn't mean
  * its safe to do so. Same is true with the TemplateTap. Interleaving writes to a common parent (root) directory
  * across multiple flows will very likely lead to data loss.
