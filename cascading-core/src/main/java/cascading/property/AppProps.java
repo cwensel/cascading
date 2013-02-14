@@ -37,7 +37,7 @@ import static cascading.util.Util.join;
  * via a {@link cascading.flow.FlowConnector}.
  * <p/>
  * In prior releases, the FlowConnector was responsible for setting the "application jar" class or path. Those
- * methods have been deprecated and moved to AppConfig.
+ * methods have been deprecated and moved to AppProps.
  * <p/>
  * New property settings that may be set in Cascading 2 are application name, version, and any tags.
  */
@@ -49,6 +49,7 @@ public class AppProps extends Props
   public static final String APP_NAME = "cascading.app.name";
   public static final String APP_VERSION = "cascading.app.version";
   public static final String APP_TAGS = "cascading.app.tags";
+  public static final String APP_FRAMEWORKS = "cascading.app.frameworks";
   public static final String APP_JAR_CLASS = "cascading.app.appjar.class";
   public static final String APP_JAR_PATH = "cascading.app.appjar.path";
 
@@ -63,6 +64,7 @@ public class AppProps extends Props
   protected Set<String> tags = new TreeSet<String>();
   protected Class jarClass;
   protected String jarPath;
+  protected Set<String> frameworks = new TreeSet<String>();
 
   public static AppProps appProps()
     {
@@ -141,18 +143,18 @@ public class AppProps extends Props
 
   public static void setApplicationID( Map<Object, Object> properties )
     {
-    properties.put( APP_ID, getAppID( properties ) );
+    properties.put( APP_ID, getAppID() );
     }
 
   public static String getApplicationID( Map<Object, Object> properties )
     {
     if( properties == null )
-      return getAppID( null );
+      return getAppID();
 
-    return PropertyUtil.getProperty( properties, APP_ID, getAppID( properties ) );
+    return PropertyUtil.getProperty( properties, APP_ID, getAppID() );
     }
 
-  private static String getAppID( Map<Object, Object> properties )
+  private static String getAppID()
     {
     if( appID == null )
       {
@@ -211,10 +213,39 @@ public class AppProps extends Props
     return PropertyUtil.getProperty( properties, APP_TAGS, (String) null );
     }
 
+  public static void addApplicationFramework( Map<Object, Object> properties, String framework )
+    {
+    if( framework == null )
+      return;
+
+    String frameworks = PropertyUtil.getProperty( properties, APP_FRAMEWORKS, System.getProperty( APP_FRAMEWORKS ) );
+
+    if( frameworks != null )
+      frameworks = join( ",", framework.trim(), frameworks );
+    else
+      frameworks = framework;
+
+    if( properties != null )
+      properties.put( APP_FRAMEWORKS, frameworks );
+
+    System.setProperty( APP_FRAMEWORKS, frameworks );
+    }
+
+  public static String getApplicationFrameworks( Map<Object, Object> properties )
+    {
+    return PropertyUtil.getProperty( properties, APP_FRAMEWORKS, System.getProperty( APP_FRAMEWORKS ) );
+    }
+
   public AppProps()
     {
     }
 
+  /**
+   * Sets the name and version of this application.
+   *
+   * @param name    of type String
+   * @param version of type String
+   */
   public AppProps( String name, String version )
     {
     this.name = name;
@@ -252,6 +283,72 @@ public class AppProps extends Props
     {
     for( String tag : tags )
       addTag( tag );
+
+    return this;
+    }
+
+  /**
+   * Returns a list of frameworks used to build this App.
+   *
+   * @return Registered frameworks
+   */
+  public String getFrameworks()
+    {
+    return join( frameworks, "," );
+    }
+
+  /**
+   * Adds a new framework name to the list of frameworks used.
+   * <p/>
+   * Higher level tools should register themselves, and preferably with their version,
+   * for example {@code foo-flow-builder:1.2.3}.
+   * <p/>
+   * See {@link #addFramework(String, String)}.
+   *
+   * @param framework A String
+   * @return this AppProps instance
+   */
+  public AppProps addFramework( String framework )
+    {
+    if( !Util.isEmpty( framework ) )
+      frameworks.add( framework );
+
+    return this;
+    }
+
+  /**
+   * Adds a new framework name and its version to the list of frameworks used.
+   * <p/>
+   * Higher level tools should register themselves, and preferably with their version,
+   * for example {@code foo-flow-builder:1.2.3}.
+   *
+   * @param framework A String
+   * @return this AppProps instance
+   */
+  public AppProps addFramework( String framework, String version )
+    {
+    if( !Util.isEmpty( framework ) && !Util.isEmpty( version ) )
+      frameworks.add( framework + ":" + version );
+
+    if( !Util.isEmpty( framework ) )
+      frameworks.add( framework );
+
+    return this;
+    }
+
+  /**
+   * Adds new framework names to the list of frameworks used.
+   * <p/>
+   * Higher level tools should register themselves, and preferably with their version,
+   * for example {@code foo-flow-builder:1.2.3}.
+   *
+   * @param frameworks Strings
+   * @return this AppProps instance
+   */
+  public AppProps addFrameworks( String... frameworks )
+    {
+    for( String framework : frameworks )
+      addFramework( framework );
 
     return this;
     }
@@ -295,6 +392,7 @@ public class AppProps extends Props
     setApplicationName( properties, name );
     setApplicationVersion( properties, version );
     addApplicationTag( properties, getTags() );
+    addApplicationFramework( properties, getFrameworks() );
     setApplicationJarClass( properties, jarClass );
     setApplicationJarPath( properties, jarPath );
     }
