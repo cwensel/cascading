@@ -22,11 +22,16 @@ package cascading.platform;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -63,6 +68,12 @@ public class PlatformRunner extends ParentRunner<Runner>
 
   private Set<String> includes = new HashSet<String>();
   private List<Runner> runners;
+
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface Platform
+    {
+    Class<? extends TestPlatform>[] value();
+    }
 
   public PlatformRunner( Class<PlatformTestCase> testClass ) throws Throwable
     {
@@ -121,7 +132,12 @@ public class PlatformRunner extends ParentRunner<Runner>
 
     runners = new ArrayList<Runner>();
 
-    Set<Class<? extends TestPlatform>> classes = getPlatformClass( javaClass.getClassLoader() );
+    // test for use of annotation
+    Set<Class<? extends TestPlatform>> classes = getPlatformClassesFromAnnotation( javaClass );
+
+    // if no platforms declared from the annotation, test classpath
+    if( classes.isEmpty() )
+      classes = getPlatformClassesFromClasspath( javaClass.getClassLoader() );
 
     for( Class<? extends TestPlatform> platformClass : classes )
       {
@@ -131,12 +147,26 @@ public class PlatformRunner extends ParentRunner<Runner>
     return runners;
     }
 
-  public static Set<Class<? extends TestPlatform>> getPlatformClass( ClassLoader classLoader ) throws IOException, ClassNotFoundException
+  private Set<Class<? extends TestPlatform>> getPlatformClassesFromAnnotation( Class<?> javaClass ) throws Throwable
     {
-    Set<Class<? extends TestPlatform>> classes = new HashSet<Class<? extends TestPlatform>>();
+    PlatformRunner.Platform annotation = javaClass.getAnnotation( PlatformRunner.Platform.class );
+
+    if( annotation == null )
+      return Collections.EMPTY_SET;
+
+    HashSet<Class<? extends TestPlatform>> classes = new LinkedHashSet<Class<? extends TestPlatform>>( Arrays.asList( annotation.value() ) );
+
+    LOG.info( "found {} test platforms from Platform annotation", classes.size() );
+
+    return classes;
+    }
+
+  protected static Set<Class<? extends TestPlatform>> getPlatformClassesFromClasspath( ClassLoader classLoader ) throws IOException, ClassNotFoundException
+    {
+    Set<Class<? extends TestPlatform>> classes = new LinkedHashSet<Class<? extends TestPlatform>>();
     Properties properties = new Properties();
 
-    LOG.info( "classloader: {}", classLoader );
+    LOG.debug( "classloader: {}", classLoader );
 
     Enumeration<URL> urls = classLoader.getResources( PLATFORM_RESOURCE );
 
@@ -151,6 +181,10 @@ public class PlatformRunner extends ParentRunner<Runner>
       LOG.warn( "no platform tests will be run" );
       LOG.warn( "did not find {} in the classpath, no {} instances found", PLATFORM_RESOURCE, TestPlatform.class.getCanonicalName() );
       LOG.warn( "add cascading-local, cascading-hadoop, and/or external planner library to the test classpath" );
+      }
+    else
+      {
+      LOG.info( "found {} test platforms from classpath", classes.size() );
       }
 
     return classes;

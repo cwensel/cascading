@@ -43,6 +43,9 @@ import org.codehaus.janino.ExpressionEvaluator;
  * <p/>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
+ * <p/>
+ * Field names used in the expression should be valid Java variable names; for example, '+' or '-' are not allowed.
+ * Also the use of a field name that begins with an upper-case character is likely to fail and should be avoided.
  */
 public class ExpressionFilter extends ExpressionOperation implements Filter<ScriptOperation.Context>
   {

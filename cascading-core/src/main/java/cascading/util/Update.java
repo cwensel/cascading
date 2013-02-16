@@ -36,6 +36,7 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 
 import cascading.flow.planner.PlatformInfo;
+import cascading.property.AppProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,7 @@ public class Update extends TimerTask
     if( timer != null )
       return;
 
-    timer = new Timer( true );
+    timer = new Timer( "UpdateRequestTimer", true );
     timer.scheduleAtFixedRate( new Update(), 1000 * 30, 24 * 60 * 60 * 1000L );
     }
 
@@ -198,6 +199,8 @@ public class Update extends TimerTask
 
     sb.append( "id=" );
     sb.append( getClientId() );
+    sb.append( "&instance=" );
+    sb.append( urlEncode( AppProps.getApplicationID( null ) ) );
     sb.append( "&os-name=" );
     sb.append( urlEncode( getProperty( "os.name" ) ) );
     sb.append( "&jvm-name=" );
@@ -212,6 +215,8 @@ public class Update extends TimerTask
     sb.append( urlEncode( Version.getReleaseFull() ) );
     sb.append( "&version-build=" );
     sb.append( urlEncode( Version.getReleaseBuild() ) );
+    sb.append( "&frameworks=" );
+    sb.append( urlEncode( getProperty( AppProps.APP_FRAMEWORKS ) ) );
 
     synchronized( platformInfoSet )
       {
@@ -240,7 +245,7 @@ public class Update extends TimerTask
     {
     try
       {
-      return InetAddress.getLocalHost().hashCode();
+      return Math.abs( InetAddress.getLocalHost().hashCode() );
       }
     catch( Throwable t )
       {

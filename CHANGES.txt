@@ -44,6 +44,13 @@ Cascading Change Log
   for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
   permutations during source and sink, and type inference from field names.
 
+2.1.4
+
+  Added ability to capture frameworks used in an application via c.p.AppProps.
+
+  Restored platform test compatibility with Cascading 2.0.x via return of c.p.PlatformRunner.Platform annotation
+  and deprecated c.t.LocalPlatform and c.t.HadoopPlatform platform implementations.
+
 2.1.3
 
   Fix for extra trailing ']' in c.t.Tap#toString().
