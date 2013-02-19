@@ -21,14 +21,22 @@
 package cascading.tuple.hadoop.util;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Comparator;
 
+import cascading.tuple.Hasher;
 import cascading.tuple.StreamComparator;
 import cascading.tuple.hadoop.io.BufferedInputStream;
 import org.apache.hadoop.io.WritableComparator;
 
-/** Class BytesComparator is used to compare arrays of bytes. */
-public class BytesComparator implements StreamComparator<BufferedInputStream>, Comparator<byte[]>, Serializable
+/**
+ * Class BytesComparator is used to compare arrays of bytes.
+ * <p/>
+ * Note that BytesComparator implements {@link Hasher}, but for the Hasher interface to be applied during grouping,
+ * sorting or joining, it must be set on a {@link cascading.tuple.Fields} instance via
+ * {@link cascading.tuple.Fields#setComparator(Comparable, java.util.Comparator)}.
+ */
+public class BytesComparator implements StreamComparator<BufferedInputStream>, Hasher<byte[]>, Comparator<byte[]>, Serializable
   {
   @Override
   public int compare( byte[] lhs, byte[] rhs )
@@ -63,5 +71,11 @@ public class BytesComparator implements StreamComparator<BufferedInputStream>, C
       ( ( buffer[ off + 1 ] & 0xff ) << 16 ) +
       ( ( buffer[ off + 2 ] & 0xff ) << 8 ) +
       ( buffer[ off + 3 ] & 0xff );
+    }
+
+  @Override
+  public int hashCode( byte[] value )
+    {
+    return Arrays.hashCode( value );
     }
   }

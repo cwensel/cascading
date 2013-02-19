@@ -93,7 +93,16 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
   public static class InsertRawBytes extends BaseOperation<Long> implements Function<Long>
     {
     String asBytes;
-    private boolean increment;
+    private boolean increment = false;
+    private boolean randomIncrement = false;
+
+    public InsertRawBytes( Fields fieldDeclaration, String asBytes, boolean increment, boolean randomIncrement )
+      {
+      super( fieldDeclaration );
+      this.asBytes = asBytes;
+      this.increment = increment;
+      this.randomIncrement = randomIncrement;
+      }
 
     public InsertRawBytes( Fields fieldDeclaration, String asBytes, boolean increment )
       {
@@ -105,7 +114,15 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
     @Override
     public void prepare( FlowProcess flowProcess, OperationCall<Long> operationCall )
       {
-      operationCall.setContext( increment ? 0L : -1L );
+      operationCall.setContext( increment ? getIncrement( 0L ) : -1L );
+      }
+
+    private long getIncrement( long value )
+      {
+      if( randomIncrement )
+        return value + (long) ( Math.random() * new Object().hashCode() );
+
+      return value + 1;
       }
 
     public void operate( FlowProcess flowProcess, FunctionCall<Long> functionCall )
@@ -206,7 +223,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
   public SerializedPipesPlatformTest()
     {
-    super( true ); // leave cluster testing enabled
+    super( true, 4, 2 ); // leave cluster testing enabled, reducers > 1 to test bytes hasher
     }
 
   @Test
@@ -240,6 +257,38 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     validateLength( flow.openSource(), 10 ); // validate source, this once, as a sanity check
     validateLength( flow, 8, null );
+    }
+
+  @Test
+  public void testSimpleGroupOnBytes() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Each( pipe, new InsertRawBytes( new Fields( "bytes" ), "inserted text as bytes", true, true ), Fields.ALL );
+
+    Fields bytes = new Fields( "bytes" );
+    bytes.setComparator( "bytes", new BytesComparator() );
+    pipe = new GroupBy( pipe, bytes );
+
+    pipe = new Every( pipe, new Count(), new Fields( "bytes", "count" ) );
+
+    Tap sink = new Hfs( new SequenceFile( Fields.ALL ), getOutputPath( "grouponbytes" ), SinkMode.REPLACE );
+
+    Map<Object, Object> properties = getProperties();
+
+    TupleSerializationProps.addSerialization( properties, BytesSerialization.class.getName() );
+
+    Flow flow = new HadoopFlowConnector( properties ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10 ); // 10 unique counts
     }
 
   @Test
