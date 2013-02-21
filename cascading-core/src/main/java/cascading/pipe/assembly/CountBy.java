@@ -105,6 +105,9 @@ public class CountBy extends AggregateBy
     @Override
     public Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context )
       {
+      if( context == null )
+        context = new Tuple( 0L );
+
       switch( include )
         {
         case ALL:
@@ -123,15 +126,7 @@ public class CountBy extends AggregateBy
           break;
         }
 
-      return increment( context );
-      }
-
-    private Tuple increment( Tuple context )
-      {
-      if( context == null )
-        context = new Tuple( 1L );
-      else
-        context.set( 0, context.getLong( 0 ) + 1L );
+      context.set( 0, context.getLong( 0 ) + 1L );
 
       return context;
       }
