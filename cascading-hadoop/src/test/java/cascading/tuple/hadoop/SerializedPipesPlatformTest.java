@@ -50,6 +50,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.coerce.Coercions;
 import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.hadoop.util.BytesComparator;
 import org.apache.hadoop.io.BooleanWritable;
@@ -495,4 +496,36 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     iterator.close();
     }
+
+  @Test
+  public void testBigDecimal() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Fields sourceFields = new Fields( "offset", "line" ).applyTypes( Coercions.BIG_DECIMAL, String.class );
+
+    Tap source = new Hfs( new TextLine( sourceFields ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "offset", "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "offset" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "offset", "count" ) );
+
+    Fields sinkFields = new Fields("offset","count").applyTypes( Coercions.BIG_DECIMAL, long.class );
+    Tap sink = new Hfs( new SequenceFile( sinkFields ), getOutputPath( "bigdecimal" ), SinkMode.REPLACE );
+
+    Map<Object, Object> jobProperties = getProperties();
+
+    TupleSerialization.addSerialization( jobProperties, BigDecimalSerialization.class.getName() );
+
+    Flow flow = new HadoopFlowConnector( jobProperties ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
   }

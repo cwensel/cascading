@@ -25,34 +25,28 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Comparator;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
-import cascading.tuple.Comparison;
-import cascading.tuple.hadoop.util.BytesComparator;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.Serializer;
 
 /**
- * Class BytesSerialization is an implementation of Hadoop's {@link Serialization} interface for use
- * by {@code byte} arrays ({@code byte[]}).
+ * Class BigDecimalSerialization is an implementation of Hadoop's {@link org.apache.hadoop.io.serializer.Serialization} interface for use
+ * by {@link BigDecimal} instances.
  * <p/>
  * To use, call<br/>
- * {@code TupleSerializationProps.addSerialization(properties, BytesSerialization.class.getName() );}
+ * {@code TupleSerializationProps.addSerialization(properties, BigDecimalSerialization.class.getName());}
  * <p/>
- * This class also implements {@link Comparison} so it is not required to set a {@link cascading.tuple.hadoop.util.BytesComparator}
- * when attempting to group on a byte array via GroupBy or CoGroup.
  *
- * @see TupleSerialization#addSerialization(java.util.Map, String)
- * @see cascading.tuple.hadoop.util.BytesComparator
- * @see Comparison
+ * @see cascading.tuple.hadoop.TupleSerializationProps#addSerialization(java.util.Map, String)
  */
-@SerializationToken(tokens = {126}, classNames = {"[B"})
-public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>
+@SerializationToken(tokens = {125}, classNames = {"java.math.BigDecimal"})
+public class BigDecimalSerialization extends Configured implements Serialization<BigDecimal>
   {
-
-  public static class RawBytesDeserializer implements Deserializer<byte[]>
+  public static class BigDecimalDeserializer implements Deserializer<BigDecimal>
     {
     private DataInputStream in;
 
@@ -66,15 +60,16 @@ public class BytesSerialization extends Configured implements Comparison<byte[]>
       }
 
     @Override
-    public byte[] deserialize( byte[] existing ) throws IOException
+    public BigDecimal deserialize( BigDecimal existing ) throws IOException
       {
       int len = in.readInt();
+      byte[] valueBytes = new byte[ len ];
 
-      byte[] bytes = existing != null && existing.length == len ? existing : new byte[ len ];
+      in.readFully( valueBytes );
 
-      in.readFully( bytes );
+      BigInteger value = new BigInteger( valueBytes );
 
-      return bytes;
+      return new BigDecimal( value, in.readInt() );
       }
 
     @Override
@@ -84,7 +79,7 @@ public class BytesSerialization extends Configured implements Comparison<byte[]>
       }
     }
 
-  public static class RawBytesSerializer implements Serializer<byte[]>
+  public static class BigDecimalSerializer implements Serializer<BigDecimal>
     {
     private DataOutputStream out;
 
@@ -98,10 +93,14 @@ public class BytesSerialization extends Configured implements Comparison<byte[]>
       }
 
     @Override
-    public void serialize( byte[] bytes ) throws IOException
+    public void serialize( BigDecimal bigDecimal ) throws IOException
       {
-      out.writeInt( bytes.length );
-      out.write( bytes );
+      BigInteger value = bigDecimal.unscaledValue();
+      byte[] valueBytes = value.toByteArray();
+
+      out.writeInt( valueBytes.length );
+      out.write( valueBytes );
+      out.writeInt( bigDecimal.scale() );
       }
 
     @Override
@@ -112,31 +111,25 @@ public class BytesSerialization extends Configured implements Comparison<byte[]>
     }
 
 
-  public BytesSerialization()
+  public BigDecimalSerialization()
     {
     }
 
   @Override
   public boolean accept( Class<?> c )
     {
-    return byte[].class == c;
+    return BigDecimal.class == c;
     }
 
   @Override
-  public Serializer<byte[]> getSerializer( Class<byte[]> c )
+  public Serializer<BigDecimal> getSerializer( Class<BigDecimal> c )
     {
-    return new RawBytesSerializer();
+    return new BigDecimalSerializer();
     }
 
   @Override
-  public Deserializer<byte[]> getDeserializer( Class<byte[]> c )
+  public Deserializer<BigDecimal> getDeserializer( Class<BigDecimal> c )
     {
-    return new RawBytesDeserializer();
-    }
-
-  @Override
-  public Comparator<byte[]> getComparator( Class<byte[]> type )
-    {
-    return new BytesComparator();
+    return new BigDecimalDeserializer();
     }
   }
