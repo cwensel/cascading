@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.6 [unreleased]
 
+  Updated c.s.h.HadoopStepStats counter caching strategy to make a final attempt even if max timeouts have been
+  met. Added "cascading.step.counter.timeout" property to allow tuning of timeout period.
+
 2.1.5
 
   Updated c.t.h.u.BytesComparator to implement c.t.Hasher as a convenience.

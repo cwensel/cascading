@@ -54,6 +54,8 @@ import org.slf4j.LoggerFactory;
 /** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
 public abstract class HadoopStepStats extends FlowStepStats
   {
+  public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.step.counter.timeout";
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
   public static final int TIMEOUT_MAX = 3;
@@ -268,7 +270,7 @@ public abstract class HadoopStepStats extends FlowStepStats
 
   protected synchronized Counters cachedCounters( boolean force )
     {
-    if( ( !force && isFinished() ) || timeouts >= TIMEOUT_MAX )
+    if( !force && ( isFinished() || timeouts >= TIMEOUT_MAX ) )
       return cachedCounters;
 
     RunningJob runningJob = getRunningJob();
@@ -278,9 +280,11 @@ public abstract class HadoopStepStats extends FlowStepStats
 
     Future<Counters> future = runFuture( runningJob );
 
+    int timeout = ( (JobConf) getFlowStep().getConfig() ).getInt( COUNTER_TIMEOUT_PROPERTY, 5 );
+
     try
       {
-      Counters fetched = future.get( 5, TimeUnit.SECONDS );
+      Counters fetched = future.get( timeout, TimeUnit.SECONDS );
 
       if( fetched != null )
         cachedCounters = fetched;
@@ -310,9 +314,9 @@ public abstract class HadoopStepStats extends FlowStepStats
       timeouts++;
 
       if( timeouts >= TIMEOUT_MAX )
-        LOG.warn( "fetching counters timed out final time: {}", timeouts );
+        LOG.warn( "fetching counters timed out after: {} seconds, final attempt: {}", timeout, timeouts );
       else
-        LOG.warn( "fetching counters timed out: {}", timeouts );
+        LOG.warn( "fetching counters timed out after: {} seconds, attempts: {}", timeout, timeouts );
       }
 
     return cachedCounters;
