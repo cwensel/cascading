@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.1.6 [unreleased]
+
 2.1.5
 
   Updated c.t.h.u.BytesComparator to implement c.t.Hasher as a convenience.
