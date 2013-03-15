@@ -46,6 +46,12 @@ Cascading Change Log
   for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
   permutations during source and sink, and type inference from field names.
 
+2.1.5
+
+  Updated c.t.h.u.BytesComparator to implement c.t.Hasher as a convenience.
+
+  Fixed issue where c.c.CascadeListener was receiving null as the c.c.Cascade parameter.
+
 2.1.4
 
   Added ability to capture frameworks used in an application via c.p.AppProps.
