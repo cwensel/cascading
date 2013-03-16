@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.f.s.MemoryCoGroupGate and c.f.l.s.LocalGroupByGate to drain internal collections when pipelining
+  tuples downstream in the pipeline.
+
   Added c.t.h.BigDecimalSerialization to allow Hadoop to serialize and deserialize j.m.BigDecimal instances.
 
   Update slf4j to version 1.7.2.

@@ -21,6 +21,7 @@
 package cascading.flow.local.stream;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
@@ -90,12 +91,19 @@ public class LocalGroupByGate extends MemorySpliceGate
 
     try
       {
+      // drain the keys and keyValues collections to preserve memory
+      Iterator<Tuple> iterator = keys.iterator();
+
       // no need to synchronize here as we are guaranteed all writer threads are completed
-      for( Tuple groupTuple : keys )
+      while( iterator.hasNext() )
         {
+        Tuple groupTuple = iterator.next();
+
+        iterator.remove();
+
         keyEntry.setTuple( groupTuple );
 
-        List<Tuple> tuples = valueMap.get( groupTuple );
+        List<Tuple> tuples = valueMap.get( groupTuple ); // can't removeAll, returns unmodifiable collection
 
         if( valueComparators != null )
           Collections.sort( tuples, valueComparators[ 0 ] );
@@ -103,6 +111,8 @@ public class LocalGroupByGate extends MemorySpliceGate
         tupleEntryIterator.reset( tuples.iterator() );
 
         next.receive( this, grouping );
+
+        tuples.clear();
         }
       }
     finally

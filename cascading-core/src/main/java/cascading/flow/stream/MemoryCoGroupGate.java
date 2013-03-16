@@ -22,6 +22,7 @@ package cascading.flow.stream;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
 import cascading.pipe.Splice;
@@ -74,16 +75,20 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     try
       {
       Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
+      Iterator<Tuple> keyIterator = keys.iterator();
 
-      for( Tuple keysTuple : keys )
+      while( keyIterator.hasNext() )
         {
-        // if key does not exist, #get will create an empty array list,
-        // and store the key, which is not a copy
+        Tuple keysTuple = keyIterator.next();
+
+        keyIterator.remove();
+
+        // drain the keys and keyValues collections to preserve memory
         for( int i = 0; i < keyValues.length; i++ )
           {
-          if( keyValues[ i ].containsKey( keysTuple ) )
-            collections[ i ] = keyValues[ i ].get( keysTuple );
-          else
+          collections[ i ] = keyValues[ i ].remove( keysTuple );
+
+          if( collections[ i ] == null )
             collections[ i ] = Collections.EMPTY_LIST;
           }
 
