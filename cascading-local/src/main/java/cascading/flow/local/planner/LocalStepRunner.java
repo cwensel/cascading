@@ -85,14 +85,14 @@ public class LocalStepRunner implements Callable<Throwable>
         {
         graph.prepare();
         }
-      catch( Exception exception )
+      catch( Throwable currentThrowable )
         {
-        LOG.error( "unable to prepare operation graph", exception );
+        LOG.error( "unable to prepare operation graph", currentThrowable );
 
         complete = true;
         successful = false;
 
-        return exception;
+        return currentThrowable;
         }
 
       Throwable throwable = null;
@@ -111,12 +111,12 @@ public class LocalStepRunner implements Callable<Throwable>
         attemptedCleanup = true;
         graph.cleanup();
         }
-      catch( Exception exception )
+      catch( Throwable currentThrowable )
         {
-        LOG.error( "unable to cleanup operation graph", exception );
+        LOG.error( "unable to cleanup operation graph", currentThrowable );
 
         if( throwable == null )
-          throwable = exception;
+          throwable = currentThrowable;
         }
 
       complete = true;
@@ -131,9 +131,9 @@ public class LocalStepRunner implements Callable<Throwable>
         if( !attemptedCleanup )
           graph.cleanup();
         }
-      catch( Exception exception )
+      catch( Throwable currentThrowable )
         {
-        LOG.error( "unable to cleanup operation graph", exception );
+        LOG.error( "unable to cleanup operation graph", currentThrowable );
         }
       }
     }
