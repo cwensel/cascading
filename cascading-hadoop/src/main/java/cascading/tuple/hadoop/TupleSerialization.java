@@ -197,13 +197,13 @@ public class TupleSerialization extends Configured implements Serialization
 
     try
       {
-      Class<Comparator> type = (Class<Comparator>) TupleSerialization.class.getClassLoader().loadClass( typeName.toString() );
+      Class<Comparator> type = (Class<Comparator>) TupleSerialization.class.getClassLoader().loadClass( typeName );
 
       return ReflectionUtils.newInstance( type, jobConf );
       }
     catch( ClassNotFoundException exception )
       {
-      throw new CascadingException( "unable to load class: " + typeName.toString(), exception );
+      throw new CascadingException( "unable to load class: " + typeName, exception );
       }
     }
 
@@ -291,6 +291,8 @@ public class TupleSerialization extends Configured implements Serialization
 
     String serializationsString = getSerializations( getConf() );
 
+    LOG.info( "using hadoop serializations from the job conf: {} ", serializationsString );
+
     if( serializationsString == null )
       return;
 
@@ -322,8 +324,6 @@ public class TupleSerialization extends Configured implements Serialization
       }
 
     tokensSize = tokenClassesMap.size();
-
-    return;
     }
 
   private void addToken( Class type, int token, String className )
@@ -347,6 +347,8 @@ public class TupleSerialization extends Configured implements Serialization
       throw new IllegalStateException( "duplicate serialization classname: " + className + " for token: " + token + " on serialization: " + type.getName() );
       }
 
+    LOG.info( "adding serialization token: {}, for classname: {}", token, className );
+
     tokenClassesMap.put( token, className );
     classesTokensMap.put( className, token );
     }
@@ -363,6 +365,11 @@ public class TupleSerialization extends Configured implements Serialization
       return null;
 
     return tokenClassesMap.get( token );
+    }
+
+  final long getTokensMapSize()
+    {
+    return tokensSize;
     }
 
   /**
@@ -635,8 +642,16 @@ public class TupleSerialization extends Configured implements Serialization
       {
       String className = tupleSerialization.getClassNameFor( token );
 
-      if( className == null )
-        className = WritableUtils.readString( inputStream );
+      try
+        {
+        if( className == null )
+          className = WritableUtils.readString( inputStream );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "unable to resolve token: {}, to a valid classname, with token map of size: {}, rethrowing IOException", token, tupleSerialization.getTokensMapSize() );
+        throw exception;
+        }
 
       return className;
       }
@@ -696,7 +711,9 @@ public class TupleSerialization extends Configured implements Serialization
         WritableUtils.writeString( outputStream, className );
         }
       else
+        {
         WritableUtils.writeVInt( outputStream, token );
+        }
 
       Serializer serializer = serializers.get( type );
 
