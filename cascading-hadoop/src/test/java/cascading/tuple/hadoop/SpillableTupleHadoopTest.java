@@ -31,9 +31,12 @@ import cascading.tuple.Tuple;
 import cascading.tuple.collect.SpillableProps;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleMap;
+import org.apache.hadoop.io.BooleanWritable;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
+import org.apache.hadoop.io.serializer.WritableSerialization;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Test;
@@ -84,14 +87,19 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
   private void performListTest( int size, int threshold, CompressionCodec codec, int spills )
     {
-    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec, new JobConf() );
+    JobConf jobConf = new JobConf();
+
+    jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
+    jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing
+
+    HadoopSpillableTupleList list = new HadoopSpillableTupleList( threshold, codec, jobConf );
 
     for( int i = 0; i < size; i++ )
       {
       String aString = "string number " + i;
       double random = Math.random();
 
-      list.add( new Tuple( i, aString, random, new Text( aString ) ) );
+      list.add( new Tuple( i, aString, random, new Text( aString ), new TestText( aString ), new Tuple( "inner tuple", new BytesWritable( aString.getBytes() ) ) ) );
       }
 
     assertEquals( "not equal: list.size();", size, list.size() );
@@ -105,6 +113,15 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
       int value = tuple.getInteger( 0 );
       assertTrue( "wrong diff", value - i == 1 );
       assertEquals( "wrong value", "string number " + count, tuple.getObject( 3 ).toString() );
+      assertEquals( "wrong value", "string number " + count, tuple.getObject( 4 ).toString() );
+      assertTrue( "wrong type", tuple.getObject( 5 ) instanceof Tuple );
+
+      BytesWritable bytesWritable = (BytesWritable) ( (Tuple) tuple.getObject( 5 ) ).getObject( 1 );
+      byte[] bytes = bytesWritable.getBytes();
+      String actual = new String( bytes, 0, bytesWritable.getLength() );
+
+      assertEquals( "wrong value", "string number " + count, actual );
+
       i = value;
       count++;
       }
@@ -138,6 +155,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     long time = System.currentTimeMillis();
 
     JobConf jobConf = new JobConf();
+
     jobConf.set( SpillableProps.SPILL_CODECS, "org.apache.hadoop.io.compress.GzipCodec" );
 
     performMapTest( 5, 5, 100, 20, jobConf );
@@ -150,6 +168,9 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
   private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, JobConf jobConf )
     {
+    jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
+    jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing
+
     HadoopFlowProcess flowProcess = new HadoopFlowProcess( jobConf );
     HadoopSpillableTupleMap map = new HadoopSpillableTupleMap( SpillableProps.defaultMapInitialCapacity, SpillableProps.defaultMapLoadFactor, mapThreshold, listThreshold, flowProcess );
 
@@ -163,11 +184,15 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
       double keys = numKeys / 3.0;
       int key = (int) ( gen.nextDouble() * keys + gen.nextDouble() * keys + gen.nextDouble() * keys );
-      map.get( new Tuple( key ) ).add( new Tuple( i, aString, random, new Text( aString ) ) );
+
+      Tuple tuple = new Tuple( i, aString, random, new Text( aString ), new TestText( aString ), new Tuple( "inner tuple", new BytesWritable( aString.getBytes() ) ) );
+
+      map.get( new Tuple( key ) ).add( tuple );
 
       keySet.add( key );
       }
 
+    // the list test above verifies the contents are being serialized, the Map is just a container of lists.
     assertEquals( "not equal: map.size();", keySet.size(), map.size() );
     }
   }
