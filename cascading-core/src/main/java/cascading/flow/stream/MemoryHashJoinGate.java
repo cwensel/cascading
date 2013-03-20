@@ -120,20 +120,15 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     if( count.decrementAndGet() != 0 )
       return;
 
-    try
-      {
-      collections[ 0 ] = Collections.EMPTY_LIST;
+    collections[ 0 ] = Collections.EMPTY_LIST;
 
-      for( Tuple keyTuple : keys )
-        performJoinWith( keyTuple );
+    for( Tuple keyTuple : keys )
+      performJoinWith( keyTuple );
 
-      super.complete( previous );
-      }
-    finally
-      {
-      keys = createKeySet();
-      keyValues = createKeyValuesArray();
-      }
+    keys = createKeySet();
+    keyValues = createKeyValuesArray();
+
+    super.complete( previous );
     }
 
   protected void waitOnLatch()

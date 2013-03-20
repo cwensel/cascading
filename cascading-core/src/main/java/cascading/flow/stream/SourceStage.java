@@ -104,10 +104,12 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
 
       next.complete( this );
       }
-    catch( Throwable exception )
+    catch( Throwable throwable )
       {
-      LOG.error( "caught throwable", exception );
-      localThrowable = exception;
+      if( !( throwable instanceof OutOfMemoryError ) )
+        LOG.error( "caught throwable", throwable );
+
+      return throwable;
       }
     finally
       {
@@ -116,12 +118,12 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
         if( iterator != null )
           iterator.close();
         }
-      catch( Throwable exception )
+      catch( Throwable currentThrowable )
         {
-        LOG.warn( "failed closing iterator", exception );
+        if( !( currentThrowable instanceof OutOfMemoryError ) )
+          LOG.warn( "failed closing iterator", currentThrowable );
 
-        if( localThrowable != null )
-          localThrowable = exception;
+        localThrowable = currentThrowable;
         }
       }
 
@@ -138,5 +140,4 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
     {
     throw new UnsupportedOperationException( "use call() instead" );
     }
-
   }

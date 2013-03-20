@@ -89,39 +89,34 @@ public class LocalGroupByGate extends MemorySpliceGate
 
     next.start( this );
 
-    try
+    // drain the keys and keyValues collections to preserve memory
+    Iterator<Tuple> iterator = keys.iterator();
+
+    // no need to synchronize here as we are guaranteed all writer threads are completed
+    while( iterator.hasNext() )
       {
-      // drain the keys and keyValues collections to preserve memory
-      Iterator<Tuple> iterator = keys.iterator();
+      Tuple groupTuple = iterator.next();
 
-      // no need to synchronize here as we are guaranteed all writer threads are completed
-      while( iterator.hasNext() )
-        {
-        Tuple groupTuple = iterator.next();
+      iterator.remove();
 
-        iterator.remove();
+      keyEntry.setTuple( groupTuple );
 
-        keyEntry.setTuple( groupTuple );
+      List<Tuple> tuples = valueMap.get( groupTuple ); // can't removeAll, returns unmodifiable collection
 
-        List<Tuple> tuples = valueMap.get( groupTuple ); // can't removeAll, returns unmodifiable collection
+      if( valueComparators != null )
+        Collections.sort( tuples, valueComparators[ 0 ] );
 
-        if( valueComparators != null )
-          Collections.sort( tuples, valueComparators[ 0 ] );
+      tupleEntryIterator.reset( tuples.iterator() );
 
-        tupleEntryIterator.reset( tuples.iterator() );
+      next.receive( this, grouping );
 
-        next.receive( this, grouping );
-
-        tuples.clear();
-        }
+      tuples.clear();
       }
-    finally
-      {
-      keys = createKeySet();
-      valueMap = initNewValueMap();
-      count.set( numIncomingPaths );
 
-      next.complete( this );
-      }
+    keys = createKeySet();
+    valueMap = initNewValueMap();
+    count.set( numIncomingPaths );
+
+    next.complete( this );
     }
   }

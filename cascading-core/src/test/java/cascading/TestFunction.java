@@ -71,7 +71,7 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
   public void operate( FlowProcess flowProcess, FunctionCall<Integer> functionCall )
     {
     if( value == null )
-      throw new RuntimeException( "function failed intentionally" );
+      throwIntentionalException();
 
     try
       {
@@ -84,6 +84,11 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
       }
 
     functionCall.getOutputCollector().add( value );
+    }
+
+  protected void throwIntentionalException()
+    {
+    throw new RuntimeException( "function failed intentionally" );
     }
 
   @Override

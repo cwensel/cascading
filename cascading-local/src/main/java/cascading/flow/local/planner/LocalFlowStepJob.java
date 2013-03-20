@@ -101,17 +101,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
   @Override
   protected Throwable getThrowable()
     {
-    try
-      {
-      if( future != null && future.isDone() )
-        return future.get();
-      }
-    catch( Exception exception )
-      {
-      LOG.warn( "unable to get result", exception );
-      }
-
-    return null;
+    return stackRunner.getThrowable();
     }
 
   @Override

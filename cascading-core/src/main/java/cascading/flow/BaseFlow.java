@@ -821,6 +821,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
+      if( throwable instanceof OutOfMemoryError )
+        throw (OutOfMemoryError) throwable;
+
       if( throwable != null )
         throw new FlowException( getName(), "unhandled exception", throwable );
 

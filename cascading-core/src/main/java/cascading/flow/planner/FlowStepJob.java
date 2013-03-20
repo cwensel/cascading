@@ -204,6 +204,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
       dumpDebugInfo();
 
+      // if available, rethrow the unrecoverable error
+      if( getThrowable() instanceof OutOfMemoryError )
+        throw ( (OutOfMemoryError) getThrowable() );
+
       if( !isRemoteExecution() )
         throwable = new FlowException( "local step failed", getThrowable() );
       else

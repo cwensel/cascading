@@ -132,6 +132,10 @@ public class FlowReducer extends MapReduceBase implements Reducer
       {
       group.run( (Tuple) key, timedIterator );
       }
+    catch( OutOfMemoryError error )
+      {
+      throw error;
+      }
     catch( Throwable throwable )
       {
       if( throwable instanceof CascadingException )

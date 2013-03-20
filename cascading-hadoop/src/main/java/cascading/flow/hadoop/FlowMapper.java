@@ -126,6 +126,10 @@ public class FlowMapper implements MapRunnable
 
         streamedHead.run( input );
         }
+      catch( OutOfMemoryError error )
+        {
+        throw error;
+        }
       catch( IOException exception )
         {
         throw exception;

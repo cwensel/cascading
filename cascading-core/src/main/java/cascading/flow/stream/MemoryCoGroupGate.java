@@ -72,44 +72,39 @@ public class MemoryCoGroupGate extends MemorySpliceGate
 
     next.start( this );
 
-    try
-      {
-      Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
-      Iterator<Tuple> keyIterator = keys.iterator();
+    Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
+    Iterator<Tuple> keyIterator = keys.iterator();
 
-      while( keyIterator.hasNext() )
+    while( keyIterator.hasNext() )
+      {
+      Tuple keysTuple = keyIterator.next();
+
+      keyIterator.remove();
+
+      // drain the keys and keyValues collections to preserve memory
+      for( int i = 0; i < keyValues.length; i++ )
         {
-        Tuple keysTuple = keyIterator.next();
+        collections[ i ] = keyValues[ i ].remove( keysTuple );
 
-        keyIterator.remove();
-
-        // drain the keys and keyValues collections to preserve memory
-        for( int i = 0; i < keyValues.length; i++ )
-          {
-          collections[ i ] = keyValues[ i ].remove( keysTuple );
-
-          if( collections[ i ] == null )
-            collections[ i ] = Collections.EMPTY_LIST;
-          }
-
-        closure.reset( collections );
-
-        keyEntry.setTuple( closure.getGroupTuple( keysTuple ) );
-
-        // create Closure type here
-        tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
-
-        next.receive( this, grouping );
+        if( collections[ i ] == null )
+          collections[ i ] = Collections.EMPTY_LIST;
         }
-      }
-    finally
-      {
-      keys = createKeySet();
-      keyValues = createKeyValuesArray();
 
-      count.set( numIncomingPaths );
+      closure.reset( collections );
 
-      next.complete( this );
+      keyEntry.setTuple( closure.getGroupTuple( keysTuple ) );
+
+      // create Closure type here
+      tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
+
+      next.receive( this, grouping );
       }
+
+    keys = createKeySet();
+    keyValues = createKeyValuesArray();
+
+    count.set( numIncomingPaths );
+
+    next.complete( this );
     }
   }

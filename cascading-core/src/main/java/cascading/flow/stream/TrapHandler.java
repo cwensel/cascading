@@ -117,10 +117,13 @@ public class TrapHandler
 
   protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
     {
+    Throwable cause = throwable.getCause();
+
+    if( cause instanceof OutOfMemoryError )
+      handleReThrowableException( "caught OutOfMemoryException, will not trap, rethrowing", cause );
+
     if( trap == null )
       handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
-
-    Throwable cause = throwable.getCause();
 
     if( cause instanceof TapException && ( (TapException) cause ).getPayload() != null )
       {
