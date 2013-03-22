@@ -143,9 +143,25 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
       };
 
     if( operator.getOutputSelector().isReplace() )
+      {
+      if( incomingFields.isUnknown() )
+        return new TupleBuilder()
+        {
+        Fields resultFields = operator.getFieldDeclaration().isArguments() ? argumentSelector : declaredFields;
+
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          Tuple result = new Tuple( input );
+
+          result.set( Fields.UNKNOWN, resultFields, output );
+
+          return result;
+          }
+        };
+
       return new TupleBuilder()
       {
-      // todo: test when arg and decl are not the same?
       Fields resultFields = operator.getFieldDeclaration().isArguments() ? argumentSelector : declaredFields;
       Tuple result = createOverride( inputDeclarationFields, resultFields );
 
@@ -155,6 +171,7 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
         return TupleViews.reset( result, input, output );
         }
       };
+      }
 
     if( operator.getOutputSelector().isSwap() )
       {
@@ -240,7 +257,7 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
 
     argumentsEntry = new TupleEntry( outgoingScope.getArgumentsDeclarator(), true );
 
-    outgoingEntry = new TupleEntry( getOutgoingFields(), true );  // todo: simplify this
+    outgoingEntry = new TupleEntry( getOutgoingFields(), true );
 
     operationCall.setArguments( argumentsEntry );
 

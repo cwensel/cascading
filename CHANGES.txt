@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.6 [unreleased]
 
+  Fixed issue where Fields.REPLACE on an incoming Fields.UNKNOWN could result in a
+  java.lang.ArrayIndexOutOfBoundsException during runtime.
+
   Updated c.s.h.HadoopStepStats counter caching strategy to make a final attempt even if max timeouts have been
   met. Added "cascading.step.counter.timeout" property to allow tuning of timeout period.
 

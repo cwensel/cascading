@@ -23,6 +23,7 @@ package cascading;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
@@ -34,6 +35,7 @@ import cascading.operation.DebugLevel;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.Insert;
 import cascading.operation.aggregator.Sum;
 import cascading.operation.assertion.AssertSizeMoreThan;
 import cascading.operation.expression.ExpressionFunction;
@@ -541,5 +543,35 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
+    }
+
+  @Test
+  public void testUnknownReplace() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap source = getPlatform().getDelimitedFile( Fields.UNKNOWN, "-", inputFileJoined );
+    Tap sink = getPlatform().getDelimitedFile( Fields.UNKNOWN, getOutputPath( "unknown-replace" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( 0 ), new Insert( Fields.ARGS, "value" ), Fields.REPLACE );
+
+    pipe = new Each( pipe, new Debug() );
+
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+    FlowConnectorProps.setDebugLevel( properties, DebugLevel.NONE );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
+
+    flow.complete();
+
+    assertEquals( 5, asList( flow, sink ).size() );
+
+    Set<Tuple> results = asSet( flow, sink );
+
+    assertEquals( 1, results.size() );
+    assertEquals( new Tuple( "value" ), results.iterator().next() );
     }
   }
