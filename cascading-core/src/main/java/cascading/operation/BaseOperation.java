@@ -200,7 +200,7 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
       buffer.append( type.getName() ); // should get something for an anonymous inner class
 
     if( scope.getOperationDeclaredFields() != null )
-      buffer.append( "[decl:" ).append( scope.getOperationDeclaredFields() ).append( "]" );
+      buffer.append( "[decl:" ).append( scope.getOperationDeclaredFields().printVerbose() ).append( "]" );
 
     if( operation.getNumArgs() != ANY )
       buffer.append( "[args:" ).append( operation.getNumArgs() ).append( "]" );
