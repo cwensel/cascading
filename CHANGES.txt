@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.6 [unreleased]
 
+  Updated c.t.Fields#size() to return Fields.NONE on size == 0, instead of failing.
+
   Fixed issue where Fields.REPLACE on an incoming Fields.UNKNOWN could result in a
   java.lang.ArrayIndexOutOfBoundsException during runtime.
 

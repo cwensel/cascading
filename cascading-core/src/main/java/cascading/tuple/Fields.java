@@ -163,6 +163,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public static Fields size( int size )
     {
+    if( size == 0 )
+      return Fields.NONE;
+
     Fields fields = new Fields();
 
     fields.fields = expand( size, 0 );
