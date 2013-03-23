@@ -47,6 +47,7 @@ import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.util.Util;
+import cascading.util.Version;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
@@ -477,6 +478,14 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         {
         public String getVertexName( FlowElement object )
           {
+          if( graph.incomingEdgesOf( object ).isEmpty() )
+            {
+            String result = object.toString().replaceAll( "\"", "\'" );
+            String versionString = Version.getVersionString();
+
+            return versionString == null ? result : result + "\\n" + versionString;
+            }
+
           if( object instanceof Tap || object instanceof Extent )
             return object.toString().replaceAll( "\"", "\'" );
 
