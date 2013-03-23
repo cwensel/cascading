@@ -157,8 +157,8 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       }
     catch( OutOfMemoryError error )
       {
-      LOG.info( "received OOME when allocating compressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
       System.gc();
+      LOG.info( "received OOME when allocating compressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
 
       return CodecPool.getCompressor( codec );
       }
@@ -215,8 +215,8 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       }
     catch( OutOfMemoryError error )
       {
-      LOG.info( "received OOME when allocating decompressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
       System.gc();
+      LOG.info( "received OOME when allocating decompressor for codec: {}, retrying once", codec.getClass().getCanonicalName(), error );
 
       return CodecPool.getDecompressor( codec );
       }
