@@ -861,9 +861,9 @@ public class Splice extends Pipe
       {
       if( buffer.length() != 0 )
         {
-        if( isGroupBy() )
+        if( isGroupBy() || isMerge() )
           buffer.append( "+" );
-        else
+        else if( isCoGroup() || isJoin() )
           buffer.append( "*" ); // more semantically correct
         }
 
