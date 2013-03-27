@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -51,6 +51,65 @@ import static cascading.tuple.coerce.Coercions.asClass;
  */
 public class ScriptFunction extends ScriptOperation implements Function<ScriptOperation.Context>
   {
+  /**
+   * Constructor ScriptFunction creates a new ScriptFunction instance.
+   * <p/>
+   * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
+   * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors.
+   *
+   * The {@code returnType} will be retrieved from the given {@code fieldDeclaration.getTypeClass(0)}.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param script           of type String
+   * @param returnType       of type Class
+   */
+  @ConstructorProperties({"fieldDeclaration", "script"})
+  public ScriptFunction( Fields fieldDeclaration, String script )
+    {
+    super( ANY, fieldDeclaration, script );
+
+    verify( fieldDeclaration );
+    }
+
+  /**
+   * Constructor ScriptFunction creates a new ScriptFunction instance.
+   * <p/>
+   * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
+   * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param script           of type String
+   * @param returnType       of type Class
+   */
+  @ConstructorProperties({"fieldDeclaration", "script", "returnType"})
+  public ScriptFunction( Fields fieldDeclaration, String script, Class returnType )
+    {
+    super( ANY, fieldDeclaration, script, returnType );
+
+    verify( fieldDeclaration );
+    }
+
+  /**
+   * Constructor ScriptFunction creates a new ScriptFunction instance.
+   * <p/>
+   * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
+   * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
+   * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.
+   *
+   * @param fieldDeclaration of type Fields
+   * @param script           of type String
+   * @param returnType       of type Class
+   * @param parameterNames   of type String[]
+   * @param expectedTypes   of type Class[]
+   */
+  @ConstructorProperties({"fieldDeclaration", "script", "returnType", "expectedTypes"})
+  public ScriptFunction( Fields fieldDeclaration, String script, Class returnType, Class[] expectedTypes )
+    {
+    super( expectedTypes.length, fieldDeclaration, script, returnType, expectedTypes );
+
+    verify( fieldDeclaration );
+    }
+
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
    * <p/>

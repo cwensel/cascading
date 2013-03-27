@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -76,9 +76,45 @@ public class ScriptTest extends CascadingTestCase
     assertEquals( true, evaluate( script, returnType, names, types, getEntry( 2.0, "1", "2" ) ) );
     }
 
+  public void testSimpleScriptTyped()
+    {
+    Class returnType = Long.class;
+    String[] names = new String[]{"a", "b"};
+    Class[] types = new Class[]{long.class, int.class};
+
+    assertEquals( 3l, evaluate( "return a + b;", returnType, getEntry( names, types, 1L, 2 ) ) );
+
+    returnType = Double.class;
+    types = new Class[]{double.class, int.class};
+
+    assertEquals( 3d, evaluate( "return a + b;", returnType, getEntry( names, types, 1.0d, 2 ) ) );
+
+    returnType = Boolean.TYPE;
+    names = new String[]{"a", "b"};
+    types = new Class[]{String.class, float.class};
+    assertEquals( true, evaluate( "return (a != null) && (b > 0);", returnType, getEntry( names, types, "1", 2.0 ) ) );
+
+    names = new String[]{"$0", "$1"};
+    types = new Class[]{String.class, float.class};
+    assertEquals( true, evaluate( "return ($0 != null) && ($1 > 0);", returnType, getEntry( names, types, "1", 2.0 ) ) );
+
+    names = new String[]{"a", "b", "c"};
+    types = new Class[]{float.class, String.class, String.class};
+    assertEquals( true, evaluate( "return b.equals(\"1\") && (a == 2.0) && c.equals(\"2\");", returnType, getEntry( names, types, 2.0, "1", "2" ) ) );
+
+    names = new String[]{"a", "b", "$2"};
+    types = new Class[]{float.class, String.class, String.class};
+    assertEquals( true, evaluate( "return b.equals(\"1\") && (a == 2.0) && $2.equals(\"2\");", returnType, getEntry( names, types, 2.0, "1", "2" ) ) );
+
+    String script = "";
+    script += "boolean first = b.equals(\"1\");\n";
+    script += "return first && (a == 2.0) && $2.equals(\"2\");\n";
+    assertEquals( true, evaluate( script, returnType, getEntry( names, types, 2.0, "1", "2" ) ) );
+    }
+
   private Object evaluate( String expression, Class returnType, String[] names, Class[] types, TupleEntry tupleEntry )
     {
-    ScriptFunction function = getFunction( expression, returnType, names, types );
+    ScriptFunction function = new ScriptFunction( new Fields( "result" ), expression, returnType, names, types );
 
     ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields(), function.getFieldDeclaration() );
     function.prepare( FlowProcess.NULL, call );
@@ -86,15 +122,28 @@ public class ScriptTest extends CascadingTestCase
     return function.evaluate( call.getContext(), tupleEntry );
     }
 
-  private ScriptFunction getFunction( String expression, Class returnType, String[] names, Class[] classes )
+  private Object evaluate( String expression, Class returnType, TupleEntry tupleEntry )
     {
-    return new ScriptFunction( new Fields( "result" ), expression, returnType, names, classes );
+    ScriptFunction function = new ScriptFunction( new Fields( "result" ), expression, returnType );
+
+    ConcreteCall<ExpressionOperation.Context> call = new ConcreteCall<ExpressionOperation.Context>( tupleEntry.getFields(), function.getFieldDeclaration() );
+    function.prepare( FlowProcess.NULL, call );
+
+    return function.evaluate( call.getContext(), tupleEntry );
     }
 
   private TupleEntry getEntry( Comparable lhs, Comparable rhs )
     {
     Fields fields = new Fields( "a", "b" );
     Tuple parameters = new Tuple( lhs, rhs );
+
+    return new TupleEntry( fields, parameters );
+    }
+
+  private TupleEntry getEntry( String[] names, Class[] types, Object... values )
+    {
+    Fields fields = new Fields( names ).applyTypes( types );
+    Tuple parameters = new Tuple( values );
 
     return new TupleEntry( fields, parameters );
     }

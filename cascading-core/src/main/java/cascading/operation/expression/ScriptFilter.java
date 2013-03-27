@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -55,10 +55,40 @@ public class ScriptFilter extends ScriptOperation implements Filter<ScriptOperat
    * @param parameterName of type String
    * @param parameterType of type Class
    */
+  @ConstructorProperties({"script"})
+  public ScriptFilter( String script )
+    {
+    super( ANY, script, Boolean.class );
+    }
+
+  /**
+   * Constructor ScriptFilter creates a new ScriptFilter instance.
+   *
+   * @param script        of type String
+   * @param parameterName of type String
+   * @param parameterType of type Class
+   */
   @ConstructorProperties({"script", "parameterName", "parameterType"})
   public ScriptFilter( String script, String parameterName, Class parameterType )
     {
     super( 1, script, Boolean.class, new String[]{parameterName}, new Class[]{parameterType} );
+    }
+
+  /**
+   * Constructor ScriptFilter creates a new ScriptFilter instance.
+   * <p/>
+   * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
+   * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
+   * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.
+   *
+   * @param script         of type String
+   * @param parameterNames of type String[]
+   * @param expectedTypes  of type Class[]
+   */
+  @ConstructorProperties({"script", "expectedTypes"})
+  public ScriptFilter( String script, Class[] expectedTypes )
+    {
+    super( expectedTypes.length, script, Boolean.class, expectedTypes );
     }
 
   /**

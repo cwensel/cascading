@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -52,6 +52,32 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
   /** returnType */
   protected Class returnType = Object.class;
 
+  public ScriptOperation( int numArgs, Fields fieldDeclaration, String block )
+    {
+    super( numArgs, fieldDeclaration );
+    this.block = block;
+    this.returnType = fieldDeclaration.getTypeClass( 0 ) == null ? this.returnType : fieldDeclaration.getTypeClass( 0 );
+    }
+
+  public ScriptOperation( int numArgs, Fields fieldDeclaration, String block, Class returnType )
+    {
+    super( numArgs, fieldDeclaration );
+    this.block = block;
+    this.returnType = returnType == null ? this.returnType : returnType;
+    }
+
+  public ScriptOperation( int numArgs, Fields fieldDeclaration, String block, Class returnType, Class[] expectedTypes )
+    {
+    super( numArgs, fieldDeclaration );
+    this.block = block;
+    this.returnType = returnType == null ? this.returnType : returnType;
+
+    if( expectedTypes == null )
+      throw new IllegalArgumentException( "expectedTypes may not be null" );
+
+    this.parameterTypes = Arrays.copyOf( expectedTypes, expectedTypes.length );
+    }
+
   public ScriptOperation( int numArgs, Fields fieldDeclaration, String block, Class returnType, String[] parameterNames, Class[] parameterTypes )
     {
     super( numArgs, fieldDeclaration );
@@ -64,6 +90,25 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
     }
 
+  public ScriptOperation( int numArgs, String block, Class returnType )
+    {
+    super( numArgs );
+    this.block = block;
+    this.returnType = returnType == null ? this.returnType : returnType;
+    }
+
+  public ScriptOperation( int numArgs, String block, Class returnType, Class[] expectedTypes )
+    {
+    super( numArgs );
+    this.block = block;
+    this.returnType = returnType == null ? this.returnType : returnType;
+
+    if( expectedTypes == null || expectedTypes.length == 0 )
+      throw new IllegalArgumentException( "expectedTypes may not be null or empty" );
+
+    this.parameterTypes = Arrays.copyOf( expectedTypes, expectedTypes.length );
+    }
+
   public ScriptOperation( int numArgs, String block, Class returnType, String[] parameterNames, Class[] parameterTypes )
     {
     super( numArgs );
@@ -74,6 +119,11 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
     if( getParameterNames().length != getParameterTypes().length )
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
+    }
+
+  private boolean hasParameterNames()
+    {
+    return parameterNames != null;
     }
 
   private String[] getParameterNames()
@@ -107,12 +157,20 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return makeFields( getParameterNames() );
     }
 
+  private boolean hasParameterTypes()
+    {
+    return parameterTypes != null;
+    }
+
   private Class[] getParameterTypes()
     {
-    if( parameterNames.length == parameterTypes.length )
+    if( !hasParameterNames() )
       return parameterTypes;
 
-    if( parameterTypes.length != 1 )
+    if( hasParameterNames() && parameterNames.length == parameterTypes.length )
+      return parameterTypes;
+
+    if( parameterNames.length > 0 && parameterTypes.length != 1 )
       throw new IllegalStateException( "wrong number of parameter types, expects: " + parameterNames.length );
 
     Class[] types = new Class[ parameterNames.length ];
@@ -163,14 +221,49 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
     Fields argumentFields = operationCall.getArgumentFields();
 
-    context.parameterNames = getParameterNames();
-    context.parameterFields = argumentFields.select( getParameterFields() ); // inherit argument types
+    if( hasParameterNames() && hasParameterTypes() )
+      {
+      context.parameterNames = getParameterNames();
+      context.parameterFields = argumentFields.select( getParameterFields() ); // inherit argument types
+      context.parameterTypes = getParameterTypes();
+      }
+    else if( hasParameterTypes() )
+      {
+      context.parameterNames = toNames( argumentFields );
+      context.parameterFields = argumentFields.applyTypes( getParameterTypes() );
+      context.parameterTypes = getParameterTypes();
+      }
+    else
+      {
+      context.parameterNames = toNames( argumentFields );
+      context.parameterFields = argumentFields;
+      context.parameterTypes = argumentFields.getTypesClasses();
+
+      if( context.parameterTypes == null )
+        throw new IllegalArgumentException( "field types may not be empty" );
+      }
+
     context.parameterCoercions = Coercions.coercibleArray( context.parameterFields );
-    context.parameterTypes = getParameterTypes();
     context.parameterArray = new Object[ context.parameterTypes.length ]; // re-use object array
     context.scriptEvaluator = getEvaluator( getReturnType(), context.parameterNames, context.parameterTypes );
     context.intermediate = TupleViews.createNarrow( argumentFields.getPos( context.parameterFields ) );
     context.result = Tuple.size( 1 ); // re-use the output tuple
+    }
+
+  private String[] toNames( Fields argumentFields )
+    {
+    String[] names = new String[ argumentFields.size() ];
+
+    for( int i = 0; i < names.length; i++ )
+      {
+      Comparable comparable = argumentFields.get( i );
+      if( comparable instanceof String )
+        names[ i ] = (String) comparable;
+      else
+        names[ i ] = "$" + comparable;
+      }
+
+    return names;
     }
 
   protected Class getReturnType()
