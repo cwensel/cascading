@@ -108,6 +108,7 @@ public class HadoopPlatform extends TestPlatform
       {
       LOG.info( "not using cluster" );
       jobConf = new JobConf();
+      fileSys = FileSystem.get( jobConf );
       }
     else
       {
