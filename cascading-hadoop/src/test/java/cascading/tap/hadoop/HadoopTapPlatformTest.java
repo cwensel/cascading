@@ -33,6 +33,7 @@ import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
@@ -54,6 +55,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
@@ -61,6 +63,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.TextInputFormat;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -452,6 +455,23 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       {
       // do nothing
       }
+    }
+
+  @Test
+  public void testCombinedHfs() throws Exception
+    {
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data" );
+
+    // clean up to ensure only two files exist
+    getPlatform().remoteRemove(dataLocation, true);
+
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    // create a CombinedHfs instance on the directory location
+    CombinedHfs source = new CombinedHfs( new Hfs( new TextLine( new Fields( "offset", "line" )), dataLocation ), TextInputFormat.class );
+
+    validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10 );
     }
 
   public class DupeConfigScheme extends TextLine
