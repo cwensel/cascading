@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.lib.CombineFileSplit;
 import cascading.flow.FlowProcess;
 import cascading.tap.SourceTap;
 import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
+import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.type.FileType;
 import cascading.tuple.TupleEntryIterator;
 
@@ -53,6 +54,7 @@ public class CombinedHfs extends SourceTap<JobConf,RecordReader> implements File
 
   public CombinedHfs( Hfs hfs )
     {
+    super( hfs.getScheme() );
     this.hfs = hfs;
     }
 
@@ -64,7 +66,7 @@ public class CombinedHfs extends SourceTap<JobConf,RecordReader> implements File
   public TupleEntryIterator openForRead( FlowProcess<JobConf> flowProcess, RecordReader input )
     throws IOException
     {
-    return hfs.openForRead( flowProcess, input );
+    return new HadoopTupleEntrySchemeIterator( flowProcess, this, input );
     }
 
   public boolean resourceExists( JobConf conf ) throws IOException
