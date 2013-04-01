@@ -56,7 +56,7 @@ public class CombineFileRecordReaderWrapper<K,V> implements RecordReader<K,V>
         split.getLength(idx),
         split.getLocations());
  
-    Class<?> clz = conf.getClassByName( INDIVIDUAL_INPUT_FORMAT );
+    Class<?> clz = conf.getClass( INDIVIDUAL_INPUT_FORMAT, null );
     FileInputFormat<K,V> inputFormat = (FileInputFormat<K,V>) clz.newInstance();
     delegate = inputFormat.getRecordReader( fileSplit, (JobConf) conf, reporter );
     }
