@@ -61,14 +61,6 @@ public class CombineFileRecordReaderWrapper<K,V> implements RecordReader<K,V>
     delegate = inputFormat.getRecordReader( fileSplit, (JobConf) conf, reporter );
     }
 
-  /**
-   * Returns whether the individual input format is set with {@link #INDIVIDUAL_INPUT_FORMAT}.
-   */
-  public static boolean individualInputFormatSet( Configuration conf )
-    {
-    return conf.get( INDIVIDUAL_INPUT_FORMAT ) != null;
-    }
-
   public boolean next( K key, V value ) throws IOException
     {
     return delegate.next( key, value );
