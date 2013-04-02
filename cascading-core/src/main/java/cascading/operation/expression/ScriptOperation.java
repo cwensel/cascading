@@ -203,12 +203,24 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       String parameter = parameters[ i ];
 
       if( parameter.startsWith( "$" ) )
-        fields[ i ] = Integer.parseInt( parameter.substring( 1 ) );
+        fields[ i ] = parse( parameter ); // returns parameter if not a number after $
       else
         fields[ i ] = parameter;
       }
 
     return new Fields( fields );
+    }
+
+  private Comparable parse( String parameter )
+    {
+    try
+      {
+      return Integer.parseInt( parameter.substring( 1 ) );
+      }
+    catch( NumberFormatException exception )
+      {
+      return parameter;
+      }
     }
 
   @Override

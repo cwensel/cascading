@@ -36,6 +36,122 @@ import cascading.tuple.type.CoercibleType;
 public class Tuples
   {
   /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a )
+    {
+    return new Tuple( a );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b )
+    {
+    return new Tuple( a, b );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c )
+    {
+    return new Tuple( a, b, c );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @param d of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c, Object d )
+    {
+    return new Tuple( a, b, c, d );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @param d of type Object
+   * @param e of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c, Object d, Object e )
+    {
+    return new Tuple( a, b, c, d, e );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @param d of type Object
+   * @param e of type Object
+   * @param f of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c, Object d, Object e, Object f )
+    {
+    return new Tuple( a, b, c, d, e, f );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @param d of type Object
+   * @param e of type Object
+   * @param f of type Object
+   * @param g of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c, Object d, Object e, Object f, Object g )
+    {
+    return new Tuple( a, b, c, d, e, f, g );
+    }
+
+  /**
+   * A utility function for use with Janino expressions to get around its lack of support for varargs.
+   *
+   * @param a of type Object
+   * @param b of type Object
+   * @param c of type Object
+   * @param d of type Object
+   * @param e of type Object
+   * @param f of type Object
+   * @param g of type Object
+   * @param h of type Object
+   * @return a new Tuple
+   */
+  public static Tuple tuple( Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h )
+    {
+    return new Tuple( a, b, c, d, e, f, g, h );
+    }
+
+  /**
    * Method asArray copies the elements of the given Tuple instance to the given Object array.
    *
    * @param tuple       of type Tuple

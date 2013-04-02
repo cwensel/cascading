@@ -1031,10 +1031,10 @@ public class Splice extends Pipe
       Map<String, Fields> groupingFields = resolveSelectorsAgainstIncoming( incomingScopes, groupingSelectors, "grouping" );
 
       if( !verifySameSize( groupingFields ) )
-        throw new OperatorException( this, "all grouping fields must be same size:" + toString() );
+        throw new OperatorException( this, "all grouping fields must be same size: " + toString() );
 
       if( !verifySameTypes( groupingSelectors, groupingFields ) )
-        throw new OperatorException( this, "all grouping fields must declare same types:" + toString() );
+        throw new OperatorException( this, "all grouping fields must declare same types: " + toString() );
 
       return groupingFields;
       }
@@ -1350,7 +1350,7 @@ public class Splice extends Pipe
     for( String name : keyFieldsMap.keySet() )
       {
       if( keyFieldsMap.size() > 1 )
-        buffer.append( name ).append( ":" );
+        buffer.append( " " ).append( name ).append( ":" );
 
       buffer.append( keyFieldsMap.get( name ).printVerbose() );
       }
