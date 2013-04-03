@@ -38,6 +38,7 @@ import cascading.pipe.joiner.Joiner;
 import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 import cascading.tuple.TupleException;
+import cascading.tuple.coerce.Coercions;
 import cascading.util.Util;
 
 import static java.util.Arrays.asList;
@@ -1085,6 +1086,13 @@ public class Splice extends Pipe
 
         Type lhs = types[ i ];
         Type rhs = groupingTypes[ i ];
+
+        // if one side is primitive, up-class to its primitive wrapper type
+        if( lhs instanceof Class && rhs instanceof Class )
+          {
+          lhs = Coercions.asNonPrimitive( (Class) lhs );
+          rhs = Coercions.asNonPrimitive( (Class) rhs );
+          }
 
         if( !lhs.equals( rhs ) )
           return false;

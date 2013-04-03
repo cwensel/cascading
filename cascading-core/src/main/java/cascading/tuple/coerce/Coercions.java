@@ -105,6 +105,35 @@ public final class Coercions
       typesPrivate.put( Util.getTypeName( type ), type );
     }
 
+  private static final Map<Class, Class> primitivesPrivate = new IdentityHashMap<Class, Class>();
+  public static final Map<Class, Class> primitives = Collections.unmodifiableMap( primitivesPrivate );
+
+  static
+    {
+    primitivesPrivate.put( Boolean.TYPE, Boolean.class );
+    primitivesPrivate.put( Byte.TYPE, Byte.class );
+    primitivesPrivate.put( Short.TYPE, Short.class );
+    primitivesPrivate.put( Integer.TYPE, Integer.class );
+    primitivesPrivate.put( Long.TYPE, Long.class );
+    primitivesPrivate.put( Float.TYPE, Float.class );
+    primitivesPrivate.put( Double.TYPE, Double.class );
+    }
+
+  /**
+   * Returns the primitive wrapper fo the given type, if the given type represents a primitive, otherwise
+   * the type is returned.
+   *
+   * @param type of type Class
+   * @return a Class
+   */
+  public static Class asNonPrimitive( Class type )
+    {
+    if( type.isPrimitive() )
+      return primitives.get( type );
+
+    return type;
+    }
+
   /**
    * Method coercibleTypeFor returns the {@link CoercibleType} for the given {@link Type} instance.
    * <p/>
