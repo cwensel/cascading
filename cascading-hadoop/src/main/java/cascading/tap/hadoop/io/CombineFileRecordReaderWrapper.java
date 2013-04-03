@@ -48,8 +48,7 @@ public class CombineFileRecordReaderWrapper<K,V> implements RecordReader<K,V>
   private final RecordReader<K,V> delegate;
 
   // this constructor signature is required by CombineFileRecordReader
-  public CombineFileRecordReaderWrapper( CombineFileSplit split, Configuration conf, Reporter reporter, Integer idx )
-    throws IOException, ReflectiveOperationException
+  public CombineFileRecordReaderWrapper( CombineFileSplit split, Configuration conf, Reporter reporter, Integer idx ) throws Exception
     {
     FileSplit fileSplit = new FileSplit(split.getPath(idx),
         split.getOffset(idx),
