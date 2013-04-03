@@ -20,6 +20,11 @@
 
 package cascading.tap.hadoop;
 
+import static data.InputData.inputFileApache;
+import static data.InputData.inputFileComments;
+import static data.InputData.inputFileLower;
+import static data.InputData.inputFileUpper;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -28,12 +33,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.TextInputFormat;
+import org.junit.Test;
+
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
-import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
@@ -55,18 +66,9 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.junit.Test;
-
-import static data.InputData.*;
 
 /**
  *
