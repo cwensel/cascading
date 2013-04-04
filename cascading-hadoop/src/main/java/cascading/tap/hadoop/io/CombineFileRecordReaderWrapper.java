@@ -50,10 +50,10 @@ public class CombineFileRecordReaderWrapper<K,V> implements RecordReader<K,V>
   // this constructor signature is required by CombineFileRecordReader
   public CombineFileRecordReaderWrapper( CombineFileSplit split, Configuration conf, Reporter reporter, Integer idx ) throws Exception
     {
-    FileSplit fileSplit = new FileSplit(split.getPath(idx),
-        split.getOffset(idx),
-        split.getLength(idx),
-        split.getLocations());
+    FileSplit fileSplit = new FileSplit( split.getPath( idx ),
+        split.getOffset( idx ),
+        split.getLength( idx ),
+        split.getLocations() );
  
     Class<?> clz = conf.getClass( INDIVIDUAL_INPUT_FORMAT, null );
     FileInputFormat<K,V> inputFormat = (FileInputFormat<K,V>) clz.newInstance();

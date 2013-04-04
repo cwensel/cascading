@@ -106,17 +106,17 @@ public class CombinedHfs extends SourceTap<JobConf,RecordReader> implements File
     return hfs.getFullIdentifier( conf );
     }
 
-  public boolean isDirectory(JobConf conf) throws IOException
+  public boolean isDirectory( JobConf conf ) throws IOException
     {
     return hfs.isDirectory( conf );
     }
 
-  public String[] getChildIdentifiers(JobConf conf) throws IOException
+  public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
     return hfs.getChildIdentifiers( conf );
     }
 
-  public long getSize(JobConf conf) throws IOException
+  public long getSize( JobConf conf ) throws IOException
     {
     return hfs.getSize( conf );
     }
@@ -124,7 +124,6 @@ public class CombinedHfs extends SourceTap<JobConf,RecordReader> implements File
   /**
    * Returns the underlying Hfs instance.
    */
-  // sjlee - not sure if this will be needed
   public Hfs getHfs()
     {
     return hfs;
