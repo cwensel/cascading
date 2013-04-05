@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.1.6 [unreleased]
 
+  Fixed issue where a j.l.StackOverflowError would be thrown if the Hadoop mapred.input.format.class property
+  was not set.
+
   Updated c.t.Fields#size() to return Fields.NONE on size == 0, instead of failing.
 
   Fixed issue where Fields.REPLACE on an incoming Fields.UNKNOWN could result in a

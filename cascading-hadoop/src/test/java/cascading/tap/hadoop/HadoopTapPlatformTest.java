@@ -518,4 +518,41 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
+
+  @Test
+  public void testMissingInputFormat() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextDelimited( new Fields( "offset", "line" ) ), inputFileApache )
+    {
+    @Override
+    public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
+      {
+      // don't set input format
+      //super.sourceConfInit( process, conf );
+      }
+    };
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "missinginputformat" ), SinkMode.REPLACE );
+
+    try
+      {
+      Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+      flow.complete();
+      fail( "did not test for missing input format" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+    }
   }
