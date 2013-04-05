@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.f.AssemblyPlanner interface to allow for platform independent generative c.f.Flow planning.
+
   Fixed issue in local mode where an OOME could cause a cascading set of additional OOMEs making the jvm unstable.
 
   Updated c.f.s.MemoryCoGroupGate and c.f.l.s.LocalGroupByGate to drain internal collections when pipelining

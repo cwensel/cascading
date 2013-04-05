@@ -21,6 +21,7 @@
 package cascading.flow.planner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.AssemblyPlanner;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -59,7 +61,7 @@ import static cascading.flow.planner.ElementGraphs.*;
 import static java.util.Arrays.asList;
 
 /** Class FlowPlanner is the base class for all planner implementations. */
-public abstract class FlowPlanner
+public abstract class FlowPlanner<F extends Flow, Config>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowPlanner.class );
@@ -100,6 +102,13 @@ public abstract class FlowPlanner
     return DebugLevel.valueOf( debugLevel );
     }
 
+  public Map<Object, Object> getProperties()
+    {
+    return properties;
+    }
+
+  public abstract Config getConfig();
+
   public abstract PlatformInfo getPlatformInfo();
 
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
@@ -109,16 +118,54 @@ public abstract class FlowPlanner
     this.debugLevel = getDebugLevel( properties );
     }
 
+  protected abstract Flow createFlow( FlowDef flowDef );
+
   /**
    * Method buildFlow renders the actual Flow instance.
    *
    * @param flowDef
    * @return Flow
    */
-  public abstract Flow buildFlow( FlowDef flowDef );
+  public abstract F buildFlow( FlowDef flowDef );
 
-  /** Must be called to determine if all elements of the base pipe assembly are available */
-  protected void verifyAssembly( FlowDef flowDef )
+  protected Pipe[] resolveTails( FlowDef flowDef, Flow<Config> flow )
+    {
+    Pipe[] tails = flowDef.getTailsArray();
+
+    tails = resolveAssemblyPlanners( flowDef, flow, tails );
+
+    return tails;
+    }
+
+  protected Pipe[] resolveAssemblyPlanners( FlowDef flowDef, Flow flow, Pipe[] pipes )
+    {
+    List<Pipe> tails = Arrays.asList( pipes );
+
+    List<AssemblyPlanner> assemblyPlanners = flowDef.getAssemblyPlanners();
+
+    for( AssemblyPlanner assemblyPlanner : assemblyPlanners )
+      {
+      // todo: wrap in parameter object
+      // todo: add planner stack
+      tails = assemblyPlanner.resolveTails( flowDef, flow, tails );
+
+      if( tails.isEmpty() )
+        throw new PlannerException( "assembly planner: " + assemblyPlanner + ", returned zero tails" );
+
+      tails = Collections.unmodifiableList( tails );
+      }
+
+    return tails.toArray( new Pipe[ tails.size() ] );
+    }
+
+  protected void verifyAssembly( FlowDef flowDef, Pipe[] tails )
+    {
+    verifyPipeAssemblyEndPoints( flowDef, tails );
+    verifyTraps( flowDef, tails );
+    verifyCheckpoints( flowDef, tails );
+    }
+
+  protected void verifyAllTaps( FlowDef flowDef )
     {
     verifySourceNotSinks( flowDef.getSources(), flowDef.getSinks() );
 
@@ -129,15 +176,10 @@ public abstract class FlowPlanner
     // are both sources and sinks
     verifyTaps( flowDef.getCheckpoints(), true, false );
     verifyTaps( flowDef.getCheckpoints(), false, false );
-
-    verifyPipeAssemblyEndPoints( flowDef );
-    verifyTraps( flowDef );
-    verifyCheckpoints( flowDef );
     }
 
-  protected ElementGraph createElementGraph( FlowDef flowDef )
+  protected ElementGraph createElementGraph( FlowDef flowDef, Pipe[] flowTails )
     {
-    Pipe[] pipes = flowDef.getTailsArray();
     Map<String, Tap> sources = flowDef.getSourcesCopy();
     Map<String, Tap> sinks = flowDef.getSinksCopy();
     Map<String, Tap> traps = flowDef.getTrapsCopy();
@@ -145,9 +187,10 @@ public abstract class FlowPlanner
 
     AssertionLevel assertionLevel = flowDef.getAssertionLevel() == null ? this.assertionLevel : flowDef.getAssertionLevel();
     DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
+
     checkpointRootPath = makeCheckpointRootPath( flowDef );
 
-    return new ElementGraph( pipes, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
+    return new ElementGraph( flowTails, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
     }
 
   private String makeCheckpointRootPath( FlowDef flowDef )
@@ -204,7 +247,7 @@ public abstract class FlowPlanner
    * all the sink and source tap names match up with tail and head pipes
    */
   // todo: force dupe names to throw exceptions
-  protected void verifyPipeAssemblyEndPoints( FlowDef flowDef )
+  protected void verifyPipeAssemblyEndPoints( FlowDef flowDef, Pipe[] flowTails )
     {
     Set<String> tapNames = new HashSet<String>();
 
@@ -215,7 +258,7 @@ public abstract class FlowPlanner
     Set<Pipe> tails = new HashSet<Pipe>();
     Set<String> tailNames = new HashSet<String>();
 
-    for( Pipe pipe : flowDef.getTails() )
+    for( Pipe pipe : flowTails )
       {
       if( pipe instanceof SubAssembly )
         {
@@ -261,7 +304,7 @@ public abstract class FlowPlanner
     // unlike heads, pipes can input to another pipe and simultaneously be a sink
     // so there is no way to know all the intentional tails, so they aren't listed below in the exception
     remainingSinks = new HashSet<String>( flowDef.getSinks().keySet() );
-    remainingSinks.removeAll( asList( Pipe.names( flowDef.getTailsArray() ) ) );
+    remainingSinks.removeAll( asList( Pipe.names( flowTails ) ) );
 
     if( remainingSinks.size() != 0 )
       throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
@@ -270,7 +313,7 @@ public abstract class FlowPlanner
     Set<Pipe> heads = new HashSet<Pipe>();
     Set<String> headNames = new HashSet<String>();
 
-    for( Pipe pipe : flowDef.getTails() )
+    for( Pipe pipe : flowTails )
       {
       for( Pipe head : pipe.getHeads() )
         {
@@ -304,11 +347,11 @@ public abstract class FlowPlanner
 
     }
 
-  protected void verifyTraps( FlowDef flowDef )
+  protected void verifyTraps( FlowDef flowDef, Pipe[] flowTails )
     {
     verifyNotSourcesSinks( flowDef.getTraps(), flowDef.getSources(), flowDef.getSinks(), "trap" );
 
-    Set<String> names = new HashSet<String>( asList( Pipe.names( flowDef.getTailsArray() ) ) );
+    Set<String> names = new HashSet<String>( asList( Pipe.names( flowTails ) ) );
 
     for( String name : flowDef.getTraps().keySet() )
       {
@@ -317,7 +360,7 @@ public abstract class FlowPlanner
       }
     }
 
-  protected void verifyCheckpoints( FlowDef flowDef )
+  protected void verifyCheckpoints( FlowDef flowDef, Pipe[] flowTails )
     {
     verifyNotSourcesSinks( flowDef.getCheckpoints(), flowDef.getSources(), flowDef.getSinks(), "checkpoint" );
 
@@ -331,14 +374,14 @@ public abstract class FlowPlanner
       throw new PlannerException( "checkpoint tap scheme must be undeclared, source fields must be UNKNOWN, and sink fields ALL, got: " + scheme.toString() );
       }
 
-    Set<String> names = new HashSet<String>( asList( Pipe.names( flowDef.getTailsArray() ) ) );
+    Set<String> names = new HashSet<String>( asList( Pipe.names( flowTails ) ) );
 
     for( String name : flowDef.getCheckpoints().keySet() )
       {
       if( !names.contains( name ) )
         throw new PlannerException( "checkpoint name not found in assembly: '" + name + "'" );
 
-      Set<Pipe> pipes = new HashSet<Pipe>( asList( Pipe.named( name, flowDef.getTailsArray() ) ) );
+      Set<Pipe> pipes = new HashSet<Pipe>( asList( Pipe.named( name, flowTails ) ) );
 
       int count = 0;
 

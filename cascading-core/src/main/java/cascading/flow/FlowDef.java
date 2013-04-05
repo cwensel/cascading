@@ -50,6 +50,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   protected Map<String, Tap> checkpoints = new HashMap<String, Tap>();
 
   protected List<Pipe> tails = new ArrayList<Pipe>();
+  protected List<AssemblyPlanner> assemblyPlanners = new ArrayList<AssemblyPlanner>();
 
   protected AssertionLevel assertionLevel;
   protected DebugLevel debugLevel;
@@ -69,6 +70,29 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /** Constructor FlowDef creates a new FlowDef instance. */
   public FlowDef()
     {
+    }
+
+  /**
+   * Method getAssemblyPlanners returns the current registered AssemblyPlanners.
+   *
+   * @return a List of AssemblyPlanner instances
+   */
+  public List<AssemblyPlanner> getAssemblyPlanners()
+    {
+    return assemblyPlanners;
+    }
+
+  /**
+   * Method addAssemblyPlanner adds new AssemblyPlanner instances to be evaluated.
+   *
+   * @param assemblyPlanner of type AssemblyPlanner
+   * @return a FlowDef
+   */
+  public FlowDef addAssemblyPlanner( AssemblyPlanner assemblyPlanner )
+    {
+    assemblyPlanners.add( assemblyPlanner );
+
+    return this;
     }
 
   /**

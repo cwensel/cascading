@@ -32,7 +32,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
@@ -78,7 +77,7 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
  * For example, {@code properties.set("mapred.child.java.opts","-Xmx512m");} would convince Hadoop
  * to spawn all child jvms with a heap of 512MB.
  */
-public class HadoopPlanner extends FlowPlanner
+public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopPlanner.class );
@@ -158,6 +157,12 @@ public class HadoopPlanner extends FlowPlanner
     }
 
   @Override
+  public JobConf getConfig()
+    {
+    return jobConf;
+    }
+
+  @Override
   public PlatformInfo getPlatformInfo()
     {
     return HadoopUtil.getPlatformInfo();
@@ -188,18 +193,28 @@ public class HadoopPlanner extends FlowPlanner
     }
 
   @Override
-  public Flow buildFlow( FlowDef flowDef )
+  protected HadoopFlow createFlow( FlowDef flowDef )
+    {
+    return new HadoopFlow( getPlatformInfo(), getProperties(), getConfig(), flowDef );
+    }
+
+  @Override
+  public HadoopFlow buildFlow( FlowDef flowDef )
     {
     ElementGraph elementGraph = null;
 
     try
       {
       // generic
-      verifyAssembly( flowDef );
+      verifyAllTaps( flowDef );
 
-      HadoopFlow flow = new HadoopFlow( getPlatformInfo(), properties, jobConf, flowDef );
+      HadoopFlow flow = createFlow( flowDef );
 
-      elementGraph = createElementGraph( flowDef );
+      Pipe[] tails = resolveTails( flowDef, flow );
+
+      verifyAssembly( flowDef, tails );
+
+      elementGraph = createElementGraph( flowDef, tails );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );

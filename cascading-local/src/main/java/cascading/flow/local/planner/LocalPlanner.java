@@ -21,8 +21,8 @@
 package cascading.flow.local.planner;
 
 import java.util.Map;
+import java.util.Properties;
 
-import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.local.LocalFlow;
@@ -30,16 +30,23 @@ import cascading.flow.planner.ElementGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Version;
 
 /**
  *
  */
-public class LocalPlanner extends FlowPlanner
+public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   {
   public LocalPlanner()
     {
+    }
+
+  @Override
+  public Properties getConfig()
+    {
+    return null;
     }
 
   @Override
@@ -54,19 +61,28 @@ public class LocalPlanner extends FlowPlanner
     super.initialize( flowConnector, properties );
     }
 
+  protected LocalFlow createFlow( FlowDef flowDef )
+    {
+    return new LocalFlow( getPlatformInfo(), getProperties(), getConfig(), flowDef );
+    }
+
   @Override
-  public Flow buildFlow( FlowDef flowDef )
+  public LocalFlow buildFlow( FlowDef flowDef )
     {
     ElementGraph elementGraph = null;
 
     try
       {
       // generic
-      verifyAssembly( flowDef );
+      verifyAllTaps( flowDef );
 
-      LocalFlow flow = new LocalFlow( getPlatformInfo(), properties, null, flowDef );
+      LocalFlow flow = createFlow( flowDef );
 
-      elementGraph = createElementGraph( flowDef );
+      Pipe[] tails = resolveTails( flowDef, flow );
+
+      verifyAssembly( flowDef, tails );
+
+      elementGraph = createElementGraph( flowDef, tails );
 
       // rules
       failOnLoneGroupAssertion( elementGraph );

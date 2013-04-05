@@ -535,6 +535,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     }
 
   @Override
+  public List<String> getSourceNames()
+    {
+    return new ArrayList<String>( sources.keySet() );
+    }
+
+  @Override
   public Tap getSource( String name )
     {
     return sources.get( name );
@@ -551,6 +557,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public Map<String, Tap> getSinks()
     {
     return Collections.unmodifiableMap( sinks );
+    }
+
+  @Override
+  public List<String> getSinkNames()
+    {
+    return new ArrayList<String>( sinks.keySet() );
     }
 
   @Override
@@ -579,6 +591,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     }
 
   @Override
+  public List<String> getTrapNames()
+    {
+    return new ArrayList<String>( traps.keySet() );
+    }
+
+  @Override
   public Collection<Tap> getTrapsCollection()
     {
     return getTraps().values();
@@ -588,6 +606,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public Map<String, Tap> getCheckpoints()
     {
     return Collections.unmodifiableMap( checkpoints );
+    }
+
+  @Override
+  public List<String> getCheckpointNames()
+    {
+    return new ArrayList<String>( checkpoints.keySet() );
     }
 
   @Override

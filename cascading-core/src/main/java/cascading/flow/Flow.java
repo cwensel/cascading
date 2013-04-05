@@ -199,6 +199,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    */
   Map<String, Tap> getSources();
 
+  List<String> getSourceNames();
+
   Tap getSource( String name );
 
   /**
@@ -214,6 +216,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * @return the sinks (type Map) of this Flow object.
    */
   Map<String, Tap> getSinks();
+
+  List<String> getSinkNames();
 
   Tap getSink( String name );
 
@@ -238,6 +242,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    */
   Map<String, Tap> getTraps();
 
+  List<String> getTrapNames();
+
   /**
    * Method getTrapsCollection returns a {@link Collection} of trap {@link Tap}s for this Flow object.
    *
@@ -251,6 +257,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * @return the traps (type Map<String, Tap>) of this Flow object.
    */
   Map<String, Tap> getCheckpoints();
+
+  List<String> getCheckpointNames();
 
   /**
    * Method getCheckpointsCollection returns a {@link Collection} of checkpoint {@link Tap}s for this Flow object.
