@@ -31,7 +31,8 @@ import cascading.pipe.Pipe;
  * underlying platform or environment. Specifically field names and type information from incoming source
  * and outgoing sink {@link cascading.tap.Tap}s.
  * <p/>
- * AssemblyPlanner implementations are handed to a {@link FlowDef} instance in the order they should be evaluated.
+ * AssemblyPlanner implementations are handed to a {@link cascading.flow.planner.FlowPlanner}
+ * instance in the order they should be evaluated.
  * Every instance has the opportunity to replace any prior tails with new branches and paths.
  * <p/>
  * Every instance of AssemblyPlanner evaluated is given the current {@link FlowDef} used on the current
@@ -45,14 +46,21 @@ import cascading.pipe.Pipe;
  */
 public interface AssemblyPlanner
   {
+  interface Context
+    {
+    FlowDef getFlowDef();
+
+    Flow getFlow();
+
+    List<Pipe> getTails();
+    }
+
   /**
    * Called when this AssemblyPlanner instance should return any additional tail Pipe instances for used
    * when completing the Flow plan.
    *
-   * @param flowDef the current FlowDef
-   * @param flow    the current Flow
-   * @param tails   the current collection of tail pipes
+   * @param context parameter object of the Context
    * @return tail Pipe instances to replace the given tails
    */
-  List<Pipe> resolveTails( FlowDef flowDef, Flow flow, List<Pipe> tails );
+  List<Pipe> resolveTails( Context context );
   }

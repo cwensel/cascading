@@ -55,9 +55,9 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
     AssemblyPlanner planner = new AssemblyPlanner()
     {
     @Override
-    public List<Pipe> resolveTails( FlowDef flowDef, Flow flow, List<Pipe> tails )
+    public List<Pipe> resolveTails( Context context )
       {
-      Pipe pipe = new Pipe( (String) flow.getSourceNames().get( 0 ) );
+      Pipe pipe = new Pipe( (String) context.getFlow().getSourceNames().get( 0 ) );
 
       pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
@@ -95,9 +95,9 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
     AssemblyPlanner lazyEach = new AssemblyPlanner()
     {
     @Override
-    public List<Pipe> resolveTails( FlowDef flowDef, Flow flow, List<Pipe> tails )
+    public List<Pipe> resolveTails( Context context )
       {
-      Pipe pipe = new Each( tails.get( 0 ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+      Pipe pipe = new Each( context.getTails().get( 0 ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
       return Arrays.asList( pipe );
       }
@@ -106,9 +106,9 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
     AssemblyPlanner lazyCount = new AssemblyPlanner()
     {
     @Override
-    public List<Pipe> resolveTails( FlowDef flowDef, Flow flow, List<Pipe> tails )
+    public List<Pipe> resolveTails( Context context )
       {
-      Pipe pipe = new GroupBy( tails.get( 0 ), new Fields( "ip" ) );
+      Pipe pipe = new GroupBy( context.getTails().get( 0 ), new Fields( "ip" ) );
 
       pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 

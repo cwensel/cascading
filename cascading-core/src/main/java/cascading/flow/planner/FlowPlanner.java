@@ -145,9 +145,7 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
     for( AssemblyPlanner assemblyPlanner : assemblyPlanners )
       {
-      // todo: wrap in parameter object
-      // todo: add planner stack
-      tails = assemblyPlanner.resolveTails( flowDef, flow, tails );
+      tails = assemblyPlanner.resolveTails( new AssemblyPlannerContext( flowDef, flow, tails ) );
 
       if( tails.isEmpty() )
         throw new PlannerException( "assembly planner: " + assemblyPlanner + ", returned zero tails" );
