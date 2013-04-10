@@ -20,6 +20,11 @@
 
 package cascading.tap.hadoop;
 
+import static data.InputData.inputFileApache;
+import static data.InputData.inputFileComments;
+import static data.InputData.inputFileLower;
+import static data.InputData.inputFileUpper;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -27,6 +32,14 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.InputSplit;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
+import org.junit.Test;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
@@ -57,13 +70,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.RecordReader;
-import org.junit.Test;
-
-import static data.InputData.*;
 
 /**
  *
@@ -452,6 +458,34 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       {
       // do nothing
       }
+    }
+
+  @Test
+  public void testCombinedHfs() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
+
+    Hfs sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "lower.txt" );
+    Hfs sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "upper.txt" );
+
+    // create a CombinedHfs instance on these files
+    CombinedHfs source = new CombinedHfs( sourceLower, sourceUpper );
+
+    FlowProcess<JobConf> process = getPlatform().getFlowProcess();
+    JobConf conf = process.getConfigCopy();
+
+    // test the input format and the split
+    source.sourceConfInit( process, conf );
+    InputFormat inputFormat = conf.getInputFormat();
+
+    assertEquals( CombinedHfs.CombinedInputFormat.class, inputFormat.getClass() );
+    InputSplit[] splits = inputFormat.getSplits( conf, 1 );
+    assertEquals( 1, splits.length );
+
+    validateLength( source.openForRead( process ), 10 );
     }
 
   public class DupeConfigScheme extends TextLine
