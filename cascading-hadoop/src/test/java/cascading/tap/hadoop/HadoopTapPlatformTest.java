@@ -57,6 +57,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import data.InputData;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -249,14 +250,12 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
-
-    GlobHfs source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r],owe?}.txt" );
+    GlobHfs source = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{ppe[_r],owe?}.txt" );
 
     assertEquals( 2, source.getTaps().length );
 
     // show globhfs will just match a directory if ended with a /
-    assertEquals( 1, new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "../?ata/" ).getTaps().length );
+    assertEquals( 1, new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "../?ata/" ).getTaps().length );
 
     Tap sink = new Hfs( new TextLine(), getOutputPath( "glob" ), SinkMode.REPLACE );
 
@@ -282,10 +281,8 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
-
-    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r]}.txt" );
-    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{owe?}.txt" );
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{owe?}.txt" );
 
     MultiSourceTap source = new MultiSourceTap( source1, source2 );
 
@@ -316,16 +313,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
-
-    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r]}.txt" );
-    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{owe?}.txt" );
+    GlobHfs source1 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{ppe[_r]}.txt" );
+    GlobHfs source2 = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{owe?}.txt" );
 
     MultiSourceTap source = new MultiSourceTap( source1, source2 );
 
     validateLength( source.openForRead( getPlatform().getFlowProcess() ), 10 );
 
-    GlobHfs sourceMulti = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "?{ppe[_r],owe?}.txt" );
+    GlobHfs sourceMulti = new GlobHfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "?{ppe[_r],owe?}.txt" );
 
     source = new MultiSourceTap( sourceMulti );
 
@@ -410,16 +405,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
-
-    Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "*" );
+    Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "*" );
     TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
-      Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "/blah/" );
+      Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
       iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
       fail();
       }
@@ -435,16 +428,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    String dataLocation = System.getProperty( data.InputData.TEST_DATA_PATH, "src/test/data/" );
-
-    Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "{*}" );
+    Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "{*}" );
     TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
-      Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), dataLocation + "/blah/" );
+      Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
       iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
       fail();
       }

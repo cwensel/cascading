@@ -38,7 +38,6 @@ test {
   systemProperties = setTestingProperties()
 }
 
-
 task platformTest( type: Test, dependsOn: test ) {
 
   if( System.properties[ 'platformTest.single' ] ) // test a single class from the command line
