@@ -59,6 +59,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import data.InputData;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -508,5 +510,33 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
+  public void testCombinedHfs() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Hfs sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputFileLower );
+    Hfs sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputFileUpper );
+
+    // create a CombinedHfs instance on these files
+    CombinedHfs source = new CombinedHfs( sourceLower, sourceUpper );
+
+    FlowProcess<JobConf> process = getPlatform().getFlowProcess();
+    JobConf conf = process.getConfigCopy();
+
+    // test the input format and the split
+    source.sourceConfInit( process, conf );
+
+    InputFormat inputFormat = conf.getInputFormat();
+
+    assertEquals( CombinedHfs.CombinedInputFormat.class, inputFormat.getClass() );
+    InputSplit[] splits = inputFormat.getSplits( conf, 1 );
+
+    assertEquals( 1, splits.length );
+
+    validateLength( source.openForRead( process ), 10 );
     }
   }

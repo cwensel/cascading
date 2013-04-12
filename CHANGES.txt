@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.t.h.CombinedHfs to allow for smaller files reachable by c.t.h.Hfs taps to be aggregated into fewer
+  splits, thus fewer map tasks. @sjlee
+
   Added c.f.AssemblyPlanner interface to allow for platform independent generative c.f.Flow planning.
 
   Fixed issue in local mode where an OOME could cause a cascading set of additional OOMEs making the jvm unstable.
