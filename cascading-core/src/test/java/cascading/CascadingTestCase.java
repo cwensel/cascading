@@ -310,63 +310,65 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static List<Tuple> getSourceAsList( Flow flow ) throws IOException
     {
-    TupleEntryIterator iterator = flow.openSource();
-
-    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
-
-    iterator.close();
-
-    return result;
+    return asCollection( flow, (Tap) flow.getSourcesCollection().iterator().next(), Fields.ALL, new ArrayList<Tuple>() );
     }
 
   public static List<Tuple> getSinkAsList( Flow flow ) throws IOException
     {
-    TupleEntryIterator iterator = flow.openSink();
-
-    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
-
-    iterator.close();
-
-    return result;
+    return asCollection( flow, flow.getSink(), Fields.ALL, new ArrayList<Tuple>() );
     }
 
   public static List<Tuple> asList( Flow flow, Tap tap ) throws IOException
     {
-    TupleEntryIterator iterator = flow.openTapForRead( tap );
+    return asCollection( flow, tap, Fields.ALL, new ArrayList<Tuple>() );
+    }
 
-    List<Tuple> result = asCollection( iterator, new ArrayList<Tuple>() );
-
-    iterator.close();
-
-    return result;
+  public static List<Tuple> asList( Flow flow, Tap tap, Fields selector ) throws IOException
+    {
+    return asCollection( flow, tap, selector, new ArrayList<Tuple>() );
     }
 
   public static Set<Tuple> asSet( Flow flow, Tap tap ) throws IOException
     {
-    TupleEntryIterator iterator = flow.openTapForRead( tap );
+    return asCollection( flow, tap, Fields.ALL, new HashSet<Tuple>() );
+    }
 
-    Set<Tuple> result = asCollection( iterator, new HashSet<Tuple>() );
-
-    iterator.close();
-
-    return result;
+  public static Set<Tuple> asSet( Flow flow, Tap tap, Fields selector ) throws IOException
+    {
+    return asCollection( flow, tap, selector, new HashSet<Tuple>() );
     }
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, C collection ) throws IOException
     {
+    return asCollection( flow, tap, Fields.ALL, collection );
+    }
+
+  public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, Fields selector, C collection ) throws IOException
+    {
     TupleEntryIterator iterator = flow.openTapForRead( tap );
 
-    C result = asCollection( iterator, collection );
-
-    iterator.close();
-
-    return result;
+    try
+      {
+      return asCollection( iterator, selector, collection );
+      }
+    finally
+      {
+      iterator.close();
+      }
     }
 
   public static <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, C result )
     {
     while( iterator.hasNext() )
       result.add( iterator.next().getTupleCopy() );
+
+    return result;
+    }
+
+  public static <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, Fields selector, C result )
+    {
+    while( iterator.hasNext() )
+      result.add( iterator.next().selectTupleCopy( selector ) );
 
     return result;
     }

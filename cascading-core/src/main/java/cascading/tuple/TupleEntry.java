@@ -727,6 +727,9 @@ public class TupleEntry
 
   /**
    * Method selectTuple selects the fields specified in selector from this instance.
+   * <p/>
+   * This method may return the underlying Tuple instance without copying it. See {@link #selectTupleCopy(Fields)}
+   * to guarantee a copy suitable for modifying or caching/storing in a local collection.
    *
    * @param selector Fields selector that selects the values to return
    * @return Tuple
@@ -738,6 +741,23 @@ public class TupleEntry
 
     if( selector.isNone() )
       return Tuple.NULL;
+
+    return tuple.get( fields, selector );
+    }
+
+  /**
+   * Method selectTuple selects the fields specified in selector from this instance.
+   *
+   * @param selector Fields selector that selects the values to return
+   * @return Tuple
+   */
+  public Tuple selectTupleCopy( Fields selector )
+    {
+    if( selector == null || selector.isAll() || fields == selector )
+      return new Tuple( this.tuple );
+
+    if( selector.isNone() )
+      return new Tuple();
 
     return tuple.get( fields, selector );
     }
