@@ -23,14 +23,20 @@ package cascading.tuple.util;
 import java.util.Comparator;
 import java.util.List;
 
+import cascading.flow.stream.MemorySpliceGate;
+import cascading.tuple.Fields;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class TupleHasher
   {
+  private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
+
   private static Hasher DEFAULT = new ObjectHasher();
   private Hasher[] hashers;
 
@@ -41,6 +47,48 @@ public class TupleHasher
   public TupleHasher( Comparator defaultComparator, Comparator[] comparators )
     {
     initialize( defaultComparator, comparators );
+    }
+
+  public static Comparator[] merge( Fields[] keyFields )
+    {
+    Comparator[] comparators = new Comparator[ keyFields[ 0 ].size() ];
+
+    for( Fields keyField : keyFields )
+      {
+      if( keyField == null )
+        continue;
+
+      for( int i = 0; i < keyField.getComparators().length; i++ )
+        {
+        Comparator comparator = keyField.getComparators()[ i ];
+
+        if( !( comparator instanceof Hasher ) )
+          continue;
+
+        if( comparators[ i ] != null && !comparators[ i ].equals( comparator ) )
+          LOG.warn( "two unequal Hasher instances for the same key field position found: {}, and: {}", comparators[ i ], comparator );
+
+        comparators[ i ] = comparator;
+        }
+      }
+
+    return comparators;
+    }
+
+  public static boolean isNull( Comparator[] comparators )
+    {
+    int count = 0;
+
+    for( Comparator comparator : comparators )
+      {
+      if( comparator == null )
+        count++;
+      }
+
+    if( count == comparators.length )
+      return true;
+
+    return false;
     }
 
   protected void initialize( Comparator defaultComparator, Comparator[] comparators )

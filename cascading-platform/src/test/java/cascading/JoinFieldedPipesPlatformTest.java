@@ -20,6 +20,8 @@
 
 package cascading;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +32,7 @@ import cascading.flow.Flow;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
@@ -47,6 +50,7 @@ import cascading.pipe.joiner.RightJoin;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import org.junit.Test;
 
@@ -1599,5 +1603,69 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     assertTrue( actual.contains( new Tuple( "1\ta\t1\tA\t1\ta\t1\tA" ) ) );
     assertTrue( actual.contains( new Tuple( "5\te\t5\tE\t5\te\t5\tE" ) ) );
+    }
+
+  public static class AllComparator implements Comparator<Comparable>, Hasher<Comparable>, Serializable
+    {
+
+    @Override
+    public int compare( Comparable lhs, Comparable rhs )
+      {
+      return lhs.toString().compareTo( rhs.toString() );
+      }
+
+    @Override
+    public int hashCode( Comparable value )
+      {
+      return value.toString().hashCode();
+      }
+    }
+
+  /**
+   * Tests Hasher being honored even if default comparator is null.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testJoinWithHasher() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "joinhasher" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new Each( pipeLower, new Fields( "num" ), new ExpressionFunction( Fields.ARGS, "Integer.parseInt( num )", String.class ), Fields.REPLACE );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Fields num = new Fields( "num" );
+    num.setComparator( "num", new AllComparator() );
+
+    Pipe splice = new HashJoin( pipeLower, num, pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
   }

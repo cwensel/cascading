@@ -47,6 +47,7 @@ import static cascading.tuple.util.TupleViews.createNarrow;
  */
 public abstract class MemorySpliceGate extends SpliceGate
   {
+
   protected final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
 
   protected Comparator<Tuple>[] groupComparators;
@@ -99,6 +100,7 @@ public abstract class MemorySpliceGate extends SpliceGate
 
     Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( FlowProps.DEFAULT_ELEMENT_COMPARATOR ) );
 
+    Fields[] compareFields = new Fields[ orderedPrevious.length ];
     groupComparators = new Comparator[ orderedPrevious.length ];
 
     if( splice.isSorted() )
@@ -114,6 +116,8 @@ public abstract class MemorySpliceGate extends SpliceGate
 
       // we want the comparators
       Fields groupFields = splice.getKeySelectors().get( incomingScope.getName() );
+
+      compareFields[ pos ] = groupFields; // used for finding hashers
 
       if( groupFields.size() == 0 )
         groupComparators[ pos ] = groupFields;
@@ -133,7 +137,8 @@ public abstract class MemorySpliceGate extends SpliceGate
         }
       }
 
-    groupHasher = defaultComparator != null ? new TupleHasher( defaultComparator, new Comparator[ orderedPrevious.length ] ) : null;
+    Comparator[] hashers = TupleHasher.merge( compareFields );
+    groupHasher = defaultComparator != null || !TupleHasher.isNull( hashers ) ? new TupleHasher( defaultComparator, hashers ) : null;
 
     keys = createKeySet();
 
