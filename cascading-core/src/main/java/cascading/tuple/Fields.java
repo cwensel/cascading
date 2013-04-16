@@ -1157,6 +1157,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
    * <p/>
+   * Note any relative positional elements are retained, thus appending two Fields each declaring {@code -1}
+   * position will result in a TupleException noting duplicate fields.
+   * <p/>
    * See {@link #subtract(Fields)} for removing field names.
    *
    * @param fields of type Fields
@@ -1180,15 +1183,15 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( this.isNone() )
       return fields;
 
-    Set<String> names = new HashSet<String>();
+    Set<Comparable> names = new HashSet<Comparable>();
 
     // init the Field
     Fields result = size( this.size() + fields.size() );
 
     // copy over field names from this side
-    copy( names, result, this, 0 );
+    copyRetain( names, result, this, 0 );
     // copy over field names from that side
-    copy( names, result, fields, this.size() );
+    copyRetain( names, result, fields, this.size() );
 
     if( this.isUnknown() || fields.isUnknown() )
       result.kind = Kind.UNKNOWN;
@@ -1292,6 +1295,35 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
           throw new TupleException( "field name already exists: " + field );
 
         names.add( (String) field );
+        }
+
+      result.set( i + offset, field );
+      }
+    }
+
+  /**
+   * Retains any relative positional elements like -1, but checks for duplicates
+   *
+   * @param names
+   * @param result
+   * @param fields
+   * @param offset
+   */
+  private static void copyRetain( Set<Comparable> names, Fields result, Fields fields, int offset )
+    {
+    for( int i = 0; i < fields.size(); i++ )
+      {
+      Comparable field = fields.get( i );
+
+      if( field instanceof Integer && ( (Integer) field ) > -1 )
+        continue;
+
+      if( names != null )
+        {
+        if( names.contains( field ) )
+          throw new TupleException( "field name already exists: " + field );
+
+        names.add( field );
         }
 
       result.set( i + offset, field );
@@ -1501,7 +1533,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method setType should be used to associate a {@link java.lang.Class} with a given field name or position.
+   * Method applyType should be used to associate a {@link java.lang.reflect.Type} with a given field name or position.
    * A new instance of Fields will be returned, this instance will not be modified.
    * <p/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
@@ -1532,6 +1564,25 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     results.types[ pos ] = type;
 
     return results;
+    }
+
+  /**
+   * Method applyType should be used to associate {@link java.lang.reflect.Type} with a given field name or position
+   * as declared in the given Fields parameter.
+   * <p/>
+   * A new instance of Fields will be returned, this instance will not be modified.
+   * <p/>
+   *
+   * @param fields of type Fields
+   */
+  public Fields applyTypes( Fields fields )
+    {
+    Fields result = new Fields( this.fields, this.types );
+
+    for( Comparable field : fields )
+      result = result.applyType( field, fields.getType( fields.getPos( field ) ) );
+
+    return result;
     }
 
   /**

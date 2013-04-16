@@ -91,6 +91,35 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 0 ) );
     }
 
+  public void testAppend4()
+    {
+    Fields fieldA = new Fields( 0, 1 );
+    Fields fieldB = new Fields( -1 );
+
+    Fields appended = fieldA.append( fieldB );
+
+    assertEquals( "not equal: ", 3, appended.size() );
+    assertEquals( "not equal: ", 0, appended.get( 0 ) );
+    assertEquals( "not equal: ", 1, appended.get( 1 ) );
+    assertEquals( "not equal: ", -1, appended.get( 2 ) );
+    }
+
+  public void testAppend4Fail()
+    {
+    Fields fieldA = new Fields( 0, -1 );
+    Fields fieldB = new Fields( -1 );
+
+    try
+      {
+      Fields appended = fieldA.append( fieldB );
+      fail();
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+    }
+
   public void testAppendNamed()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -916,5 +945,20 @@ public class FieldsTest extends CascadingTestCase
 
     assertEquals( "not equal: ", 1, diff.size() );
     assertEquals( "not equal: ", String.class, diff.getType( 0 ) );
+    }
+
+  public void testTypedApply()
+    {
+    Fields fieldA = new Fields( names( "a", "b" ), types( int.class, int.class ) );
+    Fields fieldB = new Fields( names( "a" ), types( String.class ) );
+
+    Fields appended = fieldA.applyTypes( fieldB );
+
+    assertEquals( "not equal: ", 2, appended.size() );
+    assertEquals( "not equal: ", "a", appended.get( 0 ) );
+    assertEquals( "not equal: ", "b", appended.get( 1 ) );
+
+    assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
     }
   }
