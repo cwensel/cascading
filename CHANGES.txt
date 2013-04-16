@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.t.Fields to return appending value when calling Fields#append on Fields.NONE and optimized Fields#subtract
+  when subtracting Fields.NONE.
+
   Added c.t.h.CombinedHfs to allow for smaller files reachable by c.t.h.Hfs taps to be aggregated into fewer
   splits, thus fewer map tasks. @sjlee
 

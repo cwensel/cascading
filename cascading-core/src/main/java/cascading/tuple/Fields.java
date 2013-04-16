@@ -1100,6 +1100,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( fields.isAll() )
       return Fields.NONE;
 
+    if( fields.isNone() )
+      return this;
+
     List<Comparable> list = new LinkedList<Comparable>();
     Collections.addAll( list, this.get() );
     int[] pos = getPos( fields, -1 );
@@ -1173,6 +1176,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     if( fields.isNone() )
       return this;
+
+    if( this.isNone() )
+      return fields;
 
     Set<String> names = new HashSet<String>();
 

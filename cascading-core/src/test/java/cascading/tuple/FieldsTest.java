@@ -80,6 +80,17 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  public void testAppend3()
+    {
+    Fields fieldA = Fields.NONE;
+    Fields fieldB = new Fields( 2 );
+
+    Fields appended = fieldA.append( fieldB );
+
+    assertEquals( "not equal: ", 1, appended.size() );
+    assertEquals( "not equal: ", 2, appended.get( 0 ) );
+    }
+
   public void testAppendNamed()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -193,6 +204,18 @@ public class FieldsTest extends CascadingTestCase
 
     assertEquals( "not equal: ", 1, diff.size() );
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
+    }
+
+  public void testDiff2()
+    {
+    Fields fieldA = new Fields( "a", "b" );
+    Fields fieldB = Fields.NONE;
+
+    Fields diff = fieldA.subtract( fieldB );
+
+    assertEquals( "not equal: ", 2, diff.size() );
+    assertEquals( "not equal: ", "a", diff.get( 0 ) );
+    assertEquals( "not equal: ", "b", diff.get( 1 ) );
     }
 
 //  public void testDiffDupe()
