@@ -146,7 +146,7 @@ public abstract class FlowPlanner
     DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
     checkpointRootPath = makeCheckpointRootPath( flowDef );
 
-    return new ElementGraph( pipes, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
+    return new ElementGraph( getPlatformInfo(), pipes, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
     }
 
   private String makeCheckpointRootPath( FlowDef flowDef )

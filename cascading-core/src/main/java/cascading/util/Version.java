@@ -93,6 +93,17 @@ public class Version
     return releaseVersion;
     }
 
+  public static String getRelease()
+    {
+    if( getVersionProperties().isEmpty() )
+      return null;
+
+    if( getReleaseBuild() == null || getReleaseBuild().isEmpty() )
+      return String.format( "%s", getReleaseFull() );
+    else
+      return String.format( "%s-%s", getReleaseFull(), getReleaseBuild() );
+    }
+
   public static String getReleaseFull()
     {
     String releaseFull;

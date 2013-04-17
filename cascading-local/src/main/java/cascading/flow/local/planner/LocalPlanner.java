@@ -31,6 +31,7 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
 import cascading.tap.Tap;
+import cascading.util.Version;
 
 /**
  *
@@ -44,7 +45,7 @@ public class LocalPlanner extends FlowPlanner
   @Override
   public PlatformInfo getPlatformInfo()
     {
-    return new PlatformInfo( "local", null, null );
+    return new PlatformInfo( "local", "Concurrent, Inc.", Version.getRelease() );
     }
 
   @Override
