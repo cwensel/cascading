@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.1.6 [unreleased]
 
+  Updated c.p.SubAssembly to throw UnsupportedOperationException on #getConfigDef() and #getStepConfigDef() calls.
+
   Fixed issue where join field level c.t.Hasher instances were not honored during a c.p.HashJoin.
 
   Fixed issue where a j.l.StackOverflowError would be thrown if the Hadoop mapred.input.format.class property
