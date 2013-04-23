@@ -1615,6 +1615,17 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return result;
     }
 
+  /**
+   * Returns the Type at the given position or having the fieldName.
+   *
+   * @param fieldName of type String or Number
+   * @return the Type
+   */
+  public Type getType( Comparable fieldName )
+    {
+    return getType( getPos( fieldName ) );
+    }
+
   public Type getType( int pos )
     {
     if( !hasTypes() )
@@ -1626,9 +1637,14 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Returns the Class for the given position value.
    *
-   * @param pos of type int
+   * @param fieldName of type String or Number
    * @return type Class
    */
+  public Class getTypeClass( Comparable fieldName )
+    {
+    return getTypeClass( getPos( fieldName ) );
+    }
+
   public Class getTypeClass( int pos )
     {
     return (Class) getType( pos );
