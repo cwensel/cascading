@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.1.6 [unreleased]
+2.1.6
 
   Updated c.p.SubAssembly to throw UnsupportedOperationException on #getConfigDef() and #getStepConfigDef() calls.
 
