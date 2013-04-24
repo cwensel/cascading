@@ -143,7 +143,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     operationCall.setArguments( arguments );
@@ -165,7 +165,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     function.prepare( FlowProcess.NULL, operationCall );
@@ -189,7 +189,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static boolean invokeFilter( Filter filter, TupleEntry arguments )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
 
     operationCall.setArguments( arguments );
 
@@ -211,7 +211,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
     filter.prepare( FlowProcess.NULL, operationCall );
 
@@ -243,7 +243,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
     operationCall.setGroup( group );
 
@@ -281,7 +281,7 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    ConcreteCall operationCall = new ConcreteCall();
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
     operationCall.setGroup( group );
 
