@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import cascading.property.ConfigDef;
 import cascading.util.Util;
 
 /**
@@ -116,4 +117,15 @@ public abstract class SubAssembly extends Pipe
     return previous.toArray( new Pipe[ previous.size() ] );
     }
 
+  @Override
+  public ConfigDef getStepConfigDef()
+    {
+    throw new UnsupportedOperationException( "sub-assembly step config def is unsupported" );
+    }
+
+  @Override
+  public ConfigDef getConfigDef()
+    {
+    throw new UnsupportedOperationException( "sub-assembly config def is unsupported" );
+    }
   }

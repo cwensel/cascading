@@ -80,11 +80,15 @@ public class PlatformInfo implements Serializable, Comparable
   public String toString()
     {
     final StringBuilder sb = new StringBuilder();
-    sb.append( "PlatformInfo" );
-    sb.append( "{name='" ).append( name ).append( '\'' );
-    sb.append( ", vendor='" ).append( vendor ).append( '\'' );
-    sb.append( ", version='" ).append( version ).append( '\'' );
-    sb.append( '}' );
+
+    sb.append( name ).append( ':' );
+
+    if( version != null )
+      sb.append( version ).append( ':' );
+
+    if( vendor != null )
+      sb.append( vendor );
+
     return sb.toString();
     }
   }

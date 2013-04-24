@@ -188,7 +188,7 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
     checkpointRootPath = makeCheckpointRootPath( flowDef );
 
-    return new ElementGraph( flowTails, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
+    return new ElementGraph( getPlatformInfo(), flowTails, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
     }
 
   private String makeCheckpointRootPath( FlowDef flowDef )

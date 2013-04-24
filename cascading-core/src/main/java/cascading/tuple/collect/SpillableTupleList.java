@@ -353,7 +353,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
     catch( IOException exception )
       {
-      throw new TupleException( "unable to write to file output stream", exception );
+      throw new TupleException( "unable to write tuple collection to file output stream", exception );
       }
     }
 
@@ -369,7 +369,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
     catch( IOException exception )
       {
-      throw new TupleException( "unable to read from file output stream", exception );
+      throw new TupleException( "unable to read 'size' of collection from file input stream", exception );
       }
 
     return new CloseableIterator<Tuple>()
@@ -392,7 +392,7 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
         }
       catch( IOException exception )
         {
-        throw new TupleException( "unable to read from file output stream", exception );
+        throw new TupleException( "unable to read next tuple from file input stream containing: " + size + " tuples, successfully read tuples: " + count, exception );
         }
       finally
         {

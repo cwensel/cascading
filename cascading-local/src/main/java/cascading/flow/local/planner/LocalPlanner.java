@@ -52,7 +52,7 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   @Override
   public PlatformInfo getPlatformInfo()
     {
-    return new PlatformInfo( "local", "Concurrent, Inc.", Version.getVersionString() );
+    return new PlatformInfo( "local", "Concurrent, Inc.", Version.getRelease() );
     }
 
   @Override

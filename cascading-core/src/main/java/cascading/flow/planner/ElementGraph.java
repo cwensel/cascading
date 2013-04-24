@@ -47,6 +47,7 @@ import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
 import cascading.util.Util;
+import cascading.util.Version;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
@@ -72,6 +73,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   /** Field resolved */
   private boolean resolved;
 
+  private PlatformInfo platformInfo;
   /** Field sources */
   private Map<String, Tap> sources;
   /** Field sinks */
@@ -93,6 +95,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
   public ElementGraph( ElementGraph elementGraph )
     {
     this();
+    this.platformInfo = elementGraph.platformInfo;
     this.sources = elementGraph.sources;
     this.sinks = elementGraph.sinks;
     this.traps = elementGraph.traps;
@@ -111,9 +114,10 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
    * @param sources of type Map<String, Tap>
    * @param sinks   of type Map<String, Tap>
    */
-  public ElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, boolean requireUniqueCheckpoints, PlannerLevel... plannerLevels )
+  public ElementGraph( PlatformInfo platformInfo, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, boolean requireUniqueCheckpoints, PlannerLevel... plannerLevels )
     {
     super( Scope.class );
+    this.platformInfo = platformInfo;
     this.sources = sources;
     this.sinks = sinks;
     this.traps = traps;
@@ -477,6 +481,17 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
         {
         public String getVertexName( FlowElement object )
           {
+          if( graph.incomingEdgesOf( object ).isEmpty() )
+            {
+            String result = object.toString().replaceAll( "\"", "\'" );
+            String versionString = Version.getVersionString();
+
+            if( platformInfo != null )
+              versionString = ( versionString == null ? "" : versionString + "\\n" ) + platformInfo;
+
+            return versionString == null ? result : result + "\\n" + versionString;
+            }
+
           if( object instanceof Tap || object instanceof Extent )
             return object.toString().replaceAll( "\"", "\'" );
 

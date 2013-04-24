@@ -62,6 +62,23 @@ Cascading Change Log
   for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
   permutations during source and sink, and type inference from field names.
 
+2.1.6
+
+  Updated c.p.SubAssembly to throw UnsupportedOperationException on #getConfigDef() and #getStepConfigDef() calls.
+
+  Fixed issue where join field level c.t.Hasher instances were not honored during a c.p.HashJoin.
+
+  Fixed issue where a j.l.StackOverflowError would be thrown if the Hadoop mapred.input.format.class property
+  was not set.
+
+  Updated c.t.Fields#size() to return Fields.NONE on size == 0, instead of failing.
+
+  Fixed issue where Fields.REPLACE on an incoming Fields.UNKNOWN could result in a
+  java.lang.ArrayIndexOutOfBoundsException during runtime.
+
+  Updated c.s.h.HadoopStepStats counter caching strategy to make a final attempt even if max timeouts have been
+  met. Added "cascading.step.counter.timeout" property to allow tuning of timeout period.
+
 2.1.5
 
   Updated c.t.h.u.BytesComparator to implement c.t.Hasher as a convenience.

@@ -49,6 +49,12 @@ public class TestText implements Comparable<TestText>
     }
 
   @Override
+  public String toString()
+    {
+    return value;
+    }
+
+  @Override
   public int hashCode()
     {
     if( value == null )
