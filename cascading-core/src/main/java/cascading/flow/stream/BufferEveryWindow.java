@@ -121,7 +121,7 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
         {
         boolean hasNext = grouping.iterator.hasNext();
 
-        if( !hasNext )
+        if( !hasNext && !operationCall.isRetainValues() )
           tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
 
         return hasNext;

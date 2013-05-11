@@ -57,4 +57,24 @@ public interface BufferCall<C> extends OperationCall<C>
    * @return TupleCollector
    */
   TupleEntryCollector getOutputCollector();
+
+  /**
+   * Set to {@code false} if at the end of all values iterated over in the argumentsIterator, the last seen argument tuple
+   * values should not be nulled out.
+   * <p/>
+   * By default, if a result is emitted from the Buffer before and after the argumentsIterator is started or completed,
+   * the last seen non-grouping values are null. When false, the values are not nulled after completion.
+   * <p/>
+   * The default is {@code true}.
+   *
+   * @param retainValues of type boolean
+   */
+  void setRetainValues( boolean retainValues );
+
+  /**
+   * Returns {@code true} if non-grouping fields will not be nulled after the argumentsIterator is completed.
+   *
+   * @return true
+   */
+  boolean isRetainValues();
   }

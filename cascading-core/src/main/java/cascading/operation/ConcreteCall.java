@@ -46,6 +46,8 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   private Fields declaredFields;
   /** Field outputCollector */
   private TupleEntryCollector outputCollector;
+  /** Field retainValues */
+  private boolean retainValues = false;
 
   /** Constructor OperationCall creates a new OperationCall instance. */
   public ConcreteCall()
@@ -149,5 +151,17 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public void setOutputCollector( TupleEntryCollector outputCollector )
     {
     this.outputCollector = outputCollector;
+    }
+
+  @Override
+  public void setRetainValues( boolean retainValues )
+    {
+    this.retainValues = retainValues;
+    }
+
+  @Override
+  public boolean isRetainValues()
+    {
+    return retainValues;
     }
   }
