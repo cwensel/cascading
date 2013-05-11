@@ -88,7 +88,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.RESULTS );
 
-    Tap sink = getPlatform().getDelimitedFile( Fields.UNKNOWN, getOutputPath( "unknownsinks" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( Fields.UNKNOWN, getOutputPath( "unknownsinks" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -214,7 +214,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "upper" ), getOutputPath( "testtemplatesview" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "upper" ), getOutputPath( "testtemplatesview" ), SinkMode.REPLACE );
 
     sink = getPlatform().getTemplateTap( sink, "%s-%s", new Fields( "number", "lower" ), 1 );
 
@@ -222,10 +222,10 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     flow.complete();
 
-    Tap test = getPlatform().getDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/1-a", SinkMode.KEEP );
+    Tap test = getPlatform().getTabDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/1-a", SinkMode.KEEP );
     validateLength( flow.openTapForRead( test ), 1, 1 );
 
-    test = getPlatform().getDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/2-b", SinkMode.KEEP );
+    test = getPlatform().getTabDelimitedFile( new Fields( "upper" ), sink.getIdentifier().toString() + "/2-b", SinkMode.KEEP );
     validateLength( flow.openTapForRead( test ), 1, 1 );
 
     TupleEntryIterator input = flow.openTapForRead( test ); // open 2-b

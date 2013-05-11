@@ -62,7 +62,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -73,7 +73,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -84,7 +84,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -99,8 +99,8 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Identity() );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( "unusedpath" ), SinkMode.REPLACE );
-    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "mangled" ), getOutputPath( "unusedpath" ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( path ), SinkMode.REPLACE );
 
     FlowDef flowDef = FlowDef.flowDef()
       .addSource( pipe, source )
@@ -129,7 +129,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/" + ordinal ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/" + ordinal ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }

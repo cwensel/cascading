@@ -63,10 +63,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testSchemeResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -77,10 +77,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testEachArgResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new Each( pipe, new Fields( "third" ), new Identity() );
@@ -92,10 +92,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testEachOutResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new Each( pipe, new Fields( "first" ), new Identity( new Fields( "none" ) ), new Fields( "third" ) );
@@ -107,10 +107,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testGroupByResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "third" ) );
@@ -122,10 +122,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testGroupBySortResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ), new Fields( "third" ) );
@@ -137,10 +137,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testEveryArgResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ) );
@@ -154,10 +154,10 @@ public class ResolverExceptionsPlatformTest extends PlatformTestCase
   public void testEveryOutResolver() throws Exception
     {
     Fields sourceFields = new Fields( "first", "second" );
-    Tap source = getPlatform().getDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
+    Tap source = getPlatform().getTabDelimitedFile( sourceFields, "input/path", SinkMode.KEEP );
 
     Fields sinkFields = new Fields( "third", "fourth" );
-    Tap sink = getPlatform().getDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( sinkFields, "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
     pipe = new GroupBy( pipe, new Fields( "first" ) );

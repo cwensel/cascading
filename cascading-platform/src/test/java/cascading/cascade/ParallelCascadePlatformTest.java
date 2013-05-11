@@ -53,7 +53,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( name ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( name ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }
@@ -65,7 +65,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third", "fourth" ), "\\." ) );
     pipe = new Each( pipe, new FieldJoiner( new Fields( "mangled" ), "-" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "mangled" ), getOutputPath( name ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "mangled" ), getOutputPath( name ), SinkMode.REPLACE );
 
     return getPlatform().getFlowConnector().connect( source, sink, pipe );
     }

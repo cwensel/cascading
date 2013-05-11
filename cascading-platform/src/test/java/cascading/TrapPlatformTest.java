@@ -181,8 +181,8 @@ public class TrapPlatformTest extends PlatformTestCase
     pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "allseq/tap" ), SinkMode.REPLACE );
-    Tap trap = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "allseq/trap" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( "allseq/tap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( "allseq/trap" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 
@@ -324,7 +324,7 @@ public class TrapPlatformTest extends PlatformTestCase
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "seq/tap" ), SinkMode.REPLACE );
-    Tap trap = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "seq/trap" ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "seq/trap" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( "trap test", source, sink, trap, pipe );
 

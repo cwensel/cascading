@@ -66,9 +66,26 @@ public abstract class TupleEntryCollector
     if( expectedFields.isUnknown() || expectedFields.equals( tupleEntry.getFields() ) )
       outgoingEntry = tupleEntry;
     else
-      outgoingEntry.setTuple( tupleEntry.selectTuple( expectedFields ) );
+      outgoingEntry.setTuple( selectTupleFrom( tupleEntry, expectedFields ) );
 
     safeCollect( outgoingEntry );
+    }
+
+  private Tuple selectTupleFrom( TupleEntry tupleEntry, Fields expectedFields )
+    {
+    try
+      {
+      return tupleEntry.selectTuple( expectedFields );
+      }
+    catch( TupleException exception )
+      {
+      Fields givenFields = tupleEntry.getFields();
+      String string = "given TupleEntry fields: " + givenFields.printVerbose();
+      string += " do not match the operation declaredFields: " + expectedFields.printVerbose();
+      string += ", operations must emit tuples that match the fields they declare as output";
+
+      throw new TupleException( string, exception );
+      }
     }
 
   /**

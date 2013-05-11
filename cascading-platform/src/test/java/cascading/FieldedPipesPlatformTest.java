@@ -107,7 +107,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     pipe = new Every( pipe, new Count( new Fields( "count3" ) ) );
     pipe = new Every( pipe, new Count( new Fields( "count4" ) ) );
 
-    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, getOutputPath( "simplechain" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( "simplechain" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -767,9 +767,9 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     pipe = new Each( new Pipe( "third", pipe ), new Fields( "ip" ), new RegexFilter( "6" ) );
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
-    Tap sinkFirst = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/first" ), SinkMode.REPLACE );
-    Tap sinkSecond = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/second" ), SinkMode.REPLACE );
-    Tap sinkThird = getPlatform().getDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/third" ), SinkMode.REPLACE );
+    Tap sinkFirst = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/first" ), SinkMode.REPLACE );
+    Tap sinkSecond = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/second" ), SinkMode.REPLACE );
+    Tap sinkThird = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/third" ), SinkMode.REPLACE );
 
     Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second",
                                                             "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );

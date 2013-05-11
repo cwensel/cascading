@@ -146,19 +146,41 @@ public abstract class TestPlatform
     return getDelimitedFile( fields, false, delimiter, "\"", null, filename, mode );
     }
 
+  @Deprecated
   public Tap getDelimitedFile( Fields fields, String filename, SinkMode mode )
     {
     return getDelimitedFile( fields, false, "\t", "\"", null, filename, mode );
     }
 
+  @Deprecated
   public Tap getDelimitedFile( Fields fields, boolean hasHeader, String filename, SinkMode mode )
     {
     return getDelimitedFile( fields, hasHeader, "\t", "\"", null, filename, mode );
     }
 
+  public Tap getTabDelimitedFile( Fields fields, String filename, SinkMode mode )
+    {
+    return getDelimitedFile( fields, false, "\t", "\"", null, filename, mode );
+    }
+
+  public Tap getTabDelimitedFile( Fields fields, boolean hasHeader, String filename, SinkMode mode )
+    {
+    return getDelimitedFile( fields, hasHeader, "\t", "\"", null, filename, mode );
+    }
+
+  public Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, String filename, SinkMode mode )
+    {
+    return getDelimitedFile( fields, hasHeader, delimiter, quote, null, filename, mode );
+    }
+
+  public Tap getDelimitedFile( Fields fields, String delimiter, String quote, String filename, SinkMode mode )
+    {
+    return getDelimitedFile( fields, false, delimiter, quote, null, filename, mode );
+    }
+
   public Tap getDelimitedFile( Fields fields, String delimiter, Class[] types, String filename, SinkMode mode )
     {
-    return getDelimitedFile( fields, false, delimiter, "", types, filename, mode );
+    return getDelimitedFile( fields, false, delimiter, "\"", types, filename, mode );
     }
 
   public abstract Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode );

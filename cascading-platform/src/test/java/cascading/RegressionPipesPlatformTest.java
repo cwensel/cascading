@@ -291,7 +291,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileLower );
 
     Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileLower );
-    Tap splitTap = getPlatform().getDelimitedFile( new Fields( "num", "char" ), getOutputPath( "intermediate" ), SinkMode.REPLACE );
+    Tap splitTap = getPlatform().getTabDelimitedFile( new Fields( "num", "char" ), getOutputPath( "intermediate" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -347,7 +347,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileLower );
 
     Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileLower );
-    Tap splitTap = getPlatform().getDelimitedFile( new Fields( "num", "char" ), getOutputPath( "splitintermediate" ), SinkMode.REPLACE );
+    Tap splitTap = getPlatform().getTabDelimitedFile( new Fields( "num", "char" ), getOutputPath( "splitintermediate" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -552,7 +552,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileJoined );
 
     Tap source = getPlatform().getDelimitedFile( Fields.UNKNOWN, "-", inputFileJoined );
-    Tap sink = getPlatform().getDelimitedFile( Fields.UNKNOWN, getOutputPath( "unknown-replace" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTabDelimitedFile( Fields.UNKNOWN, getOutputPath( "unknown-replace" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
