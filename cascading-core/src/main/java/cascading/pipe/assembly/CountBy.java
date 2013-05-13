@@ -37,7 +37,8 @@ import cascading.tuple.Tuples;
  * {@link cascading.operation.Aggregator} operation.
  * <p/>
  * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored. When counting
- * the occurrence of a single field, this is the same behavior as {@code select count(foo) ...}. If {@code include} is
+ * the occurrence of a single field (when {@code valueFields} is set on the constructor), this is the same behavior
+ * as {@code select count(foo) ...} in SQL. If {@code include} is
  * {@link Include#ONLY_NULLS} then only tuples will all null values will be counted.
  * <p/>
  * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
