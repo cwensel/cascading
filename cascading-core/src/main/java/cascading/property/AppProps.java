@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import static cascading.util.Util.join;
 
 /**
- * Class AppPros is a fluent helper for setting various application level properties that every
+ * Class AppProps is a fluent helper for setting various application level properties that every
  * {@link cascading.flow.Flow} may or may not be required to have set. These properties are typically passed to a Flow
  * via a {@link cascading.flow.FlowConnector}.
  * <p/>

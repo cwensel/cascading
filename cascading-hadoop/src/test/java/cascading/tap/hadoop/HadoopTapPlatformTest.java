@@ -522,17 +522,20 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Hfs sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputFileUpper );
 
     // create a CombinedHfs instance on these files
-    CombinedHfs source = new CombinedHfs( sourceLower, sourceUpper );
+    Tap source = new MultiSourceTap<Hfs, JobConf, RecordReader>( sourceLower, sourceUpper );
 
     FlowProcess<JobConf> process = getPlatform().getFlowProcess();
     JobConf conf = process.getConfigCopy();
+
+    // set the combine flag
+    conf.setBoolean( HfsProps.COMBINE_INPUT_FILES, true );
 
     // test the input format and the split
     source.sourceConfInit( process, conf );
 
     InputFormat inputFormat = conf.getInputFormat();
 
-    assertEquals( CombinedHfs.CombinedInputFormat.class, inputFormat.getClass() );
+    assertEquals( Hfs.CombinedInputFormat.class, inputFormat.getClass() );
     InputSplit[] splits = inputFormat.getSplits( conf, 1 );
 
     assertEquals( 1, splits.length );

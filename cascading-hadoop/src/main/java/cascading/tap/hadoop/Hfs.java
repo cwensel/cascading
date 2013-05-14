@@ -32,6 +32,7 @@ import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.type.FileType;
@@ -40,16 +41,23 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.util.Util;
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.lib.CombineFileInputFormat;
+import org.apache.hadoop.mapred.lib.CombineFileRecordReader;
+import org.apache.hadoop.mapred.lib.CombineFileSplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,20 +80,25 @@ import org.slf4j.LoggerFactory;
  * job jar is started, Tap so will force any MapReduce jobs reading or writing to {@code file://} resources to run in
  * Hadoop "local mode" so that the file can be read.
  * <p/>
- * To change this behavior, {@link #setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
+ * To change this behavior, {@link HfsProps#setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
+ * <p/>
+ * If enabled, Hfs will combine multiple small files into larger "splits". This is enabled by calling
+ * {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}.
  */
 public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
 
-  /** Field TEMPORARY_DIRECTORY */
-  public static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
-
-  /** Fields LOCAL_MODE_SCHEME * */
-  public static final String LOCAL_MODE_SCHEME = "cascading.hadoop.localmode.scheme";
+  /**
+   * Field TEMPORARY_DIRECTORY
+   *
+   * @deprecated see {@link HfsProps#TEMPORARY_DIRECTORY}
+   */
+  @Deprecated
+  public static final String TEMPORARY_DIRECTORY = HfsProps.TEMPORARY_DIRECTORY;
 
   /** Field stringPath */
   protected String stringPath;
@@ -101,10 +114,12 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    *
    * @param properties of type Map<Object,Object>
    * @param tempDir    of type String
+   * @deprecated see {@link HfsProps}
    */
+  @Deprecated
   public static void setTemporaryDirectory( Map<Object, Object> properties, String tempDir )
     {
-    properties.put( TEMPORARY_DIRECTORY, tempDir );
+    properties.put( HfsProps.TEMPORARY_DIRECTORY, tempDir );
     }
 
   /**
@@ -112,28 +127,22 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    *
    * @param properties of type Map<Object,Object>
    * @return a String or null if not set
+   * @deprecated see {@link HfsProps}
    */
+  @Deprecated
   public static String getTemporaryDirectory( Map<Object, Object> properties )
     {
-    return (String) properties.get( TEMPORARY_DIRECTORY );
-    }
-
-  /**
-   * Method setLocalModeScheme provides a means to change the scheme value used to detect when a
-   * MapReduce job should be run in Hadoop local mode. By default the value is {@code "file"}, set to
-   * {@code "none"} to disable entirely.
-   *
-   * @param properties of tyep Map<Object,Object>
-   * @param scheme     a String
-   */
-  public static void setLocalModeScheme( Map<Object, Object> properties, String scheme )
-    {
-    properties.put( LOCAL_MODE_SCHEME, scheme );
+    return (String) properties.get( HfsProps.TEMPORARY_DIRECTORY );
     }
 
   protected static String getLocalModeScheme( JobConf conf, String defaultValue )
     {
-    return conf.get( LOCAL_MODE_SCHEME, defaultValue );
+    return conf.get( HfsProps.LOCAL_MODE_SCHEME, defaultValue );
+    }
+
+  protected static boolean getUseCombinedInput( JobConf conf )
+    {
+    return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES, false );
     }
 
   protected Hfs()
@@ -370,6 +379,36 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
 
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
+
+    // use CombineFileInputFormat if that is enabled
+    handleCombineFileInputFormat( conf );
+    }
+
+  /**
+   * Based on the configuration, handles and sets {@link CombineFileInputFormat} as the input
+   * format.
+   */
+  private void handleCombineFileInputFormat( JobConf conf )
+    {
+    // if combining files, override the configuration to use CombineFileInputFormat
+    if( !getUseCombinedInput( conf ) )
+      return;
+
+    // get the prescribed individual input format from the underlying scheme so it can be used by CombinedInputFormat
+    String individualInputFormat = conf.get( "mapred.input.format.class" );
+
+    if( individualInputFormat == null )
+      throw new TapException( "input format is missing from the underlying scheme" );
+
+    if( individualInputFormat.equals( CombinedInputFormat.class.getName() ) &&
+      conf.get( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT ) == null )
+      throw new TapException( "the input format class is already the combined input format but the underlying input format is missing" );
+
+    // set the underlying individual input format
+    conf.set( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT, individualInputFormat );
+
+    // override the input format class
+    conf.setInputFormat( CombinedInputFormat.class );
     }
 
   @Override
@@ -566,7 +605,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
 
   public static Path getTempPath( JobConf conf )
     {
-    String tempDir = conf.get( TEMPORARY_DIRECTORY );
+    String tempDir = conf.get( HfsProps.TEMPORARY_DIRECTORY );
 
     if( tempDir == null )
       tempDir = conf.get( "hadoop.tmp.dir" );
@@ -597,5 +636,31 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       return;
 
     statuses = getFileSystem( conf ).listStatus( getPath() );
+    }
+
+  /** Combined input format that uses the underlying individual input format to combine multiple files into a single split. */
+  static class CombinedInputFormat extends CombineFileInputFormat implements Configurable
+    {
+    private Configuration conf;
+
+    public RecordReader getRecordReader( InputSplit split, JobConf job, Reporter reporter ) throws IOException
+      {
+      return new CombineFileRecordReader( job, (CombineFileSplit) split, reporter, CombineFileRecordReaderWrapper.class );
+      }
+
+    @Override
+    public void setConf( Configuration conf )
+      {
+      this.conf = conf;
+
+      // set the aliased property value, if zero, the super class will look up the hadoop property
+      setMaxSplitSize( conf.getLong( HfsProps.COMBINE_INPUT_FILES_SIZE_MAX, 0 ) );
+      }
+
+    @Override
+    public Configuration getConf()
+      {
+      return conf;
+      }
     }
   }

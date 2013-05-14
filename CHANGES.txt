@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.t.h.HfsProps to localize optional Hadoop HDFS specific properties, specifically provides properties for
+  enabling the combining of small files into larger splits.
+
+  Updated c.t.h.Hfs to allow for smaller files to be combined into fewer splits, thus fewer map tasks. @sjlee
+
   Updated c.p.SubAssembly to support setting local and step properties via the c.p.ConfigDef.
 
   Updated c.o.Buffer to allow implementations to disable nulling of non-grouping fields after the arguments iterator
@@ -11,9 +16,6 @@ Cascading Change Log
 
   Updated c.t.Fields to return appending value when calling Fields#append on Fields.NONE and optimized Fields#subtract
   when subtracting Fields.NONE.
-
-  Added c.t.h.CombinedHfs to allow for smaller files reachable by c.t.h.Hfs taps to be aggregated into fewer
-  splits, thus fewer map tasks. @sjlee
 
   Added c.f.AssemblyPlanner interface to allow for platform independent generative c.f.Flow planning.
 
