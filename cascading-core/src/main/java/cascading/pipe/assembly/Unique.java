@@ -394,6 +394,8 @@ public class Unique extends SubAssembly
   @ConstructorProperties({"name", "pipes", "uniqueFields", "include", "threshold"})
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
+    super( pipes );
+
     Pipe[] filters = new Pipe[ pipes.length ];
     FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold );
 

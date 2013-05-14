@@ -40,6 +40,7 @@ public class Retain extends SubAssembly
   @ConstructorProperties({"previous", "retainFields"})
   public Retain( Pipe previous, Fields retainFields )
     {
+    super( previous );
     setTails( new Each( previous, retainFields, new Identity(), Fields.RESULTS ) );
     }
   }

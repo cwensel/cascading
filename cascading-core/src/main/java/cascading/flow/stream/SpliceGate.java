@@ -28,6 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -80,8 +81,15 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     {
     this.splice = splice;
 
-    if( splice.hasConfigDef() )
-      flowProcess = new ElementFlowProcess( flowProcess, splice.getConfigDef() );
+    FlowElement element = splice;
+
+    while( element != null )
+      {
+      if( element.hasConfigDef() )
+        flowProcess = new ElementFlowProcess( flowProcess, element.getConfigDef() );
+
+      element = ( (Pipe) element ).getParent();
+      }
 
     this.flowProcess = flowProcess;
     }

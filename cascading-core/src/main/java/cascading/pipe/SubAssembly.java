@@ -25,8 +25,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import cascading.property.ConfigDef;
 import cascading.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Subclasses of SubAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
@@ -35,69 +36,30 @@ import cascading.util.Util;
  * That is, a typical SubAssembly subclass will accept a 'previous' Pipe instance, and a few
  * arguments for configuring the resulting sub-assembly.
  * <p/>
- * If the SubAssembly represents a split in the pipeline process,
- * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe...)}.
+ * The previous pipe (or pipes) must be passed on the super constructor, or set via {@link #setPrevious(Pipe...)}. This
+ * allows the current SubAssembly to become the parent of any Pipe instances between the previous and the tails,
+ * exclusive of the previous, and inclusive of the tails.
+ * <p/>
+ * Subsequently all tail Pipes must be set via the {@link #setTails(Pipe...)} method.
+ * <p/>
+ * Note if the SubAssembly represents a split in the pipeline process,
+ * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe...)}. It is up the the developer to
+ * provide any other access to the tails so they may be chained into any subsequent Pipes.
+ * <p/>
+ * Any {@link cascading.property.ConfigDef} values on this SubAssembly will be honored by child Pipe instances via the
+ * {@link cascading.pipe.Pipe#getParent()} back link described above.
  */
 public abstract class SubAssembly extends Pipe
   {
-  /** Field assembly */
+  private static final Logger LOG = LoggerFactory.getLogger( SubAssembly.class );
+
+  /** Field previous */
+  private Pipe[] previous; // actual previous pipes instances
+  /** Field tails */
   private Pipe[] tails;
 
   /**
-   * Must be called by subclasses to set the final end points of the assembly the subclass represents.
-   *
-   * @param tails of type Pipe
-   */
-  protected void setTails( Pipe... tails )
-    {
-    this.tails = tails;
-    }
-
-  /**
-   * Method getTails returns all the tails of this PipeAssembly object. These values are set by {@link #setTails(Pipe...)}.
-   *
-   * @return the tails (type Pipe[]) of this PipeAssembly object.
-   */
-  public Pipe[] getTails()
-    {
-    return getPrevious(); // just returns a clone of tails
-    }
-
-  /**
-   * Method getTailNames returns the tailNames of this PipeAssembly object.
-   *
-   * @return the tailNames (type String[]) of this PipeAssembly object.
-   */
-  public String[] getTailNames()
-    {
-    if( tails == null )
-      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
-
-    String[] names = new String[ tails.length ];
-
-    for( int i = 0; i < tails.length; i++ )
-      names[ i ] = tails[ i ].getName();
-
-    return names;
-    }
-
-  @Override
-  public String getName()
-    {
-    return Util.join( getTailNames(), "+" );
-    }
-
-  @Override
-  public Pipe[] getPrevious()
-    {
-    if( tails == null )
-      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
-
-    return Arrays.copyOf( tails, tails.length );
-    }
-
-  /**
-   * Is responsible for unwinding nested PipeAssembly instances.
+   * Is responsible for unwinding nested SubAssembly instances.
    *
    * @param tails of type Pipe[]
    * @return a Pipe[]
@@ -117,15 +79,114 @@ public abstract class SubAssembly extends Pipe
     return previous.toArray( new Pipe[ previous.size() ] );
     }
 
-  @Override
-  public ConfigDef getStepConfigDef()
+  protected SubAssembly()
     {
-    throw new UnsupportedOperationException( "sub-assembly step config def is unsupported" );
+    }
+
+  protected SubAssembly( Pipe... previous )
+    {
+    setPrevious( previous );
+    }
+
+  protected SubAssembly( String name, Pipe[] previous )
+    {
+    super( name );
+    setPrevious( previous );
+    }
+
+  /**
+   * Must be called by subclasses to set the start end points of the assembly the subclass represents.
+   *
+   * @param previous of type Pipe
+   */
+  protected void setPrevious( Pipe... previous )
+    {
+    this.previous = previous;
+    }
+
+  /**
+   * Must be called by subclasses to set the final end points of the assembly the subclass represents.
+   *
+   * @param tails of type Pipe
+   */
+  protected void setTails( Pipe... tails )
+    {
+    this.tails = tails;
+
+    if( previous == null )
+      {
+      LOG.warn( "previous pipes not set via setPrevious or constructor" );
+      return;
+      }
+
+    Set<Pipe> previousSet = new HashSet<Pipe>();
+
+    Collections.addAll( previousSet, previous );
+
+    setParent( previousSet, tails );
+    }
+
+  private void setParent( Set<Pipe> previousSet, Pipe[] tails )
+    {
+    for( Pipe tail : tails )
+      {
+      if( previousSet.contains( tail ) )
+        continue;
+
+      tail.setParent( this );
+
+      if( tail instanceof SubAssembly )
+        setParent( previousSet, ( (SubAssembly) tail ).previous );
+      else
+        setParent( previousSet, tail.getPrevious() );
+      }
+    }
+
+  /**
+   * Method getTails returns all the tails of this SubAssembly object. These values are set by {@link #setTails(Pipe...)}.
+   *
+   * @return the tails (type Pipe[]) of this SubAssembly object.
+   */
+  public Pipe[] getTails()
+    {
+    return getPrevious(); // just returns a clone of tails
+    }
+
+  /**
+   * Method getTailNames returns the tailNames of this SubAssembly object.
+   *
+   * @return the tailNames (type String[]) of this SubAssembly object.
+   */
+  public String[] getTailNames()
+    {
+    if( tails == null )
+      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
+
+    String[] names = new String[ tails.length ];
+
+    for( int i = 0; i < tails.length; i++ )
+      names[ i ] = tails[ i ].getName();
+
+    return names;
     }
 
   @Override
-  public ConfigDef getConfigDef()
+  public String getName()
     {
-    throw new UnsupportedOperationException( "sub-assembly config def is unsupported" );
+    if( name != null )
+      return name;
+
+    return Util.join( getTailNames(), "+" );
+    }
+
+  @Override
+  public Pipe[] getPrevious()
+    {
+    // returns the semantically equivalent to Pipe#previous to simplify logic in the planner
+    // SubAssemblies are really aliases for their tails
+    if( tails == null )
+      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called after the sub-assembly is assembled" ) );
+
+    return Arrays.copyOf( tails, tails.length );
     }
   }

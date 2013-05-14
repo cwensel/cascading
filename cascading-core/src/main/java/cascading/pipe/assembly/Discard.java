@@ -40,6 +40,8 @@ public class Discard extends SubAssembly
   @ConstructorProperties({"previous", "discardFields"})
   public Discard( Pipe previous, Fields discardFields )
     {
+    super( previous );
+
     setTails( new Each( previous, discardFields, new NoOp(), Fields.SWAP ) );
     }
   }

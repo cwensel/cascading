@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.SubAssembly to support setting local and step properties via the c.p.ConfigDef.
+
   Updated c.o.Buffer to allow implementations to disable nulling of non-grouping fields after the arguments iterator
   has completed. This simplifies appending aggregated fields to the incoming tuple stream.
 

@@ -49,6 +49,8 @@ public class Rename extends SubAssembly
   @ConstructorProperties({"previous", "fromFields", "toFields"})
   public Rename( Pipe previous, Fields fromFields, Fields toFields )
     {
+    super( previous );
+
     if( fromFields.isDefined() && fromFields.size() != toFields.size() )
       throw new IllegalArgumentException( "fields arguments must be same size, from: " + fromFields.printVerbose() + " to: " + toFields.printVerbose() );
 

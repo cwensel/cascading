@@ -691,8 +691,16 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         {
         FlowElement element = iterator.next();
 
-        if( element.hasStepConfigDef() )
-          element.getStepConfigDef().apply( mode, setter );
+        while( element != null )
+          {
+          if( element.hasStepConfigDef() )
+            element.getStepConfigDef().apply( mode, setter );
+
+          if( element instanceof Pipe )
+            element = ( (Pipe) element ).getParent();
+          else
+            element = null;
+          }
         }
       }
     }

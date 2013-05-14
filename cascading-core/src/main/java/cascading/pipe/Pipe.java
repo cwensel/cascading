@@ -61,9 +61,11 @@ public class Pipe implements FlowElement, Serializable
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
   /** Field name */
-  private String name;
+  protected String name;
   /** Field previous */
   protected Pipe previous;
+  /** Field parent */
+  protected Pipe parent;
 
   protected ConfigDef configDef;
 
@@ -240,6 +242,22 @@ public class Pipe implements FlowElement, Serializable
       return new Pipe[ 0 ];
 
     return new Pipe[]{previous};
+    }
+
+  protected void setParent( Pipe parent )
+    {
+    this.parent = parent;
+    }
+
+  /**
+   * Returns the enclosing parent Pipe instance, if any. A parent is typically a {@link SubAssembly} that wraps
+   * this instance.
+   *
+   * @return of type Pipe
+   */
+  public Pipe getParent()
+    {
+    return parent;
     }
 
   /**

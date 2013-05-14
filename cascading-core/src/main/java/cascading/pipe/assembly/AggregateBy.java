@@ -465,6 +465,8 @@ public class AggregateBy extends SubAssembly
 
   protected void initialize( Fields groupingFields, Pipe[] pipes, Fields[] argumentFields, Functor[] functors, Aggregator[] aggregators )
     {
+    setPrevious( pipes );
+
     this.groupingFields = groupingFields;
     this.argumentFields = argumentFields;
     this.functors = functors;

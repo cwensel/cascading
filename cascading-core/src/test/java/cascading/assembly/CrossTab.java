@@ -51,6 +51,8 @@ public class CrossTab extends SubAssembly
    */
   public CrossTab( Pipe previous, Fields argumentFieldSelector, CrossTabOperation crossTabOperation, Fields fieldDeclaration )
     {
+    super( previous );
+
     // assert size of input
     Pipe pipe = new Each( previous, argumentFieldSelector, new Identity( new Fields( "n", "l", "v" ) ) );
 

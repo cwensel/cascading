@@ -33,6 +33,7 @@ import cascading.operation.Insert;
 import cascading.operation.OperationCall;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.pipe.SubAssembly;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -55,7 +56,6 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
   public static class IterateInsert extends BaseOperation implements Function
     {
-
     public IterateInsert( Fields fieldDeclaration )
       {
       super( fieldDeclaration );
@@ -188,6 +188,49 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
     sink.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
     sink.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    assertTrue( flow.resourceExists( sink ) );
+    }
+
+  public static class ConfigSubAssembly extends SubAssembly
+    {
+    public ConfigSubAssembly( Pipe pipe )
+      {
+      super( pipe );
+
+      pipe = new Each( pipe, new IterateInsert( new Fields( "value" ) ), Fields.ALL );
+
+      setTails( pipe );
+      }
+    }
+
+  @Test
+  public void testSubAssemblyConfigDef() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileNums20 );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileNums20 );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new ConfigSubAssembly( pipe );
+
+    pipe.getConfigDef().setProperty( Mode.DEFAULT, "default", "pipe-default" );
+
+    // steps on above value
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "default", "process-default" );
+
+    pipe.getConfigDef().setProperty( Mode.DEFAULT, "replace", "pipe-default" );
+    pipe.getConfigDef().setProperty( Mode.REPLACE, "replace", "pipe-replace" );
+
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
+    pipe.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "subassembly-configdef" ), SinkMode.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 

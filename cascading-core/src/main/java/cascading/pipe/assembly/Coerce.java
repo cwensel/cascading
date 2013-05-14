@@ -51,6 +51,8 @@ public class Coerce extends SubAssembly
   @ConstructorProperties({"previous", "types"})
   public Coerce( Pipe previous, Class... types )
     {
+    super( previous );
+
     setTails( new Each( previous, new Identity( types ) ) );
     }
 
@@ -66,6 +68,8 @@ public class Coerce extends SubAssembly
   @ConstructorProperties({"previous", "coerceFields", "types"})
   public Coerce( Pipe previous, Fields coerceFields, Class... types )
     {
+    super( previous );
+
     setTails( new Each( previous, coerceFields, new Identity( types ), Fields.REPLACE ) );
     }
 
@@ -83,6 +87,8 @@ public class Coerce extends SubAssembly
   @ConstructorProperties({"previous", "coerceFields"})
   public Coerce( Pipe previous, Fields coerceFields )
     {
+    super( previous );
+
     setTails( new Each( previous, coerceFields, new Identity( coerceFields ), Fields.REPLACE ) );
 
     if( coerceFields.getTypes().length == 0 )
