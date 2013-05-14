@@ -80,6 +80,12 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   @Override
+  public String getFullIdentifier( Properties conf )
+    {
+    return new File( getIdentifier() ).getAbsolutePath();
+    }
+
+  @Override
   public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, InputStream input ) throws IOException
     {
     if( input == null )
