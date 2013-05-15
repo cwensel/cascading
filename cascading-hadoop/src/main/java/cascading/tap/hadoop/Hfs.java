@@ -84,8 +84,11 @@ import org.slf4j.LoggerFactory;
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
  * <p/>
- * If enabled, Hfs will combine multiple small files into larger "splits". This is enabled by calling
- * {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}.
+ * Hfs can optionally combine multiple small files (or a series of small "blocks") into larger "splits". This reduces
+ * the number of resulting map tasks created by Hadoop and can improve application performance.
+ * <p/>
+ * This is enabled by calling {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}. By default, merging
+ * or combining splits into large ones is disabled.
  */
 public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>
   {

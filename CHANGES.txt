@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added ability to pass System level properties into platform level property sets to override defaults during testing.
+
   Fixed issue where c.t.l.FileTap#getFullIdentifier() was not returning the fully qualified path.
 
   Added c.t.h.HfsProps to localize optional Hadoop HDFS specific properties, specifically provides properties for

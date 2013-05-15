@@ -143,11 +143,16 @@ public class HadoopPlatform extends TestPlatform
     jobConf.setNumMapTasks( numMapTasks );
     jobConf.setNumReduceTasks( numReduceTasks );
 
-    if( logger != null )
-      properties.put( "log4j.logger", logger );
+    Map<Object, Object> globalProperties = getGlobalProperties();
 
-    FlowProps.setJobPollingInterval( properties, 10 ); // should speed up tests
-    HadoopPlanner.copyJobConf( properties, jobConf );
+    if( logger != null )
+      globalProperties.put( "log4j.logger", logger );
+
+    FlowProps.setJobPollingInterval( globalProperties, 10 ); // should speed up tests
+
+    HadoopPlanner.copyProperties( jobConf, globalProperties ); // copy any external properties
+
+    HadoopPlanner.copyJobConf( properties, jobConf ); // put all properties on the jobconf
     }
 
   @Override

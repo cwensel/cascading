@@ -110,24 +110,35 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     {
     JobConf conf = new JobConf();
 
+    copyProperties( conf, properties );
+
+    return conf;
+    }
+
+  /**
+   * Method copyProperties adds the given Map values to the given JobConf object.
+   *
+   * @param jobConf    of type JobConf
+   * @param properties of type Map
+   */
+  public static void copyProperties( JobConf jobConf, Map<Object, Object> properties )
+    {
     if( properties instanceof Properties )
       {
       Properties props = (Properties) properties;
       Set<String> keys = props.stringPropertyNames();
 
       for( String key : keys )
-        conf.set( key, props.getProperty( key ) );
+        jobConf.set( key, props.getProperty( key ) );
       }
     else
       {
       for( Map.Entry<Object, Object> entry : properties.entrySet() )
         {
         if( entry.getValue() != null )
-          conf.set( entry.getKey().toString(), entry.getValue().toString() );
+          jobConf.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
-
-    return conf;
     }
 
   /**

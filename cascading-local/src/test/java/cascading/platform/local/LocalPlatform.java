@@ -52,6 +52,10 @@ public class LocalPlatform extends TestPlatform
   {
   private Properties properties = new Properties();
 
+  {
+  properties.putAll( getGlobalProperties() );
+  }
+
   @Override
   public void setUp() throws IOException
     {

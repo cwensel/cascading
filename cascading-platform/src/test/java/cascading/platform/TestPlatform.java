@@ -22,6 +22,7 @@ package cascading.platform;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
@@ -31,18 +32,46 @@ import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class TestPlatform
   {
+  private static final Logger LOG = LoggerFactory.getLogger( TestPlatform.class );
+
   public static final String CLUSTER_TESTING_PROPERTY = "test.cluster.enabled";
 
   private boolean useCluster = false;
   private boolean enableCluster = true;
   private int numMappers = 0;
   private int numReducers = 0;
+
+  /**
+   * Method getGlobalProperties fetches all "platform." prefixed system properties.
+   * <p/>
+   * Sub-classes of TestPlatform should use these values as overrides before returning from
+   * {@link #getProperties()}.
+   *
+   * @return a Map of properties
+   */
+  public static Map<Object, Object> getGlobalProperties()
+    {
+    HashMap<Object, Object> properties = new HashMap<Object, Object>();
+
+    for( String propertyName : System.getProperties().stringPropertyNames() )
+      {
+      if( propertyName.startsWith( "platform." ) )
+        properties.put( propertyName.substring( "platform.".length() ), System.getProperty( propertyName ) );
+      }
+
+    if( !properties.isEmpty() )
+      LOG.info( "platform property overrides: ", properties );
+
+    return properties;
+    }
 
   protected TestPlatform()
     {
