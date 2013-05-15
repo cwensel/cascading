@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Removed Hadoop oro dependency from build and test runtime classpaths to stop transient build failures.
+
   Added ability to pass System level properties into platform level property sets to override defaults during testing.
 
   Fixed issue where c.t.l.FileTap#getFullIdentifier() was not returning the fully qualified path.

@@ -34,11 +34,14 @@ dependencies {
   providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
     exclude group: 'ant'
     exclude group: 'junit'
+    exclude group: 'oro' // causes transient build maven failures, ftw
   }
 
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
-  testCompile group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion
+  testCompile (group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion) {
+    exclude group: 'oro' // causes transient build maven failures, ftw
+  }
 }
 
 if( hadoopVersion.startsWith( "1.0." ) )
