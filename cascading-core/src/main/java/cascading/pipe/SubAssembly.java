@@ -115,30 +115,40 @@ public abstract class SubAssembly extends Pipe
 
     if( previous == null )
       {
-      LOG.warn( "previous pipes not set via setPrevious or constructor" );
+      LOG.warn( "previous pipes not set via setPrevious or constructor on: {}", this );
       return;
       }
 
-    Set<Pipe> previousSet = new HashSet<Pipe>();
+    Set<Pipe> stopSet = new HashSet<Pipe>();
 
-    Collections.addAll( previousSet, previous );
+    Collections.addAll( stopSet, previous );
 
-    setParent( previousSet, tails );
+    setParent( stopSet, tails );
     }
 
-  private void setParent( Set<Pipe> previousSet, Pipe[] tails )
+  private void setParent( Set<Pipe> stopSet, Pipe[] tails )
     {
+    if( tails == null )
+      return;
+
     for( Pipe tail : tails )
       {
-      if( previousSet.contains( tail ) )
+      if( stopSet.contains( tail ) )
         continue;
 
       tail.setParent( this );
 
+      Pipe[] current;
+
       if( tail instanceof SubAssembly )
-        setParent( previousSet, ( (SubAssembly) tail ).previous );
+        current = ( (SubAssembly) tail ).previous;
       else
-        setParent( previousSet, tail.getPrevious() );
+        current = tail.getPrevious();
+
+      if( current == null && tail instanceof SubAssembly )
+        LOG.warn( "previous pipes not set via setPrevious or constructor on: {}", tail );
+
+      setParent( stopSet, current );
       }
     }
 
