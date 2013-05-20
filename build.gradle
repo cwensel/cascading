@@ -206,7 +206,7 @@ task javadocAll( type: Javadoc ) {
     links = [
             'http://docs.oracle.com/javase/6/docs/api/',
             'http://dist.codehaus.org/janino/javadoc/',
-            'http://hadoop.apache.org/common/docs/r1.0.3/api/',
+            'http://hadoop.apache.org/common/docs/r1.0.4/api/',
             'http://junit.sourceforge.net/javadoc/'
     ]
   }
