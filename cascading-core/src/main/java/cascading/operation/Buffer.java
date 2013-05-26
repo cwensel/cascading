@@ -37,7 +37,7 @@ import cascading.flow.FlowProcess;
  * inserted into the middle of the group values. For example, consider a stream of timestamps. A Buffer could
  * be used to add missing entries, or to calculate running or moving averages over a smaller "window" within the grouping.
  * <p/>
- * By default, if a result is emitted from the Buffer before and after the argumentsIterator is started or after it
+ * By default, if a result is emitted from the Buffer before the argumentsIterator is started or after it is
  * completed ({@code argumentsIterator.hasNext() == false}), non-grouping values are forced to null (to allow for header
  * and footer tuple results).
  * <p/>
