@@ -518,15 +518,27 @@ public class Util
   public static String captureDebugTrace( Class type )
     {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+    Package packageName = type.getPackage();
+    String typeName = type.getName();
 
-    for( int i = 3; i < stackTrace.length; i++ )
+    boolean skip = true;
+
+    for( StackTraceElement stackTraceElement : stackTrace )
       {
-      StackTraceElement stackTraceElement = stackTrace[ i ];
+      String className = stackTraceElement.getClassName();
 
-      Package aPackage = type.getPackage();
-
-      if( aPackage != null && stackTraceElement.getClassName().startsWith( aPackage.getName() ) )
+      if( skip )
+        {
+        skip = !className.equals( typeName );
         continue;
+        }
+      else
+        {
+        if( packageName != null && stackTraceElement.getClassName().equals( typeName ) )
+          {
+          continue;
+          }
+        }
 
       return stackTraceElement.toString();
       }
