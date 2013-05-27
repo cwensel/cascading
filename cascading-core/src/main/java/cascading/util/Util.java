@@ -64,10 +64,11 @@ public class Util
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
   private static final String HEXES = "0123456789ABCDEF";
 
-  /** This method creates a globally unique HEX value seeded by the given string. */
   public static synchronized String createUniqueID()
     {
-    return createID( UUID.randomUUID().toString() );
+    // creates a cryptographically secure random value
+    String value = UUID.randomUUID().toString();
+    return value.toUpperCase().replaceAll( "-", "" );
     }
 
   public static String createID( String rawID )
@@ -75,6 +76,12 @@ public class Util
     return createID( rawID.getBytes() );
     }
 
+  /**
+   * Method CreateID returns a HEX hash of the given bytes with length 32 characters long.
+   *
+   * @param bytes the bytes
+   * @return string
+   */
   public static String createID( byte[] bytes )
     {
     try

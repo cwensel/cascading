@@ -71,8 +71,18 @@ public class Pipe implements FlowElement, Serializable
 
   protected ConfigDef stepConfigDef;
 
+  /** Field id */
+  private String id;
   /** Field trace */
   private final String trace = Util.captureDebugTrace( getClass() );
+
+  public static synchronized String id( Pipe pipe )
+    {
+    if( pipe.id == null )
+      pipe.id = Util.createUniqueID();
+
+    return pipe.id;
+    }
 
   /**
    * Convenience method to create an array of Pipe instances.

@@ -350,14 +350,6 @@ public class Each extends Operator
 
   // FIELDS
 
-  private Fields getFieldsFor( Scope incomingScope )
-    {
-    if( incomingScope.isEvery() )
-      return incomingScope.getOutGroupingFields();
-    else
-      return incomingScope.getOutValuesFields();
-    }
-
   @Override
   public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {

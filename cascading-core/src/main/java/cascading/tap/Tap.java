@@ -73,6 +73,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
 
   private ConfigDef processConfigDef;
 
+  /** Field id */
+  private String id = null;
   /** Field trace */
   private final String trace = Util.captureDebugTrace( getClass() );
 
@@ -86,8 +88,6 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     {
     return taps;
     }
-
-  private String id = null;
 
   /**
    * Creates and returns a unique ID for the given Tap, this value is cached and may be used to uniquely identify
