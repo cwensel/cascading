@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PlatformRunner extends ParentRunner<Runner>
   {
-  public static final String PLATFORM_INCLUDES = "platform.includes";
+  public static final String PLATFORM_INCLUDES = "test.platform.includes";
   public static final String PLATFORM_RESOURCE = "cascading/platform/platform.properties";
   public static final String PLATFORM_CLASSNAME = "platform.classname";
 

@@ -58,7 +58,7 @@ Cascading Change Log
   Added c.o.e.ScriptFunction, ScriptTupleFunction, and c.o.e.ScriptFilter operations to allow for more expressive
   Java scripts.
 
-  Added "platform.includes" system property so tests can be limited to specified platforms.
+  Added "test.platform.includes" system property so tests can be limited to specified platforms.
 
   Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively. If the given
   result fields declare a type, the result will be coerced to that type.
