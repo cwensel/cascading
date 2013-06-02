@@ -33,7 +33,7 @@ import cascading.tuple.Fields;
  * where the left-most side will not block (accumulate into memory) in order to complete the join, but the right-most
  * sides will. See below...
  * <p/>
- * No aggregations can be performed with a HashJoin pipe as there is no guarantees all value will be associated with
+ * No aggregations can be performed with a HashJoin pipe as there is no guarantee all value will be associated with
  * a given grouping key. In fact, an Aggregator would see the same grouping many times with a partial set of values.
  * <p/>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names

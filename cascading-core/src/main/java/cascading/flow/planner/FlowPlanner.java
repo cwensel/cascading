@@ -37,9 +37,11 @@ import cascading.flow.FlowElement;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Checkpoint;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.Group;
+import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.OperatorException;
@@ -466,14 +468,13 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
         for( FlowElement flowElement : flowElements )
           {
-          if( flowElement instanceof Each || flowElement instanceof Checkpoint )
-            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
-
-          if( flowElement instanceof Every )
+          if( flowElement instanceof Every || flowElement.getClass() == Pipe.class )
             continue;
 
-          if( flowElement instanceof Group )
+          if( flowElement instanceof GroupBy || flowElement instanceof CoGroup )
             break;
+
+          throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
           }
         }
       }
