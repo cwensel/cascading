@@ -82,7 +82,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public String getFullIdentifier( Properties conf )
     {
-    return new File( getIdentifier() ).getAbsolutePath();
+    return new File( getIdentifier() ).getAbsoluteFile().toURI().toString();
     }
 
   @Override
