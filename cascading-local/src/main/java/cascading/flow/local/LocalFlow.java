@@ -44,6 +44,8 @@ public class LocalFlow extends BaseFlow<Properties>
   public LocalFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Properties config, FlowDef flowDef )
     {
     super( platformInfo, properties, config, flowDef );
+
+    initFromProperties( properties );
     }
 
   @Override
@@ -86,12 +88,6 @@ public class LocalFlow extends BaseFlow<Properties>
   public String getProperty( String key )
     {
     return config.getProperty( key );
-    }
-
-  @Override
-  protected void initFromProperties( Map<Object, Object> properties )
-    {
-    super.initFromProperties( properties );
     }
 
   @Override

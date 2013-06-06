@@ -156,7 +156,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.name = name;
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
-    initFromProperties( properties );
 
     this.flowStats = createPrepareFlowStats(); // must be last
     }
@@ -174,7 +173,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     setSinks( flowDef.getSinksCopy() );
     setTraps( flowDef.getTrapsCopy() );
     setCheckpoints( flowDef.getCheckpointsCopy() );
-    initFromProperties( properties );
     initFromTaps();
 
     retrieveSourceFields();

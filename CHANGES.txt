@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated error messages in c.t.Fields, delegate property initialization to c.f.Flow sub-classes. @fderose
+
   Removed Hadoop oro dependency from build and test runtime classpaths to stop transient build failures.
 
   Added ability to pass System level properties into platform level property sets to override defaults during testing.

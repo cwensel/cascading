@@ -786,11 +786,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       {
       Comparable field = fields[ i ];
 
-      if( field == null )
-        throw new IllegalArgumentException( "field name or position may not be null" );
-
-      if( field instanceof Fields )
-        throw new IllegalArgumentException( "may not nest Fields instances within a Fields instance" );
+      if( !( field instanceof String || field instanceof Integer ) )
+        throw new IllegalArgumentException( String.format( "invalid field type (%s); must be String or Integer: ", field ) );
 
       if( names.contains( field ) )
         throw new IllegalArgumentException( "duplicate field name found: " + field );
