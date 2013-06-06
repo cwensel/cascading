@@ -694,6 +694,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       {
       Comparable field = fields[ i ];
 
+      if (!(field instanceof String || field instanceof Integer )) {
+        throw new IllegalArgumentException( String.format( "invalid field type (%s); must be String or Integer: ", field ));
+      }
+
       if( field == null )
         throw new IllegalArgumentException( "field name or position may not be null" );
 

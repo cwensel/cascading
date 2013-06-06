@@ -81,11 +81,13 @@ public class HadoopFlow extends BaseFlow<JobConf>
   protected HadoopFlow( PlatformInfo platformInfo, Map<Object, Object> properties, JobConf jobConf, String name )
     {
     super( platformInfo, properties, jobConf, name );
+    initFromProperties(properties);
     }
 
   public HadoopFlow( PlatformInfo platformInfo, Map<Object, Object> properties, JobConf jobConf, FlowDef flowDef )
     {
     super( platformInfo, properties, jobConf, flowDef );
+    initFromProperties(properties);
     }
 
   protected void initFromProperties( Map<Object, Object> properties )
