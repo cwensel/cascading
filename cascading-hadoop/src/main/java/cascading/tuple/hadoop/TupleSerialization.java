@@ -193,7 +193,7 @@ public class TupleSerialization extends Configured implements Serialization
     if( typeName == null || typeName.isEmpty() )
       return null;
 
-    LOG.info( "using default comparator: {}", typeName );
+    LOG.debug( "using default comparator: {}", typeName );
 
     try
       {
@@ -291,7 +291,7 @@ public class TupleSerialization extends Configured implements Serialization
 
     String serializationsString = getSerializations( getConf() );
 
-    LOG.info( "using hadoop serializations from the job conf: {} ", serializationsString );
+    LOG.debug( "using hadoop serializations from the job conf: {} ", serializationsString );
 
     if( serializationsString == null )
       return;
@@ -347,7 +347,7 @@ public class TupleSerialization extends Configured implements Serialization
       throw new IllegalStateException( "duplicate serialization classname: " + className + " for token: " + token + " on serialization: " + type.getName() );
       }
 
-    LOG.info( "adding serialization token: {}, for classname: {}", token, className );
+    LOG.debug( "adding serialization token: {}, for classname: {}", token, className );
 
     tokenClassesMap.put( token, className );
     classesTokensMap.put( className, token );
