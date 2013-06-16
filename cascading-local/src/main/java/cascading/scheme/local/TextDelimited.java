@@ -93,6 +93,17 @@ import cascading.tuple.util.TupleViews;
  * <p/>
  * To override field and line parsing behaviors, sub-class {@link DelimitedParser} or provide a
  * {@link cascading.scheme.util.FieldTypeResolver} implementation.
+ * <p/>
+ * Note that there should be no expectation that TextDelimited, or specifically {@link DelimitedParser}, can handle
+ * all delimited and quoted combinations reliably. Attempting to do so would impair its performance and maintainability.
+ * <p/>
+ * Further, it can be safely said any corrupted files will not be supported for obvious reasons. Corrupted files may
+ * result in exceptions or could cause edge cases in the underlying java regular expression engine.
+ * <p/>
+ * A large part of Cascading was designed to help users cleans data. Thus the recommendation is to create Flows that
+ * are responsible for cleansing large data-sets when faced with the problem
+ * <p/>
+ * DelimitedParser maybe sub-classed and extended if necessary.
  *
  * @see TextLine
  */
