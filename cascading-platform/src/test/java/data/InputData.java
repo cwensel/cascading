@@ -68,4 +68,7 @@ public interface InputData
   String testDelimitedExtraField = inputPath + "delimited-extra-field.txt";
 
   String inputFileComments = inputPath + "comments+lower.txt";
+
+  String testClasspathJar = inputPath + "test-classpath.jar";
+  String testClasspathJarContents = "apache.10.txt";
   }

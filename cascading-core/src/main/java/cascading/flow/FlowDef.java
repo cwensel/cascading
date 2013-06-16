@@ -49,6 +49,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   protected Map<String, Tap> traps = new HashMap<String, Tap>();
   protected Map<String, Tap> checkpoints = new HashMap<String, Tap>();
 
+  protected List<String> classPath = new ArrayList<String>();
   protected List<Pipe> tails = new ArrayList<Pipe>();
   protected List<AssemblyPlanner> assemblyPlanners = new ArrayList<AssemblyPlanner>();
 
@@ -502,5 +503,27 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   public String getRunID()
     {
     return runID;
+    }
+
+  public List<String> getClassPath()
+    {
+    return classPath;
+    }
+
+  /**
+   * Adds each given artifact to the classpath the assembly will execute under allowing
+   * {@link cascading.pipe.Operator}s to dynamically load classes and resources from a {@link ClassLoader}.
+   *
+   * @param artifact a jar or other file String path
+   * @return FlowDef
+   */
+  public FlowDef addToClassPath( String artifact )
+    {
+    if( artifact == null || artifact.isEmpty() )
+      return this;
+
+    classPath.add( artifact );
+
+    return this;
     }
   }

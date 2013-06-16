@@ -35,6 +35,7 @@ import cascading.flow.planner.PlatformInfo;
 import cascading.property.PropertyUtil;
 import cascading.tap.hadoop.io.HttpFileSystem;
 import cascading.util.ShutdownUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 
 import static cascading.flow.FlowProps.MAX_CONCURRENT_STEPS;
@@ -44,6 +45,12 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
  * Class HadoopFlow is the Apache Hadoop specific implementation of a {@link Flow}.
  * <p/>
  * HadoopFlow must be created through a {@link HadoopFlowConnector} instance.
+ * <p/>
+ * If classpath paths are provided on the {@link FlowDef}, the Hadoop distributed cache mechanism will be used
+ * to augment the remote classpath.
+ * <p/>
+ * Any path elements that are relative will be uploaded to HDFS, and the HDFS URI will be used on the JobConf. Note
+ * all paths are added as "files" to the JobConf, not archives, so they aren't needlessly uncompressed cluster side.
  *
  * @see HadoopFlowConnector
  */
@@ -57,6 +64,8 @@ public class HadoopFlow extends BaseFlow<JobConf>
   private transient JobConf jobConf;
   /** Field preserveTemporaryFiles */
   private boolean preserveTemporaryFiles = false;
+  /** Field syncPaths */
+  private transient Map<Path, Path> syncPaths;
 
   protected HadoopFlow()
     {
@@ -106,9 +115,11 @@ public class HadoopFlow extends BaseFlow<JobConf>
     if( parentConfig == null ) // this is ok, getJobConf will pass a default parent in
       return;
 
-    this.jobConf = new JobConf( parentConfig ); // prevent local values from being shared
-    this.jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
-    this.jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
+    jobConf = new JobConf( parentConfig ); // prevent local values from being shared
+    jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
+    jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
+
+    syncPaths = HadoopUtil.addToClassPath( jobConf, getClassPath() );
     }
 
   @Override
@@ -180,6 +191,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     {
     try
       {
+      copyToDistributedCache();
       deleteSinksIfReplace();
       deleteTrapsIfReplace();
       deleteCheckpointsIfReplace();
@@ -190,6 +202,11 @@ public class HadoopFlow extends BaseFlow<JobConf>
       }
 
     registerHadoopShutdownHook( this );
+    }
+
+  private void copyToDistributedCache()
+    {
+    HadoopUtil.syncPaths( jobConf, syncPaths );
     }
 
   @Override

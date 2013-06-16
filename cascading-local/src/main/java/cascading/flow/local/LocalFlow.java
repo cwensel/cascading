@@ -20,7 +20,11 @@
 
 package cascading.flow.local;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Map;
 import java.util.Properties;
 
@@ -34,6 +38,9 @@ import cascading.flow.planner.PlatformInfo;
  * Class LocalFlow is the local mode specific implementation of a {@link cascading.flow.Flow}.
  * <p/>
  * LocalFlow must be created through a {@link LocalFlowConnector} instance.
+ * <p/>
+ * If classpath paths are provided on the {@link FlowDef}, the context classloader used to internally urn the current
+ * Flow will be swapped out with an URLClassLoader pointing to each element.
  *
  * @see LocalFlowConnector
  */
@@ -108,6 +115,44 @@ public class LocalFlow extends BaseFlow<Properties>
       {
       throw new FlowException( "unable to delete sinks", exception );
       }
+    }
+
+  @Override
+  protected Thread createFlowThread( String threadName )
+    {
+    Thread flowThread = super.createFlowThread( threadName );
+
+    flowThread.setContextClassLoader( createClassPathClassloader( flowThread.getContextClassLoader() ) );
+
+    return flowThread;
+    }
+
+  private ClassLoader createClassPathClassloader( ClassLoader classLoader )
+    {
+    if( getClassPath() == null || getClassPath().isEmpty() )
+      return classLoader;
+
+    URL[] urls = new URL[ getClassPath().size() ];
+
+    for( int i = 0; i < getClassPath().size(); i++ )
+      {
+      String path = getClassPath().get( i );
+      File file = new File( path ).getAbsoluteFile();
+
+      if( !file.exists() )
+        throw new FlowException( "path does not exist: " + file );
+
+      try
+        {
+        urls[ i ] = file.toURI().toURL();
+        }
+      catch( MalformedURLException exception )
+        {
+        throw new FlowException( "bad path: " + file, exception );
+        }
+      }
+
+    return new URLClassLoader( urls, classLoader );
     }
 
   @Override

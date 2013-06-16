@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.f.FlowDef to accept classpath elements that allow for pipe assemblies to load additional resources
+  from the current context j.l.ClassLoader.
+
   Updated error messages in c.t.Fields, delegate property initialization to c.f.Flow sub-classes. @fderose
 
   Removed Hadoop oro dependency from build and test runtime classpaths to stop transient build failures.

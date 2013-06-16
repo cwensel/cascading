@@ -87,6 +87,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private String name;
   /** Fields runID */
   private String runID;
+  /** Fields classpath */
+  private List<String> classPath; // may remain null
   /** Field tags */
   private String tags;
   /** Field listeners */
@@ -166,6 +168,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
     this.runID = flowDef.getRunID();
+    this.classPath = flowDef.getClassPath();
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -763,7 +766,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     String threadName = ( "flow " + Util.toNull( getName() ) ).trim();
 
-    thread = new Thread( new Runnable()
+    thread = createFlowThread( threadName );
+
+    thread.start();
+    }
+
+  protected Thread createFlowThread( String threadName )
+    {
+    return new Thread( new Runnable()
     {
     @Override
     public void run()
@@ -771,8 +781,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       BaseFlow.this.run();
       }
     }, threadName );
-
-    thread.start();
     }
 
   protected abstract void internalStart();
@@ -1358,6 +1366,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public String getRunID()
     {
     return runID;
+    }
+
+  protected List<String> getClassPath()
+    {
+    return classPath;
     }
 
   @Override
