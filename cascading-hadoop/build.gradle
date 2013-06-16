@@ -18,9 +18,10 @@
  * limitations under the License.
  */
 
-//ext.hadoopVersion = '0.20.2'
+//ext.hadoopVersion = '0.20.2' // no longer supported
 //ext.hadoopVersion = '0.20.205.0' // missing maven deps
-ext.hadoopVersion = '1.0.4'  // missing maven deps
+//ext.hadoopVersion = '1.0.4'  // missing maven deps
+ext.hadoopVersion = '1.1.2'
 
 if( System.properties[ 'hadoop.release.final' ] )
   hadoopVersion = System.properties[ 'hadoop.release.final' ]
@@ -39,9 +40,14 @@ dependencies {
 
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
-  testCompile (group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion) {
+  testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
     exclude group: 'oro' // causes transient build maven failures, ftw
   }
+}
+
+if( hadoopVersion.startsWith( "1.1." ) )
+{
+  // do nothing
 }
 
 if( hadoopVersion.startsWith( "1.0." ) )
@@ -53,19 +59,19 @@ if( hadoopVersion.startsWith( "1.0." ) )
   }
 }
 
-if( hadoopVersion.startsWith( "0.20." ) )
-{
-  dependencies {
-    testRuntime group: 'commons-io', name: 'commons-io', version: '2.0.1'
-  }
-}
-
 if( hadoopVersion.startsWith( "0.20.205." ) )
 {
   dependencies {
     testRuntime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
     testRuntime 'org.codehaus.jackson:jackson-core-asl:1.0.1'
     testRuntime 'org.codehaus.jackson:jackson-mapper-asl:1.0.1'
+  }
+}
+
+if( hadoopVersion.startsWith( "0.20." ) )
+{
+  dependencies {
+    testRuntime group: 'commons-io', name: 'commons-io', version: '2.0.1'
   }
 }
 

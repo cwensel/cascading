@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Update default Apache Hadoop support to version 1.1.x. End support for 0.20.2.
+
   Updated c.f.FlowDef to accept classpath elements that allow for pipe assemblies to load additional resources
   from the current context j.l.ClassLoader.
 
