@@ -122,7 +122,7 @@ subprojects {
   }
 
   dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.8.2'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
   }
 
   test {
