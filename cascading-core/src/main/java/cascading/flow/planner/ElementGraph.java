@@ -484,7 +484,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
           if( graph.incomingEdgesOf( object ).isEmpty() )
             {
             String result = object.toString().replaceAll( "\"", "\'" );
-            String versionString = Version.getVersionString();
+            String versionString = Version.getRelease();
 
             if( platformInfo != null )
               versionString = ( versionString == null ? "" : versionString + "\\n" ) + platformInfo;
