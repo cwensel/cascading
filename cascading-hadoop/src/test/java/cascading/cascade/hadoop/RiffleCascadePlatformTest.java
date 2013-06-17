@@ -21,11 +21,13 @@
 package cascading.cascade.hadoop;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.LockingFlowListener;
 import cascading.flow.hadoop.ProcessFlow;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
@@ -116,7 +118,7 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testSimpleRiffleCascade() throws IOException
+  public void testSimpleRiffleCascade() throws IOException, InterruptedException
     {
     getPlatform().copyFromLocal( inputFileIps );
 
@@ -132,11 +134,17 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     ProcessFlow thirdProcess = new ProcessFlow( "third", third );
     ProcessFlow fourthProcess = new ProcessFlow( "fourth", fourth );
 
+    LockingFlowListener flowListener = new LockingFlowListener();
+    secondProcess.addListener( flowListener );
+
     Cascade cascade = new CascadeConnector().connect( fourthProcess, secondProcess, firstProcess, thirdProcess );
 
     cascade.start();
 
     cascade.complete();
+
+    assertTrue( "did not start", flowListener.started.tryAcquire( 2, TimeUnit.SECONDS ) );
+    assertTrue( "did not complete", flowListener.completed.tryAcquire( 2, TimeUnit.SECONDS ) );
 
     validateLength( fourth, 20 );
     }

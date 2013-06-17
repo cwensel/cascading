@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Fixed issue where c.f.h.ProcessFlow would not honor c.f.FlowListener instances. Currently does not support
+  the #onThrowable event.
+
   Updated c.p.a.Unique to use c.o.b.FirstNBuffer to improve performance.
 
   Added c.o.b.FirstNBuffer to provide a faster implementation of returning the first N tuples encountered in a grouping.

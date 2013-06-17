@@ -1234,7 +1234,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     logInfo( "shutdown complete" );
     }
 
-  private void fireOnCompleted()
+  protected void fireOnCompleted()
     {
     if( hasListeners() )
       {
@@ -1246,7 +1246,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
-  private void fireOnThrowable()
+  protected void fireOnThrowable()
     {
     if( hasListeners() )
       {

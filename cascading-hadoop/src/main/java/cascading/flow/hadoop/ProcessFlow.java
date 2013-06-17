@@ -46,6 +46,11 @@ import riffle.process.scheduler.ProcessWrapper;
  * Use this class to allow custom Riffle jobs to participate in the {@link cascading.cascade.Cascade} scheduler. If
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
+ * <p/>
+ * Though this class sub-classes {@link HadoopFlow}, it does not support all the methods available or features.
+ * <p/>
+ * Currently {@link cascading.flow.FlowListener}s are supported but the
+ * {@link cascading.flow.FlowListener#onThrowable(cascading.flow.Flow, Throwable)} event is not.
  */
 public class ProcessFlow<P> extends HadoopFlow
   {
@@ -53,6 +58,8 @@ public class ProcessFlow<P> extends HadoopFlow
   private final P process;
   /** Field processWrapper */
   private final ProcessWrapper processWrapper;
+
+  private boolean isStarted = false; // only used for event handling
 
   /**
    * Constructor ProcessFlow creates a new ProcessFlow instance.
@@ -127,7 +134,9 @@ public class ProcessFlow<P> extends HadoopFlow
     {
     try
       {
+      fireOnStarting();
       processWrapper.start();
+      isStarted = true;
       }
     catch( ProcessException exception )
       {
@@ -143,6 +152,7 @@ public class ProcessFlow<P> extends HadoopFlow
     {
     try
       {
+      fireOnStopping();
       processWrapper.stop();
       }
     catch( ProcessException exception )
@@ -159,7 +169,14 @@ public class ProcessFlow<P> extends HadoopFlow
     {
     try
       {
+      if( !isStarted )
+        {
+        fireOnStarting();
+        isStarted = true;
+        }
+
       processWrapper.complete();
+      fireOnCompleted();
       }
     catch( ProcessException exception )
       {
