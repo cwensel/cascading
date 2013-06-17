@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.a.Unique to use c.o.b.FirstNBuffer to improve performance.
+
+  Added c.o.b.FirstNBuffer to provide a faster implementation of returning the first N tuples encountered in a grouping.
+
   Updated junit to version 4.11.
 
   Update default Apache Hadoop support to version 1.1.x. End support for 0.20.2.

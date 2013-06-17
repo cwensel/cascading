@@ -29,7 +29,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
-import cascading.operation.aggregator.First;
+import cascading.operation.buffer.FirstNBuffer;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
@@ -42,8 +42,8 @@ import cascading.tuple.Tuples;
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
  * <p/>
- * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link First}
- * {@link cascading.operation.Aggregator} operation.
+ * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link FirstNBuffer}
+ * {@link cascading.operation.Buffer} operation.
  * <p/>
  * If the {@code include} value is set to {@link Include#NO_NULLS}, any tuple consisting of only {@code null}
  * values will be removed from the stream.
@@ -403,7 +403,7 @@ public class Unique extends SubAssembly
       filters[ i ] = new Each( pipes[ i ], uniqueFields, partialDuplicates );
 
     Pipe pipe = new GroupBy( name, filters, uniqueFields );
-    pipe = new Every( pipe, Fields.ALL, new First(), Fields.RESULTS );
+    pipe = new Every( pipe, Fields.ALL, new FirstNBuffer(), Fields.RESULTS );
 
     setTails( pipe );
     }

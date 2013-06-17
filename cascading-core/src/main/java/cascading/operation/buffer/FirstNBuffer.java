@@ -18,37 +18,40 @@
  * limitations under the License.
  */
 
-package cascading.operation.aggregator;
+package cascading.operation.buffer;
 
 import java.beans.ConstructorProperties;
+import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
-import cascading.operation.Aggregator;
-import cascading.operation.AggregatorCall;
+import cascading.operation.BaseOperation;
+import cascading.operation.Buffer;
+import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered in a grouping.
+ * Class FirstNBuffer will return the first N tuples seen in a given grouping. After the tuples
+ * are returned the Buffer stops iterating the arguments unlike the {@link cascading.operation.aggregator.First}
+ * {@link cascading.operation.Aggregator} which by contract sees all the values in the grouping.
  * <p/>
- * By default, it returns the first Tuple of {@link Fields#ARGS} found.
+ * By default it returns one Tuple.
  * <p/>
- * If {@code firstN} is given, Tuples with each of the first N number of Tuples encountered are returned. That is,
- * this Aggregator will return at maximum N tuples per grouping.
+ * Order can be controlled through the prior {@link cascading.pipe.GroupBy} or {@link cascading.pipe.CoGroup}
+ * pipes.
  * <p/>
- * Be sure to set the {@link cascading.pipe.GroupBy} {@code sortFields} to control which Tuples are seen first.
+ * This class is used by {@link cascading.pipe.assembly.Unique}.
  */
-public class First extends ExtentBase
+public class FirstNBuffer extends BaseOperation implements Buffer
   {
   private final int firstN;
 
   /** Selects and returns the first argument Tuple encountered. */
-  public First()
+  public FirstNBuffer()
     {
     super( Fields.ARGS );
 
-    this.firstN = 1;
+    firstN = 1;
     }
 
   /**
@@ -57,7 +60,7 @@ public class First extends ExtentBase
    * @param firstN of type int
    */
   @ConstructorProperties({"firstN"})
-  public First( int firstN )
+  public FirstNBuffer( int firstN )
     {
     super( Fields.ARGS );
 
@@ -70,7 +73,7 @@ public class First extends ExtentBase
    * @param fieldDeclaration of type Fields
    */
   @ConstructorProperties({"fieldDeclaration"})
-  public First( Fields fieldDeclaration )
+  public FirstNBuffer( Fields fieldDeclaration )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
 
@@ -84,46 +87,24 @@ public class First extends ExtentBase
    * @param firstN           of type int
    */
   @ConstructorProperties({"fieldDeclaration", "firstN"})
-  public First( Fields fieldDeclaration, int firstN )
+  public FirstNBuffer( Fields fieldDeclaration, int firstN )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
 
     this.firstN = firstN;
     }
 
-  /**
-   * Selects and returns the first argument Tuple encountered, unless the Tuple
-   * is a member of the set ignoreTuples.
-   *
-   * @param fieldDeclaration of type Fields
-   * @param ignoreTuples     of type Tuple...
-   */
-  @ConstructorProperties({"fieldDeclaration", "ignoreTuples"})
-  public First( Fields fieldDeclaration, Tuple... ignoreTuples )
-    {
-    super( fieldDeclaration, ignoreTuples );
-
-    this.firstN = 1;
-    }
-
-  protected void performOperation( Tuple[] context, TupleEntry entry )
-    {
-    if( context[ 0 ] == null )
-      context[ 0 ] = new Tuple();
-
-    if( context[ 0 ].size() < firstN )
-      context[ 0 ].add( entry.getTupleCopy() );
-    }
-
   @Override
-  public void complete( FlowProcess flowProcess, AggregatorCall<Tuple[]> aggregatorCall )
+  public void operate( FlowProcess flowProcess, BufferCall bufferCall )
     {
-    Tuple context = aggregatorCall.getContext()[ 0 ];
+    Iterator<TupleEntry> iterator = bufferCall.getArgumentsIterator();
 
-    if( context == null )
-      return;
+    int count = 0;
 
-    for( Object tuple : context )
-      aggregatorCall.getOutputCollector().add( (Tuple) tuple );
+    while( count < firstN && iterator.hasNext() )
+      {
+      bufferCall.getOutputCollector().add( iterator.next() );
+      count++;
+      }
     }
   }
