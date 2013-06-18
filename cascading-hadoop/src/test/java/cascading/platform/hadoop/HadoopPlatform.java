@@ -47,6 +47,7 @@ import cascading.tap.hadoop.TemplateTap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Fields;
 import cascading.util.Util;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
@@ -209,10 +210,32 @@ public class HadoopPlatform extends TestPlatform
     if( !fileSys.exists( path ) )
       throw new FileNotFoundException( "data file not found: " + outputFile );
 
-    if( new File( outputFile ).exists() )
-      new File( outputFile ).delete();
+    File file = new File( outputFile );
 
-    FileUtil.copy( fileSys, path, new File( outputFile ), false, jobConf );
+    if( file.exists() )
+      file.delete();
+
+    if( fileSys.isFile( path ) )
+      {
+      // its a file, so just copy it over
+      FileUtil.copy( fileSys, path, file, false, jobConf );
+      return;
+      }
+
+    // it's a directory
+    file.mkdirs();
+
+    FileStatus contents[] = fileSys.listStatus( path );
+
+    for( FileStatus fileStatus : contents )
+      {
+      Path currentPath = fileStatus.getPath();
+
+      if( currentPath.getName().startsWith( "_" ) ) // filter out temp and log dirs
+        continue;
+
+      FileUtil.copy( fileSys, currentPath, new File( file, currentPath.getName() ), false, jobConf );
+      }
     }
 
   @Override
