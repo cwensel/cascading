@@ -289,6 +289,8 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
   @Override
   public void cleanup()
     {
+    operationCall.setOutputCollector( null );
+
     try
       {
       ( (Operator) getFlowElement() ).getOperation().cleanup( flowProcess, operationCall );
