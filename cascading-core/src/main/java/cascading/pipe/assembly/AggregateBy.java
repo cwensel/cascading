@@ -254,7 +254,15 @@ public class AggregateBy extends SubAssembly
       for( int i = 0; i < context.arguments.length; i++ )
         {
         Fields resolvedArgumentFields = operationCall.getArgumentFields();
-        Tuple narrow = TupleViews.createNarrow( resolvedArgumentFields.getPos( argumentFields[ i ] ) );
+
+        int[] pos;
+
+        if( argumentFields[ i ].isAll() )
+          pos = resolvedArgumentFields.getPos();
+        else
+          pos = resolvedArgumentFields.getPos( argumentFields[ i ] ); // returns null if selector is ALL
+
+        Tuple narrow = TupleViews.createNarrow( pos );
 
         Fields currentFields;
 
