@@ -577,7 +577,7 @@ public abstract class HadoopStepStats extends FlowStepStats
 
     if( id == null )
       {
-      id = Util.createID( taskID.toString() );
+      id = Util.createUniqueID();
       idCache.put( taskID, id );
       }
 

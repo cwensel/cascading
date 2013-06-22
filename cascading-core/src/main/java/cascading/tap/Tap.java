@@ -101,7 +101,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public static synchronized String id( Tap tap )
     {
     if( tap.id == null )
-      tap.id = Util.createID( String.format( "%s/%s/%s", tap.getIdentifier(), tap.getScheme().getSourceFields(), tap.getScheme().getSinkFields() ) );
+      tap.id = Util.createUniqueID();
 
     return tap.id;
     }
