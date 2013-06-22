@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -42,7 +42,7 @@ import cascading.util.Util;
  * See {@link cascading.operation.text.DateParser} and {@link cascading.operation.text.DateFormatter} for similar
  * Operations for use within a pipe assembly.
  */
-public class DateType implements CoercibleType
+public class DateType implements CoercibleType<Long>
   {
   /** Field zone */
   protected TimeZone zone;
@@ -52,7 +52,6 @@ public class DateType implements CoercibleType
   protected String dateFormatString;
   /** Field dateFormat */
   private transient SimpleDateFormat dateFormat;
-
 
   /**
    * Create a new DateType instance.
@@ -82,6 +81,12 @@ public class DateType implements CoercibleType
   public DateType( String dateFormatString )
     {
     this.dateFormatString = dateFormatString;
+    }
+
+  @Override
+  public Class getCanonicalType()
+    {
+    return Long.TYPE;
     }
 
   public SimpleDateFormat getDateFormat()
@@ -118,7 +123,7 @@ public class DateType implements CoercibleType
     }
 
   @Override
-  public Object canonical( Object value )
+  public Long canonical( Object value )
     {
     if( value == null )
       return null;
@@ -132,7 +137,7 @@ public class DateType implements CoercibleType
       return ( (Date) value ).getTime(); // in UTC
 
     if( from == Long.class || from == long.class )
-      return value;
+      return (Long) value;
 
     throw new CascadingException( "unknown type coercion requested from: " + Util.getTypeName( from ) );
     }
@@ -174,5 +179,14 @@ public class DateType implements CoercibleType
       {
       throw new CascadingException( "unable to parse value: " + value + " with format: " + dateFormatString );
       }
+    }
+
+  @Override
+  public String toString()
+    {
+    final StringBuilder sb = new StringBuilder( "DateType{" );
+    sb.append( "dateFormatString='" ).append( dateFormatString ).append( '\'' );
+    sb.append( '}' );
+    return sb.toString();
     }
   }

@@ -35,7 +35,7 @@ public class BigDecimalCoerce extends Coercions.Coerce<BigDecimal>
     }
 
   @Override
-  protected Class<BigDecimal> getType()
+  public Class<BigDecimal> getCanonicalType()
     {
     return BigDecimal.class;
     }

@@ -650,12 +650,30 @@ public class Util
     return type instanceof Class ? ( (Class) type ).getCanonicalName() : type.toString();
     }
 
+  public static String getSimpleTypeName( Type type )
+    {
+    if( type == null )
+      return null;
+
+    return type instanceof Class ? ( (Class) type ).getSimpleName() : type.toString();
+    }
+
   public static String[] typeNames( Type[] types )
     {
     String[] names = new String[ types.length ];
 
     for( int i = 0; i < types.length; i++ )
       names[ i ] = getTypeName( types[ i ] );
+
+    return names;
+    }
+
+  public static String[] simpleTypeNames( Type[] types )
+    {
+    String[] names = new String[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      names[ i ] = getSimpleTypeName( types[ i ] );
 
     return names;
     }

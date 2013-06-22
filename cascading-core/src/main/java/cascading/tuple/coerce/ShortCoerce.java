@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -34,7 +34,7 @@ public class ShortCoerce extends Coercions.Coerce<Short>
     }
 
   @Override
-  protected Class<Short> getType()
+  public Class<Short> getCanonicalType()
     {
     return short.class;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -34,7 +34,7 @@ public class BooleanObjectCoerce extends Coercions.Coerce<Boolean>
     }
 
   @Override
-  protected Class<Boolean> getType()
+  public Class<Boolean> getCanonicalType()
     {
     return Boolean.class;
     }

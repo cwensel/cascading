@@ -1427,9 +1427,6 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     {
     String fieldsString = toString();
 
-    if( types != null )
-      fieldsString += " | " + Util.join( Util.typeNames( types ), ", " );
-
     return "[{" + ( isDefined() ? size() : "?" ) + "}:" + fieldsString + "]";
     }
 
@@ -1437,10 +1434,17 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   @Override
   public String toString()
     {
+    String string;
+
     if( isOrdered() )
-      return orderedToString();
+      string = orderedToString();
     else
-      return unorderedToString();
+      string = unorderedToString();
+
+    if( types != null )
+      string += " | " + Util.join( Util.simpleTypeNames( types ), ", " );
+
+    return string;
     }
 
   private String orderedToString()
@@ -1854,5 +1858,4 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     return hashCode;
     }
-
   }

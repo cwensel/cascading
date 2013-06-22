@@ -39,6 +39,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.FieldsResolverException;
 import cascading.tuple.TupleException;
 import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
 import static java.util.Arrays.asList;
@@ -1034,8 +1035,7 @@ public class Splice extends Pipe
       if( !verifySameSize( groupingFields ) )
         throw new OperatorException( this, "all grouping fields must be same size: " + toString() );
 
-      if( !verifySameTypes( groupingSelectors, groupingFields ) )
-        throw new OperatorException( this, "all grouping fields must declare same types: " + toString() );
+      verifySameTypes( groupingSelectors, groupingFields );
 
       return groupingFields;
       }
@@ -1051,7 +1051,7 @@ public class Splice extends Pipe
 
   private boolean verifySameTypes( Map<String, Fields> groupingSelectors, Map<String, Fields> groupingFields )
     {
-    // create array of field positions with comparators
+    // create array of field positions with comparators from the grouping selectors
     // unsure which side has the comparators declared so make a union
     boolean[] hasComparator = new boolean[ groupingFields.values().iterator().next().size() ];
 
@@ -1063,43 +1063,58 @@ public class Splice extends Pipe
         hasComparator[ i ] = hasComparator[ i ] || comparatorsArray[ i ] != null;
       }
 
+    // compare all the rhs fields with the lhs (lhs and rhs are arbitrary here)
     Iterator<Fields> iterator = groupingFields.values().iterator();
-    Type[] types = iterator.next().getTypes();
+    Fields lhsFields = iterator.next();
+    Type[] lhsTypes = lhsFields.getTypes();
 
     // if types are null, no basis for comparison
-    if( types == null )
+    if( lhsTypes == null )
       return true;
 
     while( iterator.hasNext() )
       {
-      Fields groupingField = iterator.next();
-      Type[] groupingTypes = groupingField.getTypes();
+      Fields rhsFields = iterator.next();
+      Type[] rhsTypes = rhsFields.getTypes();
 
       // if types are null, no basis for comparison
-      if( groupingTypes == null )
+      if( rhsTypes == null )
         return true;
 
-      for( int i = 0; i < types.length; i++ )
+      for( int i = 0; i < lhsTypes.length; i++ )
         {
         if( hasComparator[ i ] )
           continue;
 
-        Type lhs = types[ i ];
-        Type rhs = groupingTypes[ i ];
+        Type lhs = lhsTypes[ i ];
+        Type rhs = rhsTypes[ i ];
 
-        // if one side is primitive, up-class to its primitive wrapper type
-        if( lhs instanceof Class && rhs instanceof Class )
-          {
-          lhs = Coercions.asNonPrimitive( (Class) lhs );
-          rhs = Coercions.asNonPrimitive( (Class) rhs );
-          }
+        lhs = getCanonicalType( lhs );
+        rhs = getCanonicalType( rhs );
 
-        if( !lhs.equals( rhs ) )
-          return false;
+        if( lhs.equals( rhs ) )
+          continue;
+
+        Fields lhsError = new Fields( lhsFields.get( i ), lhsFields.getType( i ) );
+        Fields rhsError = new Fields( rhsFields.get( i ), rhsFields.getType( i ) );
+
+        throw new OperatorException( this, "grouping fields must declare same types:" + lhsError.printVerbose() + " not same as " + rhsError.printVerbose() );
         }
       }
 
     return true;
+    }
+
+  private Type getCanonicalType( Type type )
+    {
+    if( type instanceof CoercibleType )
+      type = ( (CoercibleType) type ).getCanonicalType();
+
+    // if one side is primitive, normalize to its primitive wrapper type
+    if( type instanceof Class )
+      type = Coercions.asNonPrimitive( (Class) type );
+
+    return type;
     }
 
   private boolean verifySameSize( Map<String, Fields> groupingFields )

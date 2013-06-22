@@ -142,7 +142,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     }
 
   /**
-   * Method setNormalizeHeterogeneousSources adds the given doNormalize boolean to the given properites object.
+   * Method setNormalizeHeterogeneousSources adds the given doNormalize boolean to the given properties object.
    * Use this method if additional jobs should be planned in to handle incompatible InputFormat classes.
    * <p/>
    * Normalization is off by default and should only be enabled by advanced users. Typically this will decrease

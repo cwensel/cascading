@@ -52,13 +52,11 @@ public final class Coercions
     {
     protected Coerce( Map<Type, Coerce> map )
       {
-      if( map.containsKey( getType() ) )
-        throw new IllegalStateException( "type already exists in map: " + getType() );
+      if( map.containsKey( getCanonicalType() ) )
+        throw new IllegalStateException( "type already exists in map: " + getCanonicalType() );
 
-      map.put( getType(), this );
+      map.put( getCanonicalType(), this );
       }
-
-    protected abstract Class<T> getType();
 
     @Override
     public T canonical( Object value )

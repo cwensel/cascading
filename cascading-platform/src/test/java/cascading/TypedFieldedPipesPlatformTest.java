@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -20,13 +20,20 @@
 
 package cascading;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
+import cascading.operation.AssertionLevel;
+import cascading.operation.assertion.AssertExpression;
+import cascading.operation.text.DateParser;
 import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
@@ -35,10 +42,10 @@ import cascading.pipe.joiner.InnerJoin;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.type.DateType;
 import org.junit.Test;
 
-import static data.InputData.inputFileLhs;
-import static data.InputData.inputFileRhs;
+import static data.InputData.*;
 
 
 public class TypedFieldedPipesPlatformTest extends PlatformTestCase
@@ -192,6 +199,77 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
         )
       );
       }
+    }
 
+  @Test
+  public void testFieldTypeCheck() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileApacheClean );
+
+    // 75.185.76.245 - - [01/Sep/2007:00:01:03 +0000] "POST /mt-tb.cgi/235 HTTP/1.1" 403 174 "-" "Opera/9.10 (Windows NT 5.1; U; ru)" "-"
+
+    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT );
+
+    Type[] lhsTypes = new Type[]{
+      String.class, // ip
+      String.class, // -
+      String.class, // -
+      dateType, // date
+      String.class, // request
+      int.class, // code
+      long.class, // bytes
+      String.class, // -
+      String.class, // agent
+      String.class // -
+    };
+
+    Fields lhsFields = new Fields( "ip", "client", "user", "date", "request", "code", "bytes", "referrer", "agent", "na" );
+    lhsFields = lhsFields.applyTypes( lhsTypes );
+
+    Tap inputLhs = getPlatform().getDelimitedFile( lhsFields, false, true, ",", "\"", null, inputFileApacheClean, SinkMode.KEEP );
+
+    Type[] rhsTypes = new Type[]{
+      String.class, // ip
+      String.class, // -
+      String.class, // -
+      String.class, // date
+      String.class, // request
+      int.class, // code
+      long.class, // bytes
+      String.class, // -
+      String.class, // agent
+      String.class // -
+    };
+
+    Fields rhsFields = new Fields( "ip", "client", "user", "date", "request", "code", "bytes", "referrer", "agent", "na" );
+    rhsFields = rhsFields.applyTypes( rhsTypes );
+
+    Tap inputRhs = getPlatform().getDelimitedFile( rhsFields, false, true, ",", "\"", null, inputFileApacheClean, SinkMode.KEEP );
+
+    Tap output = getPlatform().getDelimitedFile( Fields.UNKNOWN, true, true, ",", "\"", null, getOutputPath( getTestName() ), SinkMode.REPLACE );
+
+    Pipe lhsPipe = new Pipe( "lhs" );
+
+    lhsPipe = new Each( lhsPipe, new Fields( "date" ), AssertionLevel.STRICT, new AssertExpression( "date instanceof Long", Object.class ) );
+
+    Pipe rhsPipe = new Pipe( "rhs" );
+
+    rhsPipe = new Each( rhsPipe, new Fields( "date" ), new DateParser( new Fields( "date", Long.class ), TestConstants.APACHE_DATE_FORMAT ), Fields.REPLACE );
+    rhsPipe = new Each( rhsPipe, new Fields( "date" ), AssertionLevel.STRICT, new AssertExpression( "date instanceof Long", Object.class ) );
+
+    Fields declared = lhsFields.append( Fields.mask( rhsFields, lhsFields ) );
+
+    Pipe pipe = new CoGroup( lhsPipe, new Fields( "date" ), rhsPipe, new Fields( "date" ), declared );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhsPipe, inputLhs )
+      .addSource( rhsPipe, inputRhs )
+      .addTailSink( pipe, output );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 14, 20 );
     }
   }

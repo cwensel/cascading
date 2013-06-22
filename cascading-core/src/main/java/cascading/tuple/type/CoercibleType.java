@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -35,13 +35,20 @@ import java.lang.reflect.Type;
  * <p/>
  * Note CoercibleType used in conjunction with the TextDelimited parsers is not a replacement for using
  * a pipe assembly to cleanse data. Pushing data cleansing down to a {@link cascading.tap.Tap} and
- * {@link cascading.scheme.Scheme} may not provide the flexibility and performance expected.
+ * {@link cascading.scheme.Scheme} may not provide the flexibility and robustness expected.
  * <p/>
  * CoercibleTypes are a convenience when the input data is of high quality or was previously written out using
  * a CoercibleType instance.
+ * <p/>
+ * The CoercibleTypes further allow the Cascading planner to perform type checks during joins. If no
+ * {@link java.util.Comparator} is in use, and lhs and rhs fields are not the same type, the planner will throw an
+ * exception.
  */
 public interface CoercibleType<Canonical> extends Type, Serializable
   {
+  /** @return the actual Java type this CoercibleType represents */
+  Class<Canonical> getCanonicalType();
+
   /**
    * @param value of type Object
    * @return the value coerced into its canonical type
