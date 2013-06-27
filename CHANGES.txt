@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Fixed issue where an exception at #close() on step state reader could mask more prominent errors.
+
   Fixed issue where the c.t.TupleEntryCollector was not set to "null" on the c.o.OperationCall before
   c.o.Operation#cleanup() was called to prevent the method from emitting values during cleanup. See Operation#flush().
 

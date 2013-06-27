@@ -456,8 +456,15 @@ public class HadoopUtil
       }
     finally
       {
-      if( reader != null )
-        reader.close();
+      try
+        {
+        if( reader != null )
+          reader.close();
+        }
+      catch( IOException exception )
+        {
+        LOG.warn( "error closing state path reader", exception );
+        }
       }
     }
 
