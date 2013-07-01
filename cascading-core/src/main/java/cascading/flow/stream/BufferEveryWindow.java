@@ -151,10 +151,4 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
       handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
     }
-
-  @Override
-  public void complete( Duct previous )
-    {
-    next.complete( this );
-    }
   }

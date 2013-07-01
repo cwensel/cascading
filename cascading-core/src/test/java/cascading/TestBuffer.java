@@ -44,6 +44,7 @@ public class TestBuffer extends BaseOperation<TupleEntryCollector> implements Bu
   private boolean insertHeader;
   private boolean insertFooter;
   private Comparable value;
+  private boolean flushCalled = false;
 
   public TestBuffer( Tap path, Fields fieldDeclaration, int expectedSize, boolean insertHeader, boolean insertFooter, String value )
     {
@@ -109,6 +110,9 @@ public class TestBuffer extends BaseOperation<TupleEntryCollector> implements Bu
   @Override
   public void cleanup( FlowProcess flowProcess, OperationCall<TupleEntryCollector> operationCall )
     {
+    if( !flushCalled )
+      throw new RuntimeException( "flush never called" );
+
     if( path == null )
       return;
 
@@ -142,5 +146,11 @@ public class TestBuffer extends BaseOperation<TupleEntryCollector> implements Bu
       bufferCall.getOutputCollector().add( new Tuple( value ) );
 
     iterator.hasNext(); // regression
+    }
+
+  @Override
+  public void flush( FlowProcess flowProcess, OperationCall<TupleEntryCollector> tupleEntryCollectorOperationCall )
+    {
+    flushCalled = true;
     }
   }
