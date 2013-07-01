@@ -8,6 +8,7 @@ Cascading Change Log
 
   Fixed issue where the c.t.TupleEntryCollector was not set to "null" on the c.o.OperationCall before
   c.o.Operation#cleanup() was called to prevent the method from emitting values during cleanup. See Operation#flush().
+  Use "cascading.compatibility.retain.collector" to disable.
 
   Fixed issue where c.f.h.ProcessFlow would not honor c.f.FlowListener instances. Currently does not support
   the #onThrowable event.

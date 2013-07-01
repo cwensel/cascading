@@ -39,6 +39,13 @@ import static cascading.tuple.util.TupleViews.*;
  */
 public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, TupleEntry>
   {
+  /**
+   * In 2.2 the collector is now nulled before the
+   * {@link cascading.operation.Operation#cleanup(cascading.flow.FlowProcess, cascading.operation.OperationCall)}
+   * is called. This property retains the collector to remain compatible with 2.1.
+   */
+  public static final String RETAIN_COLLECTOR = "cascading.compatibility.retain.collector";
+
   protected ConcreteCall operationCall;
   protected TupleEntry incomingEntry;
   protected Fields argumentsSelector;
@@ -50,11 +57,15 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
   protected TupleBuilder argumentsBuilder;
   protected TupleBuilder outgoingBuilder;
 
+  private final boolean retainCollector;
+
   protected TupleEntryCollector outputCollector;
 
   public OperatorStage( FlowProcess flowProcess, FlowElement flowElement )
     {
     super( flowProcess, flowElement );
+
+    this.retainCollector = Boolean.parseBoolean( flowProcess.getStringProperty( RETAIN_COLLECTOR ) );
     }
 
   public abstract Operator getOperator();
@@ -289,7 +300,8 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
   @Override
   public void cleanup()
     {
-    operationCall.setOutputCollector( null );
+    if( !retainCollector ) // see comments for RETAIN_COLLECTOR
+      operationCall.setOutputCollector( null );
 
     try
       {
