@@ -364,14 +364,13 @@ public class DelimitedParser implements Serializable
           }
         catch( Exception exception )
           {
-          String message = "field " + sourceFields.get( i ) + " cannot be coerced from : " + split[ i ] + " to: " + Util.getTypeName( types[ i ] );
-
           result[ i ] = null;
 
-          LOG.warn( message, exception );
-
           if( !safe )
-            throw new TapException( message, exception, new Tuple( line ) ); // trap actual line data
+            throw new TapException( getSafeMessage( split[ i ], i ), exception, new Tuple( line ) ); // trap actual line data
+
+          if( LOG.isDebugEnabled() )
+            LOG.debug( getSafeMessage( split[ i ], i ), exception );
           }
         }
 
@@ -381,18 +380,22 @@ public class DelimitedParser implements Serializable
     return split;
     }
 
+  private String getSafeMessage( Object object, int i )
+    {
+    return "field " + sourceFields.get( i ) + " cannot be coerced from : " + object + " to: " + Util.getTypeName( types[ i ] );
+    }
+
   protected Object[] onlyParseLine( String line )
     {
     Object[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
 
     if( numValues != 0 && split.length != numValues )
       {
-      String message = "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
-
       if( enforceStrict )
-        throw new TapException( message, new Tuple( line ) ); // trap actual line data
+        throw new TapException( getParseMessage( split ), new Tuple( line ) ); // trap actual line data
 
-      LOG.warn( message );
+      if( LOG.isDebugEnabled() )
+        LOG.debug( getParseMessage( split ) );
 
       Object[] array = new Object[ numValues ];
       Arrays.fill( array, "" );
@@ -402,6 +405,11 @@ public class DelimitedParser implements Serializable
       }
 
     return split;
+    }
+
+  private String getParseMessage( Object[] split )
+    {
+    return "did not parse correct number of values from input data, expected: " + numValues + ", got: " + split.length + ":" + Util.join( ",", (String[]) split );
     }
 
   public Appendable joinFirstLine( Iterable iterable, Appendable buffer )
