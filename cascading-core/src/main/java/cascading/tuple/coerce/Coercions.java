@@ -155,7 +155,7 @@ public final class Coercions
     Coerce coerce = coercionsPrivate.get( type );
 
     if( coerce == null )
-      throw new IllegalStateException( "unknown type: " + Util.getTypeName( type ) );
+      return OBJECT;
 
     return coerce;
     }
