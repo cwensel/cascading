@@ -66,6 +66,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
       if( !functionCall.getArguments().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
+      if( !functionCall.getArguments().getTuple().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
       Tuple result = new Tuple( functionCall.getArguments().getTuple() );
 
       functionCall.getOutputCollector().add( result );
@@ -80,6 +83,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
     public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
       {
       if( !filterCall.getArguments().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
+      if( !filterCall.getArguments().getTuple().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
       return false;
@@ -97,6 +103,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
       {
       if( !aggregatorCall.getGroup().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
+
+      if( !aggregatorCall.getGroup().getTuple().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
       }
 
     public void aggregate( FlowProcess flowProcess, AggregatorCall aggregatorCall )
@@ -104,13 +113,22 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
       if( !aggregatorCall.getGroup().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
+      if( !aggregatorCall.getGroup().getTuple().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
       if( !aggregatorCall.getArguments().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
+      if( !aggregatorCall.getArguments().getTuple().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
       }
 
     public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
       {
       if( !aggregatorCall.getGroup().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
+      if( !aggregatorCall.getGroup().getTuple().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
       Tuple result = new Tuple( "some value" );
@@ -134,6 +152,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
       if( !bufferCall.getGroup().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
+      if( !bufferCall.getGroup().getTuple().isUnmodifiable() )
+        throw new IllegalStateException( "is modifiable" );
+
       Iterator<TupleEntry> iterator = bufferCall.getArgumentsIterator();
 
       while( iterator.hasNext() )
@@ -141,6 +162,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
         TupleEntry tupleEntry = iterator.next();
 
         if( !tupleEntry.isUnmodifiable() )
+          throw new IllegalStateException( "is modifiable" );
+
+        if( !tupleEntry.getTuple().isUnmodifiable() )
           throw new IllegalStateException( "is modifiable" );
 
         Tuple result = new Tuple( tupleEntry.getTuple() );
@@ -158,27 +182,27 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
     {
     getPlatform().copyFromLocal( inputFileLhs );
 
-    Tap source = getPlatform().getTextFile( inputFileLhs );
+    Tap source = getPlatform().getDelimitedFile( new Fields( "lhs", "rhs" ), " ", inputFileLhs );
     Tap sink = getPlatform().getTextFile( getOutputPath( "simple" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), new TestFunction() );
-    pipe = new Each( pipe, new Fields( "line" ), new TestFilter() );
+    pipe = new Each( pipe, new Fields( "lhs" ), new TestFunction(), Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "lhs" ), new TestFilter() );
 
-    pipe = new GroupBy( pipe, new Fields( "line" ) );
+    pipe = new GroupBy( pipe, new Fields( "lhs" ) );
 
-    pipe = new Every( pipe, new TestAggregator(), Fields.RESULTS );
-    pipe = new Each( pipe, new Fields( "line" ), new TestFunction() );
+    pipe = new Every( pipe, new Fields( "rhs" ), new TestAggregator(), Fields.ALL );
+    pipe = new Each( pipe, new Fields( "lhs" ), new TestFunction(), Fields.REPLACE );
 
-    pipe = new GroupBy( pipe, new Fields( "line" ) );
-    pipe = new Every( pipe, new TestBuffer(), Fields.RESULTS );
-    pipe = new Each( pipe, new Fields( "line" ), new TestFunction() );
+    pipe = new GroupBy( pipe, new Fields( "lhs" ) );
+    pipe = new Every( pipe, new Fields( "lhs" ), new TestBuffer(), Fields.RESULTS );
+    pipe = new Each( pipe, new Fields( "lhs" ), new TestFunction(), Fields.REPLACE );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
 
-    validateLength( flow, 13, null );
+    validateLength( flow, 5, null );
     }
   }

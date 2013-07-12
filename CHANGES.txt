@@ -2,6 +2,12 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.t.TupleEntry#selectTupleCopy() and #selectEntryCopy method to always provide a modifiable and cacheable
+  instance.
+
+  Fixed issue where c.t.TupleEntry#selectTuple() and #selectEntry() could return a unmodifiable or un-cacheable
+  c.t.Tuple or TupleEntry depending on the given c.t.Fields selector.
+
   Fixed issue where c.t.MultiSourceTap could keep too many open resources if #openForRead() is called directly.
 
   Fixed issue where c.o.Buffer#flush() was never called.
