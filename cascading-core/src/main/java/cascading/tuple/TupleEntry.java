@@ -808,6 +808,34 @@ public class TupleEntry
     }
 
   /**
+   * Method selectInto selects the fields specified in the selector from this instance and copies
+   * them into the given tuple argument.
+   *
+   * @param selector of type Fields
+   * @param tuple    of type Tuple
+   * @return returns the given tuple argument with new values added
+   */
+  public Tuple selectInto( Fields selector, Tuple tuple )
+    {
+    if( selector.isNone() )
+      return tuple;
+
+    int[] pos = this.tuple.getPos( fields, selector );
+
+    if( pos == null || pos.length == 0 )
+      {
+      tuple.addAll( this.tuple );
+      }
+    else
+      {
+      for( int i : pos )
+        tuple.add( this.tuple.getObject( i ) );
+      }
+
+    return tuple;
+    }
+
+  /**
    * Method setTuple sets the values specified by the selector to the values given by the given tuple.
    *
    * @param selector of type Fields

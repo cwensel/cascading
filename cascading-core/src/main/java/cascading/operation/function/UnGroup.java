@@ -181,7 +181,7 @@ public class UnGroup extends BaseOperation implements Function
       {
       Tuple group = input.selectTupleCopy( groupFieldSelector ); // need a mutable copy
 
-      group.addAll( input.selectTuple( resultFieldSelector ) ); // no copy needed
+      input.selectInto( resultFieldSelector, group );
 
       outputCollector.add( group );
       }
