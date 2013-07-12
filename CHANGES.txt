@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Fixed issue where c.t.MultiSourceTap could keep too many open resources if #openForRead() is called directly.
+
   Fixed issue where c.o.Buffer#flush() was never called.
 
   Fixed issue where an exception at #close() on step state reader could mask more prominent errors.

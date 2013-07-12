@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- *
+ * TupleEntryChainIterator chains the given Iterators into a single Iterator.
+ * <p/>
+ * As one iterator is completed, it will be closed and a new one will start.
  */
 public class TupleEntryChainIterator extends TupleEntryIterator
   {
@@ -51,6 +53,8 @@ public class TupleEntryChainIterator extends TupleEntryIterator
 
     if( iterators[ currentIterator ].hasNext() )
       return true;
+
+    closeCurrent();
 
     currentIterator++;
 
@@ -86,18 +90,26 @@ public class TupleEntryChainIterator extends TupleEntryIterator
   /** Method close closes all underlying resources. */
   public void close()
     {
-    for( Iterator iterator : iterators )
+    if( iterators.length != currentIterator )
+      closeCurrent();
+    }
+
+  protected void closeCurrent()
+    {
+    close( iterators[ currentIterator ] );
+    }
+
+  private void close( Iterator iterator )
+    {
+    if( iterator instanceof Closeable )
       {
-      if( iterator instanceof Closeable )
+      try
         {
-        try
-          {
-          ( (Closeable) iterator ).close();
-          }
-        catch( IOException exception )
-          {
-          // ignore
-          }
+        ( (Closeable) iterator ).close();
+        }
+      catch( IOException exception )
+        {
+        // ignore
         }
       }
     }
