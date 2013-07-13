@@ -177,7 +177,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     for( int i = 0; i < argumentSelectors.length; i++ )
       {
       Fields argumentSelector = argumentSelectors[ i ];
-      argumentEntries[ i ] = new TupleEntry( Fields.asDeclaration( argumentSelector ) );
+      argumentEntries[ i ] = new TupleEntry( Fields.asDeclaration( argumentSelector ), true );
       }
 
     return argumentEntries;

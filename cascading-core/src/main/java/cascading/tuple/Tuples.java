@@ -474,6 +474,13 @@ public class Tuples
     return tuple;
     }
 
+  public static Tuple setUnmodifiable( Tuple tuple, boolean isUnmodifiable )
+    {
+    tuple.isUnmodifiable = isUnmodifiable;
+
+    return tuple;
+    }
+
   public static Tuple create( List<Object> arrayList )
     {
     return new Tuple( arrayList );

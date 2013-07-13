@@ -25,7 +25,7 @@ import java.io.IOException;
 /** Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
 public abstract class TupleEntryCollector
   {
-  protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null );
+  protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null, true );
 
   protected TupleEntryCollector()
     {
@@ -49,7 +49,7 @@ public abstract class TupleEntryCollector
     if( declared.isUnknown() || declared.isAll() )
       return;
 
-    this.tupleEntry = new TupleEntry( declared, Tuple.size( declared.size() ) );
+    this.tupleEntry = new TupleEntry( declared, Tuple.size( declared.size() ), true );
     }
 
   /**
@@ -98,9 +98,18 @@ public abstract class TupleEntryCollector
     if( !tupleEntry.getFields().isUnknown() && tupleEntry.getFields().size() != tuple.size() )
       throw new TupleException( "operation added the wrong number of fields, expected: " + tupleEntry.getFields().print() + ", got result size: " + tuple.size() );
 
+    boolean isUnmodifiable = tuple.isUnmodifiable();
+
     tupleEntry.setTuple( tuple );
 
-    safeCollect( tupleEntry );
+    try
+      {
+      safeCollect( tupleEntry );
+      }
+    finally
+      {
+      Tuples.setUnmodifiable( tuple, isUnmodifiable );
+      }
     }
 
   private void safeCollect( TupleEntry tupleEntry )

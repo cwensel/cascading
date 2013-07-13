@@ -28,6 +28,8 @@ import java.util.Iterator;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 import cascading.util.ForeverValueIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TupleEntry allows a {@link Tuple} instance and its declaring {@link Fields} instance to be used as a single object.
@@ -52,6 +54,8 @@ import cascading.util.ForeverValueIterator;
  */
 public class TupleEntry
   {
+  private static final Logger LOG = LoggerFactory.getLogger( TupleEntry.class );
+
   private static final CoercibleType[] EMPTY_COERCIONS = new CoercibleType[ 0 ];
   private static final ForeverValueIterator<CoercibleType> OBJECT_ITERATOR = new ForeverValueIterator<CoercibleType>( Coercions.OBJECT );
 
@@ -250,6 +254,9 @@ public class TupleEntry
 
   private void setCoercions()
     {
+    if( coercions != EMPTY_COERCIONS )
+      return;
+
     Fields fields = getFields();
     Type[] types = fields.types; // safe to not get a copy
     int size = fields.size();
@@ -345,13 +352,22 @@ public class TupleEntry
     }
 
   /**
-   * Method setTuple sets the tuple of this TupleEntry object.
+   * Method setTuple sets the tuple of this TupleEntry object, no copy will be performed.
+   * <p/>
+   * If the given tuple is "unmodifiable" ({@code Tuple.isUnmodifiable() == true}) and this TupleEntry is
+   * not "unmodifiable", a warning will be issued.
+   * <p/>
+   * Unmodifiable tuples are generally owned by the system and cannot be be changed and must not be cached.
    *
    * @param tuple the tuple of this TupleEntry object.
    */
   public void setTuple( Tuple tuple )
     {
-    if( isUnmodifiable )
+    // todo: 2.3 make this an exception
+    if( !isUnmodifiable && tuple.isUnmodifiable() )
+      LOG.warn( "current entry is modifiable but given tuple is not modifiable, post 2.2 this will be an exception" );
+
+    if( tuple != null && isUnmodifiable )
       this.tuple = Tuples.asUnmodifiable( tuple );
     else
       this.tuple = tuple;
@@ -836,7 +852,8 @@ public class TupleEntry
     }
 
   /**
-   * Method setTuple sets the values specified by the selector to the values given by the given tuple.
+   * Method setTuple sets the values specified by the selector to the values given by the given tuple, the given
+   * values will always be copied into this TupleEntry.
    *
    * @param selector of type Fields
    * @param tuple    of type Tuple
@@ -844,12 +861,9 @@ public class TupleEntry
   public void setTuple( Fields selector, Tuple tuple )
     {
     if( selector == null || selector.isAll() )
-      {
-      this.tuple = tuple;
-      return;
-      }
-
-    this.tuple.set( fields, selector, tuple );
+      this.tuple.setAll( tuple );
+    else
+      this.tuple.set( fields, selector, tuple );
     }
 
   /**

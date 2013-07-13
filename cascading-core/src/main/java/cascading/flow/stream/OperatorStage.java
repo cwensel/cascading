@@ -224,8 +224,8 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
       return new TupleBuilder()
       {
       Fields selector = outgoingSelector.isUnknown() ? Fields.ALL : outgoingSelector;
-      TupleEntry incoming = new TupleEntry( incomingFields );
-      TupleEntry declared = new TupleEntry( declaredFields );
+      TupleEntry incoming = new TupleEntry( incomingFields, true );
+      TupleEntry declared = new TupleEntry( declaredFields, true );
 
       @Override
       public Tuple makeResult( Tuple input, Tuple output )

@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.t.TupleEntry to issue a warning if an "unmodifiable" c.t.Tuple is set via #setTuple() on a "modifiable"
+  TupleEntry instance. This typically is an indicator the Tuple instance is about to be cached and/or modified at a
+  later point. Unmodifiable, system created, Tuples should never be cached.
+
   Added c.t.TupleEntry#selectInto() to provide a more efficient way to copy values from one c.t.Tuple into another.
 
   Added c.t.TupleEntry#selectTupleCopy() and #selectEntryCopy method to always provide a modifiable and cacheable

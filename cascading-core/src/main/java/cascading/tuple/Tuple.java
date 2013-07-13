@@ -32,24 +32,32 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-import cascading.operation.Aggregator;
-import cascading.pipe.Pipe;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
 /**
- * A Tuple represents a set of values. Consider a Tuple the same as a data base record where every value is a column in that table.
- * A Tuple stream would be a set of Tuple instances, which are passed consecutively through a Pipe assembly.
+ * A Tuple represents a set of values. Consider a Tuple the same as a database record where every value is a column in
+ * that table.
  * <p/>
- * A Tuple is a collection of elements. These elements must be of type Comparable, so that Tuple instances can
- * be compared. Tuple itself is Comparable and subsequently can hold elements of type Tuple.
+ * A "tuple stream" is a set of Tuple instances passed consecutively through a Pipe assembly.
  * <p/>
- * Tuples are mutable for sake of efficiency. Since Tuples are mutable, it is not a good idea to hold an instance
- * around with out first copying it via its copy constructor, a subsequent {@link Pipe} could change the Tuple in
- * place. This is especially true for {@link Aggregator} operators.
+ * Tuples work in tandem with {@link Fields} and the {@link TupleEntry} classes. A TupleEntry holds an instance of
+ * Fields and a Tuple. It allows a tuple to be accessed by its field names, and will help maintain consistent types
+ * if any are given on the Fields instance. That is, if a field is specified at an Integer, calling {@link #set(int, Object)}
+ * with a String will force the String to be coerced into a Integer instance.
  * <p/>
- * Because a Tuple can hold any Comparable type, it is suitable for storing custom types. But all custom types
+ * For managing custom types, see the {@link CoercibleType} interface which extends {@link Type}.
+ * <p/>
+ * Tuple instances created by user code, by default, are mutable (or modifiable).
+ * Tuple instances created by the system are immutable (or unmodifiable, tested by calling {@link #isUnmodifiable()}).
+ * <p/>
+ * For example tuples returned by
+ * {@link cascading.operation.FunctionCall#getArguments()}, will always be unmodifiable. Thus they must be copied
+ * if they will be changed by user code or cached in the local context. See the Tuple copy constructor, or {@code *Copy()} methods
+ * on {@link TupleEntry}.
+ * <p/>
+ * Because a Tuple can hold any Object type, it is suitable for storing custom types. But all custom types
  * must have a serialization support per the underlying framework.
  * <p/>
  * For Hadoop, a {@link org.apache.hadoop.io.serializer.Serialization} implementation
@@ -187,6 +195,9 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
   /**
    * Method isUnmodifiable returns true if this Tuple instance is unmodifiable.
+   * <p/>
+   * "Unmodifiable" tuples are generally owned by the system and cannot be changed, nor should they be cached
+   * as the internal values may change.
    *
    * @return boolean
    */
