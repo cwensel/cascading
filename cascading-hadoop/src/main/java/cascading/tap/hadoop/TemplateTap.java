@@ -47,7 +47,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * <p/>
  * TemplateTap will populate a given {@code pathTemplate} without regard to case of the values being used. Thus
  * the resulting paths {@code 2012/June/} and {@code 2012/june/} will likely result in two open files into the same
- * location. Forcing the case to be consistent with an upstream {@link Function} is recommended, see
+ * location. Forcing the case to be consistent with an upstream {@link cascading.operation.Function} is recommended, see
  * {@link cascading.operation.expression.ExpressionFunction}.
  * <p/>
  * Though Hadoop has no mechanism to prevent simultaneous writes to a directory from multiple jobs, it doesn't mean

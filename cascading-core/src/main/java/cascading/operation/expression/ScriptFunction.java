@@ -64,7 +64,6 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
    *
    * @param fieldDeclaration of type Fields
    * @param script           of type String
-   * @param returnType       of type Class
    */
   @ConstructorProperties({"fieldDeclaration", "script"})
   public ScriptFunction( Fields fieldDeclaration, String script )
@@ -102,7 +101,6 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
    * @param fieldDeclaration of type Fields
    * @param script           of type String
    * @param returnType       of type Class
-   * @param parameterNames   of type String[]
    * @param expectedTypes    of type Class[]
    */
   @ConstructorProperties({"fieldDeclaration", "script", "returnType", "expectedTypes"})

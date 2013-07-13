@@ -179,7 +179,7 @@ subprojects {
 
 task javadocAll( type: Javadoc ) {
 
-  ext.copyright = '<i>Copyright &#169; 2007-2012 Concurrent, Inc. All Rights Reserved.</i>'
+  ext.copyright = '<i>Copyright &#169; 2007-2013 Concurrent, Inc. All Rights Reserved.</i>'
   title = "Cascading ${releaseVersion}"
 
   source subprojects.collect { project ->
@@ -188,8 +188,8 @@ task javadocAll( type: Javadoc ) {
 
   source 'cascading-core/src/test/java/cascading/CascadingTestCase.java'
   source 'cascading-core/src/test/java/cascading/tuple/TupleListCollector.java'
-  source 'cascading-local/src/test/java/cascading/test/LocalPlatform.java'
-  source 'cascading-hadoop/src/test/java/cascading/test/HadoopPlatform.java'
+  source 'cascading-local/src/test/java/cascading/platform/local/LocalPlatform.java'
+  source 'cascading-hadoop/src/test/java/cascading/platform/hadoop/HadoopPlatform.java'
   source 'cascading-platform/src/test/java/cascading/PlatformTestCase.java'
   source 'cascading-platform/src/test/java/cascading/platform/TestPlatform.java'
   source 'cascading-platform/src/test/java/cascading/platform/PlatformRunner.java'

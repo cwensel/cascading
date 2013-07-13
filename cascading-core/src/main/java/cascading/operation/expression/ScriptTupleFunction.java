@@ -43,10 +43,10 @@ import cascading.tuple.Tuple;
  * "$n", where n is an integer.
  * <p/>
  * Given an argument tuple with the fields "a" and "b", the following script returns true: <br/>
- * <code>boolean result = (a + b == $0 + $1);</code><br/>
- * <code>return cascading.tuple.Tuples.tuple( boolean );</code><br/>
+ * {@code boolean result = (a + b == $0 + $1);}<br/>
+ * {@code return cascading.tuple.Tuples.tuple( boolean );}<br/>
  * <p/>
- * Unlike an "expression" used by {@link cascading.operation.expression.ExpressionFunction}, a "script" requires each line to end in an semi-colon
+ * Unlike an "expression" used by {@link ExpressionFunction}, a "script" requires each line to end in an semi-colon
  * (@{code ;}) and the final line to be a {@code return} statement that returns a new {@link Tuple} instance.
  * <p/>
  * Since Janino does not support "varargs", see the {@link cascading.tuple.Tuples} class for helper methods.
@@ -66,7 +66,6 @@ public class ScriptTupleFunction extends ScriptOperation implements Function<Scr
    *
    * @param fieldDeclaration of type Fields
    * @param script           of type String
-   * @param returnType       of type Class
    */
   @ConstructorProperties({"fieldDeclaration", "script"})
   public ScriptTupleFunction( Fields fieldDeclaration, String script )

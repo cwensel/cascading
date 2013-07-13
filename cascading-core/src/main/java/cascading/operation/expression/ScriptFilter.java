@@ -51,9 +51,7 @@ public class ScriptFilter extends ScriptOperation implements Filter<ScriptOperat
   /**
    * Constructor ScriptFilter creates a new ScriptFilter instance.
    *
-   * @param script        of type String
-   * @param parameterName of type String
-   * @param parameterType of type Class
+   * @param script of type String
    */
   @ConstructorProperties({"script"})
   public ScriptFilter( String script )
@@ -81,9 +79,8 @@ public class ScriptFilter extends ScriptOperation implements Filter<ScriptOperat
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
    * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.
    *
-   * @param script         of type String
-   * @param parameterNames of type String[]
-   * @param expectedTypes  of type Class[]
+   * @param script        of type String
+   * @param expectedTypes of type Class[]
    */
   @ConstructorProperties({"script", "expectedTypes"})
   public ScriptFilter( String script, Class[] expectedTypes )
