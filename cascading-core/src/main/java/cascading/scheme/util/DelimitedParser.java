@@ -196,7 +196,7 @@ public class DelimitedParser implements Serializable
    * @param quote of type String
    * @return Pattern
    */
-  public static Pattern createEscapePatternFor( String quote )
+  public Pattern createEscapePatternFor( String quote )
     {
     if( quote == null || quote.isEmpty() )
       return null;
@@ -212,7 +212,7 @@ public class DelimitedParser implements Serializable
    * @param quote of type String
    * @return Pattern
    */
-  public static Pattern createCleanPatternFor( String quote )
+  public Pattern createCleanPatternFor( String quote )
     {
     if( quote == null || quote.isEmpty() )
       return null;
@@ -228,7 +228,7 @@ public class DelimitedParser implements Serializable
    * @param quote     of type String
    * @return Pattern
    */
-  public static Pattern createSplitPatternFor( String delimiter, String quote )
+  public Pattern createSplitPatternFor( String delimiter, String quote )
     {
     String escapedDelimiter = delimiter.replaceAll( SPECIAL_REGEX_CHARS, "\\\\$1" );
 

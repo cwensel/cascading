@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Changed regex j.u.r.Pattern builder methods on c.s.u.DelimitedParser from static to instance methods.
+
   Updated c.t.TupleEntry to issue a warning if an "unmodifiable" c.t.Tuple is set via #setTuple() on a "modifiable"
   TupleEntry instance. This typically is an indicator the Tuple instance is about to be cached and/or modified at a
   later point. Unmodifiable, system created, Tuples should never be cached.
