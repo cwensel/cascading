@@ -179,7 +179,8 @@ public class Update extends TimerTask
       {
       String releaseBuild = Version.getReleaseBuild();
 
-      if( releaseBuild == null || releaseBuild.contains( "wip" ) )
+      // if wip, only test if a newer wip version is available
+      if( releaseBuild != null && releaseBuild.contains( "wip" ) )
         baseURL = "http://files.concurrentinc.com/cascading/";
       else
         baseURL = "http://files.cascading.org/cascading/";

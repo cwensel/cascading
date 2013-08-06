@@ -38,9 +38,7 @@ jar.doFirst {
 jar {
   into( 'cascading' ) {
     from '../version.properties'
-
-    if( !System.properties[ 'cascading.release.final' ] )
-      from "${buildDir}/build.number.properties"
+    from "${buildDir}/build.number.properties"
   }
 }
 
