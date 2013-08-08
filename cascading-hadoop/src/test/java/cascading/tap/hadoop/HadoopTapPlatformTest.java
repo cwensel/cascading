@@ -408,6 +408,9 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileUpper );
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "*" );
+
+    assertTrue( sourceExists.resourceExists( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+
     TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
@@ -431,6 +434,9 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileUpper );
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "{*}" );
+
+    assertTrue( sourceExists.resourceExists( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+
     TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();

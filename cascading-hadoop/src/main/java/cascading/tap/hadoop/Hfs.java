@@ -66,8 +66,20 @@ import org.slf4j.LoggerFactory;
  * {@link cascading.flow.hadoop.HadoopFlowConnector} when creating Hadoop executable {@link cascading.flow.Flow}
  * instances.
  * <p/>
+ * Paths typically should point to a directory, where in turn all the "part" files immediately in that directory will
+ * be included. This is the practice Hadoop expects. Sub-directories are not included and typically result in a failure.
+ * <p/>
+ * To include sub-directories, Hadoop supports "globing". Globing is a frustrating feature and is supported more
+ * robustly by {@link GlobHfs} and less so by Hfs.
+ * <p/>
+ * Hfs will accept {@code /*} paths, but not all convenience methods like
+ * {@link #getSize(org.apache.hadoop.mapred.JobConf)} will behave properly or reliably. Nor can the Hfs instance be used
+ * as a sink to write data.
+ * <p/>
+ * In those cases use GlobHfs since it is a sub-class of {@link cascading.tap.MultiSourceTap}.
+ * <p/>
  * Optionally use {@link Dfs} or {@link Lfs} for resources specific to Hadoop Distributed file system or
- * the Local file system, respectively.
+ * the Local file system, respectively. Using Hfs is the best practice when possible, Lfs and Dfs are conveniences.
  * <p/>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
  * <code>hdfs://...</code> will denote Dfs, and <code>file://...</code> will denote Lfs.
@@ -78,7 +90,7 @@ import org.slf4j.LoggerFactory;
  * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
  * intends to read files from the local client filesystem (for example when using the {@code Lfs} Tap) where the Hadoop
  * job jar is started, Tap so will force any MapReduce jobs reading or writing to {@code file://} resources to run in
- * Hadoop "local mode" so that the file can be read.
+ * Hadoop "standalone mode" so that the file can be read.
  * <p/>
  * To change this behavior, {@link HfsProps#setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
@@ -279,11 +291,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       String schemeString = uri.getScheme();
       String authority = uri.getAuthority();
 
-      if( LOG.isDebugEnabled() )
-        {
-        LOG.debug( "found scheme: {}", schemeString );
-        LOG.debug( "found authority: {}", authority );
-        }
+      LOG.debug( "found scheme: {}, authority: {}", schemeString, authority );
 
       if( schemeString != null && authority != null )
         uriScheme = new URI( schemeString + "://" + uri.getAuthority() );
@@ -494,7 +502,11 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public boolean resourceExists( JobConf conf ) throws IOException
     {
-    return getFileSystem( conf ).exists( getPath() );
+    // unfortunately getFileSystem( conf ).exists( getPath() ); does not account for "/*" etc
+    // nor is there an more efficient means to test for existence
+    FileStatus[] fileStatuses = getFileSystem( conf ).globStatus( getPath() );
+
+    return fileStatuses != null && fileStatuses.length > 0;
     }
 
   @Override

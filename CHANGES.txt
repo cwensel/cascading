@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Fixed issue where c.t.h.Hfs#resourceExists() could fail is the identifier represented a file globing pattern.
+
   Changed regex j.u.r.Pattern builder methods on c.s.u.DelimitedParser from static to instance methods.
 
   Updated c.t.TupleEntry to issue a warning if an "unmodifiable" c.t.Tuple is set via #setTuple() on a "modifiable"
