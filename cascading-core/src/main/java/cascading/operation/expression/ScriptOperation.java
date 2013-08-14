@@ -35,6 +35,7 @@ import cascading.tuple.Tuples;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 import cascading.tuple.util.TupleViews;
+import cascading.util.Util;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ScriptEvaluator;
 
@@ -86,7 +87,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     this.returnType = returnType == null ? this.returnType : returnType;
     this.parameterTypes = Arrays.copyOf( parameterTypes, parameterTypes.length );
 
-    if( getParameterNames().length != getParameterTypes().length )
+    if( getParameterNamesInternal().length != getParameterTypesInternal().length )
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
     }
 
@@ -117,8 +118,13 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     this.returnType = returnType == null ? this.returnType : returnType;
     this.parameterTypes = Arrays.copyOf( parameterTypes, parameterTypes.length );
 
-    if( getParameterNames().length != getParameterTypes().length )
+    if( getParameterNamesInternal().length != getParameterTypesInternal().length )
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
+    }
+
+  protected String getBlock()
+    {
+    return block;
     }
 
   private boolean hasParameterNames()
@@ -126,7 +132,12 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterNames != null;
     }
 
-  private String[] getParameterNames()
+  public String[] getParameterNames()
+    {
+    return Util.copy( parameterNames );
+    }
+
+  private String[] getParameterNamesInternal()
     {
     if( parameterNames != null )
       return parameterNames;
@@ -154,7 +165,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
   private Fields getParameterFields()
     {
-    return makeFields( getParameterNames() );
+    return makeFields( getParameterNamesInternal() );
     }
 
   private boolean hasParameterTypes()
@@ -162,7 +173,12 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterTypes != null;
     }
 
-  private Class[] getParameterTypes()
+  public Class[] getParameterTypes()
+    {
+    return Util.copy( parameterTypes );
+    }
+
+  private Class[] getParameterTypesInternal()
     {
     if( !hasParameterNames() )
       return parameterTypes;
@@ -235,15 +251,15 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
     if( hasParameterNames() && hasParameterTypes() )
       {
-      context.parameterNames = getParameterNames();
+      context.parameterNames = getParameterNamesInternal();
       context.parameterFields = argumentFields.select( getParameterFields() ); // inherit argument types
-      context.parameterTypes = getParameterTypes();
+      context.parameterTypes = getParameterTypesInternal();
       }
     else if( hasParameterTypes() )
       {
       context.parameterNames = toNames( argumentFields );
-      context.parameterFields = argumentFields.applyTypes( getParameterTypes() );
-      context.parameterTypes = getParameterTypes();
+      context.parameterFields = argumentFields.applyTypes( getParameterTypesInternal() );
+      context.parameterTypes = getParameterTypesInternal();
       }
     else
       {
@@ -278,7 +294,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return names;
     }
 
-  protected Class getReturnType()
+  public Class getReturnType()
     {
     return returnType;
     }

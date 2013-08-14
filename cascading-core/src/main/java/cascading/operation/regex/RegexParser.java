@@ -100,8 +100,17 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
   @ConstructorProperties({"patternString", "groups"})
   public RegexParser( String patternString, int[] groups )
     {
-    super( 1, Fields.size( groups.length ), patternString );
+    super( 1, Fields.size( verifyReturnLength( groups ) ), patternString );
+
     this.groups = Arrays.copyOf( groups, groups.length );
+    }
+
+  private static int verifyReturnLength( int[] groups )
+    {
+    if( groups == null || groups.length == 0 )
+      throw new IllegalArgumentException( "groups may not be null or 0 length" );
+
+    return groups.length;
     }
 
   /**
@@ -116,10 +125,21 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
   public RegexParser( Fields fieldDeclaration, String patternString, int[] groups )
     {
     super( 1, fieldDeclaration, patternString );
+
+    verifyReturnLength( groups );
+
     this.groups = Arrays.copyOf( groups, groups.length );
 
     if( !fieldDeclaration.isUnknown() && fieldDeclaration.size() != groups.length )
       throw new IllegalArgumentException( "fieldDeclaration must equal number of groups to be captured, fields: " + fieldDeclaration.print() );
+    }
+
+  public int[] getGroups()
+    {
+    if( groups == null )
+      return null;
+
+    return Arrays.copyOf( groups, groups.length );
     }
 
   @Override

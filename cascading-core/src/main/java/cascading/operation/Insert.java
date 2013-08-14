@@ -48,6 +48,11 @@ public class Insert extends BaseOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration must be the same size as the given values" );
     }
 
+  public Tuple getValues()
+    {
+    return new Tuple( values );
+    }
+
   /** @see Function#operate(cascading.flow.FlowProcess, FunctionCall) */
   public void operate( FlowProcess flowProcess, FunctionCall functionCall )
     {

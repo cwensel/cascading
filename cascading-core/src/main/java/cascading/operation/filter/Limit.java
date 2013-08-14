@@ -71,6 +71,11 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
     this.limit = limit;
     }
 
+  public long getLimit()
+    {
+    return limit;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {

@@ -76,7 +76,7 @@ public class SetValue extends BaseOperation implements Function
    * @param firstValue       of type Serializable
    * @param secondValue      of type Serializable
    */
-  @ConstructorProperties({"fieldDeclaration", "filter", "values"})
+  @ConstructorProperties({"fieldDeclaration", "filter", "firstValue", "secondValue"})
   public SetValue( Fields fieldDeclaration, Filter filter, Serializable firstValue, Serializable secondValue )
     {
     super( fieldDeclaration );
@@ -84,6 +84,16 @@ public class SetValue extends BaseOperation implements Function
     this.values = new Tuple[]{new Tuple( firstValue ), new Tuple( secondValue )};
 
     verify();
+    }
+
+  public Serializable getFirstValue()
+    {
+    return (Serializable) values[ 0 ].getObject( 0 );
+    }
+
+  public Serializable getSecondValue()
+    {
+    return (Serializable) values[ 1 ].getObject( 0 );
     }
 
   private void verify()

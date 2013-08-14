@@ -56,6 +56,11 @@ public class Status extends BaseOperation<Boolean> implements Filter<Boolean>
     this.status = status;
     }
 
+  public String getStatus()
+    {
+    return status;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Boolean> operationCall )
     {

@@ -49,6 +49,11 @@ public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
     this.size = size;
     }
 
+  public int getSize()
+    {
+    return size;
+    }
+
   @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {

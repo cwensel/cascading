@@ -90,6 +90,11 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
     this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
+  public Type getType()
+    {
+    return type;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Pair<Double[], Tuple>> operationCall )
     {

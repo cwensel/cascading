@@ -58,6 +58,11 @@ public class Not extends BaseOperation implements Filter
       throw new IllegalArgumentException( "filter may not be null" );
     }
 
+  public Filter getFilter()
+    {
+    return filter;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall operationCall )
     {

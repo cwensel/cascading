@@ -78,6 +78,11 @@ public class DateOperation extends BaseOperation<Pair<SimpleDateFormat, Tuple>>
     this.locale = locale;
     }
 
+  public String getDateFormatString()
+    {
+    return dateFormatString;
+    }
+
   /**
    * Method getDateFormat returns the dateFormat of this DateParser object.
    *

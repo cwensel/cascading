@@ -78,6 +78,11 @@ public class RegexMatcher extends RegexOperation<Matcher>
     verify();
     }
 
+  public boolean isNegateMatch()
+    {
+    return negateMatch;
+    }
+
   private void verify()
     {
     if( fieldDeclaration.size() != 1 )

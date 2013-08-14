@@ -86,6 +86,26 @@ public class Counter extends BaseOperation implements Filter
     this.increment = increment;
     }
 
+  public Enum getCounterEnum()
+    {
+    return counterEnum;
+    }
+
+  public String getGroupString()
+    {
+    return groupString;
+    }
+
+  public String getCounterString()
+    {
+    return counterString;
+    }
+
+  public int getIncrement()
+    {
+    return increment;
+    }
+
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {

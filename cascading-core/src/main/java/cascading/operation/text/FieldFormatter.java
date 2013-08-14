@@ -57,7 +57,7 @@ public class FieldFormatter extends BaseOperation<Tuple> implements Function<Tup
     }
 
   /**
-   * Constructor FieldJoiner creates a new FieldJoiner instance.
+   * Constructor FieldJoiner creates a new FieldFormatter instance.
    *
    * @param fieldDeclaration of type Fields
    * @param format           of type String
@@ -73,9 +73,9 @@ public class FieldFormatter extends BaseOperation<Tuple> implements Function<Tup
     }
 
   /**
-   * Method getFormat returns the format of this FieldJoiner object.
+   * Method getFormat returns the format of this FieldFormatter object.
    *
-   * @return the format (type String) of this FieldJoiner object.
+   * @return the format (type String) of this FieldFormatter object.
    */
   public String getFormat()
     {

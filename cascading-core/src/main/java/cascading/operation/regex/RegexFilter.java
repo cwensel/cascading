@@ -85,6 +85,11 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
     this.matchEachElement = matchEachElement;
     }
 
+  public boolean isMatchEachElement()
+    {
+    return matchEachElement;
+    }
+
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Matcher> filterCall )
     {

@@ -94,6 +94,11 @@ public class FirstNBuffer extends BaseOperation implements Buffer
     this.firstN = firstN;
     }
 
+  public int getFirstN()
+    {
+    return firstN;
+    }
+
   @Override
   public void operate( FlowProcess flowProcess, BufferCall bufferCall )
     {

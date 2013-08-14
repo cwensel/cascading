@@ -156,6 +156,21 @@ public class Debug extends BaseOperation<Long> implements Filter<Long>, PlannedO
     this.printFields = printFields;
     }
 
+  public Output getOutput()
+    {
+    return output;
+    }
+
+  public String getPrefix()
+    {
+    return prefix;
+    }
+
+  public boolean isPrintFields()
+    {
+    return printFields;
+    }
+
   /**
    * Method getPrintFieldsEvery returns the printFieldsEvery interval value of this Debug object.
    *

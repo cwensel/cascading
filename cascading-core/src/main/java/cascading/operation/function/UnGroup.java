@@ -31,6 +31,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,6 +147,21 @@ public class UnGroup extends BaseOperation implements Function
     super( fieldDeclaration );
     this.groupFieldSelector = groupSelector;
     this.size = numValues;
+    }
+
+  public Fields getGroupFieldSelector()
+    {
+    return groupFieldSelector;
+    }
+
+  public Fields[] getResultFieldSelectors()
+    {
+    return Util.copy( resultFieldSelectors );
+    }
+
+  public int getSize()
+    {
+    return size;
     }
 
   @Override

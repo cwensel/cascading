@@ -73,6 +73,16 @@ public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implement
     this.replacement = replacement;
     }
 
+  public String getReplacement()
+    {
+    return replacement;
+    }
+
+  public boolean isReplaceAll()
+    {
+    return replaceAll;
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
     {

@@ -101,6 +101,11 @@ public class ScriptFilter extends ScriptOperation implements Filter<ScriptOperat
     super( parameterTypes.length, script, Boolean.class, parameterNames, parameterTypes );
     }
 
+  public String getScript()
+    {
+    return getBlock();
+    }
+
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Context> filterCall )
     {

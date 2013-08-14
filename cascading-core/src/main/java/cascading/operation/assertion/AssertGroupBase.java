@@ -88,6 +88,16 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     this.size = size;
     }
 
+  public String getPatternString()
+    {
+    return patternString;
+    }
+
+  public long getSize()
+    {
+    return size;
+    }
+
   private Pattern getPattern()
     {
     Pattern pattern;

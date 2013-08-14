@@ -156,6 +156,11 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
       throw new IllegalArgumentException( "fieldDeclaration may only declare one field, was " + fieldDeclaration.print() );
     }
 
+  public String getScript()
+    {
+    return getBlock();
+    }
+
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {

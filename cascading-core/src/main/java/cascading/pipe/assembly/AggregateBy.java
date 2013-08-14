@@ -20,6 +20,7 @@
 
 package cascading.pipe.assembly;
 
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -436,6 +437,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
+  @ConstructorProperties({"pipe", "groupingFields", "assemblies"})
   public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, 0, assemblies );
@@ -449,6 +451,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
+  @ConstructorProperties({"pipe", "groupingFields", "threshold", "assemblies"})
   public AggregateBy( Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
@@ -462,6 +465,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
+  @ConstructorProperties({"name", "pipe", "groupingFields", "threshold", "assemblies"})
   public AggregateBy( String name, Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
@@ -475,6 +479,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "assemblies"})
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
     {
     this( name, pipes, groupingFields, 0, assemblies );
@@ -489,6 +494,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
+  @ConstructorProperties({"name", "pipes", "groupingFields", "threshold", "assemblies"})
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( name, threshold );

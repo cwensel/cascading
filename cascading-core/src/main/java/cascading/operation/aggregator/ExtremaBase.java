@@ -87,6 +87,11 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     Collections.addAll( this.ignoreValues, ignoreValues );
     }
 
+  public Collection getIgnoreValues()
+    {
+    return Collections.unmodifiableCollection( ignoreValues );
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {

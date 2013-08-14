@@ -78,6 +78,16 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     this.fraction = fraction;
     }
 
+  public long getSeed()
+    {
+    return seed;
+    }
+
+  public double getFraction()
+    {
+    return fraction;
+    }
+
   protected long makeSeed()
     {
     return System.identityHashCode( this ) * 2654435761L ^ System.currentTimeMillis();

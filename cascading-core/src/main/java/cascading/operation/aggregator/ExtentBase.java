@@ -62,6 +62,11 @@ public abstract class ExtentBase extends BaseOperation<Tuple[]> implements Aggre
     Collections.addAll( this.ignoreTuples, ignoreTuples );
     }
 
+  public Collection<Tuple> getIgnoreTuples()
+    {
+    return Collections.unmodifiableCollection( ignoreTuples );
+    }
+
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Tuple[]> operationCall )
     {

@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -105,6 +106,14 @@ public class Util
       hex.append( HEXES.charAt( ( b & 0xF0 ) >> 4 ) ).append( HEXES.charAt( b & 0x0F ) );
 
     return hex.toString();
+    }
+
+  public static <T> T[] copy( T[] source )
+    {
+    if( source == null )
+      return null;
+
+    return Arrays.copyOf( source, source.length );
     }
 
   /**

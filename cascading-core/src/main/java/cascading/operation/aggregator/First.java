@@ -106,6 +106,11 @@ public class First extends ExtentBase
     this.firstN = 1;
     }
 
+  public int getFirstN()
+    {
+    return firstN;
+    }
+
   protected void performOperation( Tuple[] context, TupleEntry entry )
     {
     if( context[ 0 ] == null )

@@ -31,6 +31,7 @@ import cascading.operation.Filter;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
+import cascading.util.Util;
 
 /**
  * Class Logic is the base class for logical {@link Filter} operations.
@@ -88,6 +89,16 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     verify();
 
     this.numArgs = getFieldsSize();
+    }
+
+  public Fields[] getArgumentSelectors()
+    {
+    return Util.copy( argumentSelectors );
+    }
+
+  public Filter[] getFilters()
+    {
+    return Util.copy( filters );
     }
 
   protected void verify()

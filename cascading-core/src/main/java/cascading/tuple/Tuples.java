@@ -20,6 +20,7 @@
 
 package cascading.tuple;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -216,6 +217,11 @@ public class Tuples
       destination[ i ] = coercions[ i ].coerce( tuple.getObject( i ), types[ i ] );
 
     return destination;
+    }
+
+  public static Collection asCollection( Tuple tuple )
+    {
+    return Collections.unmodifiableCollection( tuple.elements );
     }
 
   /**

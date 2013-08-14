@@ -70,6 +70,11 @@ public class ExpressionOperation extends ScriptOperation
     super( parameterTypes.length, expression, Object.class, parameterNames, parameterTypes );
     }
 
+  public String getExpression()
+    {
+    return getBlock();
+    }
+
   protected String[] guessParameterNames() throws CompileException, IOException
     {
     return ExpressionEvaluator.guessParameterNames( new Scanner( "expressionEval", new StringReader( block ) ) );

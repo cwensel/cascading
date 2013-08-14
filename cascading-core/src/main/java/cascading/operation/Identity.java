@@ -29,6 +29,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.Util;
 
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
@@ -96,6 +97,11 @@ public class Identity extends BaseOperation<Identity.Functor> implements Functio
 
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != types.length )
       throw new IllegalArgumentException( "fieldDeclaration and types must be the same size" );
+    }
+
+  public Type[] getTypes()
+    {
+    return Util.copy( types );
     }
 
   @Override

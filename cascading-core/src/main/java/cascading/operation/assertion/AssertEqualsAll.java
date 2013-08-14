@@ -52,6 +52,11 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
     this.value = value;
     }
 
+  public Object getValue()
+    {
+    return value;
+    }
+
   @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall assertionCall )
     {

@@ -21,11 +21,13 @@
 package cascading.operation.assertion;
 
 import java.beans.ConstructorProperties;
+import java.util.Collection;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.tuple.Tuple;
+import cascading.tuple.Tuples;
 
 /**
  * Class AssertNotEquals asserts the number of constructor values is equal
@@ -55,6 +57,11 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
       throw new IllegalArgumentException( "values may not be empty" );
 
     this.values = new Tuple( values );
+    }
+
+  public Collection getValues()
+    {
+    return Tuples.asCollection( values );
     }
 
   @Override

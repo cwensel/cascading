@@ -107,6 +107,11 @@ public class ScriptTupleFunction extends ScriptOperation implements Function<Scr
     super( parameterTypes.length, fieldDeclaration, script, Tuple.class, parameterNames, parameterTypes );
     }
 
+  public String getScript()
+    {
+    return getBlock();
+    }
+
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {
