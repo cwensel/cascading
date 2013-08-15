@@ -1256,7 +1256,7 @@ public class Splice extends Pipe
           Fields fields = incomingScope.getIncomingSpliceFields();
 
           if( !commonFields.equalsFields( fields ) )
-            throw new OperatorException( this, "merged streams must declare the same field names, expected: " + commonFields.printVerbose() + " found: " + fields.printVerbose() );
+            throw new OperatorException( this, "merged streams must declare the same field names, in the same order, expected: " + commonFields.printVerbose() + " found: " + fields.printVerbose() );
           }
 
         return commonFields;
