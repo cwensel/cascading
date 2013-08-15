@@ -397,6 +397,17 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method getFullIdentifier returns a fully qualified resource identifier.
    *
+   * @param flowProcess of type FlowProcess
+   * @return String
+   */
+  public String getFullIdentifier( FlowProcess<Config> flowProcess )
+    {
+    return getFullIdentifier( flowProcess.getConfigCopy() );
+    }
+
+  /**
+   * Method getFullIdentifier returns a fully qualified resource identifier.
+   *
    * @param conf of type Config
    * @return String
    */
@@ -408,11 +419,35 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method createResource creates the underlying resource.
    *
+   * @param flowProcess of type FlowProcess
+   * @return boolean
+   * @throws IOException when there is an error making directories
+   */
+  public boolean createResource( FlowProcess<Config> flowProcess ) throws IOException
+    {
+    return createResource( flowProcess.getConfigCopy() );
+    }
+
+  /**
+   * Method createResource creates the underlying resource.
+   *
    * @param conf of type Config
    * @return boolean
    * @throws IOException when there is an error making directories
    */
   public abstract boolean createResource( Config conf ) throws IOException;
+
+  /**
+   * Method deleteResource deletes the resource represented by this instance.
+   *
+   * @param flowProcess of type FlowProcess
+   * @return boolean
+   * @throws IOException when the resource cannot be deleted
+   */
+  public boolean deleteResource( FlowProcess<Config> flowProcess ) throws IOException
+    {
+    return deleteResource( flowProcess.getConfigCopy() );
+    }
 
   /**
    * Method deleteResource deletes the resource represented by this instance.
@@ -467,11 +502,35 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /**
    * Method resourceExists returns true if the path represented by this instance exists.
    *
+   * @param flowProcess of type FlowProcess
+   * @return true if the underlying resource already exists
+   * @throws IOException when the status cannot be determined
+   */
+  public boolean resourceExists( FlowProcess<Config> flowProcess ) throws IOException
+    {
+    return resourceExists( flowProcess.getConfigCopy() );
+    }
+
+  /**
+   * Method resourceExists returns true if the path represented by this instance exists.
+   *
    * @param conf of type Config
    * @return true if the underlying resource already exists
    * @throws IOException when the status cannot be determined
    */
   public abstract boolean resourceExists( Config conf ) throws IOException;
+
+  /**
+   * Method getModifiedTime returns the date this resource was last modified.
+   *
+   * @param flowProcess of type FlowProcess
+   * @return The date this resource was last modified.
+   * @throws IOException
+   */
+  public long getModifiedTime( FlowProcess<Config> flowProcess ) throws IOException
+    {
+    return getModifiedTime( flowProcess.getConfigCopy() );
+    }
 
   /**
    * Method getModifiedTime returns the date this resource was last modified.
