@@ -65,6 +65,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static data.InputData.*;
 
@@ -73,6 +75,8 @@ import static data.InputData.*;
  */
 public class HadoopTapPlatformTest extends PlatformTestCase implements Serializable
   {
+  private static final Logger LOG = LoggerFactory.getLogger( HadoopTapPlatformTest.class );
+
   public HadoopTapPlatformTest()
     {
     super( true );
@@ -83,6 +87,13 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     {
     if( !getPlatform().isUseCluster() )
       return;
+
+    // Dfs only runs on hdfs://, not just any distributed filesystem. if unavailable, skip test
+    if( !( (HadoopPlatform) getPlatform() ).isHDFSAvailable() )
+      {
+      LOG.warn( "skipped Dfs tests, HDFS is unavailable on current platform" );
+      return;
+      }
 
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 

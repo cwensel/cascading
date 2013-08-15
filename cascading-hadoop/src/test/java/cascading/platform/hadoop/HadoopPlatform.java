@@ -23,6 +23,8 @@ package cascading.platform.hadoop;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -170,6 +172,26 @@ public class HadoopPlatform extends TestPlatform
   public JobConf getJobConf()
     {
     return new JobConf( jobConf );
+    }
+
+  public boolean isHDFSAvailable()
+    {
+    try
+      {
+      FileSystem fileSystem = FileSystem.get( new URI( "hdfs:", null, null ), getJobConf() );
+
+      return fileSystem != null;
+      }
+    catch( IOException exception ) // if no hdfs, a no filesystem for scheme io exception will be caught
+      {
+      LOG.warn( "unable to get hdfs filesystem", exception );
+      }
+    catch( URISyntaxException exception )
+      {
+      throw new RuntimeException( "internal failure", exception );
+      }
+
+    return false;
     }
 
   @Override

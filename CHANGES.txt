@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.t.h.HadoopTapPlatformTest to skip the c.t.h.Dfs test if HDFS filesystem is unavailable on the current
+  configuration.
+
   Fixed issue where c.t.h.Hfs#resourceExists() could fail is the identifier represented a file globing pattern.
 
   Changed regex j.u.r.Pattern builder methods on c.s.u.DelimitedParser from static to instance methods.
