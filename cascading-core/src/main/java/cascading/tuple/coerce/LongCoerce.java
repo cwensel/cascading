@@ -45,7 +45,7 @@ public class LongCoerce extends Coercions.Coerce<Long>
     if( value instanceof Number )
       return ( (Number) value ).longValue();
     else if( value == null )
-      return 0l;
+      return 0L;
     else
       return Long.parseLong( value.toString() );
     }

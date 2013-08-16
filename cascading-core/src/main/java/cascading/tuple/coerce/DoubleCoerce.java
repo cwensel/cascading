@@ -45,7 +45,7 @@ public class DoubleCoerce extends Coercions.Coerce<Double>
     if( value instanceof Number )
       return ( (Number) value ).doubleValue();
     else if( value == null )
-      return 0d;
+      return 0D;
     else
       return Double.parseDouble( value.toString() );
     }

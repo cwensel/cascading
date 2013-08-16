@@ -45,7 +45,7 @@ public class FloatCoerce extends Coercions.Coerce<Float>
     if( value instanceof Number )
       return ( (Number) value ).floatValue();
     else if( value == null )
-      return 0f;
+      return 0F;
     else
       return Float.parseFloat( value.toString() );
     }
