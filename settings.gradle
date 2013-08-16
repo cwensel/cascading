@@ -19,3 +19,5 @@
  */
 
 include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop', 'cascading-platform'
+
+rootProject.name = 'cascading'

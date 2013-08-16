@@ -45,6 +45,8 @@ dependencies {
 allprojects {
 
   apply plugin: 'java'
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
 
   repositories {
     mavenLocal()
@@ -57,9 +59,6 @@ allprojects {
 subprojects {
 
   apply plugin: 'maven'
-  apply plugin: 'idea'
-  apply plugin: 'eclipse'
-
   apply from: '../etc/testing.gradle'
 
   group = 'cascading'
