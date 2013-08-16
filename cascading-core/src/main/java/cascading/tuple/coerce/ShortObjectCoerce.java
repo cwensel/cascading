@@ -45,7 +45,7 @@ public class ShortObjectCoerce extends Coercions.Coerce<Short>
     if( value instanceof Number )
       return ( (Number) value ).shortValue();
     else if( value == null || value.toString().isEmpty() )
-      return 0;
+      return null;
     else
       return Short.parseShort( value.toString() );
     }
