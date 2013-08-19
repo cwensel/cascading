@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.5.0 [unreleased]
+
 2.2.0 [unreleased]
 
   Updated c.t.h.HadoopTapPlatformTest to skip the c.t.h.Dfs test if HDFS filesystem is unavailable on the current
