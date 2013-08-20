@@ -20,6 +20,25 @@
 
 
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop-common', 'cascading-hadoop', 'cascading-hadoop2', 'cascading-platform'
+evaluationDependsOn( ':cascading-hadoop-common' )
 
-rootProject.name = 'cascading'
+sourceSets {
+  main {
+    java {
+      srcDirs += '../cascading-hadoop-common/src/main/java'
+    }
+    resources {
+      srcDirs += '../cascading-hadoop-common/src/main/resources'
+    }
+  }
+
+  test {
+    java {
+      srcDirs += '../cascading-hadoop-common/src/test/java'
+    }
+    resources {
+      srcDirs += '../cascading-hadoop-common/src/test/resources'
+    }
+  }
+}
+

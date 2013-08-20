@@ -20,6 +20,5 @@
 
 
 
-include 'cascading-core', 'cascading-xml', 'cascading-local', 'cascading-hadoop-common', 'cascading-hadoop', 'cascading-hadoop2', 'cascading-platform'
-
-rootProject.name = 'cascading'
+compileJava.enabled = false
+compileTestJava.enabled = false

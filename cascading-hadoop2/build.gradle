@@ -22,61 +22,27 @@
 
 apply from: '../cascading-hadoop-common/etc/config.gradle'
 
-//ext.hadoopVersion = '0.20.2' // no longer supported
-//ext.hadoopVersion = '0.20.205.0' // missing maven deps
-//ext.hadoopVersion = '1.0.4'  // missing maven deps
-ext.hadoopVersion = '1.1.2'
+ext.hadoop2Version = '2.0.5-alpha'
 
-if( System.properties[ 'hadoop.release.final' ] )
-  hadoopVersion = System.properties[ 'hadoop.release.final' ]
+if( System.properties[ 'hadoop2.release.final' ] )
+  hadoopVersion = System.properties[ 'hadoop2.release.final' ]
 
 dependencies {
 
   compile project( ':cascading-core' )
 
-  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
-
-  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
-    exclude group: 'ant'
-    exclude group: 'junit'
-    exclude group: 'oro' // causes transient build maven failures, ftw
-  }
-
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
-  testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
-    exclude group: 'oro' // causes transient build maven failures, ftw
-  }
-}
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-jobclient', version: hadoop2Version )
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version )
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-client', version: hadoop2Version )
+  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-annotations', version: hadoop2Version )
 
-if( hadoopVersion.startsWith( "1.1." ) )
-{
-  // do nothing
-}
-
-if( hadoopVersion.startsWith( "1.0." ) )
-{
-  dependencies {
-    testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
-
-    testRuntime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
-  }
-}
-
-if( hadoopVersion.startsWith( "0.20.205." ) )
-{
-  dependencies {
-    testRuntime 'javax.ws.rs:jsr311-api:1.1.1' // missed dep in hadoop, go figure
-    testRuntime 'org.codehaus.jackson:jackson-core-asl:1.0.1'
-    testRuntime 'org.codehaus.jackson:jackson-mapper-asl:1.0.1'
-  }
-}
-
-if( hadoopVersion.startsWith( "0.20." ) )
-{
-  dependencies {
-    testRuntime group: 'commons-io', name: 'commons-io', version: '2.0.1'
-  }
+  testCompile( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-jobclient', version: hadoop2Version, ext: 'test-jar' )
+  testCompile( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version, ext: 'test-jar' )
+  testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
 }
 
 test {
