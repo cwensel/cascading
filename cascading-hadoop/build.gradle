@@ -18,9 +18,7 @@
  * limitations under the License.
  */
 
-
-
-apply from: '../cascading-hadoop-common/etc/config.gradle'
+apply from: '../cascading-hadoop-shared/etc/config.gradle'
 
 //ext.hadoopVersion = '0.20.2' // no longer supported
 //ext.hadoopVersion = '0.20.205.0' // missing maven deps
@@ -42,6 +40,7 @@ dependencies {
     exclude group: 'oro' // causes transient build maven failures, ftw
   }
 
+//  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
