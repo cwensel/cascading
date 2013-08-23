@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-apply from: '../cascading-hadoop-shared/etc/config.gradle'
+apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
 
 //ext.hadoopVersion = '0.20.2' // no longer supported
 //ext.hadoopVersion = '0.20.205.0' // missing maven deps
