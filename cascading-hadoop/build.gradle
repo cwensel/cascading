@@ -40,7 +40,7 @@ dependencies {
     exclude group: 'oro' // causes transient build maven failures, ftw
   }
 
-//  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {

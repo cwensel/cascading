@@ -29,7 +29,6 @@ import java.util.Map;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -252,7 +251,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     TupleSerialization.addSerializationToken( jobProperties, 1000, BooleanWritable.class.getName() );
 
-    Flow flow = new HadoopFlowConnector( jobProperties ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( jobProperties ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -285,7 +284,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     TupleSerializationProps.addSerialization( properties, BytesSerialization.class.getName() );
 
-    Flow flow = new HadoopFlowConnector( properties ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -321,7 +320,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "group" ), pipeUpper, new Fields( "group" ), Fields.size( 8 ) );
 
-    Flow countFlow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow countFlow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, splice );
 
     countFlow.complete();
 
@@ -355,7 +354,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, splice );
 
     flow.complete();
 
@@ -405,7 +404,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 //    MultiMapReducePlanner.getJobConf( properties ).set( "io.serializations",serializations );
     properties.put( "io.serializations", TestSerialization.class.getName() );
 
-    Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();
 
@@ -519,7 +518,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     properties.put( "mapred.map.tasks", 1 );
 
-    Flow flow = new HadoopFlowConnector( properties ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();
 
@@ -570,11 +569,10 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     TupleSerialization.addSerialization( jobProperties, BigDecimalSerialization.class.getName() );
 
-    Flow flow = new HadoopFlowConnector( jobProperties ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( jobProperties ).connect( source, sink, pipe );
 
     flow.complete();
 
     validateLength( flow, 10 );
     }
-
   }

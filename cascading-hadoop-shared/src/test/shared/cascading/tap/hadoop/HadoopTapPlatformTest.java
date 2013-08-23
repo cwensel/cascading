@@ -33,7 +33,6 @@ import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.operation.Function;
@@ -46,7 +45,7 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
-import cascading.platform.hadoop.HadoopPlatform;
+import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.hadoop.TextDelimited;
@@ -89,7 +88,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       return;
 
     // Dfs only runs on hdfs://, not just any distributed filesystem. if unavailable, skip test
-    if( !( (HadoopPlatform) getPlatform() ).isHDFSAvailable() )
+    if( !( (BaseHadoopPlatform) getPlatform() ).isHDFSAvailable() )
       {
       LOG.warn( "skipped Dfs tests, HDFS is unavailable on current platform" );
       return;
@@ -179,7 +178,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Tap sink = new Hfs( new TextLine( 1 ), getOutputPath( "testnulls" ), SinkMode.REPLACE );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -241,7 +240,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Tap sink = new Hfs( new ResolvedScheme( new Fields( "num", "char" ) ), getOutputPath( "resolvedfields" ), SinkMode.REPLACE );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( source, sink, pipe );
 
     flow.complete();
 
@@ -275,11 +274,11 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
     Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 
-    Flow concatFlow = new HadoopFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
+    Flow concatFlow = getPlatform().getFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
 
     Tap nextSink = new Hfs( new TextLine(), getOutputPath( "glob2" ), SinkMode.REPLACE );
 
-    Flow nextFlow = new HadoopFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
+    Flow nextFlow = getPlatform().getFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
 
     Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
 
@@ -307,11 +306,11 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), "\\s" );
     Pipe concatPipe = new Each( new Pipe( "concat" ), new Fields( "line" ), splitter );
 
-    Flow concatFlow = new HadoopFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
+    Flow concatFlow = getPlatform().getFlowConnector( getProperties() ).connect( "first", source, sink, concatPipe );
 
     Tap nextSink = new Hfs( new TextLine(), getOutputPath( "globmultiource2" ), SinkMode.REPLACE );
 
-    Flow nextFlow = new HadoopFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
+    Flow nextFlow = getPlatform().getFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
 
     Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
 
@@ -420,16 +419,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "*" );
 
-    assertTrue( sourceExists.resourceExists( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
       fail();
       }
     catch( IOException exception )
@@ -446,16 +445,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "{*}" );
 
-    assertTrue( sourceExists.resourceExists( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (HadoopPlatform) getPlatform() ).getJobConf() ) );
+      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
       fail();
       }
     catch( IOException exception )

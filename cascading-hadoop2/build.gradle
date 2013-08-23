@@ -29,7 +29,7 @@ dependencies {
 
   compile project( ':cascading-core' )
 
-//  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
   providedCompile( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )

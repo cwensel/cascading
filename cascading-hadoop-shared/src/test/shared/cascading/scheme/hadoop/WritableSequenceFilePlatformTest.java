@@ -24,7 +24,6 @@ import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
@@ -62,9 +61,9 @@ public class WritableSequenceFilePlatformTest extends PlatformTestCase
     Tap tapKey = new Hfs( new WritableSequenceFile( new Fields( "offset" ), LongWritable.class, null ), getOutputPath( "key" ), SinkMode.REPLACE );
     Tap tapValue = new Hfs( new WritableSequenceFile( new Fields( "line" ), Text.class ), getOutputPath( "value" ), SinkMode.REPLACE );
 
-    Flow flowKeyValue = new HadoopFlowConnector( getProperties() ).connect( source, tapKeyValue, pipe );
-    Flow flowKey = new HadoopFlowConnector( getProperties() ).connect( tapKeyValue, tapKey, new Pipe( "key" ) );
-    Flow flowValue = new HadoopFlowConnector( getProperties() ).connect( tapKeyValue, tapValue, new Pipe( "value" ) );
+    Flow flowKeyValue = getPlatform().getFlowConnector( getProperties() ).connect( source, tapKeyValue, pipe );
+    Flow flowKey = getPlatform().getFlowConnector( getProperties() ).connect( tapKeyValue, tapKey, new Pipe( "key" ) );
+    Flow flowValue = getPlatform().getFlowConnector( getProperties() ).connect( tapKeyValue, tapValue, new Pipe( "value" ) );
 
     Cascade cascade = new CascadeConnector().connect( "keyvalues", flowKeyValue, flowKey, flowValue );
 

@@ -49,7 +49,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.platform.hadoop.HadoopPlatform;
+import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
@@ -85,7 +85,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     Map<Object, Object> props = getProperties();
-    Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -110,7 +110,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     Map<Object, Object> props = getProperties();
-    Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -137,7 +137,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     Map<Object, Object> props = getProperties();
-    Flow flow = new HadoopFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -184,7 +184,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    final Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
+    final Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "stopped.dot" );
 
@@ -274,7 +274,7 @@ public class FlowPlatformTest extends PlatformTestCase
     try
       {
       // assembly serialization now happens during Flow construction, no chance to use a listener to catch
-      Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+      Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
       fail( "did not throw serialization exception" );
       }
     catch( Exception exception )
@@ -303,7 +303,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
 
     flow.start();
     flow.stop(); // should not fail
@@ -373,7 +373,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = new HadoopFlowConnector( getProperties() ).connect( sources, sink, splice );
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, splice );
 
 //    countFlow.writeDOT( "stopped.dot" );
 
@@ -430,14 +430,14 @@ public class FlowPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     Map<Object, Object> props = getProperties();
-    Flow flow1 = new HadoopFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow1 = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
 //    System.out.println( "flow.getID() = " + flow1.getID() );
 
     assertNotNull( "missing id", flow1.getID() );
     assertNotNull( "missing id in conf", ( (HadoopFlow) flow1 ).getConfig().get( "cascading.flow.id" ) );
 
-    Flow flow2 = new HadoopFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow2 = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
     assertTrue( "same id", !flow1.getID().equalsIgnoreCase( flow2.getID() ) );
     }
@@ -450,7 +450,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    JobConf conf = ( (HadoopPlatform) getPlatform() ).getJobConf();
+    JobConf conf = ( (BaseHadoopPlatform) getPlatform() ).getJobConf();
 
     conf.set( AppProps.APP_NAME, "testname" );
 
@@ -458,7 +458,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Properties properties = props.buildProperties( conf ); // convert job conf to properties instance
 
-    Flow flow = new HadoopFlowConnector( properties ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
     assertEquals( "testname", flow.getProperty( AppProps.APP_NAME ) );
     assertEquals( "1.2.3", flow.getProperty( AppProps.APP_VERSION ) );

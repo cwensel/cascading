@@ -18,12 +18,27 @@
  * limitations under the License.
  */
 
-package cascading.test;
+package cascading.hadoop2.platform;
+
+import java.util.Map;
+
+import cascading.flow.FlowConnector;
+import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
+import cascading.platform.hadoop.BaseHadoopPlatform;
 
 /**
- * Retained for backwards compatibility. See {@link cascading.platform.hadoop.HadoopPlatform}.
+ * Class HadoopPlatform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
+ * so that all *PlatformTest classes can be tested against Apache Hadoop.
  */
-@Deprecated
-public class HadoopPlatform extends cascading.platform.hadoop.HadoopPlatform
+public class Hadoop2Platform extends BaseHadoopPlatform
   {
+  public Hadoop2Platform()
+    {
+    }
+
+  @Override
+  public FlowConnector getFlowConnector( Map<Object, Object> properties )
+    {
+    return new Hadoop2MR1FlowConnector( properties );
+    }
   }

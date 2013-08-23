@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-evaluationDependsOn( ':cascading-hadoop-shared' )
+//evaluationDependsOn( ':cascading-hadoop-shared' )
 
 idea {
   pathVariables MODULE_DIR: file("${rootDir}/cascading-hadoop-shared")

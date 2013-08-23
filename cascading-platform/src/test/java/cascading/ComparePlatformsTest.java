@@ -57,44 +57,52 @@ public class ComparePlatformsTest extends CascadingTestCase
     // total hack for now
     File localRoot = new File( roots[ 0 ].contains( "/cascading-local/" ) ? roots[ 0 ] : roots[ 1 ], "local" );
     File hadoopRoot = new File( roots[ 0 ].contains( "/cascading-hadoop/" ) ? roots[ 0 ] : roots[ 1 ], "hadoop" );
+    File hadoop2Root = new File( roots[ 0 ].contains( "/cascading-hadoop2/" ) ? roots[ 0 ] : roots[ 1 ], "hadoop2" );
 
     LOG.info( "local path: {}", localRoot );
     LOG.info( "hadoop path: {}", hadoopRoot );
+    LOG.info( "hadoop2 path: {}", hadoop2Root );
 
-    LinkedList<File> localFiles = new LinkedList<File>( FileUtils.listFiles( localRoot, new RegexFileFilter( "^[\\w-]+" ), TrueFileFilter.INSTANCE ) );
-    LinkedList<File> hadoopFiles = new LinkedList<File>();
+    TestSuite suite = new TestSuite();
 
-    LOG.info( "found local files: {}", localFiles.size() );
+    createComparisons( localRoot, hadoopRoot, suite );
+    createComparisons( localRoot, hadoop2Root, suite );
 
-    int rootLength = localRoot.toString().length() + 1;
+    return suite;
+    }
 
-    ListIterator<File> iterator = localFiles.listIterator();
+  private static void createComparisons( File lhsRoot, File rhsRoot, TestSuite suite )
+    {
+    LinkedList<File> lhsFiles = new LinkedList<File>( FileUtils.listFiles( lhsRoot, new RegexFileFilter( "^[\\w-]+" ), TrueFileFilter.INSTANCE ) );
+    LinkedList<File> rhsFiles = new LinkedList<File>();
+
+    LOG.info( "found lhs files: {}", lhsFiles.size() );
+
+    int rootLength = lhsRoot.toString().length() + 1;
+
+    ListIterator<File> iterator = lhsFiles.listIterator();
     while( iterator.hasNext() )
       {
       File localFile = iterator.next();
-      File file = new File( hadoopRoot, localFile.toString().substring( rootLength ) );
+      File file = new File( rhsRoot, localFile.toString().substring( rootLength ) );
 
       if( localFile.toString().endsWith( NONDETERMINISTIC ) )
         iterator.remove();
       else if( file.exists() )
-        hadoopFiles.add( file );
+        rhsFiles.add( file );
       else
         iterator.remove();
       }
 
-    LOG.info( "running {} comparisons", localFiles.size() );
+    LOG.info( "running {} comparisons", lhsFiles.size() );
 
-    TestSuite suite = new TestSuite();
-
-    for( int i = 0; i < localFiles.size(); i++ )
+    for( int i = 0; i < lhsFiles.size(); i++ )
       {
-      File localFile = localFiles.get( i );
-      File hadoopFile = hadoopFiles.get( i );
+      File localFile = lhsFiles.get( i );
+      File hadoopFile = rhsFiles.get( i );
 
       suite.addTest( new CompareTestCase( localFile, hadoopFile ) );
       }
-
-    return suite;
     }
 
   public static class CompareTestCase extends TestCase

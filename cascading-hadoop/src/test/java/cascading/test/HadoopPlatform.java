@@ -18,12 +18,12 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-//include 'cascading-hadoop-shared'
-include 'cascading-hadoop'
-include 'cascading-hadoop2'
-include 'cascading-platform'
+package cascading.test;
 
-rootProject.name = 'cascading'
+/**
+ * Retained for backwards compatibility. See {@link cascading.hadoop.platform.HadoopPlatform}.
+ */
+@Deprecated
+public class HadoopPlatform extends cascading.hadoop.platform.HadoopPlatform
+  {
+  }

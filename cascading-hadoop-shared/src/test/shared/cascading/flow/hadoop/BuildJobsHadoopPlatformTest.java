@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.CascadingTestCase;
+import cascading.PlatformTestCase;
 import cascading.TestBuffer;
 import cascading.TestFunction;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -70,10 +71,11 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.junit.Test;
 
-public class BuildJobsHadoopTest extends CascadingTestCase
+public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   {
-  public BuildJobsHadoopTest()
+  public BuildJobsHadoopPlatformTest()
     {
+    super( false );
     }
 
   /**
@@ -89,7 +91,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    Flow flow = new HadoopFlowConnector().connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -129,7 +131,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new Count(), new Fields( 0, 1 ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -161,7 +163,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 0 ) ); // in:_all out:_all
     pipe = new Every( pipe, new Fields( 0 ), new Count(), new Fields( 0, 1 ) ); // in:_all out:_all,count
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -194,7 +196,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( splice.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -232,7 +234,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( cogroup.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, cogroup ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, cogroup ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -267,7 +269,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( splice.getName(), new Hfs( new TextLine(), "output/path" ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -299,7 +301,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, pipe );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, pipe );
       fail( "did not throw flow exception" );
       }
     catch( Exception exception )
@@ -331,7 +333,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
 //    flow.writeDOT( "safesplit.dot" );
 
@@ -366,7 +368,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      new HadoopFlowConnector().connect( sources, sinks, pipe );
+      getPlatform().getFlowConnector().connect( sources, sinks, pipe );
       fail( "did not catch missing tails" );
       }
     catch( Exception exception )
@@ -400,7 +402,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -440,7 +442,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "right", sink2 );
     sinks.put( "middle", sink3 );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -484,7 +486,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
 //    flow.writeDOT( "splitcomplex.dot" );
 
@@ -543,7 +545,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     sinks.put( "left", sink1 );
     sinks.put( "right", sink2 );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -587,7 +589,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Map sinks = new HashMap();
     sinks.put( "merge", sink );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -617,7 +619,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Map sinks = new HashMap();
     sinks.put( "merge", sink );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -641,7 +643,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Map sinks = new HashMap();
     sinks.put( "cogroup", sink );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -669,7 +671,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 //    flow.writeDOT( "dupesource.dot" );
       fail( "did not throw planner exception" );
       }
@@ -706,7 +708,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail( "did not throw planner exception" );
       }
     catch( PlannerException exception )
@@ -767,7 +769,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Map sinks = new HashMap();
     sinks.put( "merge", sink );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -795,7 +797,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Pipe merge = new GroupBy( "merge", Pipe.pipes( left, right ), new Fields( "offset" ) );
 
-    Flow flow = new HadoopFlowConnector().connect( source, sink, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, merge );
 
 //    flow.writeDOT( "splitmerge.dot" );
 
@@ -827,7 +829,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sink, splice2 );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
 
     assertEquals( "not equal: steps.size()", 2, flow.getFlowSteps().size() );
     }
@@ -858,7 +860,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Properties properties = new Properties();
     FlowConnectorProps.setIntermediateSchemeClass( properties, TextLine.class );
 
-    HadoopFlowConnector flowConnector = new HadoopFlowConnector( properties );
+    FlowConnector flowConnector = getPlatform().getFlowConnector( properties );
 
     Flow flow = flowConnector.connect( sources, sink, splice2 );
 
@@ -903,7 +905,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sink, splice2 );
+      flow = getPlatform().getFlowConnector().connect( sources, sink, splice2 );
       }
     catch( FlowException exception )
       {
@@ -937,7 +939,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "num1", "value" ) );
 
-    Flow countFlow = new HadoopFlowConnector().connect( sources, sink, splice );
+    Flow countFlow = getPlatform().getFlowConnector().connect( sources, sink, splice );
     }
 
   @Test
@@ -963,7 +965,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     splice = new Every( splice, new First( new Fields( "value" ) ), new Fields( "somenum", "value" ) );
 
-    Flow countFlow = new HadoopFlowConnector().connect( sources, sink, splice );
+    Flow countFlow = getPlatform().getFlowConnector().connect( sources, sink, splice );
     }
 
   @Test
@@ -1004,7 +1006,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, splice3 );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, splice3 );
       }
     catch( FlowException exception )
       {
@@ -1054,7 +1056,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, splice3 );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, splice3 );
       }
     catch( FlowException exception )
       {
@@ -1119,7 +1121,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, output1, output2 );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, output1, output2 );
       }
     catch( FlowException exception )
       {
@@ -1162,7 +1164,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
       }
     catch( PlannerException exception )
       {
@@ -1202,7 +1204,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
       fail( "did not throw planner exception" );
       }
     catch( PlannerException exception )
@@ -1237,7 +1239,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Flow flow = null;
     try
       {
-      flow = new HadoopFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
+      flow = getPlatform().getFlowConnector().connect( sources, sinks, Pipe.pipes( left, right ) );
       }
     catch( FlowException exception )
       {
@@ -1319,7 +1321,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     assertEquals( "not equal: steps.size()", 3, flow.getFlowSteps().size() );
     }
@@ -1349,7 +1351,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     sinks.put( merge.getName(), new Hfs( new TextLine(), "output/path" ) );
 
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
 
     assertEquals( "not equal: steps.size()", 3, flow.getFlowSteps().size() );
     }
@@ -1375,7 +1377,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail( "did not catch missing source tap" );
       }
     catch( PlannerException exception )
@@ -1410,7 +1412,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail( "did not catch missing sink tap" );
       }
     catch( PlannerException exception )
@@ -1446,7 +1448,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail( "did not catch extra source tap" );
       }
     catch( PlannerException exception )
@@ -1483,7 +1485,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail( "did not catch extra sink tap" );
       }
     catch( PlannerException exception )
@@ -1510,7 +1512,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( 1 ) );
     pipe = new Every( pipe, new Fields( 1 ), new TestBuffer( new Fields( "fourth" ), "value" ), new Fields( 0, 1 ) );
 
-    List steps = new HadoopFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
+    List steps = getPlatform().getFlowConnector().connect( sources, sinks, pipe ).getFlowSteps();
 
     assertEquals( "wrong size", 1, steps.size() );
 
@@ -1543,7 +1545,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      new HadoopFlowConnector().connect( sources, sinks, pipe );
+      getPlatform().getFlowConnector().connect( sources, sinks, pipe );
       fail( "did not throw planner exception" );
       }
     catch( Exception exception )
@@ -1569,7 +1571,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      new HadoopFlowConnector().connect( sources, sinks, pipe );
+      getPlatform().getFlowConnector().connect( sources, sinks, pipe );
       fail( "did not throw planner exception" );
       }
     catch( Exception exception )
@@ -1602,7 +1604,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num9" ), pipeNum102, new Fields( "num" ), new Fields( "num1", "num2", "num3" ) );
 
-    HadoopFlowConnector flowConnector = new HadoopFlowConnector();
+    FlowConnector flowConnector = getPlatform().getFlowConnector();
 
     try
       {
@@ -1612,7 +1614,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     catch( Exception exception )
       {
       // ignore
-      assertTrue( "missing message", exception.getMessage().contains( "BuildJobsHadoopTest.testErrorMessages" ) );
+      assertTrue( "missing message", exception.getMessage().contains( "BuildJobsHadoopPlatformTest.testErrorMessages" ) );
       }
     }
 
@@ -1648,7 +1650,6 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     splitMiddle( false, false );
     }
 
-  @Test
   private void splitMiddle( boolean before, boolean testTempReplaced )
     {
     Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "lower" );
@@ -1699,7 +1700,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     if( !before )
       right = new Pipe( "right", right );
 
-    Flow flow = new HadoopFlowConnector().connect( "splitmiddle", sources, sinks, left, right );
+    Flow flow = getPlatform().getFlowConnector().connect( "splitmiddle", sources, sinks, left, right );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -1739,7 +1740,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( tap, tap, pipe );
+      Flow flow = getPlatform().getFlowConnector().connect( tap, tap, pipe );
       fail( "did not throw planner exception" );
       }
     catch( Exception exception )
@@ -1763,7 +1764,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( source, sink, pipe );
+      Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
       fail( "did not fail" );
       }
     catch( Exception exception )
@@ -1791,7 +1792,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     defaultProperties.setProperty( "test.key", "test.value" );
 
-    HadoopFlow flow = (HadoopFlow) new HadoopFlowConnector( new Properties( defaultProperties ) ).connect( source, sink, pipe );
+    HadoopFlow flow = (HadoopFlow) getPlatform().getFlowConnector( new Properties( defaultProperties ) ).connect( source, sink, pipe );
 
     assertEquals( "test flow", "test.value", flow.getProperty( "test.key" ) );
     assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getFlowSteps().get( 0 ) ).getInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
@@ -1822,7 +1823,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
 
     try
       {
-      Flow flow = new HadoopFlowConnector().connect( sources, sinks, merge );
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
       fail();
       }
     catch( Exception exception )

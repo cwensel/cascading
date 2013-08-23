@@ -18,12 +18,27 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-//include 'cascading-hadoop-shared'
-include 'cascading-hadoop'
-include 'cascading-hadoop2'
-include 'cascading-platform'
+package cascading.hadoop.platform;
 
-rootProject.name = 'cascading'
+import java.util.Map;
+
+import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.platform.hadoop.BaseHadoopPlatform;
+
+/**
+ * Class HadoopPlatform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
+ * so that all *PlatformTest classes can be tested against Apache Hadoop.
+ */
+public class HadoopPlatform extends BaseHadoopPlatform
+  {
+  public HadoopPlatform()
+    {
+    }
+
+  @Override
+  public FlowConnector getFlowConnector( Map<Object, Object> properties )
+    {
+    return new HadoopFlowConnector( properties );
+    }
+  }
