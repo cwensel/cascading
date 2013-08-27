@@ -108,6 +108,26 @@ public abstract class TestPlatform
     this.numReducers = numReducers;
     }
 
+  public void setNumMapTasks( Map<Object, Object> properties, int numMapTasks )
+    {
+    // do nothing
+    }
+
+  public void setNumReduceTasks( Map<Object, Object> properties, int numReduceTasks )
+    {
+    // do nothing
+    }
+
+  public Integer getNumMapTasks( Map<Object, Object> properties )
+    {
+    return null;
+    }
+
+  public Integer getNumReduceTasks( Map<Object, Object> properties )
+    {
+    return null;
+    }
+
   public abstract void setUp() throws IOException;
 
   public abstract Map<Object, Object> getProperties();

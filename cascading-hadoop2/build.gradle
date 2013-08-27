@@ -21,10 +21,10 @@
 apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
 
 idea {
-  pathVariables MODULE_DIR: file("${rootDir}/cascading-hadoop")
+  pathVariables MODULE_DIR: file( "${rootDir}/cascading-hadoop" )
 }
 
-ext.hadoop2Version = '2.0.5-alpha'
+ext.hadoop2Version = '2.1.0-beta'
 
 if( System.properties[ 'hadoop2.release.final' ] )
   hadoopVersion = System.properties[ 'hadoop2.release.final' ]
@@ -47,6 +47,9 @@ dependencies {
 }
 
 test {
+
+  delete( "target" ) // hardcoded path in hadoop2
+
   forkEvery = 1 // static fields on the platform test get munged otherwise
 
   systemProperties[ 'hadoop.log.dir' ] = new String( "${buildDir}/test/log" )

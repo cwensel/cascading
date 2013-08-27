@@ -253,7 +253,14 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector( jobProperties ).connect( source, sink, pipe );
 
-    flow.complete();
+    try
+      {
+      flow.complete();
+      }
+    finally
+      {
+//      Thread.sleep( 60*60*1000 );
+      }
 
     validateLength( flow.openSource(), 10 ); // validate source, this once, as a sanity check
     validateLength( flow, 8, null );
@@ -516,7 +523,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
       TupleSerialization.addSerialization( properties, NoTokenTestBytesSerialization.class.getName() );
       }
 
-    properties.put( "mapred.map.tasks", 1 );
+    getPlatform().setNumMapTasks( properties, 1 );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 
@@ -562,7 +569,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     pipe = new Every( pipe, new Count(), new Fields( "offset", "count" ) );
 
-    Fields sinkFields = new Fields("offset","count").applyTypes( Coercions.BIG_DECIMAL, long.class );
+    Fields sinkFields = new Fields( "offset", "count" ).applyTypes( Coercions.BIG_DECIMAL, long.class );
     Tap sink = new Hfs( new SequenceFile( sinkFields ), getOutputPath( "bigdecimal" ), SinkMode.REPLACE );
 
     Map<Object, Object> jobProperties = getProperties();

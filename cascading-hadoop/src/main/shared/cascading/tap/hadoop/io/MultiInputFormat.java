@@ -180,6 +180,7 @@ public class MultiInputFormat implements InputFormat
       Map<String, String> config = configs.get( i );
 
       config.remove( "mapred.input.dir" ); // this is a redundant value, will show up cluster side
+      config.remove( "mapreduce.input.fileinputformat.inputdir" ); // hadoop2
 
       InputSplit[] split = splits[ i ];
 

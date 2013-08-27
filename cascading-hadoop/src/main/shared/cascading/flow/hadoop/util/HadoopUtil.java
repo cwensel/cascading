@@ -344,6 +344,7 @@ public class HadoopUtil
         configs.remove( entry.getKey() );
 
       configs.remove( "mapred.working.dir" );
+      configs.remove( "mapreduce.job.working.dir" ); // hadoop2
       }
 
     return configs;

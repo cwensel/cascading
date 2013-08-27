@@ -104,6 +104,9 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     runningJob = jobClient.submitJob( currentConf );
 
     flowStep.logInfo( "submitted hadoop job: " + runningJob.getID() );
+
+    if( runningJob.getTrackingURL() != null )
+      flowStep.logInfo( "tracking url: " + runningJob.getTrackingURL() );
     }
 
   protected boolean internalNonBlockingIsSuccessful() throws IOException

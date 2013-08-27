@@ -30,12 +30,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
-import cascading.flow.FlowProps;
 import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.platform.TestPlatform;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
@@ -48,14 +45,12 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.TemplateTap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Fields;
-import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MiniMRCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +60,11 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseHadoopPlatform extends TestPlatform
   {
   private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopPlatform.class );
-  public transient static MiniDFSCluster dfs;
+
   public transient static FileSystem fileSys;
-  public transient static MiniMRCluster mr;
-  public transient static JobConf jobConf;
+  public transient static Configuration jobConf;
   public transient static Map<Object, Object> properties = new HashMap<Object, Object>();
+
   public int numMapTasks = 4;
   public int numReduceTasks = 1;
   protected String logger;
@@ -95,63 +90,6 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     {
     if( numReduceTasks > 0 )
       this.numReduceTasks = numReduceTasks;
-    }
-
-  @Override
-  public synchronized void setUp() throws IOException
-    {
-    if( jobConf != null )
-      return;
-
-    if( !isUseCluster() )
-      {
-      LOG.info( "not using cluster" );
-      jobConf = new JobConf();
-      fileSys = FileSystem.get( jobConf );
-      }
-    else
-      {
-      LOG.info( "using cluster" );
-
-      if( Util.isEmpty( System.getProperty( "hadoop.log.dir" ) ) )
-        System.setProperty( "hadoop.log.dir", "build/test/log" );
-
-      if( Util.isEmpty( System.getProperty( "hadoop.tmp.dir" ) ) )
-        System.setProperty( "hadoop.tmp.dir", "build/test/tmp" );
-
-      new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs();
-
-      JobConf conf = new JobConf();
-
-      conf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
-
-      dfs = new MiniDFSCluster( conf, 4, true, null );
-      fileSys = dfs.getFileSystem();
-      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1, null, null, conf );
-
-      jobConf = mr.createJobConf();
-
-      jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
-      jobConf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
-      jobConf.setInt( "jobclient.completion.poll.interval", 50 );
-      jobConf.setInt( "jobclient.progress.monitor.poll.interval", 50 );
-      jobConf.setMapSpeculativeExecution( false );
-      jobConf.setReduceSpeculativeExecution( false );
-      }
-
-    jobConf.setNumMapTasks( numMapTasks );
-    jobConf.setNumReduceTasks( numReduceTasks );
-
-    Map<Object, Object> globalProperties = getGlobalProperties();
-
-    if( logger != null )
-      globalProperties.put( "log4j.logger", logger );
-
-    FlowProps.setJobPollingInterval( globalProperties, 10 ); // should speed up tests
-
-    HadoopPlanner.copyProperties( jobConf, globalProperties ); // copy any external properties
-
-    HadoopPlanner.copyJobConf( properties, jobConf ); // put all properties on the jobconf
     }
 
   @Override

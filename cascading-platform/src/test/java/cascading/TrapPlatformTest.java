@@ -356,8 +356,8 @@ public class TrapPlatformTest extends PlatformTestCase
     Map<Object, Object> properties = getProperties();
 
     // compensate for running in cluster mode
-    properties.put( "mapred.map.tasks", 1 );
-    properties.put( "mapred.reduce.tasks", 1 );
+    getPlatform().setNumMapTasks( properties, 1 );
+    getPlatform().setNumReduceTasks( properties, 1 );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
 

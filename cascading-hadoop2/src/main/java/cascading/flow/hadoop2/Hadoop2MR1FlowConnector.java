@@ -24,7 +24,6 @@ import java.beans.ConstructorProperties;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
-import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.planner.FlowPlanner;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
@@ -69,6 +68,6 @@ public class Hadoop2MR1FlowConnector extends FlowConnector
 
   protected FlowPlanner createFlowPlanner()
     {
-    return new HadoopPlanner();
+    return new Hadoop2MR1Planner();
     }
   }
