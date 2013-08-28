@@ -65,7 +65,9 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
     {
     getPlatform().copyFromLocal( inputFileApache );
 
-    JobConf conf = new JobConf( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() );
+    JobConf defaultConf = ( (BaseHadoopPlatform) getPlatform() ).getJobConf();
+
+    JobConf conf = new JobConf( defaultConf );
     conf.setJobName( "mrflow" );
 
     conf.setOutputKeyClass( LongWritable.class );
@@ -84,11 +86,11 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
 
     Flow flow = new MapReduceFlow( "mrflow", conf, true );
 
-    validateLength( flow.openTapForRead( new Hfs( new TextLine(), inputFileApache ) ), 10 );
+    validateLength( new Hfs( new TextLine(), inputFileApache ).openForRead( new HadoopFlowProcess( defaultConf ) ), 10 );
 
     flow.complete();
 
-    validateLength( flow.openTapForRead( new Hfs( new TextLine(), outputPath ) ), 10 );
+    validateLength( new Hfs( new TextLine(), outputPath ).openForRead( new HadoopFlowProcess( defaultConf ) ), 10 );
     }
 
   private String remove( String path, boolean delete ) throws IOException
@@ -179,6 +181,6 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
 
     cascade.complete();
 
-    validateLength( thirdMR.openTapForRead( new Hfs( new TextLine(), sinkPath3 ) ), 10 );
+    validateLength( new Hfs( new TextLine(), sinkPath3 ).openForRead( new HadoopFlowProcess( defaultConf ) ), 10 );
     }
   }
