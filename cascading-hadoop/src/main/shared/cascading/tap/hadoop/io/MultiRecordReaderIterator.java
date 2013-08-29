@@ -88,8 +88,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     if( property == null )
       {
       // default behavior is to accumulate paths, so remove any set prior
-      conf = HadoopUtil.removePropertiesFrom( conf, "mapred.input.dir" );
-      conf = HadoopUtil.removePropertiesFrom( conf, "mapreduce.input.fileinputformat.inputdir" ); // hadoop2
+      conf = HadoopUtil.removePropertiesFrom( conf, "mapred.input.dir", "mapreduce.input.fileinputformat.inputdir" ); // hadoop2
       tap.sourceConfInit( flowProcess, conf );
       }
 
