@@ -10,6 +10,12 @@ import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * 
+ * This piece of code is borrowed from pig (under Apache v2 license) with some customized modification
+ * 
+ */
 public class ReducerEstimaterUtil {
 
 	private static final Logger LOG = LoggerFactory

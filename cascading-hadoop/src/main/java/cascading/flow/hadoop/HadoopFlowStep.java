@@ -37,7 +37,6 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
-import cascading.tap.hadoop.ReducerEstimater;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.hadoop.util.TempHfs;
@@ -112,28 +111,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         conf.setNumReduceTasks( getSink().getScheme().getNumSinkParts() );
       else
         conf.setNumMapTasks( getSink().getScheme().getNumSinkParts() );
-      }else{
-    	if (getGroup()!=null){
-          Set<Tap> taps=getSources();
-    	  boolean allEstimatable=true;
-          for (Tap tap:taps){
-            if (!(tap instanceof ReducerEstimater)){
-                   allEstimatable=false;
-            }
-          }
-          if (allEstimatable){
-           int reducerNum=0;
-           for (Tap tap:taps){
-             try {
-                     reducerNum+=((ReducerEstimater)tap).getReducerNum(conf);
-             } catch (IOException e) {
-                     e.printStackTrace();
-                     throw new RuntimeException("IOException happens when estimating reducer from tap:"+tap.getIdentifier());
-             }
-           }
-           conf.setNumReduceTasks(reducerNum);
-         }
-        }
       }
 
     conf.setOutputKeyComparatorClass( TupleComparator.class );
