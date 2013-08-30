@@ -54,10 +54,9 @@ public class ComparePlatformsTest extends CascadingTestCase
 
     String[] roots = root.split( "," );
 
-    // total hack for now
-    File localRoot = new File( roots[ 0 ].contains( "/cascading-local/" ) ? roots[ 0 ] : roots[ 1 ], "local" );
-    File hadoopRoot = new File( roots[ 0 ].contains( "/cascading-hadoop/" ) ? roots[ 0 ] : roots[ 1 ], "hadoop" );
-    File hadoop2Root = new File( roots[ 0 ].contains( "/cascading-hadoop2/" ) ? roots[ 0 ] : roots[ 1 ], "hadoop2" );
+    File localRoot = new File( find( roots, "/cascading-local/" ), "local" );
+    File hadoopRoot = new File( find( roots, "/cascading-hadoop/" ), "hadoop" );
+    File hadoop2Root = new File( find( roots, "/cascading-hadoop2/" ), "hadoop2" );
 
     LOG.info( "local path: {}", localRoot );
     LOG.info( "hadoop path: {}", hadoopRoot );
@@ -73,6 +72,8 @@ public class ComparePlatformsTest extends CascadingTestCase
 
   private static void createComparisons( File lhsRoot, File rhsRoot, TestSuite suite )
     {
+    LOG.info( "comparing directory: {}, with: {}", lhsRoot, rhsRoot );
+
     LinkedList<File> lhsFiles = new LinkedList<File>( FileUtils.listFiles( lhsRoot, new RegexFileFilter( "^[\\w-]+" ), TrueFileFilter.INSTANCE ) );
     LinkedList<File> rhsFiles = new LinkedList<File>();
 
@@ -103,6 +104,17 @@ public class ComparePlatformsTest extends CascadingTestCase
 
       suite.addTest( new CompareTestCase( localFile, hadoopFile ) );
       }
+    }
+
+  private static String find( String[] roots, String string )
+    {
+    for( String root : roots )
+      {
+      if( root.contains( string ) )
+        return root;
+      }
+
+    throw new IllegalStateException( "not found in roots: " + string );
     }
 
   public static class CompareTestCase extends TestCase
