@@ -50,6 +50,9 @@ import cascading.tuple.Fields;
  * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin}
  * {@link cascading.pipe.joiner.Joiner} class.
  * <p/>
+ * To implement a custom join, implement the {@link Joiner} interface. Or, as of Cascading 2.5, use a
+ * {@link cascading.pipe.joiner.BufferJoin} and implement the join in a {@link cascading.operation.Buffer}.
+ * <p/>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once.
  * <p/>
@@ -91,6 +94,7 @@ import cascading.tuple.Fields;
  * @see cascading.pipe.joiner.LeftJoin
  * @see cascading.pipe.joiner.RightJoin
  * @see cascading.pipe.joiner.MixedJoin
+ * @see cascading.pipe.joiner.BufferJoin
  * @see cascading.tuple.Fields
  * @see cascading.tuple.collect.SpillableTupleList
  */

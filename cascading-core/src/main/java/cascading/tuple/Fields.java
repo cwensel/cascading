@@ -1315,6 +1315,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       {
       Comparable field = fields.get( i );
 
+      // todo: likely problematic when appending a selector
       if( field instanceof Integer && ( (Integer) field ) > -1 )
         continue;
 

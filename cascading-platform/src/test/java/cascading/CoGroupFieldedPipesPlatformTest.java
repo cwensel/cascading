@@ -116,7 +116,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new InnerJoin( Fields.size( 4 ) ) );
 
     Map<Object, Object> properties = getProperties();
 

@@ -247,11 +247,14 @@ public class Every extends Operator
   @Override
   public Scope outgoingScopeFor( Set<Scope> incomingScopes )
     {
+    Scope incomingScope = getFirst( incomingScopes );
+
+    if( !isBuffer() && incomingScope.getOutValuesFields().isNone() )
+      throw new OperatorException( this, "only a Buffer may be preceded by a CoGroup declaring Fields.NONE as the join fields" );
+
     Fields argumentFields = resolveArgumentSelector( incomingScopes );
 
     verifyArguments( argumentFields );
-
-    Scope incomingScope = getFirst( incomingScopes );
 
     // we currently don't support using result from a previous Every in the current Every
     verifyAggregatorArguments( argumentFields, incomingScope );

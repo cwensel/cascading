@@ -22,6 +22,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
+import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -48,6 +49,8 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   private TupleEntryCollector outputCollector;
   /** Field retainValues */
   private boolean retainValues = false;
+  /** Fields joinerClosure * */
+  private JoinerClosure joinerClosure;
 
   /** Constructor OperationCall creates a new OperationCall instance. */
   public ConcreteCall()
@@ -163,5 +166,16 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public boolean isRetainValues()
     {
     return retainValues;
+    }
+
+  public void setJoinerClosure( JoinerClosure joinerClosure )
+    {
+    this.joinerClosure = joinerClosure;
+    }
+
+  @Override
+  public JoinerClosure getJoinerClosure()
+    {
+    return joinerClosure;
     }
   }

@@ -74,8 +74,8 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   protected TupleBuilder[] sortBuilder;
 
   protected Grouping<TupleEntry, TupleEntryIterator> grouping;
-  protected TupleEntryChainIterator tupleEntryIterator;
   protected TupleEntry keyEntry;
+  protected TupleEntryChainIterator tupleEntryIterator;
 
   public SpliceGate( FlowProcess flowProcess, Splice splice )
     {
@@ -294,7 +294,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
     grouping = new Grouping<TupleEntry, TupleEntryIterator>();
     grouping.key = keyEntry;
-    grouping.iterator = tupleEntryIterator;
+    grouping.joinIterator = tupleEntryIterator;
     }
 
   @Override

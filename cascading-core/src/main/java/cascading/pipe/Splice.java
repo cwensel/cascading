@@ -32,7 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.DeclaresResults;
 import cascading.flow.planner.Scope;
+import cascading.pipe.joiner.BufferJoin;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.tuple.Fields;
@@ -798,6 +800,9 @@ public class Splice extends Pipe
 
   private void verifyCoGrouper()
     {
+    if( isJoin() && joiner instanceof BufferJoin )
+      throw new IllegalArgumentException( "invalid joiner, may not use BufferJoiner in a HashJoin" );
+
     if( joiner == null )
       {
       joiner = new InnerJoin();
@@ -997,6 +1002,9 @@ public class Splice extends Pipe
 
   private Fields createJoinFields( Set<Scope> incomingScopes, Map<String, Fields> groupingSelectors, Fields declared )
     {
+    if( declared.isNone() )
+      declared = Fields.UNKNOWN;
+
     Map<String, Fields> incomingFields = new HashMap<String, Fields>();
 
     for( Scope scope : incomingScopes )
@@ -1194,7 +1202,16 @@ public class Splice extends Pipe
     {
     try
       {
-      Fields declaredFields = getDeclaredFields();
+      Fields declaredFields = getJoinDeclaredFields();
+
+      // Fields.NONE is a flag to the CoGroup the following Buffer will use the JoinerClosure directly
+      if( declaredFields != null && declaredFields.isNone() )
+        {
+        if( !isCoGroup() )
+          throw new IllegalArgumentException( "Fields.NONE may only be declared as the join fields when using a CoGroup" );
+
+        return Fields.NONE;
+        }
 
       if( declaredFields != null ) // null for GroupBy
         {
@@ -1212,7 +1229,7 @@ public class Splice extends Pipe
           size += fields.size();
           }
 
-        // we must relax field checking in the face of unkown fields
+        // we must relax field checking in the face of unknown fields
         if( !foundUnknown && declaredFields.size() != size * ( numSelfJoins + 1 ) )
           {
           if( isSelfJoin() )
@@ -1293,6 +1310,19 @@ public class Splice extends Pipe
       {
       throw new OperatorException( this, "could not resolve declared fields in: " + this, exception );
       }
+    }
+
+  public Fields getJoinDeclaredFields()
+    {
+    Fields declaredFields = getDeclaredFields();
+
+    if( !( joiner instanceof DeclaresResults ) )
+      return declaredFields;
+
+    if( declaredFields == null && ( (DeclaresResults) joiner ).getFieldDeclaration() != null )
+      declaredFields = ( (DeclaresResults) joiner ).getFieldDeclaration();
+
+    return declaredFields;
     }
 
   private List<Fields> getOrderedResolvedFields( Set<Scope> incomingScopes )

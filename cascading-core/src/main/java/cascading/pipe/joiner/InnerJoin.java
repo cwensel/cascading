@@ -20,6 +20,7 @@
 
 package cascading.pipe.joiner;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -34,10 +35,20 @@ import org.slf4j.LoggerFactory;
  * Class InnerJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * and inner join of the CoGrouper internal grouped tuple collections.
  */
-public class InnerJoin implements Joiner
+public class InnerJoin extends BaseJoiner
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( InnerJoin.class );
+
+  public InnerJoin()
+    {
+    }
+
+  @ConstructorProperties({"fieldDeclaration"})
+  public InnerJoin( Fields fieldDeclaration )
+    {
+    super( fieldDeclaration );
+    }
 
   public Iterator<Tuple> getIterator( JoinerClosure closure )
     {

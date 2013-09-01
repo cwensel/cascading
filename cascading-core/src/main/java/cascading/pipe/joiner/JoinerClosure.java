@@ -28,7 +28,15 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- *
+ * Class JoinerClosure wraps all incoming tuple streams with iterator instances allowing for just join implementations.
+ * <p/>
+ * This class is provided to a {@link Joiner#getIterator(JoinerClosure)} implementation, or to a {@link cascading.operation.Buffer}
+ * via the {@link cascading.operation.BufferCall#getJoinerClosure()} method.
+ * <p/>
+ * All iterators returned by {@link #getIterator(int)} may be retrieved more than once to restart them except for the left
+ * most iterator at position {@code 0} (zero).
+ * <p/>
+ * This iterator may only be iterated across once. All other iterators are backed by memory and possibly disk.
  */
 public abstract class JoinerClosure
   {
@@ -49,11 +57,25 @@ public abstract class JoinerClosure
     return flowProcess;
     }
 
+  /**
+   * Returns an array of {@link Fields} denoting the join fields or keys uses for each incoming pipe.
+   * <p/>
+   * The most left handed pipe will be in array position 0.
+   *
+   * @return an array of Fields
+   */
   public Fields[] getJoinFields()
     {
     return joinFields;
     }
 
+  /**
+   * Returns an array of all the incoming fields for each incoming pipe.
+   * <p/>
+   * The most left handed pipe will be in array position 0;
+   *
+   * @return an array of Fields
+   */
   public Fields[] getValueFields()
     {
     return valueFields;
@@ -66,6 +88,15 @@ public abstract class JoinerClosure
 
   public abstract int size();
 
+  /**
+   * Returns a Tuple Iterator for the given pipe position. Position 0 is the most left handed pipe passed to the prior
+   * {@link cascading.pipe.CoGroup}.
+   * <p/>
+   * To restart an Iterator over a given pipe, this method must be called again.
+   *
+   * @param pos of type int
+   * @return an Iterator of Tuple instances.
+   */
   public abstract Iterator<Tuple> getIterator( int pos );
 
   public abstract boolean isEmpty( int pos );

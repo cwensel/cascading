@@ -48,6 +48,9 @@ public class HadoopGroupByGate extends HadoopGroupGate
 
     if( role != Role.sink )
       closure = new HadoopGroupByClosure( flowProcess, keyFields, valuesFields );
+
+    if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )
+      grouping.joinerClosure = closure;
     }
 
   @Override

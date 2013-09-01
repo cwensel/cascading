@@ -20,9 +20,11 @@
 
 package cascading.pipe.joiner;
 
+import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
@@ -31,7 +33,7 @@ import cascading.tuple.Tuple;
  * <p/>
  * So if joining three streams, {@code boolean []{true,false,false}} will result in a 'inner', 'outer', 'outer' join.
  */
-public class MixedJoin implements Joiner
+public class MixedJoin extends BaseJoiner
   {
   /** Field INNER */
   public static boolean INNER = true;
@@ -45,9 +47,17 @@ public class MixedJoin implements Joiner
    *
    * @param asInner of type boolean[]
    */
+  @ConstructorProperties({"asInner"})
   public MixedJoin( boolean[] asInner )
     {
     this.asInner = Arrays.copyOf( asInner, asInner.length );
+    }
+
+  @ConstructorProperties({"fieldDeclaration","asInner"})
+  public MixedJoin( Fields fieldDeclaration, boolean[] asInner )
+    {
+    super( fieldDeclaration );
+    this.asInner = asInner;
     }
 
   /** @see Joiner#numJoins() */

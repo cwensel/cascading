@@ -58,7 +58,7 @@ public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing>
       {
       Grouping grouping = new Grouping();
 
-      grouping.iterator = list.listIterator();
+      grouping.joinIterator = list.listIterator();
 
       next.start( this );
 

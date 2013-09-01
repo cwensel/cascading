@@ -40,13 +40,13 @@ public class OpenReducingDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming
   public void receive( Duct previous, Grouping<Incoming, Iterator<Incoming>> grouping )
     {
     // don't start a grouping if there are no values in the group
-    if( !grouping.iterator.hasNext() )
+    if( !grouping.joinIterator.hasNext() )
       return;
 
     reducing.startGroup( previous, grouping.key );
 
-    while( grouping.iterator.hasNext() )
-      next.receive( this, (Outgoing) grouping.iterator.next() );
+    while( grouping.joinIterator.hasNext() )
+      next.receive( this, (Outgoing) grouping.joinIterator.next() );
 
     reducing.completeGroup( previous, grouping.key );
     }

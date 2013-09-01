@@ -30,6 +30,7 @@ import cascading.flow.stream.Duct;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
+import cascading.pipe.joiner.BufferJoin;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -82,7 +83,9 @@ public abstract class HadoopGroupGate extends SpliceGate
 
     closure.reset( key, values );
 
-    values = splice.getJoiner().getIterator( closure );
+    // Buffer is using JoinerClosure directly
+    if( !( splice.getJoiner() instanceof BufferJoin ) )
+      values = splice.getJoiner().getIterator( closure );
 
     keyEntry.setTuple( closure.getGroupTuple( key ) );
     tupleEntryIterator.reset( values );

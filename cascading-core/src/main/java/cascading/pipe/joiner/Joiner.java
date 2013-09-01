@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import cascading.tuple.Tuple;
 
-/** Interface Joiner allows for custom join strategies against a {@link cascading.flow.hadoop.HadoopCoGroupClosure}. */
+/** Interface Joiner allows for custom join strategies against a {@link JoinerClosure}. */
 public interface Joiner extends Serializable
   {
   /**

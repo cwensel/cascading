@@ -20,8 +20,10 @@
 
 package cascading.pipe.joiner;
 
+import java.beans.ConstructorProperties;
 import java.util.Iterator;
 
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
@@ -33,8 +35,18 @@ import cascading.tuple.Tuple;
  *
  * @see MixedJoin
  */
-public class LeftJoin implements Joiner
+public class LeftJoin extends BaseJoiner
   {
+  public LeftJoin()
+    {
+    }
+
+  @ConstructorProperties({"fieldDeclaration"})
+  public LeftJoin( Fields fieldDeclaration )
+    {
+    super( fieldDeclaration );
+    }
+
   public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );

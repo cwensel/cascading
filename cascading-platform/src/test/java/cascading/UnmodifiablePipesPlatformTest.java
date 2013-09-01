@@ -155,6 +155,9 @@ public class UnmodifiablePipesPlatformTest extends PlatformTestCase
       if( !bufferCall.getGroup().getTuple().isUnmodifiable() )
         throw new IllegalStateException( "is modifiable" );
 
+      if( bufferCall.getJoinerClosure() != null )
+        throw new IllegalStateException( "joiner closure should be null" );
+
       Iterator<TupleEntry> iterator = bufferCall.getArgumentsIterator();
 
       while( iterator.hasNext() )

@@ -121,6 +121,9 @@ public class TestBuffer extends BaseOperation<TupleEntryCollector> implements Bu
 
   public void operate( FlowProcess flowProcess, BufferCall<TupleEntryCollector> bufferCall )
     {
+    if( bufferCall.getJoinerClosure() != null )
+      throw new IllegalStateException( "joiner closure should be null" );
+
     if( insertHeader )
       bufferCall.getOutputCollector().add( new Tuple( value ) );
 

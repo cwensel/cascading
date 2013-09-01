@@ -21,6 +21,7 @@
 package cascading.operation;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.planner.DeclaresResults;
 import cascading.tuple.Fields;
 
 /**
@@ -37,7 +38,7 @@ import cascading.tuple.Fields;
  * @see Buffer
  * @see Assertion
  */
-public interface Operation<Context>
+public interface Operation<Context> extends DeclaresResults
   {
   /** Field ANY denotes that a given Operation will take any number of argument values */
   int ANY = Integer.MAX_VALUE;

@@ -53,6 +53,13 @@ import cascading.flow.FlowProcess;
  * Buffer implementations should be re-entrant. There is no guarantee a Buffer instance will be executed in a
  * unique vm, or by a single thread. Also, note the Iterator will return the same {@link cascading.tuple.TupleEntry}
  * instance, but with new values in its child {@link cascading.tuple.Tuple}.
+ * <p/>
+ * As of Cascading 2.5, if the previous CoGroup uses a {@link cascading.pipe.joiner.BufferJoin} as the
+ * {@link cascading.pipe.joiner.Joiner}, a Buffer may be used to implement differing Joiner strategies.
+ * <p/>
+ * Instead of calling {@link cascading.operation.BufferCall#getArgumentsIterator()} (which will return null),
+ * {@link cascading.operation.BufferCall#getJoinerClosure()} will return an {@link cascading.pipe.joiner.JoinerClosure}
+ * instance with direct access to each CoGrouped Iterator.
  */
 public interface Buffer<Context> extends Operation<Context>
   {

@@ -155,6 +155,9 @@ public abstract class MemorySpliceGate extends SpliceGate
     makePosMap( posMap );
 
     closure = new MemoryCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
+
+    if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )
+      grouping.joinerClosure = closure;
     }
 
   protected Comparator getKeyComparator()

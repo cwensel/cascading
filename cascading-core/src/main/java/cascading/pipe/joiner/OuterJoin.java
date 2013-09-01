@@ -20,18 +20,30 @@
 
 package cascading.pipe.joiner;
 
+import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
  * Class OuterJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * and outer join of the CoGrouper internal grouped tuple collections.
  */
-public class OuterJoin implements Joiner
+public class OuterJoin extends BaseJoiner
   {
+  public OuterJoin()
+    {
+    }
+
+  @ConstructorProperties({"fieldDeclaration"})
+  public OuterJoin( Fields fieldDeclaration )
+    {
+    super( fieldDeclaration );
+    }
+
   public Iterator<Tuple> getIterator( JoinerClosure closure )
     {
     return new JoinIterator( closure );

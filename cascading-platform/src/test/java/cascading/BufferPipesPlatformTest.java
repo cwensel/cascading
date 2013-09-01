@@ -20,23 +20,28 @@
 
 package cascading;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.operation.Function;
 import cascading.operation.Insert;
+import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.joiner.BufferJoin;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.junit.Test;
 
-import static data.InputData.inputFileJoined;
-import static data.InputData.inputFileLhs;
+import static data.InputData.*;
 
 
 public class BufferPipesPlatformTest extends PlatformTestCase
@@ -171,5 +176,80 @@ public class BufferPipesPlatformTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "1\ta" ) ) );
     assertTrue( results.contains( new Tuple( "1\tb" ) ) );
     assertTrue( results.contains( new Tuple( "1\tc" ) ) );
+    }
+
+  @Test
+  public void testJoinerClosure() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroup" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new BufferJoin() );
+
+    splice = new Every( splice, new InnerJoinTestBuffer( Fields.size( 4 ) ), Fields.RESULTS );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
+  public void testJoinerClosureFail() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), "failpath", SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), new BufferJoin() );
+
+    splice = new Every( splice, Fields.size( 1 ), new Count(), Fields.RESULTS );
+
+    try
+      {
+      Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+      fail();
+      }
+    catch( Exception exception )
+      {
+      // success
+      assertTrue( exception.getMessage().contains( "Fields.NONE" ) );
+//      exception.printStackTrace();
+      }
     }
   }

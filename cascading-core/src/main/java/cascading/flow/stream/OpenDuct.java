@@ -41,8 +41,8 @@ public class OpenDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming, Iterat
   @Override
   public void receive( Duct previous, Grouping<Incoming, Iterator<Incoming>> grouping )
     {
-    while( grouping.iterator.hasNext() )
-      next.receive( previous, (Outgoing) grouping.iterator.next() );
+    while( grouping.joinIterator.hasNext() )
+      next.receive( previous, (Outgoing) grouping.joinIterator.next() );
     }
 
   @Override

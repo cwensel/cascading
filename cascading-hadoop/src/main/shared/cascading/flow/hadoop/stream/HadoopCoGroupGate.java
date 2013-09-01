@@ -67,6 +67,9 @@ public class HadoopCoGroupGate extends HadoopGroupGate
       closure = new HadoopCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
     else
       makePosMap( posMap );
+
+    if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )
+      grouping.joinerClosure = closure;
     }
 
   @Override

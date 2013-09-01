@@ -22,6 +22,7 @@ package cascading.operation;
 
 import java.util.Iterator;
 
+import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
@@ -39,6 +40,11 @@ public interface BufferCall<C> extends OperationCall<C>
   /**
    * Returns an {@link Iterator} of {@link TupleEntry} instances representing the arguments for the called
    * {@link Buffer#operate(cascading.flow.FlowProcess, BufferCall)} method.
+   * <p/>
+   * The return value may be {@code null} if the previous {@link cascading.pipe.CoGroup} declares
+   * {@link cascading.pipe.joiner.BufferJoin} as the {@link cascading.pipe.joiner.Joiner}.
+   * <p/>
+   * See {@link #getJoinerClosure()}.
    *
    * @return Iterator<TupleEntry>
    */
@@ -77,4 +83,20 @@ public interface BufferCall<C> extends OperationCall<C>
    * @return true
    */
   boolean isRetainValues();
+
+  /**
+   * Returns the current instance of a {@link JoinerClosure}, if any. This allows a Buffer to implement its own join
+   * strategy against the incoming tuple streams.
+   * <p/>
+   * The return value is always {@code null} unless the declared fields on the {@link cascading.pipe.CoGroup} are {@link Fields#NONE}.
+   * <p/>
+   * Note this method is provided as a means to bypass some of the Cascading internals in order to improve the
+   * implementations (performance or maintainability) behind some algorithms.
+   * <p/>
+   * Consider it only if you are an advanced user. Or more robustly, consider implementing a custom
+   * {@link cascading.pipe.joiner.Joiner}.
+   *
+   * @return JoinerClosure
+   */
+  public JoinerClosure getJoinerClosure();
   }

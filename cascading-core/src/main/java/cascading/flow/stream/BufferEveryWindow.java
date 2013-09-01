@@ -106,39 +106,21 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
       {
       // we want to null out any 'values' before and after the iterator begins/ends
       // this allows buffers to emit tuples before next() and when hasNext() return false;
-      final TupleEntry tupleEntry = grouping.iterator.getTupleEntry();
-      final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, grouping.key );
-      tupleEntry.setTuple( valueNulledTuple );
-
+      final TupleEntry tupleEntry = grouping.joinIterator.getTupleEntry();
       incomingEntry = tupleEntry;
 
+      // if Fields.NONE are declared on the CoGroup, we don't provide arguments, only the joinerClosure
+      if( !tupleEntry.getFields().isNone() )
+        {
+        final Tuple valueNulledTuple = Tuples.setOnEmpty( tupleEntry, grouping.key );
+        tupleEntry.setTuple( valueNulledTuple );
+
+        operationCall.setArgumentsIterator( createArgumentsIterator( grouping, tupleEntry, valueNulledTuple ) );
+        }
+
       operationCall.setOutputCollector( outputCollector );
+      operationCall.setJoinerClosure( grouping.joinerClosure );
       operationCall.setGroup( grouping.key );
-
-      operationCall.setArgumentsIterator( new Iterator<TupleEntry>()
-      {
-      public boolean hasNext()
-        {
-        boolean hasNext = grouping.iterator.hasNext();
-
-        if( !hasNext && !operationCall.isRetainValues() )
-          tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
-
-        return hasNext;
-        }
-
-      public TupleEntry next()
-        {
-        argumentsEntry.setTuple( argumentsBuilder.makeResult( grouping.iterator.next().getTuple(), null ) );
-
-        return argumentsEntry;
-        }
-
-      public void remove()
-        {
-        grouping.iterator.remove();
-        }
-      } );
 
       buffer.operate( flowProcess, operationCall );
       }
@@ -150,5 +132,33 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
       {
       handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
+    }
+
+  private Iterator<TupleEntry> createArgumentsIterator( final Grouping<TupleEntry, TupleEntryIterator> grouping, final TupleEntry tupleEntry, final Tuple valueNulledTuple )
+    {
+    return new Iterator<TupleEntry>()
+    {
+    public boolean hasNext()
+      {
+      boolean hasNext = grouping.joinIterator.hasNext();
+
+      if( !hasNext && !operationCall.isRetainValues() )
+        tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
+
+      return hasNext;
+      }
+
+    public TupleEntry next()
+      {
+      argumentsEntry.setTuple( argumentsBuilder.makeResult( grouping.joinIterator.next().getTuple(), null ) );
+
+      return argumentsEntry;
+      }
+
+    public void remove()
+      {
+      grouping.joinIterator.remove();
+      }
+    };
     }
   }

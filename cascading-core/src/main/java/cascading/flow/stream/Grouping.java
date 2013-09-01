@@ -22,11 +22,14 @@ package cascading.flow.stream;
 
 import java.util.Iterator;
 
+import cascading.pipe.joiner.JoinerClosure;
+
 /**
  *
  */
 public class Grouping<Group, ItemIterator extends Iterator>
   {
+  public JoinerClosure joinerClosure;
   public Group key;
-  public ItemIterator iterator;
+  public ItemIterator joinIterator;
   }
