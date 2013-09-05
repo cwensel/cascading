@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.t.h.GlobHfs to use fewer resources when deriving member identifiers.
+
   Updated c.t.h.HadoopTapPlatformTest to skip the c.t.h.Dfs test if HDFS filesystem is unavailable on the current
   configuration.
 

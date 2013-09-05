@@ -375,19 +375,49 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
-    Path qualifiedPath = new Path( getFullIdentifier( conf ) );
+    String fullIdentifier = getFullIdentifier( conf );
 
-    for( Path exitingPath : FileInputFormat.getInputPaths( conf ) )
+    applySourceConfInitIdentifiers( process, conf, fullIdentifier );
+
+    verifyNoDuplicates( conf );
+    }
+
+  protected static void verifyNoDuplicates( JobConf conf )
+    {
+    Path[] inputPaths = FileInputFormat.getInputPaths( conf );
+
+    for( int i = 0; i < inputPaths.length - 1; i++ )
       {
-      if( exitingPath.equals( qualifiedPath ) )
-        throw new TapException( "may not add duplicate paths, found: " + exitingPath );
-      }
+      Path lhs = inputPaths[ i ];
 
+      for( int j = i + 1; j < inputPaths.length; j++ )
+        {
+        Path rhs = inputPaths[ j ];
+
+        if( rhs.equals( lhs ) )
+          throw new TapException( "may not add duplicate paths, found: " + rhs );
+        }
+      }
+    }
+
+  protected void applySourceConfInitIdentifiers( FlowProcess<JobConf> process, JobConf conf, String... fullIdentifiers )
+    {
+    for( String fullIdentifier : fullIdentifiers )
+      sourceConfInitAddInputPath( conf, new Path( fullIdentifier ) );
+
+    sourceConfInitComplete( process, conf );
+    }
+
+  protected void sourceConfInitAddInputPath( JobConf conf, Path qualifiedPath )
+    {
     FileInputFormat.addInputPath( conf, qualifiedPath );
 
-    super.sourceConfInit( process, conf );
-
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
+    }
+
+  protected void sourceConfInitComplete( FlowProcess<JobConf> process, JobConf conf )
+    {
+    super.sourceConfInit( process, conf );
 
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
 
