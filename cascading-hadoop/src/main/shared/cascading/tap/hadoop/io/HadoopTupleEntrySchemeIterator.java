@@ -46,7 +46,7 @@ public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<Job
 
   public HadoopTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
     {
-    super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( "cascading.source.path" ) );
+    super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( MultiInputSplit.CASCADING_SOURCE_PATH ) );
     }
 
   private static CloseableIterator<RecordReader> makeIterator( FlowProcess<JobConf> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException

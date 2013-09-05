@@ -122,6 +122,8 @@ public class HadoopPlatform extends BaseHadoopPlatform
 
       jobConf = mr.createJobConf();
 
+      jobConf.set( "mapred.map.max.attempts", "1" );
+      jobConf.set( "mapred.reduce.max.attempts", "1" );
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
       jobConf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
       jobConf.setInt( "jobclient.completion.poll.interval", 50 );

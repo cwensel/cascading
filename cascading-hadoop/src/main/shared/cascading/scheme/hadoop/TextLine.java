@@ -347,6 +347,9 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
 
   private boolean hasZippedFiles( Path[] paths )
     {
+    if( paths == null || paths.length == 0 )
+      return false;
+
     boolean isZipped = paths[ 0 ].getName().endsWith( ".zip" );
 
     for( int i = 1; i < paths.length; i++ )

@@ -40,7 +40,9 @@ import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.FileTap;
+import cascading.tap.local.PartitionTap;
 import cascading.tap.local.TemplateTap;
+import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
 import org.apache.commons.io.FileUtils;
 
@@ -166,6 +168,12 @@ public class LocalPlatform extends TestPlatform
   public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
     {
     return new TemplateTap( (FileTap) sink, pathTemplate, fields, openThreshold );
+    }
+
+  @Override
+  public Tap getPartitionTap( Tap sink, Partition partition, int openThreshold )
+    {
+    return new PartitionTap( (FileTap) sink, partition, openThreshold );
     }
 
   @Override

@@ -363,9 +363,8 @@ public class TupleEntry
    */
   public void setTuple( Tuple tuple )
     {
-    // todo: 2.3 make this an exception
     if( !isUnmodifiable && tuple.isUnmodifiable() )
-      LOG.warn( "current entry is modifiable but given tuple is not modifiable, post 2.2 this will be an exception" );
+      throw new IllegalArgumentException( "current entry is modifiable but given tuple is not modifiable, make copy of given Tuple first" );
 
     if( tuple != null && isUnmodifiable )
       this.tuple = Tuples.asUnmodifiable( tuple );
@@ -395,6 +394,25 @@ public class TupleEntry
     for( int i = 0; i < coercions.length; i++ )
       {
       Object element = tuple.getObject( i );
+
+      this.tuple.set( i, coercions[ i ].canonical( element ) ); // force read type to the expected type
+      }
+    }
+
+  /**
+   * Method setCanonicalValues replaces each value of the current tuple with th give Object[]
+   * after they are coerced.
+   *
+   * @param values to replace the current wrapped tuple instance values
+   */
+  public void setCanonicalValues( Object[] values )
+    {
+    if( fields.size() != values.length )
+      throw new IllegalArgumentException( "current entry and given array must be same length" );
+
+    for( int i = 0; i < coercions.length; i++ )
+      {
+      Object element = values[ i ];
 
       this.tuple.set( i, coercions[ i ].canonical( element ) ); // force read type to the expected type
       }

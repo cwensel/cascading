@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.5.0 [unreleased]
 
+  Added c.t.l.PartitionTap and c.t.h.PartitionTap to replace c.t.l.TemplateTap and c.t.h.TemplateTap respectively. The
+  PartitionTap can be used as both a sink and source and provides pluggable partitioning via c.t.p.Partition.
+
   Added c.p.j.BufferJoin as a convenience to flag to the planner the following c.o.Buffer implements a join strategy.
 
   Updated c.o.BufferCall to allow access to the current c.p.j.JoinerClosure to allow for more complex join operations

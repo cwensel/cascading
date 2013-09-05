@@ -24,7 +24,9 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
@@ -52,9 +54,9 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.mapred.lib.CombineFileInputFormat;
 import org.apache.hadoop.mapred.lib.CombineFileRecordReader;
 import org.apache.hadoop.mapred.lib.CombineFileSplit;
@@ -375,19 +377,43 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
-    Path qualifiedPath = new Path( getFullIdentifier( conf ) );
+    String fullIdentifier = getFullIdentifier( conf );
 
-    for( Path exitingPath : FileInputFormat.getInputPaths( conf ) )
+    applySourceConfInitIdentifiers( process, conf, fullIdentifier );
+
+    verifyNoDuplicates( conf );
+    }
+
+  protected static void verifyNoDuplicates( JobConf conf )
+    {
+    Path[] inputPaths = FileInputFormat.getInputPaths( conf );
+
+    for( int i = 0; i < inputPaths.length - 1; i++ )
       {
-      if( exitingPath.equals( qualifiedPath ) )
-        throw new TapException( "may not add duplicate paths, found: " + exitingPath );
+      Path lhs = inputPaths[ i ];
+
+      for( int j = i + 1; j < inputPaths.length; j++ )
+        {
+        Path rhs = inputPaths[ j ];
+
+        if( rhs.equals( lhs ) )
+          throw new TapException( "may not add duplicate paths, found: " + rhs );
+        }
+      }
+    }
+
+  public void applySourceConfInitIdentifiers( FlowProcess<JobConf> process, JobConf conf, String... fullIdentifiers )
+    {
+    for( String fullIdentifier : fullIdentifiers )
+      {
+      Path qualifiedPath = new Path( fullIdentifier );
+
+      FileInputFormat.addInputPath( conf, qualifiedPath );
+
+      makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
       }
 
-    FileInputFormat.addInputPath( conf, qualifiedPath );
-
     super.sourceConfInit( process, conf );
-
-    makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
 
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
 
@@ -476,18 +502,27 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public boolean deleteResource( JobConf conf ) throws IOException
     {
+    String fullIdentifier = getFullIdentifier( conf );
+
+    return deleteFullIdentifier( conf, fullIdentifier );
+    }
+
+  private boolean deleteFullIdentifier( JobConf conf, String fullIdentifier ) throws IOException
+    {
     if( LOG.isDebugEnabled() )
-      LOG.debug( "deleting: {}", getFullIdentifier( conf ) );
+      LOG.debug( "deleting: {}", fullIdentifier );
+
+    Path fullPath = new Path( fullIdentifier );
 
     // do not delete the root directory
-    if( new Path( getFullIdentifier( conf ) ).depth() == 0 )
+    if( fullPath.depth() == 0 )
       return true;
 
     FileSystem fileSystem = getFileSystem( conf );
 
     try
       {
-      return fileSystem.delete( getPath(), true );
+      return fileSystem.delete( fullPath, true );
       }
     catch( NullPointerException exception )
       {
@@ -498,6 +533,17 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
 
     return true;
     }
+
+  public boolean deleteChildResource( JobConf conf, String childIdentifier ) throws IOException
+    {
+    Path childPath = new Path( childIdentifier ).makeQualified( getFileSystem( conf ) );
+
+    if( !childPath.toString().startsWith( getFullIdentifier( conf ) ) )
+      return false;
+
+    return deleteFullIdentifier( conf, childPath.toString() );
+    }
+
 
   @Override
   public boolean resourceExists( JobConf conf ) throws IOException
@@ -576,17 +622,42 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public String[] getChildIdentifiers( JobConf conf ) throws IOException
     {
+    return getChildIdentifiers( conf, 1, false );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( JobConf conf, int depth, boolean fullyQualified ) throws IOException
+    {
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( getPath(), new OutputLogFilter() );
+    String fullIdentifier = getFullIdentifier( conf );
 
-    String[] children = new String[ statuses.length ];
+    int trim = fullyQualified ? 0 : fullIdentifier.length() + 1;
 
-    for( int i = 0; i < statuses.length; i++ )
-      children[ i ] = statuses[ i ].getPath().toString();
+    Set<String> results = new LinkedHashSet<String>();
 
-    return children;
+    getChildPaths( conf, results, trim, new Path( fullIdentifier ), depth );
+
+    return results.toArray( new String[ results.size() ] );
+    }
+
+  private void getChildPaths( JobConf conf, Set<String> results, int trim, Path path, int depth ) throws IOException
+    {
+    if( depth == 0 )
+      {
+      String substring = path.toString().substring( trim );
+      results.add( new Path( getIdentifier(), substring ).toString() );
+      return;
+      }
+
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( path, new Utils.OutputFileUtils.OutputFilesFilter() );
+
+    if( statuses == null )
+      return;
+
+    for( FileStatus fileStatus : statuses )
+      getChildPaths( conf, results, trim, fileStatus.getPath(), depth - 1 );
     }
 
   @Override

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-rootProject.ext.testRoots = [ ]
+rootProject.ext.testRoots = []
 
 project.ext.setTestingProperties = {
 
@@ -33,7 +33,7 @@ project.ext.setTestingProperties = {
 }
 
 test {
-  jvmArgs '-Xmx756m'
+  maxHeapSize '756m'
 
   systemProperties = setTestingProperties()
 }
@@ -47,7 +47,7 @@ task platformTest( type: Test, dependsOn: test ) {
 
   systemProperties = setTestingProperties()
 
-  jvmArgs '-Xmx756m'
+  maxHeapSize '756m'
 
   // not called when disabled
   doFirst() {

@@ -99,6 +99,8 @@ public class TapOutputCollector implements OutputCollector, Closeable
       Hadoop18TapUtil.setupTask( conf );
       }
 
+    LOG.info( "creating path: {}", filename );
+
     writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
     }
 

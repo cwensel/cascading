@@ -46,6 +46,8 @@ public interface FileType<Config>
    */
   String[] getChildIdentifiers( Config conf ) throws IOException;
 
+  String[] getChildIdentifiers( Config conf, int depth, boolean fullyQualified ) throws IOException;
+
   /**
    * Method getSize returns the size of the file referenced by this tap.
    *

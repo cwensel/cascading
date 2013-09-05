@@ -25,7 +25,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
@@ -70,7 +72,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String path, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
-    this.path = path;
+    this.path = new File( path ).getPath(); // cleans path information
     }
 
   @Override
@@ -155,18 +157,40 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public String[] getChildIdentifiers( Properties conf ) throws IOException
     {
+    return getChildIdentifiers( conf, 1, false );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( Properties conf, int depth, boolean fullyQualified ) throws IOException
+    {
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
-    File file = new File( getIdentifier() );
+    Set<String> results = new LinkedHashSet<String>();
+
+    String identifier = fullyQualified ? getFullIdentifier( conf ) : getIdentifier();
+
+    getChildPaths( results, identifier, depth );
+
+    return results.toArray( new String[ results.size() ] );
+    }
+
+  private void getChildPaths( Set<String> results, String identifier, int depth )
+    {
+    if( depth == 0 )
+      {
+      results.add( identifier );
+      return;
+      }
+
+    File file = new File( identifier );
+
     String[] paths = file.list();
 
     if( paths == null )
-      return new String[ 0 ];
+      return;
 
-    for( int i = 0; i < paths.length; i++ )
-      paths[ i ] = new File( file, paths[ i ] ).getPath();
-
-    return paths;
+    for( String path : paths )
+      getChildPaths( results, new File( file, path ).getPath(), depth - 1 );
     }
   }

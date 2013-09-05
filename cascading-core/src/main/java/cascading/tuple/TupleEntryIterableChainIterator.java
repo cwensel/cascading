@@ -29,16 +29,20 @@ import java.util.Iterator;
  * <p/>
  * As one iterator is completed, it will be closed and a new one will start.
  */
-public class TupleEntryChainIterator extends TupleEntryIterator
+public class TupleEntryIterableChainIterator extends TupleEntryIterator
   {
-  /** Field iterator */
-  Iterator<Tuple>[] iterators;
-  int currentIterator = 0;
+  Iterator<Iterator<Tuple>> iterators;
+  Iterator<Tuple> currentIterator = null;
 
-  public TupleEntryChainIterator( Fields fields, Iterator<Tuple>... iterators )
+  public TupleEntryIterableChainIterator( Fields fields )
     {
     super( fields );
-    this.iterators = iterators;
+    }
+
+  public TupleEntryIterableChainIterator( Fields fields, Iterable<Iterator<Tuple>> iterable )
+    {
+    super( fields );
+    this.iterators = iterable.iterator();
     }
 
   /**
@@ -48,23 +52,26 @@ public class TupleEntryChainIterator extends TupleEntryIterator
    */
   public boolean hasNext()
     {
-    if( iterators.length < currentIterator + 1 ) // past the end
+    if( currentIterator == null && !iterators.hasNext() )
       return false;
 
-    if( iterators[ currentIterator ].hasNext() )
+    if( currentIterator != null && currentIterator.hasNext() )
       return true;
 
     closeCurrent();
 
-    currentIterator++;
+    currentIterator = null;
 
-    return iterators.length != currentIterator && hasNext();
+    if( iterators.hasNext() )
+      currentIterator = iterators.next();
+
+    return hasNext();
     }
 
-  public void reset( Iterator<Tuple>... iterators )
+  public void reset( Iterable<Iterator<Tuple>> iterable )
     {
-    this.currentIterator = 0;
-    this.iterators = iterators;
+    this.currentIterator = null;
+    this.iterators = iterable.iterator();
     }
 
   /**
@@ -76,7 +83,7 @@ public class TupleEntryChainIterator extends TupleEntryIterator
     {
     hasNext(); // force roll to next iterator
 
-    entry.setTuple( iterators[ currentIterator ].next() );
+    entry.setTuple( currentIterator.next() );
 
     return entry;
     }
@@ -84,19 +91,19 @@ public class TupleEntryChainIterator extends TupleEntryIterator
   /** Method remove removes the current TupleEntry from the underlying collection. */
   public void remove()
     {
-    iterators[ currentIterator ].remove();
+    currentIterator.remove();
     }
 
   /** Method close closes all underlying resources. */
   public void close()
     {
-    if( iterators.length != currentIterator )
+    if( currentIterator != null )
       closeCurrent();
     }
 
   protected void closeCurrent()
     {
-    close( iterators[ currentIterator ] );
+    close( currentIterator );
     }
 
   private void close( Iterator iterator )

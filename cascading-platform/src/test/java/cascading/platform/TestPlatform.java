@@ -31,6 +31,7 @@ import cascading.scheme.Scheme;
 import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,6 +242,8 @@ public abstract class TestPlatform
   public abstract Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold );
 
   public abstract Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold );
+
+  public abstract Tap getPartitionTap( Tap sink, Partition partition, int openThreshold );
 
   public abstract Scheme getTestConfigDefScheme();
 

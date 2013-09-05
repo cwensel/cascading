@@ -42,8 +42,10 @@ import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
+import cascading.tap.hadoop.PartitionTap;
 import cascading.tap.hadoop.TemplateTap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -243,6 +245,12 @@ public abstract class BaseHadoopPlatform extends TestPlatform
   public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
     {
     return new TemplateTap( (Hfs) sink, pathTemplate, fields, openThreshold );
+    }
+
+  @Override
+  public Tap getPartitionTap( Tap sink, Partition partition, int openThreshold )
+    {
+    return new PartitionTap( (Hfs) sink, partition, openThreshold );
     }
 
   @Override

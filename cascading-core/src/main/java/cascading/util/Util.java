@@ -199,6 +199,26 @@ public class Util
     return buffer.toString();
     }
 
+  public static String join( Iterable iterable, String delim, boolean printNull )
+    {
+    int count = 0;
+
+    StringBuilder buffer = new StringBuilder();
+
+    for( Object s : iterable )
+      {
+      if( count != 0 )
+        buffer.append( delim );
+
+      if( printNull || s != null )
+        buffer.append( s );
+
+      count++;
+      }
+
+    return buffer.toString();
+    }
+
   /**
    * This method joins each value in the collection with a tab character as the delimiter.
    *
