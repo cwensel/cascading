@@ -1155,7 +1155,13 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
+   * Method is used for appending the given Fields instance to this instance, into a new Fields instance suitable
+   * for use as a field declaration.
+   * <p/>
+   * That is, any positional elements (other than relative) will be ignored during the append. For example, the
+   * second {@code 0} position is lost in the result.
+   * <p/>
+   * {@code assert new Fields( 0, "a" ).append( new Fields( 0, "b" ).equals( new Fields( 0, "a", 2, "b" )}
    * <p/>
    * Note any relative positional elements are retained, thus appending two Fields each declaring {@code -1}
    * position will result in a TupleException noting duplicate fields.
@@ -1166,6 +1172,33 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * @return Fields
    */
   public Fields append( Fields fields )
+    {
+    return appendInternal( fields, false );
+    }
+
+  /**
+   * Method is used for appending the given Fields instance to this instance, into a new Fields instance
+   * suitable for use as a field selector.
+   * <p/>
+   * That is, any positional elements will be retained during the append. For example, the {@code 5} and {@code 0}
+   * are retained in the result.
+   * <p/>
+   * {@code assert new Fields( 5, "a" ).append( new Fields( 0, "b" ).equals( new Fields( 5, "a", 0, "b" )}
+   * <p/>
+   * Note any relative positional elements are retained, thus appending two Fields each declaring {@code -1}
+   * position will result in a TupleException noting duplicate fields.
+   * <p/>
+   * See {@link #subtract(Fields)} for removing field names.
+   *
+   * @param fields of type Fields
+   * @return Fields
+   */
+  public Fields appendSelector( Fields fields )
+    {
+    return appendInternal( fields, true );
+    }
+
+  private Fields appendInternal( Fields fields, boolean isSelect )
     {
     if( fields == null )
       return this;
@@ -1189,9 +1222,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     Fields result = size( this.size() + fields.size() );
 
     // copy over field names from this side
-    copyRetain( names, result, this, 0 );
+    copyRetain( names, result, this, 0, isSelect );
     // copy over field names from that side
-    copyRetain( names, result, fields, this.size() );
+    copyRetain( names, result, fields, this.size(), isSelect );
 
     if( this.isUnknown() || fields.isUnknown() )
       result.kind = Kind.UNKNOWN;
@@ -1308,14 +1341,15 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * @param result
    * @param fields
    * @param offset
+   * @param isSelect
    */
-  private static void copyRetain( Set<Comparable> names, Fields result, Fields fields, int offset )
+  private static void copyRetain( Set<Comparable> names, Fields result, Fields fields, int offset, boolean isSelect )
     {
     for( int i = 0; i < fields.size(); i++ )
       {
       Comparable field = fields.get( i );
 
-      if( field instanceof Integer && ( (Integer) field ) > -1 )
+      if( !isSelect && field instanceof Integer && ( (Integer) field ) > -1 )
         continue;
 
       if( names != null )

@@ -146,6 +146,49 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  public void testAppendSelectNamed()
+    {
+    Fields fieldA = new Fields( 0, 1 );
+    Fields fieldB = new Fields( "a" );
+
+    Fields appended = fieldA.appendSelector( fieldB );
+
+    assertEquals( "not equal: ", 3, appended.size() );
+    assertEquals( "not equal: ", 0, appended.get( 0 ) );
+    assertEquals( "not equal: ", 1, appended.get( 1 ) );
+    assertEquals( "not equal: ", "a", appended.get( 2 ) );
+    }
+
+  public void testAppendSelectNamed2()
+    {
+    Fields fieldA = new Fields( "a" );
+    Fields fieldB = new Fields( 0, 1 );
+
+    Fields appended = fieldA.appendSelector( fieldB );
+
+    assertEquals( "not equal: ", 3, appended.size() );
+    assertEquals( "not equal: ", "a", appended.get( 0 ) );
+    assertEquals( "not equal: ", 0, appended.get( 1 ) );
+    assertEquals( "not equal: ", 1, appended.get( 2 ) );
+    }
+
+  public void testAppendSelectNamedFail()
+    {
+    Fields fieldA = new Fields( "a", 0 );
+    Fields fieldB = new Fields( 0, 1 );
+
+    try
+      {
+      Fields appended = fieldA.appendSelector( fieldB );
+      fail( "did not throw exception" );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+//      exception.printStackTrace();
+      }
+    }
+
   public void testAppendArray()
     {
     Fields fieldA = new Fields( 0, 1 );
