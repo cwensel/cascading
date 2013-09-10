@@ -69,6 +69,9 @@ To report an issue, first ping the [Cascading User mailing list](http://www.casc
 If unresolved, look for a comparable test in the `cascading-platform` sub-project, reproduce your issue, then issue
 a pull request with the failing test added to one of the existing suites.
 
+If you wish to allow your test code to be added to the Cascading test suite, please sign and return this
+[contributor agreement](http://files.concurrentinc.com/agreements/Concurrent_Contributor_Agreement.doc).
+
 ## Using with Maven/Ivy
 
 It is strongly recommended developers pull Cascading from our Maven compatible jar repository
