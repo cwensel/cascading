@@ -85,6 +85,11 @@ import cascading.tuple.Fields;
  * increasing the threshold, but memory errors aren't recoverable, so the correct balance will need to be found.
  * <p/>
  * To customize the spill values for a given CoGroup only, see {@link #getStepConfigDef()}.
+ * <p/>
+ * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
+ * being provided that makes two values with differing hashCode values equal. For example, {@code A} and {@code a}
+ * are equal using a "case insensitive" Comparator, but {@link String#hashCode()} will be different, thus forcing
+ * each value into differing partitions.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin

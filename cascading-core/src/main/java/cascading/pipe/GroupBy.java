@@ -54,6 +54,11 @@ import cascading.tuple.Tuple;
  * <p/>
  * It should be noted for MapReduce systems, distributed group sorting is not 'total'. That is groups are sorted
  * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
+ * <p/>
+ * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
+ * being provided that makes two values with differing hashCode values equal. For example, {@code A} and {@code a}
+ * are equal using a "case insensitive" Comparator, but {@link String#hashCode()} will be different, thus forcing
+ * each value into differing partitions.
  */
 public class GroupBy extends Splice implements Group
   {
