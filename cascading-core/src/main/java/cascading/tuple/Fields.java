@@ -1158,13 +1158,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance suitable
    * for use as a field declaration.
    * <p/>
-   * That is, any positional elements (other than relative) will be ignored during the append. For example, the
-   * second {@code 0} position is lost in the result.
+   * That is, any positional elements (including relative positions like {@code -1}, will be ignored during the
+   * append. For example, the second {@code 0} position is lost in the result.
    * <p/>
    * {@code assert new Fields( 0, "a" ).append( new Fields( 0, "b" ).equals( new Fields( 0, "a", 2, "b" )}
-   * <p/>
-   * Note any relative positional elements are retained, thus appending two Fields each declaring {@code -1}
-   * position will result in a TupleException noting duplicate fields.
    * <p/>
    * See {@link #subtract(Fields)} for removing field names.
    *
@@ -1349,7 +1346,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       {
       Comparable field = fields.get( i );
 
-      if( !isSelect && field instanceof Integer && ( (Integer) field ) > -1 )
+      if( !isSelect && field instanceof Integer )
         continue;
 
       if( names != null )

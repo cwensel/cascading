@@ -65,8 +65,6 @@ Cascading Change Log
   Updated c.o.Buffer to allow implementations to disable nulling of non-grouping fields after the arguments iterator
   has completed. This simplifies appending aggregated fields to the incoming tuple stream.
 
-  Updated c.t.Fields to retain relative positions when calling Fields#append.
-
   Updated c.t.Fields to return appending value when calling Fields#append on Fields.NONE and optimized Fields#subtract
   when subtracting Fields.NONE.
 

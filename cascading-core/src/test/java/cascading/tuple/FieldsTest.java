@@ -96,7 +96,7 @@ public class FieldsTest extends CascadingTestCase
     Fields fieldA = new Fields( 0, 1 );
     Fields fieldB = new Fields( -1 );
 
-    Fields appended = fieldA.append( fieldB );
+    Fields appended = fieldA.appendSelector( fieldB );
 
     assertEquals( "not equal: ", 3, appended.size() );
     assertEquals( "not equal: ", 0, appended.get( 0 ) );
@@ -111,7 +111,7 @@ public class FieldsTest extends CascadingTestCase
 
     try
       {
-      Fields appended = fieldA.append( fieldB );
+      Fields appended = fieldA.appendSelector( fieldB );
       fail();
       }
     catch( Exception exception )
