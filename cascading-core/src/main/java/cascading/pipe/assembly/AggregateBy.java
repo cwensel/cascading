@@ -93,6 +93,10 @@ import org.slf4j.LoggerFactory;
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
  * <p/>
  * Also note that {@link Unique} is not a CompositeAggregator and is slightly more optimized internally.
+ * <p/>
+ * Keep in mind the {@link cascading.tuple.Hasher} interface is not honored here (for storing keys in the cache). Thus
+ * arrays of primitives and object, like {@code byte[]} will not be properly stored. This is a known issue and will
+ * be resolved in a future release.
  *
  * @see SumBy
  * @see CountBy
