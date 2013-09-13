@@ -87,9 +87,17 @@ import cascading.tuple.Fields;
  * To customize the spill values for a given CoGroup only, see {@link #getStepConfigDef()}.
  * <p/>
  * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
- * being provided that makes two values with differing hashCode values equal. For example, {@code A} and {@code a}
- * are equal using a "case insensitive" Comparator, but {@link String#hashCode()} will be different, thus forcing
- * each value into differing partitions.
+ * being provided that makes two values with differing hashCode values equal. For example,
+ * {@code new BigDecimal( 100.0D )} and {@code new Double 100.0D )} are equal using a custom Comparator, but
+ * {@link Object#hashCode()} will be different, thus forcing each value into differing partitions.
+ * <p/>
+ * Currently "non-equi-joins" are not supported via the Hasher and Comparator interfaces. That is, joining one String
+ * key with a lowercase value with another String key with an uppercase value using a "case insensitive" Comparator
+ * will not have consistent results. The join will execute and be correct, but the actual values in the key columns may
+ * be replaced with "equivalent" values from other streams.
+ * <p/>
+ * If the original key values must be retained, consider normalizing the keys with a Function and then joining on the
+ * resulting field.
  *
  * @see cascading.pipe.joiner.InnerJoin
  * @see cascading.pipe.joiner.OuterJoin
