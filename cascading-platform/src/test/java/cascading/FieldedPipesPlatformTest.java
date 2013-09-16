@@ -58,6 +58,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
+import static cascading.ComparePlatformsTest.NONDETERMINISTIC;
 import static data.InputData.*;
 
 
@@ -945,7 +946,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "insensitivegrouping" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "insensitivegrouping" + NONDETERMINISTIC ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Pipe( "lower" );
     Pipe pipeUpper = new Pipe( "upper" );
