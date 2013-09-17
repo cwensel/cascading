@@ -213,6 +213,14 @@ public class AppProps extends Props
     return PropertyUtil.getProperty( properties, APP_TAGS, (String) null );
     }
 
+  /**
+   * Adds a framework "name:version" string to the property set and to the System properties.
+   * <p/>
+   * Properties may be null. Duplicates are removed.
+   *
+   * @param properties may be null, additionally adds to System properties
+   * @param framework  "name:version" String
+   */
   public static void addApplicationFramework( Map<Object, Object> properties, String framework )
     {
     if( framework == null )
@@ -224,6 +232,8 @@ public class AppProps extends Props
       frameworks = join( ",", framework.trim(), frameworks );
     else
       frameworks = framework;
+
+    frameworks = Util.unique( frameworks, "," );
 
     if( properties != null )
       properties.put( APP_FRAMEWORKS, frameworks );
