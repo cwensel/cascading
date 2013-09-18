@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Fixed issue where c.o.t.DateParser would drop incoming Tuples if the argument was null.
+
   Fixed issue where c.t.Hasher was not honored during grouping in local mode.
 
   Updated c.t.h.GlobHfs to use fewer resources when deriving member identifiers.

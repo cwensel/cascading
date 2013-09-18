@@ -144,6 +144,9 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
       if( value == null ) // if null, return null for the field
         {
         output.set( 0, null ); // safe to call set, tuple is size of 1
+
+        functionCall.getOutputCollector().add( output );
+
         return;
         }
 
