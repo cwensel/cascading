@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.tap.Tap;
+import cascading.tuple.type.CoercibleType;
 import cascading.util.Util;
 
 /**
@@ -1671,6 +1672,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Returns the Class for the given position value.
+   * <p/>
+   * If the underlying value is of type {@link CoercibleType}, the result of
+   * {@link cascading.tuple.type.CoercibleType#getCanonicalType()} will returned.
    *
    * @param fieldName of type String or Number
    * @return type Class
@@ -1682,7 +1686,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   public Class getTypeClass( int pos )
     {
-    return (Class) getType( pos );
+    Type type = getType( pos );
+
+    if( type instanceof CoercibleType )
+      return ( (CoercibleType) type ).getCanonicalType();
+
+    return (Class) type;
     }
 
   protected void setType( int pos, Type type )
@@ -1706,7 +1715,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Returns a copy of the current types Class[] if any, else null.
    * <p/>
-   * May fail if all types are not an instance of {@link Class}.
+   * If any underlying value is of type {@link CoercibleType}, the result of
+   * {@link cascading.tuple.type.CoercibleType#getCanonicalType()} will returned.
    *
    * @return of type Class
    */
@@ -1718,7 +1728,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     Class[] classes = new Class[ types.length ];
 
     for( int i = 0; i < types.length; i++ )
-      classes[ i ] = (Class) types[ i ]; // this throws a more helpful exception vs arraycopy
+      {
+      if( types[ i ] instanceof CoercibleType )
+        classes[ i ] = ( (CoercibleType) types[ i ] ).getCanonicalType();
+      else
+        classes[ i ] = (Class) types[ i ]; // this throws a more helpful exception vs arraycopy
+      }
 
     return classes;
     }
