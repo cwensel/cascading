@@ -25,7 +25,7 @@ import cascading.tuple.TupleEntry;
 
 /**
  * An Aggregator takes the set of all values associated with a unique grouping and returns
- * zero or more values. {@link cascading.operation.aggregator.Max}, {@link cascading.operation.aggregator.Min},
+ * zero or more values. {@link cascading.operation.aggregator.MaxValue}, {@link cascading.operation.aggregator.MinValue},
  * {@link cascading.operation.aggregator.Count}, and {@link cascading.operation.aggregator.Average} are good examples.
  * <p/>
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a

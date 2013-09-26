@@ -43,7 +43,7 @@ import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
-import cascading.operation.aggregator.Max;
+import cascading.operation.aggregator.MaxValue;
 import cascading.operation.assertion.AssertNotNull;
 import cascading.operation.assertion.AssertNull;
 import cascading.operation.expression.ExpressionFilter;
@@ -1811,7 +1811,7 @@ public class BuildJobsHadoopTest extends CascadingTestCase
     Fields[] fields = Fields.fields( new Fields( "offset" ), new Fields( "offset" ) );
     Pipe merge = new HashJoin( "join", Pipe.pipes( left, right ), fields, Fields.size( 4 ), new InnerJoin() );
 
-    merge = new Every( merge, new Max() );
+    merge = new Every( merge, new MaxValue() );
 
     Map sources = new HashMap();
     sources.put( "left", source1 );

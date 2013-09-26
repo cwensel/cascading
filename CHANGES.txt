@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Added c.o.a.MaxValue and c.o.a.MinValue c.o.Aggregator sub-classes to replace c.o.a.Max and c.o.a.Min classes
+  respectively. MaxValue and MinValue rely on the values compared to be j.l.Comparable types resulting in a simpler
+  implementation and support for max/min of non numeric types.
+
   Fixed issue where c.o.t.DateParser would drop incoming Tuples if the argument was null.
 
   Fixed issue where c.t.Hasher was not honored during grouping in local mode.
@@ -109,8 +113,7 @@ Cascading Change Log
 
   Added "test.platform.includes" system property so tests can be limited to specified platforms.
 
-  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively. If the given
-  result fields declare a type, the result will be coerced to that type.
+  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively.
 
   Updated c.p.a.SumBy and c.p.a.AverageBy to honor result fields type declaration by coercing the result to the
   declared type.

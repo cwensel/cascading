@@ -237,6 +237,17 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     }
 
   /**
+   * Method getChar returns the element at the given position as a char.
+   *
+   * @param pos of type int
+   * @return String
+   */
+  public char getChar( int pos )
+    {
+    return Coercions.CHARACTER.coerce( getObject( pos ) );
+    }
+
+  /**
    * Method getString returns the element at the given position as a String.
    *
    * @param pos of type int

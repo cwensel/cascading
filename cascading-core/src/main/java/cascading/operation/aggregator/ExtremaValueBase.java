@@ -35,28 +35,25 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Class ExtremaBase is the base class for Max and Min. The unique thing about Max and Min are that they return the original,
- * un-coerced, argument value, though a coerced version of the argument is used for the comparison.
+ * Class ExtremaValueBase is the base class for MaxValue and MinValue where the values are expected to by
+ * {@link Comparable} types and the {@link Comparable#compareTo(Object)} result is use for max/min
+ * comparison.
  */
-@Deprecated
-public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> implements Aggregator<ExtremaBase.Context>
+public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Context> implements Aggregator<ExtremaValueBase.Context>
   {
   /** Field ignoreValues */
   protected final Collection ignoreValues;
 
   protected static class Context
     {
-    Number extrema;
     Tuple value = Tuple.size( 1 );
 
-    public Context( Number extrema )
+    public Context()
       {
-      this.extrema = extrema;
       }
 
-    public Context reset( Number extrema )
+    public Context reset()
       {
-      this.extrema = extrema;
       this.value.set( 0, null );
 
       return this;
@@ -64,14 +61,14 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     }
 
   @ConstructorProperties({"fieldDeclaration"})
-  public ExtremaBase( Fields fieldDeclaration )
+  public ExtremaValueBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
     ignoreValues = null;
     }
 
   @ConstructorProperties({"numArgs", "fieldDeclaration"})
-  public ExtremaBase( int numArgs, Fields fieldDeclaration )
+  public ExtremaValueBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
     ignoreValues = null;
@@ -81,7 +78,7 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     }
 
   @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
-  protected ExtremaBase( Fields fieldDeclaration, Object... ignoreValues )
+  protected ExtremaValueBase( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration );
     this.ignoreValues = new HashSet();
@@ -96,16 +93,14 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
-    operationCall.setContext( new Context( getInitialValue() ) );
+    operationCall.setContext( new Context() );
     }
 
   @Override
   public void start( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
     {
-    aggregatorCall.getContext().reset( getInitialValue() );
+    aggregatorCall.getContext().reset();
     }
-
-  protected abstract double getInitialValue();
 
   @Override
   public void aggregate( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
@@ -113,28 +108,26 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     TupleEntry entry = aggregatorCall.getArguments();
     Context context = aggregatorCall.getContext();
 
-    Object arg = entry.getObject( 0 );
+    Object arg = entry.getObject( 0 ); // returns canonical type
 
     if( ignoreValues != null && ignoreValues.contains( arg ) )
       return;
 
-    Number rhs;
+    Comparable lhs = (Comparable) context.value.getObject( 0 );
+    Comparable rhs = (Comparable) arg;
 
-    if( arg instanceof Number )
-      rhs = (Number) arg;
-    else
-      rhs = entry.getDouble( 0 );
-
-    Number lhs = context.extrema;
-
-    if( compare( lhs, rhs ) )
-      {
-      context.value.set( 0, arg ); // keep and return original value
-      context.extrema = rhs;
-      }
+    if( lhs == null || compare( lhs, rhs ) )
+      context.value.set( 0, rhs );
     }
 
-  protected abstract boolean compare( Number lhs, Number rhs );
+  /**
+   * Allows subclasses to provide own comparison method.
+   *
+   * @param lhs Comparable type
+   * @param rhs Comparable type
+   * @return true if the rhs should be retained as the result value
+   */
+  protected abstract boolean compare( Comparable lhs, Comparable rhs );
 
   @Override
   public void complete( FlowProcess flowProcess, AggregatorCall<Context> aggregatorCall )
@@ -152,12 +145,12 @@ public abstract class ExtremaBase extends BaseOperation<ExtremaBase.Context> imp
     {
     if( this == object )
       return true;
-    if( !( object instanceof ExtremaBase ) )
+    if( !( object instanceof ExtremaValueBase ) )
       return false;
     if( !super.equals( object ) )
       return false;
 
-    ExtremaBase that = (ExtremaBase) object;
+    ExtremaValueBase that = (ExtremaValueBase) object;
 
     if( ignoreValues != null ? !ignoreValues.equals( that.ignoreValues ) : that.ignoreValues != null )
       return false;

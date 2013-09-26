@@ -22,24 +22,21 @@ package cascading.operation.aggregator;
 
 import java.beans.ConstructorProperties;
 
-import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 /**
- * Class Min is an {@link Aggregator} that returns the minimum value encountered in the current group.
- * * <p/>
- * This class assumes the argument values is a {@link Number}, or a {@link String} representation of a number.
+ * Class Min is an {@link cascading.operation.Aggregator} that returns the minimum value encountered in the current group.
  * <p/>
- * See {@link MinValue} to find the min of any {@link Comparable} type.
+ * As opposed to the {@link Min} class, values are expected to be {@link Comparable} types vs numeric representations and
+ * the {@link Comparable#compareTo(Object)} result is use for min comparison.
  */
-@Deprecated
-public class Min extends ExtremaBase
+public class MinValue extends ExtremaValueBase
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "min";
 
   /** Constructs a new instance that returns the Min value encountered in the field name "min". */
-  public Min()
+  public MinValue()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
@@ -50,7 +47,7 @@ public class Min extends ExtremaBase
    * @param fieldDeclaration of type Fields
    */
   @ConstructorProperties({"fieldDeclaration"})
-  public Min( Fields fieldDeclaration )
+  public MinValue( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
     }
@@ -63,20 +60,14 @@ public class Min extends ExtremaBase
    * @param ignoreValues     of type Object...
    */
   @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
-  public Min( Fields fieldDeclaration, Object... ignoreValues )
+  public MinValue( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );
     }
 
   @Override
-  protected boolean compare( Number lhs, Number rhs )
+  protected boolean compare( Comparable lhs, Comparable rhs )
     {
-    return lhs.doubleValue() > rhs.doubleValue();
-    }
-
-  @Override
-  protected double getInitialValue()
-    {
-    return Double.POSITIVE_INFINITY;
+    return lhs.compareTo( rhs ) > 0;
     }
   }

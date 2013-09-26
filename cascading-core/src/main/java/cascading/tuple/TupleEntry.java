@@ -425,7 +425,7 @@ public class TupleEntry
     }
 
   /**
-   * Method get returns the value in the given position pos.
+   * Method getObject returns the value in the given position pos.
    * <p/>
    * No coercion is performed if there is an associated coercible type.
    *
@@ -435,6 +435,19 @@ public class TupleEntry
   public Object getObject( int pos )
     {
     return tuple.getObject( pos );
+    }
+
+  /**
+   * Method getObject returns the value in the given field or position as the requested type.
+   * <p/>
+   * Coercion is performed to the given type.
+   *
+   * @param pos position of the element to return.
+   * @return Object
+   */
+  public Object getObject( int pos, Type type )
+    {
+    return coercions[ pos ].coerce( tuple.getObject( pos ), type );
     }
 
   /**
@@ -455,7 +468,7 @@ public class TupleEntry
     }
 
   /**
-   * Method get returns the value in the given field or position.
+   * Method getObject returns the value in the given field or position.
    * <br/>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
@@ -469,6 +482,23 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
     return tuple.getObject( pos );
+    }
+
+  /**
+   * Method getObject returns the value in the given field or position as the requested type.
+   * <br/>
+   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
+   * be considered.
+   * <p/>
+   * Coercion is performed to the given type.
+   *
+   * @param fieldName field name or position to return
+   * @return Comparable
+   */
+  public Object getObject( Comparable fieldName, Type type )
+    {
+    int pos = fields.getPos( asFieldName( fieldName ) );
+    return coercions[ pos ].coerce( tuple.getObject( pos ), type );
     }
 
   /**

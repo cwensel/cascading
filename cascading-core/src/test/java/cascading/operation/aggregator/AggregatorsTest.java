@@ -174,4 +174,72 @@ public class AggregatorsTest extends CascadingTestCase
 
     assertEquals( "got expected value after aggregate", 5.0, tuple.getDouble( 0 ), 0.0d );
     }
+
+  public void testMaxValue()
+    {
+    Aggregator aggregator = new MaxValue();
+
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
+
+    Fields resultFields = new Fields( "field" );
+
+    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
+
+    Tuple tuple = resultEntryCollector.iterator().next();
+
+    assertEquals( "got expected value after aggregate", 4.0, tuple.getDouble( 0 ), 0.0d );
+    }
+
+  public void testMinValue()
+    {
+    Aggregator aggregator = new MinValue();
+
+    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
+                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
+                                    new Tuple( new Double( -5.0 ) )};
+
+    Fields resultFields = new Fields( "field" );
+
+    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
+
+    Tuple tuple = resultEntryCollector.iterator().next();
+
+    assertEquals( "got expected value after aggregate", -5.0, tuple.getDouble( 0 ), 0.0d );
+    }
+
+  public void testMaxValueNonNumber()
+    {
+    Aggregator aggregator = new MaxValue();
+
+    Tuple[] arguments = new Tuple[]{new Tuple( 'a' ), new Tuple( 'b' ),
+                                    new Tuple( 'c' ), new Tuple( 'd' ),
+                                    new Tuple( 'e' )};
+
+    Fields resultFields = new Fields( "field" );
+
+    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
+
+    Tuple tuple = resultEntryCollector.iterator().next();
+
+    assertEquals( "got expected value after aggregate", 'e', tuple.getChar( 0 ) );
+    }
+
+  public void testMinValueNonNumber()
+    {
+    Aggregator aggregator = new MinValue();
+
+    Tuple[] arguments = new Tuple[]{new Tuple( 'a' ), new Tuple( 'b' ),
+                                    new Tuple( 'c' ), new Tuple( 'd' ),
+                                    new Tuple( 'e' )};
+
+    Fields resultFields = new Fields( "field" );
+
+    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
+
+    Tuple tuple = resultEntryCollector.iterator().next();
+
+    assertEquals( "got expected value after aggregate", 'a', tuple.getChar( 0 ) );
+    }
   }

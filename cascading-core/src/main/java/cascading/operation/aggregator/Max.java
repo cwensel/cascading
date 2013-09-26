@@ -25,7 +25,14 @@ import java.beans.ConstructorProperties;
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
-/** Class Max is an {@link Aggregator} that returns the maximum value encountered in the current group. */
+/**
+ * Class Max is an {@link Aggregator} that returns the maximum value encountered in the current group.
+ * <p/>
+ * This class assumes the argument values is a {@link Number}, or a {@link String} representation of a number.
+ * <p/>
+ * See {@link MaxValue} to find the max of any {@link Comparable} type.
+ */
+@Deprecated
 public class Max extends ExtremaBase
   {
   /** Field FIELD_NAME */
