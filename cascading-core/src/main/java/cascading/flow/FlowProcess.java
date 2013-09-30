@@ -216,7 +216,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getCurrentSliceNum returns an integer representing which slice instance currently running.
-   *
+   * <p/>
    * {@code 0} (zero) is the first slice instance.
    *
    * @return an int
@@ -238,7 +238,7 @@ public abstract class FlowProcess<Config>
    * <p/>
    * In the case of Hadoop, the current Configuration will be queried.
    *
-   * @param key of type String
+   * @param key of type String, null if property is not set
    * @return an Object
    */
   public String getStringProperty( String key )
@@ -249,6 +249,24 @@ public abstract class FlowProcess<Config>
       return null;
 
     return value.toString();
+    }
+
+  /**
+   * Method getIntegerProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key of type Integer, null if property is not set
+   * @return an Object
+   */
+  public Integer getIntegerProperty( String key )
+    {
+    String value = getStringProperty( key );
+
+    if( value == null || value.isEmpty() )
+      return null;
+
+    return Integer.valueOf( value );
     }
 
   /**

@@ -66,6 +66,6 @@ public class Last extends ExtentBase
 
   protected void performOperation( Tuple[] context, TupleEntry entry )
     {
-    context[ 0 ] = new Tuple( entry.getTuple() );
+    context[ 0 ] = entry.getTupleCopy();
     }
   }

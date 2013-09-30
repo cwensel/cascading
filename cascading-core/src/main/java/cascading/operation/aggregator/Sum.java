@@ -85,7 +85,7 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   @ConstructorProperties({"fieldDeclaration", "type"})
   public Sum( Fields fieldDeclaration, Class type )
     {
-    this( fieldDeclaration );
+    this( fieldDeclaration.applyTypes( type ) );
     this.type = type;
     this.canonical = Coercions.coercibleTypeFor( this.type );
     }

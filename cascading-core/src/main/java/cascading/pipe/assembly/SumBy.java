@@ -49,12 +49,16 @@ import cascading.tuple.type.CoercibleType;
  * <p/>
  * The {@code threshold} value tells the underlying SumPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry.
+ * <p/>
+ * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
+ * will be used.
  *
  * @see AggregateBy
  */
 public class SumBy extends AggregateBy
   {
   /** DEFAULT_THRESHOLD */
+  @Deprecated
   public static final int DEFAULT_THRESHOLD = 10000;
 
   /**
@@ -153,7 +157,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField"})
   public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField )
     {
-    this( null, pipe, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, sumField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -183,7 +187,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField"})
   public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField )
     {
-    this( name, pipe, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, sumField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -213,7 +217,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField )
     {
-    this( null, pipes, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, sumField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -243,7 +247,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField"})
   public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField )
     {
-    this( name, pipes, groupingFields, valueField, sumField, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, sumField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -292,7 +296,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( null, pipe, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, sumField, sumType, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -324,7 +328,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( name, pipe, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, sumField, sumType, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -356,7 +360,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( null, pipes, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, sumField, sumType, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -388,7 +392,7 @@ public class SumBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
-    this( name, pipes, groupingFields, valueField, sumField, sumType, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, sumField, sumType, USE_DEFAULT_THRESHOLD );
     }
 
   /**

@@ -43,6 +43,9 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * The {@code threshold} value tells the underlying MaxPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry.
+ * <p/>
+ * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
+ * will be used.
  *
  * @see AggregateBy
  */
@@ -119,7 +122,7 @@ public class MaxBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "maxField"})
   public MaxBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields maxField )
     {
-    this( null, pipe, groupingFields, valueField, maxField, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, maxField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -149,7 +152,7 @@ public class MaxBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "maxField"})
   public MaxBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields maxField )
     {
-    this( name, pipe, groupingFields, valueField, maxField, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, maxField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -179,7 +182,7 @@ public class MaxBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "maxField"})
   public MaxBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields maxField )
     {
-    this( null, pipes, groupingFields, valueField, maxField, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, maxField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -209,7 +212,7 @@ public class MaxBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "maxField"})
   public MaxBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields maxField )
     {
-    this( name, pipes, groupingFields, valueField, maxField, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, maxField, USE_DEFAULT_THRESHOLD );
     }
 
   /**

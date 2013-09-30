@@ -43,12 +43,16 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * The {@code threshold} value tells the underlying MinPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry.
+ * <p/>
+ * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
+ * will be used.
  *
  * @see cascading.pipe.assembly.AggregateBy
  */
 public class MinBy extends AggregateBy
   {
   /** DEFAULT_THRESHOLD */
+  @Deprecated
   public static final int DEFAULT_THRESHOLD = 10000;
 
   public static class MinPartials implements Functor
@@ -120,7 +124,7 @@ public class MinBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "minField"})
   public MinBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields minField )
     {
-    this( null, pipe, groupingFields, valueField, minField, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, minField, 0 );
     }
 
   /**
@@ -150,7 +154,7 @@ public class MinBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "minField"})
   public MinBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields minField )
     {
-    this( name, pipe, groupingFields, valueField, minField, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -180,7 +184,7 @@ public class MinBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "minField"})
   public MinBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField )
     {
-    this( null, pipes, groupingFields, valueField, minField, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -210,7 +214,7 @@ public class MinBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "minField"})
   public MinBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField )
     {
-    this( name, pipes, groupingFields, valueField, minField, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
     }
 
   /**

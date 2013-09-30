@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.0 [unreleased]
 
+  Updated c.p.a.AggregateBy sub-classes to pass 0 as default threshold value to allow the system default value
+  to be honored.
+
   Added c.o.a.MaxValue and c.o.a.MinValue c.o.Aggregator sub-classes to replace c.o.a.Max and c.o.a.Min classes
   respectively. MaxValue and MinValue rely on the values compared to be j.l.Comparable types resulting in a simpler
   implementation and support for max/min of non numeric types.
