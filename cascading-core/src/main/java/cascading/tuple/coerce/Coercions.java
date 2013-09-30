@@ -132,6 +132,16 @@ public final class Coercions
     return type;
     }
 
+  public static Class[] asNonPrimitive( Class[] types )
+    {
+    Class[] results = new Class[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      results[ i ] = asNonPrimitive( types[ i ] );
+
+    return results;
+    }
+
   /**
    * Method coercibleTypeFor returns the {@link CoercibleType} for the given {@link Type} instance.
    * <p/>
@@ -255,6 +265,46 @@ public final class Coercions
       return getInstance( typeClass );
 
     return typeClass;
+    }
+
+  public static String[] getTypeNames( Type[] types )
+    {
+    String[] names = new String[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      {
+      if( Class.class.isInstance( types[ i ] ) )
+        names[ i ] = ( (Class) types[ i ] ).getName();
+      else
+        names[ i ] = types[ i ].getClass().getName();
+      }
+
+    return names;
+    }
+
+  public static Type[] getTypes( String[] names )
+    {
+    Type[] types = new Type[ names.length ];
+
+    for( int i = 0; i < names.length; i++ )
+      types[ i ] = asType( names[ i ] );
+
+    return types;
+    }
+
+  public static Class[] getCanonicalTypes( Type[] types )
+    {
+    Class[] canonicalTypes = new Class[ types.length ];
+
+    for( int i = 0; i < types.length; i++ )
+      {
+      if( CoercibleType.class.isInstance( types[ i ] ) )
+        canonicalTypes[ i ] = ( (CoercibleType) types[ i ] ).getCanonicalType();
+      else
+        canonicalTypes[ i ] = (Class) types[ i ];
+      }
+
+    return canonicalTypes;
     }
 
   private static CoercibleType getInstance( Class<CoercibleType> typeClass )

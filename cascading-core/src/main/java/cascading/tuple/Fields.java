@@ -312,17 +312,27 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public static Fields merge( Fields... fields )
     {
     List<Comparable> elements = new ArrayList<Comparable>();
+    List<Type> elementTypes = new ArrayList<Type>();
 
     for( Fields field : fields )
       {
       for( Comparable comparable : field )
         {
         if( !elements.contains( comparable ) )
+          {
           elements.add( comparable );
+          elementTypes.add( field.getType( comparable ) );
+          }
         }
       }
 
-    return new Fields( elements.toArray( new Comparable[ elements.size() ] ) );
+    Comparable[] comparables = elements.toArray( new Comparable[ elements.size() ] );
+    Type[] types = elementTypes.toArray( new Type[ elementTypes.size() ] );
+
+    if( Util.containsNull( types ) )
+      return new Fields( comparables );
+
+    return new Fields( comparables, types );
     }
 
   public static Fields copyComparators( Fields toFields, Fields... fromFields )
