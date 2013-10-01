@@ -345,7 +345,7 @@ public class TupleEntry
     for( int i = 0; i < coercions.length; i++ )
       {
       Object element = tuple.getObject( i );
-      into.set( i, coercions[ i ].coerce( element, types[ i ] ) );
+      into.set( i, Coercions.coerce( coercions[ i ], element, types[ i ] ) );
       }
 
     return into;
@@ -447,7 +447,7 @@ public class TupleEntry
    */
   public Object getObject( int pos, Type type )
     {
-    return coercions[ pos ].coerce( tuple.getObject( pos ), type );
+    return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
     }
 
   /**
@@ -498,7 +498,7 @@ public class TupleEntry
   public Object getObject( Comparable fieldName, Type type )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
-    return coercions[ pos ].coerce( tuple.getObject( pos ), type );
+    return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
     }
 
   /**
@@ -641,7 +641,6 @@ public class TupleEntry
   public void setString( Comparable fieldName, String value )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
-
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
@@ -656,8 +655,7 @@ public class TupleEntry
    */
   public String getString( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (String) coercions[ pos ].coerce( tuple.getObject( pos ), String.class );
+    return (String) getObject( fieldName, String.class );
     }
 
   /**
@@ -671,8 +669,7 @@ public class TupleEntry
    */
   public float getFloat( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Float) coercions[ pos ].coerce( tuple.getObject( pos ), float.class );
+    return (Float) getObject( fieldName, float.class );
     }
 
   /**
@@ -686,8 +683,7 @@ public class TupleEntry
    */
   public double getDouble( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Double) coercions[ pos ].coerce( tuple.getObject( pos ), double.class );
+    return (Double) getObject( fieldName, double.class );
     }
 
   /**
@@ -701,8 +697,7 @@ public class TupleEntry
    */
   public int getInteger( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Integer) coercions[ pos ].coerce( tuple.getObject( pos ), int.class );
+    return (Integer) getObject( fieldName, int.class );
     }
 
   /**
@@ -716,8 +711,7 @@ public class TupleEntry
    */
   public long getLong( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Long) coercions[ pos ].coerce( tuple.getObject( pos ), long.class );
+    return (Long) getObject( fieldName, long.class );
     }
 
   /**
@@ -731,8 +725,7 @@ public class TupleEntry
    */
   public short getShort( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Short) coercions[ pos ].coerce( tuple.getObject( pos ), short.class );
+    return (Short) getObject( fieldName, short.class );
     }
 
   /**
@@ -747,8 +740,7 @@ public class TupleEntry
    */
   public boolean getBoolean( Comparable fieldName )
     {
-    int pos = fields.getPos( asFieldName( fieldName ) );
-    return (Boolean) coercions[ pos ].coerce( tuple.getObject( pos ), boolean.class );
+    return (Boolean) getObject( fieldName, boolean.class );
     }
 
   private Comparable asFieldName( Comparable fieldName )

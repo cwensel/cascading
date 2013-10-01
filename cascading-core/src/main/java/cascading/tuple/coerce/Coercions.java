@@ -71,6 +71,24 @@ public final class Coercions
       }
 
     public abstract T coerce( Object value );
+
+    @Override
+    public int hashCode()
+      {
+      return getCanonicalType().hashCode();
+      }
+
+    @Override
+    public boolean equals( Object object )
+      {
+      if( this == object )
+        return true;
+
+      if( !( object instanceof CoercibleType ) )
+        return false;
+
+      return getCanonicalType().equals( ( (CoercibleType) object ).getCanonicalType() );
+      }
     }
 
   private static final Map<Type, Coerce> coercionsPrivate = new IdentityHashMap<Type, Coerce>();
@@ -188,6 +206,25 @@ public final class Coercions
       return (T) OBJECT.coerce( value );
 
     return coerce.coerce( value );
+    }
+
+  /**
+   * Method coerce will coerce the given value to the given type using the given {@link CoercibleType}.
+   * <p/>
+   * If the given CoercibleType is equivalent ({@link #equals(Object)}) to the given Type, the value
+   * is returned. Note the Type can be itself a CoercibleType, so unnecessary work is prevented.
+   *
+   * @param currentType the current Type of the value.
+   * @param value       the value to coerce, may be null.
+   * @param type        the type to coerce to via any mapped CoercibleType
+   * @return the coerced value
+   */
+  public static final Object coerce( CoercibleType currentType, Object value, Type type )
+    {
+    if( currentType.equals( type ) )
+      return value;
+
+    return currentType.coerce( value, type );
     }
 
   /**
