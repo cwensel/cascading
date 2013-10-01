@@ -489,21 +489,21 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     {
     HashSet<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
 
     handleJoins( "cogroupinner", new InnerJoin(), results, 7, false );
     handleJoins( "cogroupinner-resultgroup", new InnerJoin(), results, 7, true );
@@ -571,32 +571,32 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     {
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "5\te1\tnull\tnull" ) );
-    results.add( new Tuple( "5\te2\tnull\tnull" ) );
-    results.add( new Tuple( "5\te3\tnull\tnull" ) );
-    results.add( new Tuple( "null\tnull\t6\tF1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF2" ) );
-    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "3", "c1", null, null ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( "5", "e1", null, null ) );
+    results.add( new Tuple( "5", "e2", null, null ) );
+    results.add( new Tuple( "5", "e3", null, null ) );
+    results.add( new Tuple( null, null, "6", "F1" ) );
+    results.add( new Tuple( null, null, "6", "F2" ) );
+    results.add( new Tuple( "7", "g1", null, null ) );
+    results.add( new Tuple( "7", "g2", null, null ) );
+    results.add( new Tuple( "7", "g3", null, null ) );
+    results.add( new Tuple( "7", "g4", null, null ) );
+    results.add( new Tuple( "7", "g5", null, null ) );
 
     handleJoins( "cogroupouter", new OuterJoin(), results, 7, false );
     handleJoins( "cogroupouter-resultgroup", new OuterJoin(), results, 7, true );
@@ -662,30 +662,30 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     {
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "5\te1\tnull\tnull" ) );
-    results.add( new Tuple( "5\te2\tnull\tnull" ) );
-    results.add( new Tuple( "5\te3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "3", "c1", null, null ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( "5", "e1", null, null ) );
+    results.add( new Tuple( "5", "e2", null, null ) );
+    results.add( new Tuple( "5", "e3", null, null ) );
+    results.add( new Tuple( "7", "g1", null, null ) );
+    results.add( new Tuple( "7", "g2", null, null ) );
+    results.add( new Tuple( "7", "g3", null, null ) );
+    results.add( new Tuple( "7", "g4", null, null ) );
+    results.add( new Tuple( "7", "g5", null, null ) );
 
     handleJoins( "cogroupinnerouter", new LeftJoin(), results, 7, false );
     handleJoins( "cogroupinnerouter-resultgroup", new LeftJoin(), results, 7, true );
@@ -744,23 +744,23 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     {
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( null, null, "6", "F1" ) );
+    results.add( new Tuple( null, null, "6", "F2" ) );
 
     handleJoins( "cogroupouterinner", new RightJoin(), results, 7, false );
     handleJoins( "cogroupouterinner-resultgroup", new RightJoin(), results, 7, true );
@@ -781,7 +781,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( Fields.size( 4, String.class ), "\t", getOutputPath( path ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -856,14 +856,13 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupmixed" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( Fields.size( 6, String.class ), "\t", getOutputPath( "cogroupmixed" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     Pipe pipeLowerOffset = new Each( new Pipe( "loweroffset" ), new Fields( "line" ), splitter );
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-
 
     Pipe[] pipes = Pipe.pipes( pipeLowerOffset, pipeUpper, pipeLower );
     Fields[] fields = Fields.fields( new Fields( "num" ), new Fields( "num" ), new Fields( "num" ) );
@@ -877,15 +876,14 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     validateLength( flow, 6 );
 
-
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta\t1\tA\t1\ta" ) );
-    results.add( new Tuple( "null\tnull\t2\tB\t2\tb" ) );
-    results.add( new Tuple( "null\tnull\t3\tC\t3\tc" ) );
-    results.add( new Tuple( "null\tnull\t4\tD\t4\td" ) );
-    results.add( new Tuple( "5\tb\t5\tE\t5\te" ) );
-    results.add( new Tuple( "5\te\t5\tE\t5\te" ) );
+    results.add( new Tuple( "1", "a", "1", "A", "1", "a" ) );
+    results.add( new Tuple( null, null, "2", "B", "2", "b" ) );
+    results.add( new Tuple( null, null, "3", "C", "3", "c" ) );
+    results.add( new Tuple( null, null, "4", "D", "4", "d" ) );
+    results.add( new Tuple( "5", "b", "5", "E", "5", "e" ) );
+    results.add( new Tuple( "5", "e", "5", "E", "5", "e" ) );
 
     List<Tuple> actual = getSinkAsList( flow );
 

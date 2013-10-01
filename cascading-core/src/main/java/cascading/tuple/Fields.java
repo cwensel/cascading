@@ -189,6 +189,29 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
+   * Method size is a factory that makes new instances of Fields the given size with every field
+   * of the given type.
+   *
+   * @param size of type int
+   * @param type of type Type
+   * @return Fields
+   */
+  public static Fields size( int size, Type type )
+    {
+    if( size == 0 )
+      return Fields.NONE;
+
+    Fields fields = new Fields();
+
+    fields.fields = expand( size, 0 );
+
+    for( Comparable field : fields )
+      fields.applyType( field, type );
+
+    return fields;
+    }
+
+  /**
    * Method join joins all given Fields instances into a new Fields instance.
    * <p/>
    * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
