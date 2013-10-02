@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.2.0 [unreleased]
+2.2.0
 
   Fixed issue where c.p.CoGroup in local mode did not properly handle joins where the grouping j.u.Comparator
   did not treat null values as equal. SQL semantics expect null values to not be equivalent. c.p.HashJoin
