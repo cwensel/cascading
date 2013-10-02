@@ -104,7 +104,7 @@ import static cascading.flow.FlowDef.flowDef;
 public abstract class FlowConnector
   {
   /** Field properties */
-  protected Map<Object, Object> properties;
+  protected Map<Object, Object> properties; // may be a Map or Properties instance. see PropertyUtil
 
   /**
    * Method getIntermediateSchemeClass is used for debugging.
@@ -177,12 +177,16 @@ public abstract class FlowConnector
   /**
    * Method getProperties returns the properties of this FlowConnector object. The returned Map instance
    * is immutable to prevent changes to the underlying property values in this FlowConnector instance.
+   * <p/>
+   * If a {@link Properties} instance was passed to the constructor, the returned object will be a flattened
+   * {@link Map} instance.
    *
    * @return the properties (type Map<Object, Object>) of this FlowConnector object.
    */
   public Map<Object, Object> getProperties()
     {
-    return Collections.unmodifiableMap( properties );
+    // Sub-classes of FlowConnector should rely on PropertyUtil to manage access to properties objects internally.
+    return Collections.unmodifiableMap( PropertyUtil.asFlatMap( properties ) );
     }
 
   /**
