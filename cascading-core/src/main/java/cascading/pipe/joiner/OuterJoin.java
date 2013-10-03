@@ -29,6 +29,11 @@ import cascading.tuple.Tuple;
 /**
  * Class OuterJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * and outer join of the CoGrouper internal grouped tuple collections.
+ * <p/>
+ * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
+ * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
+ * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from
+ * equaling null. As a convenience, see the {@link cascading.util.NullNotEquivalentComparator} class.
  */
 public class OuterJoin implements Joiner
   {

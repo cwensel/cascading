@@ -30,6 +30,11 @@ import cascading.tuple.Tuple;
  * {@link Joiner} and return tuples that represent a join as defined by the given boolean array.
  * <p/>
  * So if joining three streams, {@code boolean []{true,false,false}} will result in a 'inner', 'outer', 'outer' join.
+ * <p/>
+ * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
+ * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
+ * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from
+ * equaling null. As a convenience, see the {@link cascading.util.NullNotEquivalentComparator} class.
  */
 public class MixedJoin implements Joiner
   {

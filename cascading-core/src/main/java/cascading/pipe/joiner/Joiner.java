@@ -25,7 +25,14 @@ import java.util.Iterator;
 
 import cascading.tuple.Tuple;
 
-/** Interface Joiner allows for custom join strategies against a {@link cascading.flow.hadoop.HadoopCoGroupClosure}. */
+/**
+ * Interface Joiner allows for custom join strategies against a {@link cascading.pipe.CoGroup}.
+ * <p/>
+ * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
+ * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
+ * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from
+ * equaling null. As a convenience, see the {@link cascading.util.NullNotEquivalentComparator} class.
+ */
 public interface Joiner extends Serializable
   {
   /**

@@ -30,12 +30,16 @@ import cascading.flow.FlowProcess;
 import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class MemoryHashJoinGate extends MemorySpliceGate
   {
+  private static final Logger LOG = LoggerFactory.getLogger( MemoryHashJoinGate.class );
+
   protected CountDownLatch latch;
 
   private Collection<Tuple>[] collections;
@@ -63,6 +67,9 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     streamedCollection = new ArrayList<Tuple>( Arrays.asList( new Tuple() ) ); // placeholder in collection
     collections = new Collection[ orderedPrevious.length ];
     collections[ 0 ] = streamedCollection;
+
+    if( nullsAreNotEqual )
+      LOG.warn( "HashJoin does not fully support key comparators where null values are not treated equal" );
     }
 
   @Override

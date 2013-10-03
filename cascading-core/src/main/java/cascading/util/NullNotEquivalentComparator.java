@@ -18,29 +18,28 @@
  * limitations under the License.
  */
 
-package cascading.tuple.hadoop.util;
+package cascading.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-import cascading.tuple.hadoop.TupleSerialization;
-import cascading.tuple.util.TupleHasher;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
-
 /**
- *
+ * Class NullNotEquivalentComparator simply returns -1 if the lhs is null, 1 if the rhs is null, or
+ * the result of {@code lhs.compareTo(rhs)}.
+ * <p/>
+ * Use this {@link Comparator} when performing a {@link cascading.pipe.CoGroup} that needs SQL like semantics.
  */
-public class HasherPartitioner extends TupleHasher implements JobConfigurable
+public class NullNotEquivalentComparator implements Comparator<Comparable>, Serializable
   {
-  private static Comparator defaultComparator;
-  private Comparator[] comparators;
-
-  public void configure( JobConf jobConf )
+  @Override
+  public int compare( Comparable lhs, Comparable rhs )
     {
-    defaultComparator = TupleSerialization.getDefaultComparator( defaultComparator, jobConf );
+    if( lhs == null )
+      return -1;
 
-    comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
+    if( rhs == null )
+      return 1;
 
-    initialize( defaultComparator, comparators );
+    return lhs.compareTo( rhs );
     }
   }

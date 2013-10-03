@@ -30,6 +30,11 @@ import cascading.tuple.Tuple;
  * <p/>
  * Note only the farthest right tuple stream will be used as the outer join. All preceding joins to the left will
  * be inner joins. See {@link MixedJoin} for more flexibility.
+ * <p/>
+ * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
+ * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
+ * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from
+ * equaling null. As a convenience, see the {@link cascading.util.NullNotEquivalentComparator} class.
  *
  * @see MixedJoin
  */
