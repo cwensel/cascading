@@ -21,6 +21,7 @@
 package cascading.operation.aggregator;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Type;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
@@ -30,6 +31,8 @@ import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /** Class Average is an {@link Aggregator} that returns the average of all numeric values in the current group. */
 public class Average extends BaseOperation<Average.Context> implements Aggregator<Average.Context>
@@ -37,12 +40,23 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "average";
 
+  /** Field type */
+  private Type type = Double.class;
+  private CoercibleType canonical;
+
   /** Class Context is used to hold intermediate values. */
   protected static class Context
     {
+    private final CoercibleType canonical;
+
     Tuple tuple = Tuple.size( 1 );
     double sum = 0.0D;
     long count = 0L;
+
+    public Context( CoercibleType canonical )
+      {
+      this.canonical = canonical;
+      }
 
     public Context reset()
       {
@@ -54,7 +68,7 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
 
     public Tuple result()
       {
-      tuple.set( 0, sum / count );
+      tuple.set( 0, canonical.canonical( sum / count ) );
 
       return tuple;
       }
@@ -63,7 +77,9 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
   /** Constructs a new instance that returns the average of the values encountered in the field name "average". */
   public Average()
     {
-    super( 1, new Fields( FIELD_NAME ) );
+    super( 1, new Fields( FIELD_NAME, Double.class ) );
+
+    this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
   /**
@@ -78,12 +94,17 @@ public class Average extends BaseOperation<Average.Context> implements Aggregato
 
     if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+
+    if( fieldDeclaration.hasTypes() )
+      this.type = fieldDeclaration.getType( 0 );
+
+    this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
-    operationCall.setContext( new Context() );
+    operationCall.setContext( new Context( canonical ) );
     }
 
   @Override
