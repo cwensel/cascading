@@ -12,7 +12,24 @@ Cascading Change Log
 
   Added support for Apache Hadoop 2.0 and YARN.
 
-2.2.0 [unreleased]
+2.2.0
+
+  Fixed issue where c.p.CoGroup in local mode did not properly handle joins where the grouping j.u.Comparator
+  did not treat null values as equal. SQL semantics expect null values to not be equivalent. c.p.HashJoin
+  does not support non-equality between null and will issue a warning.
+
+  Updated c.p.a.AggregateBy sub-classes to pass 0 as default threshold value to allow the system default value
+  to be honored.
+
+  Added c.o.a.MaxValue and c.o.a.MinValue c.o.Aggregator sub-classes to replace c.o.a.Max and c.o.a.Min classes
+  respectively. MaxValue and MinValue rely on the values compared to be j.l.Comparable types resulting in a simpler
+  implementation and support for max/min of non numeric types.
+
+  Fixed issue where c.o.t.DateParser would drop incoming Tuples if the argument was null.
+
+  Fixed issue where c.t.Hasher was not honored during grouping in local mode.
+
+  Updated c.t.h.GlobHfs to use fewer resources when deriving member identifiers.
 
   Updated c.t.h.HadoopTapPlatformTest to skip the c.t.h.Dfs test if HDFS filesystem is unavailable on the current
   configuration.
@@ -75,8 +92,6 @@ Cascading Change Log
   Updated c.o.Buffer to allow implementations to disable nulling of non-grouping fields after the arguments iterator
   has completed. This simplifies appending aggregated fields to the incoming tuple stream.
 
-  Updated c.t.Fields to retain relative positions when calling Fields#append.
-
   Updated c.t.Fields to return appending value when calling Fields#append on Fields.NONE and optimized Fields#subtract
   when subtracting Fields.NONE.
 
@@ -117,8 +132,7 @@ Cascading Change Log
 
   Added "test.platform.includes" system property so tests can be limited to specified platforms.
 
-  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively. If the given
-  result fields declare a type, the result will be coerced to that type.
+  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively.
 
   Updated c.p.a.SumBy and c.p.a.AverageBy to honor result fields type declaration by coercing the result to the
   declared type.

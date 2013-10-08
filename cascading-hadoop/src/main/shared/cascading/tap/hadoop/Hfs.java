@@ -402,16 +402,24 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       }
     }
 
-  public void applySourceConfInitIdentifiers( FlowProcess<JobConf> process, JobConf conf, String... fullIdentifiers )
+  protected void applySourceConfInitIdentifiers( FlowProcess<JobConf> process, JobConf conf, String... fullIdentifiers )
     {
     for( String fullIdentifier : fullIdentifiers )
-      {
-      Path qualifiedPath = new Path( fullIdentifier );
+      sourceConfInitAddInputPath( conf, new Path( fullIdentifier ) );
 
-      FileInputFormat.addInputPath( conf, qualifiedPath );
+    sourceConfInitComplete( process, conf );
+    }
 
-      makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
-      }
+  protected void sourceConfInitAddInputPath( JobConf conf, Path qualifiedPath )
+    {
+    FileInputFormat.addInputPath( conf, qualifiedPath );
+
+    makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
+    }
+
+  protected void sourceConfInitComplete( FlowProcess<JobConf> process, JobConf conf )
+    {
+    super.sourceConfInit( process, conf );
 
     super.sourceConfInit( process, conf );
 

@@ -44,7 +44,7 @@ public class Count extends BaseOperation<Pair<Long[], Tuple>> implements Aggrega
   /** Constructor Count creates a new Count instance using the default field declaration of name 'count'. */
   public Count()
     {
-    super( new Fields( FIELD_NAME ) );
+    super( new Fields( FIELD_NAME, Long.class ) );
     }
 
   /**

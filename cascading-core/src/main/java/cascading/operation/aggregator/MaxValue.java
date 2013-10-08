@@ -22,61 +22,53 @@ package cascading.operation.aggregator;
 
 import java.beans.ConstructorProperties;
 
-import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 /**
- * Class Min is an {@link Aggregator} that returns the minimum value encountered in the current group.
- * * <p/>
- * This class assumes the argument values is a {@link Number}, or a {@link String} representation of a number.
+ * Class MaxValue is an {@link cascading.operation.Aggregator} that returns the maximum value encountered in the
+ * current group.
  * <p/>
- * See {@link MinValue} to find the min of any {@link Comparable} type.
+ * As opposed to the {@link Max} class, values are expected to be {@link Comparable} types vs numeric representations and
+ * the {@link Comparable#compareTo(Object)} result is use for max comparison.
  */
-@Deprecated
-public class Min extends ExtremaBase
+public class MaxValue extends ExtremaValueBase
   {
   /** Field FIELD_NAME */
-  public static final String FIELD_NAME = "min";
+  public static final String FIELD_NAME = "max";
 
-  /** Constructs a new instance that returns the Min value encountered in the field name "min". */
-  public Min()
+  /** Constructs a new instance that returns the maximum value encountered in the field name "max". */
+  public MaxValue()
     {
     super( 1, new Fields( FIELD_NAME ) );
     }
 
   /**
-   * Constructs a new instance that returns the minimum value encountered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the maximum value encountered in the given fieldDeclaration field name.
    *
    * @param fieldDeclaration of type Fields
    */
   @ConstructorProperties({"fieldDeclaration"})
-  public Min( Fields fieldDeclaration )
+  public MaxValue( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
     }
 
   /**
-   * Constructs a new instance that returns the minimum value encountered in the given fieldDeclaration field name.
+   * Constructs a new instance that returns the maximum value encountered in the given fieldDeclaration field name.
    * Any argument matching an ignoredValue won't be compared.
    *
    * @param fieldDeclaration of type Fields
    * @param ignoreValues     of type Object...
    */
   @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
-  public Min( Fields fieldDeclaration, Object... ignoreValues )
+  public MaxValue( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );
     }
 
   @Override
-  protected boolean compare( Number lhs, Number rhs )
+  protected boolean compare( Comparable lhs, Comparable rhs )
     {
-    return lhs.doubleValue() > rhs.doubleValue();
-    }
-
-  @Override
-  protected double getInitialValue()
-    {
-    return Double.POSITIVE_INFINITY;
+    return lhs.compareTo( rhs ) < 0;
     }
   }

@@ -42,14 +42,14 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   public static final String FIELD_NAME = "sum";
 
   /** Field type */
-  private Type type = double.class;
+  private Type type = Double.class;
   private CoercibleType canonical;
 
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()
     {
-    super( 1, new Fields( FIELD_NAME ) );
+    super( 1, new Fields( FIELD_NAME, Double.class ) );
     this.canonical = Coercions.coercibleTypeFor( this.type );
     }
 
@@ -85,7 +85,7 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   @ConstructorProperties({"fieldDeclaration", "type"})
   public Sum( Fields fieldDeclaration, Class type )
     {
-    this( fieldDeclaration );
+    this( fieldDeclaration.applyTypes( type ) );
     this.type = type;
     this.canonical = Coercions.coercibleTypeFor( this.type );
     }

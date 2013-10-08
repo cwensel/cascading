@@ -39,6 +39,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.util.TupleBuilder;
 import cascading.tuple.util.TupleHasher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static cascading.tuple.util.TupleViews.createNarrow;
 
@@ -47,12 +49,14 @@ import static cascading.tuple.util.TupleViews.createNarrow;
  */
 public abstract class MemorySpliceGate extends SpliceGate
   {
+  private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
 
   protected final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
 
   protected Comparator<Tuple>[] groupComparators;
   protected Comparator<Tuple>[] valueComparators;
   protected TupleHasher groupHasher;
+  protected boolean nullsAreNotEqual;
 
   protected Set<Tuple> keys;
   protected Map<Tuple, Collection<Tuple>>[] keyValues;
@@ -137,12 +141,31 @@ public abstract class MemorySpliceGate extends SpliceGate
         }
       }
 
+    nullsAreNotEqual = !areNullsEqual();
+
+    if( nullsAreNotEqual )
+      LOG.debug( "treating null values in Tuples at not equal during in memory grouping" );
+
     Comparator[] hashers = TupleHasher.merge( compareFields );
     groupHasher = defaultComparator != null || !TupleHasher.isNull( hashers ) ? new TupleHasher( defaultComparator, hashers ) : null;
 
     keys = createKeySet();
 
     count.set( numIncomingPaths ); // the number of paths incoming
+    }
+
+  private boolean areNullsEqual()
+    {
+    try
+      {
+      Tuple tupleWithNull = Tuple.size( 1 );
+
+      return groupComparators[ 0 ].compare( tupleWithNull, tupleWithNull ) == 0;
+      }
+    catch( Exception exception )
+      {
+      return true; // assume we have an npe or something and they don't expect to see nulls
+      }
     }
 
   @Override

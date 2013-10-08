@@ -55,12 +55,16 @@ import cascading.tuple.type.CoercibleType;
  * <p/>
  * The {@code threshold} value tells the underlying AveragePartials functions how many unique key sums and counts to accumulate
  * in the LRU cache, before emitting the least recently used entry.
+ * <p/>
+ * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
+ * will be used.
  *
  * @see cascading.pipe.assembly.AggregateBy
  */
 public class AverageBy extends AggregateBy
   {
   /** DEFAULT_THRESHOLD */
+  @Deprecated
   public static final int DEFAULT_THRESHOLD = 10000;
 
   public enum Include
@@ -99,7 +103,10 @@ public class AverageBy extends AggregateBy
     @Override
     public Fields getDeclaredFields()
       {
-      return new Fields( AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".sum", AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".count" );
+      Fields sumName = new Fields( AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".sum", Double.class );
+      Fields countName = new Fields( AverageBy.class.getPackage().getName() + "." + declaredFields.get( 0 ) + ".count", Long.class );
+
+      return sumName.append( countName );
       }
 
     @Override
@@ -178,10 +185,18 @@ public class AverageBy extends AggregateBy
      */
     public AverageFinal( Fields fieldDeclaration )
       {
-      super( 2, fieldDeclaration );
+      super( 2, makeFieldDeclaration( fieldDeclaration ) );
 
       if( !fieldDeclaration.isSubstitution() && fieldDeclaration.size() != 1 )
         throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
+      }
+
+    private static Fields makeFieldDeclaration( Fields fieldDeclaration )
+      {
+      if( fieldDeclaration.hasTypes() )
+        return fieldDeclaration;
+
+      return fieldDeclaration.applyTypes( Double.class );
       }
 
     @Override
@@ -261,7 +276,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField )
     {
-    this( null, pipe, groupingFields, valueField, averageField, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -291,7 +306,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField )
     {
-    this( name, pipe, groupingFields, valueField, averageField, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -321,7 +336,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField )
     {
-    this( null, pipes, groupingFields, valueField, averageField, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -351,7 +366,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField )
     {
-    this( name, pipes, groupingFields, valueField, averageField, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -382,7 +397,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
-    this( null, pipe, groupingFields, valueField, averageField, include, DEFAULT_THRESHOLD );
+    this( null, pipe, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -414,7 +429,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
-    this( name, pipe, groupingFields, valueField, averageField, include, DEFAULT_THRESHOLD );
+    this( name, pipe, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -446,7 +461,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
-    this( null, pipes, groupingFields, valueField, averageField, include, DEFAULT_THRESHOLD );
+    this( null, pipes, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -478,7 +493,7 @@ public class AverageBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
-    this( name, pipes, groupingFields, valueField, averageField, include, DEFAULT_THRESHOLD );
+    this( name, pipes, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
     }
 
   /**

@@ -186,13 +186,34 @@ public class TupleSerialization extends Configured implements Serialization
     return jobConf.get( HADOOP_IO_SERIALIZATIONS, null );
     }
 
+  public static Comparator getDefaultComparator( Comparator comparator, Configuration jobConf )
+    {
+    String typeName = jobConf.get( FlowProps.DEFAULT_ELEMENT_COMPARATOR );
+
+    if( Util.isEmpty( typeName ) )
+      return null;
+
+    if( comparator == null )
+      return createComparator( jobConf, typeName );
+
+    if( comparator.getClass().getName().equals( typeName ) && !( comparator instanceof Configured ) )
+      return comparator;
+
+    return createComparator( jobConf, typeName );
+    }
+
   public static Comparator getDefaultComparator( Configuration jobConf )
     {
     String typeName = jobConf.get( FlowProps.DEFAULT_ELEMENT_COMPARATOR );
 
-    if( typeName == null || typeName.isEmpty() )
+    if( Util.isEmpty( typeName ) )
       return null;
 
+    return createComparator( jobConf, typeName );
+    }
+
+  private static Comparator createComparator( Configuration jobConf, String typeName )
+    {
     LOG.debug( "using default comparator: {}", typeName );
 
     try

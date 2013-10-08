@@ -22,12 +22,15 @@ package cascading.flow.stream;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.pipe.Splice;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 
 /**
  *
@@ -75,29 +78,50 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
     Iterator<Tuple> keyIterator = keys.iterator();
 
+    Set<Tuple> seenNulls = new HashSet<Tuple>();
+
     while( keyIterator.hasNext() )
       {
       Tuple keysTuple = keyIterator.next();
 
       keyIterator.remove();
 
-      // drain the keys and keyValues collections to preserve memory
-      for( int i = 0; i < keyValues.length; i++ )
+      // provides sql like semantics
+      if( nullsAreNotEqual && Tuples.frequency( keysTuple, null ) != 0 )
         {
-        collections[ i ] = keyValues[ i ].remove( keysTuple );
+        if( seenNulls.contains( keysTuple ) )
+          continue;
 
-        if( collections[ i ] == null )
-          collections[ i ] = Collections.EMPTY_LIST;
+        seenNulls.add( keysTuple );
+
+        for( int i = 0; i < keyValues.length; i++ )
+          {
+          Collection<Tuple> values = keyValues[ i ].remove( keysTuple );
+
+          if( values == null )
+            continue;
+
+          for( int j = 0; j < keyValues.length; j++ )
+            collections[ j ] = Collections.EMPTY_LIST;
+
+          collections[ i ] = values;
+
+          push( collections, keysTuple );
+          }
         }
+      else
+        {
+        // drain the keys and keyValues collections to preserve memory
+        for( int i = 0; i < keyValues.length; i++ )
+          {
+          collections[ i ] = keyValues[ i ].remove( keysTuple );
 
-      closure.reset( collections );
+          if( collections[ i ] == null )
+            collections[ i ] = Collections.EMPTY_LIST;
+          }
 
-      keyEntry.setTuple( closure.getGroupTuple( keysTuple ) );
-
-      // create Closure type here
-      tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
-
-      next.receive( this, grouping );
+        push( collections, keysTuple );
+        }
       }
 
     keys = createKeySet();
@@ -106,5 +130,17 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     count.set( numIncomingPaths );
 
     next.complete( this );
+    }
+
+  private void push( Collection<Tuple>[] collections, Tuple keysTuple )
+    {
+    closure.reset( collections );
+
+    keyEntry.setTuple( closure.getGroupTuple( keysTuple ) );
+
+    // create Closure type here
+    tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
+
+    next.receive( this, grouping );
     }
   }

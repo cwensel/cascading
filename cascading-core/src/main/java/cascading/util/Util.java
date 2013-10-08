@@ -34,8 +34,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import cascading.CascadingException;
@@ -114,6 +117,17 @@ public class Util
       return null;
 
     return Arrays.copyOf( source, source.length );
+    }
+
+  public static String unique( String value, String delim )
+    {
+    String[] split = value.split( delim );
+
+    Set<String> values = new LinkedHashSet<String>();
+
+    Collections.addAll( values, split );
+
+    return join( values, delim );
     }
 
   /**

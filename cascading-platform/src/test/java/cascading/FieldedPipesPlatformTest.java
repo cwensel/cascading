@@ -20,7 +20,9 @@
 
 package cascading;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,15 +47,18 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
+import static cascading.ComparePlatformsTest.NONDETERMINISTIC;
 import static data.InputData.*;
 
 
@@ -909,5 +914,57 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 8, null );
+    }
+
+
+  public static class LowerComparator implements Comparator<Comparable>, Hasher<Comparable>, Serializable
+    {
+    @Override
+    public int compare( Comparable lhs, Comparable rhs )
+      {
+      return lhs.toString().toLowerCase().compareTo( rhs.toString().toLowerCase() );
+      }
+
+    @Override
+    public int hashCode( Comparable value )
+      {
+      return value.toString().toLowerCase().hashCode();
+      }
+    }
+
+  @Test
+  public void testGroupByInsensitive() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap sourceUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "insensitivegrouping" + NONDETERMINISTIC ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
+
+    Pipe merge = new Merge( pipeLower, pipeUpper );
+
+    Fields charFields = new Fields( "char" );
+    charFields.setComparator( "char", new LowerComparator() );
+
+    Pipe splice = new GroupBy( merge, charFields );
+
+    splice = new Every( splice, new Fields( "char" ), new Count() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    // we can't guarantee if the grouping key will be upper or lower
+    validateLength( flow, 5, 1, Pattern.compile( "^\\w+\\s2$" ) );
     }
   }

@@ -77,6 +77,8 @@ public class LocalGroupByGate extends MemorySpliceGate
     Tuple valuesTuple = incomingEntry.getTupleCopy();
     Tuple groupTuple = keyBuilder[ 0 ].makeResult( valuesTuple, null ); // view on valuesTuple
 
+    groupTuple = getDelegatedTuple( groupTuple ); // wrap so hasher/comparator is honored
+
     keys.add( groupTuple );
     valueMap.put( groupTuple, valuesTuple );
     }

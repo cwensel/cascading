@@ -153,8 +153,12 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
   @Override
   public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
     {
-    initTapsInternal( conf );
-    super.sourceConfInit( null, conf );
+    Hfs[] taps = initTapsInternal( conf );
+
+    for( Hfs tap : taps )
+      taps[ 0 ].sourceConfInitAddInputPath( conf, tap.getPath() ); // we are building fully qualified paths above
+
+    taps[ 0 ].sourceConfInitComplete( process, conf );
     }
 
   @Override

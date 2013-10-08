@@ -20,6 +20,7 @@
 
 package cascading.property;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -105,5 +106,19 @@ public class PropertyUtil
       }
 
     return results;
+    }
+
+  public static Map<Object, Object> asFlatMap( Map<Object, Object> properties )
+    {
+    if( !( properties instanceof Properties ) )
+      return properties;
+
+    Map<Object, Object> map = new HashMap<Object, Object>();
+    Properties props = (Properties) properties;
+
+    for( String property : props.stringPropertyNames() )
+      map.put( property, props.getProperty( property ) );
+
+    return map;
     }
   }

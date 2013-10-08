@@ -47,6 +47,9 @@ import cascading.tuple.TupleEntry;
  * <p/>
  * The {@code threshold} value tells the underlying FirstPartials functions how many unique key counts to accumulate
  * in the LRU cache, before emitting the least recently used entry.
+ * <p/>
+ * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
+ * will be used.
  *
  * @see AggregateBy
  */
@@ -164,7 +167,7 @@ public class FirstBy extends AggregateBy
   @ConstructorProperties({"name", "pipe", "groupingFields", "firstFields"})
   public FirstBy( String name, Pipe pipe, Fields groupingFields, Fields firstFields )
     {
-    this( name, pipe, groupingFields, firstFields, 10000 );
+    this( name, pipe, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -192,7 +195,7 @@ public class FirstBy extends AggregateBy
   @ConstructorProperties({"pipes", "groupingFields", "firstFields"})
   public FirstBy( Pipe[] pipes, Fields groupingFields, Fields firstFields )
     {
-    this( null, pipes, groupingFields, firstFields, 10000 );
+    this( null, pipes, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
     }
 
   /**
@@ -220,7 +223,7 @@ public class FirstBy extends AggregateBy
   @ConstructorProperties({"name", "pipes", "groupingFields", "firstFields"})
   public FirstBy( String name, Pipe[] pipes, Fields groupingFields, Fields firstFields )
     {
-    this( name, pipes, groupingFields, firstFields, 10000 );
+    this( name, pipes, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
     }
 
   /**

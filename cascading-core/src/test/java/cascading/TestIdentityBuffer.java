@@ -37,12 +37,14 @@ public class TestIdentityBuffer extends BaseOperation<Integer> implements Buffer
   {
   private Fields groupFields;
   private Integer numGroups;
+  private boolean nullsAreOK;
 
-  public TestIdentityBuffer( Fields groupFields, int numGroups )
+  public TestIdentityBuffer( Fields groupFields, int numGroups, boolean nullsAreOK )
     {
     super( Fields.ARGS );
     this.groupFields = groupFields;
     this.numGroups = numGroups;
+    this.nullsAreOK = nullsAreOK;
     }
 
   @Override
@@ -64,8 +66,8 @@ public class TestIdentityBuffer extends BaseOperation<Integer> implements Buffer
     bufferCall.setContext( bufferCall.getContext() + 1 );
     TupleEntry group = bufferCall.getGroup();
 
-    if( !group.getFields().equals( groupFields ) )
-      throw new RuntimeException( "group fields do not match: " + group.getFields() + " " + groupFields );
+//    if( !group.getFields().equals( groupFields ) )
+//      throw new RuntimeException( "group fields do not match: " + group.getFields() + " != " + groupFields );
 
     if( group.size() != groupFields.size() )
       throw new RuntimeException( "group tuple size not fields size" );
@@ -80,7 +82,7 @@ public class TestIdentityBuffer extends BaseOperation<Integer> implements Buffer
         allAreNull = false;
       }
 
-    if( allAreNull )
+    if( !nullsAreOK && allAreNull )
       throw new RuntimeException( "group tuple value is null" );
 
     Iterator<TupleEntry> iterator = bufferCall.getArgumentsIterator();

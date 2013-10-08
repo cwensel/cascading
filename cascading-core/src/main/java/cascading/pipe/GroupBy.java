@@ -54,6 +54,22 @@ import cascading.tuple.Tuple;
  * <p/>
  * It should be noted for MapReduce systems, distributed group sorting is not 'total'. That is groups are sorted
  * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
+ * <p/>
+ * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
+ * being provided that makes two values with differing hashCode values equal. For example,
+ * {@code new BigDecimal( 100.0D )} and {@code new Double 100.0D )} are equal using a custom Comparator, but
+ * {@link Object#hashCode()} will be different, thus forcing each value into differing partitions.
+ * <p/>
+ * Note that grouping one String key with a lowercase value with another String key with an uppercase value using a
+ * "case insensitive" Comparator will not have consistent results. The grouping will execute and be correct,
+ * but the actual values in the key columns may be replaced with "equivalent" values from other streams.
+ * <p/>
+ * That is, if two streams are merged and then grouped on a key, where one stream the key values are uppercase and the
+ * other stream values are lowercase, the resulting key value for the grouping may arbitrarily be either upper or
+ * lower case.
+ * <p/>
+ * If the original key values must be retained, consider normalizing the keys with a Function and then grouping on the
+ * resulting field.
  */
 public class GroupBy extends Splice implements Group
   {

@@ -93,6 +93,10 @@ import org.slf4j.LoggerFactory;
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
  * <p/>
  * Also note that {@link Unique} is not a CompositeAggregator and is slightly more optimized internally.
+ * <p/>
+ * Keep in mind the {@link cascading.tuple.Hasher} interface is not honored here (for storing keys in the cache). Thus
+ * arrays of primitives and object, like {@code byte[]} will not be properly stored. This is a known issue and will
+ * be resolved in a future release.
  *
  * @see SumBy
  * @see CountBy
@@ -102,6 +106,8 @@ public class AggregateBy extends SubAssembly
   {
   private static final Logger LOG = LoggerFactory.getLogger( AggregateBy.class );
 
+  public static final int USE_DEFAULT_THRESHOLD = 0;
+  public static final int DEFAULT_THRESHOLD = CompositeFunction.DEFAULT_THRESHOLD;
   public static final String AGGREGATE_BY_THRESHOLD = "cascading.aggregateby.threshold";
 
   private String name;
@@ -204,16 +210,16 @@ public class AggregateBy extends SubAssembly
      */
     public CompositeFunction( Fields groupingFields, Fields[] argumentFields, Functor[] functors, int threshold )
       {
-      super( getFields( groupingFields, functors ) );
+      super( getFields( groupingFields, functors ) ); // todo: groupingFields should lookup incoming type information
       this.groupingFields = groupingFields;
       this.argumentFields = argumentFields;
       this.functors = functors;
       this.threshold = threshold;
 
-      functorFields = new Fields[ functors.length ];
+      this.functorFields = new Fields[ functors.length ];
 
       for( int i = 0; i < functors.length; i++ )
-        functorFields[ i ] = functors[ i ].getDeclaredFields();
+        this.functorFields[ i ] = functors[ i ].getDeclaredFields();
       }
 
     private static Fields getFields( Fields groupingFields, Functor[] functors )
@@ -231,10 +237,10 @@ public class AggregateBy extends SubAssembly
       {
       if( threshold == 0 )
         {
-        Object value = flowProcess.getProperty( AGGREGATE_BY_THRESHOLD );
+        Integer value = flowProcess.getIntegerProperty( AGGREGATE_BY_THRESHOLD );
 
-        if( value != null && !value.toString().isEmpty() )
-          threshold = Integer.valueOf( (String) flowProcess.getProperty( AGGREGATE_BY_THRESHOLD ) );
+        if( value != null && value > 0 )
+          threshold = value;
         else
           threshold = DEFAULT_THRESHOLD;
         }
@@ -300,6 +306,11 @@ public class AggregateBy extends SubAssembly
 
             LOG.info( "flushed keys num times: {}, with threshold: {}", flushes + 1, threshold );
             LOG.info( "mem on flush (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+
+            float percent = (float) totalMem / (float) maxMem;
+
+            if( percent < 0.80F )
+              LOG.info( "total mem is {}% of max mem, to better utilize unused memory consider increasing current LRU threshold with system property \"{}\"", (int) ( percent * 100.0F ), AGGREGATE_BY_THRESHOLD );
             }
 
           flushes++;
@@ -539,25 +550,25 @@ public class AggregateBy extends SubAssembly
 
     verify();
 
-    Fields sortFields = Fields.copyComparators( Fields.merge( argumentFields ), argumentFields );
-    Fields argumentSelector = Fields.merge( groupingFields, sortFields );
+    Fields sortFields = Fields.copyComparators( Fields.merge( this.argumentFields ), this.argumentFields );
+    Fields argumentSelector = Fields.merge( this.groupingFields, sortFields );
 
     if( argumentSelector.equals( Fields.NONE ) )
       argumentSelector = Fields.ALL;
 
     Pipe[] functions = new Pipe[ pipes.length ];
 
-    CompositeFunction function = new CompositeFunction( groupingFields, argumentFields, functors, threshold );
+    CompositeFunction function = new CompositeFunction( this.groupingFields, this.argumentFields, this.functors, threshold );
 
     for( int i = 0; i < functions.length; i++ )
       functions[ i ] = new Each( pipes[ i ], argumentSelector, function, Fields.RESULTS );
 
-    groupBy = new GroupBy( name, functions, groupingFields, sortFields.hasComparators() ? sortFields : null );
+    groupBy = new GroupBy( name, functions, this.groupingFields, sortFields.hasComparators() ? sortFields : null );
 
     Pipe pipe = groupBy;
 
     for( int i = 0; i < aggregators.length; i++ )
-      pipe = new Every( pipe, functors[ i ].getDeclaredFields(), aggregators[ i ], Fields.ALL );
+      pipe = new Every( pipe, this.functors[ i ].getDeclaredFields(), this.aggregators[ i ], Fields.ALL );
 
     setTails( pipe );
     }

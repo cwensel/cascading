@@ -399,6 +399,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g3
    * 7 g4
    * 7 g5
+   * null h1
    * <p/>
    * 1 A1
    * 1 A2
@@ -409,6 +410,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4 D1
    * 6 F1
    * 6 F2
+   * null H1
    * <p/>
    * 1	a1	1	A1
    * 1	a1	1	A2
@@ -425,6 +427,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4	d1	4	D1
    * 4	d2	4	D1
    * 4	d3	4	D1
+   * null h1  null  H1
    *
    * @throws Exception
    */
@@ -433,26 +436,28 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     {
     HashSet<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( null, "h1", null, "H1" ) );
 
     handleJoins( "joininner", new InnerJoin(), results );
     }
 
   /**
+   * /**
    * 1 a1
    * 1 a2
    * 1 a3
@@ -469,6 +474,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g3
    * 7 g4
    * 7 g5
+   * null h1
    * <p/>
    * 1 A1
    * 1 A2
@@ -479,6 +485,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4 D1
    * 6 F1
    * 6 F2
+   * null H1
    * <p/>
    * 1	a1	1	A1
    * 1	a1	1	A2
@@ -506,6 +513,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7	g3	null	null
    * 7	g4	null	null
    * 7	g5	null	null
+   * null h1  null  H1
    *
    * @throws Exception
    */
@@ -518,32 +526,33 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "5\te1\tnull\tnull" ) );
-    results.add( new Tuple( "5\te2\tnull\tnull" ) );
-    results.add( new Tuple( "5\te3\tnull\tnull" ) );
-    results.add( new Tuple( "null\tnull\t6\tF1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF2" ) );
-    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "3", "c1", null, null ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( "5", "e1", null, null ) );
+    results.add( new Tuple( "5", "e2", null, null ) );
+    results.add( new Tuple( "5", "e3", null, null ) );
+    results.add( new Tuple( null, null, "6", "F1" ) );
+    results.add( new Tuple( null, null, "6", "F2" ) );
+    results.add( new Tuple( "7", "g1", null, null ) );
+    results.add( new Tuple( "7", "g2", null, null ) );
+    results.add( new Tuple( "7", "g3", null, null ) );
+    results.add( new Tuple( "7", "g4", null, null ) );
+    results.add( new Tuple( "7", "g5", null, null ) );
+    results.add( new Tuple( null, "h1", null, "H1" ) );
 
     handleJoins( "joinouter", new OuterJoin(), results );
     }
@@ -565,6 +574,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g3
    * 7 g4
    * 7 g5
+   * null h1
    * <p/>
    * 1 A1
    * 1 A2
@@ -575,6 +585,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4 D1
    * 6 F1
    * 6 F2
+   * null H1
    * <p/>
    * 1	a1	1	A1
    * 1	a1	1	A2
@@ -600,6 +611,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7	g3	null	null
    * 7	g4	null	null
    * 7	g5	null	null
+   * null h1	null	H1
    *
    * @throws Exception
    */
@@ -608,30 +620,31 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     {
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "3\tc1\tnull\tnull" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "5\te1\tnull\tnull" ) );
-    results.add( new Tuple( "5\te2\tnull\tnull" ) );
-    results.add( new Tuple( "5\te3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg1\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg2\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg3\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg4\tnull\tnull" ) );
-    results.add( new Tuple( "7\tg5\tnull\tnull" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "3", "c1", null, null ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( "5", "e1", null, null ) );
+    results.add( new Tuple( "5", "e2", null, null ) );
+    results.add( new Tuple( "5", "e3", null, null ) );
+    results.add( new Tuple( "7", "g1", null, null ) );
+    results.add( new Tuple( "7", "g2", null, null ) );
+    results.add( new Tuple( "7", "g3", null, null ) );
+    results.add( new Tuple( "7", "g4", null, null ) );
+    results.add( new Tuple( "7", "g5", null, null ) );
+    results.add( new Tuple( null, "h1", null, "H1" ) );
 
     handleJoins( "joininnerouter", new LeftJoin(), results );
     }
@@ -653,6 +666,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g3
    * 7 g4
    * 7 g5
+   * null h1
    * <p/>
    * 1 A1
    * 1 A2
@@ -663,6 +677,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4 D1
    * 6 F1
    * 6 F2
+   * null H1
    * <p/>
    * 1	a1	1	A1
    * 1	a1	1	A2
@@ -681,6 +696,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 4	d3	4	D1
    * null	null	6	F1
    * null	null	6	F2
+   * null h1	null	H1
    *
    * @throws Exception
    */
@@ -693,23 +709,24 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Set<Tuple> results = new HashSet<Tuple>();
 
-    results.add( new Tuple( "1\ta1\t1\tA1" ) );
-    results.add( new Tuple( "1\ta1\t1\tA2" ) );
-    results.add( new Tuple( "1\ta1\t1\tA3" ) );
-    results.add( new Tuple( "1\ta2\t1\tA1" ) );
-    results.add( new Tuple( "1\ta2\t1\tA2" ) );
-    results.add( new Tuple( "1\ta2\t1\tA3" ) );
-    results.add( new Tuple( "1\ta3\t1\tA1" ) );
-    results.add( new Tuple( "1\ta3\t1\tA2" ) );
-    results.add( new Tuple( "1\ta3\t1\tA3" ) );
-    results.add( new Tuple( "2\tb1\t2\tB1" ) );
-    results.add( new Tuple( "2\tb1\t2\tB2" ) );
-    results.add( new Tuple( "2\tb1\t2\tB3" ) );
-    results.add( new Tuple( "4\td1\t4\tD1" ) );
-    results.add( new Tuple( "4\td2\t4\tD1" ) );
-    results.add( new Tuple( "4\td3\t4\tD1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF1" ) );
-    results.add( new Tuple( "null\tnull\t6\tF2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A1" ) );
+    results.add( new Tuple( "1", "a1", "1", "A2" ) );
+    results.add( new Tuple( "1", "a1", "1", "A3" ) );
+    results.add( new Tuple( "1", "a2", "1", "A1" ) );
+    results.add( new Tuple( "1", "a2", "1", "A2" ) );
+    results.add( new Tuple( "1", "a2", "1", "A3" ) );
+    results.add( new Tuple( "1", "a3", "1", "A1" ) );
+    results.add( new Tuple( "1", "a3", "1", "A2" ) );
+    results.add( new Tuple( "1", "a3", "1", "A3" ) );
+    results.add( new Tuple( "2", "b1", "2", "B1" ) );
+    results.add( new Tuple( "2", "b1", "2", "B2" ) );
+    results.add( new Tuple( "2", "b1", "2", "B3" ) );
+    results.add( new Tuple( "4", "d1", "4", "D1" ) );
+    results.add( new Tuple( "4", "d2", "4", "D1" ) );
+    results.add( new Tuple( "4", "d3", "4", "D1" ) );
+    results.add( new Tuple( null, null, "6", "F1" ) );
+    results.add( new Tuple( null, null, "6", "F2" ) );
+    results.add( new Tuple( null, "h1", null, "H1" ) );
 
     handleJoins( "joinouterinner", new RightJoin(), results );
     }
@@ -719,23 +736,24 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileLhsSparse );
     getPlatform().copyFromLocal( inputFileRhsSparse );
 
-    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLhsSparse );
-    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileRhsSparse );
+    Fields fields = new Fields( "num", "char" ).applyTypes( Integer.class, String.class );
+    Tap sourceLower = getPlatform().getDelimitedFile( fields, " ", inputFileLhsSparse );
+    Tap sourceUpper = getPlatform().getDelimitedFile( fields, " ", inputFileRhsSparse );
 
     Map sources = new HashMap();
 
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( Fields.size( 4, String.class ), "\t", getOutputPath( path ), SinkMode.REPLACE );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
-
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
 
     Fields declaredFields = new Fields( "num", "char", "num2", "char2" );
-    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), declaredFields, joiner );
+    Fields groupingFields = new Fields( "num" );
+
+    Pipe splice = new HashJoin( pipeLower, groupingFields, pipeUpper, groupingFields, declaredFields, joiner );
 
     splice = new Each( splice, Fields.ALL, new Identity(), Fields.RESULTS );
 
@@ -1617,6 +1635,9 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     @Override
     public int hashCode( Comparable value )
       {
+      if( value == null )
+        return 0;
+
       return value.toString().hashCode();
       }
     }
