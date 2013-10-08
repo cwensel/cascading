@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.2.1 [unreleased]
+
 2.2.0
 
   Fixed issue where c.p.CoGroup in local mode did not properly handle joins where the grouping j.u.Comparator
