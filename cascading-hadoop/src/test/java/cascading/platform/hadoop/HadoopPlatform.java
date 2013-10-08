@@ -62,6 +62,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Class HadoopPlatform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
  * so that all *PlatformTest classes can be tested against Apache Hadoop.
+ * <p/>
+ * This platform works in three modes.
+ * <p/>
+ * Hadoop standalone mode is when Hadoop is NOT run as a cluster, and all
+ * child tasks are in process and in memory of the "client" side code.
+ * <p/>
+ * Hadoop mini cluster mode where a cluster is created on demand using the Hadoop MiniDFSCluster and MiniMRCluster
+ * utilities. When a PlatformTestCase requests to use a cluster, this is the default cluster. All properties are
+ * pulled from the current CLASSPATH via the JobConf.
+ * <p/>
+ * Lastly remote cluster mode is enabled when the System property "mapred.jar" is set. This is a Hadoop property
+ * specifying the Hadoop "job jar" to be used cluster side. This MUST be the Cascading test suite and dependencies
+ * packaged in a Hadoop compatible way. This is left to be implemented by the framework using this mode. Additionally
+ * these properties may optionally be set if not already in the CLASSPATH; fs.default.name and mapred.job.tracker.
  */
 public class HadoopPlatform extends TestPlatform
   {
@@ -129,11 +143,36 @@ public class HadoopPlatform extends TestPlatform
 
       conf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
 
-      dfs = new MiniDFSCluster( conf, 4, true, null );
-      fileSys = dfs.getFileSystem();
-      mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1, null, null, conf );
+      if( !Util.isEmpty( System.getProperty( "mapred.jar" ) ) )
+        {
+        LOG.info( "using a remote cluster with jar: {}", System.getProperty( "mapred.jar" ) );
+        jobConf = conf;
 
-      jobConf = mr.createJobConf();
+        jobConf.setJar( System.getProperty( "mapred.jar" ) );
+
+        if( !Util.isEmpty( System.getProperty( "fs.default.name" ) ) )
+          {
+          LOG.info( "using {}={}", "fs.default.name", System.getProperty( "fs.default.name" ) );
+          jobConf.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "mapred.job.tracker" ) ) )
+          {
+          LOG.info( "using {}={}", "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          jobConf.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          }
+
+        jobConf.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        fileSys = FileSystem.get( jobConf );
+        }
+      else
+        {
+        dfs = new MiniDFSCluster( conf, 4, true, null );
+        fileSys = dfs.getFileSystem();
+        mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1, null, null, conf );
+
+        jobConf = mr.createJobConf();
+        }
 
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
       jobConf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
