@@ -421,8 +421,6 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     {
     super.sourceConfInit( process, conf );
 
-    super.sourceConfInit( process, conf );
-
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
 
     // use CombineFileInputFormat if that is enabled
