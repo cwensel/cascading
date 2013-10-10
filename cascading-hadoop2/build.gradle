@@ -24,7 +24,7 @@ idea {
   pathVariables MODULE_DIR: file( "${rootDir}/cascading-hadoop" )
 }
 
-ext.hadoop2Version = '2.1.0-beta'
+ext.hadoop2Version = '2.1.1-beta'
 
 if( System.properties[ 'hadoop2.release.final' ] )
   hadoopVersion = System.properties[ 'hadoop2.release.final' ]
