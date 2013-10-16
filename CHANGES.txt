@@ -10,7 +10,7 @@ Cascading Change Log
   Updated c.o.BufferCall to allow access to the current c.p.j.JoinerClosure to allow for more complex join operations
   to be built out within a c.o.Buffer implementation.
 
-  Added support for Apache Hadoop 2.0 and YARN.
+  Added support for Apache Hadoop 2 and YARN.
 
 2.2.0
 

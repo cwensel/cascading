@@ -86,5 +86,4 @@ public class Hadoop2MR1Planner extends HadoopPlanner
         }
       }
     }
-
   }

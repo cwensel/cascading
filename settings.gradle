@@ -22,7 +22,7 @@ include 'cascading-core'
 include 'cascading-xml'
 include 'cascading-local'
 include 'cascading-hadoop'
-include 'cascading-hadoop2'
+include 'cascading-hadoop2-mr1'
 include 'cascading-platform'
 
 rootProject.name = 'cascading'
