@@ -28,8 +28,10 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 import cascading.stats.hadoop.HadoopStepStats;
+
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 
@@ -94,7 +96,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
   protected void internalBlockOnStop() throws IOException
     {
-    if( runningJob != null )
+    if( runningJob != null  && !runningJob.isComplete() )
       runningJob.killJob();
     }
 
@@ -139,6 +141,10 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       {
       if( runningJob == null )
         return;
+
+      flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " +
+          JobStatus.getJobRunState( runningJob.getJobState() ) );
+      flowStep.logWarn( "failure info: " + runningJob.getFailureInfo() );
 
       TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
       flowStep.logWarn( "task completion events identify failed tasks" );
