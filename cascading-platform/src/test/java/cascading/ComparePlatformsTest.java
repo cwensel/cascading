@@ -56,7 +56,7 @@ public class ComparePlatformsTest extends CascadingTestCase
 
     File localRoot = new File( find( roots, "/cascading-local/" ), "local" );
     File hadoopRoot = new File( find( roots, "/cascading-hadoop/" ), "hadoop" );
-    File hadoop2Root = new File( find( roots, "/cascading-hadoop2/" ), "hadoop2" );
+    File hadoop2Root = new File( find( roots, "/cascading-hadoop2-mr1/" ), "hadoop2-mr1" );
 
     LOG.info( "local path: {}", localRoot );
     LOG.info( "hadoop path: {}", hadoopRoot );
