@@ -64,13 +64,13 @@ public class ComparePlatformsTest extends CascadingTestCase
 
     TestSuite suite = new TestSuite();
 
-    createComparisons( localRoot, hadoopRoot, suite );
-    createComparisons( localRoot, hadoop2Root, suite );
+    createComparisons( "local~hadoop", localRoot, hadoopRoot, suite );
+    createComparisons( "local~hadoop2mr1", localRoot, hadoop2Root, suite );
 
     return suite;
     }
 
-  private static void createComparisons( File lhsRoot, File rhsRoot, TestSuite suite )
+  private static void createComparisons( String comparison, File lhsRoot, File rhsRoot, TestSuite suite )
     {
     LOG.info( "comparing directory: {}, with: {}", lhsRoot, rhsRoot );
 
@@ -102,7 +102,7 @@ public class ComparePlatformsTest extends CascadingTestCase
       File localFile = lhsFiles.get( i );
       File hadoopFile = rhsFiles.get( i );
 
-      suite.addTest( new CompareTestCase( localFile, hadoopFile ) );
+      suite.addTest( new CompareTestCase( comparison, localFile, hadoopFile ) );
       }
     }
 
@@ -122,15 +122,15 @@ public class ComparePlatformsTest extends CascadingTestCase
     File localFile;
     File hadoopFile;
 
-    public CompareTestCase( File localFile, File hadoopFile )
+    public CompareTestCase( String comparison, File localFile, File hadoopFile )
       {
-      super( "testFiles" );
       this.localFile = localFile;
       this.hadoopFile = hadoopFile;
 
-      setName( String.format("%s..%s", localFile.getName(), hadoopFile.getName()) );
+      setName( String.format( "%s..%s", comparison, localFile.getName() ) ); // relevant bits have same file name
       }
 
+    @org.junit.Test
     public void testFiles() throws IOException
       {
       LinkedList<String> localLines = getLines( localFile );
