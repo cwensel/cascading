@@ -127,6 +127,8 @@ public class ComparePlatformsTest extends CascadingTestCase
       super( "testFiles" );
       this.localFile = localFile;
       this.hadoopFile = hadoopFile;
+
+      setName( String.format("%s..%s", localFile.getName(), hadoopFile.getName()) );
       }
 
     public void testFiles() throws IOException

@@ -43,13 +43,13 @@ import org.slf4j.LoggerFactory;
  * Class Hadoop2Platform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
  * so that all *PlatformTest classes can be tested against Apache Hadoop 2.x.
  */
-public class Hadoop2Platform extends BaseHadoopPlatform
+public class Hadoop2MR1Platform extends BaseHadoopPlatform
   {
-  private static final Logger LOG = LoggerFactory.getLogger( Hadoop2Platform.class );
+  private static final Logger LOG = LoggerFactory.getLogger( Hadoop2MR1Platform.class );
   private transient static MiniDFSCluster dfs;
   private transient static MiniMRClientCluster mr;
 
-  public Hadoop2Platform()
+  public Hadoop2MR1Platform()
     {
     }
 
