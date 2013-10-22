@@ -124,10 +124,13 @@ public class ComparePlatformsTest extends CascadingTestCase
 
     public CompareTestCase( String comparison, File localFile, File hadoopFile )
       {
+      super( "testFiles" );
+
       this.localFile = localFile;
       this.hadoopFile = hadoopFile;
 
-      setName( String.format( "%s..%s", comparison, localFile.getName() ) ); // relevant bits have same file name
+      // craps out junit, unsure how to set display name
+//      setName( String.format( "%s..%s", comparison, localFile.getName() ) ); // relevant bits have same file name
       }
 
     @org.junit.Test
