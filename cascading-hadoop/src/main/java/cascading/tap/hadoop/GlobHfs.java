@@ -29,6 +29,8 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.TapException;
+import cascading.tap.hadoop.util.ReducerEstimaterUtil;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -55,7 +57,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * @see cascading.tap.MultiSourceTap
  * @see FileSystem
  */
-public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
+public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader> implements ReducerEstimater
   {
   /** Field pathPattern */
   private final String pathPattern;
@@ -194,5 +196,15 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
   public String toString()
     {
     return "GlobHfs[" + pathPattern + ']';
+    }
+  
+   @Override
+   public int getReducerNum(JobConf conf) throws IOException{
+     Hfs[] taps=getTaps();
+     List<Path> paths=new ArrayList<Path>();
+     for (Hfs tap: taps){
+             paths.add(tap.getPath());
+     }
+     return ReducerEstimaterUtil.estimateFromPath(paths, conf);
     }
   }

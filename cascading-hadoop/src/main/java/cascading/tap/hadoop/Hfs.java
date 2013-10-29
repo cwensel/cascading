@@ -24,6 +24,8 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
@@ -35,6 +37,7 @@ import cascading.tap.TapException;
 import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
+import cascading.tap.hadoop.util.ReducerEstimaterUtil;
 import cascading.tap.type.FileType;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
@@ -102,7 +105,7 @@ import org.slf4j.LoggerFactory;
  * This is enabled by calling {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}. By default, merging
  * or combining splits into large ones is disabled.
  */
-public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>
+public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>, ReducerEstimater
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
@@ -682,6 +685,14 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
 
     statuses = getFileSystem( conf ).listStatus( getPath() );
     }
+  
+   @Override
+   public int getReducerNum(JobConf conf) throws IOException {
+      Path path=getPath();
+      List<Path> paths=new ArrayList<Path>();
+      paths.add(path);
+      return ReducerEstimaterUtil.estimateFromPath(paths, conf);
+   }
 
   /** Combined input format that uses the underlying individual input format to combine multiple files into a single split. */
   static class CombinedInputFormat extends CombineFileInputFormat implements Configurable

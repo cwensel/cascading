@@ -28,7 +28,9 @@ import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowSkipStrategy;
 import cascading.flow.FlowStep;
+import cascading.flow.FlowStepStrategy;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
@@ -280,4 +282,10 @@ public class HadoopFlow extends BaseFlow<JobConf>
     {
     return stepsAreLocal() ? 1 : getMaxConcurrentSteps( getConfig() );
     }
+  
+    @Override
+  public FlowStepStrategy<JobConf> getFlowStepStrategy() 
+	{
+	return new ReducerEstimaterStrategy();
+	}
   }
