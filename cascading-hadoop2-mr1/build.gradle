@@ -26,8 +26,8 @@ idea {
 
 ext.hadoop2Version = '2.2.0'
 
-if( System.properties[ 'hadoop2.release.final' ] )
-  hadoopVersion = System.properties[ 'hadoop2.release.final' ]
+if( System.properties[ 'hadoop2mr1.release.final' ] )
+  hadoopVersion = System.properties[ 'hadoop2mr1.release.final' ]
 
 dependencies {
 
