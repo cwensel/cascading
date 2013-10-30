@@ -212,7 +212,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
   @Override
   public boolean stepsAreLocal()
     {
-    return getConfig().get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+    return HadoopUtil.isLocal( getConfig() );
     }
 
   private void cleanTemporaryFiles( boolean stop )

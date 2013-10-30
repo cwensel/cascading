@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
@@ -471,12 +472,12 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     {
     String scheme = getLocalModeScheme( conf, "file" );
 
-    if( !conf.get( "mapred.job.tracker", "" ).equalsIgnoreCase( "local" ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( scheme ) )
+    if( !HadoopUtil.isLocal( conf ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( scheme ) )
       {
       if( LOG.isInfoEnabled() )
         LOG.info( infoMessage + toString() );
 
-      conf.set( "mapred.job.tracker", "local" ); // force job to run locally
+      HadoopUtil.setLocal( conf ); // force job to run locally
       }
     }
 

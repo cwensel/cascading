@@ -73,7 +73,7 @@ public class MultiInputFormat implements InputFormat
       Collections.addAll( allPaths, FileInputFormat.getInputPaths( fromJob ) );
 
       if( !isLocal )
-        isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+        isLocal = HadoopUtil.isLocal( fromJob );
       }
 
     if( !allPaths.isEmpty() ) // it's possible there aren't any
@@ -89,7 +89,7 @@ public class MultiInputFormat implements InputFormat
       }
 
     if( isLocal )
-      toJob.set( "mapred.job.tracker", "local" );
+      HadoopUtil.setLocal( toJob );
     }
 
   static InputFormat[] getInputFormats( JobConf[] jobConfs )

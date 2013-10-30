@@ -181,7 +181,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   public boolean isHadoopLocalMode( JobConf conf )
     {
-    return "local".equals( conf.get( "mapred.job.tracker" ) );
+    return HadoopUtil.isLocal( conf );
     }
 
   private String pack( Object object, JobConf conf )

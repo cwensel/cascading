@@ -38,6 +38,7 @@ import cascading.flow.Flows;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.planner.HadoopPlanner;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
@@ -91,10 +92,9 @@ public class FlowPlatformTest extends PlatformTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    FlowStep step = steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
-    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -116,10 +116,9 @@ public class FlowPlatformTest extends PlatformTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    FlowStep step = steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
-    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -143,10 +142,9 @@ public class FlowPlatformTest extends PlatformTestCase
 
     assertEquals( "wrong size", 1, steps.size() );
 
-    FlowStep step = (FlowStep) steps.get( 0 );
+    FlowStep step = steps.get( 0 );
 
-    String tracker = ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ).get( "mapred.job.tracker" );
-    boolean isLocal = tracker.equalsIgnoreCase( "local" );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is local", !isLocal );
     }

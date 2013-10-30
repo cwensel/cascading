@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.0 [unreleased]
 
+  Updated detection of Hadoop standalone (local) mode to work across Hadoop 1 and 2.
+
   Updated c.f.h.p.HadoopFlowStepJob to call kill only jobs on that are not complete. In theory calling kill on a
   completed job should have no effect, but resulting logs could be confusing during post mortem.
 
