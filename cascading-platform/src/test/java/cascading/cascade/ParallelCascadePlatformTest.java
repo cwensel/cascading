@@ -103,4 +103,57 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
     validateLength( third, 28 );
     }
+
+  @Test
+  public void testCascadeRaceCondition() throws Throwable
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    final Throwable[] found = new Throwable[ 1 ];
+
+    CascadeListener listener = new CascadeListener()
+    {
+    @Override
+    public void onStarting( Cascade cascade )
+      {
+      }
+
+    @Override
+    public void onStopping( Cascade cascade )
+      {
+      }
+
+    @Override
+    public void onCompleted( Cascade cascade )
+      {
+      }
+
+    @Override
+    public boolean onThrowable( Cascade cascade, Throwable throwable )
+      {
+      found[ 0 ] = throwable;
+      return false;
+      }
+    };
+
+    for( int i = 0; i <= 50; i += 5 )
+      {
+      Flow first = firstFlow( String.format( "race-%d/first", i ) );
+
+      Cascade cascade = new CascadeConnector().connect( first );
+
+      cascade.addListener( listener );
+
+      cascade.start();
+
+      Thread.sleep( i * 10 );
+
+      cascade.stop();
+
+      cascade.complete();
+
+      if( found[ 0 ] != null )
+        throw found[ 0 ];
+      }
+    }
   }

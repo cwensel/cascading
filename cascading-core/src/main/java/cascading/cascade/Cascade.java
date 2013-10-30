@@ -126,7 +126,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   /** Field shutdownHook */
   private ShutdownUtil.Hook shutdownHook;
   /** Field jobsMap */
-  private Map<String, Callable<Throwable>> jobsMap;
+  private final Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
   /** Field stop */
   private boolean stop;
   /** Field flowSkipStrategy */
@@ -745,6 +745,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
     try
       {
+      if( stop )
+        return;
+
       // mark started, not submitted
       cascadeStats.markStartedThenRunning();
 
@@ -873,26 +876,28 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
   private void initializeNewJobsMap()
     {
-    // keep topo order
-    jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
-    TopologicalOrderIterator<Flow, Integer> topoIterator = flowGraph.getTopologicalIterator();
-
-    while( topoIterator.hasNext() )
+    synchronized( jobsMap )
       {
-      Flow flow = topoIterator.next();
+      // keep topo order
+      TopologicalOrderIterator<Flow, Integer> topoIterator = flowGraph.getTopologicalIterator();
 
-      cascadeStats.addFlowStats( flow.getFlowStats() );
+      while( topoIterator.hasNext() )
+        {
+        Flow flow = topoIterator.next();
 
-      CascadeJob job = new CascadeJob( flow );
+        cascadeStats.addFlowStats( flow.getFlowStats() );
 
-      jobsMap.put( flow.getName(), job );
+        CascadeJob job = new CascadeJob( flow );
 
-      List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
+        jobsMap.put( flow.getName(), job );
 
-      for( Flow predecessor : Graphs.predecessorListOf( flowGraph, flow ) )
-        predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
+        List<CascadeJob> predecessors = new ArrayList<CascadeJob>();
 
-      job.init( predecessors );
+        for( Flow predecessor : Graphs.predecessorListOf( flowGraph, flow ) )
+          predecessors.add( (CascadeJob) jobsMap.get( predecessor.getName() ) );
+
+        job.init( predecessors );
+        }
       }
     }
 
@@ -919,12 +924,15 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     logInfo( "stopping all flows" );
 
-    List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
+    synchronized( jobsMap )
+      {
+      List<Callable<Throwable>> jobs = new ArrayList<Callable<Throwable>>( jobsMap.values() );
 
-    Collections.reverse( jobs );
+      Collections.reverse( jobs );
 
-    for( Callable<Throwable> callable : jobs )
-      ( (CascadeJob) callable ).stop();
+      for( Callable<Throwable> callable : jobs )
+        ( (CascadeJob) callable ).stop();
+      }
 
     logInfo( "stopped all flows" );
     }
