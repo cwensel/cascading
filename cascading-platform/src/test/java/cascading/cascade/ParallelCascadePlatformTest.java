@@ -22,6 +22,7 @@ package cascading.cascade;
 
 import java.io.IOException;
 
+import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.operation.Identity;
@@ -138,7 +139,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
     for( int i = 0; i <= 50; i += 5 )
       {
-      Flow first = firstFlow( String.format( "race-%d/first", i ) );
+      Flow first = firstFlow( String.format( "race-%d/first" + ComparePlatformsTest.NONDETERMINISTIC, i ) );
 
       Cascade cascade = new CascadeConnector().connect( first );
 
