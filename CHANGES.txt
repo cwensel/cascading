@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.1 [unreleased]
 
+  Fixed issue where resolved fields were not properly presented to c.t.MultiSinkTap child c.t.Tap and c.s.Scheme
+  instances preventing header information from being written in the case of TextDelimited files.
+
   Fixed issue where the number of fields parsed by c.s.u.DelimitedParser were greater than those declared could cause
   an j.l.ArrayIndexOutOfBoundsException.
 

@@ -31,6 +31,7 @@ import cascading.operation.AssertionLevel;
 import cascading.operation.assertion.AssertExpression;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.tap.MultiSinkTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -186,7 +187,10 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
   public void testHeaderFieldsAll() throws IOException
     {
     Tap input = getPlatform().getDelimitedFile( Fields.UNKNOWN, true, true, ",", "\"", null, testDelimitedHeader, SinkMode.KEEP );
-    Tap output = getPlatform().getDelimitedFile( Fields.ALL, true, true, ",", "\"", null, getOutputPath( "headerfieldsall" ), SinkMode.REPLACE );
+    Tap output1 = getPlatform().getDelimitedFile( Fields.ALL, true, true, ",", "\"", null, getOutputPath( "headerfieldsall1" ), SinkMode.REPLACE );
+    Tap output2 = getPlatform().getDelimitedFile( Fields.ALL, true, true, ",", "\"", null, getOutputPath( "headerfieldsall2" ), SinkMode.REPLACE );
+
+    Tap output = new MultiSinkTap( output1, output2 );
 
     Pipe pipe = new Pipe( "pipe" );
 
@@ -195,11 +199,17 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
     flow.complete();
 
     Fields fields = new Fields( "first", "second", "third", "fourth", "fifth" );
-    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, output.getIdentifier(), SinkMode.REPLACE ) );
+    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getDelimitedFile( fields, true, true, ",", "\"", null, output1.getIdentifier(), SinkMode.REPLACE ) );
 
     validateLength( iterator, 13, 5 );
 
-    iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
+    assertHeaders( output1, flow );
+    assertHeaders( output2, flow );
+    }
+
+  private void assertHeaders( Tap output, Flow flow ) throws IOException
+    {
+    TupleEntryIterator iterator = flow.openTapForRead( getPlatform().getTextFile( new Fields( "line" ), output.getIdentifier() ) );
 
     assertEquals( iterator.next().getObject( 0 ), "first,second,third,fourth,fifth" );
 
