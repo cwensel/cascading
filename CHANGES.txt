@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.2.1 [unreleased]
 
+  Fixed issue where the number of fields parsed by c.s.u.DelimitedParser were greater than those declared could cause
+  an j.l.ArrayIndexOutOfBoundsException.
+
   Fixed issue where a race condition could cause a NPE between c.c.Cascade#start() and Cascade#stop().
 
 2.2.0
