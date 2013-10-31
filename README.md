@@ -9,13 +9,13 @@ For project documentation and community support, visit: [cascading.org](http://c
 To download a pre-built distribution, visit [http://www.cascading.org/downloads/](http://www.cascading.org/downloads/),
 or use Maven (described below).
 
-The distribution includes five Cascading jar files:
+The project includes five Cascading jar files:
 
-* `cascading-core-x.y.z.jar`      - all Cascading Core class files
-* `cascading-xml-x.y.z.jar`       - all Cascading XML operations class files
-* `cascading-local-x.y.z.jar`     - all Cascading Local mode class files
-* `cascading-hadoop-x.y.z.jar`    - all Cascading Hadoop 1.x mode class files
-* `cascading-hadoop2-x.y.z.jar`   - all Cascading Hadoop 2.x mode class files
+* `cascading-core-x.y.z.jar`          - all Cascading Core class files
+* `cascading-xml-x.y.z.jar`           - all Cascading XML operations class files
+* `cascading-local-x.y.z.jar`         - all Cascading Local mode class files
+* `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x mode class files
+* `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x mode class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
@@ -23,19 +23,19 @@ These class jars, along with, tests, source and javadoc jars, are all available 
 Hadoop 1.x mode is where the Cascading application should run on a Hadoop cluster. Hadoop 2.x is the same
 but for Hadoop 2.x releases.
 
-Local mode is where the Cascading application will run locally in memory without any Hadoop dependenices.
+Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies.
 
 ## Extensions, the SDK, and DSLs
 
 There are a number of projects based on Cascading available. Visit the
-[Cascading Extensions](http://www.cascading.org/extensions/) page for a current list.
+[Cascading Extensions](http://cascading.org/extensions/) page for a current list.
 
-Or download the [Cascading SDK](http://www.cascading.org/sdk/) which includes pre-built binaries.
+Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-built binaries.
 
 Of note are two top level projects:
 
-* [Lingual](http://www.cascading.org/lingual/) - ANSI SQL and JDBC with Cascading
-* [Pattern](http://www.cascading.org/pattern/) - Machine Learning and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
+* [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC with Cascading
+* [Pattern](http://cascading.org/pattern/) - Machine Learning and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
 And new languages:
 
@@ -59,14 +59,14 @@ The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 Or downloaded from here:
-[http://www.concurrentinc.com/downloads/](http://www.concurrentinc.com/downloads/)
+[http://concurrentinc.com/downloads/](http://concurrentinc.com/downloads/)
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
 available from the cascading.org site.
 
 ## Reporting issues
 
-To report an issue, first ping the [Cascading User mailing list](http://www.cascading.org/support/) with any questions.
+To report an issue, first ping the [Cascading User mailing list](http://cascading.org/support/) with any questions.
 
 If unresolved, look for a comparable test in the `cascading-platform` sub-project, reproduce your issue, then issue
 a pull request with the failing test added to one of the existing suites.
@@ -84,6 +84,7 @@ You can find the latest public and wip (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-core
 *  http://conjars.org/cascading/cascading-local
 *  http://conjars.org/cascading/cascading-hadoop
+*  http://conjars.org/cascading/cascading-hadoop2-mr1
 *  http://conjars.org/cascading/cascading-xml
 
 When creating tests, make sure to add any of the relevant above dependencies to your "test" scope or equivalent
@@ -94,13 +95,13 @@ configuration along with the `cascading-platform` dependency.
 Note the `cascading-plaform` compile dependency has no classes, you must pull the tests dependency with the
 "tests" classifier.
 
-See [http://www.cascading.org/downloads/#maven](http://www.cascading.org/downloads/#maven) for example Maven pom
+See [http://cascading.org/downloads/#maven](http://cascading.org/downloads/#maven) for example Maven pom
 dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
 
-Note that `cascading-hadoop` has a "provided" dependency on the Hadoop jars so that it won't get sucked into any
-application packaging as a dependency, typically.
+Note that `cascading-hadoop` and `cascading-hadoop2-mr1` has a "provided" dependency on the Hadoop jars so that it
+won't get sucked into any application packaging as a dependency, typically.
 
 ## Building
 
@@ -129,10 +130,10 @@ Similarly for Eclipse:
 ## Using with Apache Hadoop
 
 First confirm you are using a supported version of Apache Hadoop by checking the
-[Compatibility](http://www.cascading.org/support/compatibility/) page.
+[Compatibility](http://cascading.org/support/compatibility/) page.
 
 To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop`, (optionally) `cascading-xml`
-jarfiles and all third-party libs into the `lib` folder of your job jar and executing your job via
+jar files and all third-party libs into the `lib` folder of your job jar and executing your job via
 `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
 For example, your job jar would look like this (via: `jar -t your.jar`)
