@@ -812,7 +812,8 @@ public class TextDelimited extends TextLine
    * @param types           of type Class[]
    * @param safe            of type boolean
    */
-  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "delimiter", "strict", "quote", "types", "safe"})
+  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "writeHeader", "delimiter", "strict", "quote",
+                          "types", "safe"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
     this( fields, sinkCompression, skipHeader, writeHeader, delimiter, strict, quote, types, safe, DEFAULT_CHARSET );
@@ -831,8 +832,8 @@ public class TextDelimited extends TextLine
    * @param safe            of type boolean
    * @param charsetName     of type String
    */
-  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "delimiter", "strict", "quote", "types", "safe",
-                          "charsetName"})
+  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "writeHeader", "delimiter", "strict", "quote",
+                          "types", "safe", "charsetName"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
     {
     this( fields, sinkCompression, skipHeader, writeHeader, charsetName, new DelimitedParser( delimiter, quote, types, strict, safe ) );
@@ -871,7 +872,7 @@ public class TextDelimited extends TextLine
    * @param writeHeader     of type boolean
    * @param delimitedParser of type DelimitedParser
    */
-  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimitedParser"})
+  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "writeHeader", "delimitedParser"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
     {
     this( fields, sinkCompression, skipHeader, writeHeader, null, delimitedParser );
@@ -887,6 +888,7 @@ public class TextDelimited extends TextLine
    * @param charsetName     of type String
    * @param delimitedParser of type DelimitedParser
    */
+  @ConstructorProperties({"fields", "sinkCompression", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
   public TextDelimited( Fields fields, Compress sinkCompression, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
     {
     super( sinkCompression );
