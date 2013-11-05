@@ -6,16 +6,16 @@ Thanks for using Cascading.
 
 For project documentation and community support, visit: [cascading.org](http://cascading.org/)
 
-To download a pre-built distribution, visit [http://www.cascading.org/downloads/](http://www.cascading.org/downloads/),
+To download a pre-built distribution, visit [http://cascading.org/downloads/](http://cascading.org/downloads/),
 or use Maven (described below).
 
 The project includes five Cascading jar files:
 
 * `cascading-core-x.y.z.jar`          - all Cascading Core class files
 * `cascading-xml-x.y.z.jar`           - all Cascading XML operations class files
-* `cascading-local-x.y.z.jar`         - all Cascading Local mode class files
-* `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x mode class files
-* `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x mode class files
+* `cascading-local-x.y.z.jar`         - all Cascading Local in-memory mode class files
+* `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x MapReduce mode class files
+* `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x MapReduce mode class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
@@ -79,7 +79,7 @@ If you wish to allow your test code to be added to the Cascading test suite, ple
 It is strongly recommended developers pull Cascading from our Maven compatible jar repository
 [Conjars.org](http://conjars.org).
 
-You can find the latest public and wip (work in progress) releases here:
+You can find the latest public and WIP (work in progress) releases here:
 
 *  http://conjars.org/cascading/cascading-core
 *  http://conjars.org/cascading/cascading-local
@@ -87,23 +87,26 @@ You can find the latest public and wip (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-hadoop2-mr1
 *  http://conjars.org/cascading/cascading-xml
 
-When creating tests, make sure to add any of the relevant above dependencies to your "test" scope or equivalent
+When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
 configuration along with the `cascading-platform` dependency.
 
 *  http://conjars.org/cascading/cascading-platform
 
-Note the `cascading-plaform` compile dependency has no classes, you must pull the tests dependency with the
-"tests" classifier.
+Note the `cascading-platform` compile dependency has no classes, you must pull the tests dependency with the
+`tests` classifier.
 
 See [http://cascading.org/downloads/#maven](http://cascading.org/downloads/#maven) for example Maven pom
 dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
 
-Note that `cascading-hadoop` and `cascading-hadoop2-mr1` has a "provided" dependency on the Hadoop jars so that it
+Note that `cascading-hadoop` and `cascading-hadoop2-mr1` has a `provided` dependency on the Hadoop jars so that it
 won't get sucked into any application packaging as a dependency, typically.
 
-## Building
+## Building and IDE Integration
+
+For most cases, building Cascading is unnecessary as it has been pre-built, tested, and published to our Maven
+repository (above).
 
 To build Cascading, run the following in the shell:
 
