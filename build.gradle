@@ -39,10 +39,6 @@ configurations {
   s3AntTask
 }
 
-dependencies {
-  s3AntTask 'thirdparty:awstasks:0.3'
-}
-
 ext.distDir = mkdir( "${rootDir}/build/dist" )
 
 allprojects {
