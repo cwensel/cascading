@@ -20,6 +20,7 @@
 
 package cascading.flow.planner;
 
+import cascading.flow.BaseFlow;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
+import cascading.flow.FlowStepListener;
 import cascading.management.CascadingServices;
 import cascading.management.state.ClientState;
 import cascading.operation.Operation;
@@ -646,6 +648,73 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     }
 
   public abstract void clean( Config config );
+
+  protected void fireOnCompleted()
+    
+    {
+    BaseFlow baseFlow = (BaseFlow)getFlow();
+    if( baseFlow.hasStepListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onCompleted event: " + baseFlow.getStepListeners().size() );
+
+      for( Object flowStepListener : baseFlow.getStepListeners() )
+        ((FlowStepListener)flowStepListener).onStepCompleted( this );
+      }
+    }
+
+  protected void fireOnThrowable(Throwable throwable)
+    {
+    BaseFlow baseFlow = (BaseFlow)getFlow();
+    if( baseFlow.hasStepListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onThrowable event: " + baseFlow.getStepListeners().size() );
+
+
+      for( Object flowStepListener : baseFlow.getStepListeners() )
+        ((FlowStepListener)flowStepListener).onStepThrowable( this, throwable );
+      }
+    }
+
+  protected void fireOnStopping()
+    {
+    BaseFlow baseFlow = (BaseFlow)getFlow(); 
+    if( baseFlow.hasStepListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStopping event: " + baseFlow.getStepListeners() );
+
+      for( Object flowStepListener : baseFlow.getStepListeners() )
+        ((FlowStepListener)flowStepListener).onStepStopping( this );
+      }
+    }
+
+  protected void fireOnStarting()
+    {
+    BaseFlow baseFlow = (BaseFlow)getFlow();
+    if( baseFlow.hasStepListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onStarting event: " + baseFlow.getStepListeners().size() );
+
+      for( Object flowStepListener : baseFlow.getStepListeners() )
+        ((FlowStepListener)flowStepListener).onStepStarting( this );
+      }
+    }
+
+    protected void fireOnProgressing()
+    {
+    BaseFlow baseFlow = (BaseFlow)getFlow();
+    if( baseFlow.hasStepListeners() )
+      {
+      if( LOG.isDebugEnabled() )
+        logDebug( "firing onProgressing event: " + baseFlow.getStepListeners().size() );
+
+      for( Object flowStepListener : baseFlow.getStepListeners() )
+        ((FlowStepListener)flowStepListener).onStepProgressing( this );
+      }
+    }
 
   @Override
   public boolean equals( Object object )

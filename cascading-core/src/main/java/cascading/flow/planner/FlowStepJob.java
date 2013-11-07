@@ -102,7 +102,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       // call rollback after the job has been stopped, only if it was stopped
       if( flowStepStats.isStopped() )
-        flowStep.rollbackSinks();
+        {
+          flowStep.rollbackSinks();
+          flowStep.fireOnStopping();
+        }
 
       flowStepStats.cleanup();
       }
@@ -137,6 +140,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         }
 
       flowStepStats.markStarted();
+
+      flowStep.fireOnStarting();
 
       blockOnPredecessors();
 
@@ -200,6 +205,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         flowStep.rollbackSinks();
         flowStepStats.markFailed( getThrowable() );
+        flowStep.fireOnThrowable(getThrowable());
+
         }
 
       dumpDebugInfo();
@@ -216,9 +223,15 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         throwable = flowStep.commitSinks();
 
         if( throwable != null )
-          flowStepStats.markFailed( throwable );
+          {
+            flowStepStats.markFailed( throwable );
+            flowStep.fireOnThrowable(throwable);
+          }
         else
-          flowStepStats.markSuccessful();
+          {
+            flowStepStats.markSuccessful();
+            flowStep.fireOnCompleted();
+          }
         }
       }
 
@@ -243,7 +256,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     while( true )
       {
       if( flowStepStats.isSubmitted() && isStarted() )
-        markRunning();
+        {
+          markRunning();
+          flowStep.fireOnProgressing();
+        }
 
       if( stop || internalNonBlockingIsComplete() )
         break;
