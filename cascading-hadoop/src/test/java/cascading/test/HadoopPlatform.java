@@ -20,10 +20,8 @@
 
 package cascading.test;
 
-/**
- * Retained for backwards compatibility. See {@link cascading.hadoop.platform.HadoopPlatform}.
- */
+/** Retained for backwards compatibility. See {@link cascading.platform.hadoop.HadoopPlatform}. */
 @Deprecated
-public class HadoopPlatform extends cascading.hadoop.platform.HadoopPlatform
+public class HadoopPlatform extends cascading.platform.hadoop.HadoopPlatform
   {
   }

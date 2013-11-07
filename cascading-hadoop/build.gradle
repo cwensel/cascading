@@ -93,3 +93,17 @@ platformTest {
   systemProperties[ 'hadoop.tmp.dir' ] = new String( "${buildDir}/test/tmp" )
   systemProperties[ 'test.build.data' ] = new String( "${buildDir}/test/data" )
 }
+
+javadoc {
+
+  source 'src/test/java/cascading/platform/hadoop/HadoopPlatform.java'
+  source 'src/test/shared/cascading/platform/hadoop/BaseHadoopPlatform.java'
+
+  classpath = files( project.sourceSets.test.compileClasspath )
+
+  configure( options ) {
+    links << 'http://hadoop.apache.org/docs/r1.1.2/api/'
+
+    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+  }
+}

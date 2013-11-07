@@ -27,3 +27,14 @@ dependencies {
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
 }
+
+javadoc {
+
+  source 'src/test/java/cascading/platform/local/LocalPlatform.java'
+
+  classpath = files( project.sourceSets.test.compileClasspath )
+
+  configure( options ) {
+    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+  }
+}

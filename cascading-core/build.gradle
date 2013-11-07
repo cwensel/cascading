@@ -45,3 +45,18 @@ jar {
 }
 
 platformTest.enabled = false
+
+javadoc {
+
+  source 'src/test/java/cascading/CascadingTestCase.java'
+  source 'src/test/java/cascading/tuple/TupleListCollector.java'
+
+  classpath = files( project.sourceSets.test.compileClasspath )
+
+  configure( options ) {
+    links << 'http://hadoop.apache.org/docs/r1.1.2/api/'
+
+    linksOffline( '../../../cascading-hadoop', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-hadoop".toString() )
+    linksOffline( '../../../cascading-local', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-local".toString() )
+  }
+}

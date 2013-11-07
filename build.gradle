@@ -33,6 +33,7 @@
 */
 
 apply from: 'etc/version.gradle'
+apply from: "etc/s3Upload.gradle"
 
 configurations {
   s3AntTask
@@ -41,6 +42,8 @@ configurations {
 dependencies {
   s3AntTask 'thirdparty:awstasks:0.3'
 }
+
+ext.distDir = mkdir( "${rootDir}/build/dist" )
 
 allprojects {
 
@@ -88,6 +91,22 @@ subprojects {
 
   javadoc {
     classpath += configurations.providedCompile
+
+    def copyright = '<i>Copyright &#169; 2007-2013 Concurrent, Inc. All Rights Reserved.</i>'
+
+    title = "Cascading ${releaseVersion}"
+    destinationDir = file( "${distDir}/javadoc/${project.name}" )
+
+    configure( options ) {
+      linkSource = true
+      encoding = "UTF8"
+      bottom = copyright
+      links = [
+              'http://docs.oracle.com/javase/6/docs/api/',
+              'http://dist.codehaus.org/janino/javadoc/',
+              'http://junit.sourceforge.net/javadoc/'
+      ]
+    }
   }
 
   task sourcesJar( type: Jar, dependsOn: classes ) {
@@ -176,50 +195,29 @@ subprojects {
   }
 }
 
-task javadocAll( type: Javadoc ) {
+task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
 
-  ext.copyright = '<i>Copyright &#169; 2007-2013 Concurrent, Inc. All Rights Reserved.</i>'
-  title = "Cascading ${releaseVersion}"
+  s3UploadDocs.dependsOn << prepareRelease
+  s3UploadArtifacts.dependsOn << prepareRelease
 
-  source subprojects.collect { project ->
-    project.sourceSets.main.allJava
-  }
+  // copy dist and apply any analytics scripts
+  def analytics = System.getProperty( 'publish.docs.analytics', '' )
 
-  source 'cascading-core/src/test/java/cascading/CascadingTestCase.java'
-  source 'cascading-core/src/test/java/cascading/tuple/TupleListCollector.java'
-  source 'cascading-local/src/test/java/cascading/platform/local/LocalPlatform.java'
-  source 'cascading-hadoop/src/test/java/cascading/platform/hadoop/HadoopPlatform.java'
-  source 'cascading-platform/src/test/java/cascading/PlatformTestCase.java'
-  source 'cascading-platform/src/test/java/cascading/platform/TestPlatform.java'
-  source 'cascading-platform/src/test/java/cascading/platform/PlatformRunner.java'
+  from "${distDir}/javadoc/"
+  into "${s3UploadDocs.source}"
 
-  destinationDir = new File( buildDir, 'javadoc' )
-
-  classpath = files( subprojects.collect { project ->
-    project.sourceSets.test.compileClasspath
-  } )
-
-  configure( options ) {
-    encoding = "UTF8"
-    bottom = copyright
-    links = [
-            'http://docs.oracle.com/javase/6/docs/api/',
-            'http://dist.codehaus.org/janino/javadoc/',
-            'http://hadoop.apache.org/common/docs/r1.0.4/api/',
-            'http://junit.sourceforge.net/javadoc/'
-    ]
+  filter { line ->
+    line.replaceAll( "</BODY>", "${analytics}\n</BODY>" )
   }
 }
-
-task prepareRelease( dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-xml:build', 'cascading-platform:build'] )
 
 prepareRelease << {
   logger.info( 'built all artifacts' )
 }
 
-task buildDist( dependsOn: [prepareRelease, javadocAll] ) << {
+javadoc.enabled = false
 
-  def distDir = mkdir( "${rootDir}/build/dist" )
+task buildDist( dependsOn: [prepareRelease, javadoc] ) << {
 
   copy {
     from 'CHANGES.txt'
@@ -228,20 +226,13 @@ task buildDist( dependsOn: [prepareRelease, javadocAll] ) << {
     from 'LICENSE.txt'
     into distDir
   }
-
-  copy {
-    from javadocAll.destinationDir
-    into "${distDir}/javadoc"
-  }
 }
-
-ext.distDir = mkdir( "${rootDir}/build/dist" )
 
 task buildPackage( type: Tar, dependsOn: buildDist ) {
 
   description = "package current build, does not run tests"
 
-  destinationDir = buildDir
+  destinationDir = file( s3UploadArtifacts.source )
   baseName = "cascading-${releaseVersion}"
   compression = "GZIP"
 
@@ -252,6 +243,8 @@ task buildPackage( type: Tar, dependsOn: buildDist ) {
 
 task buildLatestMeta( dependsOn: buildPackage ) {
 
+  s3UploadArtifacts.dependsOn << buildLatestMeta
+
   ext.latestArchivePath = null
   ext.latestReleaseTagPath = null
   ext.latestPropertiesPath = null
@@ -259,15 +252,16 @@ task buildLatestMeta( dependsOn: buildPackage ) {
 
 buildLatestMeta << {
 
+  def destination = s3UploadArtifacts.source
   def releaseTar = buildPackage.archivePath.name
 
-  latestArchivePath = new File( buildDir, 'latest.txt' )
-  latestArchivePath.write( "http://${s3Bucket}/cascading/${majorVersion}/${releaseTar}" )
+  latestArchivePath = new File( destination, 'latest.txt' )
+  latestArchivePath.write( "http://${s3UploadArtifacts.destination}${releaseTar}" )
 
-  latestReleaseTagPath = new File( buildDir, 'latest-tag.txt' )
+  latestReleaseTagPath = new File( destination, 'latest-tag.txt' )
   latestReleaseTagPath.write( "${releaseTag}" )
 
-  latestPropertiesPath = new File( buildDir, 'latest.properties' )
+  latestPropertiesPath = new File( destination, 'latest.properties' )
   latestPropertiesPath.write( "cascading.release.version=${releaseVersion}\n" +
           "cascading.release.major=${majorVersion}\n" +
           "cascading.release.minor=${minorVersion}\n" +
@@ -275,22 +269,4 @@ buildLatestMeta << {
           "cascading.release.commit=${currentCommit}\n" +
           "cascading.release.tag=${releaseTag}"
   )
-}
-
-task s3Upload( dependsOn: buildLatestMeta ) << {
-
-  def remotePath = "cascading/${majorVersion}/"
-
-  ant.taskdef( name: 's3Upload', classname: 'dak.ant.taskdefs.S3Upload',
-          classpath: configurations.s3AntTask.asPath )
-
-  ant.s3Upload( verbose: 'true', accessId: awsAccessId, secretKey: awsSecretKey,
-          bucket: s3Bucket, prefix: remotePath, publicRead: 'true' ) {
-
-    fileset( file: buildPackage.archivePath )
-
-    fileset( file: buildLatestMeta.latestArchivePath )
-    fileset( file: buildLatestMeta.latestReleaseTagPath )
-    fileset( file: buildLatestMeta.latestPropertiesPath )
-  }
 }

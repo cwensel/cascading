@@ -45,4 +45,23 @@ test {
   }
 }
 
+javadoc {
+
+  source 'src/test/java/cascading/PlatformTestCase.java'
+  source 'src/test/java/cascading/FieldedPipesPlatformTest.java'
+  source 'src/test/java/cascading/CoGroupFieldedPipesPlatformTest.java'
+  source 'src/test/java/cascading/JoinFieldedPipesPlatformTest.java'
+  source 'src/test/java/cascading/platform/TestPlatform.java'
+  source 'src/test/java/cascading/platform/PlatformRunner.java'
+
+  source 'src/test/java/cascading/ComparePlatformsTest.java'
+  source 'src/test/java/data/InputData.java'
+
+  classpath = files( project.sourceSets.test.compileClasspath )
+
+  configure( options ) {
+    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+  }
+}
+
 platformTest.enabled = false

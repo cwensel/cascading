@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.hadoop.platform;
+package cascading.platform.hadoop;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,6 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowProps;
 import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.flow.hadoop.planner.HadoopPlanner;
-import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;

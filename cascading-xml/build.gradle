@@ -28,4 +28,10 @@ dependencies {
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
 }
 
+javadoc {
+  configure( options ) {
+    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+  }
+}
+
 platformTest.enabled = false

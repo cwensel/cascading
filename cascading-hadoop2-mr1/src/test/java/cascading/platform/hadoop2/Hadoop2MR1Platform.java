@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.hadoop2.platform;
+package cascading.platform.hadoop2;
 
 import java.io.File;
 import java.io.IOException;

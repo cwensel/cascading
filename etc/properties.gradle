@@ -40,3 +40,4 @@ if( System.properties[ 'publish.repo.url' ] )
 ext.awsAccessId = System.properties[ 'publish.aws.accessId' ]
 ext.awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
 ext.s3Bucket = System.properties[ 'publish.bucket' ]
+ext.s3BucketDocs = System.properties[ 'publish.docs.bucket' ]
