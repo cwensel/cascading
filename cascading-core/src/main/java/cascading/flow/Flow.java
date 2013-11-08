@@ -200,9 +200,9 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   boolean hasStepListeners();
 
   /**
-   * Method addStepListener registers the given flowStepListener with this instance.
+   * Method addStepListener registers the given {@link FlowStepListener} with this instance.
    *
-   * @param flowStepListener of type addStepListener
+   * @param flowStepListener of type flowStepListener
    */
   void addStepListener( FlowStepListener flowStepListener );
 

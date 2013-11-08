@@ -92,7 +92,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   /** Field listeners */
   private List<SafeFlowListener> listeners;
   /** Field step listeners */
-  private List<SafeFlowStepListener> stepListeners;
+  private List<SafeFlowStepListener> stepListeners; //for flow step updates
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
   /** Field flowStats */
@@ -539,7 +539,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     {
     return getListeners().remove( new SafeFlowListener( flowListener ) );
     }
-    /////////////////////////
+    
   @Override
   public boolean hasStepListeners()
     {

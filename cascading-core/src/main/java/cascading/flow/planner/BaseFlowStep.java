@@ -669,7 +669,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     if( baseFlow.hasStepListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onThrowable event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onStepThrowable event: " + baseFlow.getStepListeners().size() );
 
 
       for( Object flowStepListener : baseFlow.getStepListeners() )
@@ -683,7 +683,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     if( baseFlow.hasStepListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStopping event: " + baseFlow.getStepListeners() );
+        logDebug( "firing onStepStopping event: " + baseFlow.getStepListeners() );
 
       for( Object flowStepListener : baseFlow.getStepListeners() )
         ((FlowStepListener)flowStepListener).onStepStopping( this );
@@ -696,7 +696,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     if( baseFlow.hasStepListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStarting event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onStepStarting event: " + baseFlow.getStepListeners().size() );
 
       for( Object flowStepListener : baseFlow.getStepListeners() )
         ((FlowStepListener)flowStepListener).onStepStarting( this );
@@ -709,7 +709,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     if( baseFlow.hasStepListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onProgressing event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onStepProgressing event: " + baseFlow.getStepListeners().size() );
 
       for( Object flowStepListener : baseFlow.getStepListeners() )
         ((FlowStepListener)flowStepListener).onStepProgressing( this );
