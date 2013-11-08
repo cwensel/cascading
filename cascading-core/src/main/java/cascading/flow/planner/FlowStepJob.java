@@ -141,8 +141,6 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
       flowStepStats.markStarted();
 
-      flowStep.fireOnStarting();
-
       blockOnPredecessors();
 
       applyFlowStepConfStrategy();
@@ -153,6 +151,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       dumpDebugInfo();
       this.throwable = throwable;
+      flowStep.fireOnThrowable(throwable);
       }
     finally
       {
@@ -196,7 +195,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     internalNonBlockingStart();
 
     markSubmitted();
-
+    flowStep.fireOnStarting();
+    
     blockTillCompleteOrStopped();
 
     if( !stop && !internalNonBlockingIsSuccessful() )
@@ -225,7 +225,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         if( throwable != null )
           {
             flowStepStats.markFailed( throwable );
-            flowStep.fireOnThrowable(throwable);
+            flowStep.fireOnThrowable( throwable );
           }
         else
           {
