@@ -532,7 +532,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public boolean hasStepListeners()
     {
     boolean hasStepListeners = false;
-    for (FlowStep step : steps)
+    for (FlowStep step : getFlowSteps())
       {
       hasStepListeners |= step.hasListeners();
       }
@@ -542,7 +542,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   @Override
   public void addStepListener( FlowStepListener flowStepListener )
     {
-    for (FlowStep step : steps)
+    for (FlowStep step : getFlowSteps())
       {
       step.addListener(flowStepListener);
       }
@@ -552,7 +552,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public boolean removeStepListener( FlowStepListener flowStepListener )
     {
     boolean listenerRemoved = true;
-    for (FlowStep step : steps)
+    for (FlowStep step : getFlowSteps())
       {
       listenerRemoved &= step.removeListener(flowStepListener);
       }
