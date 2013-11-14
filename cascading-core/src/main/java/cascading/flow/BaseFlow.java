@@ -91,8 +91,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private String tags;
   /** Field listeners */
   private List<SafeFlowListener> listeners;
-  /** Field step listeners */
-  private List<SafeFlowStepListener> stepListeners; //for flow step updates
   /** Field skipStrategy */
   private FlowSkipStrategy flowSkipStrategy = new FlowSkipIfSinkNotStale();
   /** Field flowStats */
@@ -512,16 +510,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     return listeners;
     }
 
-    public List<SafeFlowStepListener> getStepListeners()
-    {
-    if( stepListeners == null )
-      stepListeners = new LinkedList<SafeFlowStepListener>();
-
-    return stepListeners;
-    }
-
-
-
   @Override
   public boolean hasListeners()
     {
@@ -543,19 +531,32 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   @Override
   public boolean hasStepListeners()
     {
-    return stepListeners != null && !stepListeners.isEmpty();
+    boolean hasStepListeners = false;
+    for (FlowStep step : steps)
+      {
+      hasStepListeners |= step.hasListeners();
+      }
+    return hasStepListeners;
     }
 
   @Override
   public void addStepListener( FlowStepListener flowStepListener )
     {
-    getStepListeners().add( new SafeFlowStepListener( flowStepListener ) );
+    for (FlowStep step : steps)
+      {
+      step.addListener(flowStepListener);
+      }
     }
 
   @Override
   public boolean removeStepListener( FlowStepListener flowStepListener )
     {
-    return getStepListeners().remove( new SafeFlowStepListener( flowStepListener ) );
+    boolean listenerRemoved = true;
+    for (FlowStep step : steps)
+      {
+      listenerRemoved &= step.removeListener(flowStepListener);
+      }
+    return listenerRemoved;
     }
 
   @Override
@@ -1516,113 +1517,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     public int hashCode()
       {
       return flowListener.hashCode();
-      }
-    }
-
-
-
-  /**
-   * Class SafeFlowStepListener safely calls a wrapped FlowStepListener.
-   * <p/>
-   * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
-   * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
-   * which in turn is run in a new Thread.
-   */
-  private class SafeFlowStepListener implements FlowStepListener
-    {
-    /** Field flowListener */
-    final FlowStepListener flowStepListener;
-    /** Field throwable */
-    Throwable throwable;
-
-    private SafeFlowStepListener( FlowStepListener flowStepListener )
-      {
-      this.flowStepListener = flowStepListener;
-      }
-
-    public void onStepStarting( FlowStep flowStep )
-      {
-      try
-        {
-        flowStepListener.onStepStarting( flowStep );
-        }
-      catch( Throwable throwable )
-        {
-        handleThrowable( throwable );
-        }
-      }
-
-    public void onStepStopping( FlowStep flowStep )
-      {
-      try
-        {
-        flowStepListener.onStepStopping( flowStep );
-        }
-      catch( Throwable throwable )
-        {
-        handleThrowable( throwable );
-        }
-      }
-
-    public void onStepCompleted( FlowStep flowStep )
-      {
-      try
-        {
-        flowStepListener.onStepCompleted( flowStep );
-        }
-      catch( Throwable throwable )
-        {
-        handleThrowable( throwable );
-        }
-      }
-
-    public void onStepProgressing( FlowStep flowStep )
-      {
-      try
-        {
-        flowStepListener.onStepProgressing( flowStep );
-        }
-      catch( Throwable throwable )
-        {
-        handleThrowable( throwable );
-        }
-      }
-
-    public boolean onStepThrowable( FlowStep flowStep, Throwable flowStepThrowable )
-      {
-      try
-        {
-        return flowStepListener.onStepThrowable( flowStep, flowStepThrowable );
-        }
-      catch( Throwable throwable )
-        {
-        handleThrowable( throwable );
-        }
-
-      return false;
-      }
-
-    private void handleThrowable( Throwable throwable )
-      {
-      this.throwable = throwable;
-
-      logWarn( String.format( "flow step listener %s threw throwable", flowStepListener ), throwable );
-
-      // stop this flow
-      stop();
-      }
-
-    public boolean equals( Object object )
-      {
-      if( object instanceof BaseFlow.SafeFlowStepListener )
-        return flowStepListener.equals( ( (BaseFlow.SafeFlowStepListener) object ).flowStepListener );
-
-      return flowStepListener.equals( object );
-      }
-
-    public int hashCode()
-      {
-      return flowStepListener.hashCode();
       }
     }
   }

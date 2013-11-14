@@ -96,6 +96,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   private String id;
   private final int stepNum;
 
+  /** Field step listeners */
+  private List<SafeFlowStepListener> listeners;
+
   /** Field graph */
   private final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
 
@@ -649,69 +652,90 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   public abstract void clean( Config config );
 
-  protected void fireOnCompleted()
-    
+  List<SafeFlowStepListener> getListeners()
     {
-    BaseFlow baseFlow = (BaseFlow)getFlow();
-    if( baseFlow.hasStepListeners() )
+    if( listeners == null )
+      listeners = new LinkedList<SafeFlowStepListener>();
+
+    return listeners;
+    }
+
+  @Override
+  public boolean hasListeners()
+    {
+    return listeners != null && !listeners.isEmpty();
+    }
+
+  @Override
+  public void addListener( FlowStepListener flowStepListener )
+    {
+    getListeners().add( new SafeFlowStepListener( flowStepListener ) );
+    }
+
+  @Override
+  public boolean removeListener( FlowStepListener flowStepListener )
+    {
+    return getListeners().remove( new SafeFlowStepListener( flowStepListener ) );
+    }
+
+  protected void fireOnCompleted()
+    {
+    
+    if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onCompleted event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onCompleted event: " + getListeners().size() );
 
-      for( Object flowStepListener : baseFlow.getStepListeners() )
+      for( Object flowStepListener : getListeners() )
         ((FlowStepListener)flowStepListener).onStepCompleted( this );
       }
     }
 
   protected void fireOnThrowable(Throwable throwable)
     {
-    BaseFlow baseFlow = (BaseFlow)getFlow();
-    if( baseFlow.hasStepListeners() )
+    if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStepThrowable event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onThrowable event: " + getListeners().size() );
 
 
-      for( Object flowStepListener : baseFlow.getStepListeners() )
+      for( Object flowStepListener : getListeners() )
         ((FlowStepListener)flowStepListener).onStepThrowable( this, throwable );
       }
     }
 
   protected void fireOnStopping()
     {
-    BaseFlow baseFlow = (BaseFlow)getFlow(); 
-    if( baseFlow.hasStepListeners() )
+    if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStepStopping event: " + baseFlow.getStepListeners() );
+        logDebug( "firing onStopping event: " + getListeners() );
 
-      for( Object flowStepListener : baseFlow.getStepListeners() )
+      for( Object flowStepListener : getListeners() )
         ((FlowStepListener)flowStepListener).onStepStopping( this );
       }
     }
 
   protected void fireOnStarting()
     {
-    BaseFlow baseFlow = (BaseFlow)getFlow();
-    if( baseFlow.hasStepListeners() )
+    if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStepStarting event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onStarting event: " + getListeners().size() );
 
-      for( Object flowStepListener : baseFlow.getStepListeners() )
+      for( Object flowStepListener : getListeners() )
         ((FlowStepListener)flowStepListener).onStepStarting( this );
       }
     }
 
     protected void fireOnProgressing()
     {
-    BaseFlow baseFlow = (BaseFlow)getFlow();
-    if( baseFlow.hasStepListeners() )
+    if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onStepProgressing event: " + baseFlow.getStepListeners().size() );
+        logDebug( "firing onProgressing event: " + getListeners().size() );
 
-      for( Object flowStepListener : baseFlow.getStepListeners() )
+      for( Object flowStepListener : getListeners() )
         ((FlowStepListener)flowStepListener).onStepProgressing( this );
       }
     }
@@ -820,5 +844,107 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   public void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
+    }
+
+    /**
+   * Class SafeFlowStepListener safely calls a wrapped FlowStepListener.
+   * <p/>
+   * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
+   * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
+   * which in turn is run in a new Thread.
+   */
+  private class SafeFlowStepListener implements FlowStepListener
+    {
+    /** Field flowListener */
+    final FlowStepListener flowStepListener;
+    /** Field throwable */
+    Throwable throwable;
+
+    private SafeFlowStepListener( FlowStepListener flowStepListener )
+      {
+      this.flowStepListener = flowStepListener;
+      }
+
+    public void onStepStarting( FlowStep flowStep )
+      {
+      try
+        {
+        flowStepListener.onStepStarting( flowStep );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onStepStopping( FlowStep flowStep )
+      {
+      try
+        {
+        flowStepListener.onStepStopping( flowStep );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onStepCompleted( FlowStep flowStep )
+      {
+      try
+        {
+        flowStepListener.onStepCompleted( flowStep );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public void onStepProgressing( FlowStep flowStep )
+      {
+      try
+        {
+        flowStepListener.onStepProgressing( flowStep );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+      }
+
+    public boolean onStepThrowable( FlowStep flowStep, Throwable flowStepThrowable )
+      {
+      try
+        {
+        return flowStepListener.onStepThrowable( flowStep, flowStepThrowable );
+        }
+      catch( Throwable throwable )
+        {
+        handleThrowable( throwable );
+        }
+
+      return false;
+      }
+
+    private void handleThrowable( Throwable throwable )
+      {
+      this.throwable = throwable;
+
+      logWarn( String.format( "flow step listener %s threw throwable", flowStepListener ), throwable );
+      }
+
+    public boolean equals( Object object )
+      {
+      if( object instanceof BaseFlowStep.SafeFlowStepListener )
+        return flowStepListener.equals( ( (BaseFlowStep.SafeFlowStepListener) object ).flowStepListener );
+
+      return flowStepListener.equals( object );
+      }
+
+    public int hashCode()
+      {
+      return flowStepListener.hashCode();
+      }
     }
   }

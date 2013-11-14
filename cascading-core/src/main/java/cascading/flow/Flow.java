@@ -193,16 +193,17 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   boolean removeListener( FlowListener flowListener );
 
   /**
-   * Method hasStepListeners returns true if {@link FlowStepListener} instances have been registered.
+   * Method hasStepListeners returns true if {@link FlowStepListener} instances have been registered
+   * with any of the {@link FlowStep}s belonging to this instance
    *
    * @return boolean
    */
   boolean hasStepListeners();
 
   /**
-   * Method addStepListener registers the given {@link FlowStepListener} with this instance.
+   * Method addStepListener registers the given flowStepListener with this instance.
    *
-   * @param flowStepListener of type flowStepListener
+   * @param flowStepListener of type addStepListener
    */
   void addStepListener( FlowStepListener flowStepListener );
 
@@ -210,7 +211,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * Method removeStepListener removes the given flowStepListener from this instance.
    *
    * @param flowStepListener of type FlowStepListener
-   * @return true if the listener was removed
+   * @return true if the listener was removed from all the {@link FlowStep} belonging to this instance
    */
   boolean removeStepListener( FlowStepListener flowStepListener );
 
