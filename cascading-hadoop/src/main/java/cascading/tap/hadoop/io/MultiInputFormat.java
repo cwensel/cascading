@@ -73,7 +73,14 @@ public class MultiInputFormat implements InputFormat
       Collections.addAll( allPaths, FileInputFormat.getInputPaths( fromJob ) );
 
       if( !isLocal )
-        isLocal = fromJob.get( "mapred.job.tracker" ).equalsIgnoreCase( "local" );
+        {
+        String jobTracker = fromJob.get( "mapred.job.tracker" );
+
+        if( jobTracker == null || jobTracker.isEmpty() )
+          throw new CascadingException( "mapred.job.tracker has not been set in the Hadoop configuration, you may be using an incompatible Hadoop release" );
+
+        isLocal = jobTracker.equalsIgnoreCase( "local" );
+        }
       }
 
     if( !allPaths.isEmpty() ) // it's possible there aren't any
