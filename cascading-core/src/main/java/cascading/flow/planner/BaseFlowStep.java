@@ -728,15 +728,15 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       }
     }
 
-    protected void fireOnProgressing()
+    protected void fireOnRunning()
     {
     if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
-        logDebug( "firing onProgressing event: " + getListeners().size() );
+        logDebug( "firing onRunning event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepProgressing( this );
+        ((FlowStepListener)flowStepListener).onStepRunning( this );
       }
     }
 
@@ -846,7 +846,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
     }
 
-    /**
+  /**
    * Class SafeFlowStepListener safely calls a wrapped FlowStepListener.
    * <p/>
    * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
@@ -901,11 +901,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         }
       }
 
-    public void onStepProgressing( FlowStep flowStep )
+    public void onStepRunning( FlowStep flowStep )
       {
       try
         {
-        flowStepListener.onStepProgressing( flowStep );
+        flowStepListener.onStepRunning( flowStep );
         }
       catch( Throwable throwable )
         {

@@ -258,7 +258,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       if( flowStepStats.isSubmitted() && isStarted() )
         {
           markRunning();
-          flowStep.fireOnProgressing();
+          flowStep.fireOnRunning();
         }
 
       if( stop || internalNonBlockingIsComplete() )
