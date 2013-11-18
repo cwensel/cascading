@@ -28,7 +28,12 @@ import cascading.tuple.TupleEntry;
 import cascading.util.Util;
 
 /**
- *
+ * DelimitedPartition is an implementation of the {@link Partition} interface that allows for simple
+ * text delimited paths as partitions.
+ * <p/>
+ * For example, given the delimiter {@code -} (dash), a partition path will have dashes.
+ * <p/>
+ * Note the delimiter must not be naturally present in any of the values making up the partition.
  */
 public class DelimitedPartition implements Partition
   {

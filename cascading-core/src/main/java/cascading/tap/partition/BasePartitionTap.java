@@ -74,7 +74,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       else
         {
-        String[] childIdentifiers = getChildPartitions( flowProcess, false );
+        String[] childIdentifiers = getChildPartitionIdentifiers( flowProcess, false );
 
         for( String childIdentifier : childIdentifiers )
           iterators.add( createPartitionEntryIterator( flowProcess, null, parent.getIdentifier(), childIdentifier ) );
@@ -133,7 +133,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       catch( IOException exception )
         {
-        throw new TapException( "unable to open template path: " + path, exception );
+        throw new TapException( "unable to open partition path: " + path, exception );
         }
 
       if( collectors.size() > openWritesThreshold )
@@ -218,7 +218,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
   /** Field parent */
   protected Tap parent;
-  /** Field pathTemplate */
+  /** Field partition */
   protected Partition partition;
   /** Field keepParentOnDelete */
   protected boolean keepParentOnDelete = false;
@@ -261,9 +261,9 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   /**
-   * Method getParent returns the parent Tap of this TemplateTap object.
+   * Method getParent returns the parent Tap of this PartitionTap object.
    *
-   * @return the parent (type Tap) of this TemplateTap object.
+   * @return the parent (type Tap) of this PartitionTap object.
    */
   public Tap getParent()
     {
@@ -271,16 +271,28 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   /**
-   * Method getPathTemplate returns the pathTemplate {@link java.util.Formatter} format String of this TemplateTap object.
+   * Method getPartition returns the {@link Partition} instance used by this PartitionTap
    *
-   * @return the pathTemplate (type String) of this TemplateTap object.
+   * @return the partition instance
    */
   public Partition getPartition()
     {
     return partition;
     }
 
-  public String[] getChildPartitions( FlowProcess<Config> flowProcess, boolean fullyQualified ) throws IOException
+  /**
+   * Method getChildPartitionIdentifiers returns an array of all identifiers for all available partitions.
+   * <p/>
+   * This method is used internally to set all incoming paths, override to limit applicable partitions.
+   * <p/>
+   * Note the returns array may be large.
+   *
+   * @param flowProcess    of type FlowProcess
+   * @param fullyQualified of type boolean
+   * @return a String[] of partition identifiers
+   * @throws IOException
+   */
+  public String[] getChildPartitionIdentifiers( FlowProcess<Config> flowProcess, boolean fullyQualified ) throws IOException
     {
     return ( (FileType) parent ).getChildIdentifiers( flowProcess.getConfigCopy(), partition.getPathDepth(), fullyQualified );
     }
@@ -291,15 +303,12 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     return parent.getIdentifier();
     }
 
-  protected String getCurrentIdentifier( FlowProcess<Config> flowProcess )
-    {
-    return null;
-    }
+  protected abstract String getCurrentIdentifier( FlowProcess<Config> flowProcess );
 
   /**
-   * Method getOpenWritesThreshold returns the openTapsThreshold of this TemplateTap object.
+   * Method getOpenWritesThreshold returns the openTapsThreshold of this PartitionTap object.
    *
-   * @return the openTapsThreshold (type int) of this TemplateTap object.
+   * @return the openTapsThreshold (type int) of this PartitionTap object.
    */
   public int getOpenWritesThreshold()
     {

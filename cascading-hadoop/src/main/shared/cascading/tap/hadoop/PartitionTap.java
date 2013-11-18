@@ -174,7 +174,7 @@ public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, Output
     {
     try
       {
-      String[] childPartitions = getChildPartitions( flowProcess, true );
+      String[] childPartitions = getChildPartitionIdentifiers( flowProcess, true );
 
       ( (Hfs) getParent() ).applySourceConfInitIdentifiers( flowProcess, conf, childPartitions );
       }

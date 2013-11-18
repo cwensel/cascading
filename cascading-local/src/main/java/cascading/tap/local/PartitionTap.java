@@ -137,6 +137,12 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     }
 
   @Override
+  protected String getCurrentIdentifier( FlowProcess<Properties> flowProcess )
+    {
+    return null;
+    }
+
+  @Override
   protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Properties> flowProcess, Tap parent, String path ) throws IOException
     {
     TapFileOutputStream output = new TapFileOutputStream( parent, path, isUpdate() ); // append if we are in update mode
