@@ -145,7 +145,7 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     if( !isUseCluster() )
       return;
 
-    Path path = new Path( inputFile );
+    Path path = new Path( safeFileName( inputFile ) );
 
     if( !fileSys.exists( path ) )
       FileUtil.copy( new File( inputFile ), fileSys, path, false, jobConf );
@@ -157,7 +157,7 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     if( !isUseCluster() )
       return;
 
-    Path path = new Path( outputFile );
+    Path path = new Path( safeFileName( outputFile ) );
 
     if( !fileSys.exists( path ) )
       throw new FileNotFoundException( "data file not found: " + outputFile );
@@ -193,46 +193,46 @@ public abstract class BaseHadoopPlatform extends TestPlatform
   @Override
   public boolean remoteExists( String outputFile ) throws IOException
     {
-    return fileSys.exists( new Path( outputFile ) );
+    return fileSys.exists( new Path( safeFileName( outputFile ) ) );
     }
 
   @Override
   public boolean remoteRemove( String outputFile, boolean recursive ) throws IOException
     {
-    return fileSys.delete( new Path( outputFile ), recursive );
+    return fileSys.delete( new Path( safeFileName( outputFile ) ), recursive );
     }
 
   @Override
   public Tap getTap( Scheme scheme, String filename, SinkMode mode )
     {
-    return new Hfs( scheme, filename, mode );
+    return new Hfs( scheme, safeFileName( filename ), mode );
     }
 
   @Override
   public Tap getTextFile( Fields sourceFields, Fields sinkFields, String filename, SinkMode mode )
     {
     if( sourceFields == null )
-      return new Hfs( new TextLine(), filename, mode );
+      return new Hfs( new TextLine(), safeFileName( filename ), mode );
 
-    return new Hfs( new TextLine( sourceFields, sinkFields ), filename, mode );
+    return new Hfs( new TextLine( sourceFields, sinkFields ), safeFileName( filename ), mode );
     }
 
   @Override
   public Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
-    return new Hfs( new TextDelimited( fields, hasHeader, delimiter, quote, types ), filename, mode );
+    return new Hfs( new TextDelimited( fields, hasHeader, delimiter, quote, types ), safeFileName( filename ), mode );
     }
 
   @Override
   public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
-    return new Hfs( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    return new Hfs( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), safeFileName( filename ), mode );
     }
 
   @Override
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
-    return new Hfs( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
+    return new Hfs( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), safeFileName( filename ), mode );
     }
 
   @Override
@@ -281,5 +281,16 @@ public abstract class BaseHadoopPlatform extends TestPlatform
   public String getHiddenTemporaryPath()
     {
     return Hadoop18TapUtil.TEMPORARY_PATH;
+    }
+
+  /**
+   * Replaces characters, that are not allowed by HDFS with an "_".
+   *
+   * @param filename The filename to make safe
+   * @return The filename with all non-supported characters removed.
+   */
+  protected String safeFileName( String filename )
+    {
+    return filename.replace( ":", "_" ); // not using Util.cleansePathName as it removes /
     }
   }

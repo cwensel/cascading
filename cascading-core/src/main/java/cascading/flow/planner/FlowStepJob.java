@@ -78,7 +78,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
   protected abstract FlowStepStats createStepStats( ClientState clientState );
 
-  public void stop()
+  public synchronized void stop()
     {
     if( flowStep.isInfoEnabled() )
       flowStep.logInfo( "stopping: " + stepName );
@@ -263,9 +263,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     }
 
-  private void markSubmitted()
+  private synchronized void markSubmitted()
     {
-    flowStepStats.markSubmitted();
+    if( flowStepStats.isStarted() )
+      flowStepStats.markSubmitted();
 
     Flow flow = flowStep.getFlow();
 
@@ -284,21 +285,21 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     }
 
-  private void markRunning()
+  private synchronized void markRunning()
     {
     flowStepStats.markRunning();
 
     markFlowRunning();
     }
 
-  private void markSkipped()
+  private synchronized void markSkipped()
     {
     flowStepStats.markSkipped();
 
     markFlowRunning();
     }
 
-  private void markFlowRunning()
+  private synchronized void markFlowRunning()
     {
     Flow flow = flowStep.getFlow();
 

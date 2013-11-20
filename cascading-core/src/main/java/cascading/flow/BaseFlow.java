@@ -1064,6 +1064,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
     try
       {
+      if( stop )
+        return;
+
       flowStats.markStarted();
 
       fireOnStarting();

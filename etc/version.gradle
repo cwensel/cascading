@@ -41,22 +41,25 @@ file( 'version.properties' ).withInputStream { versionProperties.load( it ) }
 ext.majorVersion = versionProperties[ 'cascading.release.major' ]
 ext.minorVersion = versionProperties[ 'cascading.release.minor' ]
 
-ext.buildNumber = System.getProperty( 'build.number', 'dev' )
+ext.buildNumber = System.getProperty( 'build.number', 'dev' ) // local dev or build server build
 
 if( System.properties[ 'cascading.release.private' ] )
   buildNumber = "priv-${buildNumber}"
 else if( !System.properties[ 'cascading.release.final' ] )
   buildNumber = "wip-${buildNumber}"
 
-ext.releaseTag = "${majorVersion}-${buildNumber}"
-
-if( !System.properties[ 'build.number' ] )
-  releaseTag = "wip-${majorVersion}"
-
 ext.releaseVersion = majorVersion
 
 if( minorVersion )
-  releaseVersion = "${releaseVersion}.${minorVersion}"
+  releaseVersion = "${majorVersion}.${minorVersion}"
 
-if( !System.properties[ 'cascading.release.final' ] )
+if( !System.properties[ 'cascading.release.final' ] ) // is wip
   releaseVersion = "${releaseVersion}-${buildNumber}"
+
+ext.releaseTag = "${releaseVersion}"
+
+if( !System.properties[ 'build.number' ] ) // is dev
+  releaseTag = "wip-${majorVersion}"
+
+if( !System.properties[ 'cascading.release.final' ] ) // is wip
+  releaseTag = "${majorVersion}-${buildNumber}"

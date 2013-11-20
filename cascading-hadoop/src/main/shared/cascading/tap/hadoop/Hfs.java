@@ -24,6 +24,7 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -75,9 +76,9 @@ import org.slf4j.LoggerFactory;
  * To include sub-directories, Hadoop supports "globing". Globing is a frustrating feature and is supported more
  * robustly by {@link GlobHfs} and less so by Hfs.
  * <p/>
- * Hfs will accept {@code /*} paths, but not all convenience methods like
- * {@link #getSize(org.apache.hadoop.mapred.JobConf)} will behave properly or reliably. Nor can the Hfs instance be used
- * as a sink to write data.
+ * Hfs will accept {@code /*} (wildcard) paths, but not all convenience methods like
+ * {@link #getSize(org.apache.hadoop.mapred.JobConf)} will behave properly or reliably. Nor can the Hfs instance
+ * with a wildcard path be used as a sink to write data.
  * <p/>
  * In those cases use GlobHfs since it is a sub-class of {@link cascading.tap.MultiSourceTap}.
  * <p/>
@@ -388,18 +389,12 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   protected static void verifyNoDuplicates( JobConf conf )
     {
     Path[] inputPaths = FileInputFormat.getInputPaths( conf );
+    Set<Path> paths = new HashSet<Path>( (int) ( inputPaths.length / .75f ) );
 
-    for( int i = 0; i < inputPaths.length - 1; i++ )
+    for( Path inputPath : inputPaths )
       {
-      Path lhs = inputPaths[ i ];
-
-      for( int j = i + 1; j < inputPaths.length; j++ )
-        {
-        Path rhs = inputPaths[ j ];
-
-        if( rhs.equals( lhs ) )
-          throw new TapException( "may not add duplicate paths, found: " + rhs );
-        }
+      if( !paths.add( inputPath ) )
+        throw new TapException( "may not add duplicate paths, found: " + inputPath );
       }
     }
 

@@ -17,6 +17,20 @@ Cascading Change Log
 
   Added support for Apache Hadoop 2 and YARN.
 
+2.2.1
+
+  Updated Hadoop platform to fail during planning if "mapred.job.tracker" is not set.
+
+  Updated c.t.h.Hfs to improve duplicate identifier check performance. @gianm
+
+  Fixed issue where resolved fields were not properly presented to c.t.MultiSinkTap child c.t.Tap and c.s.Scheme
+  instances preventing header information from being written in the case of TextDelimited files.
+
+  Fixed issue where the number of fields parsed by c.s.u.DelimitedParser were greater than those declared could cause
+  an j.l.ArrayIndexOutOfBoundsException.
+
+  Fixed issue where a race condition could cause a NPE between c.c.Cascade#start() and Cascade#stop().
+
 2.2.0
 
   Fixed issue where c.p.CoGroup in local mode did not properly handle joins where the grouping j.u.Comparator

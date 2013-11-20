@@ -105,36 +105,57 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
       {
       LOG.info( "using cluster" );
 
-      // ignored
       if( Util.isEmpty( System.getProperty( "hadoop.log.dir" ) ) )
         System.setProperty( "hadoop.log.dir", "build/test/log" );
 
       if( Util.isEmpty( System.getProperty( "hadoop.tmp.dir" ) ) )
         System.setProperty( "hadoop.tmp.dir", "build/test/tmp" );
 
-      new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs();
-      // ignored
+      new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs(); // ignored
 
       JobConf conf = new JobConf();
 
-      conf.setInt( "mapreduce.job.jvm.numtasks", -1 );
+      if( !Util.isEmpty( System.getProperty( "mapred.jar" ) ) )
+        {
+        LOG.info( "using a remote cluster with jar: {}", System.getProperty( "mapred.jar" ) );
+        jobConf = conf;
 
-      conf.setBoolean( "yarn.is.minicluster", true );
+        ( (JobConf) jobConf ).setJar( System.getProperty( "mapred.jar" ) );
+
+        if( !Util.isEmpty( System.getProperty( "fs.default.name" ) ) )
+          {
+          LOG.info( "using {}={}", "fs.default.name", System.getProperty( "fs.default.name" ) );
+          jobConf.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "mapred.job.tracker" ) ) )
+          {
+          LOG.info( "using {}={}", "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          jobConf.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          }
+
+        jobConf.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        fileSys = FileSystem.get( jobConf );
+        }
+      else
+        {
+        conf.setBoolean( "yarn.is.minicluster", true );
 //      conf.setInt( "yarn.nodemanager.delete.debug-delay-sec", -1 );
 //      conf.set( "yarn.scheduler.capacity.root.queues", "default" );
 //      conf.set( "yarn.scheduler.capacity.root.default.capacity", "100" );
-      // disable blacklisting hosts not to fail localhost during unit tests
-      conf.setBoolean( "yarn.app.mapreduce.am.job.node-blacklisting.enable", false );
+        // disable blacklisting hosts not to fail localhost during unit tests
+        conf.setBoolean( "yarn.app.mapreduce.am.job.node-blacklisting.enable", false );
 
-      dfs = new MiniDFSCluster( conf, 4, true, null );
-      fileSys = dfs.getFileSystem();
+        dfs = new MiniDFSCluster( conf, 4, true, null );
+        fileSys = dfs.getFileSystem();
 
-      FileSystem.setDefaultUri( conf, fileSys.getUri() );
-      String identifier = this.getClass().getSimpleName() + "_" + Integer.toString( new Random().nextInt( Integer.MAX_VALUE ) );
+        FileSystem.setDefaultUri( conf, fileSys.getUri() );
+        String identifier = this.getClass().getSimpleName() + "_" + Integer.toString( new Random().nextInt( Integer.MAX_VALUE ) );
 
-      mr = MiniMRClientClusterFactory.create( this.getClass(), identifier, 4, conf );
+        mr = MiniMRClientClusterFactory.create( this.getClass(), identifier, 4, conf );
 
-      jobConf = mr.getConfig();
+        jobConf = mr.getConfig();
+        }
 
       jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
       jobConf.setInt( "mapreduce.job.jvm.numtasks", -1 );

@@ -172,7 +172,7 @@ public class PlatformTestCase extends CascadingTestCase
 
   public static String getTestRoot()
     {
-    return System.getProperty( ROOT_OUTPUT_PATH, "build/test/output" );
+    return System.getProperty( ROOT_OUTPUT_PATH, "build/test/output" ).replace( ":", "_" );
     }
 
   @Before

@@ -81,7 +81,7 @@ public class Update extends TimerTask
       return true;
 
     boolean isCurrentWip = Version.getReleaseFull() != null && Version.getReleaseFull().contains( "wip" );
-    boolean isCurrentDev = isCurrentWip ? Version.getReleaseFull().contains( "wip-dev" ) : Version.getReleaseBuild() == null;
+    boolean isCurrentDev = Version.getReleaseFull() == null || Version.getReleaseFull().contains( "wip-dev" );
 
     URL updateCheckUrl = getUpdateCheckUrl();
 

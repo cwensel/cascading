@@ -382,7 +382,16 @@ public class DelimitedParser implements Serializable
 
   private String getSafeMessage( Object object, int i )
     {
-    return "field " + sourceFields.get( i ) + " cannot be coerced from : " + object + " to: " + Util.getTypeName( types[ i ] );
+    try
+      {
+      return "field " + sourceFields.get( i ) + " cannot be coerced from : " + object + " to: " + Util.getTypeName( types[ i ] );
+      }
+    catch( Throwable throwable )
+      {
+      // you may get an exception while composing the message (e.g. ArrayIndexOutOfBoundsException)
+      // use a generic string
+      return "field pos " + i + " cannot be coerced from: " + object + ", pos has no corresponding field name or coercion type";
+      }
     }
 
   protected Object[] onlyParseLine( String line )
@@ -399,7 +408,7 @@ public class DelimitedParser implements Serializable
 
       Object[] array = new Object[ numValues ];
       Arrays.fill( array, "" );
-      System.arraycopy( split, 0, array, 0, split.length );
+      System.arraycopy( split, 0, array, 0, Math.min( numValues, split.length ) );
 
       split = array;
       }
