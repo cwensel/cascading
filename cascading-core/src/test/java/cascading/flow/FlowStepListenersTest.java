@@ -20,7 +20,12 @@
 
 package cascading.flow;
 
+import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.FlowStepJob;
+import cascading.tap.Tap;
+
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -35,114 +40,68 @@ public class FlowStepListenersTest extends TestCase
 
   public void testListeners()
     {
-    Flow flow = new BaseFlow<Object>()
-    {
+    BaseFlowStep step = new BaseFlowStep( "step1", 0 ) {
 
-    @Override
-    protected void initConfig( Map<Object, Object> properties, Object parentConfig )
-      {
-      }
+      @Override
+      protected Object getInitializedConfig( FlowProcess fp, Object config )
+        {
+        return null;
+        }
 
-    @Override
-    protected void setConfigProperty( Object object, Object key, Object value )
-      {
-      }
+      @Override
+      public void clean(Object config) 
+        {
+        }
 
-    @Override
-    protected Object newConfig( Object defaultConfig )
-      {
-      return null;
-      }
+      @Override
+      protected FlowStepJob createFlowStepJob( FlowProcess fp, Object config ) 
+        {
+        return null;
+        }
 
-    @Override
-    public Object getConfig()
-      {
-      return null;
-      }
+      @Override
+      public Set getTraps() 
+        {
+        return null;
+        }
 
-    @Override
-    public Object getConfigCopy()
-      {
-      return null;
-      }
-
-    @Override
-    public Map<Object, Object> getConfigAsProperties()
-      {
-      return null;
-      }
-
-    @Override
-    public String getProperty( String key )
-      {
-      return null;
-      }
-
-    @Override
-    public FlowProcess getFlowProcess()
-      {
-      return null;
-      }
-
-    @Override
-    protected void internalStart()
-      {
-      }
-
-    @Override
-    protected void internalClean( boolean stop )
-      {
-      }
-
-    @Override
-    public boolean stepsAreLocal()
-      {
-      return false;
-      }
-
-    @Override
-    protected int getMaxNumParallelSteps()
-      {
-      return 0;
-      }
-
-    @Override
-    protected void internalShutdown()
-      {
-      }
+      @Override
+      public Tap getTrap( String string ) 
+        {
+        return null;
+        }
     };
 
     FlowStepListener listener = new FlowStepListener()
     {
 
-      public void onStepStarting(FlowStep flowStep)
-        {
-        }
+    public void onStepStarting( FlowStep flowStep )
+      {
+      }
 
-      public void onStepStopping(FlowStep flowStep) 
-        {
-        }
+    public void onStepStopping( FlowStep flowStep )
+      {
+      }
 
-      public void onStepCompleted(FlowStep flowStep)
-        {
-        }
+    public void onStepCompleted( FlowStep flowStep )
+      {
+      }
 
-      public boolean onStepThrowable(FlowStep flowStep, Throwable throwable)
-        {
-        }
+    public boolean onStepThrowable( FlowStep flowStep, Throwable throwable )
+      {
+      return false;
+      }
 
-      public void onStepRunning(FlowStep flowStep)
-        {
-         return false;
-        }
+    public void onStepRunning( FlowStep flowStep )
+      {
+      }
     };
+    step.addListener( listener );
+    
+    assertTrue( "no listener found", step.hasListeners() );
 
-    flow.addStepListener(listener);
+    step.removeListener( listener );
 
-    assertTrue( "no listener found", flow.hasStepListeners() );
-
-    flow.removeStepListener( listener );
-
-    assertFalse( "listener found", flow.hasStepListeners() );
+    assertFalse( "listener found", step.hasListeners() );
     }
   }
