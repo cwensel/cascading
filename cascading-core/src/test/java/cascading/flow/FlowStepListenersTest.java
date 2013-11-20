@@ -40,62 +40,61 @@ public class FlowStepListenersTest extends TestCase
 
   public void testListeners()
     {
-    BaseFlowStep step = new BaseFlowStep( "step1", 0 ) {
+    BaseFlowStep step = new BaseFlowStep( "step1", 0 ) 
+    {
+    @Override
+    protected Object getInitializedConfig( FlowProcess fp, Object config )
+      {
+      return null;
+      }
 
-      @Override
-      protected Object getInitializedConfig( FlowProcess fp, Object config )
-        {
-        return null;
-        }
+    @Override
+    public void clean(Object config) 
+      {
+      }
 
-      @Override
-      public void clean(Object config) 
-        {
-        }
+    @Override
+    protected FlowStepJob createFlowStepJob( FlowProcess fp, Object config ) 
+      {
+      return null;
+      }
 
-      @Override
-      protected FlowStepJob createFlowStepJob( FlowProcess fp, Object config ) 
-        {
-        return null;
-        }
+    @Override
+    public Set getTraps() 
+      {
+      return null;
+      }
 
-      @Override
-      public Set getTraps() 
-        {
-        return null;
-        }
-
-      @Override
-      public Tap getTrap( String string ) 
-        {
-        return null;
-        }
+    @Override
+    public Tap getTrap( String string ) 
+      {
+      return null;
+      }
     };
 
     FlowStepListener listener = new FlowStepListener()
-    {
-
-    public void onStepStarting( FlowStep flowStep )
       {
-      }
+      public void onStepStarting( FlowStep flowStep )
+        {
+        }
 
-    public void onStepStopping( FlowStep flowStep )
-      {
-      }
+      public void onStepStopping( FlowStep flowStep )
+        {
+        }
 
-    public void onStepCompleted( FlowStep flowStep )
-      {
-      }
+      public void onStepCompleted( FlowStep flowStep )
+        {
+        }
 
-    public boolean onStepThrowable( FlowStep flowStep, Throwable throwable )
-      {
-      return false;
-      }
+      public boolean onStepThrowable( FlowStep flowStep, Throwable throwable )
+        {
+        return false;
+        }
 
-    public void onStepRunning( FlowStep flowStep )
-      {
-      }
-    };
+      public void onStepRunning( FlowStep flowStep )
+        {
+        }
+      };
     step.addListener( listener );
     
     assertTrue( "no listener found", step.hasListeners() );
