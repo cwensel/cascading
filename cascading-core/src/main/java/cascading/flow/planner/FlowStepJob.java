@@ -102,9 +102,9 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       // call rollback after the job has been stopped, only if it was stopped
       if( flowStepStats.isStopped() )
-        {
-          flowStep.rollbackSinks();
-          flowStep.fireOnStopping();
+        {  
+        flowStep.rollbackSinks();
+        flowStep.fireOnStopping();
         }
 
       flowStepStats.cleanup();
@@ -151,7 +151,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       dumpDebugInfo();
       this.throwable = throwable;
-      flowStep.fireOnThrowable(throwable);
+      flowStep.fireOnThrowable( throwable );
       }
     finally
       {
@@ -205,8 +205,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         flowStep.rollbackSinks();
         flowStepStats.markFailed( getThrowable() );
-        flowStep.fireOnThrowable(getThrowable());
-
+        flowStep.fireOnThrowable( getThrowable() );
         }
 
       dumpDebugInfo();
@@ -224,13 +223,13 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
         if( throwable != null )
           {
-            flowStepStats.markFailed( throwable );
-            flowStep.fireOnThrowable( throwable );
+          flowStepStats.markFailed( throwable );
+          flowStep.fireOnThrowable( throwable );
           }
         else
           {
-            flowStepStats.markSuccessful();
-            flowStep.fireOnCompleted();
+          flowStepStats.markSuccessful();
+          flowStep.fireOnCompleted();
           }
         }
       }
@@ -257,8 +256,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       {
       if( flowStepStats.isSubmitted() && isStarted() )
         {
-          markRunning();
-          flowStep.fireOnRunning();
+        markRunning();
+        flowStep.fireOnRunning();
         }
 
       if( stop || internalNonBlockingIsComplete() )

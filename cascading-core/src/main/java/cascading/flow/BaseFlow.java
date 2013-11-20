@@ -532,30 +532,28 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public boolean hasStepListeners()
     {
     boolean hasStepListeners = false;
-    for (FlowStep step : getFlowSteps())
-      {
+
+    for( FlowStep step : getFlowSteps() )
       hasStepListeners |= step.hasListeners();
-      }
+
     return hasStepListeners;
     }
 
   @Override
   public void addStepListener( FlowStepListener flowStepListener )
     {
-    for (FlowStep step : getFlowSteps())
-      {
-      step.addListener(flowStepListener);
-      }
+    for( FlowStep step : getFlowSteps() )
+      step.addListener( flowStepListener );
     }
 
   @Override
   public boolean removeStepListener( FlowStepListener flowStepListener )
     {
     boolean listenerRemoved = true;
-    for (FlowStep step : getFlowSteps())
-      {
-      listenerRemoved &= step.removeListener(flowStepListener);
-      }
+
+    for( FlowStep step : getFlowSteps() )
+      listenerRemoved &= step.removeListener( flowStepListener );
+
     return listenerRemoved;
     }
 

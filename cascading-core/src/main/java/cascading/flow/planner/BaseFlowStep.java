@@ -680,18 +680,18 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   protected void fireOnCompleted()
     {
-    
+
     if( hasListeners() )
       {
       if( LOG.isDebugEnabled() )
         logDebug( "firing onCompleted event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepCompleted( this );
+        ( (FlowStepListener) flowStepListener ).onStepCompleted( this );
       }
     }
 
-  protected void fireOnThrowable(Throwable throwable)
+  protected void fireOnThrowable( Throwable throwable )
     {
     if( hasListeners() )
       {
@@ -700,7 +700,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepThrowable( this, throwable );
+        ( (FlowStepListener) flowStepListener ).onStepThrowable( this, throwable );
       }
     }
 
@@ -712,7 +712,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         logDebug( "firing onStopping event: " + getListeners() );
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepStopping( this );
+        ( (FlowStepListener) flowStepListener ).onStepStopping( this );
       }
     }
 
@@ -724,11 +724,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         logDebug( "firing onStarting event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepStarting( this );
+        ( (FlowStepListener) flowStepListener ).onStepStarting( this );
       }
     }
 
-    protected void fireOnRunning()
+  protected void fireOnRunning()
     {
     if( hasListeners() )
       {
@@ -736,7 +736,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
         logDebug( "firing onRunning event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
-        ((FlowStepListener)flowStepListener).onStepRunning( this );
+        ( (FlowStepListener) flowStepListener ).onStepRunning( this );
       }
     }
 
