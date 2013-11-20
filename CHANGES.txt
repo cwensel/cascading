@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.0 [unreleased]
 
+  Added the c.f.FlowStepListener listener interface and subsequent listener support to c.f.FlowStep. @Ahmed--Mohsen
+
   Updated Hadoop 1 dependency to use Hadoop 1.2.1.
 
   Updated c.f.h.p.HadoopFlowStepJob to call kill only jobs on that are not complete. In theory calling kill on a
