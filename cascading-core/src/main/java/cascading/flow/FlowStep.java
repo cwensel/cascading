@@ -138,4 +138,26 @@ public interface FlowStep<Config>
   boolean containsPipeNamed( String pipeName );
 
   FlowStepStats getFlowStepStats();
+
+  /**
+   * Method hasListeners returns true if {@link FlowStepListener} instances have been registered.
+   *
+   * @return boolean
+   */
+  boolean hasListeners();
+
+  /**
+   * Method addListener registers the given {@link FlowStepListener} with this instance.
+   *
+   * @param flowStepListener of type flowStepListener
+   */
+  void addListener( FlowStepListener flowStepListener );
+
+  /**
+   * Method removeListener removes the given flowStepListener from this instance.
+   *
+   * @param flowStepListener of type FlowStepListener
+   * @return true if the listener was removed
+   */
+  boolean removeListener( FlowStepListener flowStepListener );
   }
