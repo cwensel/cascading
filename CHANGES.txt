@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.2.1 [unreleased]
+2.2.1
 
   Updated Hadoop platform to fail during planning if "mapred.job.tracker" is not set.
 
