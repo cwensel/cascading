@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.5.0 [unreleased]
+2.5.0
 
   Updated c.f.BaseFlow to fail when deleting resources fails.
 
