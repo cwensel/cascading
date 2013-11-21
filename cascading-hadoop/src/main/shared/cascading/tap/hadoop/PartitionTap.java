@@ -145,9 +145,9 @@ public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, Output
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap parent, String path ) throws IOException
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap parent, String path, long sequence ) throws IOException
     {
-    TapOutputCollector outputCollector = new TapOutputCollector( flowProcess, parent, path );
+    TapOutputCollector outputCollector = new TapOutputCollector( flowProcess, parent, path, sequence );
 
     return new TupleEntrySchemeCollector<JobConf, OutputCollector>( flowProcess, parent, outputCollector );
     }

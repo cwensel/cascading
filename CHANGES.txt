@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.5.0 [unreleased]
 
+  Updated c.f.BaseFlow to fail when deleting resources fails.
+
+  Updated c.t.h.PartitionTap to append sequence numbers to part files to prevent filename collisions within a task.
+
   Added the c.f.FlowStepListener listener interface and subsequent listener support to c.f.FlowStep. @Ahmed--Mohsen
 
   Updated Hadoop 1 dependency to use Hadoop 1.2.1.

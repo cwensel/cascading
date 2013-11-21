@@ -84,7 +84,12 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public String getFullIdentifier( Properties conf )
     {
-    return new File( getIdentifier() ).getAbsoluteFile().toURI().toString();
+    return fullyQualifyIdentifier( getIdentifier() );
+    }
+
+  private String fullyQualifyIdentifier( String identifier )
+    {
+    return new File( identifier ).getAbsoluteFile().toURI().toString();
     }
 
   @Override
@@ -168,29 +173,39 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
 
     Set<String> results = new LinkedHashSet<String>();
 
-    String identifier = fullyQualified ? getFullIdentifier( conf ) : getIdentifier();
+    getChildPaths( results, getIdentifier(), depth );
 
-    getChildPaths( results, identifier, depth );
+    String[] allPaths = results.toArray( new String[ results.size() ] );
 
-    return results.toArray( new String[ results.size() ] );
+    if( !fullyQualified )
+      return allPaths;
+
+    for( int i = 0; i < allPaths.length; i++ )
+      allPaths[ i ] = fullyQualifyIdentifier( allPaths[ i ] );
+
+    return allPaths;
     }
 
-  private void getChildPaths( Set<String> results, String identifier, int depth )
+  private boolean getChildPaths( Set<String> results, String identifier, int depth )
     {
-    if( depth == 0 )
+    File file = new File( identifier );
+
+    if( depth == 0 || file.isFile() )
       {
       results.add( identifier );
-      return;
+      return true;
       }
-
-    File file = new File( identifier );
 
     String[] paths = file.list();
 
     if( paths == null )
-      return;
+      return false;
+
+    boolean result = false;
 
     for( String path : paths )
-      getChildPaths( results, new File( file, path ).getPath(), depth - 1 );
+      result |= getChildPaths( results, new File( file, path ).getPath(), depth - 1 );
+
+    return result;
     }
   }

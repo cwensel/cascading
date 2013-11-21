@@ -59,6 +59,7 @@ public interface InputData
   String inputFileLhs = inputPath + "lhs.txt";
   String inputFileRhs = inputPath + "rhs.txt";
   String inputFileCross = inputPath + "lhs+rhs-cross.txt";
+  String inputFileCrossX2 = inputPath + "lhs+rhs-cross-x2.txt";
   String inputFileLhsSparse = inputPath + "lhs-sparse.txt";
   String inputFileRhsSparse = inputPath + "rhs-sparse.txt";
 

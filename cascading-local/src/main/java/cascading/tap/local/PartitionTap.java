@@ -21,6 +21,7 @@
 package cascading.tap.local;
 
 import java.beans.ConstructorProperties;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -143,9 +144,25 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Properties> flowProcess, Tap parent, String path ) throws IOException
+  public boolean deleteResource( Properties conf ) throws IOException
     {
-    TapFileOutputStream output = new TapFileOutputStream( parent, path, isUpdate() ); // append if we are in update mode
+    String[] childIdentifiers = ( (FileTap) parent ).getChildIdentifiers( conf, Integer.MAX_VALUE, false );
+
+    if( childIdentifiers.length == 0 )
+      return true;
+
+    boolean result = false;
+
+    for( String childIdentifier : childIdentifiers )
+      result |= new File( childIdentifier ).delete();
+
+    return result;
+    }
+
+  @Override
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Properties> flowProcess, Tap parent, String path, long sequence ) throws IOException
+    {
+    TapFileOutputStream output = new TapFileOutputStream( parent, path, true ); // always append
 
     return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, parent, output );
     }

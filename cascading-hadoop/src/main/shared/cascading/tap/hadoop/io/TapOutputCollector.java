@@ -45,18 +45,23 @@ public class TapOutputCollector implements OutputCollector, Closeable
   {
   private static final Logger LOG = LoggerFactory.getLogger( TapOutputCollector.class );
 
+  public static final String PART_TASK_PATTERN = "%s%spart-%05d";
+  public static final String PART_TASK_SEQ_PATTERN = "%s%spart-%05d-%05d";
+
   /** Field conf */
   private JobConf conf;
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
-  private String filenamePattern = "%s%spart-%05d";
+  private String filenamePattern;
   /** Field filename */
   private String filename;
   /** Field tap */
   private Tap<JobConf, RecordReader, OutputCollector> tap;
   /** Field prefix */
   private String prefix;
+  /** Field sequence */
+  private long sequence;
   /** Field isFileOutputFormat */
   private boolean isFileOutputFormat;
   /** Field reporter */
@@ -70,11 +75,17 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
   public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
+    this( flowProcess, tap, prefix, -1 );
+    }
+
+  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix, long sequence ) throws IOException
+    {
     this.tap = tap;
+    this.sequence = sequence;
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.flowProcess = flowProcess;
     this.conf = this.flowProcess.getConfigCopy();
-    this.filenamePattern = this.conf.get( "cascading.tapcollector.partname", this.filenamePattern );
+    this.filenamePattern = this.conf.get( "cascading.tapcollector.partname", sequence == -1 ? PART_TASK_PATTERN : PART_TASK_SEQ_PATTERN );
 
     initialize();
     }
@@ -90,13 +101,12 @@ public class TapOutputCollector implements OutputCollector, Closeable
     if( isFileOutputFormat )
       {
       Hadoop18TapUtil.setupJob( conf );
+      Hadoop18TapUtil.setupTask( conf );
 
       if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ) );
+        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ), sequence );
       else
-        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ) );
-
-      Hadoop18TapUtil.setupTask( conf );
+        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ), sequence );
       }
 
     LOG.info( "creating path: {}", filename );

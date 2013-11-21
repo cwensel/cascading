@@ -127,8 +127,9 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         {
         LOG.debug( "creating collector for parent: {}, path: {}", parent.getFullIdentifier( conf ), path );
 
-        collector = createTupleEntrySchemeCollector( flowProcess, parent, path );
+        collector = createTupleEntrySchemeCollector( flowProcess, parent, path, openedCollectors );
 
+        openedCollectors++;
         flowProcess.increment( Counters.Paths_Opened, 1 );
         }
       catch( IOException exception )
@@ -224,10 +225,13 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   protected boolean keepParentOnDelete = false;
   /** Field openTapsThreshold */
   protected int openWritesThreshold = OPEN_WRITES_THRESHOLD_DEFAULT;
+
+  /** Field openedCollectors */
+  private long openedCollectors = 0;
   /** Field collectors */
   private final Map<String, TupleEntryCollector> collectors = new LinkedHashMap<String, TupleEntryCollector>( 1000, .75f, true );
 
-  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap parent, String path ) throws IOException;
+  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap parent, String path, long sequence ) throws IOException;
 
   protected abstract TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Tap parent, String path, Input input ) throws IOException;
 

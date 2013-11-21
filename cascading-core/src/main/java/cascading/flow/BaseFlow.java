@@ -528,7 +528,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     {
     return getListeners().remove( new SafeFlowListener( flowListener ) );
     }
-    
+
   @Override
   public boolean hasStepListeners()
     {
@@ -998,7 +998,16 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public void deleteSinks() throws IOException
     {
     for( Tap tap : sinks.values() )
-      tap.deleteResource( getConfig() );
+      deleteOrFail( tap );
+    }
+
+  private void deleteOrFail( Tap tap ) throws IOException
+    {
+    if( !tap.resourceExists( getConfig() ) )
+      return;
+
+    if( !tap.deleteResource( getConfig() ) )
+      throw new FlowException( "unable to delete resource: " + tap.getFullIdentifier( getFlowProcess() ) );
     }
 
   /**
@@ -1015,7 +1024,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : sinks.values() )
       {
       if( !tap.isUpdate() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 
@@ -1024,7 +1033,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : sinks.values() )
       {
       if( tap.isReplace() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 
@@ -1033,7 +1042,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : traps.values() )
       {
       if( !tap.isUpdate() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 
@@ -1042,7 +1051,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : checkpoints.values() )
       {
       if( !tap.isUpdate() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 
@@ -1051,7 +1060,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : traps.values() )
       {
       if( tap.isReplace() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 
@@ -1060,7 +1069,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     for( Tap tap : checkpoints.values() )
       {
       if( tap.isReplace() )
-        tap.deleteResource( getConfig() );
+        deleteOrFail( tap );
       }
     }
 

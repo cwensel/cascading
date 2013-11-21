@@ -281,20 +281,16 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
   @Test
   public void testPartitionTapTextDelimited() throws IOException
     {
-    getPlatform().copyFromLocal( inputFileJoined );
+    getPlatform().copyFromLocal( inputFileCrossX2 );
 
-    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileJoined );
-
-    Pipe pipe = new Pipe( "test" );
-
-    pipe = new Each( pipe, new RegexSplitter( new Fields( "number", "lower", "upper" ), "\t" ) );
+    Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2 );
 
     Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( getTestName() + "/partitioned" ), SinkMode.REPLACE );
 
-    Partition partition = new DelimitedPartition( new Fields( "number", "lower" ) );
+    Partition partition = new DelimitedPartition( new Fields( "lower", "number" ) );
     partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
 
-    Flow firstFlow = getPlatform().getFlowConnector().connect( source, partitionTap, pipe );
+    Flow firstFlow = getPlatform().getFlowConnector().connect( source, partitionTap, new Pipe( "partition" ) );
 
     firstFlow.complete();
 
@@ -304,18 +300,18 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     secondFlow.complete();
 
-    Tap test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/1/a" );
-    validateLength( firstFlow.openTapForRead( test ), 1, Pattern.compile( "[A-Z]" ) );
+    Tap test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/a/1" );
+    validateLength( firstFlow.openTapForRead( test ), 6, Pattern.compile( "[A-Z]" ) );
 
-    test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/2/b" );
-    validateLength( firstFlow.openTapForRead( test ), 1, Pattern.compile( "[A-Z]" ) );
+    test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/b/2" );
+    validateLength( firstFlow.openTapForRead( test ), 6, Pattern.compile( "[A-Z]" ) );
 
     List<Tuple> tuples = asList( firstFlow, partitionTap );
 
-    assertTrue( tuples.contains( new Tuple( "A", "1", "a" ) ) );
-    assertTrue( tuples.contains( new Tuple( "B", "2", "b" ) ) );
+    assertTrue( tuples.contains( new Tuple( "A", "a", "1" ) ) );
+    assertTrue( tuples.contains( new Tuple( "B", "b", "2" ) ) );
 
     test = getPlatform().getTextFile( new Fields( "line" ), sink.getIdentifier() );
-    validateLength( secondFlow.openTapForRead( test ), 5, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+    validateLength( secondFlow.openTapForRead( test ), 74, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
     }
   }
