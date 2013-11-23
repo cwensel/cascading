@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.1 [unreleased]
 
+  Updated Hadoop 1 platform tests to enable default num task retries.
+
 2.5.0
 
   Updated c.f.BaseFlow to fail when deleting resources fails.
