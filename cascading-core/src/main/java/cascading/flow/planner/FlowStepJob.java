@@ -33,6 +33,7 @@ import cascading.flow.FlowStepStrategy;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -337,14 +338,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
   protected void sleepForPollingInterval()
     {
-    try
-      {
-      Thread.sleep( pollingInterval );
-      }
-    catch( InterruptedException exception )
-      {
-      // do nothing
-      }
+    Util.safeSleep( pollingInterval );
     }
 
   protected void blockOnPredecessors()

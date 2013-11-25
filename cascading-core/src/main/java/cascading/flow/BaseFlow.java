@@ -857,7 +857,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       {
       try
         {
-        thread.join();
+        synchronized( this ) // prevent NPE on quick stop() & complete() after start()
+          {
+          while( thread == null && !stop )
+            Util.safeSleep( 10 );
+          }
+
+        if( thread != null )
+          thread.join();
         }
       catch( InterruptedException exception )
         {

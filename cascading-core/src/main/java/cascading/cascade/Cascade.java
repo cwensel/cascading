@@ -782,10 +782,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
         if( throwable != null )
           {
-          cascadeStats.markFailed( throwable );
-
           if( !stop )
             {
+            cascadeStats.markFailed( throwable );
             internalStopAllFlows();
             fireOnThrowable();
             }

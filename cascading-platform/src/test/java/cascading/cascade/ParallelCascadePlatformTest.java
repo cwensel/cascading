@@ -137,7 +137,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
       }
     };
 
-    for( int i = 0; i <= 50; i += 5 )
+    for( int i = 0; i <= 500; i += 50 )
       {
       Flow first = firstFlow( String.format( "race-%d/first" + ComparePlatformsTest.NONDETERMINISTIC, i ) );
 
@@ -147,7 +147,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
       cascade.start();
 
-      Thread.sleep( i * 10 );
+      Thread.sleep( i );
 
       cascade.stop();
 

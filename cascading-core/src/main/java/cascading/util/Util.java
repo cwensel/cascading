@@ -732,6 +732,18 @@ public class Util
     return false;
     }
 
+  public static void safeSleep( long durationMillis )
+    {
+    try
+      {
+      Thread.sleep( durationMillis );
+      }
+    catch( InterruptedException exception )
+      {
+      // do nothing
+      }
+    }
+
   public interface RetryOperator<T>
     {
     T operate() throws Exception;
