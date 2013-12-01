@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.5.1 [unreleased]
 
+  Updated c.t.h.Hfs to throw an exception if the o.a.h.m.l.CombineFileInputFormat is enabled but the wrapped
+  o.a.h.mapred.InputFormat was is a o.a.h.mapred.FileInputFormat.
+
   Fixed issue in c.c.Cascade where a race condition during start/stop/complete could result in state exception.
 
   Updated Hadoop 1 platform tests to enable default num task retries.

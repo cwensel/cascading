@@ -443,6 +443,9 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       conf.get( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT ) == null )
       throw new TapException( "the input format class is already the combined input format but the underlying input format is missing" );
 
+    if( !FileInputFormat.class.isAssignableFrom( conf.getClass( "mapred.input.format.class", null ) ) )
+      throw new TapException( "input format must be of type org.apache.hadoop.mapred.FileInputFormat, got: " + individualInputFormat );
+
     // set the underlying individual input format
     conf.set( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT, individualInputFormat );
 

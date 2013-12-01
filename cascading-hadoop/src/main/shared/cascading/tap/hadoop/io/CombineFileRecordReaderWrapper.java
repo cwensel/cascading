@@ -22,6 +22,7 @@ package cascading.tap.hadoop.io;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
@@ -57,6 +58,9 @@ public class CombineFileRecordReaderWrapper<K, V> implements RecordReader<K, V>
 
     Class<?> clz = conf.getClass( INDIVIDUAL_INPUT_FORMAT, null );
     FileInputFormat<K, V> inputFormat = (FileInputFormat<K, V>) clz.newInstance();
+
+    if( inputFormat instanceof Configurable )
+      ( (Configurable) inputFormat ).setConf( conf );
 
     delegate = inputFormat.getRecordReader( fileSplit, (JobConf) conf, reporter );
     }
