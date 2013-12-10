@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.5.2 [unreleased]
+
 2.5.1
 
   Updated c.t.h.Hfs to throw an exception if the o.a.h.m.l.CombineFileInputFormat is enabled but the wrapped
