@@ -91,6 +91,18 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
     this.outputCollector = outputCollector;
     }
 
+  public ConcreteCall( ConcreteCall<C> concreteCall )
+    {
+    this.arguments = concreteCall.arguments;
+    this.argumentFields = concreteCall.argumentFields;
+    this.argumentsIterator = concreteCall.argumentsIterator;
+    this.context = concreteCall.context;
+    this.declaredFields = concreteCall.declaredFields;
+    this.outputCollector = concreteCall.outputCollector;
+    this.retainValues = concreteCall.retainValues;
+    this.joinerClosure = concreteCall.joinerClosure;
+    }
+
   /** @see AggregatorCall#getContext() */
   public C getContext()
     {
@@ -116,6 +128,11 @@ public class ConcreteCall<C> implements FunctionCall<C>, FilterCall<C>, Aggregat
   public Fields getArgumentFields()
     {
     return argumentFields;
+    }
+
+  public void setArgumentFields( Fields argumentFields )
+    {
+    this.argumentFields = argumentFields;
     }
 
   /** @see BufferCall#getArgumentsIterator() */

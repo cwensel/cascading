@@ -27,6 +27,7 @@ import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
+import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
@@ -55,7 +56,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
   public class Context
     {
     TupleEntry[] argumentEntries;
-    Object[] contexts;
+    ConcreteCall[] calls;
     }
 
   @ConstructorProperties({"filters"})
@@ -131,17 +132,17 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     Context context = new Context();
 
     context.argumentEntries = getArgumentEntries();
-    context.contexts = new Object[ filters.length ];
+    context.calls = new ConcreteCall[ filters.length ];
 
     for( int i = 0; i < filters.length; i++ )
       {
       Filter filter = filters[ i ];
 
-      filter.prepare( flowProcess, operationCall );
+      context.calls[ i ] = new ConcreteCall( (ConcreteCall) operationCall );
+      context.calls[ i ].setArguments( context.argumentEntries[ i ] );
+      context.calls[ i ].setArgumentFields( context.argumentEntries[ i ].getFields() );
 
-      context.contexts[ i ] = operationCall.getContext();
-
-      operationCall.setContext( null );
+      filter.prepare( flowProcess, context.calls[ i ] );
       }
 
     operationCall.setContext( context );
@@ -151,15 +152,13 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
   public void cleanup( FlowProcess flowProcess, OperationCall operationCall )
     {
     Context context = (Context) operationCall.getContext();
-    Object[] contexts = context.contexts;
+    ConcreteCall[] calls = context.calls;
 
     for( int i = 0; i < filters.length; i++ )
       {
       Filter filter = filters[ i ];
 
-      operationCall.setContext( contexts[ i ] );
-
-      filter.cleanup( flowProcess, operationCall );
+      filter.cleanup( flowProcess, calls[ i ] );
       }
 
     operationCall.setContext( null );
@@ -181,7 +180,7 @@ public abstract class Logic extends BaseOperation<Logic.Context> implements Filt
     return pos.size();
     }
 
-  private final TupleEntry[] getArgumentEntries()
+  private TupleEntry[] getArgumentEntries()
     {
     TupleEntry[] argumentEntries = new TupleEntry[ argumentSelectors.length ];
 

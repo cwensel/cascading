@@ -23,10 +23,10 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
-import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -86,29 +86,17 @@ public class And extends Logic
     Context context = (Context) filterCall.getContext();
 
     TupleEntry[] argumentEntries = context.argumentEntries;
-    Object[] contexts = context.contexts;
 
-    try
+    for( int i = 0; i < argumentSelectors.length; i++ )
       {
-      for( int i = 0; i < argumentSelectors.length; i++ )
-        {
-        TupleEntry entry = argumentEntries[ i ];
+      Tuple selected = arguments.selectTuple( argumentSelectors[ i ] );
 
-        entry.setTuple( arguments.selectTuple( argumentSelectors[ i ] ) );
+      argumentEntries[ i ].setTuple( selected );
 
-        ( (ConcreteCall) filterCall ).setArguments( entry );
-        filterCall.setContext( contexts[ i ] );
-
-        if( !filters[ i ].isRemove( flowProcess, filterCall ) )
-          return false;
-        }
-
-      return true;
+      if( !filters[ i ].isRemove( flowProcess, context.calls[ i ] ) )
+        return false;
       }
-    finally
-      {
-      ( (ConcreteCall) filterCall ).setArguments( arguments );
-      filterCall.setContext( context );
-      }
+
+    return true;
     }
   }

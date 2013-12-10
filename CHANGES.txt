@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.5.2 [unreleased]
 
+  Fixed issue in c.o.f.Logic filter sub-classes where argumentFields was not properly set causing some nested
+  c.o.Filter instances to fail.
+
 2.5.1
 
   Updated c.t.h.Hfs to throw an exception if the o.a.h.m.l.CombineFileInputFormat is enabled but the wrapped

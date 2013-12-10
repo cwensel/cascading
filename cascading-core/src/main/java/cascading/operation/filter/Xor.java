@@ -23,7 +23,6 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
-import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.Fields;
@@ -72,33 +71,17 @@ public class Xor extends Logic
   @Override
   public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
     {
-    TupleEntry arguments = filterCall.getArguments();
     Context context = (Logic.Context) filterCall.getContext();
-    TupleEntry[] argumentEntries = context.argumentEntries;
-    Object[] contexts = context.contexts;
 
-    TupleEntry lhsEntry = argumentEntries[ 0 ];
-    TupleEntry rhsEntry = argumentEntries[ 1 ];
+    TupleEntry lhsEntry = context.argumentEntries[ 0 ];
+    TupleEntry rhsEntry = context.argumentEntries[ 1 ];
 
     lhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 0 ] ) );
     rhsEntry.setTuple( filterCall.getArguments().selectTuple( argumentSelectors[ 1 ] ) );
 
-    ( (ConcreteCall) filterCall ).setArguments( lhsEntry );
-    filterCall.setContext( contexts[ 0 ] );
-    boolean lhsResult = filters[ 0 ].isRemove( flowProcess, filterCall );
+    boolean lhsResult = filters[ 0 ].isRemove( flowProcess, context.calls[ 0 ] );
+    boolean rhsResult = filters[ 1 ].isRemove( flowProcess, context.calls[ 1 ] );
 
-    ( (ConcreteCall) filterCall ).setArguments( rhsEntry );
-    filterCall.setContext( contexts[ 1 ] );
-    boolean rhsResult = filters[ 1 ].isRemove( flowProcess, filterCall );
-
-    try
-      {
-      return lhsResult != rhsResult;
-      }
-    finally
-      {
-      ( (ConcreteCall) filterCall ).setArguments( arguments );
-      filterCall.setContext( context );
-      }
+    return lhsResult != rhsResult;
     }
   }
