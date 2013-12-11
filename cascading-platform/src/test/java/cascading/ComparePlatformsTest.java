@@ -65,7 +65,7 @@ public class ComparePlatformsTest extends CascadingTestCase
     TestSuite suite = new TestSuite();
 
     createComparisons( "local~hadoop", localRoot, hadoopRoot, suite );
-    createComparisons( "local~hadoop2mr1", localRoot, hadoop2Root, suite );
+    createComparisons( "local~hadoop2-mr1", localRoot, hadoop2Root, suite );
 
     return suite;
     }

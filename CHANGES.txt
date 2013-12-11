@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.2 [unreleased]
 
+  Updated c.p.h2.Hadoop2MR1Platform to return a name consistent with other resources and artifacts for Hadoop2 MR1.
+
   Fixed issue in c.o.f.Logic filter sub-classes where argumentFields was not properly set causing some nested
   c.o.Filter instances to fail.
 

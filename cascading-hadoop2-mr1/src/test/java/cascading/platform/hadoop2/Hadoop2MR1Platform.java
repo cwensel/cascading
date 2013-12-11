@@ -54,6 +54,12 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
     }
 
   @Override
+  public String getName()
+    {
+    return "hadoop2-mr1";
+    }
+
+  @Override
   public FlowConnector getFlowConnector( Map<Object, Object> properties )
     {
     return new Hadoop2MR1FlowConnector( properties );
