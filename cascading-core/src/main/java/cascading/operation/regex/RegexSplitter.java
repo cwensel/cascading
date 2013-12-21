@@ -44,8 +44,7 @@ public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implemen
   @ConstructorProperties({"patternString"})
   public RegexSplitter( String patternString )
     {
-    super( 1, patternString );
-    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
+    this( Fields.UNKNOWN, patternString );
     }
 
   /**
@@ -56,8 +55,7 @@ public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implemen
   @ConstructorProperties({"fieldDeclaration"})
   public RegexSplitter( Fields fieldDeclaration )
     {
-    super( 1, fieldDeclaration, "\t" );
-    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
+    this( fieldDeclaration, "\t" );
     }
 
   /**
@@ -91,9 +89,11 @@ public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implemen
 
     output.clear();
 
-    String[] split = functionCall.getContext().getLhs().split( value, length );
+    String[] split = functionCall.getContext().getLhs().split( value, length + 1 );
 
-    for( int i = 0; i < split.length; i++ )
+    int size = length == -1 ? split.length : length;
+
+    for( int i = 0; i < size; i++ )
       output.add( split[ i ] );
 
     functionCall.getOutputCollector().add( output );
