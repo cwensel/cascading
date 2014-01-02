@@ -151,6 +151,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
    * @param properties  of type Map
    * @param doNormalize of type boolean
    */
+  @Deprecated
   public static void setNormalizeHeterogeneousSources( Map<Object, Object> properties, boolean doNormalize )
     {
     properties.put( "cascading.multimapreduceplanner.normalizesources", Boolean.toString( doNormalize ) );
@@ -162,6 +163,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
    * @param properties of type Map
    * @return a boolean
    */
+  @Deprecated
   public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
     {
     return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
