@@ -156,9 +156,8 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
         fileSys = dfs.getFileSystem();
 
         FileSystem.setDefaultUri( conf, fileSys.getUri() );
-        String identifier = this.getClass().getSimpleName() + "_" + Integer.toString( new Random().nextInt( Integer.MAX_VALUE ) );
 
-        mr = MiniMRClientClusterFactory.create( this.getClass(), identifier, 4, conf );
+        mr = MiniMRClientClusterFactory.create( this.getClass(), 4, conf );
 
         jobConf = mr.getConfig();
         }
