@@ -111,6 +111,12 @@ public class HadoopPlatform extends BaseHadoopPlatform
       {
       LOG.info( "not using cluster" );
       jobConf = new JobConf();
+      
+      // enforce the local file system in local mode
+      jobConf.set( "fs.default.name", "file:///" );
+      jobConf.set( "mapred.job.tracker", "local" );
+      jobConf.set( "mapreduce.jobtracker.staging.root.dir", "build/tmp/cascading/staging" );
+      
       fileSys = FileSystem.get( jobConf );
       }
     else
