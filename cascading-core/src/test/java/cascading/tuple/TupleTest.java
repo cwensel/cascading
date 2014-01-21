@@ -24,6 +24,7 @@ import java.util.Date;
 
 import cascading.CascadingTestCase;
 import cascading.tuple.io.TuplePair;
+import org.junit.Test;
 
 public class TupleTest extends CascadingTestCase
   {
@@ -34,7 +35,7 @@ public class TupleTest extends CascadingTestCase
     }
 
   @Override
-  protected void setUp() throws Exception
+  public void setUp() throws Exception
     {
     super.setUp();
 
@@ -47,6 +48,7 @@ public class TupleTest extends CascadingTestCase
     tuple.add( "d" );
     }
 
+  @Test
   public void testHas()
     {
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
@@ -54,6 +56,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testGet()
     {
     Tuple aTuple = tuple.get( new int[]{0} );
@@ -65,6 +68,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testGetNull()
     {
     Tuple aTuple = tuple.get( (int[]) null );
@@ -77,6 +81,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testRemove()
     {
     Tuple aTuple = tuple.remove( new int[]{0} );
@@ -89,6 +94,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testRemove2()
     {
     Tuple aTuple = tuple.remove( new int[]{2, 4} );
@@ -102,6 +108,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "d", tuple.getObject( 2 ) );
     }
 
+  @Test
   public void testLeave()
     {
     Tuple aTuple = tuple.leave( new int[]{0} );
@@ -114,6 +121,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", aTuple.getObject( 1 ) );
     }
 
+  @Test
   public void testExtractSet()
     {
     Tuple aTuple = tuple.extract( new int[]{0} );
@@ -134,6 +142,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 2 ) );
     }
 
+  @Test
   public void testEqualPrimitive()
     {
     assertEquals( "not equal: tuple", new Tuple( 1 ), new Tuple( 1 ) );
@@ -142,6 +151,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple", new Tuple( "1", 2 ), new Tuple( "1", 2 ) );
     }
 
+  @Test
   public void testEqual()
     {
     Tuple aTuple = new Tuple( tuple );
@@ -164,6 +174,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: hash code", aTuple.hashCode(), bTuple.hashCode() );
     }
 
+  @Test
   public void testCompare()
     {
     Tuple aTuple = new Tuple( "a" );
@@ -185,6 +196,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) < 0 );
     }
 
+  @Test
   public void testCompare2()
     {
     Tuple aTuple = new Tuple( "Just My Luck", "ClaudiaPuig", "3.0", "LisaRose", "3.0" );
@@ -199,6 +211,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) < 0 );
     }
 
+  @Test
   public void testCompare3()
     {
     Tuple aTuple = new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 3.0 );
@@ -213,6 +226,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) < 0 );
     }
 
+  @Test
   public void testCompare4()
     {
     Tuple aTuple = new Tuple( "Just My Luck", "ClaudiaPuig", null, "LisaRose", null );
@@ -227,6 +241,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) == "Z".compareTo( "LisaRose" ) );
     }
 
+  @Test
   public void testPairCompare()
     {
     TuplePair aTuple = new TuplePair( new Tuple( "Just My Luck", "ClaudiaPuig", 3.0, "LisaRose", 3.0 ), new Tuple( "a" ) );
@@ -246,6 +261,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple > aTuple", bTuple.compareTo( aTuple ) > 0 );
     }
 
+  @Test
   public void testCompareNull()
     {
     Tuple aTuple = new Tuple( "a", null, "c" );
@@ -255,6 +271,7 @@ public class TupleTest extends CascadingTestCase
     assertTrue( "not less than: bTuple < aTuple", bTuple.compareTo( aTuple ) > 0 );
     }
 
+  @Test
   public void testCoerce()
     {
     Date date = new Date();
@@ -268,6 +285,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( results.getObject( 3 ), date.toString() );
     }
 
+  @Test
   public void testCoerceInto()
     {
     Date date = new Date();
@@ -284,6 +302,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( results.getObject( 3 ), date.toString() );
     }
 
+  @Test
   public void testSetAll()
     {
     Tuple aTuple = new Tuple( tuple );

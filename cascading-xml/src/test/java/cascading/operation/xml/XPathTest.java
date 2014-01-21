@@ -28,6 +28,7 @@ import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.junit.Test;
 
 /**
  *
@@ -38,6 +39,7 @@ public class XPathTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testParserMultipleXPaths() throws IOException
     {
     String[][] namespaces = {new String[]{"a", "http://foo.com/a"},
@@ -62,6 +64,7 @@ public class XPathTest extends CascadingTestCase
     assertEquals( "nested-top-second", tuple.getString( 1 ) );
     }
 
+  @Test
   public void testGeneratorMultipleXPaths() throws IOException
     {
     String[][] namespaces = {new String[]{"a", "http://foo.com/a"},
@@ -88,6 +91,7 @@ public class XPathTest extends CascadingTestCase
     assertEquals( "nested-top-second", tupleIterator.next().getString( 0 ) );
     }
 
+  @Test
   public void testFilterXPaths()
     {
     String[][] namespaces = {new String[]{"a", "http://foo.com/a"},

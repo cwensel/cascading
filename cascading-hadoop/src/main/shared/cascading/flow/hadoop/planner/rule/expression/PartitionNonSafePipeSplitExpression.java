@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cascading.flow.hadoop.planner.rule.expression;
+
+import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.expression.FlowElementExpression;
+import cascading.flow.planner.iso.expression.NonSafeAndSplitAndSyncPipeExpressionGraph;
+import cascading.flow.planner.iso.expression.NonSafeOperationExpression;
+import cascading.flow.planner.iso.expression.TypeExpression;
+import cascading.flow.planner.rule.RuleExpression;
+import cascading.pipe.Pipe;
+import cascading.tap.Tap;
+
+/**
+ * Captures a split against a non-safe Operation to prevent the operation from running
+ * in parallel mappers.
+ * <p/>
+ * THis variant allows a non-safe operation to be followed by any Pipe. this assumes other rules
+ * enforce splitting to only be on Each or Pipe types.
+ */
+public class PartitionNonSafePipeSplitExpression extends RuleExpression
+  {
+  public PartitionNonSafePipeSplitExpression()
+    {
+    super(
+      new NonSafeAndSplitAndSyncPipeExpressionGraph(),
+
+      new ExpressionGraph()
+        .arcs(
+          new FlowElementExpression( Tap.class ),
+          new NonSafeOperationExpression(),
+          new FlowElementExpression( Pipe.class, TypeExpression.Topo.Split )
+        ),
+
+      new ExpressionGraph()
+        .arcs(
+          new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class, TypeExpression.Topo.Tail )
+        )
+    );
+    }
+  }

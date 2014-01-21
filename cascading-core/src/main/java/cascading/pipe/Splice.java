@@ -997,7 +997,26 @@ public class Splice extends Pipe
       outGroupingFields = createJoinFields( incomingScopes, groupingSelectors, declared );
 
     // for Group, the outgoing fields are the same as those declared
-    return new Scope( getName(), declared, outGroupingFields, groupingSelectors, sortingSelectors, declared, isGroupBy() );
+    Scope.Kind kind = getScopeKind();
+
+    return new Scope( getName(), declared, outGroupingFields, groupingSelectors, sortingSelectors, declared, kind );
+    }
+
+  private Scope.Kind getScopeKind()
+    {
+    switch( kind )
+      {
+      case GroupBy:
+        return Scope.Kind.GROUPBY;
+      case CoGroup:
+        return Scope.Kind.COGROUP;
+      case Merge:
+        return Scope.Kind.MERGE;
+      case Join:
+        return Scope.Kind.HASHJOIN;
+      }
+
+    throw new IllegalStateException( "unknown kind: " + kind );
     }
 
   private Fields createJoinFields( Set<Scope> incomingScopes, Map<String, Fields> groupingSelectors, Fields declared )
@@ -1434,7 +1453,13 @@ public class Splice extends Pipe
         if( map.size() > 1 )
           buffer.append( name ).append( ":" );
 
-        buffer.append( map.get( name ).print() ); // get resolved keys
+        Fields keys = map.get( name );
+
+        // if keys null, this is likely an edge contracted map
+        if( keys == null )
+          buffer.append( "<unavailable>" );
+        else
+          buffer.append( keys.print() ); // get resolved keys
         }
 
       if( isSelfJoin() )

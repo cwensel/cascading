@@ -24,6 +24,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -31,17 +33,21 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.pipe.Group;
+import cascading.pipe.HashJoin;
+import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.planner.ElementGraphs.*;
+import static cascading.util.Util.getFirst;
 
 /** Class StepGraph is an internal representation of {@link FlowStep} instances. */
 public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep<Config>, Integer>
@@ -58,42 +64,72 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
   /**
    * Constructor StepGraph creates a new StepGraph instance.
    *
-   * @param elementGraph of type ElementGraph
+   * @param flowElementGraph of type ElementGraph
    */
-  public FlowStepGraph( String flowName, ElementGraph elementGraph )
+  public FlowStepGraph( FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
     {
     this();
 
-    makeStepGraph( flowName, elementGraph );
+    makeStepGraph( flowElementGraph, elementSubGraphs );
     }
+
+  protected abstract FlowStep<Config> createFlowStep( String stepName, int stepNum, ElementGraph elementSubGraph );
 
   /**
-   * Method getCreateFlowStep ...
+   * Creates the map reduce step graph.
    *
-   * @param steps   of type Map<String, FlowStep>
-   * @param sink    of type String
-   * @param numJobs of type int
-   * @return FlowStep
+   * @param flowElementGraph
+   * @param elementSubGraphs
    */
-  protected FlowStep<Config> getCreateFlowStep( Map<Tap, FlowStep<Config>> steps, Tap sink, int numJobs )
+  protected void makeStepGraph( FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
     {
-    if( steps.containsKey( sink ) )
-      return steps.get( sink );
+    Map<FlowStep, Set<Tap>> stepToSources = new LinkedHashMap<>();
+    Map<FlowStep, Set<Tap>> stepToSinks = new LinkedHashMap<>();
 
-    LOG.debug( "creating step: {}", sink );
+    int stepCount = 0;
+    for( ElementGraph elementSubGraph : elementSubGraphs )
+      {
+      if( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) != null )
+        elementSubGraph.writeDOT( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) + "/steps/" + stepCount++ + "sub-graph.dot" );
 
-    int stepNum = steps.size() + 1;
-    String stepName = makeStepName( sink, numJobs, stepNum );
-    FlowStep<Config> step = createFlowStep( stepName, stepNum );
+      Map<String, Tap> sources = ElementGraphs.createSourceMap( elementSubGraph );
+      Map<String, Tap> sinks = ElementGraphs.createSinkMap( elementSubGraph );
 
-    steps.put( sink, step );
+      String stepName = makeStepName( getFirst( sinks.values() ), elementSubGraphs.size(), vertexSet().size() + 1 );
 
-    return step;
+      FlowStep<Config> flowStep = createFlowStep( stepName, vertexSet().size() + 1, elementSubGraph );
+
+      stepToSources.put( flowStep, new HashSet<>( sources.values() ) );
+      stepToSinks.put( flowStep, new HashSet<>( sinks.values() ) );
+
+      ( (BaseFlowStep) flowStep ).addSinks( sinks );
+      ( (BaseFlowStep) flowStep ).addSources( sources );
+      ( (BaseFlowStep) flowStep ).addGroups( ElementGraphs.findAllGroups( elementSubGraph ) );
+
+      assignTraps( (BaseFlowStep) flowStep, flowElementGraph.getTrapMap() );
+      addSourceModes( (BaseFlowStep) flowStep );
+
+      addVertex( flowStep );
+      }
+
+    int count = 0;
+    for( Map.Entry<FlowStep, Set<Tap>> sinkEntry : stepToSinks.entrySet() )
+      {
+      for( Tap sink : sinkEntry.getValue() )
+        {
+        for( Map.Entry<FlowStep, Set<Tap>> sourceEntry : stepToSources.entrySet() )
+          {
+          if( sourceEntry.getKey() == sinkEntry.getKey() )
+            continue;
+
+          if( sourceEntry.getValue().contains( sink ) )
+            addEdge( sinkEntry.getKey(), sourceEntry.getKey(), count++ );
+          }
+        }
+      }
     }
 
-  protected abstract FlowStep<Config> createFlowStep( String stepName, int stepNum );
-
-  private String makeStepName( Tap sink, int numJobs, int stepNum )
+  protected String makeStepName( Tap sink, int numJobs, int stepNum )
     {
     if( sink.isTemporary() )
       return String.format( "(%d/%d)", stepNum, numJobs );
@@ -106,27 +142,48 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
     return String.format( "(%d/%d) %s", stepNum, numJobs, identifier );
     }
 
-  protected abstract void makeStepGraph( String flowName, ElementGraph elementGraph );
-
-  protected boolean pathContainsTap( GraphPath<FlowElement, Scope> path )
+  private void assignTraps( BaseFlowStep step, Map<String, Tap> traps )
     {
-    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-
-    // first and last are taps, if we find more than 2, return false
-    int count = 0;
-
-    for( FlowElement flowElement : flowElements )
+    for( FlowElement flowElement : step.getGraph().vertexSet() )
       {
-      if( flowElement instanceof Tap )
-        count++;
-      }
+      if( !( flowElement instanceof Pipe ) )
+        continue;
 
-    return count > 2;
+      String name = ( (Pipe) flowElement ).getName();
+
+      // this is legacy, can probably now collapse into one collection safely
+      if( traps.containsKey( name ) )
+        step.getTrapMap().put( name, traps.get( name ) );
+      }
+    }
+
+  private void addSourceModes( BaseFlowStep step )
+    {
+    Set<HashJoin> hashJoins = ElementGraphs.findAllHashJoins( step.getGraph() );
+
+    for( HashJoin hashJoin : hashJoins )
+      {
+      for( Object object : step.getSources() )
+        {
+        Tap source = (Tap) object;
+        Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( step.getGraph(), source, hashJoin );
+
+        boolean isStreamed = isOnlyStreamedPath( sourcePaths );
+        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
+        boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
+
+        if( isStreamed || isBoth )
+          step.addStreamedSourceFor( hashJoin, source );
+
+        if( isAccumulated || isBoth )
+          step.addAccumulatedSourceFor( hashJoin, source );
+        }
+      }
     }
 
   public TopologicalOrderIterator<FlowStep<Config>, Integer> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<FlowStep<Config>, Integer>( this, new PriorityQueue<FlowStep<Config>>( 10, new Comparator<FlowStep<Config>>()
+    return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, new Comparator<FlowStep<Config>>()
     {
     @Override
     public int compare( FlowStep<Config> lhs, FlowStep<Config> rhs )
@@ -204,5 +261,4 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
     }
-
   }

@@ -26,6 +26,7 @@ import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
@@ -36,6 +37,7 @@ public class ScriptTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testSimpleScript()
     {
     Class returnType = Long.class;
@@ -76,6 +78,7 @@ public class ScriptTest extends CascadingTestCase
     assertEquals( true, evaluate( script, returnType, names, types, getEntry( 2.0, "1", "2" ) ) );
     }
 
+  @Test
   public void testSimpleScriptTyped()
     {
     Class returnType = Long.class;

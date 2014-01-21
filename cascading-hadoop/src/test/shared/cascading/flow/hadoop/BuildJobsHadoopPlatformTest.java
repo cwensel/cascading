@@ -39,12 +39,14 @@ import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.aggregator.MaxValue;
+import cascading.operation.aggregator.Sum;
 import cascading.operation.assertion.AssertNotNull;
 import cascading.operation.assertion.AssertNull;
 import cascading.operation.expression.ExpressionFilter;
@@ -68,7 +70,7 @@ import cascading.tap.hadoop.util.TempHfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BuildJobsHadoopPlatformTest extends PlatformTestCase
@@ -411,6 +413,39 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     FlowStep step = steps.get( 0 );
 
     assertEquals( "wrong number of operations", 2, ( (BaseFlowStep) step ).getAllOperations().size() );
+    }
+
+  @Test
+  public void testSplitOnNonSafeOperationsSimple()
+    {
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+
+    Pipe pipe = new Pipe( "split" );
+
+    // this operation is not safe
+    pipe = new Each( pipe, new Fields( "line" ), new TestFunction( new Fields( "ignore" ), new Tuple( 1 ), false ), new Fields( "line" ) );
+
+    Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
+    Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
+
+    Map sources = new HashMap();
+    sources.put( "split", source );
+
+    Map sinks = new HashMap();
+    sinks.put( "left", sink1 );
+    sinks.put( "right", sink2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, right );
+
+    List<FlowStep> steps = flow.getFlowSteps();
+
+    assertEquals( "not equal: steps.size()", 3, steps.size() );
+
+    FlowStep step = steps.get( 0 );
+
+    assertEquals( "wrong number of operations", 1, ( (BaseFlowStep) step ).getAllOperations().size() );
     }
 
   // verify unsafe splits happen when splitting on a pipe
@@ -778,8 +813,6 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
   /**
    * Tests the case where the same source is split, then re-merged
-   * <p/>
-   * todo: planner should keep as a single mr job
    */
   @Test
   public void testMergeSameSourceSplit()
@@ -803,7 +836,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
     List<FlowStep> steps = flow.getFlowSteps();
 
-    assertEquals( "not equal: steps.size()", 2, steps.size() ); // todo: should be a single job
+    assertEquals( "not equal: steps.size()", 1, steps.size() );
     }
 
   @Test
@@ -1772,7 +1805,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
       }
     }
 
-  private int countDistance( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement lhs, FlowElement rhs )
+  private int countDistance( ElementGraph graph, FlowElement lhs, FlowElement rhs )
     {
     return DijkstraShortestPath.findPathBetween( graph, lhs, rhs ).size() - 1;
     }
@@ -1831,5 +1864,43 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
       // do nothing
 //      exception.printStackTrace();
       }
+    }
+
+//  @Test
+  @Ignore
+  public void testManyJoins()
+    {
+    int n = 50;
+    Map<String, Tap> sources = new HashMap<>();
+    Map<String, Tap> sinks = new HashMap<>();
+    Pipe[] pipes = new Pipe[ n ];
+
+    int count = 0;
+
+    for( int i = 0; i < n; i++ )
+      {
+      String nameIn = "in" + i;
+      String nameOut = "out" + i;
+      Pipe pipe = new Pipe( nameIn );
+      sources.put( nameIn, new Hfs( new TextLine( new Fields( "key" + i ) ), "foo/in" + i ) );
+      sinks.put( nameOut, new Hfs( new TextLine(), "foo/out" + i ) );
+
+      count += 2; // 2 taps
+
+      if( i > 0 )
+        {
+        pipe = new CoGroup( pipes[ i - 1 ], new Fields( "key" + ( i - 1 ) ), pipe, new Fields( "key" + i ) );
+        pipe = new Every( pipe, new Fields( "key" + ( i - 1 ) ), new Sum() );
+        count += 2; // 2 pipes
+        }
+
+      pipes[ i ] = new Pipe( nameOut, pipe );
+      count += 1; // 1 pipe
+      }
+
+    long start = System.currentTimeMillis();
+    Flow flow = new HadoopFlowConnector().connect( sources, sinks, pipes );
+    long end = System.currentTimeMillis();
+    System.out.printf( "n = %d: elements: %d: %.03f seconds\n", n, count, ( end - start ) / 1000.0 );
     }
   }

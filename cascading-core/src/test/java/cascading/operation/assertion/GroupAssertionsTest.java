@@ -28,6 +28,7 @@ import cascading.operation.GroupAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
@@ -92,6 +93,7 @@ public class GroupAssertionsTest extends CascadingTestCase
     assertion.cleanup( FlowProcess.NULL, operationCall );
     }
 
+  @Test
   public void testSizeEquals()
     {
     GroupAssertion assertion = new AssertGroupSizeEquals( 1 );
@@ -112,6 +114,7 @@ public class GroupAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testSizeLessThan()
     {
     GroupAssertion assertion = new AssertGroupSizeLessThan( 2 );
@@ -132,6 +135,7 @@ public class GroupAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testSizeMoreThan()
     {
     GroupAssertion assertion = new AssertGroupSizeMoreThan( 1 );
@@ -150,5 +154,4 @@ public class GroupAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ), getEntry( new Tuple( "0", null ) ) );
     assertPass( assertion, getEntry( new Tuple( "0", 1 ) ), getEntry( new Tuple( "0", 1 ) ) );
     }
-
   }

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import cascading.CascadingTestCase;
+import org.junit.Test;
 
 /**
  *
@@ -34,9 +35,9 @@ public class FieldsComparatorTest extends CascadingTestCase
 
   public FieldsComparatorTest()
     {
-    super();
     }
 
+  @Test
   public void testCompare()
     {
     Fields fields = new Fields( "a" );
@@ -58,6 +59,7 @@ public class FieldsComparatorTest extends CascadingTestCase
     assertTrue( "not greater than: aTuple > bTuple", fields.compare( aTuple, bTuple ) > 0 );
     }
 
+  @Test
   public void testCompare2()
     {
     Fields fields = new Fields( "a" );

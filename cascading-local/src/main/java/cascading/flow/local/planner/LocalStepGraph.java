@@ -20,51 +20,27 @@
 
 package cascading.flow.local.planner;
 
-import java.util.Map;
+import java.util.List;
 
 import cascading.flow.FlowStep;
 import cascading.flow.local.LocalFlowStep;
-import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.FlowStepGraph;
-import cascading.tap.Tap;
-import org.jgrapht.Graphs;
+import cascading.flow.planner.graph.ElementGraph;
 
 /**
  *
  */
 public class LocalStepGraph extends FlowStepGraph
   {
-  public LocalStepGraph( String flowName, ElementGraph elementGraph )
+  public LocalStepGraph( String flowName, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
     {
-    super( flowName, elementGraph );
+    super( flowElementGraph, elementSubGraphs );
     }
 
   @Override
-  protected FlowStep createFlowStep( String stepName, int stepNum )
+  protected FlowStep createFlowStep( String stepName, int stepNum, ElementGraph elementSubGraph )
     {
-    return new LocalFlowStep( stepName, stepNum );
-    }
-
-  protected void makeStepGraph( String flowName, ElementGraph elementGraph )
-    {
-    LocalFlowStep step = (LocalFlowStep) createFlowStep( "local", 1 );
-
-    addVertex( step );
-
-    for( Map.Entry<String, Tap> entry : elementGraph.getSourceMap().entrySet() )
-      step.addSource( entry.getKey(), entry.getValue() );
-
-    for( Map.Entry<String, Tap> entry : elementGraph.getSinkMap().entrySet() )
-      step.addSink( entry.getKey(), entry.getValue() );
-
-    step.getTrapMap().putAll( elementGraph.getTrapMap() );
-
-    Graphs.addGraph( step.getGraph(), elementGraph );
-
-    // remove the extents
-    step.getGraph().removeVertex( ElementGraph.head );
-    step.getGraph().removeVertex( ElementGraph.tail );
-
-    step.getGroups().addAll( elementGraph.findAllGroups() );
+    return new LocalFlowStep( stepName, stepNum, elementSubGraph );
     }
   }

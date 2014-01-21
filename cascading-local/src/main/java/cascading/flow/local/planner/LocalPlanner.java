@@ -20,17 +20,17 @@
 
 package cascading.flow.local.planner;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Properties;
 
-import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.local.LocalFlow;
-import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
-import cascading.pipe.Pipe;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.tap.Tap;
 import cascading.util.Version;
 
@@ -44,7 +44,7 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     }
 
   @Override
-  public Properties getConfig()
+  public Properties getDefaultConfig()
     {
     return null;
     }
@@ -55,58 +55,21 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     return new PlatformInfo( "local", "Concurrent, Inc.", Version.getRelease() );
     }
 
-  @Override
-  public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
-    {
-    super.initialize( flowConnector, properties );
-    }
-
   protected LocalFlow createFlow( FlowDef flowDef )
     {
-    return new LocalFlow( getPlatformInfo(), getProperties(), getConfig(), flowDef );
+    return new LocalFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
   @Override
-  public LocalFlow buildFlow( FlowDef flowDef )
+  protected FlowStepGraph createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
     {
-    ElementGraph elementGraph = null;
+    return new LocalStepGraph( flowDef.getName(), flowElementGraph, elementSubGraphs );
+    }
 
-    try
-      {
-      // generic
-      verifyAllTaps( flowDef );
-
-      LocalFlow flow = createFlow( flowDef );
-
-      Pipe[] tails = resolveTails( flowDef, flow );
-
-      verifyAssembly( flowDef, tails );
-
-      elementGraph = createElementGraph( flowDef, tails );
-
-      // rules
-      failOnLoneGroupAssertion( elementGraph );
-      failOnMissingGroup( elementGraph );
-      failOnMisusedBuffer( elementGraph );
-      failOnGroupEverySplit( elementGraph );
-
-      // generic
-      elementGraph.removeUnnecessaryPipes(); // groups must be added before removing pipes
-      elementGraph.resolveFields();
-
-      // used for checkpointing
-      elementGraph = flow.updateSchemes( elementGraph );
-
-      FlowStepGraph flowStepGraph = new LocalStepGraph( flowDef.getName(), elementGraph );
-
-      flow.initialize( elementGraph, flowStepGraph );
-
-      return flow;
-      }
-    catch( Exception exception )
-      {
-      throw handleExceptionDuringPlanning( exception, elementGraph );
-      }
+  @Override
+  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
+    {
+    return new LocalRuleRegistry();
     }
 
   @Override

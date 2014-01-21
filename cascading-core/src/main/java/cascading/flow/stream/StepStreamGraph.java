@@ -21,6 +21,7 @@
 package cascading.flow.stream;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -206,6 +207,9 @@ public abstract class StepStreamGraph extends StreamGraph
       // if streamed source is multi path
       Object tap = step.getStreamedSourceByJoin().get( join );
 
+      if( tap == null )
+        return false;
+
       return getNumImmediateBranches( (FlowElement) tap, join ) > 1;
       }
 
@@ -284,6 +288,9 @@ public abstract class StepStreamGraph extends StreamGraph
    */
   private Set<String> getTapBranchNamesFor( Duct duct )
     {
+    if( ( (Tap) ( (ElementDuct) duct ).getFlowElement() ).isTemporary() )
+      return Collections.emptySet();
+
     if( duct instanceof SourceStage )
       return step.getSourceName( (Tap) ( (SourceStage) duct ).getFlowElement() );
     else if( duct instanceof SinkStage )

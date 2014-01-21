@@ -37,7 +37,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 public class PlannerException extends FlowException
   {
   /** Field pipeGraph */
-  ElementGraph elementGraph;
+  FlowElementGraph flowElementGraph;
 
   /** Constructor PlannerException creates a new PlannerException instance. */
   public PlannerException()
@@ -73,12 +73,12 @@ public class PlannerException extends FlowException
    * @param pipe         of type Pipe
    * @param message      of type String
    * @param throwable    of type Throwable
-   * @param elementGraph of type ElementGraph
+   * @param flowElementGraph of type ElementGraph
    */
-  public PlannerException( Pipe pipe, String message, Throwable throwable, ElementGraph elementGraph )
+  public PlannerException( Pipe pipe, String message, Throwable throwable, FlowElementGraph flowElementGraph )
     {
     super( Util.formatTrace( pipe, message ), throwable );
-    this.elementGraph = elementGraph;
+    this.flowElementGraph = flowElementGraph;
     }
 
   /**
@@ -117,12 +117,12 @@ public class PlannerException extends FlowException
    *
    * @param string       of type String
    * @param throwable    of type Throwable
-   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param flowElementGraph of type SimpleDirectedGraph<FlowElement, Scope>
    */
-  public PlannerException( String string, Throwable throwable, ElementGraph elementGraph )
+  public PlannerException( String string, Throwable throwable, FlowElementGraph flowElementGraph )
     {
     super( string, throwable );
-    this.elementGraph = elementGraph;
+    this.flowElementGraph = flowElementGraph;
     }
 
   /**
@@ -130,9 +130,9 @@ public class PlannerException extends FlowException
    *
    * @return the pipeGraph (type SimpleDirectedGraph<FlowElement, Scope>) of this PlannerException object.
    */
-  SimpleDirectedGraph<FlowElement, Scope> getElementGraph()
+  SimpleDirectedGraph<FlowElement, Scope> getFlowElementGraph()
     {
-    return elementGraph;
+    return flowElementGraph;
     }
 
   /**
@@ -142,9 +142,9 @@ public class PlannerException extends FlowException
    */
   public void writeDOT( String filename )
     {
-    if( elementGraph == null )
+    if( flowElementGraph == null )
       return;
 
-    elementGraph.writeDOT( filename );
+    flowElementGraph.writeDOT( filename );
     }
   }

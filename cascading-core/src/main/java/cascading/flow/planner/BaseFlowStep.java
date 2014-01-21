@@ -42,6 +42,8 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
+import cascading.flow.planner.graph.ElementDirectedGraph;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.management.CascadingServices;
 import cascading.management.state.ClientState;
 import cascading.operation.Operation;
@@ -57,7 +59,6 @@ import cascading.util.Util;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KShortestPaths;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,12 +100,15 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   private List<SafeFlowStepListener> listeners;
 
   /** Field graph */
-  private final SimpleDirectedGraph<FlowElement, Scope> graph = new SimpleDirectedGraph<FlowElement, Scope>( Scope.class );
+  private final ElementGraph graph;
 
   /** Field sources */
-  protected final Map<Tap, Set<String>> sources = new HashMap<Tap, Set<String>>(); // all sources
+  protected final Map<Tap, Set<String>> sources = new HashMap<>(); // all sources
   /** Field sink */
-  protected final Map<Tap, Set<String>> sinks = new HashMap<Tap, Set<String>>(); // all sinks
+  protected final Map<Tap, Set<String>> sinks = new HashMap<>(); // all sinks
+
+  /** Field mapperTraps */
+  private final Map<String, Tap> traps = new HashMap<>();
 
   /** Field tempSink */
   protected Tap tempSink; // used if we need to bypass the filesystem
@@ -119,10 +123,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   private transient FlowStepJob<Config> flowStepJob;
 
-  protected BaseFlowStep( String name, int stepNum )
+  protected BaseFlowStep( String name, int stepNum, ElementGraph elementGraph )
     {
     setName( name );
     this.stepNum = stepNum;
+    this.graph = new ElementDirectedGraph( elementGraph );
     }
 
   @Override
@@ -233,7 +238,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return flowStepJob.getStepStats();
     }
 
-  public SimpleDirectedGraph<FlowElement, Scope> getGraph()
+  public ElementGraph getGraph()
     {
     return graph;
     }
@@ -254,6 +259,12 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   public List<Group> getGroups()
     {
     return groups;
+    }
+
+  public void addGroups( Collection<Group> groups )
+    {
+    for( Group group : groups )
+      addGroup( group );
     }
 
   public void addGroup( Group group )
@@ -300,12 +311,24 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     sources.get( source ).add( name );
     }
 
+  public void addSources( Map<String, Tap> sources )
+    {
+    for( Map.Entry<String, Tap> entry : sources.entrySet() )
+      addSource( entry.getKey(), entry.getValue() );
+    }
+
   public void addSink( String name, Tap sink )
     {
     if( !sinks.containsKey( sink ) )
       sinks.put( sink, new HashSet<String>() );
 
     sinks.get( sink ).add( name );
+    }
+
+  public void addSinks( Map<String, Tap> sinks )
+    {
+    for( Map.Entry<String, Tap> entry : sinks.entrySet() )
+      addSink( entry.getKey(), entry.getValue() );
     }
 
   @Override
@@ -363,6 +386,22 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       }
 
     return null;
+    }
+
+  public Map<String, Tap> getTrapMap()
+    {
+    return traps;
+    }
+
+  @Override
+  public Set<Tap> getTraps()
+    {
+    return Collections.unmodifiableSet( new HashSet<Tap>( traps.values() ) );
+    }
+
+  public Tap getTrap( String name )
+    {
+    return getTrapMap().get( name );
     }
 
   boolean allSourcesExist() throws IOException

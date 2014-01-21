@@ -35,9 +35,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,6 +54,8 @@ import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.ext.ComponentAttributeProvider;
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
@@ -67,6 +72,49 @@ public class Util
 
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
   private static final String HEXES = "0123456789ABCDEF";
+
+  public static <K, V> HashMap<K, V> createHashMap()
+    {
+    return new HashMap<K, V>();
+    }
+
+  public static <K, V> boolean reverseMap( Map<V, K> from, Map<K, V> to )
+    {
+    boolean dupes = false;
+
+    for( Map.Entry<V, K> entry : from.entrySet() )
+      dupes |= to.put( entry.getValue(), entry.getKey() ) != null;
+
+    return dupes;
+    }
+
+  public static <V> V getFirst( Collection<V> collection )
+    {
+    if( collection == null || collection.isEmpty() )
+      return null;
+
+    return collection.iterator().next();
+    }
+
+  public static <T> Set<T> narrowSet( Class<T> type, Collection collection )
+    {
+    return narrowSet( type, collection.iterator() );
+    }
+
+  public static <T> Set<T> narrowSet( Class<T> type, Iterator iterator )
+    {
+    Set<T> set = new HashSet<>();
+
+    while( iterator.hasNext() )
+      {
+      Object o = iterator.next();
+
+      if( type.isInstance( o ) )
+        set.add( (T) o );
+      }
+
+    return set;
+    }
 
   public static synchronized String createUniqueID()
     {
@@ -589,9 +637,15 @@ public class Util
     return null;
     }
 
-  public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
+  public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
+    }
+
+  public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider,
+                               ComponentAttributeProvider vertexAttributeProvider, ComponentAttributeProvider edgeAttributeProvider )
+    {
+    new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider, vertexAttributeProvider, edgeAttributeProvider ).export( writer, graph );
     }
 
   public static boolean isEmpty( String string )

@@ -29,6 +29,7 @@ import cascading.operation.expression.ExpressionFilter;
 import cascading.pipe.assembly.Unique;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.junit.Test;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -41,11 +42,12 @@ public class FilterTest extends CascadingTestCase
     }
 
   @Override
-  protected void setUp() throws Exception
+  public void setUp() throws Exception
     {
     super.setUp();
     }
 
+  @Test
   public void testNotNull()
     {
     Filter filter = new FilterNotNull();
@@ -57,6 +59,7 @@ public class FilterTest extends CascadingTestCase
     assertFalse( invokeFilter( filter, new Tuple( null, null ) ) );
     }
 
+  @Test
   public void testNull()
     {
     Filter filter = new FilterNull();
@@ -84,6 +87,7 @@ public class FilterTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testAnd()
     {
     Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
@@ -109,6 +113,7 @@ public class FilterTest extends CascadingTestCase
     assertFalse( invokeFilter( filter, new Tuple( 1, 2 ) ) );
     }
 
+  @Test
   public void testOr()
     {
     Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
@@ -134,6 +139,7 @@ public class FilterTest extends CascadingTestCase
     assertFalse( invokeFilter( filter, new Tuple( 1, 2 ) ) );
     }
 
+  @Test
   public void testXor()
     {
     Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
@@ -159,6 +165,7 @@ public class FilterTest extends CascadingTestCase
     assertFalse( invokeFilter( filter, new Tuple( 1, 2 ) ) );
     }
 
+  @Test
   public void testNot()
     {
     Fields[] fields = new Fields[]{new Fields( 0 ), new Fields( 1 )};
@@ -184,6 +191,7 @@ public class FilterTest extends CascadingTestCase
     assertTrue( invokeFilter( filter, new Tuple( 1, 2 ) ) );
     }
 
+  @Test
   public void testPartialDuplicates()
     {
     Filter filter = new Unique.FilterPartialDuplicates( 2 );

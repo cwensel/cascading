@@ -32,7 +32,7 @@ public class MapReduceFlowStep extends HadoopFlowStep
 
   MapReduceFlowStep( String flowName, String stepName, JobConf jobConf, Tap sink )
     {
-    super( stepName, 1 );
+    super( stepName, 1, null );
     setFlowName( flowName );
     this.jobConf = jobConf;
     addSink( "default", sink );

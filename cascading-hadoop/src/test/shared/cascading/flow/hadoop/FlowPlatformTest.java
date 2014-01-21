@@ -58,6 +58,7 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -196,6 +197,8 @@ public class FlowPlatformTest extends PlatformTestCase
 
     LOG.info( "calling start" );
     flow.start();
+
+    Util.safeSleep( 5000 );
 
     assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
 

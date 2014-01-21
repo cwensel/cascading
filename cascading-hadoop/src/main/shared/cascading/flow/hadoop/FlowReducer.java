@@ -98,7 +98,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       for( Duct tail : streamGraph.getTails() )
         LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
 
-      for( Tap trap : step.getReducerTraps().values() )
+      for( Tap trap : step.getTraps() )
         LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )

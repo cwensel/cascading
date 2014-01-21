@@ -28,7 +28,20 @@ import cascading.flow.hadoop.planner.HadoopPlanner;
 import org.apache.hadoop.conf.Configuration;
 
 /**
- *
+ * Class Hadoop2MR1Planner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop2.Hadoop2MR1FlowConnector}.
+ * <p/>
+ * Notes:
+ * <p/>
+ * <strong>Custom JobConf properties</strong><br/>
+ * A custom JobConf instance can be passed to this planner by calling {@link #copyJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
+ * on a map properties object before constructing a new {@link cascading.flow.hadoop2.Hadoop2MR1FlowConnector}.
+ * <p/>
+ * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
+ * All values in the map will be passed to a new default JobConf instance to be used as defaults for all resulting
+ * Flow instances.
+ * <p/>
+ * For example, {@code properties.set("mapred.child.java.opts","-Xmx512m");} would convince Hadoop
+ * to spawn all child jvms with a heap of 512MB.
  */
 public class Hadoop2MR1Planner extends HadoopPlanner
   {
@@ -44,21 +57,6 @@ public class Hadoop2MR1Planner extends HadoopPlanner
     for( Map.Entry<String, String> entry : configuration )
       properties.put( entry.getKey(), entry.getValue() );
     }
-
-//  /**
-//   * Method createJobConf returns a new JobConf instance using the values in the given properties argument.
-//   *
-//   * @param properties of type Map
-//   * @return a JobConf instance
-//   */
-//  public static JobConf createJobConf( Map<Object, Object> properties )
-//    {
-//    JobConf conf = new JobConf();
-//
-//    copyProperties( conf, properties );
-//
-//    return conf;
-//    }
 
   /**
    * Method copyProperties adds the given Map values to the given JobConf object.

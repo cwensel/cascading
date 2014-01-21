@@ -30,11 +30,8 @@ import cascading.flow.FlowConnectorProps;
 import cascading.operation.DebugLevel;
 import cascading.platform.PlatformRunner;
 import cascading.platform.TestPlatform;
-import cascading.util.Util;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,14 +69,9 @@ public class PlatformTestCase extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PlatformTestCase.class );
 
-  public static final String ROOT_OUTPUT_PATH = "test.output.root";
   static Set<String> allPaths = new HashSet<String>();
 
-  private String rootPath;
   Set<String> currentPaths = new HashSet<String>();
-
-  @Rule
-  public transient TestName name = new TestName();
 
   private transient TestPlatform platform = null;
 
@@ -121,22 +113,16 @@ public class PlatformTestCase extends CascadingTestCase
     return platform;
     }
 
-  public String getTestName()
+  @Override
+  protected String[] getOutputPathElements()
     {
-    return name.getMethodName();
+    return new String[]{getTestOutputRoot(), getPlatformName(), getTestCaseName(), getTestName()};
     }
 
-  protected String getRootPath()
+  @Override
+  protected String[] getPlanPathElements()
     {
-    if( rootPath == null )
-      rootPath = Util.join( getPathElements(), "/" );
-
-    return rootPath;
-    }
-
-  protected String[] getPathElements()
-    {
-    return new String[]{getTestRoot(), getPlatformName(), getTestCaseName()};
+    return new String[]{getTestPlanRoot(), getPlatformName(), getTestCaseName(), getTestName()};
     }
 
   public String getOutputPath( String path )
@@ -152,17 +138,12 @@ public class PlatformTestCase extends CascadingTestCase
     return result;
     }
 
-  private String makeOutputPath( String path )
+  protected String makeOutputPath( String path )
     {
     if( path.startsWith( "/" ) )
-      return getRootPath() + path;
+      return getOutputPath() + path;
 
-    return getRootPath() + "/" + path;
-    }
-
-  public String getTestCaseName()
-    {
-    return getClass().getSimpleName().replaceAll( "^(.*)Test.*$", "$1" ).toLowerCase();
+    return getOutputPath() + "/" + path;
     }
 
   public String getPlatformName()
@@ -170,14 +151,10 @@ public class PlatformTestCase extends CascadingTestCase
     return platform.getName();
     }
 
-  public static String getTestRoot()
-    {
-    return System.getProperty( ROOT_OUTPUT_PATH, "build/test/output" ).replace( ":", "_" );
-    }
-
   @Before
   public void setUp() throws Exception
     {
+    super.setUp();
     getPlatform().setUp();
     }
 

@@ -28,6 +28,7 @@ import cascading.operation.ValueAssertion;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
@@ -72,6 +73,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertion.doAssert( FlowProcess.NULL, concreteCall );
     }
 
+  @Test
   public void testNotNull()
     {
     ValueAssertion assertion = new AssertNotNull();
@@ -83,6 +85,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testNull()
     {
     ValueAssertion assertion = new AssertNull();
@@ -95,6 +98,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( null, null ) ) );
     }
 
+  @Test
   public void testEquals()
     {
     ValueAssertion assertion = new AssertEquals( 1 );
@@ -115,6 +119,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testNotEquals()
     {
     ValueAssertion assertion = new AssertNotEquals( 4 );
@@ -137,6 +142,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testEqualsAll()
     {
     ValueAssertion assertion = new AssertEqualsAll( 1 );
@@ -149,6 +155,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testMatches()
     {
     // match tuple, assert match
@@ -186,6 +193,7 @@ public class ValueAssertionsTest extends CascadingTestCase
 
     }
 
+  @Test
   public void testMatchesAll()
     {
     // match elements, assert match
@@ -224,6 +232,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertPass( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testExpression()
     {
     ValueAssertion assertion = new AssertExpression( "$0 == 1", int.class );
@@ -235,6 +244,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testTupleEquals()
     {
     ValueAssertion assertion = new AssertSizeEquals( 1 );
@@ -246,6 +256,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testTupleLessThan()
     {
     ValueAssertion assertion = new AssertSizeLessThan( 2 );
@@ -257,6 +268,7 @@ public class ValueAssertionsTest extends CascadingTestCase
     assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
     }
 
+  @Test
   public void testTupleMoreThan()
     {
     ValueAssertion assertion = new AssertSizeMoreThan( 1 );

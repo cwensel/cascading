@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -41,7 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlatformInfo;
@@ -120,7 +121,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   protected boolean stop;
 
   /** Field pipeGraph */
-  private ElementGraph pipeGraph; // only used for documentation purposes
+  private FlowElementGraph pipeGraph; // only used for documentation purposes
 
   private transient CascadingServices cascadingServices;
 
@@ -154,8 +155,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name )
     {
+    properties = new HashMap<>( properties );
+
     this.platformInfo = platformInfo;
     this.name = name;
+
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
 
@@ -164,6 +168,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
     {
+    properties = PropertyUtil.asFlatMap( properties );
+
     this.platformInfo = platformInfo;
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
@@ -187,7 +193,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     return platformInfo;
     }
 
-  public void initialize( ElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
+  public void initialize( FlowElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
     {
     this.pipeGraph = pipeGraph;
     this.flowStepGraph = flowStepGraph;
@@ -199,13 +205,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     initializeNewJobsMap();
     }
 
-  public ElementGraph updateSchemes( ElementGraph pipeGraph )
+  public FlowElementGraph updateSchemes( FlowElementGraph pipeGraph )
     {
     presentSourceFields( pipeGraph );
 
     presentSinkFields( pipeGraph );
 
-    return new ElementGraph( pipeGraph );
+    return new FlowElementGraph( pipeGraph );
     }
 
   /** Force a Scheme to fetch any fields from a meta-data store */
@@ -220,7 +226,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
    *
    * @param pipeGraph
    */
-  protected void presentSourceFields( ElementGraph pipeGraph )
+  protected void presentSourceFields( FlowElementGraph pipeGraph )
     {
     for( Tap tap : sources.values() )
       {
@@ -247,7 +253,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
    *
    * @param pipeGraph
    */
-  protected void presentSinkFields( ElementGraph pipeGraph )
+  protected void presentSinkFields( FlowElementGraph pipeGraph )
     {
     for( Tap tap : sinks.values() )
       {
@@ -262,7 +268,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
-  protected Fields getFieldsFor( ElementGraph pipeGraph, Tap tap )
+  protected Fields getFieldsFor( FlowElementGraph pipeGraph, Tap tap )
     {
     return pipeGraph.outgoingEdgesOf( tap ).iterator().next().getOutValuesFields();
     }
@@ -391,7 +397,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.submitPriority = submitPriority;
     }
 
-  ElementGraph getPipeGraph()
+  FlowElementGraph getPipeGraph()
     {
     return pipeGraph;
     }

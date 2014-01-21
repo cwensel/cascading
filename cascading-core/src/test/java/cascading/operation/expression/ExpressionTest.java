@@ -26,6 +26,7 @@ import cascading.operation.ConcreteCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
@@ -36,6 +37,7 @@ public class ExpressionTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testSimpleExpression()
     {
     assertEquals( 3, evaluate( "a + b", int.class, getEntry( 1, 2 ) ) );
@@ -76,6 +78,7 @@ public class ExpressionTest extends CascadingTestCase
     assertEquals( true, evaluate( "b.equals(\"1\") && (a == 2.0) && $2.equals(\"2\")", names, types, getEntry( 2.0, "1", "2" ) ) );
     }
 
+  @Test
   public void testNoParamExpression()
     {
     String expression = "(int) (Math.random() * Integer.MAX_VALUE)";

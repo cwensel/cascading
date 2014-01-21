@@ -35,6 +35,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import org.junit.Test;
 
 /**
  *
@@ -48,7 +49,7 @@ public class LimitFilterTest extends CascadingTestCase
     }
 
   @Override
-  protected void setUp() throws Exception
+  public void setUp() throws Exception
     {
     super.setUp();
 
@@ -183,6 +184,7 @@ public class LimitFilterTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testLimit()
     {
     int limit = 20;

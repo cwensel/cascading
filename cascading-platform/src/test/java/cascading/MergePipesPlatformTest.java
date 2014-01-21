@@ -438,7 +438,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
 
     // two jobs, we must put a temp tap between the Merge and HashJoin
     if( getPlatform().isMapReduce() )
-      assertEquals( "wrong num jobs", !streamed ? 2 : 1, flow.getFlowSteps().size() );
+      assertEquals( "wrong num jobs", 1, flow.getFlowSteps().size() );
 
     flow.complete();
 
@@ -497,7 +497,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
 //    flow.writeDOT( name + ".dot" );
 
     if( getPlatform().isMapReduce() )
-      assertEquals( "wrong num jobs", 2, flow.getFlowSteps().size() );
+      assertEquals( "wrong num jobs", streamed ? 1 : 2, flow.getFlowSteps().size() );
 
     flow.complete();
 
@@ -507,7 +507,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedStreamedMerge() throws Exception
     {
-    runMultiHashJoinIntoMergeIntoHashJoin( true, true, true, 3 );
+    runMultiHashJoinIntoMergeIntoHashJoin( true, true, true, 1 );
     }
 
   @Test
@@ -519,7 +519,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedAccumulatedMerge() throws Exception
     {
-    runMultiHashJoinIntoMergeIntoHashJoin( true, false, true, 3 );
+    runMultiHashJoinIntoMergeIntoHashJoin( true, false, true, 2 );
     }
 
   @Test
@@ -531,7 +531,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedStreamed() throws Exception
     {
-    runMultiHashJoinIntoMergeIntoHashJoin( true, true, false, 2 );
+    runMultiHashJoinIntoMergeIntoHashJoin( true, true, false, 1 );
     }
 
   @Test
@@ -543,7 +543,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedAccumulated() throws Exception
     {
-    runMultiHashJoinIntoMergeIntoHashJoin( true, false, false, 3 );
+    runMultiHashJoinIntoMergeIntoHashJoin( true, false, false, 2 );
     }
 
   @Test

@@ -20,7 +20,9 @@
 
 package cascading.flow.planner;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,53 +32,75 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.AssemblyPlanner;
+import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.transformer.ElementFactory;
+import cascading.flow.planner.rule.PlanPhase;
+import cascading.flow.planner.rule.RuleExec;
+import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleResult;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Checkpoint;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.Group;
-import cascading.pipe.GroupBy;
-import cascading.pipe.HashJoin;
-import cascading.pipe.Merge;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
-import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
+import cascading.property.AppProps;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.util.Util;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
+import cascading.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.*;
 import static java.util.Arrays.asList;
 
-/** Class FlowPlanner is the base class for all planner implementations. */
-public abstract class FlowPlanner<F extends Flow, Config>
+/**
+ * Class FlowPlanner is the base class for all planner implementations.
+ * <p/>
+ * This planner support tracing execution of each rule. See the appropriate properties on this
+ * class to enable.
+ */
+public abstract class FlowPlanner<F extends BaseFlow, Config>
   {
+  /**
+   * Enables the planner to write out basic planner information including the initial element-graph,
+   * completed element-graph, and the completed step-graph dot files.
+   */
+  public static final String TRACE_PLAN_PATH = "cascading.planner.plan.path";
+
+  /**
+   * Enables the planner to write out detail level planner information for each rule, including recursive
+   * transforms.
+   * <p/>
+   * Use this to debug rules. This does increase overhead during planning.
+   */
+  public static final String TRACE_PLAN_TRANSFORM_PATH = "cascading.planner.plan.transforms.path";
+
+  /**
+   * Enables the planner to write out planner statistics for each planner phase and rule.
+   */
+  public static final String TRACE_STATS_PATH = "cascading.planner.stats.path";
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowPlanner.class );
 
   /** Field properties */
-  protected Map<Object, Object> properties;
+  protected Map<Object, Object> defaultProperties;
 
-  protected String checkpointRootPath = null;
+  protected String checkpointTapRootPath = null;
 
   /** Field assertionLevel */
-  protected AssertionLevel assertionLevel;
+  protected AssertionLevel defaultAssertionLevel;
   /** Field debugLevel */
-  protected DebugLevel debugLevel;
+  protected DebugLevel defaultDebugLevel;
 
   /**
    * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
@@ -104,33 +128,82 @@ public abstract class FlowPlanner<F extends Flow, Config>
     return DebugLevel.valueOf( debugLevel );
     }
 
-  public Map<Object, Object> getProperties()
+  public Map<Object, Object> getDefaultProperties()
     {
-    return properties;
+    return defaultProperties;
     }
 
-  public abstract Config getConfig();
+  public abstract Config getDefaultConfig();
 
   public abstract PlatformInfo getPlatformInfo();
 
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
     {
-    this.properties = properties;
-    this.assertionLevel = getAssertionLevel( properties );
-    this.debugLevel = getDebugLevel( properties );
+    this.defaultProperties = properties;
+    this.defaultAssertionLevel = getAssertionLevel( properties );
+    this.defaultDebugLevel = getDebugLevel( properties );
     }
 
-  protected abstract Flow createFlow( FlowDef flowDef );
+  public F buildFlow( FlowDef flowDef )
+    {
+    FlowElementGraph flowElementGraph = null;
 
-  /**
-   * Method buildFlow renders the actual Flow instance.
-   *
-   * @param flowDef
-   * @return Flow
-   */
-  public abstract F buildFlow( FlowDef flowDef );
+    try
+      {
+      verifyAllTaps( flowDef );
 
-  protected Pipe[] resolveTails( FlowDef flowDef, Flow<Config> flow )
+      F flow = createFlow( flowDef );
+
+      Pipe[] tails = resolveTails( flowDef, flow );
+
+      verifyAssembly( flowDef, tails );
+
+      RuleRegistry ruleRegistry = getRuleRegistry( flowDef );
+
+      configRuleRegistry( ruleRegistry );
+
+      RuleExec ruleExec = new RuleExec( ruleRegistry );
+
+      flowElementGraph = createElementGraph( flowDef, tails );
+
+      writeTracePlan( "initial-flow-element-graph", flowElementGraph );
+
+      ruleExec.enableTransformTracing( getPlanTransformTracePath() );
+
+      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, getPlanTransformTracePath() );
+
+      RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
+
+      writeTracePlan( "completed-flow-element-graph", ruleResult.getResult( PlanPhase.Complete ) );
+
+      writeStats( plannerContext, ruleResult );
+
+      FlowStepGraph<Config> flowStepGraph = createStepGraph( flowDef, flowElementGraph, ruleResult.getElementSubGraphs() );
+
+      writeTracePlan( "completed-flow-step-graph", flowStepGraph );
+
+      flow.initialize( flowElementGraph, flowStepGraph );
+
+      return flow;
+      }
+    catch( Exception exception )
+      {
+      throw handleExceptionDuringPlanning( exception, flowElementGraph );
+      }
+    }
+
+  protected void configRuleRegistry( RuleRegistry ruleRegistry )
+    {
+
+    }
+
+  protected abstract FlowStepGraph<Config> createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs );
+
+  protected abstract RuleRegistry getRuleRegistry( FlowDef flowDef );
+
+  protected abstract F createFlow( FlowDef flowDef );
+
+  protected Pipe[] resolveTails( FlowDef flowDef, F flow )
     {
     Pipe[] tails = flowDef.getTailsArray();
 
@@ -178,19 +251,16 @@ public abstract class FlowPlanner<F extends Flow, Config>
     verifyTaps( flowDef.getCheckpoints(), false, false );
     }
 
-  protected ElementGraph createElementGraph( FlowDef flowDef, Pipe[] flowTails )
+  protected FlowElementGraph createElementGraph( FlowDef flowDef, Pipe[] flowTails )
     {
     Map<String, Tap> sources = flowDef.getSourcesCopy();
     Map<String, Tap> sinks = flowDef.getSinksCopy();
     Map<String, Tap> traps = flowDef.getTrapsCopy();
     Map<String, Tap> checkpoints = flowDef.getCheckpointsCopy();
 
-    AssertionLevel assertionLevel = flowDef.getAssertionLevel() == null ? this.assertionLevel : flowDef.getAssertionLevel();
-    DebugLevel debugLevel = flowDef.getDebugLevel() == null ? this.debugLevel : flowDef.getDebugLevel();
+    checkpointTapRootPath = makeCheckpointRootPath( flowDef );
 
-    checkpointRootPath = makeCheckpointRootPath( flowDef );
-
-    return new ElementGraph( getPlatformInfo(), flowTails, sources, sinks, traps, checkpoints, checkpointRootPath != null, assertionLevel, debugLevel );
+    return new FlowElementGraph( getPlatformInfo(), flowTails, sources, sinks, traps, checkpoints, checkpointTapRootPath != null );
     }
 
   private String makeCheckpointRootPath( FlowDef flowDef )
@@ -206,7 +276,6 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
     return flowName + "/" + runID;
     }
-
 
   protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
     {
@@ -414,138 +483,11 @@ public abstract class FlowPlanner<F extends Flow, Config>
       }
     }
 
-  /**
-   * Verifies that there are not only GroupAssertions following any given Group instance. This will adversely
-   * affect the stream entering any subsequent Tap of Each instances.
-   */
-  protected void failOnLoneGroupAssertion( ElementGraph elementGraph )
-    {
-    List<Group> groups = elementGraph.findAllGroups();
-
-    // walk Every instances after Group
-    for( Group group : groups )
-      {
-      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsFrom( group ) )
-        {
-        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is tail
-
-        int everies = 0;
-        int assertions = 0;
-
-        for( FlowElement flowElement : flowElements )
-          {
-          if( flowElement instanceof Group )
-            continue;
-
-          if( !( flowElement instanceof Every ) )
-            break;
-
-          everies++;
-
-          Every every = (Every) flowElement;
-
-          if( every.getPlannerLevel() != null )
-            assertions++;
-          }
-
-        if( everies != 0 && everies == assertions )
-          throw new PlannerException( "group assertions must be accompanied by aggregator operations" );
-        }
-      }
-    }
-
-  protected void failOnMissingGroup( ElementGraph elementGraph )
-    {
-    List<Every> everies = elementGraph.findAllEveries();
-
-    // walk Every instances after Group
-    for( Every every : everies )
-      {
-      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( every ) )
-        {
-        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is every
-        Collections.reverse( flowElements ); // first element is every
-
-        for( FlowElement flowElement : flowElements )
-          {
-          if( flowElement instanceof Every || flowElement.getClass() == Pipe.class )
-            continue;
-
-          if( flowElement instanceof GroupBy || flowElement instanceof CoGroup )
-            break;
-
-          throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a Group pipe, found: " + flowElement );
-          }
-        }
-      }
-    }
-
-  protected void failOnMisusedBuffer( ElementGraph elementGraph )
-    {
-    List<Every> everies = elementGraph.findAllEveries();
-
-    // walk Every instances after Group
-    for( Every every : everies )
-      {
-      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( every ) )
-        {
-        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is every
-        Collections.reverse( flowElements ); // first element is every
-
-        Every last = null;
-        boolean foundBuffer = false;
-        int foundEveries = -1;
-
-        for( FlowElement flowElement : flowElements )
-          {
-          if( flowElement instanceof Each )
-            throw new PlannerException( (Pipe) flowElement, "Every may only be preceded by another Every or a GroupBy or CoGroup pipe, found: " + flowElement );
-
-          if( flowElement instanceof Every )
-            {
-            foundEveries++;
-
-            boolean isBuffer = ( (Every) flowElement ).isBuffer();
-
-            if( foundEveries != 0 && ( isBuffer || foundBuffer ) )
-              throw new PlannerException( (Pipe) flowElement, "Only one Every with a Buffer may follow a GroupBy or CoGroup pipe, no other Every instances are allowed immediately before or after, found: " + flowElement + " before: " + last );
-
-            if( !foundBuffer )
-              foundBuffer = isBuffer;
-
-            last = (Every) flowElement;
-            }
-
-          if( flowElement instanceof Group )
-            break;
-          }
-        }
-      }
-    }
-
-  protected void failOnGroupEverySplit( ElementGraph elementGraph )
-    {
-    List<Group> groups = new ArrayList<Group>();
-
-    elementGraph.findAllOfType( 1, 2, Group.class, groups );
-
-    for( Group group : groups )
-      {
-      Set<FlowElement> children = elementGraph.getAllChildrenNotExactlyType( group, Pipe.class );
-
-      for( FlowElement flowElement : children )
-        {
-        if( flowElement instanceof Every )
-          throw new PlannerException( (Every) flowElement, "Every instances may not split after a GroupBy or CoGroup pipe, found: " + flowElement + " after: " + group );
-        }
-      }
-    }
-
-  protected PlannerException handleExceptionDuringPlanning( Exception exception, ElementGraph elementGraph )
+  protected PlannerException handleExceptionDuringPlanning( Exception exception, FlowElementGraph flowElementGraph )
     {
     if( exception instanceof PlannerException )
       {
-      ( (PlannerException) exception ).elementGraph = elementGraph;
+      ( (PlannerException) exception ).flowElementGraph = flowElementGraph;
 
       return (PlannerException) exception;
       }
@@ -561,78 +503,33 @@ public abstract class FlowPlanner<F extends Flow, Config>
       String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
 
       if( cause instanceof OperatorException )
-        return new PlannerException( message, cause, elementGraph );
+        return new PlannerException( message, cause, flowElementGraph );
 
       if( cause instanceof TapException )
-        return new PlannerException( message, cause, elementGraph );
+        return new PlannerException( message, cause, flowElementGraph );
 
-      return new PlannerException( ( (ElementGraphException) exception ).getPipe(), message, cause, elementGraph );
+      return new PlannerException( ( (ElementGraphException) exception ).getPipe(), message, cause, flowElementGraph );
       }
     else
       {
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
       String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
-      return new PlannerException( message, exception, elementGraph );
+      return new PlannerException( message, exception, flowElementGraph );
       }
     }
 
-  protected void handleNonSafeOperations( ElementGraph elementGraph )
+  public class TempTapElementFactory implements ElementFactory
     {
-    // if there was a graph change, iterate paths again.
-    while( !internalNonSafeOperations( elementGraph ) )
-      ;
-    }
-
-  private boolean internalNonSafeOperations( ElementGraph elementGraph )
-    {
-    Set<Pipe> tapInsertions = new HashSet<Pipe>();
-
-    List<Pipe> splits = elementGraph.findAllPipeSplits();
-
-    // if any predecessor is unsafe, insert temp
-    for( Pipe split : splits )
+    @Override
+    public FlowElement create( FlowElementGraph graph, FlowElement flowElement )
       {
-      List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsTo( split );
-
-      for( GraphPath<FlowElement, Scope> path : paths )
-        {
-        List<FlowElement> elements = Graphs.getPathVertexList( path );
-        Collections.reverse( elements );
-
-        for( FlowElement element : elements )
-          {
-          if( !( element instanceof Each ) && element.getClass() != Pipe.class )
-            break;
-
-          if( element.getClass() == Pipe.class )
-            continue;
-
-          if( !( (Each) element ).getOperation().isSafe() )
-            {
-            tapInsertions.add( split );
-            break;
-            }
-          }
-        }
+      return makeTempTap( graph, (Pipe) flowElement );
       }
-
-    for( Pipe pipe : tapInsertions )
-      insertTempTapAfter( elementGraph, pipe );
-
-    return tapInsertions.isEmpty();
     }
 
-  /**
-   * Method insertTapAfter ...
-   *
-   * @param graph of type PipeGraph
-   * @param pipe  of type Pipe
-   */
-  protected void insertTempTapAfter( ElementGraph graph, Pipe pipe )
+  private Tap makeTempTap( FlowElementGraph graph, Pipe pipe )
     {
-    LOG.debug( "inserting tap after: {}", pipe );
-
     Tap checkpointTap = graph.getCheckpointsMap().get( pipe.getName() );
 
     if( checkpointTap != null )
@@ -642,12 +539,12 @@ public abstract class FlowPlanner<F extends Flow, Config>
       {
       // only restart from a checkpoint pipe or checkpoint tap below
       if( pipe instanceof Checkpoint )
-        checkpointTap = makeTempTap( checkpointRootPath, pipe.getName() );
+        checkpointTap = makeTempTap( checkpointTapRootPath, pipe.getName() );
       else
         checkpointTap = makeTempTap( pipe.getName() );
       }
 
-    graph.insertFlowElementAfter( pipe, checkpointTap );
+    return checkpointTap;
     }
 
   protected Tap makeTempTap( String name )
@@ -655,230 +552,103 @@ public abstract class FlowPlanner<F extends Flow, Config>
     return makeTempTap( null, name );
     }
 
+  protected DebugLevel getDebugLevel( FlowDef flowDef )
+    {
+    return flowDef.getDebugLevel() == null ? this.defaultDebugLevel : flowDef.getDebugLevel();
+    }
+
+  protected AssertionLevel getAssertionLevel( FlowDef flowDef )
+    {
+    return flowDef.getAssertionLevel() == null ? this.defaultAssertionLevel : flowDef.getAssertionLevel();
+    }
+
   protected abstract Tap makeTempTap( String prefix, String name );
 
-  /**
-   * Inserts a temporary Tap between logical MR jobs.
-   * <p/>
-   * Since all joins are at groups or splices, depth first search is safe
-   * <p/>
-   * todo: refactor so that rules are applied to path segments bounded by taps
-   * todo: this would allow balancing of operations within paths instead of pushing
-   * todo: all operations up. may allow for consolidation of rules
-   *
-   * @param elementGraph of type PipeGraph
-   */
-  protected void handleJobPartitioning( ElementGraph elementGraph )
+  protected String getPlanTracePath()
     {
-    // if there was a graph change, iterate paths again. prevents many temp taps from being inserted in front of a group
-    while( !internalJobPartitioning( elementGraph ) )
-      ;
+    return System.getProperty( FlowPlanner.TRACE_PLAN_PATH );
     }
 
-  private boolean internalJobPartitioning( ElementGraph elementGraph )
+  protected String getPlanTransformTracePath()
     {
-    for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsBetweenExtents() )
+    return System.getProperty( FlowPlanner.TRACE_PLAN_TRANSFORM_PATH );
+    }
+
+  protected String getPlanStatsPath()
+    {
+    return System.getProperty( FlowPlanner.TRACE_STATS_PATH );
+    }
+
+  protected void writeTracePlan( String name, FlowElementGraph flowElementGraph )
+    {
+    String path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    File file = new File( path, String.format( "%s.dot", name ) );
+
+    LOG.info( "writing trace element plan: {}", file );
+
+    String filename = file.toString();
+
+    flowElementGraph.writeDOT( filename );
+    }
+
+  protected void writeTracePlan( String name, FlowStepGraph stepGraph )
+    {
+    String path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    File file = new File( path, String.format( "%s.dot", name ) );
+
+    LOG.info( "writing trace step plan: {}", file );
+
+    stepGraph.writeDOT( file.toString() );
+    }
+
+  private void writeStats( PlannerContext plannerContext, RuleResult ruleResult )
+    {
+    if( getPlanStatsPath() == null )
+      return;
+
+    File file = new File( getPlanStatsPath(), "planner-stats.txt" );
+
+    LOG.info( "writing planner stats to: {}", file );
+
+    file.getParentFile().mkdirs();
+
+    try (PrintWriter writer = new PrintWriter( file ))
       {
-      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-      List<Pipe> tapInsertions = new ArrayList<Pipe>();
+      Flow flow = plannerContext.getFlow();
 
-      boolean foundGroup = false;
+      writer.format( "cascading version: %s, build: %s\n", emptyOrValue( Version.getReleaseFull() ), emptyOrValue( Version.getReleaseBuild() ) );
+      writer.format( "application id: %s\n", emptyOrValue( AppProps.getApplicationID( flow.getConfigAsProperties() ) ) );
+      writer.format( "application name: %s\n", emptyOrValue( AppProps.getApplicationName( flow.getConfigAsProperties() ) ) );
+      writer.format( "application version: %s\n", emptyOrValue( AppProps.getApplicationVersion( flow.getConfigAsProperties() ) ) );
+      writer.format( "platform: %s\n", emptyOrValue( flow.getPlatformInfo() ) );
+      writer.format( "frameworks: %s\n", emptyOrValue( AppProps.getApplicationFrameworks( flow.getConfigAsProperties() ) ) );
 
-      for( int i = 0; i < flowElements.size(); i++ )
-        {
-        FlowElement flowElement = flowElements.get( i );
+      writer.println();
 
-        if( flowElement instanceof ElementGraph.Extent ) // is an extent: head or tail
-          continue;
-        else if( flowElement instanceof Tap && flowElements.get( i - 1 ) instanceof ElementGraph.Extent )  // is a source tap
-          continue;
-
-        if( flowElement instanceof Group && !foundGroup )
-          {
-          foundGroup = true;
-          }
-        else if( flowElement instanceof Splice && foundGroup ) // add tap between groups, push joins/merge map side
-          {
-          tapInsertions.add( (Pipe) flowElements.get( i - 1 ) );
-
-          if( !( flowElement instanceof Group ) )
-            foundGroup = false;
-          }
-        else if( flowElement instanceof Checkpoint ) // add tap after checkpoint
-          {
-          if( flowElements.get( i + 1 ) instanceof Tap ) // don't keep inserting
-            continue;
-
-          tapInsertions.add( (Pipe) flowElement );
-          foundGroup = false;
-          }
-        else if( flowElement instanceof Tap )
-          {
-          foundGroup = false;
-          }
-        }
-
-      for( Pipe pipe : tapInsertions )
-        insertTempTapAfter( elementGraph, pipe );
-
-      if( !tapInsertions.isEmpty() )
-        return false;
+      ruleResult.writeStats( writer );
       }
-
-    return true;
-    }
-
-  /**
-   * Prevent leftmost sources from sourcing a downstream join on the rightmost side intra-task by inserting a
-   * temp tap between the left-sourced join and right-sourced join.
-   *
-   * @param elementGraph
-   */
-  protected void handleJoins( ElementGraph elementGraph )
-    {
-    while( !internalJoins( elementGraph ) )
-      ;
-    }
-
-  private boolean internalJoins( ElementGraph elementGraph )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetweenExtents();
-
-    // large to small
-    Collections.reverse( paths );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
+    catch( IOException exception )
       {
-      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-      List<Pipe> tapInsertions = new ArrayList<Pipe>();
-      List<HashJoin> joins = new ArrayList<HashJoin>();
-      List<Merge> merges = new ArrayList<Merge>();
-
-      FlowElement lastSourceElement = null;
-
-      for( int i = 0; i < flowElements.size(); i++ )
-        {
-        FlowElement flowElement = flowElements.get( i );
-
-        if( flowElement instanceof Merge )
-          {
-          merges.add( (Merge) flowElement );
-          }
-        else if( flowElement instanceof HashJoin )
-          {
-          HashJoin join = (HashJoin) flowElement;
-
-          Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join, true );
-
-          // is this path streamed
-          int pathPosition = pathPositionInto( path, join );
-          boolean thisPathIsStreamed = pathPosition == 0;
-
-          boolean isAccumulatedAndStreamed = isBothAccumulatedAndStreamedPath( pathCounts ); // has streamed and accumulated paths
-          int pathCount = countPaths( pathCounts );
-
-          int priorJoins = countTypesBetween( elementGraph, lastSourceElement, join, HashJoin.class );
-
-          if( priorJoins == 0 )
-            {
-            // if same source is leading into the hashjoin, insert tap on the accumulated side
-            if( pathCount == 2 && isAccumulatedAndStreamed && !thisPathIsStreamed )
-              {
-              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
-              break;
-              }
-
-            // if more than one path into streamed and accumulated branches, insert tap on streamed side
-            if( pathCount > 2 && isAccumulatedAndStreamed && thisPathIsStreamed )
-              {
-              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
-              break;
-              }
-            }
-
-          if( !merges.isEmpty() )
-            {
-            // if a Merge is prior to a HashJoin, and its an accumulated path, force Merge results to disk
-            int joinPos = flowElements.indexOf( join );
-            int mergePos = nearest( flowElements, joinPos, merges );
-
-            if( mergePos != -1 && joinPos > mergePos )
-              {
-              // if all paths are accumulated and streamed, insert
-              // else if just if this path is accumulated
-              if( ( isAccumulatedAndStreamed && thisPathIsStreamed ) || !thisPathIsStreamed )
-                {
-                tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
-                break;
-                }
-              }
-            }
-
-          joins.add( (HashJoin) flowElement );
-          }
-        else if( flowElement instanceof Tap || flowElement instanceof Group )
-          {
-          for( int j = 0; j < joins.size(); j++ )
-            {
-            HashJoin join = joins.get( j );
-
-            int pathPosition = pathPositionInto( path, join );
-            boolean thisPathIsStreamed = pathPosition == 0;
-
-            Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, join, true );
-
-            boolean isAccumulatedAndStreamed = isBothAccumulatedAndStreamedPath( pathCounts ); // has streamed and accumulated paths
-            int pathCount = countPaths( pathCounts );
-
-            if( pathCount >= 2 && isAccumulatedAndStreamed && thisPathIsStreamed )
-              {
-              tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
-              break;
-              }
-
-            if( thisPathIsStreamed )
-              continue;
-
-            if( j == 0 ) // is accumulated on first join
-              break;
-
-            // prevent a streamed path from being accumulated by injecting a tap before the
-            // current HashJoin
-            tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( join ) - 1 ) );
-            break;
-            }
-
-          if( !tapInsertions.isEmpty() )
-            break;
-
-          lastSourceElement = flowElement;
-          merges.clear();
-          joins.clear();
-          }
-        }
-
-      for( Pipe pipe : tapInsertions )
-        insertTempTapAfter( elementGraph, pipe );
-
-      if( !tapInsertions.isEmpty() )
-        return false;
+      LOG.error( "could not write stats", exception );
       }
-
-    return true;
     }
 
-  private int nearest( List<FlowElement> flowElements, int index, List<Merge> merges )
+  private static String emptyOrValue( Object value )
     {
-    List<Merge> reversed = new ArrayList<Merge>( merges );
-    Collections.reverse( reversed );
+    if( value == null )
+      return "";
 
-    for( Merge merge : reversed )
-      {
-      int pos = flowElements.indexOf( merge );
-      if( pos < index )
-        return pos;
-      }
+    if( Util.isEmpty( value.toString() ) )
+      return "";
 
-    return -1;
+    return value.toString();
     }
   }

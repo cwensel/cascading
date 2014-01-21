@@ -22,7 +22,7 @@ package cascading.flow;
 
 import java.util.Map;
 
-import cascading.flow.planner.ElementGraph;
+import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 
@@ -38,7 +38,7 @@ public class Flows
     return ( (BaseFlow) flow ).getJobsMap();
     }
 
-  public static ElementGraph getPipeGraphFrom( Flow flow )
+  public static FlowElementGraph getPipeGraphFrom( Flow flow )
     {
     return ( (BaseFlow) flow ).getPipeGraph();
     }

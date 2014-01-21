@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
+import cascading.flow.planner.FlowPlanner;
 import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
 import cascading.operation.ConcreteCall;
@@ -43,15 +44,33 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleListCollector;
+import cascading.util.Util;
 import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * Class CascadingTestCase is the base class for all Cascading tests.
  * <p/>
  * It included a few helpful utility methods for testing Cascading applications.
  */
-public class CascadingTestCase extends TestCase implements Serializable
+@RunWith(BlockJUnit4ClassRunner.class)
+public abstract class CascadingTestCase extends TestCase implements Serializable
   {
+  public static final String ROOT_OUTPUT_PATH = "test.output.root";
+  public static final String ROOT_PLAN_PATH = "test.plan.root";
+  public static final String TEST_TRACEPLAN_ENABLED = "test.traceplan.enabled";
+
+  private String outputPath;
+  private String planPath;
+
+  @Rule
+  public transient TestName name = new TestName();
+
   public CascadingTestCase()
     {
     }
@@ -59,6 +78,73 @@ public class CascadingTestCase extends TestCase implements Serializable
   public CascadingTestCase( String name )
     {
     super( name );
+    }
+
+  @Override
+  @Before
+  public void setUp() throws Exception
+    {
+    super.setUp();
+
+    if( Boolean.getBoolean( TEST_TRACEPLAN_ENABLED ) )
+      {
+      System.setProperty( FlowPlanner.TRACE_PLAN_TRANSFORM_PATH, Util.join( "/", getPlanPath(), "planner" ) );
+      System.setProperty( FlowPlanner.TRACE_PLAN_PATH, getPlanPath() );
+      System.setProperty( FlowPlanner.TRACE_STATS_PATH, getPlanPath() );
+      }
+    }
+
+  @Override
+  @After
+  public void tearDown() throws Exception
+    {
+    super.tearDown();
+    }
+
+  protected static String getTestOutputRoot()
+    {
+    return System.getProperty( ROOT_OUTPUT_PATH, "build/test/output" ).replace( ":", "_" );
+    }
+
+  protected static String getTestPlanRoot()
+    {
+    return System.getProperty( ROOT_PLAN_PATH, "build/test/plan" ).replace( ":", "_" );
+    }
+
+  protected String[] getOutputPathElements()
+    {
+    return new String[]{getTestOutputRoot(), getTestCaseName(), getTestName()};
+    }
+
+  protected String[] getPlanPathElements()
+    {
+    return new String[]{getTestPlanRoot(), getTestCaseName(), getTestName()};
+    }
+
+  protected String getOutputPath()
+    {
+    if( outputPath == null )
+      outputPath = Util.join( getOutputPathElements(), "/" );
+
+    return outputPath;
+    }
+
+  protected String getPlanPath()
+    {
+    if( planPath == null )
+      planPath = Util.join( getPlanPathElements(), "/" );
+
+    return planPath;
+    }
+
+  public String getTestCaseName()
+    {
+    return getClass().getSimpleName().replaceAll( "^(.*)Test.*$", "$1" ).toLowerCase();
+    }
+
+  public String getTestName()
+    {
+    return name.getMethodName();
     }
 
   public static void validateLength( Flow flow, int length ) throws IOException
@@ -345,15 +431,9 @@ public class CascadingTestCase extends TestCase implements Serializable
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, Fields selector, C collection ) throws IOException
     {
-    TupleEntryIterator iterator = flow.openTapForRead( tap );
-
-    try
+    try (TupleEntryIterator iterator = flow.openTapForRead( tap ))
       {
       return asCollection( iterator, selector, collection );
-      }
-    finally
-      {
-      iterator.close();
       }
     }
 

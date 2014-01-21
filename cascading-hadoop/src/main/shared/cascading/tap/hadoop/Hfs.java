@@ -128,6 +128,8 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   /** Field paths */
   private transient FileStatus[] statuses; // only used by getModifiedTime
 
+  private transient String cachedPath = null;
+
   /**
    * Method setTemporaryDirectory sets the temporary directory on the given properties object.
    *
@@ -359,7 +361,10 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   @Override
   public String getIdentifier()
     {
-    return getPath().toString();
+    if( cachedPath == null )
+      cachedPath = getPath().toString();
+
+    return cachedPath;
     }
 
   public Path getPath()

@@ -26,6 +26,7 @@ import cascading.operation.Filter;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
@@ -40,7 +41,7 @@ public class SampleFilterTest extends CascadingTestCase
     }
 
   @Override
-  protected void setUp() throws Exception
+  public void setUp() throws Exception
     {
     super.setUp();
 
@@ -52,13 +53,11 @@ public class SampleFilterTest extends CascadingTestCase
     return new TupleEntry( Fields.size( tuple.size() ), tuple );
     }
 
-
+  @Test
   public void testSample()
     {
     for( double i = 0; i < 1; i = i + .01 )
-      {
       performSampleTest( i, 100000 );
-      }
     }
 
   private void performSampleTest( double sample, int values )

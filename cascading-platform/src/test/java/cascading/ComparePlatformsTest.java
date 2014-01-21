@@ -35,12 +35,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.junit.internal.runners.SuiteMethod;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
+@RunWith(SuiteMethod.class)
 public class ComparePlatformsTest extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( ComparePlatformsTest.class );
@@ -49,6 +52,9 @@ public class ComparePlatformsTest extends CascadingTestCase
   public static Test suite() throws Exception
     {
     String root = System.getProperty( "test.output.roots" );
+
+    if( root == null )
+      return new TestSuite();
 
     LOG.info( "output roots: {}", root );
 

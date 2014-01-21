@@ -22,6 +22,7 @@ package cascading.flow.planner;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,11 +36,17 @@ public class Scope implements Serializable
   /** Enum Kind */
   static public enum Kind
     {
-      TAP, EACH, EVERY, GROUP, SPLICE
+      TAP, EACH, EVERY, GROUPBY, COGROUP, HASHJOIN, MERGE
     }
 
   /** Field name */
   private String name;
+  private LinkedList<String> priorNames = new LinkedList<>();
+  /** Field ordinal */
+  private int ordinal = 0;
+
+  // copied
+
   /** Field kind */
   private Kind kind;
   /** Field incomingPassThroughFields */
@@ -51,8 +58,6 @@ public class Scope implements Serializable
   private Fields operationArgumentFields;
   /** Field declaredFields */
   private Fields operationDeclaredFields; // fields declared by the operation
-  /** Field isGroupBy */
-  private boolean isGroupBy;
 
   /** Field groupingSelectors */
   private Map<String, Fields> keySelectors;
@@ -156,13 +161,12 @@ public class Scope implements Serializable
    * @param keySelectors            of type Map<String, Fields>
    * @param sortingSelectors        of type Fields
    * @param outValuesFields         of type Fields
-   * @param isGroupBy               of type boolean
+   * @param kind                    of type boolean
    */
-  public Scope( String name, Fields operationDeclaredFields, Fields outGroupingFields, Map<String, Fields> keySelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, boolean isGroupBy )
+  public Scope( String name, Fields operationDeclaredFields, Fields outGroupingFields, Map<String, Fields> keySelectors, Map<String, Fields> sortingSelectors, Fields outValuesFields, Kind kind )
     {
     this.name = name;
-    this.kind = Kind.GROUP;
-    this.isGroupBy = isGroupBy;
+    this.kind = kind;
 
     if( keySelectors == null )
       throw new IllegalArgumentException( "grouping may not be null" );
@@ -187,14 +191,59 @@ public class Scope implements Serializable
     this.name = name;
     }
 
-  /**
-   * Method isGroup returns true if this Scope object represents a Group.
-   *
-   * @return the group (type boolean) of this Scope object.
-   */
+  public void addPriorNames( Scope incoming, Scope outgoing )
+    {
+    priorNames.addAll( 0, outgoing.priorNames );
+    priorNames.addFirst( incoming.getName() );
+    priorNames.addAll( 0, incoming.priorNames );
+    }
+
+  public String getPriorName()
+    {
+    if( priorNames.isEmpty() )
+      return getName();
+
+    return priorNames.getFirst();
+    }
+
+  public int getOrdinal()
+    {
+    return ordinal;
+    }
+
+  public void setOrdinal( int ordinal )
+    {
+    this.ordinal = ordinal;
+    }
+
+  public boolean isSplice()
+    {
+    return isGroupBy() || isCoGroup() || isMerge() || isHashJoin();
+    }
+
   public boolean isGroup()
     {
-    return kind == Kind.GROUP;
+    return kind == Kind.GROUPBY || kind == Kind.COGROUP;
+    }
+
+  public boolean isGroupBy()
+    {
+    return kind == Kind.GROUPBY;
+    }
+
+  public boolean isCoGroup()
+    {
+    return kind == Kind.COGROUP;
+    }
+
+  public boolean isMerge()
+    {
+    return kind == Kind.MERGE;
+    }
+
+  public boolean isHashJoin()
+    {
+    return kind == Kind.HASHJOIN;
     }
 
   /**
@@ -388,13 +437,13 @@ public class Scope implements Serializable
    */
   public Fields getOutGroupingFields()
     {
-    if( !isGroup() )
+    if( !isSplice() )
       return outGroupingFields;
 
     Fields first = keySelectors.values().iterator().next();
 
     // if more than one, this is a merge, so same key names are expected
-    if( keySelectors.size() == 1 || isGroup() && isGroupBy )
+    if( keySelectors.size() == 1 || isGroupBy() )
       return first;
 
     // handling CoGroup only
@@ -447,7 +496,6 @@ public class Scope implements Serializable
   public void copyFields( Scope scope )
     {
     this.kind = scope.kind;
-    this.isGroupBy = scope.isGroupBy;
     this.incomingPassThroughFields = scope.incomingPassThroughFields;
     this.remainderPassThroughFields = scope.remainderPassThroughFields;
     this.operationArgumentFields = scope.operationArgumentFields;

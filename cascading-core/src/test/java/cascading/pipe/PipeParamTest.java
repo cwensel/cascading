@@ -25,6 +25,7 @@ import cascading.TestFunction;
 import cascading.operation.Identity;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.junit.Test;
 
 public class PipeParamTest extends CascadingTestCase
   {
@@ -42,6 +43,7 @@ public class PipeParamTest extends CascadingTestCase
     super();
     }
 
+  @Test
   public void testEachPassCtor()
     {
     for( Fields arg : ARGS_PASS )
@@ -63,6 +65,7 @@ public class PipeParamTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testEachFailCtor()
     {
     for( Fields arg : ARGS_FAIL )
@@ -118,6 +121,7 @@ public class PipeParamTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testGetFirst()
     {
     Pipe pipeFirst = new Pipe( "first" );
@@ -129,6 +133,7 @@ public class PipeParamTest extends CascadingTestCase
     assertEquals( pipeFirst, pipe.getHeads()[ 0 ] );
     }
 
+  @Test
   public void testGetFirstSplit()
     {
     Pipe pipeFirst = new Pipe( "first" );
@@ -142,6 +147,7 @@ public class PipeParamTest extends CascadingTestCase
     assertEquals( pipeFirst, pipeB.getHeads()[ 0 ] );
     }
 
+  @Test
   public void testGetFirstJoin()
     {
     Pipe pipeFirst = new Pipe( "first" );
@@ -168,6 +174,7 @@ public class PipeParamTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testGetNames()
     {
     Pipe pipe = new Pipe( "first" );

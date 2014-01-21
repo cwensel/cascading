@@ -21,8 +21,6 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,6 +33,7 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
@@ -68,14 +67,9 @@ import static cascading.flow.hadoop.util.HadoopUtil.writeStateToDistCache;
  */
 public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
-  /** Field mapperTraps */
-  private final Map<String, Tap> mapperTraps = new HashMap<String, Tap>();
-  /** Field reducerTraps */
-  private final Map<String, Tap> reducerTraps = new HashMap<String, Tap>();
-
-  public HadoopFlowStep( String name, int stepNum )
+  public HadoopFlowStep( String name, int stepNum, ElementGraph elementGraph )
     {
-    super( name, stepNum );
+    super( name, stepNum, elementGraph );
     }
 
   public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
@@ -257,12 +251,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       cleanTapMetaData( config, getSink() );
       }
 
-    for( Tap tap : getMapperTraps().values() )
+    for( Tap tap : getTraps() )
       cleanTapMetaData( config, tap );
-
-    for( Tap tap : getReducerTraps().values() )
-      cleanTapMetaData( config, tap );
-
     }
 
   private void cleanTapMetaData( JobConf jobConf, Tap tap )
@@ -408,9 +398,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
    */
   private Set<Tap> getUniqueStreamedSources()
     {
-    HashSet<Tap> set = new HashSet<Tap>( sources.keySet() );
+    Set<Tap> allAccumulatedSources = getAllAccumulatedSources();
 
-    set.removeAll( getAllAccumulatedSources() );
+    HashSet<Tap> set = new HashSet<>( sources.keySet() );
+
+    set.removeAll( allAccumulatedSources );
 
     return set;
     }
@@ -431,49 +423,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   protected void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf )
     {
-    initFromTraps( flowProcess, conf, getMapperTraps() );
-    initFromTraps( flowProcess, conf, getReducerTraps() );
-    }
-
-  @Override
-  public Set<Tap> getTraps()
-    {
-    Set<Tap> set = new HashSet<Tap>();
-
-    set.addAll( mapperTraps.values() );
-    set.addAll( reducerTraps.values() );
-
-    return Collections.unmodifiableSet( set );
-    }
-
-  @Override
-  public Tap getTrap( String name )
-    {
-    Tap trap = getMapperTrap( name );
-
-    if( trap == null )
-      trap = getReducerTrap( name );
-
-    return trap;
-    }
-
-  public Map<String, Tap> getMapperTraps()
-    {
-    return mapperTraps;
-    }
-
-  public Map<String, Tap> getReducerTraps()
-    {
-    return reducerTraps;
-    }
-
-  public Tap getMapperTrap( String name )
-    {
-    return getMapperTraps().get( name );
-    }
-
-  public Tap getReducerTrap( String name )
-    {
-    return getReducerTraps().get( name );
+    initFromTraps( flowProcess, conf, getTrapMap() );
     }
   }

@@ -21,6 +21,7 @@
 package cascading.tuple;
 
 import cascading.CascadingTestCase;
+import org.junit.Test;
 
 public class TupleFieldsTest extends CascadingTestCase
   {
@@ -32,7 +33,7 @@ public class TupleFieldsTest extends CascadingTestCase
     }
 
   @Override
-  protected void setUp() throws Exception
+  public void setUp() throws Exception
     {
     tuple = new Tuple();
 
@@ -45,6 +46,7 @@ public class TupleFieldsTest extends CascadingTestCase
     fields = new Fields( "one", "two", "three", "four", "five" );
     }
 
+  @Test
   public void testHas()
     {
     assertEquals( "not equal: tuple.size()", 5, tuple.size() );
@@ -52,6 +54,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "b", tuple.get( fields, new Fields( "two" ) ).getObject( 0 ) );
     }
 
+  @Test
   public void testGet()
     {
     Fields aFields = new Fields( "one" );
@@ -65,6 +68,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testWildcard()
     {
     Fields aFields = Fields.ALL;
@@ -75,6 +79,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: aTuple.get( 1 )", "b", aTuple.get( fields, new Fields( "two" ) ).getObject( 0 ) );
     }
 
+  @Test
   public void testRemove()
     {
     Fields aFields = new Fields( "one" );
@@ -89,6 +94,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.get( fields, new Fields( "three" ) ).getObject( 0 ) );
     }
 
+  @Test
   public void testPut()
     {
     Fields aFields = new Fields( "one", "five" );
@@ -101,6 +107,7 @@ public class TupleFieldsTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get( 0 )", "eleven", tuple.get( fields, new Fields( "five" ) ).getObject( 0 ) );
     }
 
+  @Test
   public void testSelectComplex()
     {
     Tuple tuple = new Tuple( "movie", "name1", "movie1", "rate1", "name2", "movie2", "rate2" );

@@ -22,12 +22,14 @@ package cascading.pipe.assembly;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.FlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -857,7 +859,6 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
    * Tests chained merge + AggregateBy, which really tests the complete() calls within the pipeline. when failing
    * the map side functor function will fail during a flush
    * <p/>
-   * todo: push merge upstream
    *
    * @throws IOException
    */
@@ -890,6 +891,11 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     Map<String, Tap> tapMap = Cascades.tapsMap( sourcePipe, source );
 
     Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, countPipe );
+
+    List<FlowStep> steps = flow.getFlowSteps();
+
+    if( getPlatform().isMapReduce() )
+      assertEquals( "not equal: steps.size()", 2, steps.size() );
 
 //    flow.writeDOT( "pushmerge.dot" );
 

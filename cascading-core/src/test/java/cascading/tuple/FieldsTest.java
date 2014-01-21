@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import cascading.CascadingTestCase;
+import org.junit.Test;
 
 import static cascading.tuple.Fields.names;
 import static cascading.tuple.Fields.types;
@@ -34,6 +35,7 @@ public class FieldsTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testDuplicate()
     {
     try
@@ -57,6 +59,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testAppend()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -70,6 +73,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  @Test
   public void testAppend2()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -83,6 +87,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  @Test
   public void testAppend3()
     {
     Fields fieldA = Fields.NONE;
@@ -94,6 +99,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 0 ) );
     }
 
+  @Test
   public void testAppend4()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -107,6 +113,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", -1, appended.get( 2 ) );
     }
 
+  @Test
   public void testAppend4Fail()
     {
     Fields fieldA = new Fields( 0, -1 );
@@ -123,6 +130,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testAppendNamed()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -136,6 +144,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", appended.get( 2 ) );
     }
 
+  @Test
   public void testAppendNamed2()
     {
     Fields fieldA = new Fields( "a" );
@@ -149,6 +158,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, appended.get( 2 ) );
     }
 
+  @Test
   public void testAppendSelectNamed()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -162,6 +172,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", appended.get( 2 ) );
     }
 
+  @Test
   public void testAppendSelectNamed2()
     {
     Fields fieldA = new Fields( "a" );
@@ -175,6 +186,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 1, appended.get( 2 ) );
     }
 
+  @Test
   public void testAppendSelectNamedFail()
     {
     Fields fieldA = new Fields( "a", 0 );
@@ -192,6 +204,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testAppendArray()
     {
     Fields fieldA = new Fields( 0, 1 );
@@ -207,7 +220,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, appended.get( 3 ) );
     }
 
-
+  @Test
   public void testRename()
     {
     Fields fields = new Fields( "a", "b", "c", "d" );
@@ -223,6 +236,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", renamed.get( 3 ) );
     }
 
+  @Test
   public void testRename2()
     {
     Fields fields = new Fields( "a", "b", "c", "d" );
@@ -238,6 +252,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", renamed.get( 3 ) );
     }
 
+  @Test
   public void testRename3()
     {
     Fields fields = new Fields( "a", "b", "c", "d" );
@@ -254,6 +269,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", renamed.get( 3 ) );
     }
 
+  @Test
   public void testRename4()
     {
     Fields fields = new Fields( "a", "b", "c", "d" );
@@ -270,6 +286,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", renamed.get( 3 ) );
     }
 
+  @Test
   public void testDiff()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -281,6 +298,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
     }
 
+  @Test
   public void testDiff2()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -304,6 +322,7 @@ public class FieldsTest extends CascadingTestCase
 //    assertEquals( "not equal: ", "b", diff.get( 0 ) );
 //    }
 
+  @Test
   public void testDiffSame()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -314,6 +333,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 0, diff.size() );
     }
 
+  @Test
   public void testDiffIndex()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -325,6 +345,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", diff.get( 0 ) );
     }
 
+  @Test
   public void testDiffIndex2()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -336,6 +357,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", diff.get( 0 ) );
     }
 
+  @Test
   public void testDiff3()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -359,6 +381,7 @@ public class FieldsTest extends CascadingTestCase
    * <p/>
    * the result of a select is always a field declaration
    */
+  @Test
   public void testSelect()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -371,6 +394,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 1 ) );
     }
 
+  @Test
   public void testSelect2()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -383,6 +407,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectPos()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -399,6 +424,7 @@ public class FieldsTest extends CascadingTestCase
    * this test is reverted from original. we don't want to do the following comment
    * ~~this one is funky. regardless of the input, positions are always monotonically increasing~~
    */
+  @Test
   public void testSelectPos2()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -411,6 +437,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 0, got.get( 1 ) );
     }
 
+  @Test
   public void testSelectMixed()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -423,6 +450,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectMixed2()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -435,6 +463,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectMixed3()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -449,6 +478,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, got.get( 3 ) );
     }
 
+  @Test
   public void testSelectMixed4()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -463,6 +493,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 3 ) );
     }
 
+  @Test
   public void testSelectMixedNeg()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -475,6 +506,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectMixedNeg2()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -487,6 +519,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectMixedNeg3()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -501,6 +534,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, got.get( 3 ) );
     }
 
+  @Test
   public void testSelectMixedNeg4()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -515,6 +549,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 3 ) );
     }
 
+  @Test
   public void testSelectMixedNeg5()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -529,6 +564,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, got.get( 3 ) );
     }
 
+  @Test
   public void testResolveIndexOnly()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -541,6 +577,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 0, got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexOnly2()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -553,6 +590,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 1, got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexOnly3()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -565,6 +603,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 2, got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexOnly4()
     {
     Fields declarationA = new Fields( 0, 1 );
@@ -577,6 +616,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexAppended()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -589,6 +629,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexAppended2()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -601,6 +642,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexAppended3()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -613,6 +655,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "c", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveIndexAppended4()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -625,6 +668,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveAppended()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -637,6 +681,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "a", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveAppended2()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -649,6 +694,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveAppended3()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -661,6 +707,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "c", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveAppended4()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -673,6 +720,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", got.get( 0 ) );
     }
 
+  @Test
   public void testResolveAppended5()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -686,6 +734,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", got.get( 1 ) );
     }
 
+  @Test
   public void testResolveAppendedComplex()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -705,6 +754,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 3, got.get( 7 ) );
     }
 
+  @Test
   public void testResolveAppendedFail()
     {
     Fields declarationA = new Fields( "a", "b", 2, 3 );
@@ -722,6 +772,7 @@ public class FieldsTest extends CascadingTestCase
     }
 
   /** This must fail, no way the dec is a declaration */
+  @Test
   public void testSelectFail()
     {
     Fields declarationA = new Fields( 2, "a", "b", 3 );
@@ -738,6 +789,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testSelectWildcard()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -750,6 +802,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "b", got.get( 1 ) );
     }
 
+  @Test
   public void testSelectComplex()
     {
     Fields declarationA = new Fields( "movie", "name1", "movie1", "rate1", "name2", "movie2", "rate2" );
@@ -765,6 +818,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", 6, got[ 4 ] );
     }
 
+  @Test
   public void testUnknown()
     {
     Fields declarationA = new Fields( "a", "b" );
@@ -796,6 +850,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testSelectNegative()
     {
     Fields declarationA = new Fields( "movie", "name1", "movie1", "rate1", "name2", "movie2", "rate2" );
@@ -819,6 +874,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testJoin()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -833,6 +889,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", join.get( 3 ) );
     }
 
+  @Test
   public void testNestedFieldsFail()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -849,6 +906,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testNullFieldsFail()
     {
     try
@@ -862,6 +920,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testMergeFields()
     {
     Fields fieldA = new Fields( "a", "b" );
@@ -897,6 +956,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "d", join.get( 3 ) );
     }
 
+  @Test
   public void testSelectFrom()
     {
     Fields declarationA = new Fields( "a", "b", "c", "d", "e", "f", "g" );
@@ -913,6 +973,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", "F", results.get( 2 ) );
     }
 
+  @Test
   public void testTypedAppendToNone()
     {
     Fields fieldA = Fields.NONE;
@@ -926,6 +987,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
     }
 
+  @Test
   public void testTypedAppendNamed()
     {
     Fields fieldA = new Fields( names( 0, 1 ), types( int.class, int.class ) );
@@ -943,6 +1005,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", String.class, appended.getType( 2 ) );
     }
 
+  @Test
   public void testTypedRename()
     {
     Fields fields = new Fields( names( "a", "b", "c", "d" ), types( int.class, int.class, int.class, int.class ) );
@@ -958,6 +1021,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", int.class, renamed.getType( 3 ) );
     }
 
+  @Test
   public void testTypedSelect()
     {
     Fields declarationA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
@@ -970,6 +1034,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", String.class, got.getType( 1 ) );
     }
 
+  @Test
   public void testTypedSelect2()
     {
     Fields declarationA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
@@ -982,6 +1047,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", int.class, got.getType( 1 ) );
     }
 
+  @Test
   public void testTypedDiff()
     {
     Fields fieldA = new Fields( names( "a", "b" ), types( int.class, String.class ) );
@@ -993,6 +1059,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", String.class, diff.getType( 0 ) );
     }
 
+  @Test
   public void testTypedApply()
     {
     Fields fieldA = new Fields( names( "a", "b" ), types( int.class, int.class ) );

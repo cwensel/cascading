@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import cascading.CascadingTestCase;
 import cascading.tuple.type.CoercibleType;
 import cascading.tuple.type.DateType;
+import org.junit.Test;
 
 public class TupleEntryTest extends CascadingTestCase
   {
@@ -36,6 +37,7 @@ public class TupleEntryTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testSelect()
     {
     Fields selector = new Fields( "a", "d" );
@@ -50,6 +52,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "d", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testSelect2()
     {
     Fields selector = new Fields( 1, "d" );
@@ -64,6 +67,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "d", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testSelectNotComparable()
     {
     Fields selector = new Fields( 1, "d" );
@@ -79,6 +83,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "d", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testSelectComplex()
     {
     Fields selector = new Fields( -1, -3 );
@@ -98,6 +103,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testSelectComplex2()
     {
     Fields selector = new Fields( -1, -3 );
@@ -117,6 +123,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(1)", "b", tuple.getObject( 1 ) );
     }
 
+  @Test
   public void testExtractSet()
     {
     Fields selector = new Fields( 1, "d" );
@@ -138,6 +145,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(3)", "D", entryA.getObject( 3 ) );
     }
 
+  @Test
   public void testExtractSet2()
     {
     Fields selector = new Fields( "d", 1 );
@@ -159,6 +167,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(3)", "D", entryA.getObject( 3 ) );
     }
 
+  @Test
   public void testUnmodifiable()
     {
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b" ), true );
@@ -191,6 +200,7 @@ public class TupleEntryTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testEquals()
     {
     assertEquals(
@@ -222,6 +232,7 @@ public class TupleEntryTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testCoerceCanonical()
     {
     final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
@@ -244,6 +255,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( Long.toString( date.getTime() ), results.getString( 1 ) );
     }
 
+  @Test
   public void testCoerceOnSet()
     {
     final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
@@ -314,6 +326,7 @@ public class TupleEntryTest extends CascadingTestCase
 
     }
 
+  @Test
   public void testCoerceIterable()
     {
     final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );

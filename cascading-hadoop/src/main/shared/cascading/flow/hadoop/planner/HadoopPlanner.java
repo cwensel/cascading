@@ -21,48 +21,33 @@
 package cascading.flow.hadoop.planner;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
-import cascading.flow.FlowElement;
 import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.ElementGraph;
-import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
-import cascading.flow.planner.Scope;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Every;
-import cascading.pipe.Group;
-import cascading.pipe.Pipe;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
 import cascading.property.AppProps;
-import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
-
 /**
- * Class HadoopPlanner is the core Hadoop MapReduce planner.
+ * Class HadoopPlanner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop.HadoopFlowConnector}.
  * <p/>
  * Notes:
  * <p/>
@@ -83,7 +68,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   private static final Logger LOG = LoggerFactory.getLogger( HadoopPlanner.class );
 
   /** Field jobConf */
-  private JobConf jobConf;
+  private JobConf defaultJobConf;
   /** Field intermediateSchemeClass */
   private Class intermediateSchemeClass;
 
@@ -141,38 +126,10 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
       }
     }
 
-  /**
-   * Method setNormalizeHeterogeneousSources adds the given doNormalize boolean to the given properties object.
-   * Use this method if additional jobs should be planned in to handle incompatible InputFormat classes.
-   * <p/>
-   * Normalization is off by default and should only be enabled by advanced users. Typically this will decrease
-   * application performance.
-   *
-   * @param properties  of type Map
-   * @param doNormalize of type boolean
-   */
-  @Deprecated
-  public static void setNormalizeHeterogeneousSources( Map<Object, Object> properties, boolean doNormalize )
-    {
-    properties.put( "cascading.multimapreduceplanner.normalizesources", Boolean.toString( doNormalize ) );
-    }
-
-  /**
-   * Method getNormalizeHeterogeneousSources returns if this planner will normalize heterogeneous input sources.
-   *
-   * @param properties of type Map
-   * @return a boolean
-   */
-  @Deprecated
-  public static boolean getNormalizeHeterogeneousSources( Map<Object, Object> properties )
-    {
-    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
-    }
-
   @Override
-  public JobConf getConfig()
+  public JobConf getDefaultConfig()
     {
-    return jobConf;
+    return defaultJobConf;
     }
 
   @Override
@@ -186,413 +143,65 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     {
     super.initialize( flowConnector, properties );
 
-    jobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
+    defaultJobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
     intermediateSchemeClass = flowConnector.getIntermediateSchemeClass( properties );
 
     Class type = AppProps.getApplicationJarClass( properties );
-    if( jobConf.getJar() == null && type != null )
-      jobConf.setJarByClass( type );
+    if( defaultJobConf.getJar() == null && type != null )
+      defaultJobConf.setJarByClass( type );
 
     String path = AppProps.getApplicationJarPath( properties );
-    if( jobConf.getJar() == null && path != null )
-      jobConf.setJar( path );
+    if( defaultJobConf.getJar() == null && path != null )
+      defaultJobConf.setJar( path );
 
-    if( jobConf.getJar() == null )
-      jobConf.setJarByClass( HadoopUtil.findMainClass( HadoopPlanner.class ) );
+    if( defaultJobConf.getJar() == null )
+      defaultJobConf.setJarByClass( HadoopUtil.findMainClass( HadoopPlanner.class ) );
 
-    AppProps.setApplicationJarPath( properties, jobConf.getJar() );
+    AppProps.setApplicationJarPath( properties, defaultJobConf.getJar() );
 
-    LOG.info( "using application jar: {}", jobConf.getJar() );
+    LOG.info( "using application jar: {}", defaultJobConf.getJar() );
+    }
+
+  @Override
+  protected FlowStepGraph<JobConf> createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
+    {
+    return new HadoopStepGraph( flowElementGraph, elementSubGraphs );
+    }
+
+  @Override
+  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
+    {
+    return new HadoopRuleRegistry();
+    }
+
+  @Override
+  protected void configRuleRegistry( RuleRegistry ruleRegistry )
+    {
+    super.configRuleRegistry( ruleRegistry );
+
+    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new TempTapElementFactory() );
     }
 
   @Override
   protected HadoopFlow createFlow( FlowDef flowDef )
     {
-    return new HadoopFlow( getPlatformInfo(), getProperties(), getConfig(), flowDef );
+    return new HadoopFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  @Override
-  public HadoopFlow buildFlow( FlowDef flowDef )
+  public URI getDefaultURIScheme( Tap tap )
     {
-    ElementGraph elementGraph = null;
-
-    try
-      {
-      // generic
-      verifyAllTaps( flowDef );
-
-      HadoopFlow flow = createFlow( flowDef );
-
-      Pipe[] tails = resolveTails( flowDef, flow );
-
-      verifyAssembly( flowDef, tails );
-
-      elementGraph = createElementGraph( flowDef, tails );
-
-      // rules
-      failOnLoneGroupAssertion( elementGraph );
-      failOnMissingGroup( elementGraph );
-      failOnMisusedBuffer( elementGraph );
-      failOnGroupEverySplit( elementGraph );
-
-      // m/r specific
-      handleWarnEquivalentPaths( elementGraph );
-      handleSplit( elementGraph );
-      handleJobPartitioning( elementGraph );
-      handleJoins( elementGraph );
-      handleNonSafeOperations( elementGraph );
-
-      if( getNormalizeHeterogeneousSources( properties ) )
-        handleHeterogeneousSources( elementGraph );
-
-      // generic
-      elementGraph.removeUnnecessaryPipes(); // groups must be added before removing pipes
-      elementGraph.resolveFields();
-
-      elementGraph = flow.updateSchemes( elementGraph );
-
-      // m/r specific
-      handleAdjacentTaps( elementGraph );
-
-      FlowStepGraph flowStepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph );
-
-      flow.initialize( elementGraph, flowStepGraph );
-
-      return flow;
-      }
-    catch( Exception exception )
-      {
-      throw handleExceptionDuringPlanning( exception, elementGraph );
-      }
+    return ( (Hfs) tap ).getDefaultFileSystemURIScheme( defaultJobConf );
     }
 
-  private void handleWarnEquivalentPaths( ElementGraph elementGraph )
+  public URI getURIScheme( Tap tap )
     {
-    List<CoGroup> coGroups = elementGraph.findAllCoGroups();
-
-    for( CoGroup coGroup : coGroups )
-      {
-      List<GraphPath<FlowElement, Scope>> graphPaths = elementGraph.getAllShortestPathsTo( coGroup );
-
-      List<List<FlowElement>> paths = ElementGraphs.asPathList( graphPaths );
-
-      if( !areEquivalentPaths( elementGraph, paths ) )
-        continue;
-
-      LOG.warn( "found equivalent paths from: {} to: {}", paths.get( 0 ).get( 1 ), coGroup );
-
-      // in order to remove dupe paths, we need to verify there isn't any branching
-      }
-    }
-
-  private boolean areEquivalentPaths( ElementGraph elementGraph, List<List<FlowElement>> paths )
-    {
-    int length = sameLength( paths );
-
-    if( length == -1 )
-      return false;
-
-    Set<FlowElement> elements = new TreeSet<FlowElement>( new EquivalenceComparator( elementGraph ) );
-
-    for( int i = 0; i < length; i++ )
-      {
-      elements.clear();
-
-      for( List<FlowElement> path : paths )
-        elements.add( path.get( i ) );
-
-      if( elements.size() != 1 )
-        return false;
-      }
-
-    return true;
-    }
-
-  private class EquivalenceComparator implements Comparator<FlowElement>
-    {
-    private final ElementGraph elementGraph;
-
-    public EquivalenceComparator( ElementGraph elementGraph )
-      {
-      this.elementGraph = elementGraph;
-      }
-
-    @Override
-    public int compare( FlowElement lhs, FlowElement rhs )
-      {
-      boolean areEquivalent = lhs.isEquivalentTo( rhs );
-      boolean sameIncoming = elementGraph.inDegreeOf( lhs ) == elementGraph.inDegreeOf( rhs );
-      boolean sameOutgoing = elementGraph.outDegreeOf( lhs ) == elementGraph.outDegreeOf( rhs );
-
-      if( areEquivalent && sameIncoming && sameOutgoing )
-        return 0;
-
-      return System.identityHashCode( lhs ) - System.identityHashCode( rhs );
-      }
-    }
-
-  private int sameLength( List<List<FlowElement>> paths )
-    {
-    int lastSize = paths.get( 0 ).size();
-
-    for( int i = 1; i < paths.size(); i++ )
-      {
-      if( paths.get( i ).size() != lastSize )
-        return -1;
-      }
-
-    return lastSize;
-    }
-
-  /**
-   * optimized for this case
-   * <pre>
-   *         e - t           e1 - e - t
-   * t - e1 -       -- > t -
-   *         e - t           e1 - e - t
-   * </pre>
-   * <p/>
-   * this should run in two map/red jobs, not 3. needs to be a flag on e1 to prevent this
-   * <p/>
-   * <pre>
-   *        g - t                 g - t
-   * g - e -       --> g - e - t -
-   *        g - t                 g - t
-   * </pre>
-   * <p/>
-   * <pre>
-   *             - e - e                            e - e
-   * t - e1 - e2         - g  --> t - e1 - e2 - t -       - g
-   *             - e - e                            e - e
-   * </pre>
-   *
-   * @param elementGraph
-   */
-  private void handleSplit( ElementGraph elementGraph )
-    {
-    // if there was a graph change, iterate paths again.
-    while( !internalSplit( elementGraph ) )
-      ;
-    }
-
-  private boolean internalSplit( ElementGraph elementGraph )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = elementGraph.getAllShortestPathsBetweenExtents();
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-      Set<Pipe> tapInsertions = new HashSet<Pipe>();
-      FlowElement lastInsertable = null;
-
-      for( int i = 0; i < flowElements.size(); i++ )
-        {
-        FlowElement flowElement = flowElements.get( i );
-
-        if( flowElement instanceof ElementGraph.Extent ) // is an extent: head or tail
-          continue;
-
-        // if Tap, Group, or Every - we insert the tap here
-        if( flowElement instanceof Tap || flowElement instanceof Group || flowElement instanceof Every )
-          lastInsertable = flowElement;
-
-        // support splits on Pipe unless the previous is a Tap
-        if( flowElement.getClass() == Pipe.class && flowElements.get( i - 1 ) instanceof Tap )
-          continue;
-
-        if( flowElement instanceof Tap )
-          continue;
-
-        if( elementGraph.outDegreeOf( flowElement ) <= 1 )
-          continue;
-
-        // we are at the root of a split here
-
-        // do any split paths converge on a single Group?
-        int maxPaths = elementGraph.getMaxNumPathsBetweenElementAndGroupingMergeJoin( flowElement );
-        if( maxPaths <= 1 && lastInsertable instanceof Tap )
-          continue;
-
-        tapInsertions.add( (Pipe) flowElement );
-        }
-
-      for( Pipe pipe : tapInsertions )
-        insertTempTapAfter( elementGraph, pipe );
-
-      if( !tapInsertions.isEmpty() )
-        return false;
-      }
-
-    return true;
-    }
-
-  /**
-   * will collapse adjacent and equivalent taps.
-   * equivalence is based on the tap adjacent taps using the same filesystem
-   * and the sink being symmetrical, and having the same fields as the temp tap.
-   * <p/>
-   * <p/>
-   * must be run after fields are resolved so temp taps have fully defined scheme instances.
-   *
-   * @param elementGraph
-   */
-  private void handleAdjacentTaps( ElementGraph elementGraph )
-    {
-    // if there was a graph change, iterate paths again.
-    while( !internalAdjacentTaps( elementGraph ) )
-      ;
-    }
-
-  private boolean internalAdjacentTaps( ElementGraph elementGraph )
-    {
-    List<Tap> taps = elementGraph.findAllTaps();
-
-    for( Tap tap : taps )
-      {
-      if( !( tap instanceof TempHfs ) )
-        continue;
-
-      for( FlowElement successor : elementGraph.getAllSuccessors( tap ) )
-        {
-        if( !( successor instanceof Hfs ) )
-          continue;
-
-        Hfs successorTap = (Hfs) successor;
-
-        // does this scheme source what it sinks
-        if( !successorTap.getScheme().isSymmetrical() )
-          continue;
-
-        URI tempURIScheme = getDefaultURIScheme( tap ); // temp uses default fs
-        URI successorURIScheme = getURIScheme( successorTap );
-
-        if( !tempURIScheme.equals( successorURIScheme ) )
-          continue;
-
-        // safe, both are symmetrical
-        // should be called after fields are resolved
-        if( !tap.getSourceFields().equals( successorTap.getSourceFields() ) )
-          continue;
-
-        elementGraph.replaceElementWith( tap, successor );
-
-        return false;
-        }
-      }
-
-    return true;
-    }
-
-  private URI getDefaultURIScheme( Tap tap )
-    {
-    return ( (Hfs) tap ).getDefaultFileSystemURIScheme( jobConf );
-    }
-
-  private URI getURIScheme( Tap tap )
-    {
-    return ( (Hfs) tap ).getURIScheme( jobConf );
-    }
-
-  private void handleHeterogeneousSources( ElementGraph elementGraph )
-    {
-    while( !internalHeterogeneousSources( elementGraph ) )
-      ;
-    }
-
-  private boolean internalHeterogeneousSources( ElementGraph elementGraph )
-    {
-    // find all Groups
-    List<Group> groups = elementGraph.findAllMergeJoinGroups();
-
-    // compare group sources
-    Map<Group, Set<Tap>> normalizeGroups = new HashMap<Group, Set<Tap>>();
-
-    for( Group group : groups )
-      {
-      Set<Tap> taps = new HashSet<Tap>();
-
-      // iterate each shortest path to current group finding each tap sourcing the merge/join
-      for( GraphPath<FlowElement, Scope> path : elementGraph.getAllShortestPathsTo( group ) )
-        {
-        List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // last element is group
-        Collections.reverse( flowElements ); // first element is group
-
-        for( FlowElement previousElement : flowElements )
-          {
-          if( previousElement instanceof Tap )
-            {
-            taps.add( (Tap) previousElement );
-            break; // stop finding taps in this path
-            }
-          }
-        }
-
-      if( taps.size() == 1 )
-        continue;
-
-      Iterator<Tap> iterator = taps.iterator();
-      Tap commonTap = iterator.next();
-
-      while( iterator.hasNext() )
-        {
-        Tap tap = iterator.next();
-
-        // making assumption hadoop can handle multiple filesytems, but not multiple inputformats
-        // in the same job
-        // possibly could test for common input format
-        if( getSchemeClass( tap ) != getSchemeClass( commonTap ) )
-          {
-          normalizeGroups.put( group, taps );
-          break;
-          }
-        }
-      }
-
-    // if incompatible, insert Tap after its join/merge pipe
-    for( Group group : normalizeGroups.keySet() )
-      {
-      Set<Tap> taps = normalizeGroups.get( group );
-
-      for( Tap tap : taps )
-        {
-        if( tap instanceof TempHfs || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
-          continue;
-
-        // handle case where there is a split on a pipe between the tap and group
-        for( GraphPath<FlowElement, Scope> path : getAllShortestPathsBetween( elementGraph, tap, group ) )
-          {
-          List<FlowElement> flowElements = Graphs.getPathVertexList( path ); // shortest path tap -> group
-          Collections.reverse( flowElements ); // group -> tap
-
-          FlowElement flowElement = flowElements.get( 1 );
-
-          if( flowElement instanceof TempHfs )
-            continue;
-
-          LOG.warn( "inserting step to normalize incompatible sources: {}", tap );
-
-          insertTempTapAfter( elementGraph, (Pipe) flowElement );
-
-          return false;
-          }
-        }
-      }
-
-    return normalizeGroups.isEmpty();
+    return ( (Hfs) tap ).getURIScheme( defaultJobConf );
     }
 
   @Override
   protected Tap makeTempTap( String prefix, String name )
     {
     // must give Taps unique names
-    return new TempHfs( jobConf, Util.makePath( prefix, name ), intermediateSchemeClass, prefix == null );
-    }
-
-  private Class getSchemeClass( Tap tap )
-    {
-    if( tap instanceof TempHfs )
-      return ( (TempHfs) tap ).getSchemeClass();
-    else
-      return tap.getScheme().getClass();
+    return new TempHfs( defaultJobConf, Util.makePath( prefix, name ), intermediateSchemeClass, prefix == null );
     }
   }

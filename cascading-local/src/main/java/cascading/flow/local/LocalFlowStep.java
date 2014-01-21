@@ -20,9 +20,7 @@
 
 package cascading.flow.local;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -31,21 +29,19 @@ import cascading.flow.FlowProcess;
 import cascading.flow.local.planner.LocalFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 
 /** Class LocalFlowStep is the local mode implementation of {@link cascading.flow.FlowStep}. */
 public class LocalFlowStep extends BaseFlowStep<Properties>
   {
-  /** Field mapperTraps */
-  private final Map<String, Tap> traps = new HashMap<String, Tap>();
-
   /** Map of Properties modified by each Tap's sourceConfInit/sinkConfInit */
   private final Map<Tap, Properties> tapProperties = new HashMap<Tap, Properties>();
 
-  public LocalFlowStep( String name, int id )
+  public LocalFlowStep( String name, int id, ElementGraph elementGraph )
     {
-    super( name, id );
+    super( name, id, elementGraph );
     }
 
   @Override
@@ -139,24 +135,9 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     return new LocalFlowStepJob( createClientState( flowProcess ), (LocalFlowProcess) flowProcess, this );
     }
 
-  public Map<String, Tap> getTrapMap()
-    {
-    return traps;
-    }
-
   public Map<Tap, Properties> getPropertiesMap()
     {
     return tapProperties;
     }
 
-  @Override
-  public Set<Tap> getTraps()
-    {
-    return Collections.unmodifiableSet( new HashSet<Tap>( traps.values() ) );
-    }
-
-  public Tap getTrap( String name )
-    {
-    return getTrapMap().get( name );
-    }
   }

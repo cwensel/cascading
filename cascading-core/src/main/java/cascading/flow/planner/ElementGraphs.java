@@ -20,26 +20,69 @@
 
 package cascading.flow.planner;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementMaskSubGraph;
+import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.expression.FlowElementExpression;
+import cascading.flow.planner.iso.expression.TypeExpression;
+import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.pipe.Group;
+import cascading.pipe.HashJoin;
+import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
+import cascading.util.Util;
+import cascading.util.Version;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.BiconnectivityInspector;
+import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.alg.KShortestPaths;
+import org.jgrapht.ext.ComponentAttributeProvider;
+import org.jgrapht.ext.EdgeNameProvider;
+import org.jgrapht.ext.IntegerNameProvider;
+import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static cascading.util.Util.narrowSet;
+import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
  *
  */
 public class ElementGraphs
   {
+  private static final Logger LOG = LoggerFactory.getLogger( ElementGraphs.class );
+
+  public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
+    {
+    return new TopologicalOrderIterator<>( graph );
+    }
+
   /**
    * Method getAllShortestPathsBetween ...
    *
@@ -48,27 +91,14 @@ public class ElementGraphs
    * @param to    of type FlowElement
    * @return List<GraphPath<FlowElement, Scope>>
    */
-  public static List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, FlowElement to )
+  public static <V, E> List<GraphPath<V, E>> getAllShortestPathsBetween( DirectedGraph<V, E> graph, V from, V to )
     {
-    List<GraphPath<FlowElement, Scope>> paths = new KShortestPaths<FlowElement, Scope>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    List<GraphPath<V, E>> paths = new KShortestPaths<>( graph, from, Integer.MAX_VALUE ).getPaths( to );
 
     if( paths == null )
-      return new ArrayList<GraphPath<FlowElement, Scope>>();
+      return new ArrayList<>();
 
     return paths;
-    }
-
-  public static List<List<FlowElement>> asPathList( List<GraphPath<FlowElement, Scope>> paths )
-    {
-    List<List<FlowElement>> results = new LinkedList<List<FlowElement>>();
-
-    if( paths == null )
-      return results;
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      results.add( Graphs.getPathVertexList( path ) );
-
-    return results;
     }
 
   /**
@@ -79,10 +109,10 @@ public class ElementGraphs
    * @param to
    * @return of type List
    */
-  public static List<GraphPath<FlowElement, Scope>> getAllDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, FlowElement to )
+  public static List<GraphPath<FlowElement, Scope>> getAllDirectPathsBetween( ElementGraph graph, FlowElement from, FlowElement to )
     {
     List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( graph, from, to );
-    List<GraphPath<FlowElement, Scope>> results = new ArrayList<GraphPath<FlowElement, Scope>>( paths );
+    List<GraphPath<FlowElement, Scope>> results = new ArrayList<>( paths );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -103,29 +133,6 @@ public class ElementGraphs
     return results;
     }
 
-  public static int countTypesBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to, Class type )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = getAllDirectPathsBetween( graph, from, to );
-
-    int count = 0;
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      if( hasIntermediateTap( path, from ) )
-        continue;
-
-      List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-
-      for( FlowElement flowElement : flowElements )
-        {
-        if( type.isInstance( flowElement ) && flowElement != to )
-          count++;
-        }
-      }
-
-    return count;
-    }
-
   /**
    * for every incoming stream to the splice, gets the count of paths.
    * <p/>
@@ -137,12 +144,12 @@ public class ElementGraphs
    * @param to
    * @return of type Map
    */
-  public static Map<Integer, Integer> countOrderedDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to )
+  public static Map<Integer, Integer> countOrderedDirectPathsBetween( ElementGraph graph, FlowElement from, Splice to )
     {
     return countOrderedDirectPathsBetween( graph, from, to, false );
     }
 
-  public static Map<Integer, Integer> countOrderedDirectPathsBetween( SimpleDirectedGraph<FlowElement, Scope> graph, FlowElement from, Splice to, boolean skipTaps )
+  public static Map<Integer, Integer> countOrderedDirectPathsBetween( ElementGraph graph, FlowElement from, Splice to, boolean skipTaps )
     {
     List<GraphPath<FlowElement, Scope>> paths = getAllDirectPathsBetween( graph, from, to );
 
@@ -174,16 +181,6 @@ public class ElementGraphs
     return pathCounts.size() >= 1 && !pathCounts.containsKey( 0 );
     }
 
-  public static int countPaths( Map<Integer, Integer> pathCounts )
-    {
-    int count = 0;
-
-    for( Integer integer : pathCounts.values() )
-      count += integer;
-
-    return count;
-    }
-
   private static boolean hasIntermediateTap( GraphPath<FlowElement, Scope> path, FlowElement from )
     {
     List<FlowElement> flowElements = Graphs.getPathVertexList( path );
@@ -195,15 +192,6 @@ public class ElementGraphs
       }
 
     return false;
-    }
-
-  public static int pathPositionInto( GraphPath<FlowElement, Scope> path, Splice to )
-    {
-    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-    List<Scope> scopes = path.getEdgeList();
-    int index = flowElements.indexOf( to );
-
-    return to.getPipePos().get( scopes.get( index - 1 ).getName() );
     }
 
   private static Map<Integer, Integer> pathPositionInto( Map<Integer, Integer> results, GraphPath<FlowElement, Scope> path, Splice to )
@@ -220,5 +208,401 @@ public class ElementGraphs
       results.put( pos, 1 );
 
     return results;
+    }
+
+  public static ElementSubGraph asSubGraph2( ElementGraph elementGraph, ElementGraph contractedGraph )
+    {
+    return new ElementSubGraph( elementGraph, findClosureViaBiConnected( elementGraph, contractedGraph ) );
+    }
+
+  public static <V, E> Set<V> findClosureViaBiConnected( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
+    {
+    SimpleGraph<V, E> biConnected = (SimpleGraph<V, E>) new SimpleGraph<>( Object.class );
+
+    Graphs.addGraph( biConnected, full );
+    Graphs.addGraph( biConnected, contracted );
+
+    BiconnectivityInspector inspector = new BiconnectivityInspector( biConnected );
+
+    LinkedList<Set<V>> components = new LinkedList( inspector.getBiconnectedVertexComponents() );
+
+    if( components.isEmpty() )
+      throw new IllegalStateException( "no components" );
+
+    Set<V> vertices = new HashSet<>( contracted.vertexSet() );
+
+    for( E edge : contracted.edgeSet() )
+      {
+      V edgeSource = contracted.getEdgeSource( edge );
+      V edgeTarget = contracted.getEdgeTarget( edge );
+
+      ListIterator<Set<V>> iterator = components.listIterator();
+      while( iterator.hasNext() )
+        {
+        Set<V> set = iterator.next();
+        if( set.contains( edgeSource ) && set.contains( edgeTarget ) )
+          {
+          iterator.remove();
+          vertices.addAll( set );
+          }
+        }
+      }
+
+    if( vertices.isEmpty() )
+      throw new IllegalStateException( "no vertices" );
+
+    return vertices;
+    }
+
+  public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph )
+    {
+    return new ElementSubGraph( elementGraph, findClosureViaFloydWarshall( elementGraph, contractedGraph ) );
+    }
+
+  public static <V, E> Set<V> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
+    {
+    Set<V> vertices = new HashSet<>( contracted.vertexSet() );
+    LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
+
+    allVertices.removeAll( vertices );
+
+    Set<E> edges = new HashSet<>();
+
+    for( V v : contracted.vertexSet() )
+      {
+      if( contracted.inDegreeOf( v ) == 0 )
+        edges.addAll( full.incomingEdgesOf( v ) );
+      }
+
+    for( V v : contracted.vertexSet() )
+      {
+      if( contracted.outDegreeOf( v ) == 0 )
+        edges.addAll( full.outgoingEdgesOf( v ) );
+      }
+
+    DirectedGraph<V, E> disconnected = disconnectExtents( full, edges );
+
+    FloydWarshallShortestPaths<V, E> paths = new FloydWarshallShortestPaths<>( disconnected );
+
+    for( E edge : contracted.edgeSet() )
+      {
+      V edgeSource = contracted.getEdgeSource( edge );
+      V edgeTarget = contracted.getEdgeTarget( edge );
+
+      ListIterator<V> iterator = allVertices.listIterator();
+      while( iterator.hasNext() )
+        {
+        V vertex = iterator.next();
+
+        if( !isBetween( paths, edgeSource, edgeTarget, vertex ) )
+          continue;
+
+        vertices.add( vertex );
+        iterator.remove();
+        }
+      }
+
+    return vertices;
+    }
+
+  private static <V, E> DirectedGraph<V, E> disconnectExtents( DirectedGraph<V, E> full, Set<E> withoutEdges )
+    {
+    DirectedGraph<V, E> copy = (DirectedGraph<V, E>) new SimpleDirectedGraph<>( Object.class );
+
+    Graphs.addAllVertices( copy, full.vertexSet() );
+
+    Set<E> edges = full.edgeSet();
+
+    if( !withoutEdges.isEmpty() )
+      {
+      edges = new HashSet<>( edges );
+      edges.removeAll( withoutEdges );
+      }
+
+    Graphs.addAllEdges( copy, full, edges );
+
+    return copy;
+    }
+
+  private static <V, E> boolean isBetween( FloydWarshallShortestPaths<V, E> paths, V edgeSource, V edgeTarget, V vertex )
+    {
+    return paths.shortestDistance( edgeSource, vertex ) != POSITIVE_INFINITY && paths.shortestDistance( vertex, edgeTarget ) != POSITIVE_INFINITY;
+    }
+
+  public static ElementSubGraph asSubGraphKS( ElementGraph elementGraph, ElementGraph contractedGraph )
+    {
+    return new ElementSubGraph( elementGraph, findClosureViaKShortest( elementGraph, contractedGraph ) );
+    }
+
+  public static <V, E> Set<V> findClosureViaKShortest( DirectedGraph<V, E> elementGraph, DirectedGraph<V, E> contractedGraph )
+    {
+    // this is bad news, shortest paths is non-linear
+
+    Set<V> allVertices = new HashSet<>( contractedGraph.vertexSet() ); // if no edges, we have the vertices
+    Set<E> edges = contractedGraph.edgeSet();
+
+    for( E edge : edges )
+      {
+      V lhs = contractedGraph.getEdgeSource( edge );
+      V rhs = contractedGraph.getEdgeTarget( edge );
+
+      Set<V> otherVertices = new HashSet<>( contractedGraph.vertexSet() );
+
+      otherVertices.remove( lhs );
+      otherVertices.remove( rhs );
+
+      List<GraphPath<V, E>> between = getAllShortestPathsBetween( elementGraph, lhs, rhs );
+
+      for( GraphPath<V, E> graphPath : between )
+        {
+        List<V> pathVertices = Graphs.getPathVertexList( graphPath );
+
+        // do not include a path if it crosses a distinguished element from the contracted graph
+        if( Collections.disjoint( pathVertices, otherVertices ) )
+          allVertices.addAll( pathVertices );
+        }
+      }
+
+    return allVertices;
+    }
+
+  public static void removeAndContract( ElementGraph elementGraph, FlowElement flowElement )
+    {
+    LOG.debug( "removing element, contracting edge : " + flowElement );
+
+    Set<Scope> incomingScopes = elementGraph.incomingEdgesOf( flowElement );
+
+    boolean contractIncoming = true;
+
+    if( !contractIncoming )
+      {
+      if( incomingScopes.size() != 1 )
+        throw new IllegalStateException( "flow element:" + flowElement + ", has multiple input paths: " + incomingScopes.size() );
+      }
+
+    for( Scope incoming : incomingScopes )
+      {
+      Set<Scope> outgoingScopes = elementGraph.outgoingEdgesOf( flowElement );
+
+      // source -> incoming -> flowElement -> outgoing -> target
+      FlowElement source = elementGraph.getEdgeSource( incoming );
+
+      for( Scope outgoing : outgoingScopes )
+        {
+        FlowElement target = elementGraph.getEdgeTarget( outgoing );
+
+        Scope scope = new Scope( outgoing );
+        scope.setOrdinal( outgoing.getOrdinal() ); // not copied
+        scope.addPriorNames( incoming, outgoing ); // not copied
+        elementGraph.addEdge( source, target, scope );
+        }
+      }
+
+    elementGraph.removeVertex( flowElement );
+    }
+
+  public static void printElementGraph( String filename, final DirectedGraph<FlowElement, Scope> graph, final PlatformInfo platformInfo )
+    {
+    try
+      {
+      File parentFile = new File( filename ).getParentFile();
+
+      if( parentFile != null && !parentFile.exists() )
+        parentFile.mkdirs();
+
+      Writer writer = new FileWriter( filename );
+
+      Util.writeDOT( writer, graph,
+        new IntegerNameProvider<FlowElement>(),
+        new FlowElementVertexNameProvider( graph, platformInfo ),
+        new ScopeEdgeNameProvider(),
+        new VertexAttributeProvider(), new EdgeAttributeProvider() );
+
+      writer.close();
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
+      }
+    }
+
+  public static void insertFlowElementAfter( ElementGraph elementGraph, FlowElement previousElement, FlowElement flowElement )
+    {
+    Set<Scope> outgoing = new HashSet<Scope>( elementGraph.outgoingEdgesOf( previousElement ) );
+
+    elementGraph.addVertex( flowElement );
+
+    String name = previousElement.toString();
+
+    if( previousElement instanceof Pipe )
+      name = ( (Pipe) previousElement ).getName();
+
+    elementGraph.addEdge( previousElement, flowElement, new Scope( name ) );
+
+    for( Scope scope : outgoing )
+      {
+      FlowElement target = elementGraph.getEdgeTarget( scope );
+      elementGraph.removeEdge( previousElement, target ); // remove scope
+      elementGraph.addEdge( flowElement, target, scope ); // add scope back
+      }
+    }
+
+  public static Map<String, Tap> createSinkMap( ElementGraph elementGraph )
+    {
+    Set<Tap> sinks = findSinks( elementGraph );
+
+    Map<String, Tap> map = Util.createHashMap();
+
+    for( Tap tap : sinks )
+      {
+      Set<Scope> scopes = elementGraph.incomingEdgesOf( tap );
+
+      for( Scope scope : scopes )
+        map.put( scope.getName(), tap );
+      }
+
+    return map;
+    }
+
+  public static Set<Tap> findSinks( ElementGraph elementGraph )
+    {
+    if( elementGraph instanceof FlowElementGraph )
+      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
+
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Tail ) ),
+      elementGraph
+    );
+
+    return narrowSet( Tap.class, getAllVertices( iterator ) );
+    }
+
+  public static Map<String, Tap> createSourceMap( ElementGraph elementGraph )
+    {
+    Set<Tap> sources = findSources( elementGraph );
+
+    Map<String, Tap> map = Util.createHashMap();
+
+    for( Tap tap : sources )
+      {
+      Set<Scope> scopes = elementGraph.outgoingEdgesOf( tap );
+
+      for( Scope scope : scopes )
+        map.put( scope.getPriorName(), tap );
+      }
+
+    return map;
+    }
+
+  public static Set<Tap> findSources( ElementGraph elementGraph )
+    {
+    if( elementGraph instanceof FlowElementGraph )
+      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
+
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Head ) ),
+      elementGraph
+    );
+
+    return narrowSet( Tap.class, getAllVertices( iterator ) );
+    }
+
+  public static Set<Group> findAllGroups( ElementGraph elementGraph )
+    {
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, Group.class ) ),
+      elementGraph
+    );
+
+    return narrowSet( Group.class, getAllVertices( iterator ) );
+    }
+
+  public static Set<HashJoin> findAllHashJoins( ElementGraph elementGraph )
+    {
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, HashJoin.class ) ),
+      elementGraph
+    );
+
+    return narrowSet( HashJoin.class, getAllVertices( iterator ) );
+    }
+
+  private static Set<FlowElement> getAllVertices( SubGraphIterator iterator )
+    {
+    Set<FlowElement> vertices = new HashSet<>();
+
+    while( iterator.hasNext() )
+      vertices.addAll( iterator.next().vertexSet() );
+
+    return vertices;
+    }
+
+  private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>
+    {
+    private final DirectedGraph<FlowElement, Scope> graph;
+    private final PlatformInfo platformInfo;
+
+    public FlowElementVertexNameProvider( DirectedGraph<FlowElement, Scope> graph, PlatformInfo platformInfo )
+      {
+      this.graph = graph;
+      this.platformInfo = platformInfo;
+      }
+
+    public String getVertexName( FlowElement object )
+      {
+      if( graph.incomingEdgesOf( object ).isEmpty() ) // is head
+        {
+        String result = object.toString().replaceAll( "\"", "\'" );
+        String versionString = Version.getRelease();
+
+        if( platformInfo != null )
+          versionString = ( versionString == null ? "" : versionString + "\\n" ) + platformInfo;
+
+        return versionString == null ? result : result + "\\n" + versionString;
+        }
+
+      Iterator<Scope> iterator = graph.outgoingEdgesOf( object ).iterator();
+
+      if( object instanceof Tap || object instanceof FlowElementGraph.Extent || !iterator.hasNext() )
+        return object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+
+      Scope scope = iterator.next();
+
+      return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+      }
+    }
+
+  private static class ScopeEdgeNameProvider implements EdgeNameProvider<Scope>
+    {
+    public String getEdgeName( Scope object )
+      {
+      return object.toString().replaceAll( "\"", "\'" ).replaceAll( "\n", "\\\\n" ); // fix for newlines in graphviz
+      }
+    }
+
+  private static class VertexAttributeProvider implements ComponentAttributeProvider<FlowElement>
+    {
+    @Override
+    public Map<String, String> getComponentAttributes( FlowElement object )
+      {
+      return null;
+      }
+    }
+
+  private static class EdgeAttributeProvider implements ComponentAttributeProvider<Scope>
+    {
+    Map<String, String> attributes = new HashMap<String, String>()
+    {
+    {put( "style", "dotted" );}
+    };
+
+    @Override
+    public Map<String, String> getComponentAttributes( Scope scope )
+      {
+      if( scope.getOrdinal() == 0 )
+        return null;
+
+      return attributes;
+      }
     }
   }

@@ -30,6 +30,7 @@ import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
+import org.junit.Test;
 
 public class TupleTest extends CascadingTestCase
   {
@@ -37,6 +38,7 @@ public class TupleTest extends CascadingTestCase
     {
     }
 
+  @Test
   public void testWritableCompareReadWrite() throws IOException
     {
     Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0", true );
@@ -58,6 +60,7 @@ public class TupleTest extends CascadingTestCase
     assertEquals( aTuple, newTuple );
     }
 
+  @Test
   public void testWritableCompare()
     {
     Tuple aTuple = new Tuple( new TestWritableComparable( "Just My Luck" ), "ClaudiaPuig", "3.0", "LisaRose", "3.0" );

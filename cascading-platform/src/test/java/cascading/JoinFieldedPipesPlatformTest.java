@@ -1287,6 +1287,47 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( actual.contains( new Tuple( "2\tb\t2\tB\t2\tB" ) ) );
     }
 
+  @Test
+  public void testJoinSameSourceIntoJoinSimple() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "upper1", sourceUpper );
+    sources.put( "upper2", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "joinsamesourceintojoinsimple" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
+
+    Pipe splice1 = new HashJoin( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
+
+    splice1 = new Each( splice1, new Identity() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice1 );
+
+//    flow.writeDOT( "joinsamesourceintojoin.dot" );
+
+    if( getPlatform().isMapReduce() )
+      assertEquals( "wrong number of steps", 2, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> actual = getSinkAsList( flow );
+
+    assertTrue( actual.contains( new Tuple( "1\tA\t1\tA" ) ) );
+    assertTrue( actual.contains( new Tuple( "2\tB\t2\tB" ) ) );
+    }
+
   /**
    * Tests that two independent streamed sources with loadable tributaries properly plan into a GroupBy
    * without loading unused sources

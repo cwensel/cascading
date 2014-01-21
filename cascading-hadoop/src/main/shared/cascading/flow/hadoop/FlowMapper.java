@@ -88,7 +88,7 @@ public class FlowMapper implements MapRunnable
       for( Duct tail : streamGraph.getTails() )
         LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
 
-      for( Tap trap : step.getMapperTraps().values() )
+      for( Tap trap : step.getTraps() )
         LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )

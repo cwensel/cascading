@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
+  assertions, transforms, and step partitioning.
+
 2.5.3
 
   Updated c.f.h.ProcessFlow to include missing status changes.
