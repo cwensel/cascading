@@ -21,6 +21,7 @@
 package cascading;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -376,16 +377,23 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    validateLength( flow, 10, null );
+    List<Tuple> tuples  = asList( flow, sink );
+    assertEquals( 10, tuples.size() );
 
-    TupleEntryIterator iterator = flow.openSink();
+    List<Object> values = new ArrayList<Object>(  );
+    for (Tuple tuple: tuples)
+      values.add( tuple.getObject( 1 ) );
 
-    Object line = iterator.next().getObject( 1 );
-    assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\ta" ) );
-    line = iterator.next().getObject( 1 );
-    assertTrue( "not equal: tuple.get(1)", line.equals( "1\t1\tA" ) );
-
-    iterator.close();
+    assertTrue( values.contains( "1\t1\ta" ) );
+    assertTrue( values.contains( "1\t1\tA" ) );
+    assertTrue( values.contains( "2\t2\tb" ) );
+    assertTrue( values.contains( "2\t2\tB" ) );
+    assertTrue( values.contains( "3\t3\tc" ) );
+    assertTrue( values.contains( "3\t3\tC" ) );
+    assertTrue( values.contains( "4\t4\td" ) );
+    assertTrue( values.contains( "4\t4\tD" ) );
+    assertTrue( values.contains( "5\t5\te" ) );
+    assertTrue( values.contains( "5\t5\tE" ) );
     }
 
   @Test

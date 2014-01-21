@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -244,16 +245,21 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     flow.complete();
 
-    validateLength( flow, 5, null );
+    List<Tuple> tuples = asList( flow, sink );
+    List<Object> values = new ArrayList<Object>(  );
+    for (Tuple tuple: tuples)
+        values.add( tuple.getObject( 1 ) );
 
-    TupleEntryIterator iterator = flow.openSink();
+    assertTrue( values.contains( "1\ta") );
+    assertTrue( values.contains( "2\tb") );
+    assertTrue( values.contains( "3\tc") );
+    assertTrue( values.contains( "4\td") );
+    assertTrue( values.contains( "5\te") );
 
-    assertEquals( "not equal: tuple.get(1)", "1\ta", iterator.next().getObject( 1 ) );
-
-    iterator.close();
+    assertEquals( 5, tuples.size() );
 
     // confirm the tuple iterator can handle nulls from the source
-    validateLength( flow.openSource(), 5 );
+    assertEquals(5, asList( flow, source ).size() );
     }
 
   @Test
