@@ -164,6 +164,11 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES, false );
     }
 
+  protected static boolean getCombinedInputSafeMode( JobConf conf )
+    {
+    return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES_SAFE_MODE, true );
+    }
+
   protected Hfs()
     {
     }
@@ -443,14 +448,25 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       conf.get( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT ) == null )
       throw new TapException( "the input format class is already the combined input format but the underlying input format is missing" );
 
+    // if safe mode is on (default) throw an exception if the InputFormat is not a FileInputFormat, otherwise log a
+    // warning and don't use the CombineFileInputFormat
+    boolean safeMode = getCombinedInputSafeMode( conf );
+
     if( !FileInputFormat.class.isAssignableFrom( conf.getClass( "mapred.input.format.class", null ) ) )
-      throw new TapException( "input format must be of type org.apache.hadoop.mapred.FileInputFormat, got: " + individualInputFormat );
+      {
+      if( safeMode )
+        throw new TapException( "input format must be of type org.apache.hadoop.mapred.FileInputFormat, got: " + individualInputFormat );
+      else
+        LOG.warn( "not combining input splits with CombineFileInputFormat, {} is not of type org.apache.hadoop.mapred.FileInputFormat.", individualInputFormat );
+      }
+    else
+      {
+      // set the underlying individual input format
+      conf.set( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT, individualInputFormat );
 
-    // set the underlying individual input format
-    conf.set( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT, individualInputFormat );
-
-    // override the input format class
-    conf.setInputFormat( CombinedInputFormat.class );
+      // override the input format class
+      conf.setInputFormat( CombinedInputFormat.class );
+      }
     }
 
   @Override

@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.5.2 [unreleased]
 
+  Updated c.t.h.Hfs to log a warning and disable o.a.h.m.l.CombineFileInputFormat (if enabled) if
+  c.t.h.HfsProps#isCombineInputSafeMode is true but the current o.a.h.mapred.InputFormat is not
+  a o.a.h.mapred.FileInputFormat.
+
   Updated c.p.h2.Hadoop2MR1Platform to return a name consistent with other resources and artifacts for Hadoop2 MR1.
 
   Fixed issue in c.o.f.Logic filter sub-classes where argumentFields was not properly set causing some nested
@@ -10,7 +14,7 @@ Cascading Change Log
 2.5.1
 
   Updated c.t.h.Hfs to throw an exception if the o.a.h.m.l.CombineFileInputFormat is enabled but the wrapped
-  o.a.h.mapred.InputFormat was is a o.a.h.mapred.FileInputFormat.
+  o.a.h.mapred.InputFormat is not a o.a.h.mapred.FileInputFormat.
 
   Fixed issue in c.c.Cascade where a race condition during start/stop/complete could result in state exception.
 

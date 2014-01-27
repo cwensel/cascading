@@ -36,8 +36,10 @@ public class HfsProps extends Props
   public static final String TEMPORARY_DIRECTORY = "cascading.tmp.dir";
   /** Fields LOCAL_MODE_SCHEME * */
   public static final String LOCAL_MODE_SCHEME = "cascading.hadoop.localmode.scheme";
-  /** Field COMBINE_FILES_FOR_INPUT */
+  /** Field COMBINE_INPUT_FILES */
   public static final String COMBINE_INPUT_FILES = "cascading.hadoop.hfs.combine.files";
+  /** Field COMBINE_INPUT_FILES_SAFEMODE */
+  public static final String COMBINE_INPUT_FILES_SAFE_MODE = "cascading.hadoop.hfs.combine.safemode";
   /** Field COMBINE_INPUT_FILES_SIZE_MAX */
   public static final String COMBINE_INPUT_FILES_SIZE_MAX = "cascading.hadoop.hfs.combine.max.size";
 
@@ -45,6 +47,7 @@ public class HfsProps extends Props
   protected String localModeScheme;
   protected Boolean useCombinedInput;
   protected Long combinedInputMaxSize;
+  protected Boolean combinedInputSafeMode;
 
   /**
    * Method setTemporaryDirectory sets the temporary directory on the given properties object.
@@ -86,6 +89,24 @@ public class HfsProps extends Props
     if( combine != null )
       properties.put( COMBINE_INPUT_FILES, Boolean.toString( combine ) );
     }
+
+  /**
+   * Method setUseCombinedInputSafeMode toggles safe mode when using
+   * {@link org.apache.hadoop.mapred.lib.CombineFileInputFormat}. Safe mode will throw an exception if the underlying
+   * InputFormat is not of type {@link org.apache.hadoop.mapred.FileInputFormat}. If safeMode is off a warning will
+   * be logged instead. safeMode is on by default.
+   * <p/>
+   * Setting this property when not setting {@link #setUseCombinedInput(boolean)} to true has no effect.
+   *
+   * @param properties of type Map<Object,Object>
+   * @param safeMode   a boolean
+   */
+  public static void setUseCombinedInputSafeMode( Map<Object, Object> properties, Boolean safeMode )
+    {
+    if( safeMode != null )
+      properties.put( COMBINE_INPUT_FILES_SAFE_MODE, Boolean.toString( safeMode ) );
+    }
+
 
   /**
    * Method setCombinedInputMaxSize sets the maximum input split size to be used.
@@ -182,6 +203,30 @@ public class HfsProps extends Props
     return this;
     }
 
+  public boolean isUseCombinedInputSafeMode()
+    {
+    return combinedInputSafeMode;
+    }
+
+  /**
+   * Method setUseCombinedInputSafeMode toggles safe mode when using
+   * {@link org.apache.hadoop.mapred.lib.CombineFileInputFormat}. Safe mode will throw an exception if the underlying
+   * InputFormat is not of type {@link org.apache.hadoop.mapred.FileInputFormat}. If safeMode is off a warning will
+   * be logged instead. safeMode is on by default.
+   * <p/>
+   * Setting this property when not setting {@link #setUseCombinedInput(boolean)} to true has no effect.
+   *
+   * @param combinedInputSafeMode boolean
+   * @return returns this instance
+   */
+  public HfsProps setUseCombinedInputSafeMode( boolean combinedInputSafeMode )
+    {
+    this.combinedInputSafeMode = combinedInputSafeMode;
+
+    return this;
+    }
+
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -189,5 +234,6 @@ public class HfsProps extends Props
     setLocalModeScheme( properties, localModeScheme );
     setUseCombinedInput( properties, useCombinedInput );
     setCombinedInputMaxSize( properties, combinedInputMaxSize );
+    setUseCombinedInputSafeMode( properties, combinedInputSafeMode );
     }
   }
