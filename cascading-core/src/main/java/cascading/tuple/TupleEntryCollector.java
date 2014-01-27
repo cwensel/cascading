@@ -22,7 +22,29 @@ package cascading.tuple;
 
 import java.io.IOException;
 
-/** Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit result {@link Tuple} values. */
+/**
+ * Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit
+ * one or more result {@link Tuple} values.
+ * <p/>
+ * The general rule in Cascading is if you are handed a Tuple, you cannot change or cache it. Attempts at modifying
+ * such a Tuple will result in an Exception. Preventing caching is harder, see below.
+ * <p/>
+ * If you create the Tuple, you can re-use or modify it.
+ * <p/>
+ * When calling {@link #add(Tuple)} or {@link #add(TupleEntry)}, you are passing a Tuple to the down stream pipes and
+ * operations. Since no downstream operation may modify or cache the Tuple instance, it is safe to re-use the Tuple
+ * instance when {@code add()} returns.
+ * <p/>
+ * That said, Tuple copies do get cached in order to perform specific operations in the underlying platforms. Currently
+ * only a shallow copy is made (via the {@link Tuple} copy constructor). Thus, any mutable type or collection
+ * placed inside a Tuple will not be copied, but will likely be cached if a copy of the Tuple passed downstream is
+ * copied.
+ * <p/>
+ * So any subsequent changes to that nested type or collection will be reflected in the cached copy, a likely
+ * source of hard to find errors.
+ * <p/>
+ * There is currently no way to specify that a deep copy must be performed when making a Tuple copy.
+ */
 public abstract class TupleEntryCollector
   {
   protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null, true );
@@ -55,6 +77,8 @@ public abstract class TupleEntryCollector
   /**
    * Method add inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
    * more efficient as it simply calls {@link TupleEntry#getTuple()};
+   * <p/>
+   * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param tupleEntry of type TupleEntry
    */
@@ -90,6 +114,8 @@ public abstract class TupleEntryCollector
 
   /**
    * Method add inserts the given {@link Tuple} into the outgoing stream.
+   * <p/>
+   * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param tuple of type Tuple
    */

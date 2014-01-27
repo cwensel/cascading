@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.2 [unreleased]
 
+  Updated c.t.TupleEntryCollector javadoc to clarify re-use of c.t.Tuple instances.
+
   Updated c.t.h.Hfs to log a warning and disable o.a.h.m.l.CombineFileInputFormat (if enabled) if
   c.t.h.HfsProps#isCombineInputSafeMode is true but the current o.a.h.mapred.InputFormat is not
   a o.a.h.mapred.FileInputFormat.
