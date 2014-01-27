@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -111,12 +111,12 @@ public class HadoopPlatform extends BaseHadoopPlatform
       {
       LOG.info( "not using cluster" );
       jobConf = new JobConf();
-      
+
       // enforce the local file system in local mode
       jobConf.set( "fs.default.name", "file:///" );
       jobConf.set( "mapred.job.tracker", "local" );
       jobConf.set( "mapreduce.jobtracker.staging.root.dir", "build/tmp/cascading/staging" );
-      
+
       fileSys = FileSystem.get( jobConf );
       }
     else
