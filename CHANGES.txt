@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.5.2 [unreleased]
+2.5.2
 
   Updated c.t.TupleEntryCollector javadoc to clarify re-use of c.t.Tuple instances.
 
