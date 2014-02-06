@@ -45,6 +45,7 @@ import cascading.operation.Debug;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.Function;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -60,6 +61,8 @@ import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static data.InputData.inputFileLower;
 import static data.InputData.inputFileUpper;
@@ -70,6 +73,8 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
  */
 public class FlowPlatformTest extends PlatformTestCase
   {
+  private static final Logger LOG = LoggerFactory.getLogger( FlowPlatformTest.class );
+
   public FlowPlatformTest()
     {
     super( true ); // must be run in cluster mode
@@ -178,6 +183,8 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
+    pipeUpper = new Each( pipeUpper, new Fields( "num", "char" ), new ExpressionFunction( Fields.ALL, "Thread.sleep(1000);" ) );
+
     pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
@@ -190,14 +197,14 @@ public class FlowPlatformTest extends PlatformTestCase
 
     flow.addListener( listener );
 
-    System.out.println( "calling start" );
+    LOG.info( "calling start" );
     flow.start();
 
     assertTrue( "did not start", listener.started.tryAcquire( 60, TimeUnit.SECONDS ) );
 
     while( true )
       {
-      System.out.println( "testing if running" );
+      LOG.info( "testing if running" );
       Thread.sleep( 100 );
 
       Map<String, FlowStepJob> map = Flows.getJobsMap( flow );
@@ -218,14 +225,14 @@ public class FlowPlatformTest extends PlatformTestCase
     public Long call() throws Exception
       {
       start.release();
-      System.out.println( "calling complete" );
+      LOG.info( "calling complete" );
       flow.complete();
       return System.nanoTime() - startTime;
       }
     } );
 
     start.acquire();
-    System.out.println( "calling stop" );
+    LOG.info( "calling stop" );
     flow.stop();
 
     long stopTime = System.nanoTime() - startTime;
@@ -379,7 +386,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     flow.addListener( listener );
 
-    System.out.println( "calling start" );
+    LOG.info( "calling start" );
     flow.start();
 
     assertTrue( "did not start", listener.started.tryAcquire( 120, TimeUnit.SECONDS ) );
@@ -388,7 +395,7 @@ public class FlowPlatformTest extends PlatformTestCase
       {
       while( true )
         {
-        System.out.println( "testing if running" );
+        LOG.info( "testing if running" );
         Thread.sleep( 1000 );
 
         Map<String, FlowStepJob> map = Flows.getJobsMap( flow );
@@ -400,7 +407,7 @@ public class FlowPlatformTest extends PlatformTestCase
           break;
         }
 
-      System.out.println( "calling stop" );
+      LOG.info( "calling stop" );
 
       flow.stop();
       }
