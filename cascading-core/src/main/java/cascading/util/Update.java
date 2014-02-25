@@ -48,6 +48,10 @@ public class Update extends TimerTask
   private static final Logger LOG = LoggerFactory.getLogger( Update.class );
   private static final String UPDATE_PROPERTIES = "latest.properties";
 
+  private static final long UPDATE_TIMER_DELAY = 30 * 1000L; // 30s
+  private static final long UPDATE_TIMER_PERIOD = 24 * 60 * 60 * 1000L; // 24h
+  private static final int URL_CONNECTION_TIMEOUT = 3 * 1000; // 3s
+
   public static final String UPDATE_CHECK_SKIP = "cascading.update.skip";
   public static final String UPDATE_URL = "cascading.update.url";
 
@@ -66,7 +70,7 @@ public class Update extends TimerTask
       return;
 
     timer = new Timer( "UpdateRequestTimer", true );
-    timer.scheduleAtFixedRate( new Update(), 1000 * 30, 24 * 60 * 60 * 1000L );
+    timer.scheduleAtFixedRate( new Update(), UPDATE_TIMER_DELAY, UPDATE_TIMER_PERIOD );
     }
 
   @Override
@@ -127,7 +131,7 @@ public class Update extends TimerTask
     try
       {
       URLConnection connection = updateUrl.openConnection();
-      connection.setConnectTimeout( 3 * 1000 );
+      connection.setConnectTimeout( URL_CONNECTION_TIMEOUT );
 
       InputStream in = connection.getInputStream();
 
