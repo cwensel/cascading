@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.5.3 [unreleased]
 
+  Fixed issue where c.t.Fields#merge() did not honor underlying Fields type information properly.
+
+  Fixed issue where c.t.Fields#getType() attempted to resolve position when there is no associated type information.
+
 2.5.2
 
   Updated c.t.TupleEntryCollector javadoc to clarify re-use of c.t.Tuple instances.

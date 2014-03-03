@@ -339,13 +339,18 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     for( Fields field : fields )
       {
+      Type[] types = field.getTypes();
+      int i = 0;
+
       for( Comparable comparable : field )
         {
         if( !elements.contains( comparable ) )
           {
           elements.add( comparable );
-          elementTypes.add( field.getType( comparable ) );
+          elementTypes.add( types == null ? null : types[ i ] ); // nulls ok
           }
+
+        i++;
         }
       }
 
@@ -1692,6 +1697,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public Type getType( Comparable fieldName )
     {
+    if( !hasTypes() )
+      return null;
+
     return getType( getPos( fieldName ) );
     }
 
@@ -1714,6 +1722,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    */
   public Class getTypeClass( Comparable fieldName )
     {
+    if( !hasTypes() )
+      return null;
+
     return getTypeClass( getPos( fieldName ) );
     }
 

@@ -20,6 +20,9 @@
 
 package cascading.tuple;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
+
 import cascading.CascadingTestCase;
 
 import static cascading.tuple.Fields.names;
@@ -1003,5 +1006,31 @@ public class FieldsTest extends CascadingTestCase
 
     assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
     assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
+    }
+
+  public void testMergeWithSelectors()
+    {
+    Fields f1 = new Fields( "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" );
+    Fields f2 = new Fields( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 );
+    Fields merged = Fields.merge( f1, f2 );
+
+    assertEquals( 20, merged.size() );
+    }
+
+  public void testMergeWithSelectorsWithTypes()
+    {
+    Type[] types = new Type[ 10 ];
+    Arrays.fill( types, int.class );
+
+    types[ 1 ] = long.class;
+
+    Fields f1 = new Fields( "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ).applyTypes( types );
+    Fields f2 = new Fields( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ).applyTypes( types );
+    Fields merged = Fields.merge( f1, f2 );
+
+    assertEquals( 20, merged.size() );
+    assertEquals( 20, merged.getTypes().length );
+    assertEquals( long.class, merged.getTypes()[ 1 ] );
+    assertEquals( long.class, merged.getTypes()[ 11 ] );
     }
   }
