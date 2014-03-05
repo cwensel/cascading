@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.3 [unreleased]
 
+  Updated c.p.Pipe and c.p.SubAssembly to cache any resolved name as its own name to improve #hashCode() performance.
+
   Fixed issue where c.t.Fields#merge() did not honor underlying Fields type information properly.
 
   Fixed issue where c.t.Fields#getType() attempted to resolve position when there is no associated type information.

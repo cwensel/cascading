@@ -235,7 +235,11 @@ public class Pipe implements FlowElement, Serializable
       return name;
 
     if( previous != null )
-      return previous.getName();
+      {
+      name = previous.getName();
+
+      return name;
+      }
 
     return "ANONYMOUS";
     }

@@ -58,6 +58,8 @@ public abstract class SubAssembly extends Pipe
   /** Field tails */
   private Pipe[] tails;
 
+  private transient String[] names;
+
   /**
    * Is responsible for unwinding nested SubAssembly instances.
    *
@@ -172,7 +174,10 @@ public abstract class SubAssembly extends Pipe
     if( tails == null )
       throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
 
-    String[] names = new String[ tails.length ];
+    if( names != null )
+      return names;
+
+    names = new String[ tails.length ];
 
     for( int i = 0; i < tails.length; i++ )
       names[ i ] = tails[ i ].getName();
@@ -183,10 +188,10 @@ public abstract class SubAssembly extends Pipe
   @Override
   public String getName()
     {
-    if( name != null )
-      return name;
+    if( name == null )
+      name = Util.join( getTailNames(), "+" );
 
-    return Util.join( getTailNames(), "+" );
+    return name;
     }
 
   @Override
