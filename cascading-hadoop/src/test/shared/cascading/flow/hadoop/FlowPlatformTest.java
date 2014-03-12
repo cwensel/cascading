@@ -183,7 +183,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
 
-    pipeUpper = new Each( pipeUpper, new Fields( "num", "char" ), new ExpressionFunction( Fields.ALL, "Thread.sleep(1000);" ) );
+    pipeUpper = new Each( pipeUpper, new Fields( "num", "char" ), new ExpressionFunction( Fields.ALL, "Thread.sleep(1000)" ) );
 
     pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
 
