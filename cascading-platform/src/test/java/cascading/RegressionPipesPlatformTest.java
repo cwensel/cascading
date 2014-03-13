@@ -56,7 +56,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -189,13 +188,9 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     validateLength( flow, 10 );
     }
 
-  // todo: re-enable these tests on next major release
-  @Ignore
+  @Test
   public void testDupeHeadNames() throws Exception
     {
-    if( true )
-      return;
-
     Tap source = getPlatform().getTextFile( inputFileJoined );
     Tap sink = getPlatform().getTextFile( getOutputPath( "unknown" ), SinkMode.REPLACE );
 
@@ -223,10 +218,6 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
   @Test
   public void testDupeTailNames() throws Exception
     {
-    // todo: re-enable these tests on next major release
-    if( true )
-      return;
-
     Tap source = getPlatform().getTextFile( inputFileJoined );
     Tap sink = getPlatform().getTextFile( getOutputPath( "unknown" ), SinkMode.REPLACE );
 

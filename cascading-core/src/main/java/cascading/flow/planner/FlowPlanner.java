@@ -339,8 +339,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             throw new PlannerException( tail, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
-            LOG.warn( "duplicate tail name found: '{}'", tailName );
-//            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+//            LOG.warn( "duplicate tail name found: '{}'", tailName );
+            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
           tailNames.add( tailName );
           tails.add( tail );
@@ -354,8 +354,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-          LOG.warn( "duplicate tail name found: '{}'", tailName );
-//            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+//          LOG.warn( "duplicate tail name found: '{}'", tailName );
+            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
         tails.add( pipe );

@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Changed planner to disallow duplicate c.p.Pipe head and tail names.
+
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
 
