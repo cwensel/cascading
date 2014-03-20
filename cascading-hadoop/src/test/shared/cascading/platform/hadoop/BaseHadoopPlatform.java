@@ -29,9 +29,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowProcess;
-import cascading.flow.FlowSession;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.platform.TestPlatform;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
@@ -51,19 +48,18 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-public abstract class BaseHadoopPlatform extends TestPlatform
+public abstract class BaseHadoopPlatform<Config extends Configuration> extends TestPlatform
   {
   private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopPlatform.class );
 
   public transient static FileSystem fileSys;
-  public transient static Configuration jobConf;
+  public transient static Configuration configuration;
   public transient static Map<Object, Object> properties = new HashMap<Object, Object>();
 
   public int numMapTasks = 4;
@@ -104,16 +100,13 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     {
     }
 
-  public JobConf getJobConf()
-    {
-    return new JobConf( jobConf );
-    }
+  public abstract Config getConfiguration();
 
   public boolean isHDFSAvailable()
     {
     try
       {
-      FileSystem fileSystem = FileSystem.get( new URI( "hdfs:", null, null ), getJobConf() );
+      FileSystem fileSystem = FileSystem.get( new URI( "hdfs:", null, null ), configuration );
 
       return fileSystem != null;
       }
@@ -130,12 +123,6 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     }
 
   @Override
-  public FlowProcess getFlowProcess()
-    {
-    return new HadoopFlowProcess( FlowSession.NULL, getJobConf(), true );
-    }
-
-  @Override
   public void copyFromLocal( String inputFile ) throws IOException
     {
     if( !new File( inputFile ).exists() )
@@ -147,7 +134,7 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     Path path = new Path( safeFileName( inputFile ) );
 
     if( !fileSys.exists( path ) )
-      FileUtil.copy( new File( inputFile ), fileSys, path, false, jobConf );
+      FileUtil.copy( new File( inputFile ), fileSys, path, false, configuration );
     }
 
   @Override
@@ -169,7 +156,7 @@ public abstract class BaseHadoopPlatform extends TestPlatform
     if( fileSys.isFile( path ) )
       {
       // its a file, so just copy it over
-      FileUtil.copy( fileSys, path, file, false, jobConf );
+      FileUtil.copy( fileSys, path, file, false, configuration );
       return;
       }
 
@@ -185,7 +172,7 @@ public abstract class BaseHadoopPlatform extends TestPlatform
       if( currentPath.getName().startsWith( "_" ) ) // filter out temp and log dirs
         continue;
 
-      FileUtil.copy( fileSys, currentPath, new File( file, currentPath.getName() ), false, jobConf );
+      FileUtil.copy( fileSys, currentPath, new File( file, currentPath.getName() ), false, configuration );
       }
     }
 

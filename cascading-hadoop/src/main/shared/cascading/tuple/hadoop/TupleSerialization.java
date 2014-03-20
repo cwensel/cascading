@@ -158,7 +158,7 @@ public class TupleSerialization extends Configured implements Serialization
    *
    * @param jobConf of type JobConf
    */
-  public static void setSerializations( JobConf jobConf )
+  public static void setSerializations( Configuration jobConf )
     {
     String serializations = getSerializations( jobConf );
 

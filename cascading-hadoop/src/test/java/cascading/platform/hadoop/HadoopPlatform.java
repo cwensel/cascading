@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowProcess;
 import cascading.flow.FlowProps;
+import cascading.flow.FlowSession;
 import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.util.Util;
 import org.apache.hadoop.fs.FileSystem;
@@ -54,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * packaged in a Hadoop compatible way. This is left to be implemented by the framework using this mode. Additionally
  * these properties may optionally be set if not already in the CLASSPATH; fs.default.name and mapred.job.tracker.
  */
-public class HadoopPlatform extends BaseHadoopPlatform
+public class HadoopPlatform extends BaseHadoopPlatform<JobConf>
   {
   private static final Logger LOG = LoggerFactory.getLogger( HadoopPlatform.class );
 
@@ -101,23 +104,34 @@ public class HadoopPlatform extends BaseHadoopPlatform
     return Integer.parseInt( properties.get( "mapred.reduce.tasks" ).toString() );
     }
 
+  public JobConf getConfiguration()
+    {
+    return new JobConf( configuration );
+    }
+
+  @Override
+  public FlowProcess getFlowProcess()
+    {
+    return new HadoopFlowProcess( FlowSession.NULL, (JobConf) getConfiguration(), true );
+    }
+
   @Override
   public synchronized void setUp() throws IOException
     {
-    if( jobConf != null )
+    if( configuration != null )
       return;
 
     if( !isUseCluster() )
       {
       LOG.info( "not using cluster" );
-      jobConf = new JobConf();
+      configuration = new JobConf();
 
       // enforce the local file system in local mode
-      jobConf.set( "fs.default.name", "file:///" );
-      jobConf.set( "mapred.job.tracker", "local" );
-      jobConf.set( "mapreduce.jobtracker.staging.root.dir", "build/tmp/cascading/staging" );
+      configuration.set( "fs.default.name", "file:///" );
+      configuration.set( "mapred.job.tracker", "local" );
+      configuration.set( "mapreduce.jobtracker.staging.root.dir", "build/tmp/cascading/staging" );
 
-      fileSys = FileSystem.get( jobConf );
+      fileSys = FileSystem.get( configuration );
       }
     else
       {
@@ -136,24 +150,24 @@ public class HadoopPlatform extends BaseHadoopPlatform
       if( !Util.isEmpty( System.getProperty( "mapred.jar" ) ) )
         {
         LOG.info( "using a remote cluster with jar: {}", System.getProperty( "mapred.jar" ) );
-        jobConf = conf;
+        configuration = conf;
 
-        ( (JobConf) jobConf ).setJar( System.getProperty( "mapred.jar" ) );
+        ( (JobConf) configuration ).setJar( System.getProperty( "mapred.jar" ) );
 
         if( !Util.isEmpty( System.getProperty( "fs.default.name" ) ) )
           {
           LOG.info( "using {}={}", "fs.default.name", System.getProperty( "fs.default.name" ) );
-          jobConf.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
+          configuration.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
           }
 
         if( !Util.isEmpty( System.getProperty( "mapred.job.tracker" ) ) )
           {
           LOG.info( "using {}={}", "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
-          jobConf.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          configuration.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
           }
 
-        jobConf.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
-        fileSys = FileSystem.get( jobConf );
+        configuration.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        fileSys = FileSystem.get( configuration );
         }
       else
         {
@@ -161,21 +175,21 @@ public class HadoopPlatform extends BaseHadoopPlatform
         fileSys = dfs.getFileSystem();
         mr = new MiniMRCluster( 4, fileSys.getUri().toString(), 1, null, null, conf );
 
-        jobConf = mr.createJobConf();
+        configuration = mr.createJobConf();
         }
 
 //      jobConf.set( "mapred.map.max.attempts", "1" );
 //      jobConf.set( "mapred.reduce.max.attempts", "1" );
-      jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
-      jobConf.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
-      jobConf.setInt( "jobclient.completion.poll.interval", 50 );
-      jobConf.setInt( "jobclient.progress.monitor.poll.interval", 50 );
-      ( (JobConf) jobConf ).setMapSpeculativeExecution( false );
-      ( (JobConf) jobConf ).setReduceSpeculativeExecution( false );
+      configuration.set( "mapred.child.java.opts", "-Xmx512m" );
+      configuration.setInt( "mapred.job.reuse.jvm.num.tasks", -1 );
+      configuration.setInt( "jobclient.completion.poll.interval", 50 );
+      configuration.setInt( "jobclient.progress.monitor.poll.interval", 50 );
+      ( (JobConf) configuration ).setMapSpeculativeExecution( false );
+      ( (JobConf) configuration ).setReduceSpeculativeExecution( false );
       }
 
-    ( (JobConf) jobConf ).setNumMapTasks( numMapTasks );
-    ( (JobConf) jobConf ).setNumReduceTasks( numReduceTasks );
+    ( (JobConf) configuration ).setNumMapTasks( numMapTasks );
+    ( (JobConf) configuration ).setNumReduceTasks( numReduceTasks );
 
     Map<Object, Object> globalProperties = getGlobalProperties();
 
@@ -184,8 +198,8 @@ public class HadoopPlatform extends BaseHadoopPlatform
 
     FlowProps.setJobPollingInterval( globalProperties, 10 ); // should speed up tests
 
-    HadoopPlanner.copyProperties( (JobConf) jobConf, globalProperties ); // copy any external properties
+    HadoopPlanner.copyProperties( (JobConf) configuration, globalProperties ); // copy any external properties
 
-    HadoopPlanner.copyJobConf( properties, (JobConf) jobConf ); // put all properties on the jobconf
+    HadoopPlanner.copyJobConf( properties, (JobConf) configuration ); // put all properties on the jobconf
     }
   }

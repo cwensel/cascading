@@ -52,7 +52,7 @@ public class LocalFailScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     if( !sourceFired )
       {
@@ -64,7 +64,7 @@ public class LocalFailScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     if( !sinkFired )
       {

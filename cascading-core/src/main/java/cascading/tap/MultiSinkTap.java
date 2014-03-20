@@ -65,18 +65,18 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
     {
     TupleEntryCollector[] collectors;
 
-    public MultiSinkCollector( FlowProcess<Config> flowProcess, Tap... taps ) throws IOException
+    public <C extends Config> MultiSinkCollector( FlowProcess<C> flowProcess, Tap<Config,?,?>... taps ) throws IOException
       {
       super( Fields.asDeclaration( getSinkFields() ) );
 
       collectors = new TupleEntryCollector[ taps.length ];
 
-      Config conf = flowProcess.getConfigCopy();
+      C conf = flowProcess.getConfigCopy();
 
       for( int i = 0; i < taps.length; i++ )
         {
-        Config mergedConf = childConfigs == null ? conf : flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
-        Tap tap = taps[ i ];
+        C mergedConf = childConfigs == null ? conf : flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
+        Tap<Config,?,?> tap = taps[ i ];
         LOG.info( "opening for write: {}", tap.toString() );
 
         collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ), null );
@@ -150,31 +150,36 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
     }
 
   @Override
-  public void presentSinkFields( FlowProcess<Config> flowProcess, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Config> flowProcess, Fields fields )
     {
     for( Tap child : getTaps() )
       child.presentSinkFields( flowProcess, fields );
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Output output ) throws IOException
     {
     return new MultiSinkCollector( flowProcess, getTaps() );
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Config> process, Config conf )
+  public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
     {
-    childConfigs = new ArrayList<Map<String, String>>();
+    bridge( flowProcess, conf );
+    }
+
+  private void bridge( FlowProcess flowProcess, Object conf )
+    {
+    childConfigs = new ArrayList<>();
 
     for( int i = 0; i < getTaps().length; i++ )
       {
       Tap tap = getTaps()[ i ];
-      Config jobConf = process.copyConfig( conf );
+      Object newConfig =  flowProcess.copyConfig( conf );
 
-      tap.sinkConfInit( process, jobConf );
+      tap.sinkConfInit( flowProcess, newConfig );
 
-      childConfigs.add( process.diffConfigIntoMap( conf, jobConf ) );
+      childConfigs.add( flowProcess.diffConfigIntoMap( conf, newConfig ) );
       }
     }
 

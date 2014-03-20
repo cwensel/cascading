@@ -166,7 +166,7 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
-    public Object copyConfig( Object jobConf )
+    public Object copyConfig( Object config )
       {
       return null;
       }

@@ -93,7 +93,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, InputStream input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Properties> flowProcess, InputStream input ) throws IOException
     {
     if( input == null )
       input = new FileInputStream( getIdentifier() );
@@ -102,7 +102,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Properties> flowProcess, OutputStream output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Properties> flowProcess, OutputStream output ) throws IOException
     {
     if( output == null )
       output = new TapFileOutputStream( getIdentifier(), isUpdate() ); // append if we are in update mode

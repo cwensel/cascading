@@ -36,9 +36,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.util.TupleViews;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -953,7 +953,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public Fields retrieveSourceFields( FlowProcess<JobConf> flowProcess, Tap tap )
+  public Fields retrieveSourceFields( FlowProcess<? extends Configuration> flowProcess, Tap tap )
     {
     if( !skipHeader || !getSourceFields().isUnknown() )
       return getSourceFields();
@@ -971,19 +971,19 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public void presentSourceFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+  public void presentSourceFields( FlowProcess<? extends Configuration> flowProcess, Tap tap, Fields fields )
     {
     presentSourceFieldsInternal( fields );
     }
 
   @Override
-  public void presentSinkFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Configuration> flowProcess, Tap tap, Fields fields )
     {
     presentSinkFieldsInternal( fields );
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     super.sourcePrepare( flowProcess, sourceCall );
 
@@ -991,7 +991,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object[] context = sourceCall.getContext();
 
@@ -1014,7 +1014,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.setContext( new Object[ 3 ] );
 
@@ -1044,7 +1044,7 @@ public class TextDelimited extends TextLine
     }
 
   @Override
-  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 

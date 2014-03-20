@@ -27,7 +27,7 @@ import cascading.flow.SliceCounters;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.TupleEntrySchemeCollector;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -35,21 +35,21 @@ import org.apache.hadoop.mapred.RecordReader;
  * Class HadoopTupleEntrySchemeCollector is a kind of {@link cascading.tuple.TupleEntryCollector} that writes tuples to the resource managed by
  * a particular {@link cascading.tap.Tap} instance.
  */
-public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<JobConf, OutputCollector>
+public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<Configuration, OutputCollector>
   {
   private MeasuredOutputCollector measuredOutputCollector;
 
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap ) throws IOException
     {
     super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, null ), tap.getIdentifier() );
     }
 
-  public HadoopTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
+  public HadoopTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
     {
     super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, outputCollector ), tap.getIdentifier() );
     }
 
-  private static OutputCollector makeCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
+  private static OutputCollector makeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
     {
     if( outputCollector != null )
       return outputCollector;

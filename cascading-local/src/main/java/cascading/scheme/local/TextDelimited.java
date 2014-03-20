@@ -602,7 +602,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public Fields retrieveSourceFields( FlowProcess<Properties> process, Tap tap )
+  public Fields retrieveSourceFields( FlowProcess<? extends Properties> process, Tap tap )
     {
     if( !skipHeader || !getSourceFields().isUnknown() )
       return getSourceFields();
@@ -619,25 +619,25 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public void presentSourceFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+  public void presentSourceFields( FlowProcess<? extends Properties> process, Tap tap, Fields fields )
     {
     // do nothing
     }
 
   @Override
-  public void presentSinkFields( FlowProcess<Properties> flowProcess, Tap tap, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Properties> flowProcess, Tap tap, Fields fields )
     {
     if( writeHeader )
       presentSinkFieldsInternal( fields );
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( createInput( sourceCall.getInput() ) );
 
@@ -645,7 +645,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     String line = sourceCall.getContext().readLine();
 
@@ -669,18 +669,18 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public void sourceCleanup( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public void sourceCleanup( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
+  public void sinkPrepare( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
     {
     sinkCall.setContext( createOutput( sinkCall.getOutput() ) );
 
@@ -694,7 +694,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 
@@ -706,7 +706,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Override
-  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
+  public void sinkCleanup( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
     {
     sinkCall.getContext().flush();
     sinkCall.setContext( null );

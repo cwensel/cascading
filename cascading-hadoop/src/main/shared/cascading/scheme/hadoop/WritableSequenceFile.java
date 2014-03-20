@@ -30,10 +30,11 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
@@ -94,23 +95,23 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
     if( keyType != null )
-      conf.setOutputKeyClass( keyType );
+      conf.setClass( "mapred.output.key.class", keyType, Object.class );
     else
-      conf.setOutputKeyClass( NullWritable.class );
+      conf.setClass( "mapred.output.key.class", NullWritable.class, Object.class );
 
     if( valueType != null )
-      conf.setOutputValueClass( valueType );
+      conf.setClass( "mapred.output.value.class", valueType, Object.class );
     else
-      conf.setOutputValueClass( NullWritable.class );
+      conf.setClass( "mapred.output.value.class", NullWritable.class, Object.class );
 
-    conf.setOutputFormat( SequenceFileOutputFormat.class );
+    conf.setClass( "mapred.output.format.class", SequenceFileOutputFormat.class, OutputFormat.class );
     }
 
   @Override
-  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Object key = sourceCall.getContext()[ 0 ];
     Object value = sourceCall.getContext()[ 1 ];
@@ -132,7 +133,7 @@ public class WritableSequenceFile extends SequenceFile
     }
 
   @Override
-  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
 

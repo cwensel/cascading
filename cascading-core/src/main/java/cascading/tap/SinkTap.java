@@ -63,13 +63,13 @@ public abstract class SinkTap<Config, Output> extends Tap<Config, Void, Output>
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
+  public void sourceConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SinkTap instance" );
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Void input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Void input ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for read via a SinkTap instance" );
     }

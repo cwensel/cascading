@@ -172,11 +172,10 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    * <p/>
    * Note that no resources or services should be modified by this method.
-   *
-   * @param flowProcess of type FlowProcess
+   *  @param flowProcess of type FlowProcess
    * @param conf        of type Config
    */
-  public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
+  public void sourceConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
     {
     getScheme().sourceConfInit( flowProcess, this, conf );
     }
@@ -195,11 +194,10 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * Note that no resources or services should be modified by this method. If this Tap instance returns true for
    * {@link #isReplace()}, then {@link #deleteResource(Object)} will be called by the parent Flow.
-   *
-   * @param flowProcess of type FlowProcess
+   *  @param flowProcess of type FlowProcess
    * @param conf        of type Config
    */
-  public void sinkConfInit( FlowProcess<Config> flowProcess, Config conf )
+  public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
     {
     getScheme().sinkConfInit( flowProcess, this, conf );
     }
@@ -252,7 +250,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException;
+  public abstract TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException;
 
   /**
    * Method openForRead opens the resource represented by this Tap instance for reading.
@@ -265,7 +263,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return TupleEntryIterator
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return openForRead( flowProcess, null );
     }
@@ -285,7 +283,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return TupleEntryCollector
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public abstract TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException;
+  public abstract TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Output output ) throws IOException;
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance for writing.
@@ -299,7 +297,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return TupleEntryCollector
    * @throws java.io.IOException when the resource cannot be opened
    */
-  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     if( isReplace() )
       deleteResource( flowProcess.getConfigCopy() );
@@ -356,12 +354,12 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @param flowProcess of type FlowProcess
    * @return the found Fields
    */
-  public Fields retrieveSourceFields( FlowProcess<Config> flowProcess )
+  public Fields retrieveSourceFields( FlowProcess<? extends Config> flowProcess )
     {
     return getScheme().retrieveSourceFields( flowProcess, this );
     }
 
-  public void presentSourceFields( FlowProcess<Config> flowProcess, Fields fields )
+  public void presentSourceFields( FlowProcess<? extends Config> flowProcess, Fields fields )
     {
     getScheme().presentSourceFields( flowProcess, this, fields );
     }
@@ -372,12 +370,12 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @param flowProcess of type FlowProcess
    * @return the found Fields
    */
-  public Fields retrieveSinkFields( FlowProcess<Config> flowProcess )
+  public Fields retrieveSinkFields( FlowProcess<? extends Config> flowProcess )
     {
     return getScheme().retrieveSinkFields( flowProcess, this );
     }
 
-  public void presentSinkFields( FlowProcess<Config> flowProcess, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Config> flowProcess, Fields fields )
     {
     getScheme().presentSinkFields( flowProcess, this, fields );
     }
@@ -400,7 +398,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @param flowProcess of type FlowProcess
    * @return String
    */
-  public String getFullIdentifier( FlowProcess<Config> flowProcess )
+  public String getFullIdentifier( FlowProcess<? extends Config> flowProcess )
     {
     return getFullIdentifier( flowProcess.getConfigCopy() );
     }
@@ -423,7 +421,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return boolean
    * @throws IOException when there is an error making directories
    */
-  public boolean createResource( FlowProcess<Config> flowProcess ) throws IOException
+  public boolean createResource( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return createResource( flowProcess.getConfigCopy() );
     }
@@ -444,7 +442,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return boolean
    * @throws IOException when the resource cannot be deleted
    */
-  public boolean deleteResource( FlowProcess<Config> flowProcess ) throws IOException
+  public boolean deleteResource( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return deleteResource( flowProcess.getConfigCopy() );
     }
@@ -506,7 +504,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return true if the underlying resource already exists
    * @throws IOException when the status cannot be determined
    */
-  public boolean resourceExists( FlowProcess<Config> flowProcess ) throws IOException
+  public boolean resourceExists( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return resourceExists( flowProcess.getConfigCopy() );
     }
@@ -527,7 +525,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * @return The date this resource was last modified.
    * @throws IOException
    */
-  public long getModifiedTime( FlowProcess<Config> flowProcess ) throws IOException
+  public long getModifiedTime( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return getModifiedTime( flowProcess.getConfigCopy() );
     }

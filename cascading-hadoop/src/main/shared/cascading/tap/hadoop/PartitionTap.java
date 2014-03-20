@@ -34,8 +34,8 @@ import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -60,7 +60,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * its safe to do so. Same is true with the PartitionTap. Interleaving writes to a common parent (root) directory
  * across multiple flows will very likely lead to data loss.
  */
-public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, OutputCollector>
+public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, OutputCollector>
   {
   /**
    * Constructor PartitionTap creates a new PartitionTap instance using the given parent {@link cascading.tap.hadoop.Hfs} Tap as the
@@ -145,21 +145,21 @@ public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, Output
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap parent, String path, long sequence ) throws IOException
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap parent, String path, long sequence ) throws IOException
     {
     TapOutputCollector outputCollector = new TapOutputCollector( flowProcess, parent, path, sequence );
 
-    return new TupleEntrySchemeCollector<JobConf, OutputCollector>( flowProcess, parent, outputCollector );
+    return new TupleEntrySchemeCollector<Configuration, OutputCollector>( flowProcess, parent, outputCollector );
     }
 
   @Override
-  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<JobConf> flowProcess, Tap parent, String path, RecordReader recordReader ) throws IOException
+  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<? extends Configuration> flowProcess, Tap parent, String path, RecordReader recordReader ) throws IOException
     {
     return new HadoopTupleEntrySchemeIterator( flowProcess, new Hfs( parent.getScheme(), path ), recordReader );
     }
 
   @Override
-  protected String getCurrentIdentifier( FlowProcess<JobConf> flowProcess )
+  protected String getCurrentIdentifier( FlowProcess<? extends Configuration> flowProcess )
     {
     String identifier = flowProcess.getStringProperty( MultiInputSplit.CASCADING_SOURCE_PATH ); // set on current split
 
@@ -170,7 +170,7 @@ public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, Output
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Configuration conf )
     {
     try
       {

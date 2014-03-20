@@ -86,7 +86,7 @@ public class FlowPlatformTest extends PlatformTestCase
   public void testLocalModeSource() throws Exception
     {
     Tap source = new Lfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap sink = new Hfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -99,7 +99,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -110,7 +110,7 @@ public class FlowPlatformTest extends PlatformTestCase
   public void testLocalModeSink() throws Exception
     {
     Tap source = new Hfs( new TextLine(), "input/path" );
-    Tap sink = new Lfs( new TextLine(), "output/path", true );
+    Tap sink = new Lfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -123,7 +123,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -149,7 +149,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).getInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
 
     assertTrue( "is local", !isLocal );
     }
@@ -455,7 +455,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    JobConf conf = ( (BaseHadoopPlatform) getPlatform() ).getJobConf();
+    JobConf conf = (JobConf) ( (BaseHadoopPlatform) getPlatform() ).getConfiguration();
 
     conf.set( AppProps.APP_NAME, "testname" );
 

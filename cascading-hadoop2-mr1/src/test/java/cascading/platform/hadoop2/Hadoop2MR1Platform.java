@@ -23,10 +23,12 @@ package cascading.platform.hadoop2;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Random;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowProcess;
 import cascading.flow.FlowProps;
+import cascading.flow.FlowSession;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.flow.hadoop2.Hadoop2MR1Planner;
 import cascading.platform.hadoop.BaseHadoopPlatform;
@@ -43,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * Class Hadoop2Platform is automatically loaded and injected into a {@link cascading.PlatformTestCase} instance
  * so that all *PlatformTest classes can be tested against Apache Hadoop 2.x.
  */
-public class Hadoop2MR1Platform extends BaseHadoopPlatform
+public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
   {
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop2MR1Platform.class );
   private transient static MiniDFSCluster dfs;
@@ -95,17 +97,28 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
     return Integer.parseInt( properties.get( "mapreduce.job.reduces" ).toString() );
     }
 
+  public JobConf getConfiguration()
+    {
+    return new JobConf( configuration );
+    }
+
+  @Override
+  public FlowProcess getFlowProcess()
+    {
+    return new HadoopFlowProcess( FlowSession.NULL, getConfiguration(), true );
+    }
+
   @Override
   public synchronized void setUp() throws IOException
     {
-    if( jobConf != null )
+    if( configuration != null )
       return;
 
     if( !isUseCluster() )
       {
       LOG.info( "not using cluster" );
-      jobConf = new JobConf();
-      fileSys = FileSystem.get( jobConf );
+      configuration = new JobConf();
+      fileSys = FileSystem.get( configuration );
       }
     else
       {
@@ -124,24 +137,24 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
       if( !Util.isEmpty( System.getProperty( "mapred.jar" ) ) )
         {
         LOG.info( "using a remote cluster with jar: {}", System.getProperty( "mapred.jar" ) );
-        jobConf = conf;
+        configuration = conf;
 
-        ( (JobConf) jobConf ).setJar( System.getProperty( "mapred.jar" ) );
+        ( (JobConf) configuration ).setJar( System.getProperty( "mapred.jar" ) );
 
         if( !Util.isEmpty( System.getProperty( "fs.default.name" ) ) )
           {
           LOG.info( "using {}={}", "fs.default.name", System.getProperty( "fs.default.name" ) );
-          jobConf.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
+          configuration.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
           }
 
         if( !Util.isEmpty( System.getProperty( "mapred.job.tracker" ) ) )
           {
           LOG.info( "using {}={}", "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
-          jobConf.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          configuration.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
           }
 
-        jobConf.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
-        fileSys = FileSystem.get( jobConf );
+        configuration.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        fileSys = FileSystem.get( configuration );
         }
       else
         {
@@ -159,19 +172,19 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
 
         mr = MiniMRClientClusterFactory.create( this.getClass(), 4, conf );
 
-        jobConf = mr.getConfig();
+        configuration = mr.getConfig();
         }
 
-      jobConf.set( "mapred.child.java.opts", "-Xmx512m" );
-      jobConf.setInt( "mapreduce.job.jvm.numtasks", -1 );
-      jobConf.setInt( "mapreduce.client.completion.pollinterval", 50 );
-      jobConf.setInt( "mapreduce.client.progressmonitor.pollinterval", 50 );
-      jobConf.setBoolean( "mapreduce.map.speculative", false );
-      jobConf.setBoolean( "mapreduce.reduce.speculative", false );
+      configuration.set( "mapred.child.java.opts", "-Xmx512m" );
+      configuration.setInt( "mapreduce.job.jvm.numtasks", -1 );
+      configuration.setInt( "mapreduce.client.completion.pollinterval", 50 );
+      configuration.setInt( "mapreduce.client.progressmonitor.pollinterval", 50 );
+      configuration.setBoolean( "mapreduce.map.speculative", false );
+      configuration.setBoolean( "mapreduce.reduce.speculative", false );
       }
 
-    jobConf.setInt( "mapreduce.job.maps", numMapTasks );
-    jobConf.setInt( "mapreduce.job.reduces", numReduceTasks );
+    configuration.setInt( "mapreduce.job.maps", numMapTasks );
+    configuration.setInt( "mapreduce.job.reduces", numReduceTasks );
 
     Map<Object, Object> globalProperties = getGlobalProperties();
 
@@ -180,8 +193,8 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
 
     FlowProps.setJobPollingInterval( globalProperties, 10 ); // should speed up tests
 
-    Hadoop2MR1Planner.copyProperties( jobConf, globalProperties ); // copy any external properties
+    Hadoop2MR1Planner.copyProperties( configuration, globalProperties ); // copy any external properties
 
-    Hadoop2MR1Planner.copyConfiguration( properties, jobConf ); // put all properties on the jobconf
+    Hadoop2MR1Planner.copyConfiguration( properties, configuration ); // put all properties on the jobconf
     }
   }

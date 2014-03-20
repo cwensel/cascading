@@ -64,7 +64,7 @@ public abstract class SourceTap<Config, Input> extends Tap<Config, Input, Void>
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Config> flowProcess, Config conf )
+  public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
     {
     throw new UnsupportedOperationException( "unable to source tuple streams via a SourceTap instance" );
     }
@@ -88,7 +88,7 @@ public abstract class SourceTap<Config, Input> extends Tap<Config, Input, Void>
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Void output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Void output ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to open for write via a SourceTap instance" );
     }

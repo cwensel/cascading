@@ -39,7 +39,7 @@ import cascading.util.SingleCloseableInputIterator;
  */
 public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   {
-  private final FlowProcess<Config> flowProcess;
+  private final FlowProcess<? extends Config> flowProcess;
   private final Scheme scheme;
   private final CloseableIterator<Input> inputIterator;
   private ConcreteCall sourceCall;
@@ -49,22 +49,22 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   private boolean hasWaiting = false;
   private TupleException currentException;
 
-  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, Input input )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input )
     {
     this( flowProcess, scheme, input, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, Input input, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input, String identifier )
     {
     this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), identifier );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
     {
     this( flowProcess, scheme, inputIterator, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String identifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
@@ -96,7 +96,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       }
     }
 
-  protected FlowProcess<Config> getFlowProcess()
+  protected FlowProcess<? extends Config> getFlowProcess()
     {
     return flowProcess;
     }

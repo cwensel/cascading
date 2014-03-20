@@ -40,34 +40,34 @@ import cascading.tap.TapException;
  */
 public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollector
   {
-  private final FlowProcess<Config> flowProcess;
+  private final FlowProcess<? extends Config> flowProcess;
   private final Scheme scheme;
   private String identifier;
 
   protected final ConcreteCall<Object, Output> sinkCall;
   private boolean prepared = false;
 
-  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme )
     {
     this( flowProcess, scheme, null, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, String identifier )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, String identifier )
     {
     this( flowProcess, scheme, null, identifier );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output )
     {
     this( flowProcess, scheme, output, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap tap, Output output )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Output output )
     {
     this( flowProcess, tap.getScheme(), output, tap.getIdentifier() );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Scheme scheme, Output output, String identifier )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output, String identifier )
     {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
@@ -81,7 +81,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
       setOutput( output );
     }
 
-  protected FlowProcess<Config> getFlowProcess()
+  protected FlowProcess<? extends Config> getFlowProcess()
     {
     return flowProcess;
     }

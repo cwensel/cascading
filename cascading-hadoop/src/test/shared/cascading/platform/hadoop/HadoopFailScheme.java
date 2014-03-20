@@ -29,7 +29,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -51,7 +51,7 @@ public class HadoopFailScheme extends TextLine
     }
 
   @Override
-  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     if( !sourceFired )
       {
@@ -63,7 +63,7 @@ public class HadoopFailScheme extends TextLine
     }
 
   @Override
-  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     if( !sinkFired )
       {

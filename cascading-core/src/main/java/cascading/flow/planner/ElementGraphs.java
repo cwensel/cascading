@@ -462,15 +462,20 @@ public class ElementGraphs
 
   public static Set<Tap> findSources( ElementGraph elementGraph )
     {
+    return findSources( elementGraph, Tap.class );
+    }
+
+  public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
+    {
     if( elementGraph instanceof FlowElementGraph )
       elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
 
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Head ) ),
+      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
 
-    return narrowSet( Tap.class, getAllVertices( iterator ) );
+    return narrowSet( type, getAllVertices( iterator ) );
     }
 
   public static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
@@ -484,15 +489,20 @@ public class ElementGraphs
 
   public static Set<Tap> findSinks( ElementGraph elementGraph )
     {
+    return findSinks( elementGraph, Tap.class );
+    }
+
+  public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
+    {
     if( elementGraph instanceof FlowElementGraph )
       elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
 
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Tail ) ),
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Head ) ),
       elementGraph
     );
 
-    return narrowSet( Tap.class, getAllVertices( iterator ) );
+    return narrowSet( type, getAllVertices( iterator ) );
     }
 
   public static Set<Group> findAllGroups( ElementGraph elementGraph )

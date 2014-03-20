@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -33,16 +34,19 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+
+import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 
 /**
  * A TextLine is a type of {@link cascading.scheme.Scheme} for plain text files. Files are broken into
@@ -68,7 +72,7 @@ import org.apache.hadoop.mapred.TextOutputFormat;
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
  */
-public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]>
+public class TextLine extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]>
   {
   public enum Compress
     {
@@ -337,12 +341,12 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
-    if( hasZippedFiles( FileInputFormat.getInputPaths( conf ) ) )
-      throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( conf ) ) );
+    if( hasZippedFiles( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) )
+      throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) );
 
-    conf.setInputFormat( TextInputFormat.class );
+    conf.setClass( "mapred.input.format.class", TextInputFormat.class, InputFormat.class );
     }
 
   private boolean hasZippedFiles( Path[] paths )
@@ -362,35 +366,35 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
-  public void presentSourceFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+  public void presentSourceFields( FlowProcess<? extends Configuration> flowProcess, Tap tap, Fields fields )
     {
     // do nothing to change TextLine state
     }
 
   @Override
-  public void presentSinkFields( FlowProcess<JobConf> flowProcess, Tap tap, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Configuration> flowProcess, Tap tap, Fields fields )
     {
     // do nothing to change TextLine state
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
     if( tap.getFullIdentifier( conf ).endsWith( ".zip" ) )
-      throw new IllegalStateException( "cannot write zip files: " + FileOutputFormat.getOutputPath( conf ) );
+      throw new IllegalStateException( "cannot write zip files: " + HadoopUtil.getOutputPath( conf ) );
 
     if( getSinkCompression() == Compress.DISABLE )
       conf.setBoolean( "mapred.output.compress", false );
     else if( getSinkCompression() == Compress.ENABLE )
       conf.setBoolean( "mapred.output.compress", true );
 
-    conf.setOutputKeyClass( Text.class ); // be explicit
-    conf.setOutputValueClass( Text.class ); // be explicit
-    conf.setOutputFormat( TextOutputFormat.class );
+    conf.setClass( "mapred.output.key.class", Text.class, Object.class );
+    conf.setClass( "mapred.output.value.class", Text.class, Object.class );
+    conf.setClass( "mapred.output.format.class", TextOutputFormat.class, OutputFormat.class );
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     if( sourceCall.getContext() == null )
       sourceCall.setContext( new Object[ 3 ] );
@@ -401,7 +405,7 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
-  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     if( !sourceReadInput( sourceCall ) )
       return false;
@@ -439,13 +443,13 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
-  public void sourceCleanup( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourceCleanup( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.setContext( new Object[ 2 ] );
 
@@ -454,7 +458,7 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     }
 
   @Override
-  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     Text text = (Text) sinkCall.getContext()[ 0 ];
     Charset charset = (Charset) sinkCall.getContext()[ 1 ];

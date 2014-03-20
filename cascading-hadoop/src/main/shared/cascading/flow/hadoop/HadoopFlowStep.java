@@ -72,7 +72,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     super( name, stepNum, elementGraph );
     }
 
-  public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     JobConf conf = parentConfig == null ? new JobConf() : new JobConf( parentConfig );
 
@@ -192,7 +192,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   protected FlowStepJob<JobConf> createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
+    JobConf initializedConfig = createInitializedConfig( flowProcess, parentConfig );
 
     setConf( initializedConfig );
 

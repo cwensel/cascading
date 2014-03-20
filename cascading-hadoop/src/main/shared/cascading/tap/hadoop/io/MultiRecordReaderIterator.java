@@ -28,6 +28,7 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Tuple;
 import cascading.util.CloseableIterator;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -36,6 +37,8 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 
 /**
  * Class TapIterator is an implementation of {@link cascading.util.CloseableIterator}. It is returned by {@link cascading.tap.Tap} instances when
@@ -46,13 +49,13 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( MultiRecordReaderIterator.class );
 
-  private final FlowProcess<JobConf> flowProcess;
+  private final FlowProcess<? extends Configuration> flowProcess;
   /** Field tap */
   private final Tap tap;
   /** Field inputFormat */
   private InputFormat inputFormat;
   /** Field conf */
-  private JobConf conf;
+  private Configuration conf;
   /** Field splits */
   private InputSplit[] splits;
   /** Field reader */
@@ -71,7 +74,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
    *
    * @throws IOException when
    */
-  public MultiRecordReaderIterator( FlowProcess<JobConf> flowProcess, Tap tap ) throws IOException
+  public MultiRecordReaderIterator( FlowProcess<? extends Configuration> flowProcess, Tap tap ) throws IOException
     {
     this.flowProcess = flowProcess;
     this.tap = tap;
@@ -92,14 +95,16 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
       tap.sourceConfInit( flowProcess, conf );
       }
 
-    inputFormat = conf.getInputFormat();
+    JobConf jobConf = asJobConfInstance( conf );
+
+    inputFormat = jobConf.getInputFormat();
 
     if( inputFormat instanceof JobConfigurable )
-      ( (JobConfigurable) inputFormat ).configure( conf );
+      ( (JobConfigurable) inputFormat ).configure( jobConf );
 
     // do not test for existence, let hadoop decide how to handle the given path
     // this delegates globbing to the inputformat on split generation.
-    splits = inputFormat.getSplits( conf, 1 );
+    splits = inputFormat.getSplits( jobConf, 1 );
 
     if( splits.length == 0 )
       complete = true;
@@ -109,7 +114,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     {
     LOG.debug( "reading split: {}", currentSplit );
 
-    return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
+    return inputFormat.getRecordReader( splits[ currentSplit ], asJobConfInstance( conf ), Reporter.NULL );
     }
 
   /**

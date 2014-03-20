@@ -46,7 +46,7 @@ public class LocalConfigDefScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     // we should not see any config def values here
     if( flowProcess.getProperty( "default" ) != null )
@@ -56,7 +56,7 @@ public class LocalConfigDefScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     // we should not see any config def values here
     if( flowProcess.getProperty( "default" ) != null )
@@ -66,7 +66,7 @@ public class LocalConfigDefScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     if( !( flowProcess instanceof FlowProcessWrapper ) )
       throw new RuntimeException( "not a flow process wrapper" );
@@ -89,7 +89,7 @@ public class LocalConfigDefScheme extends cascading.scheme.local.TextLine
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     if( !( flowProcess instanceof FlowProcessWrapper ) )
       throw new RuntimeException( "not a flow process wrapper" );

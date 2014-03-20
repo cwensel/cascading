@@ -161,7 +161,7 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Config> process, Config conf )
+  public void sourceConfInit( FlowProcess<? extends Config> process, Config conf )
     {
     for( Tap tap : getTaps() )
       tap.sourceConfInit( process, conf );
@@ -196,7 +196,7 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
     {
     if( input != null )
       return taps[ 0 ].openForRead( flowProcess, input );

@@ -26,9 +26,8 @@ import java.io.IOException;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.TapException;
-import cascading.tuple.Fields;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  * Class Lfs is a {@link cascading.tap.Tap} class that provides access to the Local File System via Hadoop.
@@ -50,19 +49,6 @@ public class Lfs extends Hfs
   /**
    * Constructor Lfs creates a new Lfs instance.
    *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   */
-  @ConstructorProperties({"fields", "stringPath"})
-  @Deprecated
-  public Lfs( Fields fields, String stringPath )
-    {
-    super( fields, stringPath );
-    }
-
-  /**
-   * Constructor Lfs creates a new Lfs instance.
-   *
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
@@ -70,34 +56,6 @@ public class Lfs extends Hfs
   public Lfs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
-    }
-
-  /**
-   * Constructor Lfs creates a new Lfs instance.
-   *
-   * @param scheme     of type Scheme
-   * @param stringPath of type String
-   * @param replace    of type boolean
-   */
-  @ConstructorProperties({"scheme", "stringPath", "replace"})
-  @Deprecated
-  public Lfs( Scheme scheme, String stringPath, boolean replace )
-    {
-    super( scheme, stringPath, replace );
-    }
-
-  /**
-   * Constructor Lfs creates a new Lfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   * @param sinkMode   of type SinkMode
-   */
-  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
-  @Deprecated
-  public Lfs( Fields fields, String stringPath, SinkMode sinkMode )
-    {
-    super( fields, stringPath, sinkMode );
     }
 
   /**
@@ -121,7 +79,8 @@ public class Lfs extends Hfs
     super.setStringPath( stringPath );
     }
 
-  protected FileSystem getFileSystem( JobConf conf )
+  @Override
+  protected FileSystem getFileSystem( Configuration conf )
     {
     try
       {

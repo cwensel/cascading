@@ -27,9 +27,9 @@ import cascading.flow.FlowProcess;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
@@ -37,6 +37,8 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 
 /**
  *
@@ -49,7 +51,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
   public static final String PART_TASK_SEQ_PATTERN = "%s%spart-%05d-%05d";
 
   /** Field conf */
-  private JobConf conf;
+  private Configuration conf;
   /** Field writer */
   private RecordWriter writer;
   /** Field filenamePattern */
@@ -57,7 +59,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
   /** Field filename */
   private String filename;
   /** Field tap */
-  private Tap<JobConf, RecordReader, OutputCollector> tap;
+  private Tap<Configuration, RecordReader, OutputCollector> tap;
   /** Field prefix */
   private String prefix;
   /** Field sequence */
@@ -66,19 +68,19 @@ public class TapOutputCollector implements OutputCollector, Closeable
   private boolean isFileOutputFormat;
   /** Field reporter */
   private final Reporter reporter = Reporter.NULL;
-  private final FlowProcess<JobConf> flowProcess;
+  private final FlowProcess<? extends Configuration> flowProcess;
 
-  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap ) throws IOException
+  public TapOutputCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap ) throws IOException
     {
     this( flowProcess, tap, null );
     }
 
-  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix ) throws IOException
+  public TapOutputCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, String prefix ) throws IOException
     {
     this( flowProcess, tap, prefix, -1 );
     }
 
-  public TapOutputCollector( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, String prefix, long sequence ) throws IOException
+  public TapOutputCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, String prefix, long sequence ) throws IOException
     {
     this.tap = tap;
     this.sequence = sequence;
@@ -94,7 +96,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
     {
     tap.sinkConfInit( flowProcess, conf );
 
-    OutputFormat outputFormat = conf.getOutputFormat();
+    OutputFormat outputFormat = asJobConfInstance( conf ).getOutputFormat();
 
     isFileOutputFormat = outputFormat instanceof FileOutputFormat;
 
@@ -111,7 +113,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
     LOG.info( "creating path: {}", filename );
 
-    writer = outputFormat.getRecordWriter( null, conf, filename, Reporter.NULL );
+    writer = outputFormat.getRecordWriter( null, asJobConfInstance( conf ), filename, Reporter.NULL );
     }
 
   /**

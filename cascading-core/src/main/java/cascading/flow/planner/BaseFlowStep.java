@@ -539,7 +539,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return throwable;
     }
 
-  protected abstract Config getInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
+  protected abstract Config createInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
 
   /**
    * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),

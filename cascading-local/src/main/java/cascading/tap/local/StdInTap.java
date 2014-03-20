@@ -45,7 +45,7 @@ public class StdInTap extends SourceTap<Properties, InputStream>
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Properties> flowProcess, InputStream inputStream ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Properties> flowProcess, InputStream inputStream ) throws IOException
     {
     return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), System.in );
     }

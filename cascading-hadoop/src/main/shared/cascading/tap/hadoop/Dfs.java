@@ -27,9 +27,8 @@ import java.net.URI;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.TapException;
-import cascading.tuple.Fields;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
 
 /**
  * Class Dfs is a {@link cascading.tap.Tap} class that provides access to the Hadoop Distributed File System.
@@ -38,101 +37,6 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class Dfs extends Hfs
   {
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields of type Fields
-   * @param uri    of type URI
-   */
-  @ConstructorProperties({"fields", "uri"})
-  @Deprecated
-  public Dfs( Fields fields, URI uri )
-    {
-    super( fields, uri.getPath() );
-
-    init( uri );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields  of type Fields
-   * @param uri     of type URI
-   * @param replace of type boolean
-   */
-  @ConstructorProperties({"fields", "uri", "replace"})
-  @Deprecated
-  public Dfs( Fields fields, URI uri, boolean replace )
-    {
-    super( fields, uri.getPath(), replace );
-
-    init( uri );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields   of type Fields
-   * @param uri      of type URI
-   * @param sinkMode of type SinkMode
-   */
-  @ConstructorProperties({"fields", "uri", "sinkMode"})
-  @Deprecated
-  public Dfs( Fields fields, URI uri, SinkMode sinkMode )
-    {
-    super( fields, uri.getPath(), sinkMode );
-
-    init( uri );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   */
-  @ConstructorProperties({"fields", "stringPath"})
-  @Deprecated
-  public Dfs( Fields fields, String stringPath )
-    {
-    super( fields, stringPath );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   * @param replace    of type boolean
-   */
-  @ConstructorProperties({"fields", "stringPath", "replace"})
-  @Deprecated
-  public Dfs( Fields fields, String stringPath, boolean replace )
-    {
-    super( fields, stringPath, replace );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   * @param sinkMode   of type SinkMode
-   */
-  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
-  @Deprecated
-  public Dfs( Fields fields, String stringPath, SinkMode sinkMode )
-    {
-    super( fields, stringPath, sinkMode );
-    }
-
-  @ConstructorProperties({"scheme"})
-  Dfs( Scheme scheme )
-    {
-    super( scheme );
-    }
-
   /**
    * Constructor Dfs creates a new Dfs instance.
    *
@@ -234,9 +138,9 @@ public class Dfs extends Hfs
     }
 
   @Override
-  protected FileSystem getDefaultFileSystem( JobConf jobConf )
+  protected FileSystem getDefaultFileSystem( Configuration configuration )
     {
-    String name = jobConf.get( "fs.default.name", "hdfs://localhost:5001/" );
+    String name = configuration.get( "fs.default.name", "hdfs://localhost:5001/" );
 
     if( name.equals( "local" ) || name.matches( ".*://.*" ) && !name.startsWith( "hdfs://" ) )
       name = "hdfs://localhost:5001/";
@@ -245,7 +149,7 @@ public class Dfs extends Hfs
 
     try
       {
-      return FileSystem.get( URI.create( name ), jobConf );
+      return FileSystem.get( URI.create( name ), configuration );
       }
     catch( IOException exception )
       {

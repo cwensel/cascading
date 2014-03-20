@@ -41,7 +41,7 @@ public class FlowStepListenersTest extends TestCase
     BaseFlowStep step = new BaseFlowStep( "step1", 0, null )
     {
     @Override
-    protected Object getInitializedConfig( FlowProcess fp, Object config )
+    protected Object createInitializedConfig( FlowProcess fp, Object config )
       {
       return null;
       }

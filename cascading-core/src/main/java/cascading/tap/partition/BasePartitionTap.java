@@ -61,7 +61,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
   private class PartitionIterator extends TupleEntryIterableChainIterator
     {
-    public PartitionIterator( final FlowProcess<Config> flowProcess, Input input ) throws IOException
+    public PartitionIterator( final FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
       {
       super( getSourceFields() );
 
@@ -83,7 +83,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       reset( iterators );
       }
 
-    private PartitionTupleEntryIterator createPartitionEntryIterator( FlowProcess<Config> flowProcess, Input input, String parentIdentifier, String childIdentifier ) throws IOException
+    private PartitionTupleEntryIterator createPartitionEntryIterator( FlowProcess<? extends Config> flowProcess, Input input, String parentIdentifier, String childIdentifier ) throws IOException
       {
       TupleEntrySchemeIterator schemeIterator = createTupleEntrySchemeIterator( flowProcess, parent, childIdentifier, input );
 
@@ -93,7 +93,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
   private class PartitionCollector extends TupleEntryCollector
     {
-    private final FlowProcess<Config> flowProcess;
+    private final FlowProcess<? extends Config> flowProcess;
     private final Config conf;
     private final Fields parentFields;
     private final Fields partitionFields;
@@ -101,7 +101,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     private final Tuple partitionTuple;
     private final Tuple parentTuple;
 
-    public PartitionCollector( FlowProcess<Config> flowProcess )
+    public PartitionCollector( FlowProcess<? extends Config> flowProcess )
       {
       super( Fields.asDeclaration( getSinkFields() ) );
       this.flowProcess = flowProcess;
@@ -231,9 +231,9 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   /** Field collectors */
   private final Map<String, TupleEntryCollector> collectors = new LinkedHashMap<String, TupleEntryCollector>( 1000, .75f, true );
 
-  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap parent, String path, long sequence ) throws IOException;
+  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap parent, String path, long sequence ) throws IOException;
 
-  protected abstract TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<Config> flowProcess, Tap parent, String path, Input input ) throws IOException;
+  protected abstract TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Tap parent, String path, Input input ) throws IOException;
 
   public enum Counters
     {
@@ -296,7 +296,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
    * @return a String[] of partition identifiers
    * @throws IOException
    */
-  public String[] getChildPartitionIdentifiers( FlowProcess<Config> flowProcess, boolean fullyQualified ) throws IOException
+  public String[] getChildPartitionIdentifiers( FlowProcess<? extends Config> flowProcess, boolean fullyQualified ) throws IOException
     {
     return ( (FileType) parent ).getChildIdentifiers( flowProcess.getConfigCopy(), partition.getPathDepth(), fullyQualified );
     }
@@ -307,7 +307,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     return parent.getIdentifier();
     }
 
-  protected abstract String getCurrentIdentifier( FlowProcess<Config> flowProcess );
+  protected abstract String getCurrentIdentifier( FlowProcess<? extends Config> flowProcess );
 
   /**
    * Method getOpenWritesThreshold returns the openTapsThreshold of this PartitionTap object.
@@ -320,13 +320,13 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Output output ) throws IOException
     {
     return new PartitionCollector( flowProcess );
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
     {
     return new PartitionIterator( flowProcess, input );
     }
@@ -462,49 +462,49 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
+    public void sourceConfInit( FlowProcess<? extends Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
       {
       scheme.sourceConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sourcePrepare( FlowProcess<Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
+    public void sourcePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
       {
       scheme.sourcePrepare( flowProcess, sourceCall );
       }
 
     @Override
-    public boolean source( FlowProcess<Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
+    public boolean source( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
       {
       throw new UnsupportedOperationException( "should never be called" );
       }
 
     @Override
-    public void sourceCleanup( FlowProcess<Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
+    public void sourceCleanup( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Input> sourceCall ) throws IOException
       {
       scheme.sourceCleanup( flowProcess, sourceCall );
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
+    public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Tap<Config, Input, Output> tap, Config conf )
       {
       scheme.sinkConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sinkPrepare( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       scheme.sinkPrepare( flowProcess, sinkCall );
       }
 
     @Override
-    public void sink( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sink( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       throw new UnsupportedOperationException( "should never be called" );
       }
 
     @Override
-    public void sinkCleanup( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sinkCleanup( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       scheme.sinkCleanup( flowProcess, sinkCall );
       }

@@ -32,7 +32,6 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
-import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
@@ -40,7 +39,6 @@ import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.type.FileType;
-import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
@@ -52,7 +50,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -77,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * robustly by {@link GlobHfs} and less so by Hfs.
  * <p/>
  * Hfs will accept {@code /*} (wildcard) paths, but not all convenience methods like
- * {@link #getSize(org.apache.hadoop.mapred.JobConf)} will behave properly or reliably. Nor can the Hfs instance
+ * {@code jobConf.getSize} will behave properly or reliably. Nor can the Hfs instance
  * with a wildcard path be used as a sink to write data.
  * <p/>
  * In those cases use GlobHfs since it is a sub-class of {@link cascading.tap.MultiSourceTap}.
@@ -106,7 +104,7 @@ import org.slf4j.LoggerFactory;
  * This is enabled by calling {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}. By default, merging
  * or combining splits into large ones is disabled.
  */
-public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements FileType<JobConf>
+public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
@@ -156,17 +154,17 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return (String) properties.get( HfsProps.TEMPORARY_DIRECTORY );
     }
 
-  protected static String getLocalModeScheme( JobConf conf, String defaultValue )
+  protected static String getLocalModeScheme( Configuration conf, String defaultValue )
     {
     return conf.get( HfsProps.LOCAL_MODE_SCHEME, defaultValue );
     }
 
-  protected static boolean getUseCombinedInput( JobConf conf )
+  protected static boolean getUseCombinedInput( Configuration conf )
     {
     return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES, false );
     }
 
-  protected static boolean getCombinedInputSafeMode( JobConf conf )
+  protected static boolean getCombinedInputSafeMode( Configuration conf )
     {
     return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES_SAFE_MODE, true );
     }
@@ -176,56 +174,9 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @ConstructorProperties({"scheme"})
-  protected Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme )
+  protected Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
-    }
-
-  /**
-   * Constructor Hfs creates a new Hfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   */
-  @Deprecated
-  @ConstructorProperties({"fields", "stringPath"})
-  public Hfs( Fields fields, String stringPath )
-    {
-    super( new SequenceFile( fields ) );
-    setStringPath( stringPath );
-    }
-
-  /**
-   * Constructor Hfs creates a new Hfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   * @param replace    of type boolean
-   */
-  @Deprecated
-  @ConstructorProperties({"fields", "stringPath", "replace"})
-  public Hfs( Fields fields, String stringPath, boolean replace )
-    {
-    super( new SequenceFile( fields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
-    setStringPath( stringPath );
-    }
-
-  /**
-   * Constructor Hfs creates a new Hfs instance.
-   *
-   * @param fields     of type Fields
-   * @param stringPath of type String
-   * @param sinkMode   of type SinkMode
-   */
-  @Deprecated
-  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
-  public Hfs( Fields fields, String stringPath, SinkMode sinkMode )
-    {
-    super( new SequenceFile( fields ), sinkMode );
-    setStringPath( stringPath );
-
-    if( sinkMode == SinkMode.UPDATE )
-      throw new IllegalArgumentException( "updates are not supported" );
     }
 
   /**
@@ -235,7 +186,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param stringPath of type String
    */
   @ConstructorProperties({"scheme", "stringPath"})
-  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
+  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
     setStringPath( stringPath );
@@ -250,7 +201,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    */
   @Deprecated
   @ConstructorProperties({"scheme", "stringPath", "replace"})
-  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
+  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
@@ -264,7 +215,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param sinkMode   of type SinkMode
    */
   @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
-  public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
+  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
     setStringPath( stringPath );
@@ -280,7 +231,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     this.uriScheme = uriScheme;
     }
 
-  public URI getURIScheme( JobConf jobConf )
+  public URI getURIScheme( Configuration  jobConf )
     {
     if( uriScheme != null )
       return uriScheme;
@@ -290,7 +241,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return uriScheme;
     }
 
-  protected URI makeURIScheme( JobConf jobConf )
+  protected URI makeURIScheme( Configuration configuration )
     {
     try
       {
@@ -309,7 +260,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       else if( schemeString != null )
         uriScheme = new URI( schemeString + ":///" );
       else
-        uriScheme = getDefaultFileSystemURIScheme( jobConf );
+        uriScheme = getDefaultFileSystemURIScheme( configuration );
 
       LOG.debug( "using uri scheme: {}", uriScheme );
 
@@ -324,19 +275,19 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   /**
    * Method getDefaultFileSystemURIScheme returns the URI scheme for the default Hadoop FileSystem.
    *
-   * @param jobConf of type JobConf
+   * @param configuration of type JobConf
    * @return URI
    */
-  public URI getDefaultFileSystemURIScheme( JobConf jobConf )
+  public URI getDefaultFileSystemURIScheme( Configuration configuration )
     {
-    return getDefaultFileSystem( jobConf ).getUri();
+    return getDefaultFileSystem( configuration ).getUri();
     }
 
-  protected FileSystem getDefaultFileSystem( JobConf jobConf )
+  protected FileSystem getDefaultFileSystem( Configuration configuration )
     {
     try
       {
-      return FileSystem.get( jobConf );
+      return FileSystem.get( configuration );
       }
     catch( IOException exception )
       {
@@ -344,13 +295,13 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       }
     }
 
-  protected FileSystem getFileSystem( JobConf jobConf )
+  protected FileSystem getFileSystem( Configuration configuration )
     {
-    URI scheme = getURIScheme( jobConf );
+    URI scheme = getURIScheme( configuration );
 
     try
       {
-      return FileSystem.get( scheme, jobConf );
+      return FileSystem.get( scheme, configuration );
       }
     catch( IOException exception )
       {
@@ -381,13 +332,13 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public String getFullIdentifier( JobConf conf )
+  public String getFullIdentifier( Configuration conf )
     {
     return getPath().makeQualified( getFileSystem( conf ) ).toString();
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
     String fullIdentifier = getFullIdentifier( conf );
 
@@ -396,9 +347,9 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     verifyNoDuplicates( conf );
     }
 
-  protected static void verifyNoDuplicates( JobConf conf )
+  protected static void verifyNoDuplicates( Configuration conf )
     {
-    Path[] inputPaths = FileInputFormat.getInputPaths( conf );
+    Path[] inputPaths = FileInputFormat.getInputPaths( HadoopUtil.asJobConfInstance( conf ) );
     Set<Path> paths = new HashSet<Path>( (int) ( inputPaths.length / .75f ) );
 
     for( Path inputPath : inputPaths )
@@ -408,7 +359,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       }
     }
 
-  protected void applySourceConfInitIdentifiers( FlowProcess<JobConf> process, JobConf conf, String... fullIdentifiers )
+  protected void applySourceConfInitIdentifiers( FlowProcess<? extends Configuration> process, Configuration conf, String... fullIdentifiers )
     {
     for( String fullIdentifier : fullIdentifiers )
       sourceConfInitAddInputPath( conf, new Path( fullIdentifier ) );
@@ -416,14 +367,14 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     sourceConfInitComplete( process, conf );
     }
 
-  protected void sourceConfInitAddInputPath( JobConf conf, Path qualifiedPath )
+  protected void sourceConfInitAddInputPath( Configuration conf, Path qualifiedPath )
     {
-    FileInputFormat.addInputPath( conf, qualifiedPath );
+    HadoopUtil.addInputPath( conf, qualifiedPath );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
     }
 
-  protected void sourceConfInitComplete( FlowProcess<JobConf> process, JobConf conf )
+  protected void sourceConfInitComplete( FlowProcess<? extends Configuration> process, Configuration conf )
     {
     super.sourceConfInit( process, conf );
 
@@ -437,7 +388,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * Based on the configuration, handles and sets {@link CombineFileInputFormat} as the input
    * format.
    */
-  private void handleCombineFileInputFormat( JobConf conf )
+  private void handleCombineFileInputFormat( Configuration conf )
     {
     // if combining files, override the configuration to use CombineFileInputFormat
     if( !getUseCombinedInput( conf ) )
@@ -470,16 +421,16 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       conf.set( CombineFileRecordReaderWrapper.INDIVIDUAL_INPUT_FORMAT, individualInputFormat );
 
       // override the input format class
-      conf.setInputFormat( CombinedInputFormat.class );
+      conf.setClass( "mapred.input.format.class", CombinedInputFormat.class, InputFormat.class );
       }
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> process, JobConf conf )
+  public void sinkConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
     Path qualifiedPath = new Path( getFullIdentifier( conf ) );
 
-    FileOutputFormat.setOutputPath( conf, qualifiedPath );
+    HadoopUtil.setOutputPath( conf, qualifiedPath );
     super.sinkConfInit( process, conf );
 
     makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
@@ -487,7 +438,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
     }
 
-  private void makeLocal( JobConf conf, Path qualifiedPath, String infoMessage )
+  private void makeLocal( Configuration conf, Path qualifiedPath, String infoMessage )
     {
     String scheme = getLocalModeScheme( conf, "file" );
 
@@ -501,7 +452,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<JobConf> flowProcess, RecordReader input ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Configuration> flowProcess, RecordReader input ) throws IOException
     {
     // input may be null when this method is called on the client side or cluster side when accumulating
     // for a HashJoin
@@ -509,7 +460,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<JobConf> flowProcess, OutputCollector output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Configuration> flowProcess, OutputCollector output ) throws IOException
     {
     // output may be null when this method is called on the client side or cluster side when creating
     // side files with the TemplateTap
@@ -517,7 +468,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public boolean createResource( JobConf conf ) throws IOException
+  public boolean createResource( Configuration conf ) throws IOException
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "making dirs: {}", getFullIdentifier( conf ) );
@@ -526,14 +477,14 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public boolean deleteResource( JobConf conf ) throws IOException
+  public boolean deleteResource( Configuration conf ) throws IOException
     {
     String fullIdentifier = getFullIdentifier( conf );
 
     return deleteFullIdentifier( conf, fullIdentifier );
     }
 
-  private boolean deleteFullIdentifier( JobConf conf, String fullIdentifier ) throws IOException
+  private boolean deleteFullIdentifier( Configuration conf, String fullIdentifier ) throws IOException
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "deleting: {}", fullIdentifier );
@@ -560,7 +511,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return true;
     }
 
-  public boolean deleteChildResource( JobConf conf, String childIdentifier ) throws IOException
+  public boolean deleteChildResource( Configuration conf, String childIdentifier ) throws IOException
     {
     Path childPath = new Path( childIdentifier ).makeQualified( getFileSystem( conf ) );
 
@@ -572,7 +523,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
 
 
   @Override
-  public boolean resourceExists( JobConf conf ) throws IOException
+  public boolean resourceExists( Configuration conf ) throws IOException
     {
     // unfortunately getFileSystem( conf ).exists( getPath() ); does not account for "/*" etc
     // nor is there an more efficient means to test for existence
@@ -582,16 +533,18 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public boolean isDirectory( JobConf conf ) throws IOException
+  public boolean isDirectory( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
+      {
       return false;
+      }
 
     return getFileSystem( conf ).getFileStatus( getPath() ).isDir();
     }
 
   @Override
-  public long getSize( JobConf conf ) throws IOException
+  public long getSize( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
       return 0;
@@ -611,7 +564,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @return long
    * @throws IOException when
    */
-  public long getBlockSize( JobConf conf ) throws IOException
+  public long getBlockSize( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
       return 0;
@@ -632,7 +585,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @return int
    * @throws IOException when
    */
-  public int getReplication( JobConf conf ) throws IOException
+  public int getReplication( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
       return 0;
@@ -646,13 +599,13 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public String[] getChildIdentifiers( JobConf conf ) throws IOException
+  public String[] getChildIdentifiers( Configuration conf ) throws IOException
     {
     return getChildIdentifiers( conf, 1, false );
     }
 
   @Override
-  public String[] getChildIdentifiers( JobConf conf, int depth, boolean fullyQualified ) throws IOException
+  public String[] getChildIdentifiers( Configuration conf, int depth, boolean fullyQualified ) throws IOException
     {
     if( !resourceExists( conf ) )
       return new String[ 0 ];
@@ -668,7 +621,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return results.toArray( new String[ results.size() ] );
     }
 
-  private void getChildPaths( JobConf conf, Set<String> results, int trim, Path path, int depth ) throws IOException
+  private void getChildPaths( Configuration conf, Set<String> results, int trim, Path path, int depth ) throws IOException
     {
     if( depth == 0 )
       {
@@ -687,7 +640,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     }
 
   @Override
-  public long getModifiedTime( JobConf conf ) throws IOException
+  public long getModifiedTime( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
       return 0;
@@ -716,7 +669,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return date;
     }
 
-  public static Path getTempPath( JobConf conf )
+  public static Path getTempPath( Configuration conf )
     {
     String tempDir = conf.get( HfsProps.TEMPORARY_DIRECTORY );
 
@@ -743,7 +696,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param conf of type JobConf
    * @throws IOException on failure
    */
-  private void makeStatuses( JobConf conf ) throws IOException
+  private void makeStatuses( Configuration conf ) throws IOException
     {
     if( statuses != null )
       return;

@@ -29,6 +29,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.TapException;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -55,7 +56,7 @@ import org.apache.hadoop.mapred.RecordReader;
  * @see cascading.tap.MultiSourceTap
  * @see FileSystem
  */
-public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
+public class GlobHfs extends MultiSourceTap<Hfs, Configuration, RecordReader>
   {
   /** Field pathPattern */
   private final String pathPattern;
@@ -69,7 +70,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
    * @param pathPattern of type String
    */
   @ConstructorProperties({"scheme", "pathPattern"})
-  public GlobHfs( Scheme<JobConf, RecordReader, ?, ?, ?> scheme, String pathPattern )
+  public GlobHfs( Scheme<Configuration, RecordReader, ?, ?, ?> scheme, String pathPattern )
     {
     this( scheme, pathPattern, null );
     }
@@ -82,7 +83,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
    * @param pathFilter  of type PathFilter
    */
   @ConstructorProperties({"scheme", "pathPattern", "pathFilter"})
-  public GlobHfs( Scheme<JobConf, RecordReader, ?, ?, ?> scheme, String pathPattern, PathFilter pathFilter )
+  public GlobHfs( Scheme<Configuration, RecordReader, ?, ?, ?> scheme, String pathPattern, PathFilter pathFilter )
     {
     super( scheme );
     this.pathPattern = pathPattern;
@@ -101,7 +102,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
     return initTapsInternal( new JobConf() );
     }
 
-  private Hfs[] initTapsInternal( JobConf conf )
+  private Hfs[] initTapsInternal( Configuration conf )
     {
     if( taps != null )
       return taps;
@@ -118,7 +119,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
     return taps;
     }
 
-  private Hfs[] makeTaps( JobConf conf ) throws IOException
+  private Hfs[] makeTaps( Configuration conf ) throws IOException
     {
     FileStatus[] statusList;
 
@@ -151,7 +152,7 @@ public class GlobHfs extends MultiSourceTap<Hfs, JobConf, RecordReader>
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
     Hfs[] taps = initTapsInternal( conf );
 

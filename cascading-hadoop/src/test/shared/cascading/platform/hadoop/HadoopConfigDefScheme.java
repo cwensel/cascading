@@ -28,7 +28,7 @@ import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
@@ -43,7 +43,7 @@ public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
     // we should not see any config def values here
     if( flowProcess.getProperty( "default" ) != null )
@@ -53,7 +53,7 @@ public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
     // we should not see any config def values here
     if( flowProcess.getProperty( "default" ) != null )
@@ -63,7 +63,7 @@ public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     if( !( flowProcess instanceof FlowProcessWrapper ) )
       throw new RuntimeException( "not a flow process wrapper" );
@@ -86,7 +86,7 @@ public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
     {
     if( !( flowProcess instanceof FlowProcessWrapper ) )
       throw new RuntimeException( "not a flow process wrapper" );

@@ -138,7 +138,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     }
 
   @Override
-  protected String getCurrentIdentifier( FlowProcess<Properties> flowProcess )
+  protected String getCurrentIdentifier( FlowProcess<? extends Properties> flowProcess )
     {
     return null;
     }
@@ -160,7 +160,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Properties> flowProcess, Tap parent, String path, long sequence ) throws IOException
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Properties> flowProcess, Tap parent, String path, long sequence ) throws IOException
     {
     TapFileOutputStream output = new TapFileOutputStream( parent, path, true ); // always append
 
@@ -168,7 +168,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     }
 
   @Override
-  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<Properties> flowProcess, Tap parent, String path, InputStream input ) throws FileNotFoundException
+  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<? extends Properties> flowProcess, Tap parent, String path, InputStream input ) throws FileNotFoundException
     {
     if( input == null )
       input = new FileInputStream( path );

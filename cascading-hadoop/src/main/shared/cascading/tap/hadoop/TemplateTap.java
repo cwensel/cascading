@@ -31,7 +31,7 @@ import cascading.tap.hadoop.io.TapOutputCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntrySchemeCollector;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -55,7 +55,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * across multiple flows will very likely lead to data loss.
  */
 @Deprecated
-public class TemplateTap extends BaseTemplateTap<JobConf, OutputCollector>
+public class TemplateTap extends BaseTemplateTap<Configuration, OutputCollector>
   {
   /**
    * Constructor TemplateTap creates a new TemplateTap instance using the given parent {@link Hfs} Tap as the
@@ -248,10 +248,10 @@ public class TemplateTap extends BaseTemplateTap<JobConf, OutputCollector>
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<JobConf> flowProcess, Tap parent, String path ) throws IOException
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap parent, String path ) throws IOException
     {
     TapOutputCollector outputCollector = new TapOutputCollector( flowProcess, parent, path );
 
-    return new TupleEntrySchemeCollector<JobConf, OutputCollector>( flowProcess, parent, outputCollector );
+    return new TupleEntrySchemeCollector<Configuration, OutputCollector>( flowProcess, parent, outputCollector );
     }
   }

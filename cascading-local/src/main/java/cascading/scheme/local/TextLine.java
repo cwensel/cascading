@@ -181,35 +181,35 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     }
 
   @Override
-  public void presentSourceFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+  public void presentSourceFields( FlowProcess<? extends Properties> process, Tap tap, Fields fields )
     {
     // do nothing
     }
 
   @Override
-  public void presentSinkFields( FlowProcess<Properties> process, Tap tap, Fields fields )
+  public void presentSinkFields( FlowProcess<? extends Properties> process, Tap tap, Fields fields )
     {
     // do nothing
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, InputStream, OutputStream> tap, Properties conf )
     {
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( createInput( sourceCall.getInput() ) );
     }
 
   @Override
-  public boolean source( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     // first line is 0, this matches offset being zero, so when throwing out the first line for comments
     int lineNumber = sourceCall.getContext().getLineNumber();
@@ -234,25 +234,25 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     }
 
   @Override
-  public void sourceCleanup( FlowProcess<Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+  public void sourceCleanup( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sinkPrepare( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sinkPrepare( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     sinkCall.setContext( createOutput( sinkCall.getOutput() ) );
     }
 
   @Override
-  public void sink( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     sinkCall.getContext().println( sinkCall.getOutgoingEntry().getTuple().toString() );
     }
 
   @Override
-  public void sinkCleanup( FlowProcess<Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
+  public void sinkCleanup( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall ) throws IOException
     {
     sinkCall.getContext().flush();
     sinkCall.setContext( null );

@@ -170,7 +170,7 @@ public abstract class FlowProcess<Config>
     setCurrentSession( currentSession );
     }
 
-  public abstract FlowProcess copyWith( Config config );
+  public abstract FlowProcess<? extends Config> copyWith( Config config );
 
   /**
    * Method getID() returns the current
@@ -367,7 +367,7 @@ public abstract class FlowProcess<Config>
 
   public abstract Config getConfigCopy();
 
-  public abstract Config copyConfig( Config jobConf );
+  public abstract Config copyConfig( Config config );
 
   public abstract Map<String, String> diffConfigIntoMap( Config defaultConfig, Config updatedConfig );
 

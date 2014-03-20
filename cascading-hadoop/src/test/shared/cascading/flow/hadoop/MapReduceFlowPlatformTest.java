@@ -65,7 +65,7 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
     {
     getPlatform().copyFromLocal( inputFileApache );
 
-    JobConf defaultConf = ( (BaseHadoopPlatform) getPlatform() ).getJobConf();
+    JobConf defaultConf = (JobConf) ( (BaseHadoopPlatform) getPlatform() ).getConfiguration();
 
     JobConf conf = new JobConf( defaultConf );
     conf.setJobName( "mrflow" );

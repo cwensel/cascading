@@ -27,13 +27,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cascading.tap.Tap;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 
 public class Hadoop18TapUtil
   {
@@ -51,9 +53,9 @@ public class Hadoop18TapUtil
    * @param conf
    * @throws IOException
    */
-  public static void setupJob( JobConf conf ) throws IOException
+  public static void setupJob( Configuration conf ) throws IOException
     {
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
+    Path outputPath = FileOutputFormat.getOutputPath( asJobConfInstance( conf ) );
 
     if( outputPath == null )
       return;
@@ -81,7 +83,7 @@ public class Hadoop18TapUtil
     setWorkOutputPath( conf, taskOutputPath );
     }
 
-  public static synchronized void setupTask( JobConf conf ) throws IOException
+  public static synchronized void setupTask( Configuration conf ) throws IOException
     {
     String workpath = conf.get( "mapred.work.output.dir" );
 
@@ -108,7 +110,7 @@ public class Hadoop18TapUtil
     integer.incrementAndGet();
     }
 
-  public static boolean needsTaskCommit( JobConf conf ) throws IOException
+  public static boolean needsTaskCommit( Configuration conf ) throws IOException
     {
     String workpath = conf.get( "mapred.work.output.dir" );
 
@@ -136,7 +138,7 @@ public class Hadoop18TapUtil
    *
    * @param conf
    */
-  public static void commitTask( JobConf conf ) throws IOException
+  public static void commitTask( Configuration conf ) throws IOException
     {
     Path taskOutputPath = new Path( conf.get( "mapred.work.output.dir" ) );
 
@@ -180,7 +182,7 @@ public class Hadoop18TapUtil
    * @param conf
    * @throws IOException
    */
-  public static void cleanupTapMetaData( JobConf conf, Tap tap ) throws IOException
+  public static void cleanupTapMetaData( Configuration conf, Tap tap ) throws IOException
     {
     cleanTempPath( conf, new Path( tap.getIdentifier() ) );
     }
@@ -190,17 +192,17 @@ public class Hadoop18TapUtil
    *
    * @param conf
    */
-  public static void cleanupJob( JobConf conf ) throws IOException
+  public static void cleanupJob( Configuration conf ) throws IOException
     {
     if( isInflow( conf ) )
       return;
 
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
+    Path outputPath = FileOutputFormat.getOutputPath( asJobConfInstance( conf ) );
 
     cleanTempPath( conf, outputPath );
     }
 
-  private static synchronized void cleanTempPath( JobConf conf, Path outputPath ) throws IOException
+  private static synchronized void cleanTempPath( Configuration conf, Path outputPath ) throws IOException
     {
     // do the clean up of temporary directory
 
@@ -223,7 +225,7 @@ public class Hadoop18TapUtil
       }
     }
 
-  private static FileSystem getFSSafe( JobConf conf, Path tmpDir )
+  private static FileSystem getFSSafe( Configuration conf, Path tmpDir )
     {
     try
       {
@@ -237,16 +239,16 @@ public class Hadoop18TapUtil
     return null;
     }
 
-  static boolean isInflow( JobConf conf )
+  static boolean isInflow( Configuration conf )
     {
     return conf.get( "cascading.flow.step" ) != null || conf.get( "cascading.flow.step.path" ) != null;
     }
 
-  private static Path getTaskOutputPath( JobConf conf )
+  private static Path getTaskOutputPath( Configuration conf )
     {
     String taskId = conf.get( "mapred.task.id" );
 
-    Path p = new Path( FileOutputFormat.getOutputPath( conf ), TEMPORARY_PATH + Path.SEPARATOR + "_" + taskId );
+    Path p = new Path( FileOutputFormat.getOutputPath( asJobConfInstance( conf ) ), TEMPORARY_PATH + Path.SEPARATOR + "_" + taskId );
 
     try
       {
@@ -259,16 +261,16 @@ public class Hadoop18TapUtil
       }
     }
 
-  static void setWorkOutputPath( JobConf conf, Path outputDir )
+  static void setWorkOutputPath( Configuration conf, Path outputDir )
     {
-    outputDir = new Path( conf.getWorkingDirectory(), outputDir );
+    outputDir = new Path( asJobConfInstance( conf ).getWorkingDirectory(), outputDir );
     conf.set( "mapred.work.output.dir", outputDir.toString() );
     }
 
-  public static void makeTempPath( JobConf conf ) throws IOException
+  public static void makeTempPath( Configuration conf ) throws IOException
     {
     // create job specific temporary directory in output path
-    Path outputPath = FileOutputFormat.getOutputPath( conf );
+    Path outputPath = FileOutputFormat.getOutputPath( asJobConfInstance( conf ) );
 
     if( outputPath != null )
       {
@@ -280,7 +282,7 @@ public class Hadoop18TapUtil
       }
     }
 
-  private static void moveTaskOutputs( JobConf conf, FileSystem fs, Path jobOutputDir, Path taskOutput ) throws IOException
+  private static void moveTaskOutputs( Configuration conf, FileSystem fs, Path jobOutputDir, Path taskOutput ) throws IOException
     {
     String taskId = conf.get( "mapred.task.id" );
 
@@ -290,13 +292,10 @@ public class Hadoop18TapUtil
       if( !fs.rename( taskOutput, finalOutputPath ) )
         {
         if( !fs.delete( finalOutputPath, true ) )
-          {
           throw new IOException( "Failed to delete earlier output of task: " + taskId );
-          }
+
         if( !fs.rename( taskOutput, finalOutputPath ) )
-          {
           throw new IOException( "Failed to save output of task: " + taskId );
-          }
         }
 
       LOG.debug( "Moved {} to {}", taskOutput, finalOutputPath );
@@ -332,9 +331,8 @@ public class Hadoop18TapUtil
       }
     }
 
-
   /** used in AWS EMR to disable temp paths on some file systems, s3. */
-  private static boolean writeDirectlyToWorkingPath( JobConf conf, Path path )
+  private static boolean writeDirectlyToWorkingPath( Configuration conf, Path path )
     {
     FileSystem fs = getFSSafe( conf, path );
 
@@ -348,5 +346,4 @@ public class Hadoop18TapUtil
 
     return result;
     }
-
   }

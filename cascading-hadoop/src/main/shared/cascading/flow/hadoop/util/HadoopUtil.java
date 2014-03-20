@@ -54,6 +54,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +102,18 @@ public class HadoopUtil
       new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
     }
 
-  public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )
+  // only place JobConf should ever be returned
+  public static JobConf asJobConfInstance( Configuration configuration )
     {
-    JobConf jobConf = defaultJobconf == null ? new JobConf() : new JobConf( defaultJobconf );
+    if( configuration instanceof JobConf )
+      return (JobConf) configuration;
+
+    return new JobConf( configuration );
+    }
+
+  public static Configuration createJobConf( Map<Object, Object> properties, Configuration defaultJobconf )
+    {
+    Configuration jobConf = defaultJobconf == null ? new Configuration() : new Configuration( defaultJobconf );
 
     if( properties == null )
       return jobConf;
@@ -321,7 +331,7 @@ public class HadoopUtil
     return defaultType;
     }
 
-  public static Map<String, String> getConfig( JobConf defaultConf, JobConf updatedConf )
+  public static Map<String, String> getConfig( Configuration defaultConf, Configuration updatedConf )
     {
     Map<String, String> configs = new HashMap<String, String>();
 
@@ -350,19 +360,19 @@ public class HadoopUtil
     return configs;
     }
 
-  public static JobConf[] getJobConfs( JobConf job, List<Map<String, String>> configs )
+  public static JobConf[] getJobConfs( Configuration job, List<Map<String, String>> configs )
     {
     JobConf[] jobConfs = new JobConf[ configs.size() ];
 
     for( int i = 0; i < jobConfs.length; i++ )
-      jobConfs[ i ] = mergeConf( job, configs.get( i ), false );
+      jobConfs[ i ] = (JobConf) mergeConf( job, configs.get( i ), false );
 
     return jobConfs;
     }
 
-  public static JobConf mergeConf( JobConf job, Map<String, String> config, boolean directly )
+  public static <J extends Configuration> J mergeConf( J job, Map<String, String> config, boolean directly )
     {
-    JobConf currentConf = directly ? job : new JobConf( job );
+    Configuration currentConf = directly ? job : ( job instanceof JobConf ? new JobConf( job ) : new Configuration( job ) );
 
     for( String key : config.keySet() )
       {
@@ -371,10 +381,10 @@ public class HadoopUtil
       currentConf.set( key, config.get( key ) );
       }
 
-    return currentConf;
+    return (J) currentConf;
     }
 
-  public static JobConf removePropertiesFrom( JobConf jobConf, String... keys )
+  public static Configuration removePropertiesFrom( Configuration jobConf, String... keys )
     {
     Map<Object, Object> properties = createProperties( jobConf );
 
@@ -384,7 +394,7 @@ public class HadoopUtil
     return createJobConf( properties, null );
     }
 
-  public static boolean removeStateFromDistCache( JobConf conf, String path ) throws IOException
+  public static boolean removeStateFromDistCache( Configuration conf, String path ) throws IOException
     {
     return new Hfs( new TextLine(), path ).deleteResource( conf );
     }
@@ -520,7 +530,7 @@ public class HadoopUtil
    * @param config    the config
    * @param classpath the classpath
    */
-  public static Map<Path, Path> addToClassPath( JobConf config, List<String> classpath )
+  public static Map<Path, Path> addToClassPath( Configuration config, List<String> classpath )
     {
     if( classpath == null )
       return null;
@@ -564,7 +574,7 @@ public class HadoopUtil
     return getCommonPaths( localPaths, remotePaths );
     }
 
-  public static void syncPaths( JobConf config, Map<Path, Path> commonPaths )
+  public static void syncPaths( Configuration config, Map<Path, Path> commonPaths )
     {
     if( commonPaths == null )
       return;
@@ -602,7 +612,7 @@ public class HadoopUtil
     return commonPaths;
     }
 
-  private static Map<Path, Path> getCopyPaths( JobConf config, Map<Path, Path> commonPaths )
+  private static Map<Path, Path> getCopyPaths( Configuration config, Map<Path, Path> commonPaths )
     {
     Map<Path, Path> copyPaths = new HashMap<Path, Path>();
 
@@ -641,7 +651,7 @@ public class HadoopUtil
     return copyPaths;
     }
 
-  private static void resolvePaths( JobConf config, List<String> classpath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
+  private static void resolvePaths( Configuration config, List<String> classpath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
     {
     FileSystem defaultFS = getDefaultFS( config );
     FileSystem localFS = getLocalFS( config );
@@ -692,7 +702,7 @@ public class HadoopUtil
       }
     }
 
-  private static FileSystem getFileSystem( JobConf config, Path path )
+  private static FileSystem getFileSystem( Configuration config, Path path )
     {
     try
       {
@@ -704,7 +714,7 @@ public class HadoopUtil
       }
     }
 
-  private static LocalFileSystem getLocalFS( JobConf config )
+  private static LocalFileSystem getLocalFS( Configuration config )
     {
     try
       {
@@ -716,7 +726,7 @@ public class HadoopUtil
       }
     }
 
-  private static FileSystem getDefaultFS( JobConf config )
+  private static FileSystem getDefaultFS( Configuration config )
     {
     try
       {
@@ -728,7 +738,7 @@ public class HadoopUtil
       }
     }
 
-  public static boolean isLocal( JobConf conf )
+  public static boolean isLocal( Configuration conf )
     {
     // hadoop 1.0 and 2.0 use different properties to define local mode: we check the new YARN
     // property first
@@ -742,10 +752,55 @@ public class HadoopUtil
     return conf.get( "mapred.job.tracker" ).equals( "local" );
     }
 
-  public static void setLocal( JobConf conf )
+  public static void setLocal( Configuration conf )
     {
     // set both properties to local
     conf.set( "mapred.job.tracker", "local" );
     conf.set( "mapreduce.framework.name", "local" );
+    }
+
+  public static void addInputPath( Configuration conf, Path path )
+    {
+    Path workingDirectory = getWorkingDirectory( (JobConf) conf );
+    path = new Path( workingDirectory, path );
+    String dirStr = StringUtils.escapeString( path.toString() );
+    String dirs = conf.get( "mapred.input.dir" );
+    conf.set( "mapred.input.dir", dirs == null ? dirStr :
+      dirs + StringUtils.COMMA_STR + dirStr );
+    }
+
+  public static void setOutputPath( Configuration conf, Path path )
+    {
+    Path workingDirectory = getWorkingDirectory( (JobConf) conf );
+    path = new Path( workingDirectory, path );
+    conf.set( "mapred.output.dir", path.toString() );
+    }
+
+  private static Path getWorkingDirectory( JobConf conf )
+    {
+    String name = conf.get( "mapred.working.dir" );
+    if( name != null )
+      {
+      return new Path( name );
+      }
+    else
+      {
+      try
+        {
+        Path dir = FileSystem.get( conf ).getWorkingDirectory();
+        conf.set( "mapred.working.dir", dir.toString() );
+        return dir;
+        }
+      catch( IOException e )
+        {
+        throw new RuntimeException( e );
+        }
+      }
+    }
+
+  public static Path getOutputPath( Configuration conf )
+    {
+    String name = conf.get( "mapred.output.dir" );
+    return name == null ? null : new Path( name );
     }
   }

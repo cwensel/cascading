@@ -50,12 +50,12 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
 
   private class TemplateCollector extends TupleEntryCollector
     {
-    private final FlowProcess<Config> flowProcess;
+    private final FlowProcess<? extends Config> flowProcess;
     private final Config conf;
     private final Fields parentFields;
     private final Fields pathFields;
 
-    public TemplateCollector( FlowProcess<Config> flowProcess )
+    public TemplateCollector( FlowProcess<? extends Config> flowProcess )
       {
       super( Fields.asDeclaration( getSinkFields() ) );
       this.flowProcess = flowProcess;
@@ -181,7 +181,7 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
   /** Field collectors */
   private final Map<String, TupleEntryCollector> collectors = new LinkedHashMap<String, TupleEntryCollector>( 1000, .75f, true );
 
-  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Config> flowProcess, Tap parent, String path ) throws IOException;
+  protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap parent, String path ) throws IOException;
 
   /**
    * Method getParent returns the parent Tap of this TemplateTap object.
@@ -220,7 +220,7 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
     }
 
   @Override
-  public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException
+  public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Output output ) throws IOException
     {
     return new TemplateCollector( flowProcess );
     }
@@ -417,49 +417,49 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<Config> flowProcess, Tap<Config, Void, Output> tap, Config conf )
+    public void sourceConfInit( FlowProcess<? extends Config> flowProcess, Tap<Config, Void, Output> tap, Config conf )
       {
       scheme.sourceConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sourcePrepare( FlowProcess<Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
+    public void sourcePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
       {
       scheme.sourcePrepare( flowProcess, sourceCall );
       }
 
     @Override
-    public boolean source( FlowProcess<Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
+    public boolean source( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
       {
       throw new UnsupportedOperationException( "not supported" );
       }
 
     @Override
-    public void sourceCleanup( FlowProcess<Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
+    public void sourceCleanup( FlowProcess<? extends Config> flowProcess, SourceCall<Void, Void> sourceCall ) throws IOException
       {
       scheme.sourceCleanup( flowProcess, sourceCall );
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<Config> flowProcess, Tap<Config, Void, Output> tap, Config conf )
+    public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Tap<Config, Void, Output> tap, Config conf )
       {
       scheme.sinkConfInit( flowProcess, tap, conf );
       }
 
     @Override
-    public void sinkPrepare( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       scheme.sinkPrepare( flowProcess, sinkCall );
       }
 
     @Override
-    public void sink( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sink( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       throw new UnsupportedOperationException( "should never be called" );
       }
 
     @Override
-    public void sinkCleanup( FlowProcess<Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
+    public void sinkCleanup( FlowProcess<? extends Config> flowProcess, SinkCall<Void, Output> sinkCall ) throws IOException
       {
       scheme.sinkCleanup( flowProcess, sinkCall );
       }

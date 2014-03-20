@@ -126,8 +126,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
@@ -156,8 +156,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new Each( pipe, new Fields( 1 ), new Identity(), new Fields( 2 ) ); // in:second out:all
@@ -188,15 +188,15 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new TextLine( new Fields( "third", "fourth" ) ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
 
     Pipe splice = new CoGroup( pipeA, new Fields( 1 ), pipeB, new Fields( 1 ) );
 
-    sinks.put( splice.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sinks.put( splice.getName(), new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     List steps = getPlatform().getFlowConnector().connect( sources, sinks, splice ).getFlowSteps();
 
@@ -224,8 +224,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new TextLine( new Fields( "third", "fourth" ) ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
@@ -234,7 +234,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
     cogroup = new Each( cogroup, new Identity() );
 
-    sinks.put( cogroup.getName(), new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sinks.put( cogroup.getName(), new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     List steps = getPlatform().getFlowConnector().connect( sources, sinks, cogroup ).getFlowSteps();
 
@@ -259,8 +259,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
-    sources.put( "b", new Hfs( new Fields( "third", "fourth" ), "input/path/b" ) );
+    sources.put( "a", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" ) );
+    sources.put( "b", new Hfs( new TextLine( new Fields( "third", "fourth" ) ), "input/path/b" ) );
 
     Pipe pipeA = new Pipe( "a" );
     Pipe pipeB = new Pipe( "b" );
@@ -294,8 +294,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new Each( pipe, new Identity() );
@@ -1343,7 +1343,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "a", new Hfs( new Fields( "first", "second" ), "input/path/a" ) );
+    sources.put( "a", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" ) );
 
     Pipe pipeA = new Pipe( "a" );
 
@@ -1370,7 +1370,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    Hfs tap = new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" );
     sources.put( "a", tap );
     sources.put( "b", tap );
 
@@ -1395,7 +1395,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs source = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    Hfs source = new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" );
     sources.put( "a", source );
 
     Pipe pipeA = new Pipe( "a" );
@@ -1429,7 +1429,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    Hfs tap = new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" );
     sources.put( "a", tap );
     sources.put( "b", tap );
 
@@ -1464,7 +1464,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    Hfs tap = new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" );
     sources.put( "a", tap );
     sources.put( "b", tap );
     sources.put( "c", tap );
@@ -1501,7 +1501,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    Hfs tap = new Hfs( new Fields( "first", "second" ), "input/path/a" );
+    Hfs tap = new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path/a" );
     sources.put( "a", tap );
     sources.put( "b", tap );
 
@@ -1538,8 +1538,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
@@ -1568,8 +1568,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
@@ -1594,8 +1594,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new Fields( "first", "second" ), "input/path" ) );
-    sinks.put( "count", new Hfs( new Fields( 0, 1 ), "output/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
     pipe = new GroupBy( pipe, new Fields( 1 ) );
@@ -1828,7 +1828,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     HadoopFlow flow = (HadoopFlow) getPlatform().getFlowConnector( new Properties( defaultProperties ) ).connect( source, sink, pipe );
 
     assertEquals( "test flow", "test.value", flow.getProperty( "test.key" ) );
-    assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getFlowSteps().get( 0 ) ).getInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
+    assertEquals( "test step", "test.value", ( (HadoopFlowStep) flow.getFlowSteps().get( 0 ) ).createInitializedConfig( flow.getFlowProcess(), flow.getConfig() ).get( "test.key" ) );
     }
 
   @Test
@@ -1866,7 +1866,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
       }
     }
 
-//  @Test
+  //  @Test
   @Ignore
   public void testManyJoins()
     {

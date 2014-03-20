@@ -49,6 +49,7 @@ import cascading.pipe.Pipe;
 import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
@@ -58,6 +59,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import data.InputData;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
@@ -82,6 +84,11 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     super( true );
     }
 
+  private JobConf getJobConf()
+    {
+    return ( (BaseHadoopPlatform<JobConf>) getPlatform() ).getConfiguration();
+    }
+
   @Test
   public void testDfs() throws URISyntaxException, IOException
     {
@@ -95,17 +102,17 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       return;
       }
 
-    Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
+    Tap tap = new Dfs( new SequenceFile( new Fields( "foo" ) ), "some/path" );
 
     String path = tap.getFullIdentifier( HadoopPlanner.createJobConf( getProperties() ) );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
-    new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
-    new Dfs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
+    new Dfs( new SequenceFile( new Fields( "foo" ) ), "hdfs://localhost:5001/some/path" );
+    new Dfs( new SequenceFile( new Fields( "foo" ) ), new URI( "hdfs://localhost:5001/some/path" ) );
 
     try
       {
-      new Dfs( new Fields( "foo" ), "s3://localhost:5001/some/path" );
+      new Dfs( new SequenceFile( new Fields( "foo" ) ), "s3://localhost:5001/some/path" );
       fail( "not valid url" );
       }
     catch( Exception exception )
@@ -114,7 +121,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     try
       {
-      new Dfs( new Fields( "foo" ), new URI( "s3://localhost:5001/some/path" ) );
+      new Dfs( new SequenceFile( new Fields( "foo" ) ), new URI( "s3://localhost:5001/some/path" ) );
       fail( "not valid url" );
       }
     catch( Exception exception )
@@ -125,16 +132,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
   @Test
   public void testLfs() throws URISyntaxException, IOException
     {
-    Tap tap = new Lfs( new Fields( "foo" ), "some/path" );
+    Tap tap = new Lfs( new SequenceFile( new Fields( "foo" ) ), "some/path" );
 
     String path = tap.getFullIdentifier( HadoopPlanner.createJobConf( getProperties() ) );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
-    new Lfs( new Fields( "foo" ), "file:///some/path" );
+    new Lfs( new SequenceFile( new Fields( "foo" ) ), "file:///some/path" );
 
     try
       {
-      new Lfs( new Fields( "foo" ), "s3://localhost:5001/some/path" );
+      new Lfs( new SequenceFile( new Fields( "foo" ) ), "s3://localhost:5001/some/path" );
       fail( "not valid url" );
       }
     catch( Exception exception )
@@ -150,7 +157,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
       {
       boolean success = sourceCall.getInput().next( sourceCall.getContext()[ 0 ], sourceCall.getContext()[ 1 ] );
 
@@ -205,7 +212,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sinkPrepare( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    public void sinkPrepare( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       Fields found = sinkCall.getOutgoingEntry().getFields();
 
@@ -216,7 +223,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
+    public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object[], OutputCollector> sinkCall ) throws IOException
       {
       Fields found = sinkCall.getOutgoingEntry().getFields();
 
@@ -246,20 +253,20 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     flow.complete();
 
     List<Tuple> tuples = asList( flow, sink );
-    List<Object> values = new ArrayList<Object>(  );
-    for (Tuple tuple: tuples)
-        values.add( tuple.getObject( 1 ) );
+    List<Object> values = new ArrayList<Object>();
+    for( Tuple tuple : tuples )
+      values.add( tuple.getObject( 1 ) );
 
-    assertTrue( values.contains( "1\ta") );
-    assertTrue( values.contains( "2\tb") );
-    assertTrue( values.contains( "3\tc") );
-    assertTrue( values.contains( "4\td") );
-    assertTrue( values.contains( "5\te") );
+    assertTrue( values.contains( "1\ta" ) );
+    assertTrue( values.contains( "2\tb" ) );
+    assertTrue( values.contains( "3\tc" ) );
+    assertTrue( values.contains( "4\td" ) );
+    assertTrue( values.contains( "5\te" ) );
 
     assertEquals( 5, tuples.size() );
 
     // confirm the tuple iterator can handle nulls from the source
-    assertEquals(5, asList( flow, source ).size() );
+    assertEquals( 5, asList( flow, source ).size() );
     }
 
   @Test
@@ -364,7 +371,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committap" ), SinkMode.REPLACE )
     {
     @Override
-    public boolean commitResource( JobConf conf ) throws IOException
+    public boolean commitResource( Configuration conf ) throws IOException
       {
       count[ 0 ] = count[ 0 ] + 1;
       return true;
@@ -397,7 +404,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committapfail" ), SinkMode.REPLACE )
     {
     @Override
-    public boolean commitResource( JobConf conf ) throws IOException
+    public boolean commitResource( Configuration conf ) throws IOException
       {
       throw new IOException( "failed intentionally" );
       }
@@ -425,16 +432,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "*" );
 
-    assertTrue( sourceExists.resourceExists( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( getJobConf() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
       fail();
       }
     catch( IOException exception )
@@ -451,16 +458,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "{*}" );
 
-    assertTrue( sourceExists.resourceExists( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( getJobConf() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( ( (BaseHadoopPlatform) getPlatform() ).getJobConf() ) );
+      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
       fail();
       }
     catch( IOException exception )
@@ -477,7 +484,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
       {
       if( conf.get( "this.is.a.dupe" ) != null )
         throw new IllegalStateException( "has dupe config value" );
@@ -488,7 +495,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
 
     @Override
-    public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+    public void sourcePrepare( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
       {
       if( flowProcess.getStringProperty( "this.is.a.dupe" ) == null )
         throw new IllegalStateException( "has no dupe config value" );
@@ -573,7 +580,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Tap source = new Hfs( new TextDelimited( new Fields( "offset", "line" ) ), inputFileApache )
     {
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> process, JobConf conf )
+    public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
       {
       // don't set input format
       //super.sourceConfInit( process, conf );

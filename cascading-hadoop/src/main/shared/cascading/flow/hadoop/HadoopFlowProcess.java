@@ -310,9 +310,9 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     }
 
   @Override
-  public JobConf copyConfig( JobConf jobConf )
+  public JobConf copyConfig( JobConf config )
     {
-    return new JobConf( jobConf );
+    return new JobConf( config );
     }
 
   @Override

@@ -34,9 +34,10 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
 
@@ -50,30 +51,30 @@ public class TempHfs extends Hfs
   /** Field temporaryPath */
 
   /** Class NullScheme is a noop scheme used as a placeholder */
-  private static class NullScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object, Object>
+  private static class NullScheme extends Scheme<Configuration, RecordReader, OutputCollector, Object, Object>
     {
     @Override
-    public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
       {
       // do nothing
       }
 
     @Override
-    public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+    public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
       {
-      conf.setOutputKeyClass( Tuple.class );
-      conf.setOutputValueClass( Tuple.class );
-      conf.setOutputFormat( NullOutputFormat.class );
+      conf.setClass( "mapred.output.key.class", Tuple.class, Object.class );
+      conf.setClass( "mapred.output.value.class", Tuple.class, Object.class );
+      conf.setClass( "mapred.output.format.class", NullOutputFormat.class, OutputFormat.class );
       }
 
     @Override
-    public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
+    public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object, RecordReader> sourceCall ) throws IOException
       {
       return false;
       }
 
     @Override
-    public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
+    public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Object, OutputCollector> sinkCall ) throws IOException
       {
       }
     }
@@ -84,7 +85,7 @@ public class TempHfs extends Hfs
    * @param name   of type String
    * @param isNull of type boolean
    */
-  public TempHfs( JobConf conf, String name, boolean isNull )
+  public TempHfs( Configuration conf, String name, boolean isNull )
     {
     super( isNull ? new NullScheme() : new SequenceFile()
     {
@@ -98,12 +99,12 @@ public class TempHfs extends Hfs
    *
    * @param name of type String
    */
-  public TempHfs( JobConf conf, String name, Class<? extends Scheme> schemeClass )
+  public TempHfs( Configuration conf, String name, Class<? extends Scheme> schemeClass )
     {
     this( conf, name, schemeClass, true );
     }
 
-  public TempHfs( JobConf conf, String name, Class<? extends Scheme> schemeClass, boolean unique )
+  public TempHfs( Configuration conf, String name, Class<? extends Scheme> schemeClass, boolean unique )
     {
     this.name = name;
 
@@ -120,7 +121,7 @@ public class TempHfs extends Hfs
     return schemeClass;
     }
 
-  private String initTemporaryPath( JobConf conf, boolean unique )
+  private String initTemporaryPath( Configuration conf, boolean unique )
     {
     String child = unique ? makeTemporaryPathDirString( name ) : name;
 

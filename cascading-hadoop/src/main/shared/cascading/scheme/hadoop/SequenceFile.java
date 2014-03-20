@@ -31,8 +31,10 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -41,7 +43,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
  * A SequenceFile is a type of {@link cascading.scheme.Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
-public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Void>
+public class SequenceFile extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Void>
   {
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
@@ -61,21 +63,21 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
-    conf.setInputFormat( SequenceFileInputFormat.class );
+    conf.setClass( "mapred.input.format.class", SequenceFileInputFormat.class, InputFormat.class );
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf )
+  public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
-    conf.setOutputKeyClass( Tuple.class ); // supports TapCollector
-    conf.setOutputValueClass( Tuple.class ); // supports TapCollector
-    conf.setOutputFormat( SequenceFileOutputFormat.class );
+    conf.setClass( "mapred.output.key.class", Tuple.class, Object.class );
+    conf.setClass( "mapred.output.value.class", Tuple.class, Object.class );
+    conf.setClass( "mapred.output.format.class", SequenceFileOutputFormat.class, OutputFormat.class );
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourcePrepare( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     Object[] pair = new Object[]{
       sourceCall.getInput().createKey(),
@@ -86,7 +88,7 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
     }
 
   @Override
-  public boolean source( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     Tuple key = (Tuple) sourceCall.getContext()[ 0 ];
     Tuple value = (Tuple) sourceCall.getContext()[ 1 ];
@@ -106,13 +108,13 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
     }
 
   @Override
-  public void sourceCleanup( FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
+  public void sourceCleanup( FlowProcess<? extends Configuration> flowProcess, SourceCall<Object[], RecordReader> sourceCall )
     {
     sourceCall.setContext( null );
     }
 
   @Override
-  public void sink( FlowProcess<JobConf> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
+  public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.getOutput().collect( Tuple.NULL, sinkCall.getOutgoingEntry().getTuple() );
     }
