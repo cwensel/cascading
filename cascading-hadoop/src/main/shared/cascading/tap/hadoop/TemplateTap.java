@@ -54,6 +54,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * its safe to do so. Same is true with the TemplateTap. Interleaving writes to a common parent (root) directory
  * across multiple flows will very likely lead to data loss.
  */
+@Deprecated
 public class TemplateTap extends BaseTemplateTap<JobConf, OutputCollector>
   {
   /**

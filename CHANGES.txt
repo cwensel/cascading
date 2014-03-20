@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.3 [unreleased]
 
+  Deprecated both c.t.l.TemplateTap and c.t.h.TemplateTap for the respective PartitionTap.
+
   Updated c.p.Pipe and c.p.SubAssembly to cache any resolved name as its own name to improve #hashCode() performance.
 
   Fixed issue where c.t.Fields#merge() did not honor underlying Fields type information properly.

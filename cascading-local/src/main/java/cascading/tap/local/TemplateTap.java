@@ -48,6 +48,7 @@ import cascading.tuple.TupleEntrySchemeCollector;
  * location. Forcing the case to be consistent with an upstream {@link cascading.operation.Function} is recommended, see
  * {@link cascading.operation.expression.ExpressionFunction}.
  */
+@Deprecated
 public class TemplateTap extends BaseTemplateTap<Properties, OutputStream>
   {
   /**
