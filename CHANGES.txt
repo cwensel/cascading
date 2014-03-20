@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.3 [unreleased]
 
+  Updated c.f.h.ProcessFlow to include missing status changes.
+
   Deprecated both c.t.l.TemplateTap and c.t.h.TemplateTap for the respective PartitionTap.
 
   Updated c.p.Pipe and c.p.SubAssembly to cache any resolved name as its own name to improve #hashCode() performance.

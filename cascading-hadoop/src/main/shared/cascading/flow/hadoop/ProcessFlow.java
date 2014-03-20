@@ -136,6 +136,7 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       fireOnStarting();
       processWrapper.start();
+      flowStats.markStarted();
       isStarted = true;
       }
     catch( ProcessException exception )
@@ -154,9 +155,11 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       fireOnStopping();
       processWrapper.stop();
+      flowStats.markStopped();
       }
     catch( ProcessException exception )
       {
+      flowStats.markFailed( exception );
       if( exception.getCause() instanceof RuntimeException )
         throw (RuntimeException) exception.getCause();
 
@@ -173,13 +176,17 @@ public class ProcessFlow<P> extends HadoopFlow
         {
         fireOnStarting();
         isStarted = true;
+        flowStats.markStarted();
         }
 
+      flowStats.markRunning();
       processWrapper.complete();
       fireOnCompleted();
+      flowStats.markSuccessful();
       }
     catch( ProcessException exception )
       {
+      flowStats.markFailed( exception );
       if( exception.getCause() instanceof RuntimeException )
         throw (RuntimeException) exception.getCause();
 
