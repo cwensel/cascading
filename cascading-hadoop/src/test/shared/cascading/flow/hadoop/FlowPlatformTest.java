@@ -45,7 +45,6 @@ import cascading.operation.Debug;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.Function;
-import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -182,8 +181,6 @@ public class FlowPlatformTest extends PlatformTestCase
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
 
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
-
-    pipeUpper = new Each( pipeUpper, new Fields( "num", "char" ), new ExpressionFunction( Fields.ALL, "Thread.sleep(1000)" ) );
 
     pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
 
