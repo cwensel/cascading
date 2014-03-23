@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.5.3 [unreleased]
+2.5.3
 
   Updated c.f.h.ProcessFlow to include missing status changes.
 
