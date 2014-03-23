@@ -18,14 +18,18 @@
  * limitations under the License.
  */
 
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
+
+
+
 import com.monochromeroad.gradle.plugin.aws.s3.ACL
+import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
 
 buildscript {
   repositories {
     mavenLocal()
     mavenCentral()
     mavenRepo name: 'monochromeroad', url: 'http://repository-monochromeroad.forge.cloudbees.com/release/'
+    mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'  // backup for monochromedroad
   }
   dependencies {
     classpath 'com.monochromeroad.gradle:gradle-aws-s3-sync:0.5'
