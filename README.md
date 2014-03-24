@@ -2,6 +2,22 @@
 
 Thanks for using Cascading.
 
+## Cascading 3.0
+
+_This repo branch is an early release WIP for Cascading 3.0._
+
+3.0 will include a few major changes and additions. All of which will be centered around the complete re-write of the
+platform query planner and improvements to the planner API.
+
+These changes hope to simplify the creation of new bindings to new platform implementations and to improve the
+performance of the current MapReduce planner and resulting applications.
+
+On the last point, we ask that users please spend time running their existing applications against 3.0 WIP
+releases and to open issues along with tests via pull requests against
+[https://github.com/cwensel/cascading](https://github.com/cwensel/cascading).
+
+See below for more info on submitting issues.
+
 ## General Information:
 
 For project documentation and community support, visit: [cascading.org](http://cascading.org/)
@@ -24,6 +40,9 @@ Hadoop 1.x mode is where the Cascading application should run on a Hadoop cluste
 but for Hadoop 2.x releases.
 
 Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies.
+
+As of Cascading 3.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
+against Java 1.6.
 
 ## Extensions, the SDK, and DSLs
 
@@ -59,10 +78,10 @@ The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 Or downloaded from here:
-[http://concurrentinc.com/downloads/](http://concurrentinc.com/downloads/)
+[http://cascading.org/wip/](http://cascading.org/wip/)
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available from the cascading.org site.
+available as a stable release from the cascading.org download page.
 
 ## Reporting issues
 
@@ -116,7 +135,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading requires Gradle to build.
+Cascading requires Gradle and Java 1.7 to build.
 
 To use an IDE like IntelliJ, run the following to create IntelliJ project files:
 
