@@ -1,6 +1,7 @@
 Cascading Change Log
 
 2.6.0 [unreleased]
+  Made PartitionCollector in c.t.p.BasePartitionTap public.
 
 2.5.3
 
