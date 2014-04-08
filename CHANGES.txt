@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Updated c.t.p.PartitionCollector in c.t.p.BasePartitionTap to be public.
+
 2.5.3
 
   Updated c.f.h.ProcessFlow to include missing status changes.
