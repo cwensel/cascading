@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.SyncPipeExpressionGraph;
+import cascading.flow.planner.iso.expression.PartitioningPipeExpressionGraph;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.pipe.Group;
@@ -42,7 +42,7 @@ public class PartitionGroupSplitExpression extends RuleExpression
   public PartitionGroupSplitExpression()
     {
     super(
-      new SyncPipeExpressionGraph(),
+      new PartitioningPipeExpressionGraph(),
 
       // in order to capture out degree in sub-graph, we need to capture at least two successors
       new ExpressionGraph()

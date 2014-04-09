@@ -166,7 +166,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       flowElementGraph = createElementGraph( flowDef, tails );
 
-      writeTracePlan( "initial-flow-element-graph", flowElementGraph );
+      writeTracePlan( "0-initial-flow-element-graph", flowElementGraph );
 
       ruleExec.enableTransformTracing( getPlanTransformTracePath() );
 
@@ -174,13 +174,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-      writeTracePlan( "completed-flow-element-graph", ruleResult.getResult( PlanPhase.Complete ) );
+      writeTracePlan( "1-completed-flow-element-graph", ruleResult.getResult( PlanPhase.PostResolveElements ) );
 
       writeStats( plannerContext, ruleResult );
 
       FlowStepGraph<Config> flowStepGraph = createStepGraph( flowDef, flowElementGraph, ruleResult.getElementSubGraphs() );
 
-      writeTracePlan( "completed-flow-step-graph", flowStepGraph );
+      writeTracePlan( "2-completed-flow-step-graph", flowStepGraph );
 
       flow.initialize( flowElementGraph, flowStepGraph );
 

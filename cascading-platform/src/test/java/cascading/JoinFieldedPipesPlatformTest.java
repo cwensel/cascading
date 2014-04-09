@@ -1768,4 +1768,68 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "1\ta\t2\tB" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
+
+  @Test
+  public void testGroupBySplitJoins() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileJoined );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+    Tap sourceJoined = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileJoined );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+    sources.put( "joined", sourceJoined );
+
+    Tap lhsSink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "lhs" ), SinkMode.REPLACE );
+    Tap rhsSink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "rhs" ), SinkMode.REPLACE );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "lhs", lhsSink );
+    sinks.put( "rhs", rhsSink );
+
+    Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ), " " );
+    Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
+    Function splitterJoined = new RegexSplitter( new Fields( "numC", "lowerC", "upperC" ), "\t" );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
+    Pipe pipeJoined = new Each( new Pipe( "joined" ), new Fields( "line" ), splitterJoined );
+
+    Pipe pipe = new GroupBy( pipeLower, new Fields( "numA" ) );
+
+    pipe = new Every( pipe, Fields.ALL, new TestIdentityBuffer( new Fields( "numA" ), 5, false ), Fields.RESULTS );
+
+    Pipe lhsPipe = new Each( pipe, new Identity() );
+    lhsPipe = new HashJoin( "lhs", lhsPipe, new Fields( "numA" ), pipeUpper, new Fields( "numB" ) );
+
+    Pipe rhsPipe = new Each( pipe, new Identity() );
+    rhsPipe = new HashJoin( "rhs", rhsPipe, new Fields( "numA" ), pipeJoined, new Fields( "numC" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, lhsPipe, rhsPipe );
+
+    if( getPlatform().isMapReduce() )
+      assertEquals( "wrong number of steps", 3, flow.getFlowSteps().size() );
+
+    flow.complete();
+
+    validateLength( flow.openSink( "lhs" ), 5, null );
+    validateLength( flow.openSink( "rhs" ), 5, null );
+
+    List<Tuple> lhsActual = asList( flow, lhsSink );
+
+    assertTrue( lhsActual.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( lhsActual.contains( new Tuple( "2\tb\t2\tB" ) ) );
+
+    List<Tuple> rhsActual = asList( flow, rhsSink );
+
+    assertTrue( rhsActual.contains( new Tuple( "1\ta\t1\ta\tA" ) ) );
+    assertTrue( rhsActual.contains( new Tuple( "2\tb\t2\tb\tB" ) ) );
+    }
   }
