@@ -46,6 +46,11 @@ public class PlannerContext
     {
     }
 
+  public PlannerContext( RuleRegistry ruleRegistry )
+    {
+    this.ruleRegistry = ruleRegistry;
+    }
+
   public PlannerContext( RuleRegistry ruleRegistry, FlowPlanner flowPlanner, FlowDef flowDef, Flow flow, String tracePath )
     {
     this.ruleRegistry = ruleRegistry;

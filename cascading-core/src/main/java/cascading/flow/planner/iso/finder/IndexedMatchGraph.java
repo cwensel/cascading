@@ -20,7 +20,10 @@
 
 package cascading.flow.planner.iso.finder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import cascading.flow.planner.iso.expression.ElementExpression;
@@ -42,12 +45,23 @@ class IndexedMatchGraph extends IndexedGraph<DirectedGraph<ElementExpression, Sc
   public Set<ScopeExpression> getAllEdges( Object sourceVertex, Object targetVertex )
     {
     Set<ScopeExpression> allEdges = super.getAllEdges( sourceVertex, targetVertex );
-
     Set<ScopeExpression> results = new HashSet<>( allEdges.size() );
 
     for( ScopeExpression edge : allEdges )
       results.add( ExpressionGraph.unwind( edge ) );
 
     return results;
+    }
+
+  @Override
+  public List<ScopeExpression> getAllEdgesList( Object sourceVertex, Object targetVertex )
+    {
+    ArrayList<ScopeExpression> allEdges = (ArrayList<ScopeExpression>) super.getAllEdgesList( sourceVertex, targetVertex );
+    ListIterator<ScopeExpression> iterator = allEdges.listIterator();
+
+    while( iterator.hasNext() )
+      iterator.set( ExpressionGraph.unwind( iterator.next() ) );
+
+    return allEdges;
     }
   }

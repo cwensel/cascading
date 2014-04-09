@@ -20,10 +20,12 @@
 
 package cascading.flow.planner.iso.finder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -155,12 +157,17 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
 
   public Edge getEdge( int lhsVertex, int rhsVertex )
     {
-    return (Edge) getDelegate().getEdge( getVertex( lhsVertex ), getVertex( rhsVertex ) );
+    return getDelegate().getEdge( getVertex( lhsVertex ), getVertex( rhsVertex ) );
     }
 
   @Override
   public Set<Edge> getAllEdges( Object sourceVertex, Object targetVertex )
     {
     return getDelegate().getAllEdges( getVertex( (int) sourceVertex ), getVertex( ( (int) targetVertex ) ) );
+    }
+
+  public List<Edge> getAllEdgesList( Object sourceVertex, Object targetVertex )
+    {
+    return new ArrayList<>( getAllEdges( sourceVertex, targetVertex ) );
     }
   }

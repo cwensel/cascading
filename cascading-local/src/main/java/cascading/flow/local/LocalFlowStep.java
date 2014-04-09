@@ -28,6 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.planner.LocalFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.property.ConfigDef;
@@ -39,9 +40,9 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   /** Map of Properties modified by each Tap's sourceConfInit/sinkConfInit */
   private final Map<Tap, Properties> tapProperties = new HashMap<Tap, Properties>();
 
-  public LocalFlowStep( String name, int id, ElementGraph elementGraph )
+  public LocalFlowStep( String name, int id, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
-    super( name, id, elementGraph );
+    super( name, id, elementGraph, flowNodeGraph );
     }
 
   @Override

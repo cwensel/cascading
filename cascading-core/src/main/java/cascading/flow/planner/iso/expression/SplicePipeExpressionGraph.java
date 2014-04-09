@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.iso.expression;
 
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.Extent;
 import cascading.pipe.Checkpoint;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
@@ -36,7 +36,7 @@ public class SplicePipeExpressionGraph extends ExpressionGraph
     {
     super( new AndElementExpression(
       ElementExpression.Capture.Primary,
-      not( new FlowElementExpression( FlowElementGraph.Extent.class ) ),
+      not( new FlowElementExpression( Extent.class ) ),
       not( new FlowElementExpression( Tap.class ) ),
       not( new FlowElementExpression( Checkpoint.class ) ),
       not( new FlowElementExpression( Splice.class ) ) ) );

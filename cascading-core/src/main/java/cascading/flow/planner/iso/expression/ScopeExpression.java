@@ -23,8 +23,47 @@ package cascading.flow.planner.iso.expression;
 import cascading.flow.planner.Scope;
 
 /**
- *
+ * If ScopeExpression is the only edge, the {@link ScopeExpression.Applies} enum will apply,
+ * otherwise the number of edges on the target graph must match the number of edges in the expression.
  */
 public abstract class ScopeExpression implements Expression<Scope>
   {
+  public static final PathScopeExpression ANY = new PathScopeExpression( Applies.Any );
+  public static final PathScopeExpression ALL = new PathScopeExpression( Applies.All );
+
+  public enum Applies
+    {
+      Any, All
+    }
+
+  protected Applies applies = Applies.Any;
+
+  protected ScopeExpression()
+    {
+    }
+
+  protected ScopeExpression( Applies applies )
+    {
+    this.applies = applies;
+    }
+
+  public boolean appliesToAllPaths()
+    {
+    return applies == Applies.All;
+    }
+
+  public boolean appliesToAnyPaths()
+    {
+    return applies == Applies.Any;
+    }
+
+  public boolean acceptsAll()
+    {
+    return appliesToAllPaths();
+    }
+
+  public Applies getApplies()
+    {
+    return applies;
+    }
   }

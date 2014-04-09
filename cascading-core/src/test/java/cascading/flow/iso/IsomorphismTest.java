@@ -23,9 +23,12 @@ package cascading.flow.iso;
 import cascading.CascadingTestCase;
 import cascading.flow.FlowElement;
 import cascading.flow.iso.expression.TestCheckpointExpression;
+import cascading.flow.iso.expression.TestConsecutiveTapsExpressionGraph;
 import cascading.flow.iso.expression.TestGroupGroupExpression;
 import cascading.flow.iso.expression.TestHashJoinBlockingHashJoinExpression;
 import cascading.flow.iso.expression.TestHashJoinSameSourceExpression;
+import cascading.flow.iso.expression.TestNoMergeTapExpressionGraph;
+import cascading.flow.iso.graph.HashJoinMergeIntoHashJoinStreamedStreamedMergeGraph;
 import cascading.flow.iso.graph.HashJoinSameSourceGraph;
 import cascading.flow.iso.graph.JoinAroundJoinRightMostGraph;
 import cascading.flow.iso.graph.JoinAroundJoinRightMostGraphSwapped;
@@ -35,10 +38,13 @@ import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.assertion.Assertion;
 import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
 import cascading.flow.planner.iso.expression.TapGroupTapExpressionGraph;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.iso.transformer.Transform;
 import cascading.flow.planner.rule.PlanPhase;
@@ -49,6 +55,7 @@ import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.expression.BufferAfterEveryExpression;
 import cascading.flow.planner.rule.expression.LoneGroupExpression;
+import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
 import org.junit.Test;
 
@@ -86,10 +93,44 @@ public class IsomorphismTest extends CascadingTestCase
       new TapGroupTapExpressionGraph(),
       flowElementGraph );
 
-    iterator.enableSubGraphCheckpoints( getPlanPath() );
-
     while( iterator.hasNext() )
       assertNotNull( iterator.next() );
+
+    }
+
+  @Test
+  public void testSubGraphIterator2()
+    {
+    RuleRegistry ruleRegistry = new RuleRegistry();
+
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry );
+
+    ruleRegistry.addRule( new RemoveNoOpPipeTransformer() );
+
+    FlowElementGraph flowElementGraph = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveElements, plannerContext, new RuleResult(), new HashJoinMergeIntoHashJoinStreamedStreamedMergeGraph() );
+
+    flowElementGraph.writeDOT( getPlanPath() + "/mergejoin.dot" );
+
+    ContractedTransformer transformer = new ContractedTransformer( new TestNoMergeTapExpressionGraph() );
+
+    Transform<ElementGraph> transform = transformer.transform( plannerContext, flowElementGraph );
+
+    transform.writeDOTs( getPlanPath() + "/transform/" );
+
+    SubGraphIterator iterator = new SubGraphIterator(
+      new PlannerContext(),
+      new TestNoMergeTapExpressionGraph(),
+      new TestConsecutiveTapsExpressionGraph(),
+      true,
+      flowElementGraph );
+
+    int count = 0;
+    while( iterator.hasNext() )
+      {
+      ElementSubGraph next = iterator.next();
+      assertNotNull( next );
+      next.writeDOT( getPlanPath() + "/pipeline/" + count++ + "-graph.dot" );
+      }
 
     }
 

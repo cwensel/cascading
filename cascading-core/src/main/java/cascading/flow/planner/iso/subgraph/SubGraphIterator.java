@@ -58,8 +58,8 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
   private ElementGraph contractedGraph;
   private Transform<ElementGraph> contractedTransform;
 
+  private boolean firstOnly = false; // false will continue to accumulate around the primary
   private Match match;
-  private String dotPath;
 
   private List<Match> matches = new ArrayList<>();
 
@@ -77,7 +77,13 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
 
   public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph )
     {
+    this( plannerContext, contractionExpression, matchExpression, false, elementGraph );
+    }
+
+  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph )
+    {
     this.plannerContext = plannerContext;
+    this.firstOnly = firstOnly;
     this.flowElementGraph = elementGraph;
 
     if( contractionExpression != null )
@@ -86,11 +92,6 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
       contractedGraph = elementGraph;
 
     graphFinder = new GraphFinder( matchExpression );
-    }
-
-  public void enableSubGraphCheckpoints( String dotPath )
-    {
-    this.dotPath = dotPath;
     }
 
   public List<Match> getMatches()
@@ -103,7 +104,7 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     {
     if( match == null )
       {
-      match = graphFinder.findAllMatchesOnPrimary( plannerContext, getContractedGraph(), excludes );
+      match = graphFinder.findMatchesOnPrimary( plannerContext, getContractedGraph(), firstOnly, excludes );
 
       if( match.foundMatch() )
         {

@@ -532,7 +532,7 @@ public abstract class HadoopStepStats extends FlowStepStats
 
   private boolean stepHasReducers()
     {
-    return !getFlowStep().getGroups().isEmpty();
+    return getFlowStep().getNumFlowNodes() > 1;
     }
 
   private void incrementKind( HadoopSliceStats.Kind kind )

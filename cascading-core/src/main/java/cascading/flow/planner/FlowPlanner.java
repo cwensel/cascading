@@ -23,6 +23,8 @@ package cascading.flow.planner;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +39,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.rule.PlanPhase;
@@ -153,6 +156,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       verifyAllTaps( flowDef );
 
       F flow = createFlow( flowDef );
+      String nameOrID = getNameOrID( flow );
+      String transformPath = getPlanTransformTracePath();
+
+      if( transformPath != null )
+        transformPath = FileSystems.getDefault().getPath( transformPath, nameOrID ).toString();
 
       Pipe[] tails = resolveTails( flowDef, flow );
 
@@ -164,25 +172,27 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       RuleExec ruleExec = new RuleExec( ruleRegistry );
 
-      flowElementGraph = createElementGraph( flowDef, tails );
+      flowElementGraph = createFlowElementGraph( flowDef, tails );
 
-      writeTracePlan( "0-initial-flow-element-graph", flowElementGraph );
+      writeTracePlan( nameOrID, "0-initial-flow-element-graph", flowElementGraph );
 
-      ruleExec.enableTransformTracing( getPlanTransformTracePath() );
+      ruleExec.enableTransformTracing( transformPath );
 
-      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, getPlanTransformTracePath() );
+      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, transformPath );
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-      writeTracePlan( "1-completed-flow-element-graph", ruleResult.getResult( PlanPhase.PostResolveElements ) );
+      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getElementsPhaseResult( PlanPhase.PostResolveElements ) );
 
-      writeStats( plannerContext, ruleResult );
+      writeStats( plannerContext, nameOrID, ruleResult );
 
-      FlowStepGraph<Config> flowStepGraph = createStepGraph( flowDef, flowElementGraph, ruleResult.getElementSubGraphs() );
+      FlowElementGraph finalFlowElementGraph = ruleResult.getElementsPhaseResult( PlanPhase.PostResolveElements );
 
-      writeTracePlan( "2-completed-flow-step-graph", flowStepGraph );
+      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeSubGraphs() );
 
-      flow.initialize( flowElementGraph, flowStepGraph );
+      writeTracePlan( nameOrID, "2-completed-flow-step-graph", flowStepGraph );
+
+      flow.initialize( finalFlowElementGraph, flowStepGraph );
 
       return flow;
       }
@@ -192,12 +202,20 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
+  private String getNameOrID( F flow )
+    {
+    if( flow.getName() != null )
+      return flow.getName();
+
+    return flow.getID().substring( 0, 6 );
+    }
+
   protected void configRuleRegistry( RuleRegistry ruleRegistry )
     {
 
     }
 
-  protected abstract FlowStepGraph<Config> createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs );
+  protected abstract FlowStep<Config> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
 
   protected abstract RuleRegistry getRuleRegistry( FlowDef flowDef );
 
@@ -251,7 +269,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     verifyTaps( flowDef.getCheckpoints(), false, false );
     }
 
-  protected FlowElementGraph createElementGraph( FlowDef flowDef, Pipe[] flowTails )
+  protected FlowElementGraph createFlowElementGraph( FlowDef flowDef, Pipe[] flowTails )
     {
     Map<String, Tap> sources = flowDef.getSourcesCopy();
     Map<String, Tap> sinks = flowDef.getSinksCopy();
@@ -355,7 +373,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
 //          LOG.warn( "duplicate tail name found: '{}'", tailName );
-            throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
+          throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
         tails.add( pipe );
@@ -579,14 +597,15 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return System.getProperty( FlowPlanner.TRACE_STATS_PATH );
     }
 
-  protected void writeTracePlan( String name, FlowElementGraph flowElementGraph )
+  protected void writeTracePlan( String flowName, String fileName, FlowElementGraph flowElementGraph )
     {
     String path = getPlanTracePath();
 
     if( path == null )
       return;
 
-    File file = new File( path, String.format( "%s.dot", name ) );
+    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s.dot", fileName ) );
+    File file = filePath.toFile();
 
     LOG.info( "writing trace element plan: {}", file );
 
@@ -595,26 +614,28 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     flowElementGraph.writeDOT( filename );
     }
 
-  protected void writeTracePlan( String name, FlowStepGraph stepGraph )
+  protected void writeTracePlan( String flowName, String fileName, FlowStepGraph stepGraph )
     {
     String path = getPlanTracePath();
 
     if( path == null )
       return;
 
-    File file = new File( path, String.format( "%s.dot", name ) );
+    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s.dot", fileName ) );
+    File file = filePath.toFile();
 
     LOG.info( "writing trace step plan: {}", file );
 
     stepGraph.writeDOT( file.toString() );
     }
 
-  private void writeStats( PlannerContext plannerContext, RuleResult ruleResult )
+  private void writeStats( PlannerContext plannerContext, String flowName, RuleResult ruleResult )
     {
     if( getPlanStatsPath() == null )
       return;
 
-    File file = new File( getPlanStatsPath(), "planner-stats.txt" );
+    Path path = FileSystems.getDefault().getPath( getPlanStatsPath(), flowName, "planner-stats.txt" );
+    File file = path.toFile();
 
     LOG.info( "writing planner stats to: {}", file );
 

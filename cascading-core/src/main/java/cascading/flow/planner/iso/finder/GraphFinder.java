@@ -129,15 +129,20 @@ public class GraphFinder
 
   public Match findAllMatchesOnPrimary( PlannerContext plannerContext, ElementGraph elementGraph )
     {
-    return findAllMatchesOnPrimary( new FinderContext(), plannerContext, elementGraph );
+    return findMatchesOnPrimary( new FinderContext(), plannerContext, elementGraph, false );
+    }
+
+  public Match findMatchesOnPrimary( PlannerContext plannerContext, ElementGraph elementGraph, boolean firstOnly, Set<FlowElement> excludes )
+    {
+    return findMatchesOnPrimary( new FinderContext( excludes ), plannerContext, elementGraph, firstOnly );
     }
 
   public Match findAllMatchesOnPrimary( PlannerContext plannerContext, ElementGraph elementGraph, Set<FlowElement> excludes )
     {
-    return findAllMatchesOnPrimary( new FinderContext( excludes ), plannerContext, elementGraph );
+    return findMatchesOnPrimary( new FinderContext( excludes ), plannerContext, elementGraph, false );
     }
 
-  protected Match findAllMatchesOnPrimary( FinderContext finderContext, PlannerContext plannerContext, ElementGraph elementGraph )
+  protected Match findMatchesOnPrimary( FinderContext finderContext, PlannerContext plannerContext, ElementGraph elementGraph, boolean firstOnly )
     {
     Match match = null;
 
@@ -158,6 +163,9 @@ public class GraphFinder
 
       finderContext.getFoundElements().addAll( current.getVertexMapping().values() );
       finderContext.getFoundScopes().addAll( getAllEdges( elementGraph, current.getVertexMapping() ) );
+
+      if( firstOnly ) // we are not rotating around the primary capture
+        break;
 
       Set<FlowElement> nonCapturedElements = current.getNonCapturedElements();
 

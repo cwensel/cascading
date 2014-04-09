@@ -241,7 +241,10 @@ public class Hadoop18TapUtil
 
   static boolean isInflow( Configuration conf )
     {
-    return conf.get( "cascading.flow.step" ) != null || conf.get( "cascading.flow.step.path" ) != null;
+    return conf.get( "cascading.flow.step.node.map" ) != null ||
+      conf.get( "cascading.flow.step.node.reduce" ) != null ||
+      conf.get( "cascading.flow.step.node.path.map" ) != null ||
+      conf.get( "cascading.flow.step.node.path.reduce" ) != null;
     }
 
   private static Path getTaskOutputPath( Configuration conf )

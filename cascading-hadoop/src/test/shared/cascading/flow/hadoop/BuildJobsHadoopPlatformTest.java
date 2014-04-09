@@ -143,10 +143,10 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -175,10 +175,10 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 2, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -209,12 +209,12 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.sink", step.getSink() );
 
     Iterator<Tap> iterator = step.getSources().iterator();
-    int mapDist = countDistance( step.getGraph(), iterator.next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
-    mapDist = countDistance( step.getGraph(), iterator.next(), step.getGroup() );
+    mapDist = countDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 0, reduceDist );
     }
 
@@ -246,10 +246,10 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -281,10 +281,10 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
@@ -1555,10 +1555,10 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
+    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSources().iterator().next(), step.getGroup() );
     assertEquals( "not equal: mapDist", 0, mapDist );
 
-    int reduceDist = countDistance( step.getGraph(), step.getGroup(), step.getSink() );
+    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
     assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 

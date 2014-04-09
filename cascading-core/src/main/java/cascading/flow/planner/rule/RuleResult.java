@@ -37,20 +37,46 @@ import cascading.flow.planner.graph.ElementGraph;
 public class RuleResult
   {
   private Map<PlanPhase, FlowElementGraph> elementsTrace = new HashMap<>();
-  private List<ElementGraph> elementSubGraphs = new LinkedList<>();
+  private List<ElementGraph> stepSubGraphs = new LinkedList<>();
+  private Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = new LinkedHashMap<>();
+  private Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs = new LinkedHashMap<>();
 
   private long duration = 0;
   private Map<PlanPhase, Long> phaseDurations = new LinkedHashMap<>();
   private Map<PlanPhase, Map<String, Long>> ruleDurations = new LinkedHashMap<>();
 
-  public void addResult( PlanPhase phase, FlowElementGraph elementGraph )
+  public void setElementsPhaseResult( PlanPhase phase, FlowElementGraph elementGraph )
     {
+    if( elementGraph == null )
+      throw new IllegalArgumentException( "element graph may not be null" );
+
     elementsTrace.put( phase, elementGraph );
     }
 
-  public FlowElementGraph getResult( PlanPhase phase )
+  public FlowElementGraph getPreviousElementPhaseResults( PlanPhase phase )
     {
-    return elementsTrace.get( phase );
+    if( phase == PlanPhase.Start )
+      return null;
+
+    return getElementsPhaseResult( PlanPhase.prior( phase ) );
+    }
+
+  public FlowElementGraph getElementsPhaseResult( PlanPhase phase )
+    {
+    FlowElementGraph result = null;
+    PlanPhase prior = phase;
+
+    while( result == null && prior != null )
+      {
+      result = elementsTrace.get( prior );
+
+      prior = PlanPhase.prior( prior );
+      }
+
+    if( result != null )
+      return result;
+
+    throw new IllegalStateException( "unable to find prior plan results starting with phase: " + phase );
     }
 
   public Map<PlanPhase, FlowElementGraph> getElementsTrace()
@@ -58,19 +84,51 @@ public class RuleResult
     return elementsTrace;
     }
 
-  public void addSubGraphs( Collection<ElementGraph> subgraphs)
+  public void addStepSubGraphs( Collection<ElementGraph> stepSubGraphs )
     {
-    elementSubGraphs.addAll( subgraphs );
+    this.stepSubGraphs.addAll( stepSubGraphs );
+    }
+
+  public List<ElementGraph> getStepSubGraphs()
+    {
+    return stepSubGraphs;
+    }
+
+  public void addNodeSubGraphs( Map<ElementGraph, List<ElementGraph>> nodeSubGraphs )
+    {
+    for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodeSubGraphs.entrySet() )
+      {
+      if( !this.nodeSubGraphs.containsKey( entry.getKey() ) )
+        this.nodeSubGraphs.put( entry.getKey(), entry.getValue() );
+      else
+        this.nodeSubGraphs.get( entry.getKey() ).addAll( entry.getValue() );
+      }
+    }
+
+  public Map<ElementGraph, List<ElementGraph>> getNodeSubGraphs()
+    {
+    return nodeSubGraphs;
+    }
+
+  public void addNodePipelineGraphs( Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs )
+    {
+    for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodePipelineGraphs.entrySet() )
+      {
+      if( !this.nodePipelineGraphs.containsKey( entry.getKey() ) )
+        this.nodePipelineGraphs.put( entry.getKey(), entry.getValue() );
+      else
+        this.nodePipelineGraphs.get( entry.getKey() ).addAll( entry.getValue() );
+      }
+    }
+
+  public Map<ElementGraph, List<ElementGraph>> getNodePipelineGraphs()
+    {
+    return nodePipelineGraphs;
     }
 
   public void setDuration( long begin, long end )
     {
     duration = end - begin;
-    }
-
-  public List<ElementGraph> getElementSubGraphs()
-    {
-    return elementSubGraphs;
     }
 
   public void setPhaseDuration( PlanPhase phase, long begin, long end )

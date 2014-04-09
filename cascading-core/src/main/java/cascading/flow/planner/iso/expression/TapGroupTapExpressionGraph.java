@@ -36,8 +36,8 @@ public class TapGroupTapExpressionGraph extends ExpressionGraph
     FlowElementExpression shared = new FlowElementExpression( ElementExpression.Capture.Primary, Group.class );
 
     this
-      .arc( new FlowElementExpression( Tap.class ), PathScopeExpression.ALL, shared )
-      .arc( shared, PathScopeExpression.ALL, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class )
+      .arc( new FlowElementExpression( Tap.class ), ScopeExpression.ALL, shared )
+      .arc( shared, ScopeExpression.ALL, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class )
       );
     }
   }

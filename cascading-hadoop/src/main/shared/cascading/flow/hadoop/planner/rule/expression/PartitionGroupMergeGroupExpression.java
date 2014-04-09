@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.SplicePipeExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.pipe.Group;
@@ -49,7 +49,7 @@ public class PartitionGroupMergeGroupExpression extends RuleExpression
       new ExpressionGraph()
         .arc(
           new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class ),
-          PathScopeExpression.ANY,
+          ScopeExpression.ANY,
           new FlowElementExpression( Merge.class )
         )
     );

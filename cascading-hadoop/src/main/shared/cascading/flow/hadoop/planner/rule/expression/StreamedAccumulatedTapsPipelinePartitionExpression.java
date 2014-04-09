@@ -18,29 +18,20 @@
  * limitations under the License.
  */
 
-package cascading.flow.local.planner;
+package cascading.flow.hadoop.planner.rule.expression;
 
-import java.util.List;
-
-import cascading.flow.FlowStep;
-import cascading.flow.local.LocalFlowStep;
-import cascading.flow.planner.FlowElementGraph;
-import cascading.flow.planner.FlowStepGraph;
-import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.rule.RuleExpression;
 
 /**
  *
  */
-public class LocalStepGraph extends FlowStepGraph
+public class StreamedAccumulatedTapsPipelinePartitionExpression extends RuleExpression
   {
-  public LocalStepGraph( String flowName, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
+  public StreamedAccumulatedTapsPipelinePartitionExpression()
     {
-    super( flowElementGraph, elementSubGraphs );
-    }
-
-  @Override
-  protected FlowStep createFlowStep( String stepName, int stepNum, ElementGraph elementSubGraph )
-    {
-    return new LocalFlowStep( stepName, stepNum, elementSubGraph );
+    super(
+      new NoGroupMergeTapExpressionGraph(),
+      new StreamedAccumulatedTapsExpression()
+    );
     }
   }

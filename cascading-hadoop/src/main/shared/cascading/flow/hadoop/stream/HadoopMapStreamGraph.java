@@ -22,7 +22,6 @@ package cascading.flow.hadoop.stream;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,32 +29,33 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryHashJoinGate;
+import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
 import cascading.flow.stream.SpliceGate;
-import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
-import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
 
+import static cascading.util.Util.getFirst;
+
 /**
  *
  */
-public class HadoopMapStreamGraph extends StepStreamGraph
+public class HadoopMapStreamGraph extends NodeStreamGraph
   {
   private final Tap source;
   private SourceStage streamedHead;
 
-  public HadoopMapStreamGraph( HadoopFlowProcess flowProcess, HadoopFlowStep step, Tap source )
+  public HadoopMapStreamGraph( HadoopFlowProcess flowProcess, FlowNode node, Tap source )
     {
-    super( flowProcess, step );
+    super( flowProcess, node );
     this.source = source;
 
     buildGraph();
@@ -63,7 +63,7 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     setTraps();
     setScopes();
 
-    printGraph( step.getID(), "map", flowProcess.getCurrentSliceNum() );
+    printGraph( node.getID(), "map", flowProcess.getCurrentSliceNum() );
     bind();
     }
 
@@ -76,8 +76,8 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     {
     streamedHead = handleHead( this.source, flowProcess );
 
-    FlowElement tail = step.getGroup() != null ? step.getGroup() : step.getSink();
-    Set<Tap> tributaries = step.getJoinTributariesBetween( this.source, tail );
+    FlowElement tail = getFirst( node.getSinkElements() );
+    Set<Tap> tributaries = node.getJoinTributariesBetween( this.source, tail );
 
     tributaries.remove( this.source ); // we cannot stream and accumulate the same source
 
@@ -148,19 +148,4 @@ public class HadoopMapStreamGraph extends StepStreamGraph
     return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }
 
-  protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )
-    {
-    if( lhsElement instanceof Group )
-      return true;
-
-    if( successors.isEmpty() )
-      {
-      if( !( lhsElement instanceof Tap ) )
-        throw new IllegalStateException( "expected a Tap instance" );
-
-      return true;
-      }
-
-    return false;
-    }
   }

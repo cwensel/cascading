@@ -380,6 +380,8 @@ public class ElementGraphs
         throw new IllegalStateException( "flow element:" + flowElement + ", has multiple input paths: " + incomingScopes.size() );
       }
 
+    boolean isJoin = flowElement instanceof Splice && ( (Splice) flowElement ).isJoin();
+
     for( Scope incoming : incomingScopes )
       {
       Set<Scope> outgoingScopes = elementGraph.outgoingEdgesOf( flowElement );
@@ -391,8 +393,13 @@ public class ElementGraphs
         {
         FlowElement target = elementGraph.getEdgeTarget( outgoing );
 
+        int ordinal = outgoing.getOrdinal();
+
+        if( isJoin )
+          ordinal = Math.max( ordinal, incoming.getOrdinal() );
+
         Scope scope = new Scope( outgoing );
-        scope.setOrdinal( outgoing.getOrdinal() ); // not copied
+        scope.setOrdinal( ordinal ); // not copied
         scope.addPriorNames( incoming, outgoing ); // not copied
         elementGraph.addEdge( source, target, scope );
         }
@@ -465,10 +472,23 @@ public class ElementGraphs
     return findSources( elementGraph, Tap.class );
     }
 
+  public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
+    {
+    if( elementGraph.containsVertex( Extent.head ) )
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Head ) ),
+      elementGraph
+    );
+
+    return narrowSet( type, getAllVertices( iterator ) );
+    }
+
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
     {
-    if( elementGraph instanceof FlowElementGraph )
-      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
+    if( elementGraph.containsVertex( Extent.head ) )
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
     SubGraphIterator iterator = new SubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Tail ) ),
@@ -490,19 +510,6 @@ public class ElementGraphs
   public static Set<Tap> findSinks( ElementGraph elementGraph )
     {
     return findSinks( elementGraph, Tap.class );
-    }
-
-  public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
-    {
-    if( elementGraph instanceof FlowElementGraph )
-      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
-
-    SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Head ) ),
-      elementGraph
-    );
-
-    return narrowSet( type, getAllVertices( iterator ) );
     }
 
   public static Set<Group> findAllGroups( ElementGraph elementGraph )
@@ -561,7 +568,7 @@ public class ElementGraphs
 
       Iterator<Scope> iterator = graph.outgoingEdgesOf( object ).iterator();
 
-      if( object instanceof Tap || object instanceof FlowElementGraph.Extent || !iterator.hasNext() )
+      if( object instanceof Tap || object instanceof Extent || !iterator.hasNext() )
         return object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
 
       Scope scope = iterator.next();

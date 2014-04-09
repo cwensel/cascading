@@ -45,6 +45,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static data.InputData.inputFileApache;
@@ -52,6 +53,7 @@ import static data.InputData.inputFileApache;
 /**
  *
  */
+@Ignore
 public class MapReduceFlowPlatformTest extends PlatformTestCase
   {
 

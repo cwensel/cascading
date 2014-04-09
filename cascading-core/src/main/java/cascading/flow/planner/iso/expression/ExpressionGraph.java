@@ -64,6 +64,12 @@ public class ExpressionGraph
       }
 
     @Override
+    public boolean acceptsAll()
+      {
+      return delegate.acceptsAll();
+      }
+
+    @Override
     public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, Scope scope )
       {
       return delegate.applies( plannerContext, elementGraph, scope );

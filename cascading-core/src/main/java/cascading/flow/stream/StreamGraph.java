@@ -60,7 +60,7 @@ public class StreamGraph
   private final Duct HEAD = new Extent( "head" );
   private final Duct TAIL = new Extent( "tail" );
 
-  private final DuctGraph graph = new DuctGraph();
+  private final DuctGraph ductGraph = new DuctGraph();
 
   private class Extent extends Stage
     {
@@ -131,9 +131,9 @@ public class StreamGraph
 
     try
       {
-      graph.addVertex( lhs );
-      graph.addVertex( rhs );
-      graph.addEdge( lhs, rhs, graph.makeOrdinal( ordinal ) );
+      ductGraph.addVertex( lhs );
+      ductGraph.addVertex( rhs );
+      ductGraph.addEdge( lhs, rhs, ductGraph.makeOrdinal( ordinal ) );
       }
     catch( RuntimeException exception )
       {
@@ -178,17 +178,17 @@ public class StreamGraph
 
   public Collection<Duct> getHeads()
     {
-    return Graphs.successorListOf( graph, getHEAD() );
+    return Graphs.successorListOf( ductGraph, getHEAD() );
     }
 
   public Collection<Duct> getTails()
     {
-    return Graphs.predecessorListOf( graph, getTAIL() );
+    return Graphs.predecessorListOf( ductGraph, getTAIL() );
     }
 
   public Duct[] findAllNextFor( Duct current )
     {
-    LinkedList<Duct> successors = new LinkedList<Duct>( Graphs.successorListOf( graph, current ) );
+    LinkedList<Duct> successors = new LinkedList<Duct>( Graphs.successorListOf( ductGraph, current ) );
     ListIterator<Duct> iterator = successors.listIterator();
 
     while( iterator.hasNext() )
@@ -207,7 +207,7 @@ public class StreamGraph
 
   public Duct[] findAllPreviousFor( Duct current )
     {
-    LinkedList<Duct> predecessors = new LinkedList<Duct>( Graphs.predecessorListOf( graph, current ) );
+    LinkedList<Duct> predecessors = new LinkedList<Duct>( Graphs.predecessorListOf( ductGraph, current ) );
     ListIterator<Duct> iterator = predecessors.listIterator();
 
     while( iterator.hasNext() )
@@ -229,12 +229,12 @@ public class StreamGraph
     if( current == getHEAD() || current == getTAIL() )
       return null;
 
-    Set<DuctGraph.Ordinal> edges = graph.outgoingEdgesOf( current );
+    Set<DuctGraph.Ordinal> edges = ductGraph.outgoingEdgesOf( current );
 
     if( edges.size() == 0 )
       throw new IllegalStateException( "ducts must have an outgoing edge, current: " + current );
 
-    Duct next = graph.getEdgeTarget( edges.iterator().next() );
+    Duct next = ductGraph.getEdgeTarget( edges.iterator().next() );
 
     if( current instanceof Gate )
       {
@@ -354,12 +354,12 @@ public class StreamGraph
 
   public int ordinalBetween( Duct lhs, Duct rhs )
     {
-    return graph.getEdge( lhs, rhs ).ordinal;
+    return ductGraph.getEdge( lhs, rhs ).ordinal;
     }
 
   private List<GraphPath<Duct, DuctGraph.Ordinal>> allPathsBetweenInclusive( Duct from, Duct to )
     {
-    return new KShortestPaths<Duct, DuctGraph.Ordinal>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    return new KShortestPaths<Duct, DuctGraph.Ordinal>( ductGraph, from, Integer.MAX_VALUE ).getPaths( to );
     }
 
   public static LinkedList<List<Duct>> asPathList( List<GraphPath<Duct, DuctGraph.Ordinal>> paths )
@@ -379,7 +379,7 @@ public class StreamGraph
     {
     try
       {
-      return new TopologicalOrderIterator( graph );
+      return new TopologicalOrderIterator( ductGraph );
       }
     catch( RuntimeException exception )
       {
@@ -409,14 +409,14 @@ public class StreamGraph
     {
     DuctGraph reversedGraph = new DuctGraph();
 
-    Graphs.addGraphReversed( reversedGraph, graph );
+    Graphs.addGraphReversed( reversedGraph, ductGraph );
 
     return reversedGraph;
     }
 
   public Collection<Duct> getAllDucts()
     {
-    return graph.vertexSet();
+    return ductGraph.vertexSet();
     }
 
   public void printGraphError()
@@ -444,6 +444,6 @@ public class StreamGraph
   public void printGraph( String filename )
     {
     LOG.info( "writing stream graph to {}", filename );
-    Util.printGraph( filename, graph );
+    Util.printGraph( filename, ductGraph );
     }
   }

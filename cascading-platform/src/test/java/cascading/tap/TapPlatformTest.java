@@ -285,7 +285,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2 );
 
-    Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( getTestName() + "/partitioned" ), SinkMode.REPLACE );
+    Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned" ), SinkMode.REPLACE );
 
     Partition partition = new DelimitedPartition( new Fields( "lower", "number" ) );
     partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
@@ -294,7 +294,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     firstFlow.complete();
 
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), "+", getOutputPath( getTestName() + "/final" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), "+", getOutputPath( "/final" ), SinkMode.REPLACE );
 
     Flow secondFlow = getPlatform().getFlowConnector().connect( partitionTap, sink, new Pipe( "copy" ) );
 

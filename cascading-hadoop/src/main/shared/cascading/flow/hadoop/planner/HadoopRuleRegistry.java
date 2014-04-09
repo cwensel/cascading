@@ -20,8 +20,12 @@
 
 package cascading.flow.hadoop.planner;
 
-import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsPartitioner;
-import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapPartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsNodePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsNodePipelinePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.TapGroupNodePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
 import cascading.flow.hadoop.planner.rule.transformer.CombineAdjacentTapTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.PartitionCheckpointTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupBlockingHashJoinTransformer;
@@ -82,7 +86,15 @@ public class HadoopRuleRegistry extends RuleRegistry
     addRule( new CombineAdjacentTapTransformer() );
 
     // PartitionSteps
-    addRule( new ConsecutiveTapsPartitioner() );
-    addRule( new TapGroupTapPartitioner() );
+    addRule( new ConsecutiveTapsStepPartitioner() );
+    addRule( new TapGroupTapStepPartitioner() );
+
+    // PartitionNodes
+    addRule( new ConsecutiveTapsNodePartitioner() );
+    addRule( new TapGroupNodePartitioner() );
+    addRule( new GroupTapNodePartitioner() );
+
+    // PipelineNodes
+    addRule( new StreamedAccumulatedTapsNodePipelinePartitioner() );
     }
   }

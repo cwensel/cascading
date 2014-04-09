@@ -68,9 +68,14 @@ public class HadoopUtil
   private static final Class<?> DEFAULT_OBJECT_SERIALIZER = JavaObjectSerializer.class;
   private static PlatformInfo platformInfo;
 
-  public static void initLog4j( JobConf jobConf )
+  public static void initLog4j( JobConf configuration )
     {
-    String values = jobConf.get( "log4j.logger", null );
+    initLog4j( (Configuration) configuration );
+    }
+
+  public static void initLog4j( Configuration configuration )
+    {
+    String values = configuration.get( "log4j.logger", null );
 
     if( values == null || values.length() == 0 )
       return;
@@ -111,25 +116,30 @@ public class HadoopUtil
     return new JobConf( configuration );
     }
 
-  public static Configuration createJobConf( Map<Object, Object> properties, Configuration defaultJobconf )
+  public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )
     {
-    Configuration jobConf = defaultJobconf == null ? new Configuration() : new Configuration( defaultJobconf );
+    JobConf jobConf = defaultJobconf == null ? new JobConf() : new JobConf( defaultJobconf );
 
     if( properties == null )
       return jobConf;
 
-    Set<Object> keys = new HashSet<Object>( properties.keySet() );
+    return copyConfiguration( properties, jobConf );
+    }
+
+  public static <C extends Configuration> C copyConfiguration( Map<Object, Object> srcProperties, C dstConfiguration )
+    {
+    Set<Object> keys = new HashSet<Object>( srcProperties.keySet() );
 
     // keys will only be grabbed if both key/value are String, so keep orig keys
-    if( properties instanceof Properties )
-      keys.addAll( ( (Properties) properties ).stringPropertyNames() );
+    if( srcProperties instanceof Properties )
+      keys.addAll( ( (Properties) srcProperties ).stringPropertyNames() );
 
     for( Object key : keys )
       {
-      Object value = properties.get( key );
+      Object value = srcProperties.get( key );
 
-      if( value == null && properties instanceof Properties && key instanceof String )
-        value = ( (Properties) properties ).getProperty( (String) key );
+      if( value == null && srcProperties instanceof Properties && key instanceof String )
+        value = ( (Properties) srcProperties ).getProperty( (String) key );
 
       if( value == null ) // don't stuff null values
         continue;
@@ -138,10 +148,10 @@ public class HadoopUtil
       if( value instanceof Class || value instanceof JobConf )
         continue;
 
-      jobConf.set( key.toString(), value.toString() );
+      dstConfiguration.set( key.toString(), value.toString() );
       }
 
-    return jobConf;
+    return dstConfiguration;
     }
 
   public static Map<Object, Object> createProperties( Configuration jobConf )
@@ -254,12 +264,12 @@ public class HadoopUtil
     return objectSerializer;
     }
 
-  public static <T> String serializeBase64( T object, JobConf conf ) throws IOException
+  public static <T> String serializeBase64( T object, Configuration conf ) throws IOException
     {
     return serializeBase64( object, conf, true );
     }
 
-  public static <T> String serializeBase64( T object, JobConf conf, boolean compress ) throws IOException
+  public static <T> String serializeBase64( T object, Configuration conf, boolean compress ) throws IOException
     {
     ObjectSerializer objectSerializer;
 
@@ -391,7 +401,7 @@ public class HadoopUtil
     for( String key : keys )
       properties.remove( key );
 
-    return createJobConf( properties, null );
+    return copyConfiguration( properties, new JobConf() );
     }
 
   public static boolean removeStateFromDistCache( Configuration conf, String path ) throws IOException
@@ -399,11 +409,14 @@ public class HadoopUtil
     return new Hfs( new TextLine(), path ).deleteResource( conf );
     }
 
-  public static String writeStateToDistCache( JobConf conf, String id, String stepState )
+  public static String writeStateToDistCache( JobConf conf, String id, String kind, String stepState )
     {
+    if( stepState == null || stepState.isEmpty() )
+      return null;
+
     LOG.info( "writing step state to dist cache, too large for job conf, size: {}", stepState.length() );
 
-    String statePath = Hfs.getTempPath( conf ) + "/step-state-" + id;
+    String statePath = Hfs.getTempPath( conf ) + "/" + kind + "-state-" + id;
 
     Hfs temp = new Hfs( new TextLine(), statePath, SinkMode.REPLACE );
 
@@ -428,7 +441,7 @@ public class HadoopUtil
     return statePath;
     }
 
-  public static String readStateFromDistCache( JobConf jobConf, String id ) throws IOException
+  public static String readStateFromDistCache( JobConf jobConf, String id, String kind ) throws IOException
     {
     Path[] files = DistributedCache.getLocalCacheFiles( jobConf );
 
@@ -436,7 +449,7 @@ public class HadoopUtil
 
     for( Path file : files )
       {
-      if( !file.toString().contains( "step-state-" + id ) )
+      if( !file.toString().contains( kind + "-state-" + id ) )
         continue;
 
       stepStatePath = file;

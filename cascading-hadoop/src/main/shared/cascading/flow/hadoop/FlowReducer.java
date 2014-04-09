@@ -32,6 +32,7 @@ import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.hadoop.util.TimedIterator;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;
@@ -81,14 +82,14 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
       timedIterator = new TimedIterator( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
 
-      String stepState = jobConf.getRaw( "cascading.flow.step" );
+      String reduceNodeState = jobConf.getRaw( "cascading.flow.step.node.reduce" );
 
-      if( stepState == null )
-        stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
+      if( reduceNodeState == null )
+        reduceNodeState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ), "reduce" );
 
-      HadoopFlowStep step = deserializeBase64( stepState, jobConf, HadoopFlowStep.class );
+      FlowNode node = deserializeBase64( reduceNodeState, jobConf, FlowNode.class );
 
-      streamGraph = new HadoopReduceStreamGraph( currentProcess, step );
+      streamGraph = new HadoopReduceStreamGraph( currentProcess, node );
 
       group = (HadoopGroupGate) streamGraph.getHeads().iterator().next();
 
@@ -98,7 +99,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       for( Duct tail : streamGraph.getTails() )
         LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
 
-      for( Tap trap : step.getTraps() )
+      for( Tap trap : node.getTraps() )
         LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )

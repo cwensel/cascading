@@ -22,7 +22,7 @@
  Using:
 
  To run a single test:
-   > gradle -Dest.single=LocalTapPlatformTest :cascading-local:test -i
+   > gradle -Dtest.single=LocalTapPlatformTest :cascading-local:test -i
 
  To run a single platform test:
    > gradle -DplatformTest.single=CoGroupFieldedPipesPlatformTest :cascading-local:platformTest -i

@@ -28,7 +28,8 @@ import java.util.TreeSet;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
-import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.Extent;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.planner.Scope;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -46,15 +47,15 @@ import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 /**
  *
  */
-public abstract class StepStreamGraph extends StreamGraph
+public abstract class NodeStreamGraph extends StreamGraph
   {
   protected FlowProcess flowProcess;
-  protected final BaseFlowStep step;
+  protected final FlowNode node;
 
-  public StepStreamGraph( FlowProcess flowProcess, BaseFlowStep step )
+  public NodeStreamGraph( FlowProcess flowProcess, FlowNode node )
     {
     this.flowProcess = flowProcess;
-    this.step = step;
+    this.node = node;
     }
 
   protected Object getProperty( String name )
@@ -64,20 +65,21 @@ public abstract class StepStreamGraph extends StreamGraph
 
   protected void handleDuct( FlowElement lhsElement, Duct lhsDuct )
     {
-    List<FlowElement> successors = step.getSuccessors( lhsElement );
+    List<FlowElement> successors = node.getSuccessors( lhsElement );
 
-    if( !stopOnElement( lhsElement, successors ) )
-      handleSuccessors( lhsDuct, successors );
-    else
+    if( successors.contains( Extent.tail )  )
       addTail( lhsDuct );
+    else
+      handleSuccessors( lhsDuct, successors );
     }
-
-  protected abstract boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors );
 
   private void handleSuccessors( Duct lhsDuct, List<FlowElement> successors )
     {
     for( FlowElement rhsElement : successors )
       {
+      if( rhsElement instanceof Extent )
+        continue;
+
       Duct newRhsDuct = createDuctFor( rhsElement );
       Duct rhsDuct = findExisting( newRhsDuct );
 
@@ -100,7 +102,7 @@ public abstract class StepStreamGraph extends StreamGraph
     FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
     Splice rhsElement = (Splice) ( (SpliceGate) rhsDuct ).getFlowElement();
 
-    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( step.getGraph(), lhsElement, rhsElement );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( node.getElementGraph(), lhsElement, rhsElement );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -202,10 +204,10 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private boolean joinHasSameStreamedSource( HashJoin join )
     {
-    if( !step.getStreamedSourceByJoin().isEmpty() )
+    if( !node.getStreamedSourceByJoin().isEmpty() )
       {
       // if streamed source is multi path
-      Object tap = step.getStreamedSourceByJoin().get( join );
+      Object tap = node.getStreamedSourceByJoin().get( join );
 
       if( tap == null )
         return false;
@@ -214,7 +216,7 @@ public abstract class StepStreamGraph extends StreamGraph
       }
 
     // means we are in local mode if joins is empty
-    for( Object tap : step.getSources() )
+    for( Object tap : node.getSources() )
       {
       if( getNumImmediateBranches( (FlowElement) tap, join ) > 1 )
         return true;
@@ -225,7 +227,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
   private int getNumImmediateBranches( FlowElement tap, HashJoin join )
     {
-    return getAllShortestPathsBetween( step.getGraph(), tap, join ).size();
+    return getAllShortestPathsBetween( node.getElementGraph(), tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )
@@ -266,7 +268,7 @@ public abstract class StepStreamGraph extends StreamGraph
 
       for( String branchName : branchNames )
         {
-        Tap trap = step.getTrap( branchName );
+        Tap trap = node.getTrap( branchName );
 
         if( trap != null )
           {
@@ -292,9 +294,9 @@ public abstract class StepStreamGraph extends StreamGraph
       return Collections.emptySet();
 
     if( duct instanceof SourceStage )
-      return step.getSourceName( (Tap) ( (SourceStage) duct ).getFlowElement() );
+      return node.getSourceNames( (Tap) ( (SourceStage) duct ).getFlowElement() );
     else if( duct instanceof SinkStage )
-      return step.getSinkName( (Tap) ( (SinkStage) duct ).getFlowElement() );
+      return node.getSinkNames( (Tap) ( (SinkStage) duct ).getFlowElement() );
     else
       throw new IllegalStateException( "duct does not wrap a Tap: " + duct.getClass().getCanonicalName() );
     }
@@ -310,8 +312,8 @@ public abstract class StepStreamGraph extends StreamGraph
 
       ElementDuct elementDuct = (ElementDuct) duct;
 
-      elementDuct.getIncomingScopes().addAll( step.getPreviousScopes( elementDuct.getFlowElement() ) );
-      elementDuct.getOutgoingScopes().addAll( step.getNextScopes( elementDuct.getFlowElement() ) );
+      elementDuct.getIncomingScopes().addAll( node.getPreviousScopes( elementDuct.getFlowElement() ) );
+      elementDuct.getOutgoingScopes().addAll( node.getNextScopes( elementDuct.getFlowElement() ) );
       }
     }
   }

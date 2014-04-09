@@ -35,17 +35,14 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
     {
     this();
 
-//    Graphs.addGraph( this, parent );
-//    Graphs.addAllEdges( this, parent, parent.edgeSet() );
-
     // safe to assume there are no unconnected vertices
-    for( Scope e : parent.edgeSet() )
+    for( Scope edge : parent.edgeSet() )
       {
-      FlowElement s = parent.getEdgeSource( e );
-      FlowElement t = parent.getEdgeTarget( e );
+      FlowElement s = parent.getEdgeSource( edge );
+      FlowElement t = parent.getEdgeTarget( edge );
       addVertex( s );
       addVertex( t );
-      addEdge( s, t, e );
+      addEdge( s, t, edge );
       }
     }
 

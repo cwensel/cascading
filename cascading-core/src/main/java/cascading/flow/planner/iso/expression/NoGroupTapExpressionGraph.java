@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.iso.expression;
 
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.Extent;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 
@@ -38,7 +38,7 @@ public class NoGroupTapExpressionGraph extends ExpressionGraph
       not(
         or(
           ElementExpression.Capture.Primary,
-          new FlowElementExpression( FlowElementGraph.Extent.class ),
+          new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
           new FlowElementExpression( Tap.class )
         )

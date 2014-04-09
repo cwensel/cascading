@@ -49,10 +49,6 @@ public class FlowElementGraph extends ElementDirectedGraph
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowElementGraph.class );
 
-  /** Field head */
-  public static final Extent head = new Extent( "head" );
-  /** Field tail */
-  public static final Extent tail = new Extent( "tail" );
   /** Field resolved */
   private boolean resolved;
 
@@ -251,18 +247,18 @@ public class FlowElementGraph extends ElementDirectedGraph
    */
   private void addExtents( Map<String, Tap> sources, Map<String, Tap> sinks )
     {
-    addVertex( head );
+    addVertex( Extent.head );
 
     for( String source : sources.keySet() )
       {
-      Scope scope = addEdge( head, sources.get( source ) );
+      Scope scope = addEdge( Extent.head, sources.get( source ) );
 
       // edge may already exist, if so, above returns null
       if( scope != null )
         scope.setName( source );
       }
 
-    addVertex( tail );
+    addVertex( Extent.tail );
 
     for( String sink : sinks.keySet() )
       {
@@ -270,7 +266,7 @@ public class FlowElementGraph extends ElementDirectedGraph
 
       try
         {
-        scope = addEdge( sinks.get( sink ), tail );
+        scope = addEdge( sinks.get( sink ), Extent.tail );
         }
       catch( IllegalArgumentException exception )
         {
@@ -349,7 +345,8 @@ public class FlowElementGraph extends ElementDirectedGraph
 
       scope.setName( previous.getName() ); // name scope after previous pipe
 
-      if( current instanceof Splice )
+      // only set ordinal
+      if( current instanceof Splice && ( (Splice) current ).isJoin() )
         scope.setOrdinal( ( (Splice) current ).getPipePos().get( previous.getName() ) );
       }
     }
@@ -371,7 +368,7 @@ public class FlowElementGraph extends ElementDirectedGraph
    */
   public DepthFirstIterator<FlowElement, Scope> getDepthFirstIterator()
     {
-    return new DepthFirstIterator<>( this, head );
+    return new DepthFirstIterator<>( this, Extent.head );
     }
 
   private SimpleDirectedGraph<FlowElement, Scope> copyWithTraps()
@@ -500,38 +497,4 @@ public class FlowElementGraph extends ElementDirectedGraph
     removeVertex( element );
     }
 
-  public static class Extent extends Pipe
-    {
-    /** @see cascading.pipe.Pipe#Pipe(String) */
-    public Extent( String name )
-      {
-      super( name );
-      }
-
-    @Override
-    public Scope outgoingScopeFor( Set<Scope> scopes )
-      {
-      return new Scope();
-      }
-
-    @Override
-    public String toString()
-      {
-      return "[" + getName() + "]";
-      }
-
-    public boolean equals( Object object )
-      {
-      if( object == null )
-        return false;
-
-      if( this == object )
-        return true;
-
-      if( object.getClass() != this.getClass() )
-        return false;
-
-      return this.getName().equals( ( (Pipe) object ).getName() );
-      }
-    }
   }

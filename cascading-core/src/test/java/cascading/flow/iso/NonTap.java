@@ -34,9 +34,23 @@ import cascading.tuple.TupleEntryIterator;
  */
 public class NonTap extends Tap
   {
-  public NonTap(  )
+  String identifier = "non-tap-" + System.identityHashCode( this );
+
+  public NonTap( String identifier )
+    {
+    this();
+    this.identifier = identifier;
+    }
+
+  public NonTap()
     {
     super( new NullScheme( Fields.UNKNOWN, Fields.ALL ) );
+    }
+
+  public NonTap( String identifier, Fields fields )
+    {
+    this( fields );
+    this.identifier = identifier;
     }
 
   public NonTap( Fields fields )
@@ -47,7 +61,7 @@ public class NonTap extends Tap
   @Override
   public String getIdentifier()
     {
-    return "non-tap-" + System.identityHashCode( this );
+    return identifier;
     }
 
   @Override

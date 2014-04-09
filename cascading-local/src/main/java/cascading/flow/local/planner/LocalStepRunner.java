@@ -34,6 +34,7 @@ import cascading.flow.local.LocalFlowStep;
 import cascading.flow.local.stream.LocalStepStreamGraph;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.StreamGraph;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,15 +50,15 @@ public class LocalStepRunner implements Callable<Throwable>
   private boolean complete = false;
   private boolean successful = false;
 
-  private final StreamGraph graph;
+  private final StreamGraph streamGraph;
   private final Collection<Duct> heads;
   private Throwable throwable = null;
 
   public LocalStepRunner( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
     this.flowProcess = flowProcess;
-    this.graph = new LocalStepStreamGraph( this.flowProcess, step );
-    this.heads = graph.getHeads();
+    this.streamGraph = new LocalStepStreamGraph( this.flowProcess, step, Util.getFirst( step.getFlowNodeGraph().vertexSet() ) );
+    this.heads = streamGraph.getHeads();
     }
 
   public FlowProcess<Properties> getFlowProcess()
@@ -89,7 +90,7 @@ public class LocalStepRunner implements Callable<Throwable>
       {
       try
         {
-        graph.prepare();
+        streamGraph.prepare();
         }
       catch( Throwable currentThrowable )
         {
@@ -128,7 +129,7 @@ public class LocalStepRunner implements Callable<Throwable>
         attemptedCleanup = true; // set so we don't try again regardless
 
         if( !( throwable instanceof OutOfMemoryError ) )
-          graph.cleanup();
+          streamGraph.cleanup();
         }
       catch( Throwable currentThrowable )
         {
@@ -149,7 +150,7 @@ public class LocalStepRunner implements Callable<Throwable>
       try
         {
         if( !attemptedCleanup )
-          graph.cleanup();
+          streamGraph.cleanup();
         }
       catch( Throwable currentThrowable )
         {

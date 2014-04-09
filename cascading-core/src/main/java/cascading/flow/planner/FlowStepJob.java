@@ -140,7 +140,18 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         return;
         }
 
-      flowStepStats.markStarted();
+      synchronized( this ) // added in 3.0, jdk1.7 may have a aggravated
+        {
+        if( stop )
+          {
+          if( flowStep.isInfoEnabled() )
+            flowStep.logInfo( "stop called before start: " + stepName );
+
+          return;
+          }
+
+        flowStepStats.markStarted();
+        }
 
       blockOnPredecessors();
 

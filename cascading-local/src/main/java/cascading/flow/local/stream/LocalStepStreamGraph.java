@@ -20,19 +20,19 @@
 
 package cascading.flow.local.stream;
 
-import java.util.List;
 import java.util.Properties;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryCoGroupGate;
+import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
-import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
@@ -42,24 +42,27 @@ import cascading.tap.Tap;
 /**
  *
  */
-public class LocalStepStreamGraph extends StepStreamGraph
+public class LocalStepStreamGraph extends NodeStreamGraph
   {
-  public LocalStepStreamGraph( FlowProcess<Properties> flowProcess, LocalFlowStep step )
+  private LocalFlowStep step;
+
+  public LocalStepStreamGraph( FlowProcess<Properties> flowProcess, LocalFlowStep step, FlowNode node )
     {
-    super( flowProcess, step );
+    super( flowProcess, node );
+    this.step = step;
 
     buildGraph();
     setTraps();
     setScopes();
 
-    printGraph( step.getID(), "local", 0 );
+    printGraph( node.getID(), "local", 0 );
 
     bind();
     }
 
   protected void buildGraph()
     {
-    for( Object rhsElement : step.getSources() )
+    for( Object rhsElement : node.getSources() )
       {
       Duct rhsDuct = new SourceStage( tapFlowProcess( (Tap) rhsElement ), (Tap) rhsElement );
 
@@ -94,23 +97,11 @@ public class LocalStepStreamGraph extends StepStreamGraph
   private LocalFlowProcess tapFlowProcess( Tap tap )
     {
     Properties defaultProperties = ( (LocalFlowProcess) flowProcess ).getConfigCopy();
-    Properties tapProperties = ( (LocalFlowStep) step ).getPropertiesMap().get( tap );
+    Properties tapProperties = step.getPropertiesMap().get( tap );
 
     tapProperties = PropertyUtil.createProperties( tapProperties, defaultProperties );
 
     return new LocalFlowProcess( (LocalFlowProcess) flowProcess, tapProperties );
     }
 
-  protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )
-    {
-    if( successors.isEmpty() )
-      {
-      if( !( lhsElement instanceof Tap ) )
-        throw new IllegalStateException( "expected a Tap instance" );
-
-      return true;
-      }
-
-    return false;
-    }
   }

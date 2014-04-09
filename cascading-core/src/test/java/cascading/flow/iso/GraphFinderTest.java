@@ -28,7 +28,7 @@ import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.SyncPipeExpressionGraph;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.GraphFinder;
@@ -75,7 +75,7 @@ public class GraphFinderTest extends CascadingTestCase
     FlowElementExpression sharedHashJoin = new FlowElementExpression( HashJoin.class );
 
     ExpressionGraph expressionGraph = new ExpressionGraph()
-      .arc( sharedTap, PathScopeExpression.ALL, sharedHashJoin );
+      .arc( sharedTap, ScopeExpression.ALL, sharedHashJoin );
 
     GraphFinder graphFinder = new GraphFinder( expressionGraph );
 
@@ -99,7 +99,7 @@ public class GraphFinderTest extends CascadingTestCase
     ExpressionGraph expressionGraph = new ExpressionGraph()
       .arc(
         new FlowElementExpression( Tap.class ),
-        PathScopeExpression.ALL,
+        ScopeExpression.ALL,
         new FlowElementExpression( ElementExpression.Capture.Primary, HashJoin.class )
       );
 

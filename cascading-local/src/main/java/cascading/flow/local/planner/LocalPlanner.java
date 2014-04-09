@@ -20,14 +20,14 @@
 
 package cascading.flow.local.planner;
 
-import java.util.List;
 import java.util.Properties;
 
 import cascading.flow.FlowDef;
+import cascading.flow.FlowStep;
 import cascading.flow.local.LocalFlow;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.local.LocalFlowStep;
+import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.rule.RuleRegistry;
@@ -55,21 +55,21 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     return new PlatformInfo( "local", "Concurrent, Inc.", Version.getRelease() );
     }
 
+  @Override
+  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
+    {
+    return new LocalRuleRegistry();
+    }
+
   protected LocalFlow createFlow( FlowDef flowDef )
     {
     return new LocalFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
   @Override
-  protected FlowStepGraph createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
+  protected FlowStep<Properties> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
-    return new LocalStepGraph( flowDef.getName(), flowElementGraph, elementSubGraphs );
-    }
-
-  @Override
-  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
-    {
-    return new LocalRuleRegistry();
+    return new LocalFlowStep( "local", ordinal, stepElementGraph, flowNodeGraph );
     }
 
   @Override

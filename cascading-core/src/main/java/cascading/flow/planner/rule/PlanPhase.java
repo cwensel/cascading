@@ -35,8 +35,13 @@ public enum PlanPhase
     ResolveElements( Stage.Elements ),
     PostResolveElements( Stage.Elements ),
 
-    // Flow step graph rules
+    // Flow step sub-graph partition rules
     PartitionSteps( Stage.Steps ),
+
+    // Flow node sub-graph partition rules
+    PartitionNodes( Stage.Nodes ),
+    PipelineNodes( Stage.Nodes ),
+    PostPipelineNodes( Stage.Nodes ),
 
     // Final state
     Complete( Stage.Terminal );
@@ -49,9 +54,29 @@ public enum PlanPhase
     return values()[ phase.ordinal() - 1 ];
     }
 
-  private enum Stage
+  public enum Stage
     {
-      Terminal, Elements, Steps
+      /**
+       * Start or Complete
+       */
+      Terminal,
+
+      /**
+       * Applies to FlowElement assertions or transformations.
+       */
+      Elements,
+
+      /**
+       * Applies to generating sub-graphs of flow steps where a step is a submitted unit of cluster work.
+       */
+      Steps,
+
+      /**
+       * Applies to generation sub-graphs of flow step nodes where is a node is a unit of processing with a step.
+       * <p/>
+       * In MapReduce its a Map or Reduce node (where Map and Reduce are Kinds). In Tez its a Processor.
+       */
+      Nodes
     }
 
   Stage stage;
@@ -59,6 +84,11 @@ public enum PlanPhase
   PlanPhase( Stage stage )
     {
     this.stage = stage;
+    }
+
+  public Stage getStage()
+    {
+    return stage;
     }
 
   public boolean isTerminal()
@@ -74,5 +104,10 @@ public enum PlanPhase
   public boolean isSteps()
     {
     return stage == Stage.Steps;
+    }
+
+  public boolean isNodes()
+    {
+    return stage == Stage.Nodes;
     }
   }

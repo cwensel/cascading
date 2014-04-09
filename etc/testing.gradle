@@ -52,9 +52,7 @@ task platformTest( type: Test, dependsOn: test ) {
 
   maxHeapSize '756m'
 
-  // not called when disabled
   doFirst() {
-
     rootProject.ext.testRoots << systemProperties[ 'test.output.root' ]
 
     setTestClassesDir( file( project( ':cascading-platform' ).sourceSets.test.output.classesDir ) )

@@ -20,7 +20,6 @@
 
 package cascading.flow.planner.iso.finder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.Expression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.util.Pair;
 import com.google.common.collect.ContiguousSet;
@@ -259,12 +257,41 @@ class State
   protected boolean areCompatibleEdges( int v1, int v2, int v3, int v4 )
     {
     // there is probably a more elegant solution
-    List<ScopeExpression> matchers = new ArrayList<>( matchGraph.getAllEdges( v1, v2 ) );
+    List<ScopeExpression> matchers = matchGraph.getAllEdgesList( v1, v2 );
 
-    if( matchers.size() == 1 && matchers.get( 0 ) instanceof PathScopeExpression && ( (PathScopeExpression) matchers.get( 0 ) ).appliesToAll() )
+    if( matchers.size() == 1 && matchers.get( 0 ).acceptsAll() )
       return true;
 
-    List<Scope> scopes = new ArrayList<>( elementGraph.getAllEdges( v3, v4 ) );
+    List<Scope> scopes = elementGraph.getAllEdgesList( v3, v4 );
+
+    // if more than one matcher edge, ignore ANY/ALL path modifier
+    if( matchers.size() == 1 )
+      {
+      ScopeExpression matcher = matchers.get( 0 );
+
+      // test ALL
+      if( matcher.appliesToAllPaths() )
+        {
+        for( Scope scope : scopes )
+          {
+          if( !matcher.applies( plannerContext, elementGraph.getDelegate(), scope ) )
+            return false;
+          }
+
+        return true;
+        }
+
+      if( matcher.appliesToAnyPaths() )
+        {
+        for( Scope scope : scopes )
+          {
+          if( matcher.applies( plannerContext, elementGraph.getDelegate(), scope ) )
+            return true;
+          }
+
+        return false;
+        }
+      }
 
     // must have the same number of edges
     if( matchers.size() != scopes.size() )

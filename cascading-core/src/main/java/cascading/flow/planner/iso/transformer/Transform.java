@@ -170,6 +170,6 @@ public class Transform<E extends ElementGraph>
 
   private String makeFileName( int ordinal, String name, String state )
     {
-    return String.format( "%02d-%s-%s.dot", ordinal, name, state );
+    return String.format( "%04d-%s-%s.dot", ordinal, name, state );
     }
   }

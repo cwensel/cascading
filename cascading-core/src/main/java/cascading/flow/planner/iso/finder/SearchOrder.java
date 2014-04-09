@@ -22,7 +22,7 @@ package cascading.flow.planner.iso.finder;
 
 import java.util.Iterator;
 
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.Extent;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -60,12 +60,12 @@ public enum SearchOrder
 
     Node node = null;
 
-    if( graph.containsVertex( FlowElementGraph.head ) )
+    if( graph.containsVertex( Extent.head ) )
       {
       if( searchOrder == Depth || searchOrder == Topological || searchOrder == Breadth )
-        node = (Node) FlowElementGraph.head;
+        node = (Node) Extent.head;
       else
-        node = (Node) FlowElementGraph.tail;
+        node = (Node) Extent.tail;
       }
 
     switch( searchOrder )

@@ -35,6 +35,7 @@ test {
   dependsOn << ':cascading-local:platformTest'
   dependsOn << ':cascading-hadoop:platformTest'
   dependsOn << ':cascading-hadoop2-mr1:platformTest'
+//  dependsOn << ':cascading-hadoop2-tez:platformTest'
 
   includes.clear()
 

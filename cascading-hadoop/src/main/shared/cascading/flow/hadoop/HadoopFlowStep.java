@@ -31,6 +31,8 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.FlowNode;
+import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
@@ -55,6 +57,7 @@ import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
 import cascading.util.Util;
 import cascading.util.Version;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -67,9 +70,9 @@ import static cascading.flow.hadoop.util.HadoopUtil.writeStateToDistCache;
  */
 public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
-  public HadoopFlowStep( String name, int stepNum, ElementGraph elementGraph )
+  public HadoopFlowStep( String name, int stepNum, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
-    super( name, stepNum, elementGraph );
+    super( name, stepNum, elementGraph, flowNodeGraph );
     }
 
   public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
@@ -159,16 +162,28 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       conf.set( "cascading.version", versionString );
 
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
-    conf.set( "cascading.flow.step.num", Integer.toString( getStepNum() ) );
+    conf.set( "cascading.flow.step.num", Integer.toString( getOrdinal() ) );
 
-    String stepState = pack( this, conf );
+    Iterator<FlowNode> iterator = getFlowNodeGraph().getTopologicalIterator();
+
+    String mapState = pack( iterator.next(), conf );
+    String reduceState = pack( iterator.hasNext() ? iterator.next() : null, conf );
 
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;
-    if( isHadoopLocalMode( conf ) || stepState.length() < maxSize ) // seems safe
-      conf.set( "cascading.flow.step", stepState );
+
+    int length =  mapState.length() + reduceState.length();
+
+    if( isHadoopLocalMode( conf ) || length < maxSize ) // seems safe
+      {
+      conf.set( "cascading.flow.step.node.map", mapState );
+      conf.set( "cascading.flow.step.node.reduce", reduceState );
+      }
     else
-      conf.set( "cascading.flow.step.path", writeStateToDistCache( conf, getID(), stepState ) );
+      {
+      conf.set( "cascading.flow.step.node.map.path", writeStateToDistCache( conf, getID(), "map", mapState ) );
+      conf.set( "cascading.flow.step.node.reduce.path", writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
+      }
 
     return conf;
     }
@@ -178,8 +193,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     return HadoopUtil.isLocal( conf );
     }
 
-  private String pack( Object object, JobConf conf )
+  private String pack( Object object, Configuration conf )
     {
+    if( object == null )
+      return "";
+
     try
       {
       return serializeBase64( object, conf, true );
@@ -333,17 +351,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
 
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last
-    }
-
-  public Tap getTapForID( Set<Tap> taps, String id )
-    {
-    for( Tap tap : taps )
-      {
-      if( Tap.id( tap ).equals( id ) )
-        return tap;
-      }
-
-    return null;
     }
 
   private void initFromProcessConfigDef( final JobConf conf )

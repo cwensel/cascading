@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,26 +41,23 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.management.CascadingServices;
 import cascading.management.state.ClientState;
 import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
-import cascading.pipe.Merge;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.flow.planner.ElementGraphs.*;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -94,13 +90,15 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   String name;
   /** Field id */
   private String id;
-  private final int stepNum;
+  private final int ordinal;
 
   /** Field step listeners */
   private List<SafeFlowStepListener> listeners;
 
   /** Field graph */
   private final ElementGraph graph;
+
+  private FlowNodeGraph flowNodeGraph;
 
   /** Field sources */
   protected final Map<Tap, Set<String>> sources = new HashMap<>(); // all sources
@@ -119,30 +117,79 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   // sources streamed into join - not necessarily all sources
   protected final Map<HashJoin, Tap> streamedSourceByJoin = new LinkedHashMap<HashJoin, Tap>();
   // sources accumulated by join
-  protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<HashJoin, Set<Tap>>();
+  protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<>();
 
   private transient FlowStepJob<Config> flowStepJob;
 
-  protected BaseFlowStep( String name, int stepNum, ElementGraph elementGraph )
+  // for testing
+  protected BaseFlowStep( String name, int ordinal )
     {
+    this.id = Util.createUniqueID();
     setName( name );
-    this.stepNum = stepNum;
-    this.graph = new ElementDirectedGraph( elementGraph );
+    this.ordinal = ordinal;
+
+    this.graph = null;
+    this.flowNodeGraph = null;
+    }
+
+  protected BaseFlowStep( String name, int ordinal, ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
+    {
+    this.id = Util.createUniqueID();
+    setName( name );
+    this.ordinal = ordinal;
+    this.graph = elementStepGraph;
+    this.flowNodeGraph = flowNodeGraph;
+
+    configure();
+    }
+
+  protected void configure()
+    {
+    // todo: remove once FlowMapper/FlowReducer aren't reliant
+    ElementGraphs.addSources( this, graph, flowNodeGraph.getSourceTaps() );
+    ElementGraphs.addSinks( this, graph, flowNodeGraph.getSinkTaps() );
+
+    addGroups( findAllGroups( graph ) );
+
+    traps.putAll( flowNodeGraph.getTrapsMap() );
+
+    addSourceModes();
+    }
+
+  private void addSourceModes()
+    {
+    Set<HashJoin> hashJoins = ElementGraphs.findAllHashJoins( getElementGraph() );
+
+    for( HashJoin hashJoin : hashJoins )
+      {
+      for( Object object : getSources() )
+        {
+        Tap source = (Tap) object;
+        Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( getElementGraph(), source, hashJoin );
+
+        boolean isStreamed = isOnlyStreamedPath( sourcePaths );
+        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
+        boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
+
+        if( isStreamed || isBoth )
+          addStreamedSourceFor( hashJoin, source );
+
+        if( isAccumulated || isBoth )
+          addAccumulatedSourceFor( hashJoin, source );
+        }
+      }
     }
 
   @Override
   public String getID()
     {
-    if( id == null )
-      id = Util.createUniqueID();
-
     return id;
     }
 
   @Override
-  public int getStepNum()
+  public int getOrdinal()
     {
-    return stepNum;
+    return ordinal;
     }
 
   @Override
@@ -238,9 +285,32 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return flowStepJob.getStepStats();
     }
 
-  public ElementGraph getGraph()
+  @Override
+  public ElementGraph getElementGraph()
     {
     return graph;
+    }
+
+  @Override
+  public FlowNodeGraph getFlowNodeGraph()
+    {
+    return flowNodeGraph;
+    }
+
+  @Override
+  public int getNumFlowNodes()
+    {
+    return flowNodeGraph.vertexSet().size();
+    }
+
+  public Set<FlowElement> getSourceElements()
+    {
+    return ElementGraphs.findSources( getElementGraph(), FlowElement.class );
+    }
+
+  public Set<FlowElement> getSinkElements()
+    {
+    return ElementGraphs.findSinks( getElementGraph(), FlowElement.class );
     }
 
   @Override
@@ -256,7 +326,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     }
 
   @Override
-  public List<Group> getGroups()
+  public Collection<Group> getGroups()
     {
     return groups;
     }
@@ -273,18 +343,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       groups.add( group );
     }
 
-  @Override
-  public Map<HashJoin, Tap> getStreamedSourceByJoin()
-    {
-    return streamedSourceByJoin;
-    }
-
   public void addStreamedSourceFor( HashJoin join, Tap streamedSource )
     {
     streamedSourceByJoin.put( join, streamedSource );
     }
 
-  @Override
   public Set<Tap> getAllAccumulatedSources()
     {
     HashSet<Tap> set = new HashSet<Tap>();
@@ -311,24 +374,12 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     sources.get( source ).add( name );
     }
 
-  public void addSources( Map<String, Tap> sources )
-    {
-    for( Map.Entry<String, Tap> entry : sources.entrySet() )
-      addSource( entry.getKey(), entry.getValue() );
-    }
-
   public void addSink( String name, Tap sink )
     {
     if( !sinks.containsKey( sink ) )
       sinks.put( sink, new HashSet<String>() );
 
     sinks.get( sink ).add( name );
-    }
-
-  public void addSinks( Map<String, Tap> sinks )
-    {
-    for( Map.Entry<String, Tap> entry : sinks.entrySet() )
-      addSink( entry.getKey(), entry.getValue() );
     }
 
   @Override
@@ -388,6 +439,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return null;
     }
 
+  @Override
   public Map<String, Tap> getTrapMap()
     {
     return traps;
@@ -550,7 +602,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
    */
   public Set<Scope> getPreviousScopes( FlowElement flowElement )
     {
-    return getGraph().incomingEdgesOf( flowElement );
+    return getElementGraph().incomingEdgesOf( flowElement );
     }
 
   /**
@@ -561,7 +613,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
    */
   public Scope getNextScope( FlowElement flowElement )
     {
-    Set<Scope> set = getGraph().outgoingEdgesOf( flowElement );
+    Set<Scope> set = getElementGraph().outgoingEdgesOf( flowElement );
 
     if( set.size() != 1 )
       throw new IllegalStateException( "should only be one scope after current flow element: " + flowElement + " found: " + set.size() );
@@ -569,19 +621,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return set.iterator().next();
     }
 
-  public Scope getScopeFor( FlowElement sourceElement, FlowElement targetElement )
-    {
-    return getGraph().getEdge( sourceElement, targetElement );
-    }
-
-  public Set<Scope> getNextScopes( FlowElement flowElement )
-    {
-    return getGraph().outgoingEdgesOf( flowElement );
-    }
-
   public FlowElement getNextFlowElement( Scope scope )
     {
-    return getGraph().getEdgeTarget( scope );
+    return getElementGraph().getEdgeTarget( scope );
     }
 
   public TopologicalOrderIterator<FlowElement, Scope> getTopologicalOrderIterator()
@@ -589,70 +631,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return new TopologicalOrderIterator<FlowElement, Scope>( graph );
     }
 
-  public List<FlowElement> getSuccessors( FlowElement element )
-    {
-    return Graphs.successorListOf( graph, element );
-    }
-
-  public Set<Tap> getJoinTributariesBetween( FlowElement from, FlowElement to )
-    {
-    Set<HashJoin> joins = new HashSet<HashJoin>();
-    Set<Merge> merges = new HashSet<Merge>();
-
-    List<GraphPath<FlowElement, Scope>> paths = getPathsBetween( from, to );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
-        {
-        if( flowElement instanceof HashJoin )
-          joins.add( (HashJoin) flowElement );
-
-        if( flowElement instanceof Merge )
-          merges.add( (Merge) flowElement );
-        }
-      }
-
-    Set<Tap> tributaries = new HashSet<Tap>();
-
-    for( HashJoin join : joins )
-      {
-      for( Tap source : sources.keySet() )
-        {
-        List<GraphPath<FlowElement, Scope>> joinPaths = new LinkedList( getPathsBetween( source, join ) );
-
-        ListIterator<GraphPath<FlowElement, Scope>> iterator = joinPaths.listIterator();
-
-        while( iterator.hasNext() )
-          {
-          GraphPath<FlowElement, Scope> joinPath = iterator.next();
-
-          if( !Collections.disjoint( Graphs.getPathVertexList( joinPath ), merges ) )
-            iterator.remove();
-          }
-
-        if( !joinPaths.isEmpty() )
-          tributaries.add( source );
-        }
-      }
-
-    return tributaries;
-    }
-
-  private List<GraphPath<FlowElement, Scope>> getPathsBetween( FlowElement from, FlowElement to )
-    {
-    KShortestPaths<FlowElement, Scope> paths = new KShortestPaths<FlowElement, Scope>( graph, from, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> results = paths.getPaths( to );
-
-    if( results == null )
-      return Collections.EMPTY_LIST;
-
-    return results;
-    }
-
   public Collection<Operation> getAllOperations()
     {
-    Set<FlowElement> vertices = getGraph().vertexSet();
+    Set<FlowElement> vertices = getElementGraph().vertexSet();
     List<Operation> operations = new ArrayList<Operation>(); // operations impl equals, so two instance may be the same
 
     for( FlowElement vertex : vertices )
@@ -667,7 +648,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   @Override
   public boolean containsPipeNamed( String pipeName )
     {
-    Set<FlowElement> vertices = getGraph().vertexSet();
+    Set<FlowElement> vertices = getElementGraph().vertexSet();
 
     for( FlowElement vertex : vertices )
       {
@@ -774,22 +755,6 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       }
     }
 
-  @Override
-  public boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-
-    BaseFlowStep flowStep = (BaseFlowStep) object;
-
-    if( name != null ? !name.equals( flowStep.name ) : flowStep.name != null )
-      return false;
-
-    return true;
-    }
-
   protected ClientState createClientState( FlowProcess flowProcess )
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
@@ -837,9 +802,25 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     }
 
   @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+
+    BaseFlowStep flowStep = (BaseFlowStep) object;
+
+    if( id != null ? !id.equals( flowStep.id ) : flowStep.id != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
   public int hashCode()
     {
-    return name != null ? name.hashCode() : 0;
+    return id != null ? id.hashCode() : 0;
     }
 
   @Override
@@ -886,6 +867,17 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   public void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
+    }
+
+  public static Tap getTapForID( Set<Tap> taps, String id )
+    {
+    for( Tap tap : taps )
+      {
+      if( Tap.id( tap ).equals( id ) )
+        return tap;
+      }
+
+    return null;
     }
 
   /**

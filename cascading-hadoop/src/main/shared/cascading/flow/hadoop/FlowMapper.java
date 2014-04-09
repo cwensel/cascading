@@ -30,6 +30,8 @@ import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.stream.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.flow.stream.SourceStage;
@@ -72,15 +74,16 @@ public class FlowMapper implements MapRunnable
 
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, true );
 
-      String stepState = jobConf.getRaw( "cascading.flow.step" );
+      String mapNodeState = jobConf.getRaw( "cascading.flow.step.node.map" );
 
-      if( stepState == null )
-        stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
+      if( mapNodeState == null )
+        mapNodeState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ), "map" );
 
-      HadoopFlowStep step = deserializeBase64( stepState, jobConf, HadoopFlowStep.class );
-      Tap source = step.getTapForID( step.getSources(), jobConf.get( "cascading.step.source" ) );
+      FlowNode node = deserializeBase64( mapNodeState, jobConf, FlowNode.class );
 
-      streamGraph = new HadoopMapStreamGraph( currentProcess, step, source );
+      Tap source = BaseFlowStep.getTapForID( node.getSources(), jobConf.get( "cascading.step.source" ) );
+
+      streamGraph = new HadoopMapStreamGraph( currentProcess, node, source );
 
       for( Duct head : streamGraph.getHeads() )
         LOG.info( "sourcing from: " + ( (ElementDuct) head ).getFlowElement() );
@@ -88,7 +91,7 @@ public class FlowMapper implements MapRunnable
       for( Duct tail : streamGraph.getTails() )
         LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
 
-      for( Tap trap : step.getTraps() )
+      for( Tap trap : node.getTraps() )
         LOG.info( "trapping to: " + trap );
       }
     catch( Throwable throwable )

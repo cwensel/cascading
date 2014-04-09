@@ -20,6 +20,7 @@
 
 package cascading;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -134,7 +135,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   protected String getOutputPath()
     {
     if( outputPath == null )
-      outputPath = Util.join( getOutputPathElements(), "/" );
+      outputPath = Util.join( getOutputPathElements(), File.separator );
 
     return outputPath;
     }
@@ -142,7 +143,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   protected String getPlanPath()
     {
     if( planPath == null )
-      planPath = Util.join( getPlanPathElements(), "/" );
+      planPath = Util.join( getPlanPathElements(), File.separator );
 
     return planPath;
     }

@@ -61,7 +61,6 @@ import cascading.util.ShutdownUtil;
 import cascading.util.Update;
 import cascading.util.Util;
 import cascading.util.Version;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import riffle.process.DependencyIncoming;
@@ -112,7 +111,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private int submitPriority = 5;
 
   /** Field stepGraph */
-  private FlowStepGraph<Config> flowStepGraph;
+  private FlowStepGraph flowStepGraph;
   /** Field thread */
   protected transient Thread thread;
   /** Field throwable */
@@ -193,7 +192,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     return platformInfo;
     }
 
-  public void initialize( FlowElementGraph pipeGraph, FlowStepGraph<Config> flowStepGraph )
+  public void initialize( FlowElementGraph pipeGraph, FlowStepGraph flowStepGraph )
     {
     this.pipeGraph = pipeGraph;
     this.flowStepGraph = flowStepGraph;
@@ -757,11 +756,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       return steps;
 
     if( flowStepGraph == null )
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
 
-    TopologicalOrderIterator<FlowStep<Config>, Integer> topoIterator = flowStepGraph.getTopologicalIterator();
+    Iterator<FlowStep> topoIterator = flowStepGraph.getTopologicalIterator();
 
-    steps = new ArrayList<FlowStep<Config>>();
+    steps = new ArrayList<>();
 
     while( topoIterator.hasNext() )
       steps.add( topoIterator.next() );
@@ -1225,13 +1224,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   protected void initializeNewJobsMap()
     {
-    // keep topo order
-    jobsMap = new LinkedHashMap<String, FlowStepJob<Config>>();
-    TopologicalOrderIterator<FlowStep<Config>, Integer> topoIterator = flowStepGraph.getTopologicalIterator();
+    jobsMap = new LinkedHashMap<>(); // keep topo order
+    Iterator<FlowStep> topoIterator = flowStepGraph.getTopologicalIterator();
 
     while( topoIterator.hasNext() )
       {
-      BaseFlowStep<Config> step = (BaseFlowStep<Config>) topoIterator.next();
+      BaseFlowStep<Config> step = (BaseFlowStep) topoIterator.next();
       FlowStepJob<Config> flowStepJob = step.getFlowStepJob( getFlowProcess(), getConfig() );
 
       jobsMap.put( step.getName(), flowStepJob );
@@ -1239,7 +1237,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
 
       for( Object flowStep : predecessorListOf( flowStepGraph, step ) )
-        predecessors.add( jobsMap.get( ( (FlowStep<Config>) flowStep ).getName() ) );
+        predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
 

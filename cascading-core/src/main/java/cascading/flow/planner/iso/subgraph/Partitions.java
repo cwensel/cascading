@@ -23,7 +23,6 @@ package cascading.flow.planner.iso.subgraph;
 import java.io.File;
 import java.util.List;
 
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.rule.Rule;
@@ -35,10 +34,10 @@ public class Partitions
   {
   private final GraphPartitioner graphPartitioner;
   private final SubGraphIterator stepIterator;
-  private final FlowElementGraph elementGraph;
+  private final ElementGraph elementGraph;
   private final List<ElementGraph> subGraphs;
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator stepIterator, FlowElementGraph elementGraph, List<ElementGraph> subGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator stepIterator, ElementGraph elementGraph, List<ElementGraph> subGraphs )
     {
     this.graphPartitioner = graphPartitioner;
     this.stepIterator = stepIterator;
@@ -51,7 +50,7 @@ public class Partitions
     return graphPartitioner;
     }
 
-  public FlowElementGraph getElementGraph()
+  public ElementGraph getElementGraph()
     {
     return elementGraph;
     }
@@ -71,8 +70,6 @@ public class Partitions
 
   public void writeDOTs( String path )
     {
-    int count = 0;
-
     elementGraph.writeDOT( new File( path, "element-graph.dot" ).toString() );
 
     if( graphPartitioner.getContractionGraph() != null )
@@ -87,15 +84,15 @@ public class Partitions
       {
       ElementGraph subGraph = subGraphs.get( i );
 
-      subGraph.writeDOT( new File( path, makeFileName( count++, "sub-graph", "match" ) ).toString() );
+      subGraph.writeDOT( new File( path, makeFileName( i, "result-sub-graph" ) ).toString() );
 
       if( matches != null )
-        matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, "matched-graph", "match" ) ).toString() );
+        matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( i, "partition-matched-graph" ) ).toString() );
       }
     }
 
-  private String makeFileName( int ordinal, String name, String state )
+  private String makeFileName( int ordinal, String name )
     {
-    return String.format( "%02d-%s-%s.dot", ordinal, name, state );
+    return String.format( "%04d-%s.dot", ordinal, name );
     }
   }

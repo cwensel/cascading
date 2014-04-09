@@ -242,7 +242,7 @@ public class TemplateTap extends BaseTemplateTap<Properties, OutputStream>
     }
 
   @Override
-  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<Properties> flowProcess, Tap parent, String path ) throws IOException
+  protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Properties> flowProcess, Tap parent, String path ) throws IOException
     {
     TapFileOutputStream output = new TapFileOutputStream( parent, path, isUpdate() ); // append if we are in update mode
 

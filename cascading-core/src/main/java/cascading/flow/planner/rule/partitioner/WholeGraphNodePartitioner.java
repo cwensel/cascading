@@ -18,33 +18,21 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner;
+package cascading.flow.planner.rule.partitioner;
 
-import java.util.List;
+import cascading.flow.planner.rule.RulePartitioner;
 
-import cascading.flow.FlowStep;
-import cascading.flow.hadoop.HadoopFlowStep;
-import cascading.flow.planner.FlowElementGraph;
-import cascading.flow.planner.FlowStepGraph;
-import cascading.flow.planner.graph.ElementGraph;
-import org.apache.hadoop.mapred.JobConf;
+import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 
 /**
  *
  */
-public class HadoopStepGraph extends FlowStepGraph<JobConf>
+public class WholeGraphNodePartitioner extends RulePartitioner
   {
-  public HadoopStepGraph()
+  public WholeGraphNodePartitioner()
     {
-    }
-
-  public HadoopStepGraph( FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
-    {
-    super( flowElementGraph, elementSubGraphs );
-    }
-
-  protected FlowStep<JobConf> createFlowStep( String stepName, int stepNum, ElementGraph elementGraph )
-    {
-    return new HadoopFlowStep( stepName, stepNum, elementGraph );
+    super(
+      PartitionNodes
+    );
     }
   }

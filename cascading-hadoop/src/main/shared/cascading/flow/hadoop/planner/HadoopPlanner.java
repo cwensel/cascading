@@ -21,18 +21,18 @@
 package cascading.flow.hadoop.planner;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlow;
+import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.rule.RuleRegistry;
@@ -45,6 +45,8 @@ import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.util.Util.getFirst;
 
 /**
  * Class HadoopPlanner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop.HadoopFlowConnector}.
@@ -163,12 +165,6 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     }
 
   @Override
-  protected FlowStepGraph<JobConf> createStepGraph( FlowDef flowDef, FlowElementGraph flowElementGraph, List<ElementGraph> elementSubGraphs )
-    {
-    return new HadoopStepGraph( flowElementGraph, elementSubGraphs );
-    }
-
-  @Override
   protected RuleRegistry getRuleRegistry( FlowDef flowDef )
     {
     return new HadoopRuleRegistry();
@@ -186,6 +182,26 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   protected HadoopFlow createFlow( FlowDef flowDef )
     {
     return new HadoopFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
+    }
+
+  protected FlowStep<JobConf> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+    {
+    String name = makeStepName( getFirst( flowNodeGraph.getSinkTaps() ), numSteps, ordinal );
+
+    return new HadoopFlowStep( name, ordinal, stepElementGraph, flowNodeGraph );
+    }
+
+  protected String makeStepName( Tap sink, int numJobs, int stepNum )
+    {
+    if( sink.isTemporary() )
+      return String.format( "(%d/%d)", stepNum, numJobs );
+
+    String identifier = sink.getIdentifier();
+
+    if( identifier.length() > 25 )
+      identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
+
+    return String.format( "(%d/%d) %s", stepNum, numJobs, identifier );
     }
 
   public URI getDefaultURIScheme( Tap tap )

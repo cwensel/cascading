@@ -18,21 +18,22 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.rule.partitioner;
+package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.rule.RulePartitioner;
-
-import static cascading.flow.planner.rule.PlanPhase.PartitionSteps;
+import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
+import cascading.flow.planner.iso.expression.TapGroupExpressionGraph;
+import cascading.flow.planner.rule.RuleExpression;
 
 /**
  *
  */
-public class WholeGraphPartitioner extends RulePartitioner
+public class TapGroupPartitionExpression extends RuleExpression
   {
-  public WholeGraphPartitioner()
+  public TapGroupPartitionExpression()
     {
     super(
-      PartitionSteps
+      new NoGroupTapExpressionGraph(),
+      new TapGroupExpressionGraph()
     );
     }
   }

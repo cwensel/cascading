@@ -20,12 +20,11 @@
 
 package cascading.flow;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.planner.FlowNodeGraph;
+import cascading.flow.planner.ProcessModel;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
 
@@ -37,7 +36,7 @@ import cascading.tap.Tap;
  * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
  * all steps will be submitted for execution. The default submit priority is 5.
  */
-public interface FlowStep<Config>
+public interface FlowStep<Config> extends ProcessModel
   {
   String CASCADING_FLOW_STEP_ID = "cascading.flow.step.id";
 
@@ -48,7 +47,7 @@ public interface FlowStep<Config>
    */
   String getID();
 
-  int getStepNum();
+  int getOrdinal();
 
   /**
    * Method getName returns the name of this FlowStep object.
@@ -103,17 +102,11 @@ public interface FlowStep<Config>
    */
   void setSubmitPriority( int submitPriority );
 
+  FlowNodeGraph getFlowNodeGraph();
+
+  int getNumFlowNodes();
+
   Group getGroup();
-
-  List<Group> getGroups();
-
-  Map<HashJoin, Tap> getStreamedSourceByJoin();
-
-  Set<Tap> getAllAccumulatedSources();
-
-  Set<Tap> getSources();
-
-  Set<Tap> getSinks();
 
   Tap getSink();
 

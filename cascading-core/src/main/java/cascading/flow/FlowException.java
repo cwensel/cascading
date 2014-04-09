@@ -28,6 +28,14 @@ public class FlowException extends CascadingException
   /** Field flowName */
   String flowName;
 
+  private static String createMessage( String flowName, String message )
+    {
+    if( flowName == null )
+      return message;
+
+    return "[" + flowName + "] " + message;
+    }
+
   /** Constructor FlowException creates a new FlowException instance. */
   public FlowException()
     {
@@ -63,7 +71,7 @@ public class FlowException extends CascadingException
    */
   public FlowException( String flowName, String message, Throwable throwable )
     {
-    super( message, throwable );
+    super( createMessage( flowName, message ), throwable );
     this.flowName = flowName;
     }
 

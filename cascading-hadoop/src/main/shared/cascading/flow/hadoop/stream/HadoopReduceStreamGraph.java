@@ -20,44 +20,42 @@
 
 package cascading.flow.hadoop.stream;
 
-import java.util.List;
-
-import cascading.flow.FlowElement;
 import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.HadoopFlowStep;
+import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
+import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SpliceGate;
-import cascading.flow.stream.StepStreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
+import cascading.util.Util;
 
 /**
  *
  */
-public class HadoopReduceStreamGraph extends StepStreamGraph
+public class HadoopReduceStreamGraph extends NodeStreamGraph
   {
-  public HadoopReduceStreamGraph( HadoopFlowProcess flowProcess, HadoopFlowStep step )
+  public HadoopReduceStreamGraph( HadoopFlowProcess flowProcess, FlowNode node )
     {
-    super( flowProcess, step );
+    super( flowProcess, node );
 
     buildGraph();
 
     setTraps();
     setScopes();
 
-    printGraph( step.getID(), "reduce", flowProcess.getCurrentSliceNum() );
+    printGraph( node.getID(), "reduce", flowProcess.getCurrentSliceNum() );
 
     bind();
     }
 
   protected void buildGraph()
     {
-    Group group = step.getGroup();
+    Group group = (Group) Util.getFirst( node.getSourceElements() );
 
     Duct rhsDuct;
 
@@ -93,16 +91,4 @@ public class HadoopReduceStreamGraph extends StepStreamGraph
     throw new IllegalStateException( "should not happen" );
     }
 
-  protected boolean stopOnElement( FlowElement lhsElement, List<FlowElement> successors )
-    {
-    if( successors.isEmpty() )
-      {
-      if( !( lhsElement instanceof Tap ) )
-        throw new IllegalStateException( "expected a Tap instance" );
-
-      return true;
-      }
-
-    return false;
-    }
   }

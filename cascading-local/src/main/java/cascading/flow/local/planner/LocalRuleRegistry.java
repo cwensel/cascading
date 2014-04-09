@@ -26,7 +26,8 @@ import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
 import cascading.flow.planner.rule.assertion.LoneGroupAssert;
 import cascading.flow.planner.rule.assertion.MissingGroupAssert;
 import cascading.flow.planner.rule.assertion.SplitBeforeEveryAssert;
-import cascading.flow.planner.rule.partitioner.WholeGraphPartitioner;
+import cascading.flow.planner.rule.partitioner.WholeGraphNodePartitioner;
+import cascading.flow.planner.rule.partitioner.WholeGraphStepPartitioner;
 import cascading.flow.planner.rule.transformer.ApplyAssertionLevelTransformer;
 import cascading.flow.planner.rule.transformer.ApplyDebugLevelTransformer;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
@@ -50,6 +51,8 @@ public class LocalRuleRegistry extends RuleRegistry
     addRule( new ApplyAssertionLevelTransformer() );
     addRule( new ApplyDebugLevelTransformer() );
 
-    addRule( new WholeGraphPartitioner() );
+    addRule( new WholeGraphStepPartitioner() );
+
+    addRule( new WholeGraphNodePartitioner() );
     }
   }

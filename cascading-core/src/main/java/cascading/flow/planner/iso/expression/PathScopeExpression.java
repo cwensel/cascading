@@ -25,48 +25,68 @@ import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 
 /**
- *  All is a special case allowing allowing a node-node match with any number of edges
+ * All is a special case allowing allowing a node-node match with any number of edges
  */
 public class PathScopeExpression extends ScopeExpression
   {
-  public static final PathScopeExpression ANY = new PathScopeExpression( Path.Any );
-  public static final PathScopeExpression ALL = new PathScopeExpression( Path.All );
-  public static final PathScopeExpression BLOCKING = new PathScopeExpression( Path.Blocking );
-  public static final PathScopeExpression NON_BLOCKING = new PathScopeExpression( Path.NonBlocking );
+  public static final PathScopeExpression BLOCKING = new PathScopeExpression( Mode.Blocking );
+  public static final PathScopeExpression NON_BLOCKING = new PathScopeExpression( Mode.NonBlocking );
 
-  public enum Path
+  public static final PathScopeExpression ALL_BLOCKING = new PathScopeExpression( Applies.All, Mode.Blocking );
+  public static final PathScopeExpression ALL_NON_BLOCKING = new PathScopeExpression( Applies.All, Mode.NonBlocking );
+
+  public static final PathScopeExpression ANY_BLOCKING = new PathScopeExpression( Applies.Any, Mode.Blocking );
+  public static final PathScopeExpression ANY_NON_BLOCKING = new PathScopeExpression( Applies.Any, Mode.NonBlocking );
+
+  public enum Mode
     {
-      Any, All, Blocking, NonBlocking
+      Ignore, Blocking, NonBlocking
     }
 
-  private Path path = Path.Any;
+  private Mode mode = Mode.Ignore;
 
   public PathScopeExpression()
     {
     }
 
-  public PathScopeExpression( Path path )
+  public PathScopeExpression( Applies applies )
     {
-    this.path = path;
+    this.applies = applies;
     }
 
-  public boolean appliesToAll()
+  public PathScopeExpression( Mode mode )
     {
-    return path == Path.All;
+    this.mode = mode;
     }
 
-  public Path getPath()
+  public PathScopeExpression( Applies applies, Mode mode )
     {
-    return path;
+    super(applies);
+    this.mode = mode;
+    }
+
+  @Override
+  public boolean acceptsAll()
+    {
+    return appliesToAllPaths() && isIgnoreMode();
+    }
+
+  public boolean isIgnoreMode()
+    {
+    return mode == Mode.Ignore;
+    }
+
+  public Mode getMode()
+    {
+    return mode;
     }
 
   @Override
   public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, Scope scope )
     {
-    switch( path )
+    switch( mode )
       {
-      case Any:
-      case All:
+      case Ignore:
         return true;
       case Blocking:
         return scope.getOrdinal() != 0;
@@ -80,8 +100,9 @@ public class PathScopeExpression extends ScopeExpression
   @Override
   public String toString()
     {
-    final StringBuilder sb = new StringBuilder( "ScopeExpression{" );
-    sb.append( "path=" ).append( path );
+    final StringBuilder sb = new StringBuilder( "PathScopeExpression{" );
+    sb.append( "path=" ).append( applies );
+    sb.append( ", mode=" ).append( mode );
     sb.append( '}' );
     return sb.toString();
     }

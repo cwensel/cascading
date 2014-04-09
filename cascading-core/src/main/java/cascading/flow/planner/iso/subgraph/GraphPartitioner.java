@@ -23,7 +23,7 @@ package cascading.flow.planner.iso.subgraph;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.Extent;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
@@ -58,14 +58,17 @@ public class GraphPartitioner
     return expressionGraph;
     }
 
-  public Partitions partition( PlannerContext plannerContext, FlowElementGraph elementGraph )
+  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph )
     {
     List<ElementGraph> subGraphs = new ArrayList<>();
 
     if( expressionGraph == null )
       {
       // need a safe copy
-      subGraphs.add( new ElementDirectedGraph( new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail ) ) );
+    if( elementGraph.containsVertex( Extent.head ) )
+        elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+
+      subGraphs.add( new ElementDirectedGraph( elementGraph ) );
 
       return new Partitions( this, null, elementGraph, subGraphs );
       }
@@ -75,8 +78,6 @@ public class GraphPartitioner
     while( stepIterator.hasNext() )
       subGraphs.add( stepIterator.next() );
 
-    // todo: add all iterator matches so they can be checkpointed
-    //       remove iterator writeDOT methods
     return new Partitions( this, stepIterator, elementGraph, subGraphs );
     }
   }

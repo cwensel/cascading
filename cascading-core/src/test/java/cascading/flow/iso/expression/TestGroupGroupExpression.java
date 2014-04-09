@@ -23,7 +23,7 @@ package cascading.flow.iso.expression;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.SyncPipeExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.pipe.Group;
@@ -45,7 +45,7 @@ public class TestGroupGroupExpression extends RuleExpression
       new ExpressionGraph()
         .arc(
           new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class ),
-          PathScopeExpression.ANY,
+          ScopeExpression.ANY,
           new FlowElementExpression( Group.class )
         )
     );

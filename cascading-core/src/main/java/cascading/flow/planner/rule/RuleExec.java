@@ -20,12 +20,15 @@
 
 package cascading.flow.planner.rule;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.BaseFlow;
 import cascading.flow.FlowElement;
+import cascading.flow.planner.BoundElementGraph;
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
@@ -39,6 +42,8 @@ import cascading.pipe.Pipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.flow.planner.rule.PlanPhase.Start;
+
 /**
  *
  */
@@ -47,8 +52,8 @@ public class RuleExec
   private static final Logger LOG = LoggerFactory.getLogger( RuleExec.class );
 
   private static final int ELEMENT_THRESHOLD = 600;
+  final TraceWriter traceWriter = new TraceWriter();
 
-  String transformTracePath;
   RuleRegistry registry;
 
   public RuleExec( RuleRegistry registry )
@@ -58,7 +63,7 @@ public class RuleExec
 
   public void enableTransformTracing( String dotPath )
     {
-    this.transformTracePath = dotPath;
+    this.traceWriter.transformTracePath = dotPath;
     }
 
   public RuleResult exec( PlannerContext plannerContext, FlowElementGraph flowElementGraph )
@@ -79,28 +84,32 @@ public class RuleExec
 
       logPhase( logAsInfo, "starting rule phase: {}", phase );
 
-      FlowElementGraph elementGraph = ruleResult.getResult( PlanPhase.prior( phase ) );
+      FlowElementGraph elementGraph = ruleResult.getPreviousElementPhaseResults( phase );
 
       switch( phase )
         {
         case Start:
-        case Complete:
-          ruleResult.addResult( phase, flowElementGraph );
+          ruleResult.setElementsPhaseResult( Start, flowElementGraph );
           break;
 
         case PrePartitionElements:
         case PartitionElements:
         case PreResolveElements:
         case PostResolveElements:
-        case PartitionSteps:
-          executePhase( phase, plannerContext, ruleResult );
+          executePhase( phase, plannerContext, ruleResult, elementGraph );
           break;
 
         case ResolveElements:
-          elementGraph = new FlowElementGraph( elementGraph );
-          elementGraph.resolveFields();
-          ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
-          ruleResult.addResult( phase, elementGraph );
+          resolveElements( phase, plannerContext, ruleResult, elementGraph );
+          break;
+
+        case PartitionSteps:
+        case PartitionNodes:
+        case PipelineNodes:
+          executePhase( phase, plannerContext, ruleResult, elementGraph );
+          break;
+
+        case Complete:
           break;
         }
 
@@ -120,6 +129,16 @@ public class RuleExec
     return ruleResult;
     }
 
+  private void resolveElements( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph elementGraph )
+    {
+    elementGraph.resolveFields();
+    ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
+
+    elementGraph = new FlowElementGraph( elementGraph ); // forces a re-hash in graph
+
+    ruleResult.setElementsPhaseResult( phase, elementGraph );
+    }
+
   private void logPhase( boolean logAsInfo, String message, Object... items )
     {
     if( logAsInfo )
@@ -128,14 +147,14 @@ public class RuleExec
       LOG.debug( message, items );
     }
 
-  protected FlowElementGraph executePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult )
+  private static class PhaseContext
     {
-    FlowElementGraph flowElementGraph = ruleResult.getResult( PlanPhase.prior( phase ) );
-
-    if( flowElementGraph == null )
-      throw new IllegalStateException( "no prior graph found for state: " + PlanPhase.prior( phase ) );
-
-    return executePhase( phase, plannerContext, ruleResult, flowElementGraph );
+    int transformRuleNum = 0;
+    int stepPartitionRuleNum = 0;
+    int nodePartitionsRuleNum = 0;
+    int nodePipelinesRuleNum = 0;
+    FlowElementGraph currentElementGraph;
+    RuleResult ruleResult;
     }
 
   public FlowElementGraph executePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph flowElementGraph )
@@ -144,37 +163,35 @@ public class RuleExec
 
     LinkedList<Rule> rules = registry.getRulesFor( phase );
 
-    writePlan( flowElementGraph, phase.ordinal() + "-" + phase + "-init.dot" );
+    traceWriter.writePlan( flowElementGraph, phase.ordinal() + "-" + phase + "-init.dot" );
+
+    PhaseContext context = new PhaseContext();
+
+    context.ruleResult = ruleResult;
+    context.currentElementGraph = flowElementGraph;
 
     try
       {
-      int transformNum = 0;
-      int partitionNum = 0;
-
       for( Rule rule : rules )
         {
         long begin = System.currentTimeMillis();
 
-        if( rule instanceof GraphTransformer )
+        switch( phase.getStage() )
           {
-          FlowElementGraph resultGraph = performTransform( phase, transformNum++, plannerContext, flowElementGraph, (GraphTransformer) rule );
+          case Terminal:
+            break;
 
-          if( resultGraph != null )
-            flowElementGraph = resultGraph;
-          }
-        else if( rule instanceof RulePartitioner )
-          {
-          List<ElementGraph> subGraphs = performPartition( phase, partitionNum++, plannerContext, flowElementGraph, (RulePartitioner) rule );
+          case Elements:
+            handleElementsPhase( plannerContext, context, phase, rule );
+            break;
 
-          ruleResult.addSubGraphs( subGraphs );
-          }
-        else if( rule instanceof GraphAssert )
-          {
-          performAssertion( plannerContext, flowElementGraph, (GraphAssert) rule );
-          }
-        else
-          {
-          throw new IllegalStateException( "unknown rule type: " + rule.getClass().getName() );
+          case Steps:
+            handleStepsPhase( plannerContext, context, phase, rule );
+            break;
+
+          case Nodes:
+            handleNodesPhase( plannerContext, context, phase, rule );
+            break;
           }
 
         long end = System.currentTimeMillis();
@@ -186,56 +203,82 @@ public class RuleExec
       }
     finally
       {
-      if( phase.isElements() )
-        {
-        ruleResult.addResult( phase, flowElementGraph );
-
-        writePlan( flowElementGraph, phase.ordinal() + "-" + phase + "-result.dot" );
-        }
-      else if( phase.isSteps() )
-        {
-        writePlan( ruleResult.getElementSubGraphs(), phase, "result" );
-        }
-
       LOG.debug( "completed plan phase: {}", phase );
+      writePhaseResultPlan( phase, ruleResult, flowElementGraph );
       }
     }
 
-  private void writePlan( List<ElementGraph> flowElementGraphs, PlanPhase phase, String subName )
+  private void writePhaseResultPlan( PlanPhase phase, RuleResult ruleResult, FlowElementGraph flowElementGraph )
     {
-    if( transformTracePath == null )
-      return;
+    if( phase.isElements() )
+      traceWriter.writePlan( flowElementGraph, phase.ordinal() + "-" + phase + "-result.dot" );
+    else if( phase.isSteps() )
+      traceWriter.writePlan( ruleResult.getStepSubGraphs(), phase, "result" );
+    else if( phase.isNodes() && phase == PlanPhase.PartitionNodes )
+      traceWriter.writePlan( ruleResult.getNodeSubGraphs(), phase, "result" );
+    else if( phase.isNodes() && phase == PlanPhase.PipelineNodes )
+      traceWriter.writePlan( ruleResult.getNodeSubGraphs(), ruleResult.getNodePipelineGraphs(), phase, "result" );
+    }
 
-    for( int i = 0; i < flowElementGraphs.size(); i++ )
+  private void handleElementsPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
+    {
+    if( rule instanceof GraphTransformer )
+      performTransform( phase, context, plannerContext, (GraphTransformer) rule );
+    else if( rule instanceof GraphAssert )
+      performAssertion( plannerContext, context, (GraphAssert) rule );
+    }
+
+  private void handleStepsPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
+    {
+    testRulePartitioner( rule );
+
+    List<ElementGraph> stepSubGraphs = performStepPartitions( phase, context.stepPartitionRuleNum++, plannerContext, context.currentElementGraph, (RulePartitioner) rule );
+
+    context.ruleResult.addStepSubGraphs( stepSubGraphs );
+    }
+
+  private void handleNodesPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
+    {
+    switch( phase )
       {
-      ElementGraph flowElementGraph = flowElementGraphs.get( i );
-      String name = phase.ordinal() + "-" + phase + "-" + subName + "-" + i + ".dot";
+      case PartitionNodes:
+        testRulePartitioner( rule );
 
-      File file = new File( transformTracePath, name );
+        List<ElementGraph> stepSubGraphs = context.ruleResult.getStepSubGraphs();
+        Map<ElementGraph, List<ElementGraph>> stepNodeSubGraphs = performNodePartitions( phase, context.nodePartitionsRuleNum++, plannerContext, context.currentElementGraph, stepSubGraphs, (RulePartitioner) rule );
 
-      LOG.info( "writing phase sub-graph trace: {}, to: {}", name, file );
+        context.ruleResult.addNodeSubGraphs( stepNodeSubGraphs );
+        break;
 
-      flowElementGraph.writeDOT( file.toString() );
+      case PipelineNodes:
+        testRulePartitioner( rule );
+
+        Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphs();
+        Map<ElementGraph, List<ElementGraph>> nodePipelines = performNodePipelineIsolation( phase, context.nodePipelinesRuleNum++, plannerContext, context.currentElementGraph, nodeSubGraphs, (RulePartitioner) rule );
+
+        context.ruleResult.addNodePipelineGraphs( nodePipelines );
+        break;
+
+      case PostPipelineNodes:
+
+        break;
+
+      default:
+        throw new IllegalStateException( "unknown phase: " + phase );
       }
     }
 
-  private void writePlan( FlowElementGraph flowElementGraph, String name )
+  private static void testRulePartitioner( Rule rule )
     {
-    if( transformTracePath == null )
-      return;
-
-    File file = new File( transformTracePath, name );
-
-    LOG.info( "writing phase graph trace: {}, to: {}", name, file );
-
-    flowElementGraph.writeDOT( file.toString() );
+    if( !( rule instanceof RulePartitioner ) )
+      throw new PlannerException( "unexpected rule: " + rule.getRuleName() );
     }
 
-  private void performAssertion( PlannerContext plannerContext, FlowElementGraph flowElementGraph, GraphAssert rule )
+  private void performAssertion( PlannerContext plannerContext, PhaseContext context, GraphAssert rule )
     {
     LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
 
-    Assertion assertion = rule.assertion( plannerContext, flowElementGraph );
+    Assertion assertion = rule.assertion( plannerContext, context.currentElementGraph );
 
     FlowElement primary = assertion.getFirstPrimary();
 
@@ -245,47 +288,84 @@ public class RuleExec
     throw new PlannerException( (Pipe) assertion.getFirstPrimary(), assertion.getMessage() );
     }
 
-  private FlowElementGraph performTransform( PlanPhase phase, int transformNum, PlannerContext plannerContext, FlowElementGraph flowElementGraph, GraphTransformer transformer )
+  private void performTransform( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphTransformer transformer )
     {
     LOG.debug( "applying transform: {}", ( (Rule) transformer ).getRuleName() );
 
-    Transform transform = transformer.transform( plannerContext, flowElementGraph );
+    Transform transform = transformer.transform( plannerContext, context.currentElementGraph );
 
-    writePlan( phase, transformNum, transform );
+    traceWriter.writePlan( phase, context.transformRuleNum++, transform );
 
-    return (FlowElementGraph) transform.getEndGraph();
+    FlowElementGraph endGraph = (FlowElementGraph) transform.getEndGraph();
+
+    if( endGraph != null )
+      context.currentElementGraph = endGraph;
+
+    context.ruleResult.setElementsPhaseResult( phase, context.currentElementGraph );
     }
 
-  private List<ElementGraph> performPartition( PlanPhase phase, int partitionNum, PlannerContext plannerContext, FlowElementGraph elementGraph, RulePartitioner partitioner )
+  private List<ElementGraph> performStepPartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, RulePartitioner partitioner )
     {
     Partitions partition = partitioner.partition( plannerContext, elementGraph );
 
-    writePlan( phase, partitionNum, partition );
+    traceWriter.writePlan( phase, partitionRuleNum, partition );
 
-    return partition.getSubGraphs();
+    return convert( elementGraph, partition );
     }
 
-  private void writePlan( PlanPhase phase, int ruleOrdinal, Transform transform )
+  private Map<ElementGraph, List<ElementGraph>> performNodePartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, List<ElementGraph> stepSubGraphs, RulePartitioner partitioner )
     {
-    if( transformTracePath == null )
-      return;
+    Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = new LinkedHashMap<>();
 
-    String ruleName = transform.getRuleName();
+    int stepCount = 0;
 
-    ruleName = String.format( "%d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
+    for( ElementGraph stepSubGraph : stepSubGraphs )
+      {
+      Partitions partition = partitioner.partition( plannerContext, stepSubGraph );
 
-    transform.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+      traceWriter.writePlan( phase, partitionRuleNum, stepCount++, partition );
+
+      List<ElementGraph> results = convert( elementGraph, partition );
+
+      nodeSubGraphs.put( stepSubGraph, results );
+      }
+
+    return nodeSubGraphs;
     }
 
-  private void writePlan( PlanPhase phase, int partitionNum, Partitions partition )
+  private Map<ElementGraph, List<ElementGraph>> performNodePipelineIsolation( PlanPhase phase, int pipelineRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, Map<ElementGraph, List<ElementGraph>> nodeSubGraphs, RulePartitioner partitioner )
     {
-    if( transformTracePath == null )
-      return;
+    Map<ElementGraph, List<ElementGraph>> nodePipeLines = new LinkedHashMap<>();
 
-    String ruleName = partition.getRuleName();
+    int nodeCount = 0;
 
-    ruleName = String.format( "%d-%s-%04d-%s", phase.ordinal(), phase, partitionNum, ruleName );
+    for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodeSubGraphs.entrySet() )
+      {
+      int pipelineCount = 0;
+      for( ElementGraph nodeSubGraph : entry.getValue() )
+        {
+        Partitions partition = partitioner.partition( plannerContext, nodeSubGraph );
 
-    partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+        traceWriter.writePlan( phase, pipelineRuleNum, nodeCount, pipelineCount++, partition );
+
+        List<ElementGraph> results = convert( elementGraph, partition );
+
+        nodePipeLines.put( nodeSubGraph, results );
+        }
+
+      nodeCount++;
+      }
+
+    return nodePipeLines;
+    }
+
+  private List<ElementGraph> convert( FlowElementGraph currentElementGraph, Partitions partition )
+    {
+    List<ElementGraph> results = new ArrayList<>( partition.getSubGraphs().size() );
+
+    for( ElementGraph subGraph : partition.getSubGraphs() )
+      results.add( new BoundElementGraph( currentElementGraph, subGraph ) );
+
+    return results;
     }
   }
