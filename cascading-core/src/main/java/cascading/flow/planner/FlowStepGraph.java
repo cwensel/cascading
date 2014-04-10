@@ -90,7 +90,7 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
     for( ElementGraph elementSubGraph : elementSubGraphs )
       {
       if( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) != null )
-        elementSubGraph.writeDOT( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) + "/steps/" + stepCount++ + "sub-graph.dot" );
+        elementSubGraph.writeDOT( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) + "/steps/" + stepCount++ + "-step-sub-graph.dot" );
 
       Map<String, Tap> sources = ElementGraphs.createSourceMap( elementSubGraph );
       Map<String, Tap> sinks = ElementGraphs.createSinkMap( elementSubGraph );
