@@ -160,31 +160,4 @@ public class TempHfs extends Hfs
     {
     return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[" + name + "]";
     }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    // we are only overriding since the path is lazily initialized.
-
-    if( this == object )
-      return true;
-    if( object == null || getClass() != object.getClass() )
-      return false;
-    if( !super.equals( object ) )
-      return false;
-
-    TempHfs tempHfs = (TempHfs) object;
-
-    if( name != null ? !name.equals( tempHfs.name ) : tempHfs.name != null )
-      return false;
-
-    return true;
-    }
-
-  @Override
-  public int hashCode()
-    {
-    // don't use super hashCode() as path changes during runtime
-    return 31 * ( System.identityHashCode( this ) + name != null ? name.hashCode() : 0 );
-    }
   }

@@ -92,19 +92,19 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
       if( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) != null )
         elementSubGraph.writeDOT( System.getProperty( FlowPlanner.TRACE_PLAN_PATH ) + "/steps/" + stepCount++ + "-step-sub-graph.dot" );
 
-      Map<String, Tap> sources = ElementGraphs.createSourceMap( elementSubGraph );
-      Map<String, Tap> sinks = ElementGraphs.createSinkMap( elementSubGraph );
+      Set<Tap> sources = findSources( elementSubGraph );
+      Set<Tap> sinks = findSinks( elementSubGraph );
 
-      String stepName = makeStepName( getFirst( sinks.values() ), elementSubGraphs.size(), vertexSet().size() + 1 );
+      String stepName = makeStepName( getFirst( sinks ), elementSubGraphs.size(), vertexSet().size() + 1 );
 
       FlowStep<Config> flowStep = createFlowStep( stepName, vertexSet().size() + 1, elementSubGraph );
 
-      stepToSources.put( flowStep, new HashSet<>( sources.values() ) );
-      stepToSinks.put( flowStep, new HashSet<>( sinks.values() ) );
+      stepToSources.put( flowStep, new HashSet<>( sources ) );
+      stepToSinks.put( flowStep, new HashSet<>( sinks ) );
 
-      ( (BaseFlowStep) flowStep ).addSinks( sinks );
-      ( (BaseFlowStep) flowStep ).addSources( sources );
-      ( (BaseFlowStep) flowStep ).addGroups( ElementGraphs.findAllGroups( elementSubGraph ) );
+      addSources( (BaseFlowStep) flowStep, elementSubGraph, sources );
+      addSinks( (BaseFlowStep) flowStep, elementSubGraph, sinks );
+      ( (BaseFlowStep) flowStep ).addGroups( findAllGroups( elementSubGraph ) );
 
       assignTraps( (BaseFlowStep) flowStep, flowElementGraph.getTrapMap() );
       addSourceModes( (BaseFlowStep) flowStep );
@@ -213,23 +213,15 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
       {
       public String getVertexName( FlowStep flowStep )
         {
-        String sourceName = "";
-
-        for( Object object : flowStep.getSources() )
-          {
-          Tap source = (Tap) object;
-
-          if( source.isTemporary() )
-            continue;
-
-          sourceName += "[" + source.getIdentifier() + "]";
-          }
-
         String name = "[" + flowStep.getName() + "]";
 
-        if( sourceName.length() != 0 )
-          name += "\\nsrc:" + sourceName;
+        String sourceName = "";
+        Set<Tap> sources = flowStep.getSources();
+        for( Tap source : sources )
+          sourceName += "\\nsrc:[" + source.getIdentifier() + "]";
 
+        if( sourceName.length() != 0 )
+          name += sourceName;
 
         List<Group> groups = flowStep.getGroups();
 
@@ -242,13 +234,12 @@ public abstract class FlowStepGraph<Config> extends SimpleDirectedGraph<FlowStep
           }
 
         Set<Tap> sinks = flowStep.getSinks();
-
+        String sinkName = "";
         for( Tap sink : sinks )
-          {
-          String sinkName = sink.isTemporary() ? "" : "[" + sink.getIdentifier() + "]";
-          if( sinkName.length() != 0 )
-            name += "\\nsnk:" + sinkName;
-          }
+          sinkName = "\\nsnk:[" + sink.getIdentifier() + "]";
+
+        if( sinkName.length() != 0 )
+          name += sinkName;
 
         return name.replaceAll( "\"", "\'" );
         }

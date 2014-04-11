@@ -442,56 +442,22 @@ public class ElementGraphs
     for( Scope scope : outgoing )
       {
       FlowElement target = elementGraph.getEdgeTarget( scope );
-      elementGraph.removeEdge( previousElement, target ); // remove scope
+      Scope foundScope = elementGraph.removeEdge( previousElement, target );// remove scope
+
+      if( foundScope != scope )
+        throw new IllegalStateException( "did not remove proper scope" );
+
       elementGraph.addEdge( flowElement, target, scope ); // add scope back
       }
     }
 
-  public static Map<String, Tap> createSinkMap( ElementGraph elementGraph )
+  public static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
     {
-    Set<Tap> sinks = findSinks( elementGraph );
-
-    Map<String, Tap> map = Util.createHashMap();
-
-    for( Tap tap : sinks )
-      {
-      Set<Scope> scopes = elementGraph.incomingEdgesOf( tap );
-
-      for( Scope scope : scopes )
-        map.put( scope.getName(), tap );
-      }
-
-    return map;
-    }
-
-  public static Set<Tap> findSinks( ElementGraph elementGraph )
-    {
-    if( elementGraph instanceof FlowElementGraph )
-      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
-
-    SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Tail ) ),
-      elementGraph
-    );
-
-    return narrowSet( Tap.class, getAllVertices( iterator ) );
-    }
-
-  public static Map<String, Tap> createSourceMap( ElementGraph elementGraph )
-    {
-    Set<Tap> sources = findSources( elementGraph );
-
-    Map<String, Tap> map = Util.createHashMap();
-
     for( Tap tap : sources )
       {
-      Set<Scope> scopes = elementGraph.outgoingEdgesOf( tap );
-
-      for( Scope scope : scopes )
-        map.put( scope.getPriorName(), tap );
+      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
+        flowStep.addSource( scope.getName(), tap );
       }
-
-    return map;
     }
 
   public static Set<Tap> findSources( ElementGraph elementGraph )
@@ -501,6 +467,28 @@ public class ElementGraphs
 
     SubGraphIterator iterator = new SubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Head ) ),
+      elementGraph
+    );
+
+    return narrowSet( Tap.class, getAllVertices( iterator ) );
+    }
+
+  public static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
+    {
+    for( Tap tap : sinks )
+      {
+      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
+        flowStep.addSink( scope.getName(), tap );
+      }
+    }
+
+  public static Set<Tap> findSinks( ElementGraph elementGraph )
+    {
+    if( elementGraph instanceof FlowElementGraph )
+      elementGraph = new ElementMaskSubGraph( elementGraph, FlowElementGraph.head, FlowElementGraph.tail );
+
+    SubGraphIterator iterator = new SubGraphIterator(
+      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
 
