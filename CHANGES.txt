@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.5.4 [unreleased]
 
+  Fixed issue where a c.p.Merge could hide the streamed/accumulated nature of a stream when leading to a c.p.Group
+  pipe. This could result in duplicate data passed to the c.p.GroupBy or c.p.CoGroup within a MapReduce job.
+
   Fixed issue where c.p.a.FirstBy only accepted a single field name.
 
   Updated c.t.p.PartitionCollector in c.t.p.BasePartitionTap to be public.

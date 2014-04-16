@@ -21,6 +21,8 @@
 package cascading;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,8 +31,11 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
+import cascading.operation.Aggregator;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexFilter;
@@ -40,6 +45,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
@@ -1726,5 +1732,81 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "1\ta\t2\tB" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  /**
+   * When run against a cluster a Merge before a GroupBy can hide the streamed/accumulated nature of a branch.
+   *
+   * commented code is for troubleshooting.
+   * @throws Exception
+   */
+  @Test
+  public void testJoinMergeGroupBy() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileNums10 );
+    getPlatform().copyFromLocal( inputFileNums20 );
+
+    Tap lhsTap = getPlatform().getTextFile( new Fields( "id" ), inputFileNums10 );
+    Tap rhsTap = getPlatform().getTextFile( new Fields( "id2" ), inputFileNums20 );
+
+    Pipe lhs = new Pipe( "lhs" );
+    Pipe rhs = new Pipe( "rhs" );
+
+//    Pipe joined = new CoGroup( messages, new Fields( "id" ), people, new Fields( "id2" ) );
+    Pipe joined = new HashJoin( lhs, new Fields( "id" ), rhs, new Fields( "id2" ) );
+
+    Pipe pruned = new Each( joined, new Fields( "id2" ), new Identity(), Fields.RESULTS );
+//    pruned = new Checkpoint( pruned );
+    Pipe merged = new Merge( pruned, rhs );
+    Pipe grouped = new GroupBy( merged, new Fields( "id2" ) );
+//    Pipe grouped = new GroupBy( Pipe.pipes(  pruned, people  ), new Fields( "id2" ) );
+    Aggregator count = new Count( new Fields( "count" ) );
+    Pipe counted = new Every( grouped, count );
+
+    String testJoinMerge = "testJoinMergeGroupBy/" + ( ( joined instanceof CoGroup ) ? "cogroup" : "hashjoin" );
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, true, "\t", null, getOutputPath( testJoinMerge ), SinkMode.REPLACE );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( rhs, rhsTap )
+      .addSource( lhs, lhsTap )
+      .addTailSink( counted, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.writeDOT( "joinmerge.dot" );
+    flow.writeStepsDOT( "joinmerge-steps.dot" );
+
+    flow.complete();
+
+    validateLength( flow, 20 );
+
+    List<Tuple> values = getSinkAsList( flow );
+    List<Tuple> expected = new ArrayList<Tuple>();
+
+    expected.add( new Tuple( "1", "2" ) );
+    expected.add( new Tuple( "10", "2" ) );
+    expected.add( new Tuple( "11", "1" ) );
+    expected.add( new Tuple( "12", "1" ) );
+    expected.add( new Tuple( "13", "1" ) );
+    expected.add( new Tuple( "14", "1" ) );
+    expected.add( new Tuple( "15", "1" ) );
+    expected.add( new Tuple( "16", "1" ) );
+    expected.add( new Tuple( "17", "1" ) );
+    expected.add( new Tuple( "18", "1" ) );
+    expected.add( new Tuple( "19", "1" ) );
+    expected.add( new Tuple( "2", "2" ) );
+    expected.add( new Tuple( "20", "1" ) );
+    expected.add( new Tuple( "3", "2" ) );
+    expected.add( new Tuple( "4", "2" ) );
+    expected.add( new Tuple( "5", "2" ) );
+    expected.add( new Tuple( "6", "2" ) );
+    expected.add( new Tuple( "7", "2" ) );
+    expected.add( new Tuple( "8", "2" ) );
+    expected.add( new Tuple( "9", "2" ) );
+
+    Collections.sort(values);
+    Collections.sort(expected);
+
+    assertEquals( expected, values );
     }
   }

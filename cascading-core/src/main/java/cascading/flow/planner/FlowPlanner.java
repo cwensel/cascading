@@ -818,6 +818,31 @@ public abstract class FlowPlanner<F extends Flow, Config>
           }
         else if( flowElement instanceof Tap || flowElement instanceof Group )
           {
+          // added for JoinFieldedPipesPlatformTest.testJoinMergeGroupBy where Merge hides streamed nature of path
+          if( flowElement instanceof Group && !joins.isEmpty() )
+            {
+            List<Splice> splices = new ArrayList<Splice>(  );
+
+            splices.addAll( merges );
+            splices.add( (Splice) flowElement );
+
+            Collections.reverse( splices );
+
+            for( Splice splice : splices )
+              {
+              Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, splice, true );
+
+              if( isBothAccumulatedAndStreamedPath( pathCounts ) )
+                {
+                tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( splice ) - 1 ) );
+                break;
+                }
+              }
+
+            if( !tapInsertions.isEmpty() )
+              break;
+            }
+
           for( int j = 0; j < joins.size(); j++ )
             {
             HashJoin join = joins.get( j );
