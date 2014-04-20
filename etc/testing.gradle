@@ -46,6 +46,8 @@ task platformTest( type: Test, dependsOn: test ) {
   else
     include '**/*PlatformTest.class'
 
+  ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
+
   systemProperties = setTestingProperties()
 
   maxHeapSize '756m'

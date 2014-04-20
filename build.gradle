@@ -144,6 +144,7 @@ subprojects {
 
   test {
     include '**/*Test.class'
+    ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
   }
 
   assemble << {
