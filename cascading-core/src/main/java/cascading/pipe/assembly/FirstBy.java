@@ -76,9 +76,6 @@ public class FirstBy extends AggregateBy
     public FirstPartials( Fields declaredFields )
       {
       this.declaredFields = declaredFields;
-
-      if( !declaredFields.isDeclarator() || declaredFields.size() != 1 )
-        throw new IllegalArgumentException( "declaredFields should declare only one field name" );
       }
 
     @Override
