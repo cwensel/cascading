@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.4 [unreleased]
 
+  Updated c.p.a.AggregateBy$CompositeFunction to not use the threshold in #equals or #hashCode.
+
   Fixed issue where a c.p.Merge could hide the streamed/accumulated nature of a stream when leading to a c.p.Group
   pipe. This could result in duplicate data passed to the c.p.GroupBy or c.p.CoGroup within a MapReduce job.
 
