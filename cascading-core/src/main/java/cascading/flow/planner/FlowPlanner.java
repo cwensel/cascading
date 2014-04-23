@@ -540,9 +540,9 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   public class TempTapElementFactory implements ElementFactory
     {
     @Override
-    public FlowElement create( FlowElementGraph graph, FlowElement flowElement )
+    public FlowElement create( ElementGraph graph, FlowElement flowElement )
       {
-      return makeTempTap( graph, (Pipe) flowElement );
+      return makeTempTap( (FlowElementGraph) graph, (Pipe) flowElement );
       }
     }
 

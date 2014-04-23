@@ -20,31 +20,30 @@
 
 package cascading.flow.planner.iso.transformer;
 
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 
 /**
  *
  */
-public abstract class MutateFlowGraphTransformer extends RecursiveGraphTransformer<FlowElementGraph>
+public abstract class MutateGraphTransformer extends RecursiveGraphTransformer<ElementGraph>
   {
   protected final GraphTransformer graphTransformer;
 
-  public MutateFlowGraphTransformer( ExpressionGraph filter )
+  public MutateGraphTransformer( ExpressionGraph filter )
     {
     super( filter );
     this.graphTransformer = null;
     }
 
-  public MutateFlowGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter )
+  public MutateGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter )
     {
     super( filter );
     this.graphTransformer = graphTransformer;
     }
 
   @Override
-  protected ElementGraph prepareForMatch( Transform<FlowElementGraph> transform, FlowElementGraph graph )
+  protected ElementGraph prepareForMatch( Transform<ElementGraph> transform, ElementGraph graph )
     {
     if( graphTransformer == null )
       return graph;

@@ -37,6 +37,9 @@ import org.jgrapht.graph.MaskFunctor;
  */
 public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope> implements ElementGraph
   {
+  private DirectedGraph<FlowElement, Scope> elementGraph;
+  private FlowElementMaskFunctor mask;
+
   private static class FlowElementMaskFunctor implements MaskFunctor<FlowElement, Scope>
     {
     Set<FlowElement> masked = new HashSet<>();
@@ -62,29 +65,36 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
 
   public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElement... flowElements )
     {
-    super( elementGraph, new FlowElementMaskFunctor( Arrays.asList( flowElements ) ) );
+    this( elementGraph, new FlowElementMaskFunctor( Arrays.asList( flowElements ) ) );
     }
 
   public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> flowElements )
     {
-    super( elementGraph, new FlowElementMaskFunctor( flowElements ) );
+    this( elementGraph, new FlowElementMaskFunctor( flowElements ) );
+    }
+
+  protected ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElementMaskFunctor flowElementMaskFunctor )
+    {
+    super( elementGraph, flowElementMaskFunctor );
+
+    this.elementGraph = elementGraph;
+    this.mask = flowElementMaskFunctor;
+    }
+
+  public ElementMaskSubGraph( ElementMaskSubGraph graph )
+    {
+    this( graph.elementGraph, graph.mask );
+    }
+
+  @Override
+  public ElementGraph copyGraph()
+    {
+    return new ElementMaskSubGraph( this );
     }
 
   @Override
   public void writeDOT( String filename )
     {
     ElementGraphs.printElementGraph( filename, this, null );
-    }
-
-  @Override
-  public void removeContract( FlowElement flowElement )
-    {
-    throw new UnsupportedOperationException();
-    }
-
-  @Override
-  public void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement )
-    {
-    throw new UnsupportedOperationException();
     }
   }

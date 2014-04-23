@@ -33,26 +33,37 @@ import org.jgrapht.graph.DirectedSubgraph;
  */
 public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implements ElementGraph
   {
+  private final ElementGraph elementGraph;
+  private final Collection<FlowElement> flowElements;
+  private final Collection<Scope> scopes;
+
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements, Collection<Scope> scopes )
     {
     super( elementGraph, new HashSet<>( flowElements ), new HashSet<>( scopes ) );
+
+    this.elementGraph = elementGraph;
+    this.flowElements = flowElements;
+    this.scopes = scopes;
     }
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements )
     {
     super( elementGraph, new HashSet<>( flowElements ), null );
+
+    this.elementGraph = elementGraph;
+    this.flowElements = flowElements;
+    this.scopes = null;
+    }
+
+  public ElementSubGraph( ElementSubGraph graph )
+    {
+    this( graph.elementGraph, graph.flowElements, graph.scopes );
     }
 
   @Override
-  public void removeContract( FlowElement flowElement )
+  public ElementGraph copyGraph()
     {
-    ElementGraphs.removeAndContract( this, flowElement );
-    }
-
-  @Override
-  public void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement )
-    {
-    ElementGraphs.insertFlowElementAfter( this, previousElement, flowElement );
+    return new ElementSubGraph( this );
     }
 
   @Override

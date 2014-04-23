@@ -23,7 +23,8 @@ package cascading.flow.planner.iso.transformer;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
@@ -31,20 +32,20 @@ import cascading.flow.planner.iso.finder.Match;
 /**
  *
  */
-public class ContractedFlowGraphTransformer extends MutateFlowGraphTransformer
+public class ContractedGraphTransformer extends MutateGraphTransformer
   {
-  public ContractedFlowGraphTransformer( ExpressionGraph expression )
+  public ContractedGraphTransformer( ExpressionGraph expression )
     {
     super( expression );
     }
 
-  public ContractedFlowGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph expressionGraph )
+  public ContractedGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph expressionGraph )
     {
     super( graphTransformer, expressionGraph );
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<FlowElementGraph> transform, FlowElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
     {
     Set<FlowElement> remove = match.getCapturedElements( ElementExpression.Capture.Primary );
 
@@ -52,7 +53,7 @@ public class ContractedFlowGraphTransformer extends MutateFlowGraphTransformer
       return false;
 
     for( FlowElement flowElement : remove )
-      graph.removeContract( flowElement );
+      ElementGraphs.removeAndContract( graph, flowElement );
 
     return true;
     }

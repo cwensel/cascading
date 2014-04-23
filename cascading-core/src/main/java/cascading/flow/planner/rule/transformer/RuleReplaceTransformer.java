@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.rule.transformer;
 
-import cascading.flow.planner.iso.transformer.ReplaceFlowGraphTransformer;
+import cascading.flow.planner.iso.transformer.ReplaceGraphTransformer;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RuleTransformer;
@@ -35,10 +35,10 @@ public class RuleReplaceTransformer extends RuleTransformer
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      flowGraphTransformer = new ReplaceFlowGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ReplaceGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
     else if( contractedTransformer != null )
-      flowGraphTransformer = new ReplaceFlowGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ReplaceGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
     else
-      flowGraphTransformer = new ReplaceFlowGraphTransformer( ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ReplaceGraphTransformer( ruleExpression.getMatchExpression() );
     }
   }

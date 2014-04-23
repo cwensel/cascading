@@ -23,7 +23,8 @@ package cascading.flow.planner.iso.transformer;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
@@ -32,20 +33,20 @@ import cascading.util.Util;
 /**
  *
  */
-public class ReplaceFlowGraphTransformer extends MutateFlowGraphTransformer
+public class ReplaceGraphTransformer extends MutateGraphTransformer
   {
-  public ReplaceFlowGraphTransformer( ExpressionGraph filter )
+  public ReplaceGraphTransformer( ExpressionGraph filter )
     {
     super( filter );
     }
 
-  public ReplaceFlowGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter )
+  public ReplaceGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter )
     {
     super( graphTransformer, filter );
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<FlowElementGraph> transform, FlowElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
     {
     Set<FlowElement> replace = match.getCapturedElements( ElementExpression.Capture.Primary );
     Set<FlowElement> replaceWith = match.getCapturedElements( ElementExpression.Capture.Secondary );
@@ -59,7 +60,7 @@ public class ReplaceFlowGraphTransformer extends MutateFlowGraphTransformer
     if( replaceWith.size() != 1 )
       throw new IllegalStateException( "too many target elements" );
 
-    graph.replaceElementWith( Util.getFirst( replace ), Util.getFirst( replaceWith ) );
+    ElementGraphs.replaceElementWith( graph, Util.getFirst( replace ), Util.getFirst( replaceWith ) );
 
     return true;
     }

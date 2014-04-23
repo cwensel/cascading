@@ -23,7 +23,8 @@ package cascading.flow.planner.iso.transformer;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
@@ -31,11 +32,11 @@ import cascading.flow.planner.iso.finder.Match;
 /**
  *
  */
-public class InsertionFlowGraphTransformer extends MutateFlowGraphTransformer
+public class InsertionGraphTransformer extends MutateGraphTransformer
   {
   private final String factoryName;
 
-  public InsertionFlowGraphTransformer( ExpressionGraph expressionGraph, String factoryName )
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, String factoryName )
     {
     super( expressionGraph );
     this.factoryName = factoryName;
@@ -44,7 +45,7 @@ public class InsertionFlowGraphTransformer extends MutateFlowGraphTransformer
       throw new IllegalArgumentException( "factoryName may not be null" );
     }
 
-  public InsertionFlowGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, String factoryName )
+  public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, String factoryName )
     {
     super( graphTransformer, filter );
     this.factoryName = factoryName;
@@ -54,7 +55,7 @@ public class InsertionFlowGraphTransformer extends MutateFlowGraphTransformer
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<FlowElementGraph> transform, FlowElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
     {
     Set<FlowElement> insertions = match.getCapturedElements( ElementExpression.Capture.Primary );
 
@@ -64,7 +65,7 @@ public class InsertionFlowGraphTransformer extends MutateFlowGraphTransformer
     ElementFactory elementFactory = transform.getPlannerContext().getElementFactoryFor( factoryName );
 
     for( FlowElement flowElement : insertions )
-      graph.insertFlowElementAfter( flowElement, elementFactory.create( graph, flowElement ) );
+      ElementGraphs.insertFlowElementAfter( graph, flowElement, elementFactory.create( graph, flowElement ) );
 
     return true;
     }

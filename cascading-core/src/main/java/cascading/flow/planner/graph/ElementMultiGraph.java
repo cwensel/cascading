@@ -52,15 +52,9 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
     }
 
   @Override
-  public void removeContract( FlowElement flowElement )
+  public ElementGraph copyGraph()
     {
-    ElementGraphs.removeAndContract( this, flowElement );
-    }
-
-  @Override
-  public void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement )
-    {
-    ElementGraphs.insertFlowElementAfter( this, previousElement, flowElement );
+    return new ElementMultiGraph( this );
     }
 
   @Override

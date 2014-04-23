@@ -216,7 +216,7 @@ public class IsomorphismTest extends CascadingTestCase
     return assertion;
     }
 
-  private FlowElementGraph transform( FlowElementGraph flowElementGraph, RuleExpression ruleExpression )
+  private ElementGraph transform( ElementGraph flowElementGraph, RuleExpression ruleExpression )
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
@@ -225,7 +225,7 @@ public class IsomorphismTest extends CascadingTestCase
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
     RuleTempTapInsertionTransformer ruleTempTapInsertionTransformer = new RuleTempTapInsertionTransformer( PlanPhase.PreResolveElements, ruleExpression );
-    Transform<FlowElementGraph> insertionTransform = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );
+    Transform<ElementGraph> insertionTransform = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );
 
     insertionTransform.writeDOTs( getPlanPath() );
 
@@ -235,7 +235,7 @@ public class IsomorphismTest extends CascadingTestCase
   private static class NonTapFactory implements ElementFactory
     {
     @Override
-    public FlowElement create( FlowElementGraph graph, FlowElement flowElement )
+    public FlowElement create( ElementGraph graph, FlowElement flowElement )
       {
       return new NonTap();
       }

@@ -8,9 +8,13 @@ import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.Transform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TraceWriter
   {
+  private static final Logger LOG = LoggerFactory.getLogger( TraceWriter.class );
+
   String transformTracePath;
 
   public TraceWriter()
@@ -20,9 +24,7 @@ public class TraceWriter
   void writePlan( PlanPhase phase, int ruleOrdinal, Transform transform )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     String ruleName = transform.getRuleName();
 
@@ -34,9 +36,7 @@ public class TraceWriter
   void writePlan( PlanPhase phase, int ruleOrdinal, Partitions partition )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     String ruleName = partition.getRuleName();
 
@@ -48,9 +48,7 @@ public class TraceWriter
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, Partitions partition )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     String ruleName = partition.getRuleName();
 
@@ -62,9 +60,7 @@ public class TraceWriter
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, Partitions partition )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     String ruleName = partition.getRuleName();
 
@@ -76,13 +72,11 @@ public class TraceWriter
   void writePlan( FlowElementGraph flowElementGraph, String name )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     File file = new File( transformTracePath, name );
 
-    RuleExec.LOG.info( "writing phase graph trace: {}, to: {}", name, file );
+    LOG.info( "writing phase graph trace: {}, to: {}", name, file );
 
     flowElementGraph.writeDOT( file.toString() );
     }
@@ -90,9 +84,7 @@ public class TraceWriter
   void writePlan( List<ElementGraph> flowElementGraphs, PlanPhase phase, String subName )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     for( int i = 0; i < flowElementGraphs.size(); i++ )
       {
@@ -101,7 +93,7 @@ public class TraceWriter
 
       File file = new File( transformTracePath, name );
 
-      RuleExec.LOG.info( "writing phase step sub-graph trace: {}, to: {}", name, file );
+      LOG.info( "writing phase step sub-graph trace: {}, to: {}", name, file );
 
       flowElementGraph.writeDOT( file.toString() );
       }
@@ -110,9 +102,7 @@ public class TraceWriter
   void writePlan( Map<ElementGraph, List<ElementGraph>> parentGraphsMap, Map<ElementGraph, List<ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     int stepCount = 0;
     for( Map.Entry<ElementGraph, List<ElementGraph>> entry : parentGraphsMap.entrySet() )
@@ -129,7 +119,7 @@ public class TraceWriter
 
           File file = new File( transformTracePath, name );
 
-          RuleExec.LOG.info( "writing phase node pipeline sub-graph trace: {}, to: {}", name, file );
+          LOG.info( "writing phase node pipeline sub-graph trace: {}, to: {}", name, file );
 
           flowElementGraph.writeDOT( file.toString() );
           }
@@ -144,9 +134,7 @@ public class TraceWriter
   void writePlan( Map<ElementGraph, List<ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
     {
     if( transformTracePath == null )
-      {
       return;
-      }
 
     int stepCount = 0;
     for( Map.Entry<ElementGraph, List<ElementGraph>> entry : subGraphsMap.entrySet() )
@@ -160,7 +148,7 @@ public class TraceWriter
 
         File file = new File( transformTracePath, name );
 
-        RuleExec.LOG.info( "writing phase node sub-graph trace: {}, to: {}", name, file );
+        LOG.info( "writing phase node sub-graph trace: {}, to: {}", name, file );
 
         flowElementGraph.writeDOT( file.toString() );
         }

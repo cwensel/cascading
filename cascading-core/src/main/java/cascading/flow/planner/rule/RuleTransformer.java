@@ -20,8 +20,8 @@
 
 package cascading.flow.planner.rule;
 
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.RecursiveGraphTransformer;
@@ -31,14 +31,14 @@ import cascading.flow.planner.iso.transformer.Transform;
 /**
  *
  */
-public class RuleTransformer extends GraphTransformer<FlowElementGraph, FlowElementGraph> implements Rule
+public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph> implements Rule
   {
   private final PlanPhase phase;
   protected final RuleExpression ruleExpression;
   protected final ContractedTransformer contractedTransformer;
   protected final SubGraphTransformer subGraphTransformer;
 
-  protected RecursiveGraphTransformer<FlowElementGraph> flowGraphTransformer;
+  protected RecursiveGraphTransformer<ElementGraph> flowGraphTransformer;
 
   public RuleTransformer( PlanPhase phase, RuleExpression ruleExpression )
     {
@@ -76,13 +76,13 @@ public class RuleTransformer extends GraphTransformer<FlowElementGraph, FlowElem
     }
 
   @Override
-  public Transform<FlowElementGraph> transform( PlannerContext plannerContext, FlowElementGraph rootGraph )
+  public Transform<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
-    Transform<FlowElementGraph> result = new Transform<>( plannerContext, this, rootGraph );
+    Transform<ElementGraph> result = new Transform<>( plannerContext, this, rootGraph );
 
-    FlowElementGraph graphCopy = new FlowElementGraph( rootGraph );
+    ElementGraph graphCopy = rootGraph.copyGraph();
 
-    Transform<FlowElementGraph> transform = flowGraphTransformer.transform( plannerContext, graphCopy );
+    Transform<ElementGraph> transform = flowGraphTransformer.transform( plannerContext, graphCopy );
 
     result.addChildTransform( transform );
 

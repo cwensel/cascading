@@ -30,6 +30,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.graph.ElementDirectedGraph;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.pipe.Checkpoint;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -466,35 +467,9 @@ public class FlowElementGraph extends ElementDirectedGraph
       scope.copyFields( outgoingScope );
     }
 
-  public void replaceElementWith( FlowElement element, FlowElement replacement )
+  @Override
+  public ElementGraph copyGraph()
     {
-    Set<Scope> incoming = new HashSet<Scope>( incomingEdgesOf( element ) );
-    Set<Scope> outgoing = new HashSet<Scope>( outgoingEdgesOf( element ) );
-
-    if( !containsVertex( replacement ) )
-      addVertex( replacement );
-
-    for( Scope scope : incoming )
-      {
-      FlowElement source = getEdgeSource( scope );
-      removeEdge( source, element ); // remove scope
-
-      // drop edge between, if any
-      if( source != replacement )
-        addEdge( source, replacement, scope ); // add scope back
-      }
-
-    for( Scope scope : outgoing )
-      {
-      FlowElement target = getEdgeTarget( scope );
-      removeEdge( element, target ); // remove scope
-
-      // drop edge between, if any
-      if( target != replacement )
-        addEdge( replacement, target, scope ); // add scope back
-      }
-
-    removeVertex( element );
+    return new FlowElementGraph( this );
     }
-
   }

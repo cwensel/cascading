@@ -21,12 +21,12 @@
 package cascading.flow.planner.iso.transformer;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.graph.ElementGraph;
 
 /**
-*
-*/
+ *
+ */
 public interface ElementFactory
   {
-  FlowElement create( FlowElementGraph graph, FlowElement flowElement );
+  FlowElement create( ElementGraph graph, FlowElement flowElement );
   }

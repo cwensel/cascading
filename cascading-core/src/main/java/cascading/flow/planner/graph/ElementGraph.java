@@ -27,11 +27,9 @@ import org.jgrapht.DirectedGraph;
 /**
  *
  */
-public interface ElementGraph extends DirectedGraph<FlowElement,Scope>
+public interface ElementGraph extends DirectedGraph<FlowElement, Scope>
   {
+  ElementGraph copyGraph();
+
   void writeDOT( String filename );
-
-  void removeContract( FlowElement flowElement );
-
-  void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement );
   }

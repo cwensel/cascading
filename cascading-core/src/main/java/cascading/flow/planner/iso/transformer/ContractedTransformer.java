@@ -23,6 +23,7 @@ package cascading.flow.planner.iso.transformer;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMultiGraph;
@@ -55,7 +56,7 @@ public class ContractedTransformer extends RecursiveGraphTransformer<ElementGrap
       return false;
 
     for( FlowElement flowElement : remove )
-      graph.removeContract( flowElement );
+      ElementGraphs.removeAndContract( graph, flowElement );
 
     return true;
     }

@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.rule.transformer;
 
-import cascading.flow.planner.iso.transformer.ContractedFlowGraphTransformer;
+import cascading.flow.planner.iso.transformer.ContractedGraphTransformer;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RuleTransformer;
@@ -35,10 +35,10 @@ public class RuleContractedTransformer extends RuleTransformer
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      flowGraphTransformer = new ContractedFlowGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ContractedGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
     else if( contractedTransformer != null )
-      flowGraphTransformer = new ContractedFlowGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ContractedGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
     else
-      flowGraphTransformer = new ContractedFlowGraphTransformer( ruleExpression.getMatchExpression() );
+      flowGraphTransformer = new ContractedGraphTransformer( ruleExpression.getMatchExpression() );
     }
   }

@@ -542,6 +542,37 @@ public class ElementGraphs
     return vertices;
     }
 
+  public static void replaceElementWith( ElementGraph elementGraph, FlowElement replace, FlowElement replaceWith )
+    {
+    Set<Scope> incoming = new HashSet<Scope>( elementGraph.incomingEdgesOf( replace ) );
+    Set<Scope> outgoing = new HashSet<Scope>( elementGraph.outgoingEdgesOf( replace ) );
+
+    if( !elementGraph.containsVertex( replaceWith ) )
+      elementGraph.addVertex( replaceWith );
+
+    for( Scope scope : incoming )
+      {
+      FlowElement source = elementGraph.getEdgeSource( scope );
+      elementGraph.removeEdge( source, replace ); // remove scope
+
+      // drop edge between, if any
+      if( source != replaceWith )
+        elementGraph.addEdge( source, replaceWith, scope ); // add scope back
+      }
+
+    for( Scope scope : outgoing )
+      {
+      FlowElement target = elementGraph.getEdgeTarget( scope );
+      elementGraph.removeEdge( replace, target ); // remove scope
+
+      // drop edge between, if any
+      if( target != replaceWith )
+        elementGraph.addEdge( replaceWith, target, scope ); // add scope back
+      }
+
+    elementGraph.removeVertex( replace );
+    }
+
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>
     {
     private final DirectedGraph<FlowElement, Scope> graph;

@@ -31,6 +31,11 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  */
 public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope> implements ElementGraph
   {
+  public ElementDirectedGraph()
+    {
+    super( Scope.class );
+    }
+
   public ElementDirectedGraph( ElementGraph elementGraph )
     {
     this();
@@ -39,26 +44,15 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
       Graphs.addGraph( this, elementGraph );
     }
 
-  public ElementDirectedGraph()
+  @Override
+  public ElementGraph copyGraph()
     {
-    super( Scope.class );
+    return new ElementDirectedGraph( this );
     }
 
   @Override
   public void writeDOT( String filename )
     {
     ElementGraphs.printElementGraph( filename, this, null );
-    }
-
-  @Override
-  public void removeContract( FlowElement flowElement )
-    {
-    ElementGraphs.removeAndContract( this, flowElement );
-    }
-
-  @Override
-  public void insertFlowElementAfter( FlowElement previousElement, FlowElement flowElement )
-    {
-    ElementGraphs.insertFlowElementAfter( this, previousElement, flowElement );
     }
   }
