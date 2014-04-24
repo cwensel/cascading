@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.4 [unreleased]
 
+  Fixed an issue where c.t.h.Hfs#getChildIdentifiers() could throw an j.l.StringIndexOutOfBoundsException.
+
   Updated c.p.a.AggregateBy$CompositeFunction to not use the threshold in #equals or #hashCode.
 
   Fixed issue where a c.p.Merge could hide the streamed/accumulated nature of a stream when leading to a c.p.Group

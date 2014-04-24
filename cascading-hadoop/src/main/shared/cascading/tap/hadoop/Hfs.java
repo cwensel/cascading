@@ -652,6 +652,9 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
+    if( depth == 0 && !fullyQualified )
+      return new String[]{getIdentifier()};
+
     String fullIdentifier = getFullIdentifier( conf );
 
     int trim = fullyQualified ? 0 : fullIdentifier.length() + 1;
@@ -668,7 +671,13 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     if( depth == 0 )
       {
       String substring = path.toString().substring( trim );
-      results.add( new Path( getIdentifier(), substring ).toString() );
+      String identifier = getIdentifier();
+
+      if( identifier == null || identifier.isEmpty() )
+        results.add( new Path( substring ).toString() );
+      else
+        results.add( new Path( identifier, substring ).toString() );
+
       return;
       }
 
