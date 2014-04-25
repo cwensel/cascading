@@ -30,7 +30,7 @@ public class StreamedAccumulatedTapsPipelinePartitionExpression extends RuleExpr
   public StreamedAccumulatedTapsPipelinePartitionExpression()
     {
     super(
-      new NoGroupMergeTapExpressionGraph(),
+      new NoGroupTapExpressionGraph(),
       new StreamedAccumulatedTapsExpression()
     );
     }

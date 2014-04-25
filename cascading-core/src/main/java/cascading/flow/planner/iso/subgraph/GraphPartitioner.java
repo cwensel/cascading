@@ -20,21 +20,28 @@
 
 package cascading.flow.planner.iso.subgraph;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
+import cascading.flow.FlowElement;
 import cascading.flow.planner.Extent;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
+import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.finder.Match;
 
 /**
  *
  */
 public class GraphPartitioner
   {
+  ElementAnnotation annotation;
   ExpressionGraph contractionGraph;
   ExpressionGraph expressionGraph;
 
@@ -42,8 +49,15 @@ public class GraphPartitioner
     {
     }
 
-  public GraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
+  public GraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph  )
     {
+    this.contractionGraph = contractionGraph;
+    this.expressionGraph = expressionGraph;
+    }
+
+  public GraphPartitioner( ElementAnnotation annotation, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
+    {
+    this.annotation = annotation;
     this.contractionGraph = contractionGraph;
     this.expressionGraph = expressionGraph;
     }
@@ -60,24 +74,40 @@ public class GraphPartitioner
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph )
     {
-    List<ElementGraph> subGraphs = new ArrayList<>();
+    Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs = new LinkedHashMap<>();
 
     if( expressionGraph == null )
       {
       // need a safe copy
-    if( elementGraph.containsVertex( Extent.head ) )
+      if( elementGraph.containsVertex( Extent.head ) )
         elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-      subGraphs.add( new ElementDirectedGraph( elementGraph ) );
+      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), Collections.<Enum, Set<FlowElement>>emptyMap() );
 
-      return new Partitions( this, null, elementGraph, subGraphs );
+      return new Partitions( this, elementGraph, annotatedSubGraphs );
       }
 
     SubGraphIterator stepIterator = new SubGraphIterator( plannerContext, contractionGraph, expressionGraph, elementGraph );
 
+    int count = 0;
     while( stepIterator.hasNext() )
-      subGraphs.add( stepIterator.next() );
+      {
+      ElementSubGraph next = stepIterator.next();
 
-    return new Partitions( this, stepIterator, elementGraph, subGraphs );
+      Map<Enum, Set<FlowElement>> annotations = Collections.emptyMap();
+
+      if( annotation != null )
+        {
+        Match match = stepIterator.getContractedMatches().get( count++ );
+
+        annotations = new HashMap<>();
+
+        annotations.put( annotation.annotation, match.getCapturedElements( annotation.capture ) );
+        }
+
+      annotatedSubGraphs.put( next, annotations );
+      }
+
+    return new Partitions( this, stepIterator, elementGraph, annotatedSubGraphs );
     }
   }

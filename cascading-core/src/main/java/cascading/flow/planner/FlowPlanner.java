@@ -182,13 +182,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getElementsPhaseResult( PlanPhase.PostResolveElements ) );
+      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getAssemblyResult( PlanPhase.PostResolveAssembly ) );
 
       writeStats( plannerContext, nameOrID, ruleResult );
 
-      FlowElementGraph finalFlowElementGraph = ruleResult.getElementsPhaseResult( PlanPhase.PostResolveElements );
+      FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PostResolveAssembly );
 
-      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeSubGraphs() );
+      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeSubGraphResults(), ruleResult.getNodePipelineGraphResults() );
 
       writeTracePlan( nameOrID, "2-completed-flow-step-graph", flowStepGraph );
 
@@ -505,7 +505,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     {
     if( exception instanceof PlannerException )
       {
-      ( (PlannerException) exception ).flowElementGraph = flowElementGraph;
+      if( ( (PlannerException) exception ).elementGraph == null )
+        ( (PlannerException) exception ).elementGraph = flowElementGraph;
 
       return (PlannerException) exception;
       }

@@ -35,6 +35,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.stream.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
@@ -57,6 +58,7 @@ public class FlowNode implements ProcessModel, Serializable
   private final String name;
 
   protected ElementGraph nodeSubGraph;
+  protected List<ElementGraph> pipelineGraphs;
 
   private Set<FlowElement> sourceElements;
   private Set<FlowElement> sinkElements;
@@ -70,13 +72,19 @@ public class FlowNode implements ProcessModel, Serializable
   protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<>();
   private Map<Tap, Set<String>> reverseSource;
   private Map<Tap, Set<String>> reverseSink;
+  private Map<FlowElement, AnnotatedElementGraph> streamPipelineMap = Collections.emptyMap();
 
-  public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph )
+  public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<ElementGraph> pipelineGraphs )
     {
     this.id = Util.createUniqueID();
     this.ordinal = ordinal;
     this.name = name;
     this.nodeSubGraph = nodeSubGraph;
+    this.pipelineGraphs = pipelineGraphs;
+
+    // TODO: verify no missing elements in the union of pipelines
+    verifyPipelines();
+    createPipelineMap();
 
     assignTrappableNames( flowElementGraph );
     assignTraps( flowElementGraph.getTrapMap() );
@@ -120,6 +128,11 @@ public class FlowNode implements ProcessModel, Serializable
       sinkElements = ElementGraphs.findSinks( nodeSubGraph, FlowElement.class );
 
     return sinkElements;
+    }
+
+  public ElementGraph getPipelineGraphFor( FlowElement streamedSource )
+    {
+    return streamPipelineMap.get( streamedSource );
     }
 
   @Override
@@ -368,6 +381,56 @@ public class FlowNode implements ProcessModel, Serializable
       }
     }
 
+  private void verifyPipelines()
+    {
+    if( pipelineGraphs == null || pipelineGraphs.isEmpty() )
+      return;
+
+    Set<FlowElement> allElements = new HashSet<>( nodeSubGraph.vertexSet() );
+
+    for( ElementGraph pipelineGraph : pipelineGraphs )
+      allElements.removeAll( pipelineGraph.vertexSet() );
+
+    if( !allElements.isEmpty() )
+      throw new IllegalStateException( "union of pipeline graphs for flow node are missing elements: " + Util.join( allElements ) );
+    }
+
+  private void createPipelineMap()
+    {
+    if( pipelineGraphs == null || pipelineGraphs.isEmpty() )
+      return;
+
+    Map<FlowElement, AnnotatedElementGraph> map = new HashMap<>( pipelineGraphs.size() );
+
+    for( ElementGraph pipelineGraph : pipelineGraphs )
+      {
+      if( !( pipelineGraph instanceof AnnotatedElementGraph ) )
+        throw new IllegalStateException( "pipeline graphs must be of type AnnotatedGraph, got: " + pipelineGraph.getClass().getName() );
+
+      AnnotatedElementGraph graph = (AnnotatedElementGraph) pipelineGraph;
+
+      Set<FlowElement> flowElements;
+
+      Map<Enum, Set<FlowElement>> annotations = graph.getAnnotations();
+
+      if( annotations != null )
+        flowElements = annotations.get( StreamMode.Streamed );
+      else
+        flowElements = ElementGraphs.findSources( graph, FlowElement.class );
+
+      for( FlowElement flowElement : flowElements )
+        {
+        if( map.containsKey( flowElement ) )
+          throw new IllegalStateException( "duplicate streamable elements, found:  " + flowElement );
+
+        map.put( flowElement, graph );
+        }
+      }
+
+    this.streamPipelineMap = map;
+    }
+
+
   public List<FlowElement> getSuccessors( FlowElement flowElement )
     {
     return Graphs.successorListOf( nodeSubGraph, flowElement );
@@ -415,6 +478,7 @@ public class FlowNode implements ProcessModel, Serializable
     {
     return id != null ? id.hashCode() : 0;
     }
+
 //
 //  protected abstract Map<String, Config> initFromSources( FlowProcess<? extends Config> flowProcess, Config config );
 //

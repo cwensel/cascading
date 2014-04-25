@@ -22,6 +22,7 @@
 package cascading.flow.planner;
 
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.planner.graph.ElementGraph;
 
@@ -30,16 +31,19 @@ import cascading.flow.planner.graph.ElementGraph;
  */
 public class FlowNodeGraph extends ProcessGraph<FlowNode>
   {
-  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraph )
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraph, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
     {
-    buildGraph( flowElementGraph, nodeSubGraph );
+    buildGraph( flowElementGraph, nodeSubGraph, pipelineSubGraphsMap );
     }
 
-  protected void buildGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs )
+  protected void buildGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
     {
     int count = 0;
     for( ElementGraph nodeSubGraph : nodeSubGraphs )
-      addVertex( new FlowNode( count++, "node", flowElementGraph, nodeSubGraph ) );
+      {
+      List<ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeSubGraph );
+      addVertex( new FlowNode( count++, "node", flowElementGraph, nodeSubGraph, pipelineGraphs ) );
+      }
 
     bindEdges();
     }

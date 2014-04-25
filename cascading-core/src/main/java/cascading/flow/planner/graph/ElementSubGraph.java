@@ -43,7 +43,7 @@ public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implem
 
     this.elementGraph = elementGraph;
     this.flowElements = flowElements;
-    this.scopes = scopes;
+    this.scopes = null;
     }
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements )

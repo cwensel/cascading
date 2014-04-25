@@ -29,7 +29,7 @@ import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
 
 /**
- *
+ * Class SubGraphTransformer will return a bounded sub-graph after matching a sub-graph within a contracted graph.
  */
 public class SubGraphTransformer extends GraphTransformer<ElementGraph, ElementSubGraph>
   {

@@ -21,6 +21,7 @@
 package cascading.flow.planner.rule;
 
 import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.subgraph.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 
 /**
@@ -35,9 +36,19 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
     }
 
+  public RulePartitioner( PlanPhase phase, ElementAnnotation annotation, RuleExpression ruleExpression )
+    {
+    this( phase, annotation, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    }
+
   public RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
     {
-    super( contractionGraph, expressionGraph );
+    this( phase, null, contractionGraph, expressionGraph );
+    }
+
+  public RulePartitioner( PlanPhase phase, ElementAnnotation annotation, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
+    {
+    super( annotation, contractionGraph, expressionGraph );
     this.phase = phase;
     }
 
@@ -63,5 +74,4 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     {
     return getClass().getSimpleName().replaceAll( "^(.*)[]A-Z][a-z]*Rule$", "$1" );
     }
-
   }

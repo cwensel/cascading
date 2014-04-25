@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.assertion;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.expression.EveryAfterBufferExpression;
 
-import static cascading.flow.planner.rule.PlanPhase.PrePartitionElements;
+import static cascading.flow.planner.rule.PlanPhase.PreBalanceAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class EveryAfterBufferAssert extends RuleAssert
   public EveryAfterBufferAssert()
     {
     super(
-      PrePartitionElements,
+      PreBalanceAssembly,
       new EveryAfterBufferExpression(),
       "only one Every with a Buffer may follow a GroupBy or CoGroup pipe, no other Every instances are allowed immediately before or after, found: {Secondary} before: {Primary}"
     );

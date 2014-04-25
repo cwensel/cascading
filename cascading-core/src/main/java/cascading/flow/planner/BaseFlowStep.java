@@ -138,7 +138,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     setName( name );
     this.ordinal = ordinal;
     this.graph = elementStepGraph;
-    this.flowNodeGraph = flowNodeGraph;
+    this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
     configure();
     }

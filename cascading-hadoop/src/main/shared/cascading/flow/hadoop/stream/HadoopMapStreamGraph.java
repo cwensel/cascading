@@ -30,6 +30,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.MemoryHashJoinGate;
@@ -55,7 +56,7 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
 
   public HadoopMapStreamGraph( HadoopFlowProcess flowProcess, FlowNode node, Tap source )
     {
-    super( flowProcess, node );
+    super( flowProcess, node, source );
     this.source = source;
 
     buildGraph();
@@ -76,8 +77,9 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     {
     streamedHead = handleHead( this.source, flowProcess );
 
-    FlowElement tail = getFirst( node.getSinkElements() );
-    Set<Tap> tributaries = node.getJoinTributariesBetween( this.source, tail );
+    FlowElement tail = getFirst( ElementGraphs.findSinks( elementGraph, FlowElement.class ) );
+//    Set<Tap> tributaries = node.getJoinTributariesBetween( this.source, tail );
+    Set<Tap> tributaries = ElementGraphs.findSources( elementGraph, Tap.class );
 
     tributaries.remove( this.source ); // we cannot stream and accumulate the same source
 

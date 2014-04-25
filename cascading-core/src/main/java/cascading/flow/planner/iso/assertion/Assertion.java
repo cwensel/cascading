@@ -63,28 +63,13 @@ public class Assertion
     return match.getMatchedGraph();
     }
 
-  public Set<FlowElement> getPrimaries()
+  public Set<FlowElement> getAnchors()
     {
     return match.getCapturedElements( ElementExpression.Capture.Primary );
     }
 
-  public FlowElement getFirstPrimary()
+  public FlowElement getFirstAnchor()
     {
-    return Util.getFirst( getPrimaries() );
-    }
-
-  public Set<FlowElement> getSecondaries()
-    {
-    return match.getCapturedElements( ElementExpression.Capture.Secondary );
-    }
-
-  public FlowElement getFirstSecondary()
-    {
-    return Util.getFirst( getSecondaries() );
-    }
-
-  public Set<FlowElement> getAllCaptured()
-    {
-    return match.getCapturedElements( ElementExpression.Capture.Primary, ElementExpression.Capture.Secondary );
+    return Util.getFirst( getAnchors() );
     }
   }

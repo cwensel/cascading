@@ -40,8 +40,10 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
     {
     this();
 
-    if( elementGraph != null )
-      Graphs.addGraph( this, elementGraph );
+    if( elementGraph == null )
+      return;
+
+    Graphs.addGraph( this, elementGraph );
     }
 
   @Override

@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.assertion;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.expression.SplitBeforeEveryExpression;
 
-import static cascading.flow.planner.rule.PlanPhase.PrePartitionElements;
+import static cascading.flow.planner.rule.PlanPhase.PreBalanceAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class SplitBeforeEveryAssert extends RuleAssert
   public SplitBeforeEveryAssert()
     {
     super(
-      PrePartitionElements,
+      PreBalanceAssembly,
       new SplitBeforeEveryExpression(),
       "Every instances may not split after a GroupBy or CoGroup pipe, found: {Primary} before: {Secondary}"
     );

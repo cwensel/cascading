@@ -37,6 +37,7 @@ import cascading.flow.stream.Duct;
 import cascading.flow.stream.ElementDuct;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
+import cascading.util.Util;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -89,7 +90,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
       FlowNode node = deserializeBase64( reduceNodeState, jobConf, FlowNode.class );
 
-      streamGraph = new HadoopReduceStreamGraph( currentProcess, node );
+      streamGraph = new HadoopReduceStreamGraph( currentProcess, node, Util.getFirst( node.getSourceElements() ) );
 
       group = (HadoopGroupGate) streamGraph.getHeads().iterator().next();
 

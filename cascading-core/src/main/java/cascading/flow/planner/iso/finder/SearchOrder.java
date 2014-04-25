@@ -62,7 +62,7 @@ public enum SearchOrder
 
     if( graph.containsVertex( Extent.head ) )
       {
-      if( searchOrder == Depth || searchOrder == Topological || searchOrder == Breadth )
+      if( !searchOrder.isReversed() )
         node = (Node) Extent.head;
       else
         node = (Node) Extent.tail;

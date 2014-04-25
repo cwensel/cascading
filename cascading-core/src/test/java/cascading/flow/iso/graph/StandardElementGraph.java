@@ -59,7 +59,7 @@ public class StandardElementGraph extends FlowElementGraph
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
-    splice2 = new Each( splice2, new Identity() );
+    splice2 = new Each( new Pipe( "remove", splice2 ),  new Identity() );
 
     splice2 = new GroupBy( splice2, new Fields( 0 ) );
 

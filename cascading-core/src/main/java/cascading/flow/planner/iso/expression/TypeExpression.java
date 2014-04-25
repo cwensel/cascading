@@ -31,7 +31,15 @@ public class TypeExpression<Type> extends ElementExpression
   {
   public enum Topo
     {
-      Ignore, Head, Tail, Linear, Splice, Split, SpliceSplit
+      Ignore,
+      Head,
+      Tail,
+      Linear,
+      LinearIn,
+      LinearOut,
+      Splice,
+      Split,
+      SpliceSplit
     }
 
   boolean exact = false;
@@ -103,6 +111,9 @@ public class TypeExpression<Type> extends ElementExpression
     if( !typeApplies )
       return false;
 
+    if( topo == Topo.Ignore )
+      return true;
+
     // todo: make lazy
     boolean isHead = elementGraph.inDegreeOf( flowElement ) == 0;
     boolean isTail = elementGraph.outDegreeOf( flowElement ) == 0;
@@ -111,14 +122,16 @@ public class TypeExpression<Type> extends ElementExpression
 
     switch( topo )
       {
-      case Ignore:
-        return true;
       case Head:
         return isHead;
       case Tail:
         return isTail;
       case Linear:
         return !isSplice && !isSplit;
+      case LinearIn:
+        return !isSplice;
+      case LinearOut:
+        return !isSplit;
       case Splice:
         return isSplice && !isSplit;
       case Split:

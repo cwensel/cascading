@@ -25,19 +25,25 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.pipe.Group;
 import cascading.tap.Tap;
+
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
 public class TestConsecutiveTapsExpressionGraph extends ExpressionGraph
   {
-
-  private final FlowElementExpression shared = new FlowElementExpression( Tap.class );
+  ElementExpression shared = or(
+    ElementExpression.Capture.Secondary,
+    new FlowElementExpression( Tap.class ),
+    new FlowElementExpression( Group.class )
+  );
 
   public TestConsecutiveTapsExpressionGraph()
     {
-    super( SearchOrder.Depth, false );
+    super( SearchOrder.Depth );
 
     this.arc(
       new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ),

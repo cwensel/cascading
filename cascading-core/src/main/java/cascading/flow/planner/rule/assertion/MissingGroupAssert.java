@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.assertion;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.expression.MissingGroupExpression;
 
-import static cascading.flow.planner.rule.PlanPhase.PrePartitionElements;
+import static cascading.flow.planner.rule.PlanPhase.PreBalanceAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class MissingGroupAssert extends RuleAssert
   public MissingGroupAssert()
     {
     super(
-      PrePartitionElements,
+      PreBalanceAssembly,
       new MissingGroupExpression(),
       "Every may only be preceded by another Every or a Group pipe, found: {Secondary}"
     );

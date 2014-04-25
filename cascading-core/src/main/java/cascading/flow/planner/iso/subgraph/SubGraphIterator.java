@@ -94,9 +94,20 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     graphFinder = new GraphFinder( matchExpression );
     }
 
-  public List<Match> getMatches()
+  public List<Match> getContractedMatches()
     {
     return matches;
+    }
+
+  public ElementGraph getContractedGraph()
+    {
+    if( contractedGraph == null )
+      {
+      contractedTransform = contractedTransformer.transform( plannerContext, flowElementGraph );
+      contractedGraph = contractedTransform.getEndGraph();
+      }
+
+    return contractedGraph;
     }
 
   @Override
@@ -115,17 +126,6 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
       }
 
     return match.foundMatch();
-    }
-
-  public ElementGraph getContractedGraph()
-    {
-    if( contractedGraph == null )
-      {
-      contractedTransform = contractedTransformer.transform( plannerContext, flowElementGraph );
-      contractedGraph = contractedTransform.getEndGraph();
-      }
-
-    return contractedGraph;
     }
 
   @Override

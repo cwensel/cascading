@@ -73,17 +73,17 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
     this( elementGraph, new FlowElementMaskFunctor( flowElements ) );
     }
 
+  public ElementMaskSubGraph( ElementMaskSubGraph graph )
+    {
+    this( graph.elementGraph, graph.mask );
+    }
+
   protected ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElementMaskFunctor flowElementMaskFunctor )
     {
     super( elementGraph, flowElementMaskFunctor );
 
     this.elementGraph = elementGraph;
     this.mask = flowElementMaskFunctor;
-    }
-
-  public ElementMaskSubGraph( ElementMaskSubGraph graph )
-    {
-    this( graph.elementGraph, graph.mask );
     }
 
   @Override

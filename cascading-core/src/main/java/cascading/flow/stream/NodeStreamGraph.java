@@ -31,6 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.planner.Extent;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -41,6 +42,7 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import org.jgrapht.GraphPath;
+import org.jgrapht.Graphs;
 
 import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
 
@@ -51,11 +53,22 @@ public abstract class NodeStreamGraph extends StreamGraph
   {
   protected FlowProcess flowProcess;
   protected final FlowNode node;
+  private FlowElement streamedSource;
+  protected final ElementGraph elementGraph;
 
   public NodeStreamGraph( FlowProcess flowProcess, FlowNode node )
     {
     this.flowProcess = flowProcess;
     this.node = node;
+    this.elementGraph = node.getElementGraph();
+    }
+
+  public NodeStreamGraph( FlowProcess flowProcess, FlowNode node, FlowElement streamedSource )
+    {
+    this.flowProcess = flowProcess;
+    this.node = node;
+    this.elementGraph = streamedSource == null ? node.getElementGraph() : node.getPipelineGraphFor( streamedSource );
+    this.streamedSource = streamedSource;
     }
 
   protected Object getProperty( String name )
@@ -65,9 +78,9 @@ public abstract class NodeStreamGraph extends StreamGraph
 
   protected void handleDuct( FlowElement lhsElement, Duct lhsDuct )
     {
-    List<FlowElement> successors = node.getSuccessors( lhsElement );
+    List<FlowElement> successors = Graphs.successorListOf( elementGraph, lhsElement );
 
-    if( successors.contains( Extent.tail )  )
+    if( successors.contains( Extent.tail ) )
       addTail( lhsDuct );
     else
       handleSuccessors( lhsDuct, successors );
@@ -102,7 +115,7 @@ public abstract class NodeStreamGraph extends StreamGraph
     FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
     Splice rhsElement = (Splice) ( (SpliceGate) rhsDuct ).getFlowElement();
 
-    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( node.getElementGraph(), lhsElement, rhsElement );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( elementGraph, lhsElement, rhsElement );
 
     for( GraphPath<FlowElement, Scope> path : paths )
       {
@@ -227,7 +240,7 @@ public abstract class NodeStreamGraph extends StreamGraph
 
   private int getNumImmediateBranches( FlowElement tap, HashJoin join )
     {
-    return getAllShortestPathsBetween( node.getElementGraph(), tap, join ).size();
+    return getAllShortestPathsBetween( elementGraph, tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )
@@ -312,8 +325,8 @@ public abstract class NodeStreamGraph extends StreamGraph
 
       ElementDuct elementDuct = (ElementDuct) duct;
 
-      elementDuct.getIncomingScopes().addAll( node.getPreviousScopes( elementDuct.getFlowElement() ) );
-      elementDuct.getOutgoingScopes().addAll( node.getNextScopes( elementDuct.getFlowElement() ) );
+      elementDuct.getIncomingScopes().addAll( elementGraph.incomingEdgesOf( elementDuct.getFlowElement() ) );
+      elementDuct.getOutgoingScopes().addAll( elementGraph.outgoingEdgesOf( elementDuct.getFlowElement() ) );
       }
     }
   }

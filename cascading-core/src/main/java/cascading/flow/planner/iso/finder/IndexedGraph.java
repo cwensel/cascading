@@ -37,6 +37,7 @@ import org.jgrapht.graph.GraphDelegator;
  */
 class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends GraphDelegator
   {
+  private SearchOrder searchOrder;
   private Graph delegate;
   private Object[] index;
   private Map<Node, Integer> reverse;
@@ -54,6 +55,7 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
   public IndexedGraph( SearchOrder searchOrder, Graph graph )
     {
     super( graph );
+    this.searchOrder = searchOrder;
     delegate = graph;
 
     index = new Object[ vertexSet().size() ];
@@ -150,6 +152,14 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
       count++;
       index[ count ] = iterator.next();
       reverse.put( (Node) index[ count ], count );
+      }
+
+    if( index[ vertex ] == null )
+      {
+      if( index.length != count - 1 )
+        throw new GraphFinderException( "given graph has multiple origins with search order: " + searchOrder + ", likely not all paths connect HEAD and TAIL of element graph", getDelegate() );
+
+      throw new GraphFinderException( "vertex is null: " + vertex, getDelegate() );
       }
 
     return (Node) index[ vertex ];

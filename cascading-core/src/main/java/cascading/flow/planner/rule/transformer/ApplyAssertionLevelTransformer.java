@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.transformer;
 import cascading.flow.planner.rule.expression.PlannerLevelExpression;
 import cascading.operation.AssertionLevel;
 
-import static cascading.flow.planner.rule.PlanPhase.PreResolveElements;
+import static cascading.flow.planner.rule.PlanPhase.PreResolveAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class ApplyAssertionLevelTransformer extends RuleContractedTransformer
   public ApplyAssertionLevelTransformer()
     {
     super(
-      PreResolveElements,
+      PreResolveAssembly,
       new PlannerLevelExpression( AssertionLevel.class )
     );
     }

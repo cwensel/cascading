@@ -25,29 +25,36 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.pipe.Group;
 import cascading.tap.Tap;
+
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
 public class StreamedAccumulatedTapsExpression extends ExpressionGraph
   {
-  private final FlowElementExpression shared = new FlowElementExpression( Tap.class );
-
   public StreamedAccumulatedTapsExpression()
     {
-    super( SearchOrder.Depth, true );
+    super( SearchOrder.Depth );
+
+    ElementExpression sink = or(
+      ElementExpression.Capture.Secondary,
+      new FlowElementExpression( Tap.class ),
+      new FlowElementExpression( Group.class )
+    );
 
     this.arc(
       new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ),
       PathScopeExpression.ALL_NON_BLOCKING,
-      shared
+      sink
     );
 
     this.arc(
       new FlowElementExpression( Tap.class ),
       PathScopeExpression.ANY_BLOCKING,
-      shared
+      sink
     );
     }
   }

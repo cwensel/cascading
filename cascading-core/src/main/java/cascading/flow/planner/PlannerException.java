@@ -20,11 +20,12 @@
 
 package cascading.flow.planner;
 
-import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
+import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.finder.GraphFinderException;
+import cascading.flow.planner.rule.Rule;
 import cascading.pipe.Pipe;
 import cascading.util.Util;
-import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
  * Class PlannerException is thrown when a job planner fails.
@@ -37,7 +38,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 public class PlannerException extends FlowException
   {
   /** Field pipeGraph */
-  FlowElementGraph flowElementGraph;
+  ElementGraph elementGraph;
 
   /** Constructor PlannerException creates a new PlannerException instance. */
   public PlannerException()
@@ -73,12 +74,12 @@ public class PlannerException extends FlowException
    * @param pipe         of type Pipe
    * @param message      of type String
    * @param throwable    of type Throwable
-   * @param flowElementGraph of type ElementGraph
+   * @param elementGraph of type ElementGraph
    */
-  public PlannerException( Pipe pipe, String message, Throwable throwable, FlowElementGraph flowElementGraph )
+  public PlannerException( Pipe pipe, String message, Throwable throwable, FlowElementGraph elementGraph )
     {
     super( Util.formatTrace( pipe, message ), throwable );
-    this.flowElementGraph = flowElementGraph;
+    this.elementGraph = elementGraph;
     }
 
   /**
@@ -117,22 +118,27 @@ public class PlannerException extends FlowException
    *
    * @param string       of type String
    * @param throwable    of type Throwable
-   * @param flowElementGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
    */
-  public PlannerException( String string, Throwable throwable, FlowElementGraph flowElementGraph )
+  public PlannerException( String string, Throwable throwable, FlowElementGraph elementGraph )
     {
     super( string, throwable );
-    this.flowElementGraph = flowElementGraph;
+    this.elementGraph = elementGraph;
+    }
+
+  public PlannerException( Rule rule, Exception exception )
+    {
+    super( "failed on rule: " + rule.getRuleName(), exception );
     }
 
   /**
-   * Method getPipeGraph returns the pipeGraph of this PlannerException object.
+   * Method getElementGraph returns the elementGraph of this PlannerException object.
    *
-   * @return the pipeGraph (type SimpleDirectedGraph<FlowElement, Scope>) of this PlannerException object.
+   * @return the pipeGraph (ElementGraph) of this PlannerException object.
    */
-  SimpleDirectedGraph<FlowElement, Scope> getFlowElementGraph()
+  ElementGraph getElementGraph()
     {
-    return flowElementGraph;
+    return elementGraph;
     }
 
   /**
@@ -142,9 +148,17 @@ public class PlannerException extends FlowException
    */
   public void writeDOT( String filename )
     {
-    if( flowElementGraph == null )
+    if( elementGraph == null )
       return;
 
-    flowElementGraph.writeDOT( filename );
+    elementGraph.writeDOT( filename );
     }
+
+  public void writeCauseDOT( String filename )
+    {
+    if( getCause() instanceof GraphFinderException )
+      ( (GraphFinderException) getCause() ).writeDOT( filename );
+    }
+
+
   }

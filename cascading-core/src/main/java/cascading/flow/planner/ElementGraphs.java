@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -45,6 +46,7 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.stream.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
@@ -68,6 +70,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.getFirst;
 import static cascading.util.Util.narrowSet;
 import static java.lang.Double.POSITIVE_INFINITY;
 
@@ -423,7 +426,7 @@ public class ElementGraphs
         new IntegerNameProvider<FlowElement>(),
         new FlowElementVertexNameProvider( graph, platformInfo ),
         new ScopeEdgeNameProvider(),
-        new VertexAttributeProvider(), new EdgeAttributeProvider() );
+        new VertexAttributeProvider( graph ), new EdgeAttributeProvider() );
 
       writer.close();
       }
@@ -475,7 +478,7 @@ public class ElementGraphs
   public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
     {
     if( elementGraph.containsVertex( Extent.head ) )
-      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail ); // TODO: just return the successors
 
     SubGraphIterator iterator = new SubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Head ) ),
@@ -487,8 +490,8 @@ public class ElementGraphs
 
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
     {
-    if( elementGraph.containsVertex( Extent.head ) )
-      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+    if( elementGraph.containsVertex( Extent.tail ) )
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail ); // TODO: just return the predecessors
 
     SubGraphIterator iterator = new SubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Tail ) ),
@@ -573,6 +576,64 @@ public class ElementGraphs
     elementGraph.removeVertex( replace );
     }
 
+  public static Pipe findFirstPipeNamed( ElementGraph elementGraph, String name )
+    {
+    Iterator<FlowElement> iterator = getTopologicalIterator( elementGraph );
+
+    while( iterator.hasNext() )
+      {
+      FlowElement flowElement = iterator.next();
+
+      if( flowElement instanceof Pipe && ( (Pipe) flowElement ).getName().equals( name ) )
+        return (Pipe) flowElement;
+      }
+
+    return null;
+    }
+
+  public static void removeBranchContaining( ElementGraph elementGraph, FlowElement flowElement )
+    {
+    Set<FlowElement> branch = new LinkedHashSet<>();
+
+    // if both a join and split, cannot be removed
+    FlowElement current = flowElement;
+
+    while( true )
+      {
+      if( elementGraph.inDegreeOf( current ) != 1 || elementGraph.outDegreeOf( current ) != 1 )
+        break;
+
+      branch.add( current );
+
+      FlowElement element = elementGraph.getEdgeSource( getFirst( elementGraph.incomingEdgesOf( current ) ) );
+
+      if( element instanceof Extent )
+        break;
+
+      current = element;
+      }
+
+    current = flowElement;
+
+    while( true )
+      {
+      if( elementGraph.inDegreeOf( current ) != 1 || elementGraph.outDegreeOf( current ) != 1 )
+        break;
+
+      branch.add( current );
+
+      FlowElement element = elementGraph.getEdgeTarget( getFirst( elementGraph.outgoingEdgesOf( current ) ) );
+
+      if( element instanceof Extent )
+        break;
+
+      current = element;
+      }
+
+    for( FlowElement element : branch )
+      elementGraph.removeVertex( element );
+    }
+
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>
     {
     private final DirectedGraph<FlowElement, Scope> graph;
@@ -618,16 +679,50 @@ public class ElementGraphs
 
   private static class VertexAttributeProvider implements ComponentAttributeProvider<FlowElement>
     {
+    static Map<String, String> streamedNode = new HashMap<String, String>()
+    {
+    {put( "shape", "box" );}
+
+    {put( "fontcolor", "blue1" );}
+    };
+
+    static Map<String, String> defaultNode = new HashMap<String, String>()
+    {
+    {put( "shape", "box" );}
+    };
+
+    private final AnnotatedElementGraph graph;
+
+    public VertexAttributeProvider( DirectedGraph<FlowElement, Scope> graph )
+      {
+      if( graph instanceof AnnotatedElementGraph )
+        this.graph = (AnnotatedElementGraph) graph;
+      else
+        this.graph = null;
+      }
+
     @Override
     public Map<String, String> getComponentAttributes( FlowElement object )
       {
-      return null;
+      if( graph == null || !( object instanceof Tap ) )
+        return defaultNode;
+
+      Set<FlowElement> elements = graph.getAnnotations().get( StreamMode.Streamed );
+
+      boolean hasAnnotations = elements != null && !elements.isEmpty();
+
+      if( !hasAnnotations )
+        return defaultNode;
+
+      boolean isStreamed = hasAnnotations && elements.contains( object );
+
+      return isStreamed ? streamedNode : defaultNode;
       }
     }
 
   private static class EdgeAttributeProvider implements ComponentAttributeProvider<Scope>
     {
-    Map<String, String> attributes = new HashMap<String, String>()
+    static Map<String, String> attributes = new HashMap<String, String>()
     {
     {put( "style", "dotted" );}
     };

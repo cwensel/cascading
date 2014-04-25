@@ -28,7 +28,7 @@ public class TraceWriter
 
     String ruleName = transform.getRuleName();
 
-    ruleName = String.format( "%d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
+    ruleName = String.format( "%02d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
 
     transform.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
@@ -40,7 +40,7 @@ public class TraceWriter
 
     String ruleName = partition.getRuleName();
 
-    ruleName = String.format( "%d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
+    ruleName = String.format( "%02d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
 
     partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
@@ -52,7 +52,7 @@ public class TraceWriter
 
     String ruleName = partition.getRuleName();
 
-    ruleName = String.format( "%d-%s-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, ruleName );
+    ruleName = String.format( "%02d-%s-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, ruleName );
 
     partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
@@ -64,9 +64,21 @@ public class TraceWriter
 
     String ruleName = partition.getRuleName();
 
-    ruleName = String.format( "%d-%s-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, ruleName );
+    ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, ruleName );
 
     partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    }
+
+  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transform transform )
+    {
+    if( transformTracePath == null )
+      return;
+
+    String ruleName = transform.getRuleName();
+
+    ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, pipelineOrdinal, ruleName );
+
+    transform.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
 
   void writePlan( FlowElementGraph flowElementGraph, String name )
@@ -89,7 +101,7 @@ public class TraceWriter
     for( int i = 0; i < flowElementGraphs.size(); i++ )
       {
       ElementGraph flowElementGraph = flowElementGraphs.get( i );
-      String name = String.format( "%d-%s-%s-%04d.dot", phase.ordinal(), phase, subName, i );
+      String name = String.format( "%02d-%s-%s-%04d.dot", phase.ordinal(), phase, subName, i );
 
       File file = new File( transformTracePath, name );
 
@@ -115,7 +127,7 @@ public class TraceWriter
         for( int i = 0; i < pipelineGraphs.size(); i++ )
           {
           ElementGraph flowElementGraph = pipelineGraphs.get( i );
-          String name = String.format( "%d-%s-%s-%04d-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, nodeCount, i );
+          String name = String.format( "%02d-%s-%s-%04d-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, nodeCount, i );
 
           File file = new File( transformTracePath, name );
 
@@ -144,7 +156,7 @@ public class TraceWriter
       for( int i = 0; i < flowElementGraphs.size(); i++ )
         {
         ElementGraph flowElementGraph = flowElementGraphs.get( i );
-        String name = String.format( "%d-%s-%s-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, i );
+        String name = String.format( "%02d-%s-%s-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, i );
 
         File file = new File( transformTracePath, name );
 

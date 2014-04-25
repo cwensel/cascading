@@ -89,9 +89,9 @@ public class Match
     return matchedGraph;
     }
 
-  public Set<FlowElement> getNonCapturedElements()
+  public Set<FlowElement> getIncludedElements()
     {
-    return getCapturedElements( ElementExpression.Capture.Ignore );
+    return getCapturedElements( ElementExpression.Capture.Include );
     }
 
   public Set<FlowElement> getCapturedElements( ElementExpression.Capture... captures )

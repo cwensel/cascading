@@ -48,7 +48,7 @@ public class GraphFinder
   {
   ExpressionGraph matchExpression;
 
-  public GraphFinder( ExpressionGraph matchExpression )
+  public GraphFinder( ExpressionGraph matchExpression, ElementExpression.Capture... captures )
     {
     if( matchExpression == null )
       throw new IllegalArgumentException( "expressionGraph may not be null" );
@@ -153,33 +153,35 @@ public class GraphFinder
       if( !current.foundMatch() )
         break;
 
-      Set<FlowElement> matchedElements = current.getCapturedElements( ElementExpression.Capture.Primary );
+      Set<FlowElement> anchoredElements = current.getCapturedElements( ElementExpression.Capture.Primary );
 
       // should never capture new primary elements in subsequent searches
       if( finderContext.getRequiredElements().isEmpty() )
-        finderContext.getRequiredElements().addAll( matchedElements );
+        finderContext.getRequiredElements().addAll( anchoredElements );
 
       match = current;
 
-      finderContext.getFoundElements().addAll( current.getVertexMapping().values() );
-      finderContext.getFoundScopes().addAll( getAllEdges( elementGraph, current.getVertexMapping() ) );
+      Map<ElementExpression, FlowElement> vertexMapping = current.getVertexMapping();
+
+      finderContext.getMatchedElements().addAll( vertexMapping.values() );
+      finderContext.getMatchedScopes().addAll( getAllEdges( elementGraph, vertexMapping ) );
 
       if( firstOnly ) // we are not rotating around the primary capture
         break;
 
-      Set<FlowElement> nonCapturedElements = current.getNonCapturedElements();
+      Set<FlowElement> includedElements = current.getIncludedElements();
 
-      if( nonCapturedElements.isEmpty() )
+      if( includedElements.isEmpty() )
         break;
 
       // should only ignore edges, not elements
-      finderContext.getIgnoredElements().addAll( nonCapturedElements );
+      finderContext.getIgnoredElements().addAll( includedElements );
       }
 
     // this only returns the last mapping, but does capture the Primary matches as they are required across all matches
     Map<ElementExpression, FlowElement> mapping = match == null ? null : match.getVertexMapping();
 
-    return new Match( matchExpression, elementGraph, mapping, finderContext.getFoundElements(), finderContext.getFoundScopes() );
+    return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes() );
     }
 
   public Map<ScopeExpression, Set<Scope>> getEdgeMapping( ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )

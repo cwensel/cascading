@@ -21,8 +21,12 @@
 package cascading.flow.planner.iso.subgraph;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import cascading.flow.FlowElement;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.rule.Rule;
@@ -33,16 +37,29 @@ import cascading.flow.planner.rule.Rule;
 public class Partitions
   {
   private final GraphPartitioner graphPartitioner;
-  private final SubGraphIterator stepIterator;
+  private final SubGraphIterator subGraphIterator;
   private final ElementGraph elementGraph;
-  private final List<ElementGraph> subGraphs;
+  private final Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs;
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator stepIterator, ElementGraph elementGraph, List<ElementGraph> subGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, ElementGraph elementGraph, Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs )
+    {
+    this( graphPartitioner, null, elementGraph, annotatedSubGraphs );
+    }
+
+  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph elementGraph, Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs )
     {
     this.graphPartitioner = graphPartitioner;
-    this.stepIterator = stepIterator;
+    this.subGraphIterator = subGraphIterator;
     this.elementGraph = elementGraph;
-    this.subGraphs = subGraphs;
+    this.annotatedSubGraphs = annotatedSubGraphs;
+    }
+
+  public String getRuleName()
+    {
+    if( getGraphPartitioner() instanceof Rule )
+      return ( (Rule) getGraphPartitioner() ).getRuleName();
+
+    return "none";
     }
 
   public GraphPartitioner getGraphPartitioner()
@@ -55,44 +72,52 @@ public class Partitions
     return elementGraph;
     }
 
-  public List<ElementGraph> getSubGraphs()
+  public Map<ElementGraph, Map<Enum, Set<FlowElement>>> getAnnotatedSubGraphs()
     {
-    return subGraphs;
+    return annotatedSubGraphs;
     }
 
-  public String getRuleName()
+  public List<ElementGraph> getSubGraphs()
     {
-    if( getGraphPartitioner() instanceof Rule )
-      return ( (Rule) getGraphPartitioner() ).getRuleName();
-
-    return "none";
+    return new ArrayList<>( annotatedSubGraphs.keySet() );
     }
 
   public void writeDOTs( String path )
     {
-    elementGraph.writeDOT( new File( path, "element-graph.dot" ).toString() );
+    int count = 0;
+    elementGraph.writeDOT( new File( path, makeFileName( count++, "element-graph" ) ).toString() );
 
     if( graphPartitioner.getContractionGraph() != null )
-      graphPartitioner.getContractionGraph().writeDOT( new File( path, "contraction-graph.dot" ).toString() );
+      graphPartitioner.getContractionGraph().writeDOT( new File( path, makeFileName( count++, "contraction-graph" ) ).toString() );
 
     if( graphPartitioner.getExpressionGraph() != null )
-      graphPartitioner.getExpressionGraph().writeDOT( new File( path, "expression-graph.dot" ).toString() );
+      graphPartitioner.getExpressionGraph().writeDOT( new File( path, makeFileName( count++, "expression-graph" ) ).toString() );
 
-    List<Match> matches = stepIterator == null ? null : stepIterator.getMatches();
+    if( subGraphIterator != null )
+      subGraphIterator.getContractedGraph().writeDOT( new File( path, makeFileName( count++, "contracted-graph" ) ).toString() );
+
+    List<Match> matches = subGraphIterator == null ? null : subGraphIterator.getContractedMatches();
+
+    List<ElementGraph> subGraphs = getSubGraphs();
 
     for( int i = 0; i < subGraphs.size(); i++ )
       {
       ElementGraph subGraph = subGraphs.get( i );
 
-      subGraph.writeDOT( new File( path, makeFileName( i, "result-sub-graph" ) ).toString() );
+      subGraph.writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
 
       if( matches != null )
-        matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( i, "partition-matched-graph" ) ).toString() );
+        matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );
       }
     }
 
   private String makeFileName( int ordinal, String name )
     {
-    return String.format( "%04d-%s.dot", ordinal, name );
+    return String.format( "%02d-%s.dot", ordinal, name );
+    }
+
+  private String makeFileName( int order, int ordinal, String name )
+    {
+    return String.format( "%02d-%04d-%s.dot", order, ordinal, name );
     }
   }

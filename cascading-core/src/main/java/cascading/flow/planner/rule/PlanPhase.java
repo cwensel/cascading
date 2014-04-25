@@ -26,25 +26,29 @@ package cascading.flow.planner.rule;
 public enum PlanPhase
   {
     // Initial state
-    Start( Stage.Terminal ),
+    Start( Role.System, Stage.Terminal, Mode.None ),
 
     // Flow element graph rules
-    PrePartitionElements( Stage.Elements ),
-    PartitionElements( Stage.Elements ),
-    PreResolveElements( Stage.Elements ),
-    ResolveElements( Stage.Elements ),
-    PostResolveElements( Stage.Elements ),
+    PreBalanceAssembly( Role.User, Stage.Assembly, Mode.Mutate ),
+    BalanceAssembly( Role.User, Stage.Assembly, Mode.Mutate ),
+    PostBalanceAssembly( Role.User, Stage.Assembly, Mode.Mutate ),
+
+    PreResolveAssembly( Role.User, Stage.Assembly, Mode.Mutate ),
+    ResolveAssembly( Role.System, Stage.Assembly, Mode.Mutate ),
+    PostResolveAssembly( Role.User, Stage.Assembly, Mode.Mutate ),
 
     // Flow step sub-graph partition rules
-    PartitionSteps( Stage.Steps ),
+    PartitionSteps( Role.User, Stage.Steps, Mode.Partition ),
 
     // Flow node sub-graph partition rules
-    PartitionNodes( Stage.Nodes ),
-    PipelineNodes( Stage.Nodes ),
-    PostPipelineNodes( Stage.Nodes ),
+    PartitionNodes( Role.User, Stage.Nodes, Mode.Partition ),
+
+    // Flow node pipeline sub-graph partition rules
+    PartitionPipelines( Role.User, Stage.Pipelines, Mode.Partition ),
+    PostPipelines( Role.User, Stage.Pipelines, Mode.Mutate ),
 
     // Final state
-    Complete( Stage.Terminal );
+    Complete( Role.System, Stage.Terminal, Mode.None );
 
   public static PlanPhase prior( PlanPhase phase )
     {
@@ -52,6 +56,11 @@ public enum PlanPhase
       return null;
 
     return values()[ phase.ordinal() - 1 ];
+    }
+
+  public enum Role
+    {
+      System, User
     }
 
   public enum Stage
@@ -64,7 +73,7 @@ public enum PlanPhase
       /**
        * Applies to FlowElement assertions or transformations.
        */
-      Elements,
+      Assembly,
 
       /**
        * Applies to generating sub-graphs of flow steps where a step is a submitted unit of cluster work.
@@ -76,14 +85,45 @@ public enum PlanPhase
        * <p/>
        * In MapReduce its a Map or Reduce node (where Map and Reduce are Kinds). In Tez its a Processor.
        */
-      Nodes
+      Nodes,
+
+      /**
+       * Applies to sub-graphs with flow nodes having a single streamed input, and multiple accumulated inputs.
+       */
+      Pipelines
     }
 
-  Stage stage;
-
-  PlanPhase( Stage stage )
+  public enum Mode
     {
+      None,
+      Mutate,
+      Partition
+    }
+
+  Role role;
+  Stage stage;
+  Mode mode;
+
+  PlanPhase( Role role, Stage stage, Mode mode )
+    {
+    this.role = role;
     this.stage = stage;
+    this.mode = mode;
+    }
+
+  public Role getRole()
+    {
+    return role;
+    }
+
+  public boolean isSystem()
+    {
+    return role == Role.System;
+    }
+
+  public boolean isUser()
+    {
+    return role == Role.User;
     }
 
   public Stage getStage()
@@ -96,9 +136,9 @@ public enum PlanPhase
     return stage == Stage.Terminal;
     }
 
-  public boolean isElements()
+  public boolean isAssembly()
     {
-    return stage == Stage.Elements;
+    return stage == Stage.Assembly;
     }
 
   public boolean isSteps()

@@ -29,10 +29,20 @@ public abstract class ElementExpression implements Expression<FlowElement>
   {
   public enum Capture
     {
-      Ignore, Primary, Secondary
+      Include,
+
+      /**
+       * Becomes the anchor at which a match will rotate during partitioning.
+       */
+      Primary,
+
+      /**
+       * Will be re-captured during partitioning where the Primary acts as an anchor at which the matching rotates
+       */
+      Secondary
     }
 
-  private Capture capture = Capture.Ignore;
+  private Capture capture = Capture.Include;
 
   protected ElementExpression()
     {

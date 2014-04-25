@@ -516,6 +516,11 @@ public class MergePipesPlatformTest extends PlatformTestCase
     runMultiHashJoinIntoMergeIntoHashJoin( false, false, true, 3 );
     }
 
+  /**
+   * This test will exercise the issue where a unconnected HashJoin could be accumulated against within
+   * a node.
+   *
+   */
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedAccumulatedMerge() throws Exception
     {

@@ -72,7 +72,7 @@ class FinderContext
     return getRequiredElements().contains( flowElement );
     }
 
-  public Set<FlowElement> getFoundElements()
+  public Set<FlowElement> getMatchedElements()
     {
     if( foundElements == null )
       foundElements = new HashSet<>();
@@ -80,7 +80,7 @@ class FinderContext
     return foundElements;
     }
 
-  public Set<Scope> getFoundScopes()
+  public Set<Scope> getMatchedScopes()
     {
     if( foundScopes == null )
       foundScopes = new HashSet<>();

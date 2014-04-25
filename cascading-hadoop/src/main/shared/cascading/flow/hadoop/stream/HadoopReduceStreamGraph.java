@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.stream;
 
+import cascading.flow.FlowElement;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
@@ -39,9 +40,9 @@ import cascading.util.Util;
  */
 public class HadoopReduceStreamGraph extends NodeStreamGraph
   {
-  public HadoopReduceStreamGraph( HadoopFlowProcess flowProcess, FlowNode node )
+  public HadoopReduceStreamGraph( HadoopFlowProcess flowProcess, FlowNode node, FlowElement sourceElement )
     {
-    super( flowProcess, node );
+    super( flowProcess, node, sourceElement );
 
     buildGraph();
 

@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.transformer;
 import cascading.flow.hadoop.planner.rule.expression.AdjacentTempToTapExpression;
 import cascading.flow.planner.rule.transformer.RuleReplaceTransformer;
 
-import static cascading.flow.planner.rule.PlanPhase.PostResolveElements;
+import static cascading.flow.planner.rule.PlanPhase.PostResolveAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class CombineAdjacentTapTransformer extends RuleReplaceTransformer
   public CombineAdjacentTapTransformer()
     {
     super(
-      PostResolveElements,
+      PostResolveAssembly,
       new AdjacentTempToTapExpression()
     );
     }

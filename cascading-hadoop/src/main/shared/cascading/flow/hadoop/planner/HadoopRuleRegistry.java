@@ -23,22 +23,24 @@ package cascading.flow.hadoop.planner;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
-import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsNodePipelinePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPipelinePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceCheckpointTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupMergeGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupNonBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupSplitMergeGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceHashJoinBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceHashJoinSameSourceTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceNonSafePipeSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceNonSafeSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceSameSourceStreamedAccumulatedTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.CombineAdjacentTapTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionCheckpointTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupMergeGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupNonBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupSplitMergeGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionGroupSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionHashJoinBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionHashJoinSameSourceTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionNonSafePipeSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionNonSafeSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.PartitionSameSourceStreamedAccumulatedTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinTransformer;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.assertion.BufferAfterEveryAssert;
 import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
@@ -56,26 +58,26 @@ public class HadoopRuleRegistry extends RuleRegistry
   {
   public HadoopRuleRegistry()
     {
-    // PrePartition
+    // PreBalance
     addRule( new LoneGroupAssert() );
     addRule( new MissingGroupAssert() );
     addRule( new BufferAfterEveryAssert() );
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
 
-    // Partition
-    addRule( new PartitionGroupSplitTransformer() );
-    addRule( new PartitionGroupSplitMergeGroupTransformer() );
-    addRule( new PartitionGroupMergeGroupTransformer() );
-    addRule( new PartitionGroupGroupTransformer() );
-    addRule( new PartitionCheckpointTransformer() );
-    addRule( new PartitionHashJoinSameSourceTransformer() );
-    addRule( new PartitionHashJoinBlockingHashJoinTransformer() );
-    addRule( new PartitionGroupBlockingHashJoinTransformer() );
-    addRule( new PartitionGroupNonBlockingHashJoinTransformer() );
-    addRule( new PartitionSameSourceStreamedAccumulatedTransformer() );
-    addRule( new PartitionNonSafeSplitTransformer() );
-    addRule( new PartitionNonSafePipeSplitTransformer() );
+    // Balance
+    addRule( new BalanceGroupSplitTransformer() );
+    addRule( new BalanceGroupSplitMergeGroupTransformer() );
+    addRule( new BalanceGroupMergeGroupTransformer() );
+    addRule( new BalanceGroupGroupTransformer() );
+    addRule( new BalanceCheckpointTransformer() );
+    addRule( new BalanceHashJoinSameSourceTransformer() );
+    addRule( new BalanceHashJoinBlockingHashJoinTransformer() );
+    addRule( new BalanceGroupBlockingHashJoinTransformer() );
+    addRule( new BalanceGroupNonBlockingHashJoinTransformer() );
+    addRule( new BalanceSameSourceStreamedAccumulatedTransformer() );
+    addRule( new BalanceNonSafeSplitTransformer() );
+    addRule( new BalanceNonSafePipeSplitTransformer() );
 
     // PreResolve
     addRule( new RemoveNoOpPipeTransformer() );
@@ -94,7 +96,12 @@ public class HadoopRuleRegistry extends RuleRegistry
     addRule( new TapGroupNodePartitioner() );
     addRule( new GroupTapNodePartitioner() );
 
-    // PipelineNodes
-    addRule( new StreamedAccumulatedTapsNodePipelinePartitioner() );
+    // PartitionPipelines
+    addRule( new StreamedAccumulatedTapsPipelinePartitioner() );
+    addRule( new StreamedOnlySourcesPipelinePartitioner() );
+
+    // PostPipelines
+    addRule( new RemoveMalformedHashJoinTransformer() );
+
     }
   }

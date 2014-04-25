@@ -22,7 +22,7 @@ package cascading.flow.planner.rule.transformer;
 
 import cascading.flow.planner.rule.expression.NoOpPipeExpression;
 
-import static cascading.flow.planner.rule.PlanPhase.PreResolveElements;
+import static cascading.flow.planner.rule.PlanPhase.PreResolveAssembly;
 
 /**
  *
@@ -32,7 +32,7 @@ public class RemoveNoOpPipeTransformer extends RuleContractedTransformer
   public RemoveNoOpPipeTransformer()
     {
     super(
-      PreResolveElements,
+      PreResolveAssembly,
       new NoOpPipeExpression()
     );
     }

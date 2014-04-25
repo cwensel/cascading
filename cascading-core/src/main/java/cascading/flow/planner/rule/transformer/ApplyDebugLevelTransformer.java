@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.transformer;
 import cascading.flow.planner.rule.expression.PlannerLevelExpression;
 import cascading.operation.DebugLevel;
 
-import static cascading.flow.planner.rule.PlanPhase.PreResolveElements;
+import static cascading.flow.planner.rule.PlanPhase.PreResolveAssembly;
 
 /**
  *
@@ -33,7 +33,7 @@ public class ApplyDebugLevelTransformer extends RuleContractedTransformer
   public ApplyDebugLevelTransformer()
     {
     super(
-      PreResolveElements,
+      PreResolveAssembly,
       new PlannerLevelExpression( DebugLevel.class )
     );
     }

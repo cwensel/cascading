@@ -23,7 +23,7 @@ package cascading.flow.planner.rule.assertion;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.expression.LoneGroupExpression;
 
-import static cascading.flow.planner.rule.PlanPhase.PrePartitionElements;
+import static cascading.flow.planner.rule.PlanPhase.PreBalanceAssembly;
 
 /**
  * Verifies that there are not only GroupAssertions following any given Group instance. This will adversely
@@ -34,7 +34,7 @@ public class LoneGroupAssert extends RuleAssert
   public LoneGroupAssert()
     {
     super(
-      PrePartitionElements,
+      PreBalanceAssembly,
       new LoneGroupExpression(),
       "group assertions must be accompanied by aggregator operations"
     );
