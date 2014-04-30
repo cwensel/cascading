@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.5.5 [unreleased]
+
 2.5.4
 
   Fixed an issue where c.t.h.Hfs#getChildIdentifiers() could throw an j.l.StringIndexOutOfBoundsException.
