@@ -48,6 +48,7 @@ import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
+import cascading.property.ConfigDef;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
@@ -642,9 +643,15 @@ public abstract class FlowPlanner<F extends Flow, Config>
       {
       // only restart from a checkpoint pipe or checkpoint tap below
       if( pipe instanceof Checkpoint )
+        {
         checkpointTap = makeTempTap( checkpointRootPath, pipe.getName() );
+        // mark as an anonymous checkpoint
+        checkpointTap.getConfigDef().setProperty( ConfigDef.Mode.DEFAULT, "cascading.checkpoint", "true" );
+        }
       else
+        {
         checkpointTap = makeTempTap( pipe.getName() );
+        }
       }
 
     graph.insertFlowElementAfter( pipe, checkpointTap );
@@ -821,7 +828,7 @@ public abstract class FlowPlanner<F extends Flow, Config>
           // added for JoinFieldedPipesPlatformTest.testJoinMergeGroupBy where Merge hides streamed nature of path
           if( flowElement instanceof Group && !joins.isEmpty() )
             {
-            List<Splice> splices = new ArrayList<Splice>(  );
+            List<Splice> splices = new ArrayList<Splice>();
 
             splices.addAll( merges );
             splices.add( (Splice) flowElement );
