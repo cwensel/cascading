@@ -89,9 +89,9 @@ public class PathScopeExpression extends ScopeExpression
       case Ignore:
         return true;
       case Blocking:
-        return scope.getOrdinal() != 0;
+        return !scope.isNonBlocking();
       case NonBlocking:
-        return scope.getOrdinal() == 0;
+        return scope.isNonBlocking();
       default:
         throw new IllegalStateException( "should never reach here" );
       }

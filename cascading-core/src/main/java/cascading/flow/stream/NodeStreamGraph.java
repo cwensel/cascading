@@ -41,7 +41,7 @@ import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
-import org.jgrapht.GraphPath;
+import cascading.util.Util;
 import org.jgrapht.Graphs;
 
 import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
@@ -113,15 +113,12 @@ public abstract class NodeStreamGraph extends StreamGraph
       return 0;
 
     FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
-    Splice rhsElement = (Splice) ( (SpliceGate) rhsDuct ).getFlowElement();
+    FlowElement rhsElement = ( (ElementDuct) rhsDuct ).getFlowElement();
 
-    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( elementGraph, lhsElement, rhsElement );
+    Set<Scope> allEdges = elementGraph.getAllEdges( lhsElement, rhsElement );
 
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      if( path.getEdgeList().size() == 1 )
-        return rhsElement.getPipePos().get( path.getEdgeList().get( 0 ).getName() );
-      }
+    if( allEdges.size() == 1 )
+      return Util.getFirst( allEdges ).getOrdinal();
 
     throw new IllegalStateException( "could not find ordinal" );
     }
@@ -325,8 +322,9 @@ public abstract class NodeStreamGraph extends StreamGraph
 
       ElementDuct elementDuct = (ElementDuct) duct;
 
-      elementDuct.getIncomingScopes().addAll( elementGraph.incomingEdgesOf( elementDuct.getFlowElement() ) );
-      elementDuct.getOutgoingScopes().addAll( elementGraph.outgoingEdgesOf( elementDuct.getFlowElement() ) );
+      // get the actual incoming/outgoing scopes for the full node as we need the total number of branches
+      elementDuct.getIncomingScopes().addAll( node.getPreviousScopes( elementDuct.getFlowElement() ) );
+      elementDuct.getOutgoingScopes().addAll( node.getNextScopes( elementDuct.getFlowElement() ) );
       }
     }
   }

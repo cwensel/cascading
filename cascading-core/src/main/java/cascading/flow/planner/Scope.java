@@ -42,8 +42,11 @@ public class Scope implements Serializable
   /** Field name */
   private String name;
   private LinkedList<String> priorNames = new LinkedList<>();
+
   /** Field ordinal */
-  private int ordinal = 0;
+  private int ordinal = 0; // do not copy
+  /** Field isStreamed is not accumulated. currently only relevant to HashJoin **/
+  private boolean isNonBlocking = true; // do not copy
 
   // copied
 
@@ -214,6 +217,16 @@ public class Scope implements Serializable
   public void setOrdinal( int ordinal )
     {
     this.ordinal = ordinal;
+    }
+
+  public void setNonBlocking( boolean isNonBlocking )
+    {
+    this.isNonBlocking = isNonBlocking;
+    }
+
+  public boolean isNonBlocking()
+    {
+    return isNonBlocking;
     }
 
   public boolean isSplice()

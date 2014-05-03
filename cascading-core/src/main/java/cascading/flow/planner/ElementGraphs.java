@@ -396,13 +396,22 @@ public class ElementGraphs
         {
         FlowElement target = elementGraph.getEdgeTarget( outgoing );
 
-        int ordinal = outgoing.getOrdinal();
+        boolean isNonBlocking = outgoing.isNonBlocking();
 
         if( isJoin )
-          ordinal = Math.max( ordinal, incoming.getOrdinal() );
+          isNonBlocking = isNonBlocking && incoming.isNonBlocking();
 
         Scope scope = new Scope( outgoing );
-        scope.setOrdinal( ordinal ); // not copied
+
+        // unsure if necessary since we track blocking independently
+        // when removing a pipe, pull ordinal up to tap
+        // when removing a Splice retain ordinal
+        if( flowElement instanceof Splice )
+          scope.setOrdinal( incoming.getOrdinal() );
+        else
+          scope.setOrdinal( outgoing.getOrdinal() );
+
+        scope.setNonBlocking( isNonBlocking );
         scope.addPriorNames( incoming, outgoing ); // not copied
         elementGraph.addEdge( source, target, scope );
         }
@@ -730,7 +739,7 @@ public class ElementGraphs
     @Override
     public Map<String, String> getComponentAttributes( Scope scope )
       {
-      if( scope.getOrdinal() == 0 )
+      if( scope.isNonBlocking() )
         return null;
 
       return attributes;

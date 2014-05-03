@@ -329,7 +329,11 @@ public class FlowElementGraph extends ElementDirectedGraph
 
         LOG.debug( "adding edge: {} -> {}", source, current );
 
-        addEdge( source, current ).setName( current.getName() );
+        Scope scope = addEdge( source, current );
+
+        scope.setName( current.getName() );
+
+        setOrdinal( current, scope );
         }
       }
 
@@ -346,9 +350,19 @@ public class FlowElementGraph extends ElementDirectedGraph
 
       scope.setName( previous.getName() ); // name scope after previous pipe
 
-      // only set ordinal
-      if( current instanceof Splice && ( (Splice) current ).isJoin() )
-        scope.setOrdinal( ( (Splice) current ).getPipePos().get( previous.getName() ) );
+      setOrdinal( current, scope );
+      }
+    }
+
+  private void setOrdinal( Pipe current, Scope scope )
+    {
+    if( current instanceof Splice )
+      {
+      Integer ordinal = ( (Splice) current ).getPipePos().get( scope.getName() );
+      scope.setOrdinal( ordinal );
+
+      if( ( (Splice) current ).isJoin() && ordinal != 0 )
+        scope.setNonBlocking( false );
       }
     }
 
