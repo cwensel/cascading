@@ -37,8 +37,9 @@ public class StreamedAccumulatedTapsPipelinePartitioner extends RulePartitioner
     {
     super(
       PartitionPipelines,
+      new StreamedAccumulatedTapsPipelinePartitionExpression(),
       new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed ),
-      new StreamedAccumulatedTapsPipelinePartitionExpression()
+      new ElementAnnotation<>( ElementExpression.Capture.Include, StreamMode.Accumulated )
     );
     }
   }

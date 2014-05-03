@@ -25,13 +25,13 @@ import cascading.flow.planner.rule.RuleExpression;
 /**
  *
  */
-public class StreamedOnlySourcesPipelinePartitionExpression extends RuleExpression
+public class StreamedSelfJoinSourcesPipelinePartitionExpression extends RuleExpression
   {
-  public StreamedOnlySourcesPipelinePartitionExpression()
+  public StreamedSelfJoinSourcesPipelinePartitionExpression()
     {
     super(
       new NoGroupJoinTapExpressionGraph(),
-      new StreamedOnlySourcesExpression()
+      new StreamedSelfJoinSourcesExpression()
     );
     }
   }

@@ -36,19 +36,14 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
     }
 
-  public RulePartitioner( PlanPhase phase, ElementAnnotation annotation, RuleExpression ruleExpression )
+  public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
     {
-    this( phase, annotation, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
     }
 
-  public RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
+  public RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
-    this( phase, null, contractionGraph, expressionGraph );
-    }
-
-  public RulePartitioner( PlanPhase phase, ElementAnnotation annotation, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
-    {
-    super( annotation, contractionGraph, expressionGraph );
+    super( contractionGraph, expressionGraph, annotations );
     this.phase = phase;
     }
 

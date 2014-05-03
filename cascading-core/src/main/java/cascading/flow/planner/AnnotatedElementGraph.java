@@ -41,6 +41,10 @@ public class AnnotatedElementGraph extends ElementMultiGraph
   public AnnotatedElementGraph( ElementGraph parentElementGraph, ElementGraph elementGraph, Map<Enum, Set<FlowElement>> annotations )
     {
     super( elementGraph );
+
+    if( elementGraph instanceof AnnotatedElementGraph && ( (AnnotatedElementGraph) elementGraph ).annotations != null )
+      throw new UnsupportedOperationException( "todo: merge annotations with copy" );
+
     this.annotations = annotations;
 
     bindHeadAndTail( parentElementGraph, elementGraph );

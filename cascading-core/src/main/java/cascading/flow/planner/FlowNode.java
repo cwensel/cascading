@@ -27,9 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,13 +36,9 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.stream.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
-import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
 
 import static cascading.flow.planner.ElementGraphs.*;
 
@@ -266,80 +260,6 @@ public class FlowNode implements ProcessModel, Serializable
     streamedSourceByJoin.put( join, streamedSource );
     }
 
-  public Set<Tap> getAllAccumulatedSources()
-    {
-    HashSet<Tap> set = new HashSet<Tap>();
-
-    for( Set<Tap> taps : accumulatedSourcesByJoin.values() )
-      set.addAll( taps );
-
-    return set;
-    }
-
-  public void addAccumulatedSourceFor( HashJoin join, Tap accumulatedSource )
-    {
-    if( !accumulatedSourcesByJoin.containsKey( join ) )
-      accumulatedSourcesByJoin.put( join, new HashSet<Tap>() );
-
-    accumulatedSourcesByJoin.get( join ).add( accumulatedSource );
-    }
-
-  public Set<Tap> getJoinTributariesBetween( FlowElement from, FlowElement to )
-    {
-    Set<HashJoin> joins = new HashSet<HashJoin>();
-    Set<Merge> merges = new HashSet<Merge>();
-
-    List<GraphPath<FlowElement, Scope>> paths = getPathsBetween( from, to );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      for( FlowElement flowElement : Graphs.getPathVertexList( path ) )
-        {
-        if( flowElement instanceof HashJoin )
-          joins.add( (HashJoin) flowElement );
-
-        if( flowElement instanceof Merge )
-          merges.add( (Merge) flowElement );
-        }
-      }
-
-    Set<Tap> tributaries = new HashSet<>();
-
-    for( HashJoin join : joins )
-      {
-      for( Tap source : getSources() )
-        {
-        List<GraphPath<FlowElement, Scope>> joinPaths = new LinkedList<>( getPathsBetween( source, join ) );
-
-        ListIterator<GraphPath<FlowElement, Scope>> iterator = joinPaths.listIterator();
-
-        while( iterator.hasNext() )
-          {
-          GraphPath<FlowElement, Scope> joinPath = iterator.next();
-
-          if( !Collections.disjoint( Graphs.getPathVertexList( joinPath ), merges ) )
-            iterator.remove();
-          }
-
-        if( !joinPaths.isEmpty() )
-          tributaries.add( source );
-        }
-      }
-
-    return tributaries;
-    }
-
-  private List<GraphPath<FlowElement, Scope>> getPathsBetween( FlowElement from, FlowElement to )
-    {
-    KShortestPaths<FlowElement, Scope> paths = new KShortestPaths<FlowElement, Scope>( getElementGraph(), from, Integer.MAX_VALUE );
-    List<GraphPath<FlowElement, Scope>> results = paths.getPaths( to );
-
-    if( results == null )
-      return Collections.EMPTY_LIST;
-
-    return results;
-    }
-
   private void addSourceModes()
     {
     Set<HashJoin> hashJoins = ElementGraphs.findAllHashJoins( getElementGraph() );
@@ -352,14 +272,11 @@ public class FlowNode implements ProcessModel, Serializable
         Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( getElementGraph(), source, hashJoin );
 
         boolean isStreamed = isOnlyStreamedPath( sourcePaths );
-        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
+//        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
         boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
 
         if( isStreamed || isBoth )
           addStreamedSourceFor( hashJoin, source );
-
-        if( isAccumulated || isBoth )
-          addAccumulatedSourceFor( hashJoin, source );
         }
       }
     }
@@ -428,17 +345,6 @@ public class FlowNode implements ProcessModel, Serializable
       }
 
     this.streamPipelineMap = map;
-    }
-
-
-  public List<FlowElement> getSuccessors( FlowElement flowElement )
-    {
-    return Graphs.successorListOf( nodeSubGraph, flowElement );
-    }
-
-  public List<FlowElement> getPredecessor( FlowElement flowElement )
-    {
-    return Graphs.predecessorListOf( nodeSubGraph, flowElement );
     }
 
   public Tap getTrap( String branchName )

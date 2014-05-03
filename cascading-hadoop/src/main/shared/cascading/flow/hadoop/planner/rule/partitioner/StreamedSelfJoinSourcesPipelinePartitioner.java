@@ -18,20 +18,28 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.expression;
+package cascading.flow.hadoop.planner.rule.partitioner;
 
-import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.hadoop.planner.rule.expression.StreamedSelfJoinSourcesPipelinePartitionExpression;
+import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.subgraph.ElementAnnotation;
+import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.stream.StreamMode;
+
+import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
 
 /**
  *
  */
-public class StreamedOnlySourcesPipelinePartitionExpression extends RuleExpression
+public class StreamedSelfJoinSourcesPipelinePartitioner extends RulePartitioner
   {
-  public StreamedOnlySourcesPipelinePartitionExpression()
+
+  public StreamedSelfJoinSourcesPipelinePartitioner()
     {
     super(
-      new NoGroupJoinTapExpressionGraph(),
-      new StreamedOnlySourcesExpression()
+      PartitionPipelines,
+      new StreamedSelfJoinSourcesPipelinePartitionExpression(),
+      new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed )
     );
     }
   }

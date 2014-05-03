@@ -25,6 +25,7 @@ import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartiti
 import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
 import cascading.flow.hadoop.planner.rule.transformer.BalanceCheckpointTransformer;
@@ -99,6 +100,7 @@ public class HadoopRuleRegistry extends RuleRegistry
     // PartitionPipelines
     addRule( new StreamedAccumulatedTapsPipelinePartitioner() );
     addRule( new StreamedOnlySourcesPipelinePartitioner() );
+    addRule( new StreamedSelfJoinSourcesPipelinePartitioner() );
 
     // PostPipelines
     addRule( new RemoveMalformedHashJoinTransformer() );

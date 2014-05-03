@@ -38,8 +38,8 @@ public class StreamedOnlySourcesPipelinePartitioner extends RulePartitioner
     {
     super(
       PartitionPipelines,
-      new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed ),
-      new StreamedOnlySourcesPipelinePartitionExpression()
+      new StreamedOnlySourcesPipelinePartitionExpression(),
+      new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed )
     );
     }
   }

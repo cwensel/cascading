@@ -124,6 +124,9 @@ public class TraceWriter
         {
         List<ElementGraph> pipelineGraphs = subGraphsMap.get( elementGraph );
 
+        if( pipelineGraphs == null )
+          continue;
+
         for( int i = 0; i < pipelineGraphs.size(); i++ )
           {
           ElementGraph flowElementGraph = pipelineGraphs.get( i );

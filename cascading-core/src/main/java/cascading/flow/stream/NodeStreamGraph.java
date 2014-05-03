@@ -195,9 +195,10 @@ public abstract class NodeStreamGraph extends StreamGraph
     if( join.getNumSelfJoins() != 0 )
       return createBlockingJoinGate( join );
 
+    // TODO: waiting on hitting test where this is applicable
     // lets not block the streamed side unless it will cause a deadlock
-    if( joinHasSameStreamedSource( join ) )
-      return createBlockingJoinGate( join );
+//    if( joinHasSameStreamedSource( join ) )
+//      return createBlockingJoinGate( join );
 
     return createNonBlockingJoinGate( join );
     }

@@ -24,8 +24,10 @@ import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.pipe.Group;
+import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 
 import static cascading.flow.planner.iso.expression.OrElementExpression.or;
@@ -33,17 +35,25 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 /**
  * Captures the source when the pipeline only has a single source and its streamed.
  */
-public class StreamedOnlySourcesExpression extends ExpressionGraph
+public class StreamedSelfJoinSourcesExpression extends ExpressionGraph
   {
-  public StreamedOnlySourcesExpression()
+  public StreamedSelfJoinSourcesExpression()
     {
     super( SearchOrder.Depth, true );
 
+    FlowElementExpression intermediate = new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Linear );
+
     this.arc(
       or( ElementExpression.Capture.Primary,
-        new FlowElementExpression( Tap.class ),
-        new FlowElementExpression( Group.class )
+        new FlowElementExpression( Tap.class, TypeExpression.Topo.LinearOut ),
+        new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut )
       ),
+      PathScopeExpression.ALL,
+      intermediate
+    );
+
+    this.arc(
+      intermediate,
       PathScopeExpression.ALL,
       or(
         new FlowElementExpression( Tap.class ),

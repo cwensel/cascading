@@ -20,12 +20,16 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
+import cascading.flow.FlowElement;
+import cascading.flow.planner.PlannerContext;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Splice;
 
 import static cascading.flow.planner.iso.expression.AndElementExpression.and;
 import static cascading.flow.planner.iso.expression.NotElementExpression.not;
@@ -39,7 +43,14 @@ public class MalformedJoinExpressionGraph extends ExpressionGraph
     {
     super( SearchOrder.ReverseDepth,
       and( ElementExpression.Capture.Primary,
-        new FlowElementExpression( HashJoin.class ),
+        new FlowElementExpression( HashJoin.class )
+        {
+        @Override
+        public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, FlowElement flowElement )
+          {
+          return super.applies( plannerContext, elementGraph, flowElement ) && !( (Splice) flowElement ).isSelfJoin();
+          }
+        },
         not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Splice ) )
       )
     );

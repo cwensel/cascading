@@ -41,25 +41,27 @@ import cascading.flow.planner.iso.finder.Match;
  */
 public class GraphPartitioner
   {
-  ElementAnnotation annotation;
   ExpressionGraph contractionGraph;
   ExpressionGraph expressionGraph;
+  ElementAnnotation[] annotations;
 
   protected GraphPartitioner()
     {
+    this.annotations = new ElementAnnotation[ 0 ];
     }
 
-  public GraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph  )
+  public GraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
     {
     this.contractionGraph = contractionGraph;
     this.expressionGraph = expressionGraph;
+    this.annotations = new ElementAnnotation[ 0 ];
     }
 
-  public GraphPartitioner( ElementAnnotation annotation, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph )
+  public GraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
-    this.annotation = annotation;
     this.contractionGraph = contractionGraph;
     this.expressionGraph = expressionGraph;
+    this.annotations = annotations;
     }
 
   public ExpressionGraph getContractionGraph()
@@ -96,16 +98,19 @@ public class GraphPartitioner
 
       Map<Enum, Set<FlowElement>> annotations = Collections.emptyMap();
 
-      if( annotation != null )
+      if( this.annotations.length != 0 )
         {
-        Match match = stepIterator.getContractedMatches().get( count++ );
+        Match match = stepIterator.getContractedMatches().get( count );
 
         annotations = new HashMap<>();
 
-        annotations.put( annotation.annotation, match.getCapturedElements( annotation.capture ) );
+        for( ElementAnnotation annotation : this.annotations )
+          annotations.put( annotation.annotation, match.getCapturedElements( annotation.capture ) );
         }
 
       annotatedSubGraphs.put( next, annotations );
+
+      count++;
       }
 
     return new Partitions( this, stepIterator, elementGraph, annotatedSubGraphs );

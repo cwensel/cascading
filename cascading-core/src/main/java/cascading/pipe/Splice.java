@@ -977,7 +977,7 @@ public class Splice extends Pipe
     return numSelfJoins;
     }
 
-  boolean isSelfJoin()
+  public boolean isSelfJoin()
     {
     return numSelfJoins != 0;
     }
