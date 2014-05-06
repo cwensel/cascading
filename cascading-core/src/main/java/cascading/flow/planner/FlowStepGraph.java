@@ -79,6 +79,9 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
 
       List<ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeGraph );
 
+      if( pipelineGraphs == null )
+        continue;
+
       for( int j = 0; j < pipelineGraphs.size(); j++ )
         {
         ElementGraph pipelineGraph = pipelineGraphs.get( j );

@@ -20,6 +20,7 @@
 
 package cascading.flow.planner.iso.subgraph;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -41,9 +42,9 @@ import cascading.flow.planner.iso.finder.Match;
  */
 public class GraphPartitioner
   {
-  ExpressionGraph contractionGraph;
-  ExpressionGraph expressionGraph;
-  ElementAnnotation[] annotations;
+  protected ExpressionGraph contractionGraph;
+  protected ExpressionGraph expressionGraph;
+  protected ElementAnnotation[] annotations;
 
   protected GraphPartitioner()
     {
@@ -76,6 +77,11 @@ public class GraphPartitioner
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph )
     {
+    return partition( plannerContext, elementGraph, null );
+    }
+
+  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
+    {
     Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs = new LinkedHashMap<>();
 
     if( expressionGraph == null )
@@ -89,7 +95,7 @@ public class GraphPartitioner
       return new Partitions( this, elementGraph, annotatedSubGraphs );
       }
 
-    SubGraphIterator stepIterator = new SubGraphIterator( plannerContext, contractionGraph, expressionGraph, elementGraph );
+    SubGraphIterator stepIterator = new SubGraphIterator( plannerContext, contractionGraph, expressionGraph, elementGraph, excludes );
 
     int count = 0;
     while( stepIterator.hasNext() )

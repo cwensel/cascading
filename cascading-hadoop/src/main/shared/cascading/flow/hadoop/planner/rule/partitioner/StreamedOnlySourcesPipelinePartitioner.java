@@ -33,13 +33,11 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
  */
 public class StreamedOnlySourcesPipelinePartitioner extends RulePartitioner
   {
-
   public StreamedOnlySourcesPipelinePartitioner()
     {
-    super(
-      PartitionPipelines,
-      new StreamedOnlySourcesPipelinePartitionExpression(),
-      new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed )
-    );
+    setPhase( PartitionPipelines )
+      .setRuleExpression( new StreamedOnlySourcesPipelinePartitionExpression() )
+      .addAnnotation( new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed ) )
+      .addAnnotationExclude( StreamMode.Streamed );
     }
   }

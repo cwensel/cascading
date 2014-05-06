@@ -21,7 +21,9 @@
 package cascading.flow.planner.rule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -263,7 +265,8 @@ public class RuleExec
     testRulePartitioner( rule );
 
     List<ElementGraph> stepSubGraphs = context.ruleResult.getStepSubGraphResults();
-    Map<ElementGraph, List<ElementGraph>> stepNodeSubGraphs = performNodePartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, stepSubGraphs, (RulePartitioner) rule );
+    Map<ElementGraph, List<ElementGraph>> priorResults = context.ruleResult.getNodeSubGraphResults();
+    Map<ElementGraph, List<ElementGraph>> stepNodeSubGraphs = performNodePartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, stepSubGraphs, priorResults, (RulePartitioner) rule );
 
     context.ruleResult.addNodeSubGraphs( stepNodeSubGraphs );
     }
@@ -276,7 +279,8 @@ public class RuleExec
         testRulePartitioner( rule );
 
         Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphResults();
-        Map<ElementGraph, List<ElementGraph>> nodePipelines = performNodePipelineIsolation( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, nodeSubGraphs, (RulePartitioner) rule );
+        Map<ElementGraph, List<ElementGraph>> priorNodePipelineGraphs = context.ruleResult.getNodePipelineGraphResults();
+        Map<ElementGraph, List<ElementGraph>> nodePipelines = performNodePipelinePartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, nodeSubGraphs, priorNodePipelineGraphs, (RulePartitioner) rule );
 
         context.ruleResult.addNodePipelineGraphs( nodePipelines );
         break;
@@ -333,14 +337,16 @@ public class RuleExec
 
   private List<ElementGraph> performStepPartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, RulePartitioner partitioner )
     {
-    Partitions partition = partitioner.partition( plannerContext, elementGraph );
+    Set<FlowElement> exclusions = getExclusions( Collections.<ElementGraph>singletonList( elementGraph ), partitioner.getAnnotationExcludes() );
+
+    Partitions partition = partitioner.partition( plannerContext, elementGraph, exclusions );
 
     traceWriter.writePlan( phase, partitionRuleNum, partition );
 
     return makeBoundedOn( elementGraph, partition.getAnnotatedSubGraphs() );
     }
 
-  private Map<ElementGraph, List<ElementGraph>> performNodePartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, List<ElementGraph> stepSubGraphs, RulePartitioner partitioner )
+  private Map<ElementGraph, List<ElementGraph>> performNodePartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, List<ElementGraph> stepSubGraphs, Map<ElementGraph, List<ElementGraph>> priorResults, RulePartitioner partitioner )
     {
     Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = new LinkedHashMap<>();
 
@@ -348,7 +354,9 @@ public class RuleExec
 
     for( ElementGraph stepSubGraph : stepSubGraphs )
       {
-      Partitions partition = partitioner.partition( plannerContext, stepSubGraph );
+      Set<FlowElement> exclusions = getExclusions( priorResults.get( stepSubGraph ), partitioner.getAnnotationExcludes() );
+
+      Partitions partition = partitioner.partition( plannerContext, stepSubGraph, exclusions );
 
       traceWriter.writePlan( phase, partitionRuleNum, stepCount++, partition );
 
@@ -360,7 +368,7 @@ public class RuleExec
     return nodeSubGraphs;
     }
 
-  private Map<ElementGraph, List<ElementGraph>> performNodePipelineIsolation( PlanPhase phase, int pipelineRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, Map<ElementGraph, List<ElementGraph>> nodeSubGraphs, RulePartitioner partitioner )
+  private Map<ElementGraph, List<ElementGraph>> performNodePipelinePartitions( PlanPhase phase, int pipelineRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, Map<ElementGraph, List<ElementGraph>> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> priorResults, RulePartitioner partitioner )
     {
     Map<ElementGraph, List<ElementGraph>> nodePipeLines = new LinkedHashMap<>();
 
@@ -372,7 +380,9 @@ public class RuleExec
 
       for( ElementGraph nodeSubGraph : entry.getValue() )
         {
-        Partitions partitions = partitioner.partition( plannerContext, nodeSubGraph );
+        Set<FlowElement> exclusions = getExclusions( priorResults.get( nodeSubGraph ), partitioner.getAnnotationExcludes() );
+
+        Partitions partitions = partitioner.partition( plannerContext, nodeSubGraph, exclusions );
 
         traceWriter.writePlan( phase, pipelineRuleNum, stepCount, nodeCount++, partitions );
 
@@ -385,6 +395,30 @@ public class RuleExec
       }
 
     return nodePipeLines;
+    }
+
+  private Set<FlowElement> getExclusions( List<ElementGraph> elementGraphs, Enum[] annotationExcludes )
+    {
+    if( elementGraphs == null )
+      return null;
+
+    Set<FlowElement> exclusions = new HashSet<>();
+
+    for( ElementGraph elementGraph : elementGraphs )
+      {
+      if( !( elementGraph instanceof AnnotatedElementGraph ) )
+        continue;
+
+      for( Enum annotationExclude : annotationExcludes )
+        {
+        Set<FlowElement> flowElements = ( (AnnotatedElementGraph) elementGraph ).getAnnotations().get( annotationExclude );
+
+        if( flowElements != null )
+          exclusions.addAll( flowElements );
+        }
+      }
+
+    return exclusions;
     }
 
   private void performNodePipelineTransform( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphTransformer transformer )

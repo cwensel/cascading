@@ -99,8 +99,8 @@ public class HadoopRuleRegistry extends RuleRegistry
 
     // PartitionPipelines
     addRule( new StreamedAccumulatedTapsPipelinePartitioner() );
-    addRule( new StreamedOnlySourcesPipelinePartitioner() );
     addRule( new StreamedSelfJoinSourcesPipelinePartitioner() );
+    addRule( new StreamedOnlySourcesPipelinePartitioner() );
 
     // PostPipelines
     addRule( new RemoveMalformedHashJoinTransformer() );

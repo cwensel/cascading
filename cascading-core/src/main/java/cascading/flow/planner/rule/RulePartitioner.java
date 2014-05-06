@@ -20,6 +20,9 @@
 
 package cascading.flow.planner.rule;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.subgraph.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
@@ -30,6 +33,8 @@ import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 public class RulePartitioner extends GraphPartitioner implements Rule
   {
   PlanPhase phase;
+  Enum[] annotationExcludes = new Enum[0];
+
 
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression )
     {
@@ -41,27 +46,80 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
     }
 
-  public RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+  protected RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
     super( contractionGraph, expressionGraph, annotations );
     this.phase = phase;
     }
 
-  public RulePartitioner( PlanPhase phase, ExpressionGraph expressionGraph )
+  protected RulePartitioner( PlanPhase phase, ExpressionGraph expressionGraph )
     {
     super( null, expressionGraph );
     this.phase = phase;
     }
 
-  public RulePartitioner( PlanPhase phase )
+  protected RulePartitioner( PlanPhase phase )
     {
     this.phase = phase;
+    }
+
+  public RulePartitioner()
+    {
+    }
+
+  protected RulePartitioner setPhase( PlanPhase phase )
+    {
+    this.phase = phase;
+
+    return this;
     }
 
   @Override
   public PlanPhase getRulePhase()
     {
     return phase;
+    }
+
+  public RulePartitioner setRuleExpression( RuleExpression ruleExpression )
+    {
+    this.contractionGraph = ruleExpression.getContractionExpression();
+    this.expressionGraph = ruleExpression.getMatchExpression();
+
+    return this;
+    }
+
+  public RulePartitioner addAnnotation( ElementAnnotation annotation )
+    {
+    ArrayList<ElementAnnotation> elementAnnotations = new ArrayList<>( Arrays.asList( this.annotations ) );
+
+    elementAnnotations.add( annotation );
+
+    this.annotations = elementAnnotations.toArray( new ElementAnnotation[ elementAnnotations.size() ] );
+
+    return this;
+    }
+
+  public RulePartitioner setAnnotations( ElementAnnotation... annotations )
+    {
+    this.annotations = annotations;
+
+    return this;
+    }
+
+  public RulePartitioner addAnnotationExclude( Enum exclude )
+    {
+    ArrayList<Enum> exclusions = new ArrayList<>( Arrays.asList( this.annotationExcludes ) );
+
+    exclusions.add( exclude );
+
+    this.annotationExcludes = exclusions.toArray( new Enum[ exclusions.size() ] );
+
+    return this;
+    }
+
+  public Enum[] getAnnotationExcludes()
+    {
+    return annotationExcludes;
     }
 
   @Override

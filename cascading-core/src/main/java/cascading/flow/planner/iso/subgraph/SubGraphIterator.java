@@ -21,6 +21,7 @@
 package cascading.flow.planner.iso.subgraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -38,16 +39,12 @@ import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.Transform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class SubGraphIterator implements Iterator<ElementSubGraph>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( SubGraphIterator.class );
-
   private final PlannerContext plannerContext;
   private final ElementGraph flowElementGraph;
 
@@ -80,11 +77,24 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     this( plannerContext, contractionExpression, matchExpression, false, elementGraph );
     }
 
+  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph, Collection<FlowElement> excludes )
+    {
+    this( plannerContext, contractionExpression, matchExpression, false, elementGraph, excludes );
+    }
+
   public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph )
+    {
+    this( plannerContext, contractionExpression, matchExpression, firstOnly, elementGraph, null );
+    }
+
+  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
     this.plannerContext = plannerContext;
     this.firstOnly = firstOnly;
     this.flowElementGraph = elementGraph;
+
+    if( excludes != null )
+      this.excludes.addAll( excludes );
 
     if( contractionExpression != null )
       contractedTransformer = new ContractedTransformer( contractionExpression );
