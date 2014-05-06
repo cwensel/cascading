@@ -169,6 +169,26 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.multimapreduceplanner.normalizesources", "false" ) );
     }
 
+  /**
+   * Method setCollapseAdjacentTaps enables/disables an optimization that will identify if a sink tap and an intermediate tap
+   * are equivalent field wise, and discard the intermediate tap for the sink tap to minimize the number of MR jobs.
+   * <p/>
+   * Note that some Scheme types may lose type information if the planner cannot detect field types. This could result
+   * in type mismatch errors during joins.
+   *
+   * @param properties
+   * @param collapseAdjacent
+   */
+  public static void setCollapseAdjacentTaps( Map<Object, Object> properties, boolean collapseAdjacent )
+    {
+    properties.put( "cascading.multimapreduceplanner.collapseadjacentaps", Boolean.toString( collapseAdjacent ) );
+    }
+
+  public static boolean getCollapseAdjacentTaps( Map<Object, Object> properties )
+    {
+    return Boolean.parseBoolean( PropertyUtil.getProperty( properties, "cascading.multimapreduceplanner.collapseadjacentaps", "true" ) );
+    }
+
   @Override
   public JobConf getConfig()
     {
@@ -252,7 +272,8 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
       elementGraph = flow.updateSchemes( elementGraph );
 
       // m/r specific
-      handleAdjacentTaps( elementGraph );
+      if( getCollapseAdjacentTaps( properties ) )
+        handleAdjacentTaps( elementGraph );
 
       FlowStepGraph flowStepGraph = new HadoopStepGraph( flowDef.getName(), elementGraph );
 

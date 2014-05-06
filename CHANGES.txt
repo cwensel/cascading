@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Added new c.f.h.p.HadoopPlanner property to disable adjacent tap removal optimization. Setting
+  "cascading.multimapreduceplanner.collapseadjacentaps" to false will disable the optimization that is on by default.
+  This optimization can in a few cases reduce the number of MR jobs, but without consistent type information, could
+  result in a type mismatch errors during joins.
+
 2.5.4
 
   Fixed an issue where c.t.h.Hfs#getChildIdentifiers() could throw an j.l.StringIndexOutOfBoundsException.
