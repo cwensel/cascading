@@ -19,14 +19,13 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow.planner;
+package cascading.flow.planner.graph;
 
-import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementMultiGraph;
+import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.Scope;
 
 import static cascading.flow.planner.Extent.head;
 import static cascading.flow.planner.Extent.tail;
@@ -34,31 +33,49 @@ import static cascading.flow.planner.Extent.tail;
 /**
  *
  */
-public class AnnotatedElementGraph extends ElementMultiGraph
+public class BoundedElementMultiGraph extends ElementMultiGraph
   {
-  private Map<Enum, Set<FlowElement>> annotations;
+  public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, AnnotatedElementSet annotations )
+    {
+    copyFrom( subElementGraph );
 
-  public AnnotatedElementGraph( ElementGraph parentElementGraph, ElementGraph elementGraph, Map<Enum, Set<FlowElement>> annotations )
+    addParentAnnotations( parentElementGraph );
+
+    getAnnotations().addAnnotations( annotations );
+
+    bindHeadAndTail( parentElementGraph, subElementGraph );
+    }
+
+  public BoundedElementMultiGraph( ElementGraph elementGraph )
     {
     super( elementGraph );
-
-    if( elementGraph instanceof AnnotatedElementGraph && ( (AnnotatedElementGraph) elementGraph ).annotations != null )
-      throw new UnsupportedOperationException( "todo: merge annotations with copy" );
-
-    this.annotations = annotations;
-
-    bindHeadAndTail( parentElementGraph, elementGraph );
     }
 
-  public Map<Enum, Set<FlowElement>> getAnnotations()
+  private void addParentAnnotations( ElementGraph parentElementGraph )
     {
-    return annotations;
+    if( !( parentElementGraph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) parentElementGraph ).hasAnnotations() )
+      return;
+
+    Set<FlowElement> vertexSet = vertexSet();
+
+    AnnotatedElementSet parentAnnotations = ( (AnnotatedGraph) parentElementGraph ).getAnnotations();
+
+    for( Enum annotation : parentAnnotations.getAllAnnotations() )
+      {
+      Set<FlowElement> flowElements = parentAnnotations.getFlowElementsFor( annotation );
+
+      for( FlowElement flowElement : flowElements )
+        {
+        if( vertexSet.contains( flowElement ) )
+          getAnnotations().addAnnotations( annotation, flowElements );
+        }
+      }
     }
 
-  protected void bindHeadAndTail( ElementGraph parentElementGraph, ElementGraph elementGraph )
+  protected void bindHeadAndTail( ElementGraph parentElementGraph, ElementGraph subElementGraph )
     {
-    Set<FlowElement> sources = ElementGraphs.findSources( elementGraph, FlowElement.class );
-    Set<FlowElement> sinks = ElementGraphs.findSinks( elementGraph, FlowElement.class );
+    Set<FlowElement> sources = ElementGraphs.findSources( subElementGraph, FlowElement.class );
+    Set<FlowElement> sinks = ElementGraphs.findSinks( subElementGraph, FlowElement.class );
 
     addVertex( head );
     addVertex( tail );

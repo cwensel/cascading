@@ -21,19 +21,18 @@
 package cascading.flow.planner.iso.subgraph;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Extent;
 import cascading.flow.planner.PlannerContext;
+import cascading.flow.planner.graph.AnnotatedElementSet;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
 
@@ -82,7 +81,7 @@ public class GraphPartitioner
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
-    Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs = new LinkedHashMap<>();
+    Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs = new LinkedHashMap<>();
 
     if( expressionGraph == null )
       {
@@ -90,7 +89,7 @@ public class GraphPartitioner
       if( elementGraph.containsVertex( Extent.head ) )
         elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), Collections.<Enum, Set<FlowElement>>emptyMap() );
+      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new AnnotatedElementSet() );
 
       return new Partitions( this, elementGraph, annotatedSubGraphs );
       }
@@ -102,16 +101,14 @@ public class GraphPartitioner
       {
       ElementSubGraph next = stepIterator.next();
 
-      Map<Enum, Set<FlowElement>> annotations = Collections.emptyMap();
+      AnnotatedElementSet annotations = new AnnotatedElementSet();
 
       if( this.annotations.length != 0 )
         {
         Match match = stepIterator.getContractedMatches().get( count );
 
-        annotations = new HashMap<>();
-
         for( ElementAnnotation annotation : this.annotations )
-          annotations.put( annotation.annotation, match.getCapturedElements( annotation.capture ) );
+          annotations.addAnnotations( annotation.getAnnotation(), match.getCapturedElements( annotation.getCapture() ) );
         }
 
       annotatedSubGraphs.put( next, annotations );

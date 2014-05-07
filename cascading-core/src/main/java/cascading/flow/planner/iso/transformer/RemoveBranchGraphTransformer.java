@@ -46,7 +46,7 @@ public class RemoveBranchGraphTransformer extends MutateGraphTransformer
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
     Set<FlowElement> remove = match.getCapturedElements( ElementExpression.Capture.Primary );
 

@@ -27,13 +27,14 @@ import java.util.List;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.rule.Rule;
 
 /**
  *
  */
-public class Transform<E extends ElementGraph>
+public class Transformed<E extends ElementGraph> extends GraphResult
   {
   PlannerContext plannerContext;
   GraphTransformer graphTransformer;
@@ -41,10 +42,10 @@ public class Transform<E extends ElementGraph>
   ElementGraph beginGraph;
   int recursionCount = 0;
   List<ElementGraph> recursions;
-  List<Transform> childTransforms;
+  List<Transformed> childTransforms;
   E endGraph;
 
-  public Transform( PlannerContext plannerContext, GraphTransformer graphTransformer, ElementGraph beginGraph )
+  public Transformed( PlannerContext plannerContext, GraphTransformer graphTransformer, ElementGraph beginGraph )
     {
     this.plannerContext = plannerContext;
     this.graphTransformer = graphTransformer;
@@ -55,7 +56,7 @@ public class Transform<E extends ElementGraph>
     this.beginGraph = beginGraph;
     }
 
-  public Transform( PlannerContext plannerContext, GraphTransformer graphTransformer, ExpressionGraph expressionGraph, ElementGraph beginGraph )
+  public Transformed( PlannerContext plannerContext, GraphTransformer graphTransformer, ExpressionGraph expressionGraph, ElementGraph beginGraph )
     {
     this.plannerContext = plannerContext;
     this.graphTransformer = graphTransformer;
@@ -90,11 +91,18 @@ public class Transform<E extends ElementGraph>
     return graphTransformer;
     }
 
+  @Override
+  public ElementGraph getBeginGraph()
+    {
+    return beginGraph;
+    }
+
   public void setEndGraph( E endGraph )
     {
     this.endGraph = endGraph;
     }
 
+  @Override
   public E getEndGraph()
     {
     return endGraph;
@@ -113,7 +121,7 @@ public class Transform<E extends ElementGraph>
     return recursions;
     }
 
-  public List<Transform> getChildTransforms()
+  public List<Transformed> getChildTransforms()
     {
     if( childTransforms == null )
       childTransforms = new LinkedList<>();
@@ -129,12 +137,13 @@ public class Transform<E extends ElementGraph>
       getRecursions().add( new ElementDirectedGraph( transformed ) );
     }
 
-  public void addChildTransform( Transform transform )
+  public void addChildTransform( Transformed transformed )
     {
     if( plannerContext.isTracingEnabled() )
-      getChildTransforms().add( transform );
+      getChildTransforms().add( transformed );
     }
 
+  @Override
   public void writeDOTs( String path )
     {
     int count = 0;
@@ -144,16 +153,12 @@ public class Transform<E extends ElementGraph>
 
     for( int i = 0; i < getChildTransforms().size(); i++ )
       {
-      Transform transform = getChildTransforms().get( i );
-      String name = transform.getTransformerName();
-      transform.writeDOTs( path + "/child-" + i + "-" + name + "/" );
+      Transformed transformed = getChildTransforms().get( i );
+      String name = transformed.getTransformerName();
+      transformed.writeDOTs( path + "/child-" + i + "-" + name + "/" );
       }
 
-    if( beginGraph != null )
-      {
-      String name = beginGraph.getClass().getSimpleName();
-      beginGraph.writeDOT( new File( path, makeFileName( count++, name, "begin" ) ).toString() );
-      }
+    count = writeBeginGraph( path, count );
 
     for( ElementGraph recursion : getRecursions() )
       {
@@ -161,15 +166,7 @@ public class Transform<E extends ElementGraph>
       recursion.writeDOT( new File( path, makeFileName( count++, name, "recursion" ) ).toString() );
       }
 
-    if( getEndGraph() != null )
-      {
-      String name = getEndGraph().getClass().getSimpleName();
-      getEndGraph().writeDOT( new File( path, makeFileName( count, name, "end" ) ).toString() );
-      }
+    writeEndGraph( path, count );
     }
 
-  private String makeFileName( int ordinal, String name, String state )
-    {
-    return String.format( "%04d-%s-%s.dot", ordinal, name, state );
-    }
   }

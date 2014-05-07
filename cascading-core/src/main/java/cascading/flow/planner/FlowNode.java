@@ -32,8 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.stream.StreamMode;
+import cascading.flow.stream.annotations.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
@@ -66,7 +67,7 @@ public class FlowNode implements ProcessModel, Serializable
   protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<>();
   private Map<Tap, Set<String>> reverseSource;
   private Map<Tap, Set<String>> reverseSink;
-  private Map<FlowElement, AnnotatedElementGraph> streamPipelineMap = Collections.emptyMap();
+  private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
   public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<ElementGraph> pipelineGraphs )
     {
@@ -317,30 +318,26 @@ public class FlowNode implements ProcessModel, Serializable
     if( pipelineGraphs == null || pipelineGraphs.isEmpty() )
       return;
 
-    Map<FlowElement, AnnotatedElementGraph> map = new HashMap<>( pipelineGraphs.size() );
+    Map<FlowElement, ElementGraph> map = new HashMap<>( pipelineGraphs.size() );
 
     for( ElementGraph pipelineGraph : pipelineGraphs )
       {
-      if( !( pipelineGraph instanceof AnnotatedElementGraph ) )
+      if( !( pipelineGraph instanceof AnnotatedGraph ) )
         throw new IllegalStateException( "pipeline graphs must be of type AnnotatedGraph, got: " + pipelineGraph.getClass().getName() );
-
-      AnnotatedElementGraph graph = (AnnotatedElementGraph) pipelineGraph;
 
       Set<FlowElement> flowElements;
 
-      Map<Enum, Set<FlowElement>> annotations = graph.getAnnotations();
-
-      if( annotations != null )
-        flowElements = annotations.get( StreamMode.Streamed );
+      if( ( (AnnotatedGraph) pipelineGraph ).hasAnnotations() )
+        flowElements = ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getFlowElementsFor( StreamMode.Streamed );
       else
-        flowElements = ElementGraphs.findSources( graph, FlowElement.class );
+        flowElements = ElementGraphs.findSources( pipelineGraph, FlowElement.class );
 
       for( FlowElement flowElement : flowElements )
         {
         if( map.containsKey( flowElement ) )
           throw new IllegalStateException( "duplicate streamable elements, found:  " + flowElement );
 
-        map.put( flowElement, graph );
+        map.put( flowElement, pipelineGraph );
         }
       }
 

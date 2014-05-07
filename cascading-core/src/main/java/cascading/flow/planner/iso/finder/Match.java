@@ -61,6 +61,11 @@ public class Match
     this.foundScopes = foundScopes;
     }
 
+  public ElementGraph getElementGraph()
+    {
+    return elementGraph;
+    }
+
   public ExpressionGraph getMatchGraph()
     {
     return matchGraph;

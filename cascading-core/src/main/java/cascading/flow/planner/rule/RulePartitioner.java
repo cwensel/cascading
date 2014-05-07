@@ -23,8 +23,8 @@ package cascading.flow.planner.rule;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.subgraph.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 
 /**
@@ -33,7 +33,7 @@ import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 public class RulePartitioner extends GraphPartitioner implements Rule
   {
   PlanPhase phase;
-  Enum[] annotationExcludes = new Enum[0];
+  Enum[] annotationExcludes = new Enum[ 0 ];
 
 
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression )

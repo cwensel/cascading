@@ -43,14 +43,14 @@ public abstract class MutateGraphTransformer extends RecursiveGraphTransformer<E
     }
 
   @Override
-  protected ElementGraph prepareForMatch( Transform<ElementGraph> transform, ElementGraph graph )
+  protected ElementGraph prepareForMatch( Transformed<ElementGraph> transformed, ElementGraph graph )
     {
     if( graphTransformer == null )
       return graph;
 
-    Transform child = graphTransformer.transform( transform.getPlannerContext(), graph );
+    Transformed child = graphTransformer.transform( transformed.getPlannerContext(), graph );
 
-    transform.addChildTransform( child );
+    transformed.addChildTransform( child );
 
     return child.getEndGraph();
     }

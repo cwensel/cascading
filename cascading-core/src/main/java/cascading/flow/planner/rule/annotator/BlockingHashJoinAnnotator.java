@@ -19,21 +19,27 @@
  * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cascading.flow.planner.iso.subgraph;
+package cascading.flow.planner.rule.annotator;
 
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.rule.PlanPhase;
+import cascading.flow.planner.rule.expression.NonBlockedBlockedJoinAnnotatorExpression;
+import cascading.flow.planner.rule.transformer.RuleAnnotationTransformer;
+import cascading.flow.stream.annotations.BlockingMode;
 
 /**
  *
  */
-public class ElementAnnotation<E extends Enum>
+public class BlockingHashJoinAnnotator extends RuleAnnotationTransformer
   {
-  ElementExpression.Capture capture;
-  E annotation;
-
-  public ElementAnnotation( ElementExpression.Capture capture, E annotation )
+  public BlockingHashJoinAnnotator()
     {
-    this.capture = capture;
-    this.annotation = annotation;
+    super(
+      PlanPhase.PostResolveAssembly,
+      new NonBlockedBlockedJoinAnnotatorExpression(),
+      new ElementAnnotation( ElementExpression.Capture.Secondary, BlockingMode.Blocked )
+    );
     }
+
   }

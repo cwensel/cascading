@@ -29,12 +29,22 @@ import org.jgrapht.graph.DirectedMultigraph;
 /**
  *
  */
-public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> implements ElementGraph
+public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
   {
+  protected AnnotatedElementSet annotations;
+
   public ElementMultiGraph( DirectedGraph<FlowElement, Scope> parent )
     {
     this();
 
+    copyFrom( parent );
+
+    if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
+      this.getAnnotations().addAnnotations( ( (AnnotatedGraph) parent ).getAnnotations() );
+    }
+
+  protected void copyFrom( DirectedGraph<FlowElement, Scope> parent )
+    {
     // safe to assume there are no unconnected vertices
     for( Scope edge : parent.edgeSet() )
       {
@@ -44,6 +54,13 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
       addVertex( t );
       addEdge( s, t, edge );
       }
+    }
+
+  public ElementMultiGraph( ElementGraph parent, AnnotatedElementSet annotations )
+    {
+    this( parent );
+
+    this.getAnnotations().addAnnotations( annotations );
     }
 
   public ElementMultiGraph()
@@ -61,5 +78,20 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
   public void writeDOT( String filename )
     {
     ElementGraphs.printElementGraph( filename, this, null );
+    }
+
+  @Override
+  public boolean hasAnnotations()
+    {
+    return annotations != null && !annotations.isEmpty();
+    }
+
+  @Override
+  public AnnotatedElementSet getAnnotations()
+    {
+    if( annotations == null )
+      annotations = new AnnotatedElementSet();
+
+    return annotations;
     }
   }

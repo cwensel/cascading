@@ -21,10 +21,10 @@
 package cascading.flow.hadoop.planner.rule.partitioner;
 
 import cascading.flow.hadoop.planner.rule.expression.StreamedAccumulatedTapsPipelinePartitionExpression;
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementExpression;
-import cascading.flow.planner.iso.subgraph.ElementAnnotation;
 import cascading.flow.planner.rule.RulePartitioner;
-import cascading.flow.stream.StreamMode;
+import cascading.flow.stream.annotations.StreamMode;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
 
@@ -38,8 +38,8 @@ public class StreamedAccumulatedTapsPipelinePartitioner extends RulePartitioner
     super(
       PartitionPipelines,
       new StreamedAccumulatedTapsPipelinePartitionExpression(),
-      new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed ),
-      new ElementAnnotation<>( ElementExpression.Capture.Include, StreamMode.Accumulated )
+      new ElementAnnotation( ElementExpression.Capture.Primary, StreamMode.Streamed ),
+      new ElementAnnotation( ElementExpression.Capture.Include, StreamMode.Accumulated )
     );
     }
   }

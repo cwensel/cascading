@@ -21,10 +21,10 @@
 package cascading.flow.hadoop.planner.rule.partitioner;
 
 import cascading.flow.hadoop.planner.rule.expression.StreamedOnlySourcesPipelinePartitionExpression;
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementExpression;
-import cascading.flow.planner.iso.subgraph.ElementAnnotation;
 import cascading.flow.planner.rule.RulePartitioner;
-import cascading.flow.stream.StreamMode;
+import cascading.flow.stream.annotations.StreamMode;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
 
@@ -37,7 +37,7 @@ public class StreamedOnlySourcesPipelinePartitioner extends RulePartitioner
     {
     setPhase( PartitionPipelines )
       .setRuleExpression( new StreamedOnlySourcesPipelinePartitionExpression() )
-      .addAnnotation( new ElementAnnotation<>( ElementExpression.Capture.Primary, StreamMode.Streamed ) )
+      .addAnnotation( new ElementAnnotation( ElementExpression.Capture.Primary, StreamMode.Streamed ) )
       .addAnnotationExclude( StreamMode.Streamed );
     }
   }

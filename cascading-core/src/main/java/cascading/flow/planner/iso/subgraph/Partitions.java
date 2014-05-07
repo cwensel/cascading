@@ -24,33 +24,33 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.AnnotatedElementSet;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.rule.Rule;
 
 /**
  *
  */
-public class Partitions
+public class Partitions extends GraphResult
   {
   private final GraphPartitioner graphPartitioner;
   private final SubGraphIterator subGraphIterator;
-  private final ElementGraph elementGraph;
-  private final Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs;
+  private final ElementGraph beginGraph;
+  private final Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs;
 
-  public Partitions( GraphPartitioner graphPartitioner, ElementGraph elementGraph, Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs )
     {
-    this( graphPartitioner, null, elementGraph, annotatedSubGraphs );
+    this( graphPartitioner, null, beginGraph, annotatedSubGraphs );
     }
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph elementGraph, Map<ElementGraph, Map<Enum, Set<FlowElement>>> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs )
     {
     this.graphPartitioner = graphPartitioner;
     this.subGraphIterator = subGraphIterator;
-    this.elementGraph = elementGraph;
+    this.beginGraph = beginGraph;
     this.annotatedSubGraphs = annotatedSubGraphs;
     }
 
@@ -67,12 +67,19 @@ public class Partitions
     return graphPartitioner;
     }
 
-  public ElementGraph getElementGraph()
+  @Override
+  public ElementGraph getBeginGraph()
     {
-    return elementGraph;
+    return beginGraph;
     }
 
-  public Map<ElementGraph, Map<Enum, Set<FlowElement>>> getAnnotatedSubGraphs()
+  @Override
+  public ElementGraph getEndGraph()
+    {
+    return null;
+    }
+
+  public Map<ElementGraph, AnnotatedElementSet> getAnnotatedSubGraphs()
     {
     return annotatedSubGraphs;
     }
@@ -82,10 +89,11 @@ public class Partitions
     return new ArrayList<>( annotatedSubGraphs.keySet() );
     }
 
+  @Override
   public void writeDOTs( String path )
     {
     int count = 0;
-    elementGraph.writeDOT( new File( path, makeFileName( count++, "element-graph" ) ).toString() );
+    beginGraph.writeDOT( new File( path, makeFileName( count++, "element-graph" ) ).toString() );
 
     if( graphPartitioner.getContractionGraph() != null )
       graphPartitioner.getContractionGraph().writeDOT( new File( path, makeFileName( count++, "contraction-graph" ) ).toString() );

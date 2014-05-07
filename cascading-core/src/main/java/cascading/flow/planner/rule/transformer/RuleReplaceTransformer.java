@@ -35,10 +35,10 @@ public class RuleReplaceTransformer extends RuleTransformer
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      flowGraphTransformer = new ReplaceGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
+      graphTransformer = new ReplaceGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
     else if( contractedTransformer != null )
-      flowGraphTransformer = new ReplaceGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
+      graphTransformer = new ReplaceGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
     else
-      flowGraphTransformer = new ReplaceGraphTransformer( ruleExpression.getMatchExpression() );
+      graphTransformer = new ReplaceGraphTransformer( ruleExpression.getMatchExpression() );
     }
   }

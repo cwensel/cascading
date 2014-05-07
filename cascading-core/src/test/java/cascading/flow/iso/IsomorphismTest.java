@@ -42,14 +42,14 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
-import cascading.flow.planner.iso.assertion.Assertion;
+import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
 import cascading.flow.planner.iso.expression.TapGroupTapExpressionGraph;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.iso.transformer.RemoveBranchGraphTransformer;
-import cascading.flow.planner.iso.transformer.Transform;
+import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.RuleExec;
@@ -132,9 +132,9 @@ public class IsomorphismTest extends CascadingTestCase
 
     ContractedTransformer transformer = new ContractedTransformer( new TestNoGroupTapExpressionGraph() );
 
-    Transform<ElementGraph> transform = transformer.transform( plannerContext, flowElementGraph );
+    Transformed<ElementGraph> transformed = transformer.transform( plannerContext, flowElementGraph );
 
-    transform.writeDOTs( getPlanPath() + "/transform/" );
+    transformed.writeDOTs( getPlanPath() + "/transform/" );
 
     SubGraphIterator iterator = new SubGraphIterator(
       new PlannerContext(),
@@ -153,7 +153,7 @@ public class IsomorphismTest extends CascadingTestCase
       assertNotNull( next );
       next.writeDOT( getPlanPath() + "/pipeline/" + count + "-graph.dot" );
 
-      Transform<ElementGraph> result = removeTransformer.transform( next );
+      Transformed<ElementGraph> result = removeTransformer.transform( next );
 
       result.getEndGraph().writeDOT( getPlanPath() + "/pipeline/" + count + "-cleaned-graph.dot" );
 
@@ -276,7 +276,7 @@ public class IsomorphismTest extends CascadingTestCase
     transform( new JoinAroundJoinRightMostGraphSwapped(), new BufferAfterEveryExpression() );
     }
 
-  private Assertion assertion( FlowElementGraph flowElementGraph, RuleExpression ruleExpression )
+  private Asserted assertion( FlowElementGraph flowElementGraph, RuleExpression ruleExpression )
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
@@ -284,11 +284,11 @@ public class IsomorphismTest extends CascadingTestCase
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
-    Assertion assertion = new RuleAssert( PlanPhase.PreResolveAssembly, ruleExpression, "message" ).assertion( plannerContext, flowElementGraph );
+    Asserted asserted = new RuleAssert( PlanPhase.PreResolveAssembly, ruleExpression, "message" ).assertion( plannerContext, flowElementGraph );
 
 //    assertion.getMatched().writeDOT( getTestOutputRoot() + "/dots/assertion.dot" );
 
-    return assertion;
+    return asserted;
     }
 
   private ElementGraph transform( ElementGraph flowElementGraph, RuleExpression ruleExpression )
@@ -300,11 +300,11 @@ public class IsomorphismTest extends CascadingTestCase
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
     RuleTempTapInsertionTransformer ruleTempTapInsertionTransformer = new RuleTempTapInsertionTransformer( PlanPhase.PreResolveAssembly, ruleExpression );
-    Transform<ElementGraph> insertionTransform = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );
+    Transformed<ElementGraph> insertionTransformed = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );
 
-    insertionTransform.writeDOTs( getPlanPath() );
+    insertionTransformed.writeDOTs( getPlanPath() );
 
-    return insertionTransform.getEndGraph();
+    return insertionTransformed.getEndGraph();
     }
 
   private static class NonTapFactory implements ElementFactory

@@ -20,7 +20,8 @@
 
 package cascading.flow.planner.rule.transformer;
 
-import cascading.flow.planner.iso.transformer.RemoveBranchGraphTransformer;
+import cascading.flow.planner.iso.ElementAnnotation;
+import cascading.flow.planner.iso.transformer.AnnotateGraphTransformer;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RuleTransformer;
@@ -28,17 +29,17 @@ import cascading.flow.planner.rule.RuleTransformer;
 /**
  *
  */
-public class RuleRemoveBranchTransformer extends RuleTransformer
+public class RuleAnnotationTransformer extends RuleTransformer
   {
-  public RuleRemoveBranchTransformer( PlanPhase phase, RuleExpression ruleExpression )
+  public RuleAnnotationTransformer( PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation annotation )
     {
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      graphTransformer = new RemoveBranchGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
+      graphTransformer = new AnnotateGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), annotation );
     else if( contractedTransformer != null )
-      graphTransformer = new RemoveBranchGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
+      graphTransformer = new AnnotateGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), annotation );
     else
-      graphTransformer = new RemoveBranchGraphTransformer( ruleExpression.getMatchExpression() );
+      graphTransformer = new AnnotateGraphTransformer( ruleExpression.getMatchExpression(), annotation );
     }
   }

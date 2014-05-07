@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
@@ -46,7 +47,6 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
-import cascading.flow.stream.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
@@ -674,7 +674,17 @@ public class ElementGraphs
 
       Scope scope = iterator.next();
 
-      return ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+      String label = ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+
+      if( !( graph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) graph ).hasAnnotations() )
+        return label;
+
+      Set<Enum> annotations = ( (AnnotatedGraph) graph ).getAnnotations().getAnnotationsFor( object );
+
+      if( !annotations.isEmpty() )
+        label += "|{" + Util.join( annotations, "|" ) + "}";
+
+      return label;
       }
     }
 
@@ -690,9 +700,9 @@ public class ElementGraphs
     {
     static Map<String, String> streamedNode = new HashMap<String, String>()
     {
-    {put( "shape", "box" );}
+    {put( "shape", "record" );}
 
-    {put( "fontcolor", "blue1" );}
+//    {put( "fontcolor", "blue1" );}
     };
 
     static Map<String, String> defaultNode = new HashMap<String, String>()
@@ -700,12 +710,12 @@ public class ElementGraphs
     {put( "shape", "box" );}
     };
 
-    private final AnnotatedElementGraph graph;
+    private final AnnotatedGraph graph;
 
     public VertexAttributeProvider( DirectedGraph<FlowElement, Scope> graph )
       {
-      if( graph instanceof AnnotatedElementGraph )
-        this.graph = (AnnotatedElementGraph) graph;
+      if( graph instanceof AnnotatedGraph )
+        this.graph = (AnnotatedGraph) graph;
       else
         this.graph = null;
       }
@@ -713,17 +723,12 @@ public class ElementGraphs
     @Override
     public Map<String, String> getComponentAttributes( FlowElement object )
       {
-      if( graph == null || !( object instanceof Tap ) )
+      if( graph == null || !graph.hasAnnotations() )
         return defaultNode;
 
-      Set<FlowElement> elements = graph.getAnnotations().get( StreamMode.Streamed );
+//      boolean isStreamed = graph.getAnnotations().hasAnnotation( StreamMode.Streamed, object );
 
-      boolean hasAnnotations = elements != null && !elements.isEmpty();
-
-      if( !hasAnnotations )
-        return defaultNode;
-
-      boolean isStreamed = hasAnnotations && elements.contains( object );
+      boolean isStreamed = graph.getAnnotations().hasAnnotation( object );
 
       return isStreamed ? streamedNode : defaultNode;
       }

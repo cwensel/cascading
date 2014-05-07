@@ -7,7 +7,7 @@ import java.util.Map;
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.subgraph.Partitions;
-import cascading.flow.planner.iso.transformer.Transform;
+import cascading.flow.planner.iso.transformer.Transformed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,16 +21,16 @@ public class TraceWriter
     {
     }
 
-  void writePlan( PlanPhase phase, int ruleOrdinal, Transform transform )
+  void writePlan( PlanPhase phase, int ruleOrdinal, Transformed transformed )
     {
     if( transformTracePath == null )
       return;
 
-    String ruleName = transform.getRuleName();
+    String ruleName = transformed.getRuleName();
 
     ruleName = String.format( "%02d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
 
-    transform.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    transformed.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, Partitions partition )
@@ -69,16 +69,16 @@ public class TraceWriter
     partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
 
-  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transform transform )
+  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transformed transformed )
     {
     if( transformTracePath == null )
       return;
 
-    String ruleName = transform.getRuleName();
+    String ruleName = transformed.getRuleName();
 
     ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, pipelineOrdinal, ruleName );
 
-    transform.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    transformed.writeDOTs( new File( transformTracePath, ruleName ).toString() );
     }
 
   void writePlan( FlowElementGraph flowElementGraph, String name )

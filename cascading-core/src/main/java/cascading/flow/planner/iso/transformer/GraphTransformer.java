@@ -28,10 +28,10 @@ import cascading.flow.planner.graph.ElementGraph;
  */
 public abstract class GraphTransformer<In extends ElementGraph, Out extends ElementGraph>
   {
-  public Transform<Out> transform( In rootGraph )
+  public Transformed<Out> transform( In rootGraph )
     {
     return transform( new PlannerContext(), rootGraph );
     }
 
-  public abstract Transform<Out> transform( PlannerContext plannerContext, In rootGraph );
+  public abstract Transformed<Out> transform( PlannerContext plannerContext, In rootGraph );
   }

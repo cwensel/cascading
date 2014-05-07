@@ -42,12 +42,12 @@ public abstract class GraphAssert<E extends ElementGraph>
 
   protected abstract E prepareForMatch( PlannerContext plannerContext, E graph );
 
-  public Assertion assertion( PlannerContext plannerContext, E graph )
+  public Asserted assertion( PlannerContext plannerContext, E graph )
     {
     graph = prepareForMatch( plannerContext, graph );
 
     Match match = finder.findFirstMatch( plannerContext, graph );
 
-    return new Assertion( message, match );
+    return new Asserted( graph, message, match );
     }
   }

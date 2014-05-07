@@ -20,6 +20,10 @@
 
 package cascading.flow.planner.iso.transformer;
 
+import java.util.Collections;
+import java.util.Set;
+
+import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -44,42 +48,54 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     }
 
   @Override
-  public Transform<E> transform( PlannerContext plannerContext, E rootGraph )
+  public Transformed<E> transform( PlannerContext plannerContext, E rootGraph )
     {
-    Transform<E> transform = new Transform<>( plannerContext, this, expressionGraph, rootGraph );
+    Transformed<E> transformed = new Transformed<>( plannerContext, this, expressionGraph, rootGraph );
 
-    E result = transform( transform, rootGraph );
+    E result = transform( transformed, rootGraph );
 
-    transform.setEndGraph( result );
+    transformed.setEndGraph( result );
 
-    return transform;
+    return transformed;
     }
 
-  protected E transform( Transform<E> transform, E graph )
+  protected E transform( Transformed<E> transformed, E graph )
     {
-    ElementGraph prepared = prepareForMatch( transform, graph );
+    ElementGraph prepared = prepareForMatch( transformed, graph );
 
     if( prepared == null )
       return graph;
 
-    // for trivial cases, disable recursion and capture all primaries initially
-    Match match = findAllPrimaries ? finder.findAllMatches( transform.getPlannerContext(), prepared ) : finder.findFirstMatch( transform.getPlannerContext(), prepared );
+    Set<FlowElement> exclusions = addExclusions( graph );
 
-    if( !transformGraphInPlaceUsing( transform, graph, match ) )
+    // for trivial cases, disable recursion and capture all primaries initially
+    Match match;
+
+    if( findAllPrimaries )
+      match = finder.findAllMatches( transformed.getPlannerContext(), prepared, exclusions );
+    else
+      match = finder.findFirstMatch( transformed.getPlannerContext(), prepared, exclusions );
+
+    if( !transformGraphInPlaceUsing( transformed, graph, match ) )
       return graph;
 
-    transform.addRecursionTransform( graph );
+    transformed.addRecursionTransform( graph );
 
     if( findAllPrimaries )
       return graph;
 
-    return transform( transform, graph );
+    return transform( transformed, graph );
     }
 
-  protected ElementGraph prepareForMatch( Transform<E> transform, E graph )
+  protected Set<FlowElement> addExclusions( E graph )
+    {
+    return Collections.emptySet();
+    }
+
+  protected ElementGraph prepareForMatch( Transformed<E> transformed, E graph )
     {
     return graph;
     }
 
-  protected abstract boolean transformGraphInPlaceUsing( Transform<E> transform, E graph, Match match );
+  protected abstract boolean transformGraphInPlaceUsing( Transformed<E> transformed, E graph, Match match );
   }

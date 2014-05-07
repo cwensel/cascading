@@ -46,7 +46,7 @@ public class ReplaceGraphTransformer extends MutateGraphTransformer
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
     Set<FlowElement> replace = match.getCapturedElements( ElementExpression.Capture.Primary );
     Set<FlowElement> replaceWith = match.getCapturedElements( ElementExpression.Capture.Secondary );

@@ -18,27 +18,22 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.rule.transformer;
+package cascading.flow.planner.rule.expression;
 
-import cascading.flow.planner.iso.transformer.ContractedGraphTransformer;
-import cascading.flow.planner.rule.PlanPhase;
+import cascading.flow.planner.iso.expression.NoGroupJoinTapExpressionGraph;
+import cascading.flow.planner.iso.expression.NonBlockedBlockedJoinExpression;
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RuleTransformer;
 
 /**
  *
  */
-public class RuleContractedTransformer extends RuleTransformer
+public class NonBlockedBlockedJoinAnnotatorExpression extends RuleExpression
   {
-  public RuleContractedTransformer( PlanPhase phase, RuleExpression ruleExpression )
+  public NonBlockedBlockedJoinAnnotatorExpression()
     {
-    super( phase, ruleExpression );
-
-    if( subGraphTransformer != null )
-      graphTransformer = new ContractedGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );
-    else if( contractedTransformer != null )
-      graphTransformer = new ContractedGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression() );
-    else
-      graphTransformer = new ContractedGraphTransformer( ruleExpression.getMatchExpression() );
+    super(
+      new NoGroupJoinTapExpressionGraph(),
+      new NonBlockedBlockedJoinExpression()
+    );
     }
   }

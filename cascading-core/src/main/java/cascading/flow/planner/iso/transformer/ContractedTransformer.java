@@ -42,13 +42,13 @@ public class ContractedTransformer extends RecursiveGraphTransformer<ElementGrap
     }
 
   @Override
-  public Transform<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
+  public Transformed<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
     return super.transform( plannerContext, new ElementMultiGraph( rootGraph ) );
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
     Set<FlowElement> remove = match.getCapturedElements( ElementExpression.Capture.Primary );
 

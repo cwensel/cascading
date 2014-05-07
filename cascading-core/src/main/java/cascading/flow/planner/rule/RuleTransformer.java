@@ -26,7 +26,7 @@ import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.RecursiveGraphTransformer;
 import cascading.flow.planner.iso.transformer.SubGraphTransformer;
-import cascading.flow.planner.iso.transformer.Transform;
+import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
  *
@@ -38,7 +38,7 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
   protected final ContractedTransformer contractedTransformer;
   protected final SubGraphTransformer subGraphTransformer;
 
-  protected RecursiveGraphTransformer<ElementGraph> flowGraphTransformer;
+  protected RecursiveGraphTransformer<ElementGraph> graphTransformer;
 
   public RuleTransformer( PlanPhase phase, RuleExpression ruleExpression )
     {
@@ -76,18 +76,18 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
     }
 
   @Override
-  public Transform<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
+  public Transformed<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
-    Transform<ElementGraph> result = new Transform<>( plannerContext, this, rootGraph );
+    Transformed<ElementGraph> result = new Transformed<>( plannerContext, this, rootGraph );
 
     ElementGraph graphCopy = rootGraph.copyGraph();
 
-    Transform<ElementGraph> transform = flowGraphTransformer.transform( plannerContext, graphCopy );
+    Transformed<ElementGraph> transformed = graphTransformer.transform( plannerContext, graphCopy );
 
-    result.addChildTransform( transform );
+    result.addChildTransform( transformed );
 
-    if( rootGraph != transform.getEndGraph() )
-      result.setEndGraph( transform.getEndGraph() );
+    if( rootGraph != transformed.getEndGraph() )
+      result.setEndGraph( transformed.getEndGraph() );
 
     return result;
     }

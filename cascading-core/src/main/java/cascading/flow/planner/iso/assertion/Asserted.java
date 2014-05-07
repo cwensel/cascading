@@ -24,7 +24,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.util.Util;
@@ -32,15 +34,23 @@ import cascading.util.Util;
 /**
  *
  */
-public class Assertion
+public class Asserted extends GraphResult
   {
+  private ElementGraph beginGraph;
   private final String message;
   private final Match match;
 
-  public Assertion( String message, Match match )
+  public Asserted( ElementGraph beginGraph, String message, Match match )
     {
+    this.beginGraph = beginGraph;
     this.message = message;
     this.match = match;
+    }
+
+  @Override
+  public ElementGraph getBeginGraph()
+    {
+    return beginGraph;
     }
 
   public String getMessage()
@@ -71,5 +81,21 @@ public class Assertion
   public FlowElement getFirstAnchor()
     {
     return Util.getFirst( getAnchors() );
+    }
+
+  @Override
+  public ElementGraph getEndGraph()
+    {
+    return null;
+    }
+
+  @Override
+  public void writeDOTs( String path )
+    {
+    int count = 0;
+
+    count = writeBeginGraph( path, count );
+
+    writeEndGraph( path, count );
     }
   }

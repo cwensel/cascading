@@ -31,7 +31,9 @@ import cascading.flow.FlowProcess;
 import cascading.flow.planner.Extent;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.stream.annotations.BlockingMode;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -197,10 +199,18 @@ public abstract class NodeStreamGraph extends StreamGraph
 
     // TODO: waiting on hitting test where this is applicable
     // lets not block the streamed side unless it will cause a deadlock
-//    if( joinHasSameStreamedSource( join ) )
-//      return createBlockingJoinGate( join );
+    if( hasElementAnnotation( BlockingMode.Blocked, join ) )
+      return createBlockingJoinGate( join );
 
     return createNonBlockingJoinGate( join );
+    }
+
+  private boolean hasElementAnnotation( Enum annotation, FlowElement flowElement )
+    {
+    if( !( (AnnotatedGraph) elementGraph ).hasAnnotations() )
+      return false;
+
+    return ( (AnnotatedGraph) elementGraph ).getAnnotations().hasAnnotation( annotation, flowElement );
     }
 
   protected MemoryHashJoinGate createNonBlockingJoinGate( HashJoin join )

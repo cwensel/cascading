@@ -18,37 +18,45 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.expression;
+package cascading.flow.planner.iso.expression;
 
-import cascading.flow.planner.Extent;
-import cascading.flow.planner.iso.expression.ElementExpression;
-import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 
-import static cascading.flow.planner.iso.expression.NotElementExpression.not;
 import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
-public class NoGroupJoinTapExpressionGraph extends ExpressionGraph
+public class NonBlockedBlockedJoinJoinExpression extends ExpressionGraph
   {
-  public NoGroupJoinTapExpressionGraph()
+  public NonBlockedBlockedJoinJoinExpression()
     {
-    super( SearchOrder.ReverseDepth,
-      not(
-        or(
-          ElementExpression.Capture.Primary,
-          new FlowElementExpression( Extent.class ),
-          new FlowElementExpression( Group.class ),
-          new FlowElementExpression( HashJoin.class ),
-          new FlowElementExpression( Tap.class )
-        )
-      )
+    super( SearchOrder.ReverseDepth );
+
+    ElementExpression source = or( ElementExpression.Capture.Primary, new FlowElementExpression( Tap.class ), new FlowElementExpression( Group.class ) );
+    ElementExpression blocking = or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ) );
+    ElementExpression sink = new FlowElementExpression( ElementExpression.Capture.Secondary, HashJoin.class );
+
+    this.arc(
+      source,
+      PathScopeExpression.ANY,
+      blocking
     );
+
+    this.arc(
+      blocking,
+      PathScopeExpression.ANY,
+      sink
+    );
+
+    this.arc(
+      source,
+      PathScopeExpression.ANY,
+      sink
+    );
+
     }
   }

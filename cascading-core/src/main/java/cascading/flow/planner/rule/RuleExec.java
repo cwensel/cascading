@@ -33,16 +33,18 @@ import java.util.Set;
 
 import cascading.flow.BaseFlow;
 import cascading.flow.FlowElement;
-import cascading.flow.planner.AnnotatedElementGraph;
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
+import cascading.flow.planner.graph.AnnotatedElementSet;
+import cascading.flow.planner.graph.AnnotatedGraph;
+import cascading.flow.planner.graph.BoundedElementMultiGraph;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.assertion.Assertion;
+import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.assertion.GraphAssert;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
-import cascading.flow.planner.iso.transformer.Transform;
+import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.pipe.Pipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,7 +248,7 @@ public class RuleExec
   private void handleAssemblyPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
     {
     if( rule instanceof GraphTransformer )
-      performAssemblyTransform( phase, context, plannerContext, (GraphTransformer) rule );
+      performAssemblyTransform( plannerContext, context, phase, (GraphTransformer) rule );
     else if( rule instanceof GraphAssert )
       performAssemblyAssertion( plannerContext, context, (GraphAssert) rule );
     }
@@ -309,25 +311,25 @@ public class RuleExec
     {
     LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
 
-    Assertion assertion = rule.assertion( plannerContext, context.currentElementGraph );
+    Asserted asserted = rule.assertion( plannerContext, context.currentElementGraph );
 
-    FlowElement primary = assertion.getFirstAnchor();
+    FlowElement primary = asserted.getFirstAnchor();
 
     if( primary == null )
       return;
 
-    throw new PlannerException( (Pipe) assertion.getFirstAnchor(), assertion.getMessage() );
+    throw new PlannerException( (Pipe) asserted.getFirstAnchor(), asserted.getMessage() );
     }
 
-  private void performAssemblyTransform( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphTransformer transformer )
+  private void performAssemblyTransform( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, GraphTransformer transformer )
     {
     LOG.debug( "applying transform: {}", ( (Rule) transformer ).getRuleName() );
 
-    Transform transform = transformer.transform( plannerContext, context.currentElementGraph );
+    Transformed transformed = transformer.transform( plannerContext, context.currentElementGraph );
 
-    traceWriter.writePlan( phase, context.addRule( (Rule) transformer ), transform );
+    traceWriter.writePlan( phase, context.addRule( (Rule) transformer ), transformed );
 
-    FlowElementGraph endGraph = (FlowElementGraph) transform.getEndGraph();
+    FlowElementGraph endGraph = (FlowElementGraph) transformed.getEndGraph();
 
     if( endGraph != null )
       context.currentElementGraph = endGraph;
@@ -406,12 +408,12 @@ public class RuleExec
 
     for( ElementGraph elementGraph : elementGraphs )
       {
-      if( !( elementGraph instanceof AnnotatedElementGraph ) )
+      if( !( elementGraph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) elementGraph ).hasAnnotations() )
         continue;
 
       for( Enum annotationExclude : annotationExcludes )
         {
-        Set<FlowElement> flowElements = ( (AnnotatedElementGraph) elementGraph ).getAnnotations().get( annotationExclude );
+        Set<FlowElement> flowElements = ( (AnnotatedGraph) elementGraph ).getAnnotations().getFlowElementsFor( annotationExclude );
 
         if( flowElements != null )
           exclusions.addAll( flowElements );
@@ -443,19 +445,19 @@ public class RuleExec
         {
         List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
 
-        Map<ElementGraph, Map<Enum, Set<FlowElement>>> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
+        Map<ElementGraph, AnnotatedElementSet> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
 
         int pipelineCount = 0;
         for( ElementGraph pipelineGraph : pipelineGraphs )
           {
-          Transform transform = transformer.transform( plannerContext, pipelineGraph );
+          Transformed transformed = transformer.transform( plannerContext, pipelineGraph );
 
-          traceWriter.writePlan( phase, ruleOrdinal, stepCount, nodeCount, pipelineCount++, transform );
+          traceWriter.writePlan( phase, ruleOrdinal, stepCount, nodeCount, pipelineCount++, transformed );
 
-          ElementGraph endGraph = transform.getEndGraph();
+          ElementGraph endGraph = transformed.getEndGraph();
 
           if( endGraph != null )
-            resultPipelines.put( endGraph, ( (AnnotatedElementGraph) pipelineGraph ).getAnnotations() );
+            resultPipelines.put( endGraph, ( (AnnotatedGraph) pipelineGraph ).getAnnotations() );
           else
             resultPipelines.put( pipelineGraph, null );
           }
@@ -463,24 +465,18 @@ public class RuleExec
         results.put( nodeGraph, makeBoundedOn( context.currentElementGraph, resultPipelines ) );
         nodeCount++;
         }
-
       }
 
     context.ruleResult.setNodePipelineGraphResults( results );
     }
 
   // use the final assembly graph so we can get Scopes for heads and tails
-  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, Map<Enum, Set<FlowElement>>> subGraphs )
+  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, AnnotatedElementSet> subGraphs )
     {
     List<ElementGraph> results = new ArrayList<>( subGraphs.size() );
 
     for( ElementGraph subGraph : subGraphs.keySet() )
-      {
-      if( subGraph instanceof AnnotatedElementGraph )
-        results.add( subGraph );
-      else
-        results.add( new AnnotatedElementGraph( currentElementGraph, subGraph, subGraphs.get( subGraph ) ) );
-      }
+      results.add( new BoundedElementMultiGraph( currentElementGraph, subGraph, subGraphs.get( subGraph ) ) );
 
     return results;
     }

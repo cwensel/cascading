@@ -38,7 +38,7 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
-import cascading.flow.planner.iso.transformer.Transform;
+import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
  *
@@ -53,7 +53,7 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
 
   private Set<FlowElement> excludes = new HashSet<>();
   private ElementGraph contractedGraph;
-  private Transform<ElementGraph> contractedTransform;
+  private Transformed<ElementGraph> contractedTransformed;
 
   private boolean firstOnly = false; // false will continue to accumulate around the primary
   private Match match;
@@ -113,8 +113,8 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     {
     if( contractedGraph == null )
       {
-      contractedTransform = contractedTransformer.transform( plannerContext, flowElementGraph );
-      contractedGraph = contractedTransform.getEndGraph();
+      contractedTransformed = contractedTransformer.transform( plannerContext, flowElementGraph );
+      contractedGraph = contractedTransformed.getEndGraph();
       }
 
     return contractedGraph;

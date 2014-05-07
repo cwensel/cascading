@@ -35,10 +35,10 @@ public class RuleInsertionTransformer extends RuleTransformer
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      flowGraphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), factoryName );
     else if( contractedTransformer != null )
-      flowGraphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), factoryName );
     else
-      flowGraphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), factoryName );
     }
   }

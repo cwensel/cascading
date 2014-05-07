@@ -29,21 +29,33 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 /**
  *
  */
-public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope> implements ElementGraph
+public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
   {
+  protected AnnotatedElementSet annotations;
+
   public ElementDirectedGraph()
     {
     super( Scope.class );
     }
 
-  public ElementDirectedGraph( ElementGraph elementGraph )
+  public ElementDirectedGraph( ElementGraph parent )
     {
     this();
 
-    if( elementGraph == null )
+    if( parent == null )
       return;
 
-    Graphs.addGraph( this, elementGraph );
+    Graphs.addGraph( this, parent );
+
+    if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
+      this.getAnnotations().addAnnotations( ( (AnnotatedGraph) parent ).getAnnotations() );
+    }
+
+  public ElementDirectedGraph( ElementGraph parent, AnnotatedElementSet annotations )
+    {
+    this( parent );
+
+    this.getAnnotations().addAnnotations( annotations );
     }
 
   @Override
@@ -56,5 +68,20 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
   public void writeDOT( String filename )
     {
     ElementGraphs.printElementGraph( filename, this, null );
+    }
+
+  @Override
+  public boolean hasAnnotations()
+    {
+    return annotations != null && !annotations.isEmpty();
+    }
+
+  @Override
+  public AnnotatedElementSet getAnnotations()
+    {
+    if( annotations == null )
+      annotations = new AnnotatedElementSet();
+
+    return annotations;
     }
   }

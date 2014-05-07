@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.graph.AnnotatedElementSet;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.pipe.Checkpoint;
@@ -45,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class ElementGraph represents the executable FlowElement graph. */
-public class FlowElementGraph extends ElementDirectedGraph
+public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedGraph
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowElementGraph.class );
@@ -79,6 +81,9 @@ public class FlowElementGraph extends ElementDirectedGraph
     this.traps = flowElementGraph.traps;
     this.checkpoints = flowElementGraph.checkpoints;
     this.requireUniqueCheckpoints = flowElementGraph.requireUniqueCheckpoints;
+
+    if( flowElementGraph.annotations != null )
+      this.annotations = new AnnotatedElementSet( flowElementGraph.annotations );
 
     Graphs.addAllVertices( this, flowElementGraph.vertexSet() );
     Graphs.addAllEdges( this, flowElementGraph, flowElementGraph.edgeSet() );

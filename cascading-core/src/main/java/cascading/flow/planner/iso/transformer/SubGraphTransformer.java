@@ -46,29 +46,29 @@ public class SubGraphTransformer extends GraphTransformer<ElementGraph, ElementS
     this.findAllPrimaries = subGraphMatcher.supportsNonRecursiveMatch();
     }
 
-  public Transform<ElementSubGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
+  public Transformed<ElementSubGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
-    Transform<ElementSubGraph> transform = new Transform<>( plannerContext, this, subGraphMatcher, rootGraph );
+    Transformed<ElementSubGraph> transformed = new Transformed<>( plannerContext, this, subGraphMatcher, rootGraph );
 
-    Transform contractedTransform = graphTransformer.transform( plannerContext, rootGraph ); // contracted graph transform
+    Transformed contractedTransformed = graphTransformer.transform( plannerContext, rootGraph ); // contracted graph transform
 
-    transform.addChildTransform( contractedTransform );
+    transformed.addChildTransform( contractedTransformed );
 
     // apply contracted sub-graph matcher to get the bounded sub-graph of the original graph
-    ElementGraph contractedGraph = contractedTransform.getEndGraph();
+    ElementGraph contractedGraph = contractedTransformed.getEndGraph();
 
     Match match = findAllPrimaries ? subGraphFinder.findAllMatches( plannerContext, contractedGraph ) : subGraphFinder.findFirstMatch( plannerContext, contractedGraph );
 
     if( !match.foundMatch() )
-      return transform;
+      return transformed;
 
     ElementGraph contractedSubGraph = match.getMatchedGraph();
 
     ElementSubGraph resultSubGraph = asSubGraphOf( rootGraph, contractedSubGraph ); // the bounded sub-graph of the rootGraph
 
-    transform.setEndGraph( resultSubGraph );
+    transformed.setEndGraph( resultSubGraph );
 
-    return transform;
+    return transformed;
     }
 
   protected ElementSubGraph asSubGraphOf( ElementGraph rootGraph, ElementGraph contractedSubGraph )

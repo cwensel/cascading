@@ -71,6 +71,11 @@ public class GraphFinder
     return findFirstMatch( new FinderContext(), plannerContext, elementGraph );
     }
 
+  public Match findFirstMatch( PlannerContext plannerContext, ElementGraph elementGraph, Set<FlowElement> exclusions )
+    {
+    return findFirstMatch( new FinderContext( exclusions ), plannerContext, elementGraph );
+    }
+
   protected Match findFirstMatch( FinderContext finderContext, PlannerContext plannerContext, ElementGraph elementGraph )
     {
     Map<ElementExpression, FlowElement> mapping = findMapping( finderContext, plannerContext, elementGraph );
@@ -84,6 +89,11 @@ public class GraphFinder
     }
 
   public Match findAllMatches( PlannerContext plannerContext, ElementGraph elementGraph )
+    {
+    return findAllMatches( plannerContext, elementGraph, Collections.<FlowElement>emptySet() );
+    }
+
+  public Match findAllMatches( PlannerContext plannerContext, ElementGraph elementGraph, Set<FlowElement> exclusions )
     {
     Set<ElementExpression> elementExpressions = matchExpression.getDelegate().vertexSet();
 
@@ -103,6 +113,9 @@ public class GraphFinder
     while( iterator.hasNext() )
       {
       FlowElement flowElement = iterator.next();
+
+      if( exclusions.contains( flowElement ) )
+        continue;
 
       if( expression.applies( plannerContext, elementGraph, flowElement ) )
         foundElements.add( flowElement );

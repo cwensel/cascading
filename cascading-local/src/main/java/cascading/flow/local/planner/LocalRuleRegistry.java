@@ -21,6 +21,8 @@
 package cascading.flow.local.planner;
 
 import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.annotator.BlockingHashJoinAnnotator;
+import cascading.flow.planner.rule.annotator.HashJoinBlockingHashJoinAnnotator;
 import cascading.flow.planner.rule.assertion.BufferAfterEveryAssert;
 import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
 import cascading.flow.planner.rule.assertion.LoneGroupAssert;
@@ -50,6 +52,9 @@ public class LocalRuleRegistry extends RuleRegistry
 
     addRule( new ApplyAssertionLevelTransformer() );
     addRule( new ApplyDebugLevelTransformer() );
+
+    addRule( new BlockingHashJoinAnnotator() );
+    addRule( new HashJoinBlockingHashJoinAnnotator() );
 
     addRule( new WholeGraphStepPartitioner() );
 

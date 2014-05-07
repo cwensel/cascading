@@ -55,14 +55,14 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     }
 
   @Override
-  protected boolean transformGraphInPlaceUsing( Transform<ElementGraph> transform, ElementGraph graph, Match match )
+  protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
     Set<FlowElement> insertions = match.getCapturedElements( ElementExpression.Capture.Primary );
 
     if( insertions.isEmpty() )
       return false;
 
-    ElementFactory elementFactory = transform.getPlannerContext().getElementFactoryFor( factoryName );
+    ElementFactory elementFactory = transformed.getPlannerContext().getElementFactoryFor( factoryName );
 
     for( FlowElement flowElement : insertions )
       ElementGraphs.insertFlowElementAfter( graph, flowElement, elementFactory.create( graph, flowElement ) );
