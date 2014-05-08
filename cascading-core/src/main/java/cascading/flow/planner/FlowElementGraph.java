@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.graph.AnnotatedElementSet;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
@@ -38,6 +37,7 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
+import cascading.util.MultiMap;
 import cascading.util.Util;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -83,7 +83,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     this.requireUniqueCheckpoints = flowElementGraph.requireUniqueCheckpoints;
 
     if( flowElementGraph.annotations != null )
-      this.annotations = new AnnotatedElementSet( flowElementGraph.annotations );
+      this.annotations = new MultiMap( flowElementGraph.annotations );
 
     Graphs.addAllVertices( this, flowElementGraph.vertexSet() );
     Graphs.addAllEdges( this, flowElementGraph, flowElementGraph.edgeSet() );

@@ -435,7 +435,7 @@ public class ElementGraphs
         new IntegerNameProvider<FlowElement>(),
         new FlowElementVertexNameProvider( graph, platformInfo ),
         new ScopeEdgeNameProvider(),
-        new VertexAttributeProvider( graph ), new EdgeAttributeProvider() );
+        new VertexAttributeProvider(), new EdgeAttributeProvider() );
 
       writer.close();
       }
@@ -656,30 +656,42 @@ public class ElementGraphs
 
     public String getVertexName( FlowElement object )
       {
-      if( graph.incomingEdgesOf( object ).isEmpty() ) // is head
+      if( object instanceof Extent ) // is head/tail
         {
         String result = object.toString().replaceAll( "\"", "\'" );
+
+        if( object == Extent.tail )
+          return result;
+
         String versionString = Version.getRelease();
 
         if( platformInfo != null )
-          versionString = ( versionString == null ? "" : versionString + "\\n" ) + platformInfo;
+          versionString = ( versionString == null ? "" : versionString + "|" ) + platformInfo;
 
-        return versionString == null ? result : result + "\\n" + versionString;
+        return "{" + ( versionString == null ? result : result + "|" + versionString ) + "}";
         }
+
+      String label;
 
       Iterator<Scope> iterator = graph.outgoingEdgesOf( object ).iterator();
 
-      if( object instanceof Tap || object instanceof Extent || !iterator.hasNext() )
-        return object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+      if( object instanceof Tap || !iterator.hasNext() )
+        {
+        label = object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1|$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1|$2" );
+        }
+      else
+        {
+        Scope scope = iterator.next();
 
-      Scope scope = iterator.next();
+        label = ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1|$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1|$2" );
+        }
 
-      String label = ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1\\\\n$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1\\\\n$2" );
+      label = "{" + label.replaceAll( "\\{", "\\\\{" ).replaceAll( "\\}", "\\\\}" ).replaceAll( ">", "\\\\>" ) + "}";
 
       if( !( graph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) graph ).hasAnnotations() )
         return label;
 
-      Set<Enum> annotations = ( (AnnotatedGraph) graph ).getAnnotations().getAnnotationsFor( object );
+      Set<Enum> annotations = ( (AnnotatedGraph) graph ).getAnnotations().getKeysFor( object );
 
       if( !annotations.isEmpty() )
         label += "|{" + Util.join( annotations, "|" ) + "}";
@@ -698,39 +710,19 @@ public class ElementGraphs
 
   private static class VertexAttributeProvider implements ComponentAttributeProvider<FlowElement>
     {
-    static Map<String, String> streamedNode = new HashMap<String, String>()
-    {
-    {put( "shape", "record" );}
-
-//    {put( "fontcolor", "blue1" );}
-    };
-
     static Map<String, String> defaultNode = new HashMap<String, String>()
     {
-    {put( "shape", "box" );}
+    {put( "shape", "Mrecord" );}
     };
 
-    private final AnnotatedGraph graph;
-
-    public VertexAttributeProvider( DirectedGraph<FlowElement, Scope> graph )
+    public VertexAttributeProvider()
       {
-      if( graph instanceof AnnotatedGraph )
-        this.graph = (AnnotatedGraph) graph;
-      else
-        this.graph = null;
       }
 
     @Override
     public Map<String, String> getComponentAttributes( FlowElement object )
       {
-      if( graph == null || !graph.hasAnnotations() )
-        return defaultNode;
-
-//      boolean isStreamed = graph.getAnnotations().hasAnnotation( StreamMode.Streamed, object );
-
-      boolean isStreamed = graph.getAnnotations().hasAnnotation( object );
-
-      return isStreamed ? streamedNode : defaultNode;
+      return defaultNode;
       }
     }
 
@@ -739,6 +731,8 @@ public class ElementGraphs
     static Map<String, String> attributes = new HashMap<String, String>()
     {
     {put( "style", "dotted" );}
+
+    {put( "arrowhead", "dot" );}
     };
 
     @Override

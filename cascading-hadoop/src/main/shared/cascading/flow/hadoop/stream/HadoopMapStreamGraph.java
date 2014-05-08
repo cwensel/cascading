@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -33,7 +32,6 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Gate;
-import cascading.flow.stream.MemoryHashJoinGate;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
@@ -43,8 +41,6 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
-
-import static cascading.util.Util.getFirst;
 
 /**
  *
@@ -77,8 +73,6 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     {
     streamedHead = handleHead( this.source, flowProcess );
 
-    FlowElement tail = getFirst( ElementGraphs.findSinks( elementGraph, FlowElement.class ) );
-//    Set<Tap> tributaries = node.getJoinTributariesBetween( this.source, tail );
     Set<Tap> tributaries = ElementGraphs.findSources( elementGraph, Tap.class );
 
     tributaries.remove( this.source ); // we cannot stream and accumulate the same source
@@ -145,7 +139,7 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     }
 
   @Override
-  protected MemoryHashJoinGate createNonBlockingJoinGate( HashJoin join )
+  protected SpliceGate createNonBlockingJoinGate( HashJoin join )
     {
     return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }

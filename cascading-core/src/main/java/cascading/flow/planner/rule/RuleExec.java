@@ -36,7 +36,6 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
-import cascading.flow.planner.graph.AnnotatedElementSet;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.BoundedElementMultiGraph;
 import cascading.flow.planner.graph.ElementGraph;
@@ -46,6 +45,7 @@ import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.pipe.Pipe;
+import cascading.util.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -413,7 +413,7 @@ public class RuleExec
 
       for( Enum annotationExclude : annotationExcludes )
         {
-        Set<FlowElement> flowElements = ( (AnnotatedGraph) elementGraph ).getAnnotations().getFlowElementsFor( annotationExclude );
+        Set<FlowElement> flowElements = ( (AnnotatedGraph) elementGraph ).getAnnotations().getValues( annotationExclude );
 
         if( flowElements != null )
           exclusions.addAll( flowElements );
@@ -445,7 +445,7 @@ public class RuleExec
         {
         List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
 
-        Map<ElementGraph, AnnotatedElementSet> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
+        Map<ElementGraph, MultiMap> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
 
         int pipelineCount = 0;
         for( ElementGraph pipelineGraph : pipelineGraphs )
@@ -471,7 +471,7 @@ public class RuleExec
     }
 
   // use the final assembly graph so we can get Scopes for heads and tails
-  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, AnnotatedElementSet> subGraphs )
+  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, MultiMap> subGraphs )
     {
     List<ElementGraph> results = new ArrayList<>( subGraphs.size() );
 

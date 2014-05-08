@@ -27,7 +27,6 @@ import java.util.Map;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Extent;
 import cascading.flow.planner.PlannerContext;
-import cascading.flow.planner.graph.AnnotatedElementSet;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
@@ -35,6 +34,7 @@ import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.util.MultiMap;
 
 /**
  *
@@ -81,7 +81,7 @@ public class GraphPartitioner
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
-    Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs = new LinkedHashMap<>();
+    Map<ElementGraph, MultiMap> annotatedSubGraphs = new LinkedHashMap<>();
 
     if( expressionGraph == null )
       {
@@ -89,7 +89,7 @@ public class GraphPartitioner
       if( elementGraph.containsVertex( Extent.head ) )
         elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new AnnotatedElementSet() );
+      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new MultiMap() );
 
       return new Partitions( this, elementGraph, annotatedSubGraphs );
       }
@@ -101,14 +101,14 @@ public class GraphPartitioner
       {
       ElementSubGraph next = stepIterator.next();
 
-      AnnotatedElementSet annotations = new AnnotatedElementSet();
+      MultiMap annotations = new MultiMap();
 
       if( this.annotations.length != 0 )
         {
         Match match = stepIterator.getContractedMatches().get( count );
 
         for( ElementAnnotation annotation : this.annotations )
-          annotations.addAnnotations( annotation.getAnnotation(), match.getCapturedElements( annotation.getCapture() ) );
+          annotations.addAll( annotation.getAnnotation(), match.getCapturedElements( annotation.getCapture() ) );
         }
 
       annotatedSubGraphs.put( next, annotations );

@@ -23,6 +23,7 @@ package cascading.flow.planner.graph;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
+import cascading.util.MultiMap;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -31,7 +32,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  */
 public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
   {
-  protected AnnotatedElementSet annotations;
+  protected MultiMap annotations;
 
   public ElementDirectedGraph()
     {
@@ -48,14 +49,14 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
     Graphs.addGraph( this, parent );
 
     if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
-      this.getAnnotations().addAnnotations( ( (AnnotatedGraph) parent ).getAnnotations() );
+      this.getAnnotations().addAll( ( (AnnotatedGraph) parent ).getAnnotations() );
     }
 
-  public ElementDirectedGraph( ElementGraph parent, AnnotatedElementSet annotations )
+  public ElementDirectedGraph( ElementGraph parent, MultiMap annotations )
     {
     this( parent );
 
-    this.getAnnotations().addAnnotations( annotations );
+    this.getAnnotations().addAll( annotations );
     }
 
   @Override
@@ -77,10 +78,10 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
     }
 
   @Override
-  public AnnotatedElementSet getAnnotations()
+  public MultiMap getAnnotations()
     {
     if( annotations == null )
-      annotations = new AnnotatedElementSet();
+      annotations = new MultiMap();
 
     return annotations;
     }

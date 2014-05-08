@@ -37,6 +37,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.ScopeExpression;
+import cascading.util.MultiMap;
 import cascading.util.Pair;
 import cascading.util.Util;
 import org.jgrapht.graph.DirectedMultigraph;
@@ -159,12 +160,16 @@ public class GraphFinder
     {
     Match match = null;
 
+    MultiMap<FlowElement> captureMap = new MultiMap<>();
+
     while( true )
       {
       Match current = findFirstMatch( finderContext, plannerContext, elementGraph );
 
       if( !current.foundMatch() )
         break;
+
+      captureMap.addAll( current.getCaptureMap() );
 
       Set<FlowElement> anchoredElements = current.getCapturedElements( ElementExpression.Capture.Primary );
 
@@ -191,10 +196,12 @@ public class GraphFinder
       finderContext.getIgnoredElements().addAll( includedElements );
       }
 
+    // TODO: must capture all vertex mappings in order to see all Secondary and Included elements for annotations
+
     // this only returns the last mapping, but does capture the Primary matches as they are required across all matches
     Map<ElementExpression, FlowElement> mapping = match == null ? null : match.getVertexMapping();
 
-    return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes() );
+    return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes(), captureMap );
     }
 
   public Map<ScopeExpression, Set<Scope>> getEdgeMapping( ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )

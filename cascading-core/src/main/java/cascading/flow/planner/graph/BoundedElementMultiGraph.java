@@ -26,6 +26,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
+import cascading.util.MultiMap;
 
 import static cascading.flow.planner.Extent.head;
 import static cascading.flow.planner.Extent.tail;
@@ -35,13 +36,13 @@ import static cascading.flow.planner.Extent.tail;
  */
 public class BoundedElementMultiGraph extends ElementMultiGraph
   {
-  public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, AnnotatedElementSet annotations )
+  public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, MultiMap annotations )
     {
     copyFrom( subElementGraph );
 
     addParentAnnotations( parentElementGraph );
 
-    getAnnotations().addAnnotations( annotations );
+    getAnnotations().addAll( annotations );
 
     bindHeadAndTail( parentElementGraph, subElementGraph );
     }
@@ -58,16 +59,18 @@ public class BoundedElementMultiGraph extends ElementMultiGraph
 
     Set<FlowElement> vertexSet = vertexSet();
 
-    AnnotatedElementSet parentAnnotations = ( (AnnotatedGraph) parentElementGraph ).getAnnotations();
+    MultiMap parentAnnotations = ( (AnnotatedGraph) parentElementGraph ).getAnnotations();
 
-    for( Enum annotation : parentAnnotations.getAllAnnotations() )
+    Set<Enum> allKeys = parentAnnotations.getAllKeys();
+
+    for( Enum annotation : allKeys )
       {
-      Set<FlowElement> flowElements = parentAnnotations.getFlowElementsFor( annotation );
+      Set<FlowElement> flowElements = parentAnnotations.getValues( annotation );
 
       for( FlowElement flowElement : flowElements )
         {
         if( vertexSet.contains( flowElement ) )
-          getAnnotations().addAnnotations( annotation, flowElements );
+          getAnnotations().addAll( annotation, flowElements );
         }
       }
     }

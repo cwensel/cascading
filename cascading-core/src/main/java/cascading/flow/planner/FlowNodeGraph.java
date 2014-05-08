@@ -21,9 +21,12 @@
 
 package cascading.flow.planner;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import cascading.flow.FlowElement;
 import cascading.flow.planner.graph.ElementGraph;
 
 /**
@@ -42,9 +45,21 @@ public class FlowNodeGraph extends ProcessGraph<FlowNode>
     for( ElementGraph nodeSubGraph : nodeSubGraphs )
       {
       List<ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeSubGraph );
-      addVertex( new FlowNode( count++, "node", flowElementGraph, nodeSubGraph, pipelineGraphs ) );
+      FlowNode flowNode = new FlowNode( count++, "node", flowElementGraph, nodeSubGraph, pipelineGraphs );
+
+      addVertex( flowNode );
       }
 
     bindEdges();
+    }
+
+  public Set<FlowElement> getFlowElementsFor( Enum annotation )
+    {
+    Set<FlowElement> results = new HashSet<>();
+
+    for( FlowNode flowNode : vertexSet() )
+      results.addAll( flowNode.getFlowElementsFor( annotation ) );
+
+    return results;
     }
   }

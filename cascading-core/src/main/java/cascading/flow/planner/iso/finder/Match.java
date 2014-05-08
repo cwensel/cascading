@@ -20,12 +20,9 @@
 
 package cascading.flow.planner.iso.finder;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +33,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.util.MultiMap;
 import cascading.util.Util;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -49,16 +47,23 @@ public class Match
   protected final Map<ElementExpression, FlowElement> vertexMapping;
   protected final Collection<FlowElement> foundElements;
   protected final Collection<Scope> foundScopes;
+  protected MultiMap<FlowElement> captureMap;
 
   private ElementSubGraph matchedGraph;
 
   public Match( ExpressionGraph matchGraph, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping, Collection<FlowElement> foundElements, Collection<Scope> foundScopes )
+    {
+    this( matchGraph, elementGraph, vertexMapping, foundElements, foundScopes, null );
+    }
+
+  public Match( ExpressionGraph matchGraph, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping, Collection<FlowElement> foundElements, Collection<Scope> foundScopes, MultiMap<FlowElement> captureMap )
     {
     this.matchGraph = matchGraph;
     this.elementGraph = elementGraph;
     this.vertexMapping = vertexMapping == null ? Collections.<ElementExpression, FlowElement>emptyMap() : vertexMapping;
     this.foundElements = foundElements;
     this.foundScopes = foundScopes;
+    this.captureMap = captureMap;
     }
 
   public ElementGraph getElementGraph()
@@ -101,14 +106,20 @@ public class Match
 
   public Set<FlowElement> getCapturedElements( ElementExpression.Capture... captures )
     {
-    Set<ElementExpression.Capture> captureSet = new HashSet<>( Arrays.asList( captures ) );
+    return getCaptureMap().getAllValues( captures );
+    }
+
+  public MultiMap<FlowElement> getCaptureMap()
+    {
+    if( captureMap != null )
+      return captureMap;
+
+    captureMap = new MultiMap<>();
 
     Map<FlowElement, ElementExpression> reversed = new LinkedHashMap<>();
 
     if( Util.reverseMap( vertexMapping, reversed ) )
       throw new IllegalStateException( "duplicates found in mapping" );
-
-    Set<FlowElement> results = new LinkedHashSet<>();
 
     // returns a Set ordered topologically by the matched graph. retains this first, this second ordering for simple cases
     TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( getMatchedGraph() );
@@ -122,11 +133,10 @@ public class Match
       if( elementExpression == null )
         continue;
 
-      if( captureSet.contains( elementExpression.getCapture() ) )
-        results.add( next );
+      captureMap.addAll( elementExpression.getCapture(), next );
       }
 
-    return results;
+    return captureMap;
     }
 
   @Override

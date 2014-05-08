@@ -172,7 +172,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;
 
-    int length =  mapState.length() + reduceState.length();
+    int length = mapState.length() + reduceState.length();
 
     if( isHadoopLocalMode( conf ) || length < maxSize ) // seems safe
       {

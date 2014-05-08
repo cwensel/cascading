@@ -82,7 +82,7 @@ public class AnnotateGraphTransformer extends RecursiveGraphTransformer<ElementG
   @Override
   protected Set<FlowElement> addExclusions( ElementGraph graph )
     {
-    return ( (AnnotatedGraph) graph ).getAnnotations().getFlowElementsFor( annotation.getAnnotation() );
+    return ( (AnnotatedGraph) graph ).getAnnotations().getValues( annotation.getAnnotation() );
     }
 
   @Override
@@ -93,7 +93,7 @@ public class AnnotateGraphTransformer extends RecursiveGraphTransformer<ElementG
     if( captured.isEmpty() )
       return false;
 
-    ( (AnnotatedGraph) graph ).getAnnotations().addAnnotations( annotation.getAnnotation(), captured );
+    ( (AnnotatedGraph) graph ).getAnnotations().addAll( annotation.getAnnotation(), captured );
 
     return true;
     }

@@ -25,11 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import cascading.flow.planner.graph.AnnotatedElementSet;
+import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.rule.Rule;
+import cascading.util.MultiMap;
 
 /**
  *
@@ -39,14 +40,14 @@ public class Partitions extends GraphResult
   private final GraphPartitioner graphPartitioner;
   private final SubGraphIterator subGraphIterator;
   private final ElementGraph beginGraph;
-  private final Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs;
+  private final Map<ElementGraph, MultiMap> annotatedSubGraphs;
 
-  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, MultiMap> annotatedSubGraphs )
     {
     this( graphPartitioner, null, beginGraph, annotatedSubGraphs );
     }
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, AnnotatedElementSet> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, MultiMap> annotatedSubGraphs )
     {
     this.graphPartitioner = graphPartitioner;
     this.subGraphIterator = subGraphIterator;
@@ -79,7 +80,7 @@ public class Partitions extends GraphResult
     return null;
     }
 
-  public Map<ElementGraph, AnnotatedElementSet> getAnnotatedSubGraphs()
+  public Map<ElementGraph, MultiMap> getAnnotatedSubGraphs()
     {
     return annotatedSubGraphs;
     }
@@ -112,7 +113,8 @@ public class Partitions extends GraphResult
       {
       ElementGraph subGraph = subGraphs.get( i );
 
-      subGraph.writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
+      // want to write annotations with elements
+      new ElementDirectedGraph( subGraph, annotatedSubGraphs.get( subGraph ) ).writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
 
       if( matches != null )
         matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );

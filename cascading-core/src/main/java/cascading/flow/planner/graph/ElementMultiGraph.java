@@ -23,6 +23,7 @@ package cascading.flow.planner.graph;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
+import cascading.util.MultiMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedMultigraph;
 
@@ -31,7 +32,7 @@ import org.jgrapht.graph.DirectedMultigraph;
  */
 public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
   {
-  protected AnnotatedElementSet annotations;
+  protected MultiMap annotations;
 
   public ElementMultiGraph( DirectedGraph<FlowElement, Scope> parent )
     {
@@ -40,7 +41,7 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
     copyFrom( parent );
 
     if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
-      this.getAnnotations().addAnnotations( ( (AnnotatedGraph) parent ).getAnnotations() );
+      this.getAnnotations().addAll( ( (AnnotatedGraph) parent ).getAnnotations() );
     }
 
   protected void copyFrom( DirectedGraph<FlowElement, Scope> parent )
@@ -56,11 +57,11 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
       }
     }
 
-  public ElementMultiGraph( ElementGraph parent, AnnotatedElementSet annotations )
+  public ElementMultiGraph( ElementGraph parent, MultiMap annotations )
     {
     this( parent );
 
-    this.getAnnotations().addAnnotations( annotations );
+    this.getAnnotations().addAll( annotations );
     }
 
   public ElementMultiGraph()
@@ -87,10 +88,10 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
     }
 
   @Override
-  public AnnotatedElementSet getAnnotations()
+  public MultiMap getAnnotations()
     {
     if( annotations == null )
-      annotations = new AnnotatedElementSet();
+      annotations = new MultiMap();
 
     return annotations;
     }

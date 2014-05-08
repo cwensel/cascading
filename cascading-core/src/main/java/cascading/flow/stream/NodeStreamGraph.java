@@ -46,8 +46,6 @@ import cascading.tap.Tap;
 import cascading.util.Util;
 import org.jgrapht.Graphs;
 
-import static cascading.flow.planner.ElementGraphs.getAllShortestPathsBetween;
-
 /**
  *
  */
@@ -197,7 +195,6 @@ public abstract class NodeStreamGraph extends StreamGraph
     if( join.getNumSelfJoins() != 0 )
       return createBlockingJoinGate( join );
 
-    // TODO: waiting on hitting test where this is applicable
     // lets not block the streamed side unless it will cause a deadlock
     if( hasElementAnnotation( BlockingMode.Blocked, join ) )
       return createBlockingJoinGate( join );
@@ -210,10 +207,10 @@ public abstract class NodeStreamGraph extends StreamGraph
     if( !( (AnnotatedGraph) elementGraph ).hasAnnotations() )
       return false;
 
-    return ( (AnnotatedGraph) elementGraph ).getAnnotations().hasAnnotation( annotation, flowElement );
+    return ( (AnnotatedGraph) elementGraph ).getAnnotations().hadKey( annotation, flowElement );
     }
 
-  protected MemoryHashJoinGate createNonBlockingJoinGate( HashJoin join )
+  protected SpliceGate createNonBlockingJoinGate( HashJoin join )
     {
     return new MemoryHashJoinGate( flowProcess, join );
     }
@@ -221,34 +218,6 @@ public abstract class NodeStreamGraph extends StreamGraph
   protected MemoryCoGroupGate createBlockingJoinGate( HashJoin join )
     {
     return new MemoryCoGroupGate( flowProcess, join );
-    }
-
-  private boolean joinHasSameStreamedSource( HashJoin join )
-    {
-    if( !node.getStreamedSourceByJoin().isEmpty() )
-      {
-      // if streamed source is multi path
-      Object tap = node.getStreamedSourceByJoin().get( join );
-
-      if( tap == null )
-        return false;
-
-      return getNumImmediateBranches( (FlowElement) tap, join ) > 1;
-      }
-
-    // means we are in local mode if joins is empty
-    for( Object tap : node.getSources() )
-      {
-      if( getNumImmediateBranches( (FlowElement) tap, join ) > 1 )
-        return true;
-      }
-
-    return false;
-    }
-
-  private int getNumImmediateBranches( FlowElement tap, HashJoin join )
-    {
-    return getAllShortestPathsBetween( elementGraph, tap, join ).size();
     }
 
   protected Duct findExisting( Duct current )

@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,23 +40,25 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.stream.annotations.StreamMode;
 import cascading.management.CascadingServices;
 import cascading.management.state.ClientState;
 import cascading.operation.Operation;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
+import cascading.util.MultiMap;
 import cascading.util.Util;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.*;
+import static cascading.flow.planner.ElementGraphs.findAllGroups;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -114,11 +115,6 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
-  // sources streamed into join - not necessarily all sources
-  protected final Map<HashJoin, Tap> streamedSourceByJoin = new LinkedHashMap<HashJoin, Tap>();
-  // sources accumulated by join
-  protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<>();
-
   private transient FlowStepJob<Config> flowStepJob;
 
   // for testing
@@ -152,32 +148,6 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     addGroups( findAllGroups( graph ) );
 
     traps.putAll( flowNodeGraph.getTrapsMap() );
-
-    addSourceModes();
-    }
-
-  private void addSourceModes()
-    {
-    Set<HashJoin> hashJoins = ElementGraphs.findAllHashJoins( getElementGraph() );
-
-    for( HashJoin hashJoin : hashJoins )
-      {
-      for( Object object : getSources() )
-        {
-        Tap source = (Tap) object;
-        Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( getElementGraph(), source, hashJoin );
-
-        boolean isStreamed = isOnlyStreamedPath( sourcePaths );
-        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
-        boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
-
-        if( isStreamed || isBoth )
-          addStreamedSourceFor( hashJoin, source );
-
-        if( isAccumulated || isBoth )
-          addAccumulatedSourceFor( hashJoin, source );
-        }
-      }
     }
 
   @Override
@@ -291,6 +261,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return graph;
     }
 
+  protected MultiMap getAnnotations()
+    {
+    return ( (AnnotatedGraph) graph ).getAnnotations();
+    }
+
   @Override
   public FlowNodeGraph getFlowNodeGraph()
     {
@@ -343,27 +318,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       groups.add( group );
     }
 
-  public void addStreamedSourceFor( HashJoin join, Tap streamedSource )
-    {
-    streamedSourceByJoin.put( join, streamedSource );
-    }
-
   public Set<Tap> getAllAccumulatedSources()
     {
-    HashSet<Tap> set = new HashSet<Tap>();
-
-    for( Set<Tap> taps : accumulatedSourcesByJoin.values() )
-      set.addAll( taps );
-
-    return set;
-    }
-
-  public void addAccumulatedSourceFor( HashJoin join, Tap accumulatedSource )
-    {
-    if( !accumulatedSourcesByJoin.containsKey( join ) )
-      accumulatedSourcesByJoin.put( join, new HashSet<Tap>() );
-
-    accumulatedSourcesByJoin.get( join ).add( accumulatedSource );
+    return Util.narrowSet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
     }
 
   public void addSource( String name, Tap source )

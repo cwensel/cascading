@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +35,9 @@ import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
-
-import static cascading.flow.planner.ElementGraphs.*;
 
 /**
  *
@@ -61,10 +57,7 @@ public class FlowNode implements ProcessModel, Serializable
   private Set<Tap> sourceTaps;
   private Set<Tap> sinkTaps;
 
-  // sources streamed into join - not necessarily all sources
-  protected final Map<HashJoin, Tap> streamedSourceByJoin = new LinkedHashMap<>();
   // sources accumulated by join
-  protected final Map<HashJoin, Set<Tap>> accumulatedSourcesByJoin = new LinkedHashMap<>();
   private Map<Tap, Set<String>> reverseSource;
   private Map<Tap, Set<String>> reverseSink;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
@@ -77,13 +70,11 @@ public class FlowNode implements ProcessModel, Serializable
     this.nodeSubGraph = nodeSubGraph;
     this.pipelineGraphs = pipelineGraphs;
 
-    // TODO: verify no missing elements in the union of pipelines
     verifyPipelines();
     createPipelineMap();
 
     assignTrappableNames( flowElementGraph );
     assignTraps( flowElementGraph.getTrapMap() );
-    addSourceModes();
     }
 
   @Override
@@ -251,37 +242,6 @@ public class FlowNode implements ProcessModel, Serializable
     return getTrapMap().values();
     }
 
-  public Map<HashJoin, Tap> getStreamedSourceByJoin()
-    {
-    return streamedSourceByJoin;
-    }
-
-  public void addStreamedSourceFor( HashJoin join, Tap streamedSource )
-    {
-    streamedSourceByJoin.put( join, streamedSource );
-    }
-
-  private void addSourceModes()
-    {
-    Set<HashJoin> hashJoins = ElementGraphs.findAllHashJoins( getElementGraph() );
-
-    for( HashJoin hashJoin : hashJoins )
-      {
-      for( Object object : getSources() )
-        {
-        Tap source = (Tap) object;
-        Map<Integer, Integer> sourcePaths = countOrderedDirectPathsBetween( getElementGraph(), source, hashJoin );
-
-        boolean isStreamed = isOnlyStreamedPath( sourcePaths );
-//        boolean isAccumulated = isOnlyAccumulatedPath( sourcePaths );
-        boolean isBoth = isBothAccumulatedAndStreamedPath( sourcePaths );
-
-        if( isStreamed || isBoth )
-          addStreamedSourceFor( hashJoin, source );
-        }
-      }
-    }
-
   private void assignTraps( Map<String, Tap> traps )
     {
     trapMap = new HashMap<>();
@@ -328,7 +288,7 @@ public class FlowNode implements ProcessModel, Serializable
       Set<FlowElement> flowElements;
 
       if( ( (AnnotatedGraph) pipelineGraph ).hasAnnotations() )
-        flowElements = ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getFlowElementsFor( StreamMode.Streamed );
+        flowElements = ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getValues( StreamMode.Streamed );
       else
         flowElements = ElementGraphs.findSources( pipelineGraph, FlowElement.class );
 
@@ -380,6 +340,19 @@ public class FlowNode implements ProcessModel, Serializable
   public int hashCode()
     {
     return id != null ? id.hashCode() : 0;
+    }
+
+  public Collection<FlowElement> getFlowElementsFor( Enum annotation )
+    {
+    if( pipelineGraphs.isEmpty() )
+      return ( (AnnotatedGraph) getElementGraph() ).getAnnotations().getValues( annotation );
+
+    Set<FlowElement> results = new HashSet<>();
+
+    for( ElementGraph pipelineGraph : pipelineGraphs )
+      results.addAll( ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getValues( annotation ) );
+
+    return results;
     }
 
 //
