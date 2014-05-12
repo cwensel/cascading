@@ -1773,8 +1773,8 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( flowDef );
 
-    flow.writeDOT( "joinmerge.dot" );
-    flow.writeStepsDOT( "joinmerge-steps.dot" );
+//    flow.writeDOT( "joinmerge.dot" );
+//    flow.writeStepsDOT( "joinmerge-steps.dot" );
 
     flow.complete();
 
