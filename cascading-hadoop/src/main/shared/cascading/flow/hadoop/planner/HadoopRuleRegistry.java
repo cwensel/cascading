@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.planner;
 
+import cascading.flow.hadoop.planner.rule.assertion.DualStreamedAccumulatedMergeAssert;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
@@ -59,6 +60,8 @@ public class HadoopRuleRegistry extends RuleRegistry
   {
   public HadoopRuleRegistry()
     {
+//    enableDebugLogging();
+
     // PreBalance
     addRule( new LoneGroupAssert() );
     addRule( new MissingGroupAssert() );
@@ -104,6 +107,10 @@ public class HadoopRuleRegistry extends RuleRegistry
 
     // PostPipelines
     addRule( new RemoveMalformedHashJoinTransformer() );
+    addRule( new DualStreamedAccumulatedMergeAssert() );
+
+    // enable when GraphFinder supports captured edges
+//    addRule( new RemoveStreamedBranchTransformer() );
 
     }
   }
