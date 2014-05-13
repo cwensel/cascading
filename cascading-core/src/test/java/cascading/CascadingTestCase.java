@@ -121,6 +121,16 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
     return new String[]{getTestPlanRoot(), getTestCaseName(), getTestName()};
     }
 
+  /**
+   * @return
+   * @deprecated use {@link #getOutputPath()}
+   */
+  @Deprecated
+  protected String getRootPath()
+    {
+    return getOutputPath();
+    }
+
   protected String getOutputPath()
     {
     if( outputPath == null )
