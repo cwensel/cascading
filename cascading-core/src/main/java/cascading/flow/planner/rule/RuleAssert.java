@@ -44,10 +44,21 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
     this.phase = phase;
     this.ruleExpression = ruleExpression;
 
+    if( ruleExpression.getContractionExpression() != null )
+      contractedTransformer = new ContractedTransformer( ruleExpression.getContractionExpression() );
+    else
+      contractedTransformer = null;
+
     if( ruleExpression.getContractedMatchExpression() != null )
       {
-      this.contractedTransformer = new ContractedTransformer( ruleExpression.getContractionExpression() );
-      this.subGraphTransformer = new SubGraphTransformer( contractedTransformer, ruleExpression.getContractedMatchExpression() );
+      if( contractedTransformer == null )
+        throw new IllegalArgumentException( "must have contracted expression if given contracted match expression" );
+
+      subGraphTransformer = new SubGraphTransformer( contractedTransformer, ruleExpression.getContractedMatchExpression() );
+      }
+    else
+      {
+      subGraphTransformer = null;
       }
     }
 
@@ -66,7 +77,13 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
   @Override
   protected ElementGraph prepareForMatch( PlannerContext plannerContext, ElementGraph graph )
     {
-    if( subGraphTransformer != null )
+    if( contractedTransformer != null )
+      {
+      Transformed<ElementGraph> transformed = contractedTransformer.transform( plannerContext, graph );
+
+      graph = transformed.getEndGraph();
+      }
+    else if( subGraphTransformer != null )
       {
       Transformed<ElementSubGraph> transformed = subGraphTransformer.transform( plannerContext, graph );
 

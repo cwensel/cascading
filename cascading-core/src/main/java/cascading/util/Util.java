@@ -567,6 +567,14 @@ public class Util
     return "[" + trace + "] " + message;
     }
 
+  public static String formatTrace( FlowElement flowElement, String message )
+    {
+    if( flowElement instanceof Pipe )
+      return formatTrace( (Pipe) flowElement, message );
+    else
+      return formatTrace( (Tap) flowElement, message );
+    }
+
   public static String formatTrace( Pipe pipe, String message )
     {
     if( pipe == null )

@@ -43,6 +43,11 @@ public class StandardElementGraph extends FlowElementGraph
   {
   public StandardElementGraph()
     {
+    this( false );
+    }
+
+  public StandardElementGraph( boolean testBetween )
+    {
     Function function = new NonFunction( new Fields( "num", "char" ) );
 
     Pipe pipeLower = new Each( "lower", new Fields( "line" ), function );
@@ -59,7 +64,13 @@ public class StandardElementGraph extends FlowElementGraph
 
     Pipe splice2 = new CoGroup( splice1, new Fields( "num1" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2", "num3", "char3" ) );
 
-    splice2 = new Each( new Pipe( "remove", splice2 ),  new Identity() );
+    if( testBetween )
+      splice2 = new Each( new Pipe( "before", splice2 ), new Identity() );
+
+    splice2 = new Each( new Pipe( "remove", splice2 ), new Identity() );
+
+    if( testBetween )
+      splice2 = new Each( new Pipe( "after", splice2 ), new Identity() );
 
     splice2 = new GroupBy( splice2, new Fields( 0 ) );
 

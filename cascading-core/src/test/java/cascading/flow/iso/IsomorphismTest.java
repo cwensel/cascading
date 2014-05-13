@@ -72,10 +72,15 @@ public class IsomorphismTest extends CascadingTestCase
   @Test
   public void testElementGraphs()
     {
+    assertEquals( 5, ElementGraphs.findAllGroups( new StandardElementGraph() ).size() );
+    assertEquals( 3, ElementGraphs.findSources( new StandardElementGraph() ).size() );
+    assertEquals( 2, ElementGraphs.findSinks( new StandardElementGraph() ).size() );
+    }
+
+  @Test
+  public void testRemoveBranch()
+    {
     StandardElementGraph standardElementGraph = new StandardElementGraph();
-    assertEquals( 5, ElementGraphs.findAllGroups( standardElementGraph ).size() );
-    assertEquals( 3, ElementGraphs.findSources( standardElementGraph ).size() );
-    assertEquals( 2, ElementGraphs.findSinks( standardElementGraph ).size() );
 
     standardElementGraph.writeDOT( getPlanPath() + "/standard-before.dot" );
 
@@ -87,6 +92,42 @@ public class IsomorphismTest extends CascadingTestCase
     standardElementGraph.writeDOT( getPlanPath() + "/standard-after.dot" );
 
     assertEquals( size - 3, standardElementGraph.vertexSet().size() );
+    }
+
+  @Test
+  public void testRemoveBetweenBranchInclusive()
+    {
+    StandardElementGraph standardElementGraph = new StandardElementGraph( true );
+
+    standardElementGraph.writeDOT( getPlanPath() + "/standard-before.dot" );
+
+    Pipe before = ElementGraphs.findFirstPipeNamed( standardElementGraph, "before" );
+    Pipe after = ElementGraphs.findLastPipeNamed( standardElementGraph, "after" );
+
+    int size = standardElementGraph.vertexSet().size();
+    ElementGraphs.removeBranchBetween( standardElementGraph, before, after, true );
+
+    standardElementGraph.writeDOT( getPlanPath() + "/standard-after.dot" );
+
+    assertEquals( size - 7, standardElementGraph.vertexSet().size() );
+    }
+
+  @Test
+  public void testRemoveBetweenBranchExclusive()
+    {
+    StandardElementGraph standardElementGraph = new StandardElementGraph( true );
+
+    standardElementGraph.writeDOT( getPlanPath() + "/standard-before.dot" );
+
+    Pipe before = ElementGraphs.findFirstPipeNamed( standardElementGraph, "last*upper2" );
+    Pipe after = ElementGraphs.findFirstPipeNamed( standardElementGraph, "after*last" );
+
+    int size = standardElementGraph.vertexSet().size();
+    ElementGraphs.removeBranchBetween( standardElementGraph, before, after, false );
+
+    standardElementGraph.writeDOT( getPlanPath() + "/standard-after.dot" );
+
+    assertEquals( size - 7, standardElementGraph.vertexSet().size() );
     }
 
   @Test

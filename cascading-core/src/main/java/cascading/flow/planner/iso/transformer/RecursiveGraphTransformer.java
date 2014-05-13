@@ -29,12 +29,16 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends GraphTransformer<E, E>
   {
+  private static final Logger LOG = LoggerFactory.getLogger( RecursiveGraphTransformer.class );
+
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
   private final boolean findAllPrimaries;
@@ -61,6 +65,9 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
 
   protected E transform( Transformed<E> transformed, E graph )
     {
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "preparing match within: {}", this.getClass().getSimpleName() );
+
     ElementGraph prepared = prepareForMatch( transformed, graph );
 
     if( prepared == null )
@@ -68,13 +75,19 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
 
     Set<FlowElement> exclusions = addExclusions( graph );
 
-    // for trivial cases, disable recursion and capture all primaries initially
     Match match;
 
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "performing match within: {}, using recursion: {}", this.getClass().getSimpleName(), !findAllPrimaries );
+
+    // for trivial cases, disable recursion and capture all primaries initially
     if( findAllPrimaries )
       match = finder.findAllMatches( transformed.getPlannerContext(), prepared, exclusions );
     else
       match = finder.findFirstMatch( transformed.getPlannerContext(), prepared, exclusions );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "transforming in place within: {}", this.getClass().getSimpleName() );
 
     if( !transformGraphInPlaceUsing( transformed, graph, match ) )
       return graph;

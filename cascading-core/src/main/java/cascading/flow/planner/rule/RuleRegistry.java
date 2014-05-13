@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import cascading.flow.planner.iso.transformer.ElementFactory;
+import cascading.util.LogUtil;
 
 /**
  *
@@ -39,6 +40,13 @@ public class RuleRegistry
     rules.put( phase, new LinkedList<Rule>() );
   }
 
+  protected void enableDebugLogging()
+    {
+    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );
+    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.assertion", "DEBUG" );
+    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.subgraph", "DEBUG" );
+    }
+
   public ElementFactory addElementFactory( String name, ElementFactory elementFactory )
     {
     return factories.put( name, elementFactory );
@@ -49,7 +57,7 @@ public class RuleRegistry
     return factories.get( factoryName );
     }
 
-  public LinkedList<Rule> getRulesFor( PlanPhase phase)
+  public LinkedList<Rule> getRulesFor( PlanPhase phase )
     {
     return rules.get( phase );
     }

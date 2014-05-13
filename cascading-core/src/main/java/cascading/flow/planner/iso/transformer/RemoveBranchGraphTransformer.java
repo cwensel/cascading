@@ -48,15 +48,33 @@ public class RemoveBranchGraphTransformer extends MutateGraphTransformer
   @Override
   protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
-    Set<FlowElement> remove = match.getCapturedElements( ElementExpression.Capture.Primary );
+    Set<FlowElement> primary = match.getCapturedElements( ElementExpression.Capture.Primary );
 
-    if( remove.isEmpty() )
+    Set<FlowElement> secondary = match.getCapturedElements( ElementExpression.Capture.Secondary );
+
+    if( primary.isEmpty() )
       return false;
 
-    if( remove.size() != 1 )
-      throw new IllegalStateException( "too many captured elements" );
+    if( primary.size() != 1 )
+      throw new IllegalStateException( "too many captured primary elements" );
 
-    ElementGraphs.removeBranchContaining( graph, Util.getFirst( remove ) );
+    if( secondary.isEmpty() )
+      {
+      boolean found = ElementGraphs.removeBranchContaining( graph, Util.getFirst( primary ) );
+
+      if( !found )
+        throw new IllegalStateException( "no branch found at: " + Util.getFirst( primary ) );
+      }
+    else
+      {
+      if( secondary.size() != 1 )
+        throw new IllegalStateException( "too many captured secondary elements" );
+
+      boolean found = ElementGraphs.removeBranchBetween( graph, Util.getFirst( primary ), Util.getFirst( secondary ), false );
+
+      if( !found )
+        throw new IllegalStateException( "no branch found at: " + Util.getFirst( primary ) );
+      }
 
     return true;
     }

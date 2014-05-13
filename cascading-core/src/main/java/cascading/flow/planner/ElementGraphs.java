@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,7 @@ import org.jgrapht.ext.ComponentAttributeProvider;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
+import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -84,6 +86,11 @@ public class ElementGraphs
   public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
     {
     return new TopologicalOrderIterator<>( graph );
+    }
+
+  public static TopologicalOrderIterator<FlowElement, Scope> getReverseTopologicalIterator( ElementGraph graph )
+    {
+    return new TopologicalOrderIterator<>( new EdgeReversedGraph<>( graph ) );
     }
 
   /**
@@ -589,6 +596,18 @@ public class ElementGraphs
     {
     Iterator<FlowElement> iterator = getTopologicalIterator( elementGraph );
 
+    return find( name, iterator );
+    }
+
+  public static Pipe findLastPipeNamed( ElementGraph elementGraph, String name )
+    {
+    Iterator<FlowElement> iterator = getReverseTopologicalIterator( elementGraph );
+
+    return find( name, iterator );
+    }
+
+  private static Pipe find( String name, Iterator<FlowElement> iterator )
+    {
     while( iterator.hasNext() )
       {
       FlowElement flowElement = iterator.next();
@@ -600,11 +619,67 @@ public class ElementGraphs
     return null;
     }
 
-  public static void removeBranchContaining( ElementGraph elementGraph, FlowElement flowElement )
+  public static boolean removeBranchContaining( ElementGraph elementGraph, FlowElement flowElement )
     {
     Set<FlowElement> branch = new LinkedHashSet<>();
 
-    // if both a join and split, cannot be removed
+    walkUp( branch, elementGraph, flowElement );
+
+    walkDown( branch, elementGraph, flowElement );
+
+    if( branch.isEmpty() )
+      return false;
+
+    for( FlowElement element : branch )
+      elementGraph.removeVertex( element );
+
+    return true;
+    }
+
+  public static boolean removeBranchBetween( ElementGraph elementGraph, FlowElement first, FlowElement second, boolean inclusive )
+    {
+    Set<FlowElement> branch = new LinkedHashSet<>( Arrays.asList( first, second ) );
+
+    walkDown( branch, elementGraph, first );
+
+    if( !inclusive )
+      {
+      branch.remove( first );
+      branch.remove( second );
+      }
+
+    if( branch.isEmpty() )
+      return false;
+
+    for( FlowElement element : branch )
+      elementGraph.removeVertex( element );
+
+    return true;
+    }
+
+  private static void walkDown( Set<FlowElement> branch, ElementGraph elementGraph, FlowElement flowElement )
+    {
+    FlowElement current;
+    current = flowElement;
+
+    while( true )
+      {
+      if( !branch.contains( current ) && ( elementGraph.inDegreeOf( current ) != 1 || elementGraph.outDegreeOf( current ) != 1 ) )
+        break;
+
+      branch.add( current );
+
+      FlowElement element = elementGraph.getEdgeTarget( getFirst( elementGraph.outgoingEdgesOf( current ) ) );
+
+      if( element instanceof Extent || branch.contains( element ) )
+        break;
+
+      current = element;
+      }
+    }
+
+  private static void walkUp( Set<FlowElement> branch, ElementGraph elementGraph, FlowElement flowElement )
+    {
     FlowElement current = flowElement;
 
     while( true )
@@ -616,31 +691,11 @@ public class ElementGraphs
 
       FlowElement element = elementGraph.getEdgeSource( getFirst( elementGraph.incomingEdgesOf( current ) ) );
 
-      if( element instanceof Extent )
+      if( element instanceof Extent || branch.contains( element ) )
         break;
 
       current = element;
       }
-
-    current = flowElement;
-
-    while( true )
-      {
-      if( elementGraph.inDegreeOf( current ) != 1 || elementGraph.outDegreeOf( current ) != 1 )
-        break;
-
-      branch.add( current );
-
-      FlowElement element = elementGraph.getEdgeTarget( getFirst( elementGraph.outgoingEdgesOf( current ) ) );
-
-      if( element instanceof Extent )
-        break;
-
-      current = element;
-      }
-
-    for( FlowElement element : branch )
-      elementGraph.removeVertex( element );
     }
 
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>

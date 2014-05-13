@@ -291,8 +291,8 @@ public class RuleExec
 
         if( rule instanceof GraphTransformer )
           performNodePipelineTransform( phase, context, plannerContext, (GraphTransformer) rule );
-//        else if( rule instanceof GraphAssert )
-//          performNodePipelelineAssertion( plannerContext, context, (GraphAssert) rule );
+        else if( rule instanceof GraphAssert )
+          performNodePipelineAssertion( plannerContext, context, (GraphAssert) rule );
 
         break;
 
@@ -469,6 +469,37 @@ public class RuleExec
 
     context.ruleResult.setNodePipelineGraphResults( results );
     }
+
+  private void performNodePipelineAssertion( PlannerContext plannerContext, PhaseContext context, GraphAssert rule )
+    {
+    LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
+
+    Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphResults();
+    Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs = context.ruleResult.getNodePipelineGraphResults();
+
+    for( Map.Entry<ElementGraph, List<ElementGraph>> stepEntry : nodeSubGraphs.entrySet() )
+      {
+      List<ElementGraph> nodeGraphs = stepEntry.getValue();
+
+      for( ElementGraph nodeGraph : nodeGraphs )
+        {
+        List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
+
+        for( ElementGraph pipelineGraph : pipelineGraphs )
+          {
+          Asserted asserted = rule.assertion( plannerContext, pipelineGraph );
+
+          FlowElement primary = asserted.getFirstAnchor();
+
+          if( primary == null )
+            continue;
+
+          throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
+          }
+        }
+      }
+    }
+
 
   // use the final assembly graph so we can get Scopes for heads and tails
   private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, MultiMap> subGraphs )

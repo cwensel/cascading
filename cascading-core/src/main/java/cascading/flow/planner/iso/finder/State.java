@@ -322,11 +322,11 @@ class State
       for( int i = 0; i < permutation.size(); i++ )
         transformed[ i ] = compat[ permutation.get( i ) ];
 
-      boolean result = false;
+      boolean result = transformed[ 0 ][ 0 ];
 
       // test diagonal is true
-      for( int i = 0; i < scopes.size(); i++ )
-        result |= transformed[ i ][ i ];
+      for( int i = 1; i < scopes.size(); i++ )
+        result &= transformed[ i ][ i ];
 
       if( result )
         return true;

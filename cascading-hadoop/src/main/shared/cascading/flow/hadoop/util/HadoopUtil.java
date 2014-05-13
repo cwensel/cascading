@@ -45,6 +45,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.LogUtil;
 import cascading.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
@@ -89,22 +90,7 @@ public class HadoopUtil
     String[] elements = values.split( "," );
 
     for( String element : elements )
-      setLogLevel( element.split( "=" ) );
-    }
-
-  private static void setLogLevel( String[] logger )
-    {
-    // removing logj4 dependency
-    // org.apache.log4j.Logger.getLogger( logger[ 0 ] ).setLevel( org.apache.log4j.Level.toLevel( logger[ 1 ] ) );
-
-    Object loggerObject = Util.invokeStaticMethod( "org.apache.log4j.Logger", "getLogger",
-      new Object[]{logger[ 0 ]}, new Class[]{String.class} );
-
-    Object levelObject = Util.invokeStaticMethod( "org.apache.log4j.Level", "toLevel",
-      new Object[]{logger[ 1 ]}, new Class[]{String.class} );
-
-    Util.invokeInstanceMethod( loggerObject, "setLevel",
-      new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
+      LogUtil.setLog4jLevel( element.split( "=" ) );
     }
 
   // only place JobConf should ever be returned

@@ -20,11 +20,11 @@
 
 package cascading.flow.planner;
 
+import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.finder.GraphFinderException;
 import cascading.flow.planner.rule.Rule;
-import cascading.pipe.Pipe;
 import cascading.util.Util;
 
 /**
@@ -48,37 +48,37 @@ public class PlannerException extends FlowException
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe    of type Pipe
-   * @param message of type String
+   * @param flowElement of type FlowElement
+   * @param message     of type String
    */
-  public PlannerException( Pipe pipe, String message )
+  public PlannerException( FlowElement flowElement, String message )
     {
-    super( Util.formatTrace( pipe, message ) );
+    super( Util.formatTrace( flowElement, message ) );
     }
 
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe      of type Pipe
-   * @param message   of type String
-   * @param throwable of type Throwable
+   * @param flowElement of type FlowElement
+   * @param message     of type String
+   * @param throwable   of type Throwable
    */
-  public PlannerException( Pipe pipe, String message, Throwable throwable )
+  public PlannerException( FlowElement flowElement, String message, Throwable throwable )
     {
-    super( Util.formatTrace( pipe, message ), throwable );
+    super( Util.formatTrace( flowElement, message ), throwable );
     }
 
   /**
    * Constructor PlannerException creates a new PlannerException instance.
    *
-   * @param pipe         of type Pipe
+   * @param flowElement  of type FlowElement
    * @param message      of type String
    * @param throwable    of type Throwable
    * @param elementGraph of type ElementGraph
    */
-  public PlannerException( Pipe pipe, String message, Throwable throwable, FlowElementGraph elementGraph )
+  public PlannerException( FlowElement flowElement, String message, Throwable throwable, FlowElementGraph elementGraph )
     {
-    super( Util.formatTrace( pipe, message ), throwable );
+    super( Util.formatTrace( flowElement, message ), throwable );
     this.elementGraph = elementGraph;
     }
 
