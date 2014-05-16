@@ -1,6 +1,8 @@
 Cascading Change Log
 
 2.5.5 [unreleased]
+  Fixed an issue in c.f.h.HadoopFlowProcess#getConfigCopy() where the current c.a.h.m.JobConf context ClassLoader was
+  not also copied preventing classes from being loaded from jars not known at startup.
 
   Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
   causing j.i.EOFExceptions.
