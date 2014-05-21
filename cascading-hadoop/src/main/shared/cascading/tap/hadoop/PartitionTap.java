@@ -44,7 +44,16 @@ import org.apache.hadoop.mapred.RecordReader;
  * current {@link cascading.tuple.Tuple} instance.
  * <p/>
  * The constructor takes a {@link cascading.tap.hadoop.Hfs} {@link cascading.tap.Tap} and a {@link Partition}
- * implementation. This allows Tuple values at given positions to be used as directory names.
+ * implementation. This allows Tuple values at given positions to be used as directory names during write
+ * operations, and directory names as data during read operations.
+ * <p/>
+ * The key value here is that there is no need to duplicate data values in the directory names and inside
+ * the data files.
+ * <p/>
+ * So only values declared in the parent Tap will be read or written to the underlying file system files. But
+ * fields declared by the {@link Partition} will only be read or written to the directory names. That is, the
+ * PartitionTap instance will sink or source the partition fields, plus the parent Tap fields. The partition
+ * fields and parent Tap fields do not need to have common field names.
  * <p/>
  * Note that Hadoop can only sink to directories, and all files in those directories are "part-xxxxx" files.
  * <p/>
