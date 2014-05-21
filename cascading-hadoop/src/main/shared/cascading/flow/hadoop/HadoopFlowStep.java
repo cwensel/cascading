@@ -80,7 +80,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   public JobConf getInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    JobConf conf = parentConfig == null ? new JobConf() : new JobConf( parentConfig );
+    JobConf conf = parentConfig == null ? new JobConf() : HadoopUtil.copyJobConf( parentConfig );
 
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
@@ -305,7 +305,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     {
     if( !traps.isEmpty() )
       {
-      JobConf trapConf = new JobConf( conf );
+      JobConf trapConf = HadoopUtil.copyJobConf( conf );
 
       for( Tap tap : traps.values() )
         tap.sinkConfInit( flowProcess, trapConf );

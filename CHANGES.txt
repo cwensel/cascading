@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
+  causing j.i.EOFExceptions.
+
   Fixed issue where c.t.Fields#resolve() would lose type information with complex selectors.
 
   Added new c.f.h.p.HadoopPlanner property to disable adjacent tap removal optimization. Setting

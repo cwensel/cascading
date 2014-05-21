@@ -101,9 +101,26 @@ public class HadoopUtil
       new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
     }
 
+  public static JobConf copyJobConf( JobConf parentJobConf )
+    {
+    if( parentJobConf == null )
+      throw new NullPointerException( "parentJobConf" );
+
+    // see https://github.com/Cascading/cascading/pull/21
+    // The JobConf(JobConf) constructor causes derived JobConfs to share Credentials. We want to avoid this, in
+    // case those Credentials are mutated later on down the road (which they will be, during job submission, in
+    // separate threads!). Using the JobConf(Configuration) constructor avoids Credentials-sharing.
+    final Configuration configurationCopy = new Configuration( parentJobConf );
+    final JobConf jobConf = new JobConf( configurationCopy );
+
+    jobConf.getCredentials().addAll( parentJobConf.getCredentials() );
+
+    return jobConf;
+    }
+
   public static JobConf createJobConf( Map<Object, Object> properties, JobConf defaultJobconf )
     {
-    JobConf jobConf = defaultJobconf == null ? new JobConf() : new JobConf( defaultJobconf );
+    JobConf jobConf = defaultJobconf == null ? new JobConf() : copyJobConf( defaultJobconf );
 
     if( properties == null )
       return jobConf;
@@ -362,7 +379,7 @@ public class HadoopUtil
 
   public static JobConf mergeConf( JobConf job, Map<String, String> config, boolean directly )
     {
-    JobConf currentConf = directly ? job : new JobConf( job );
+    JobConf currentConf = directly ? job : copyJobConf( job );
 
     for( String key : config.keySet() )
       {
