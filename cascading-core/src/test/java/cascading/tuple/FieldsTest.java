@@ -1033,4 +1033,14 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( long.class, merged.getTypes()[ 1 ] );
     assertEquals( long.class, merged.getTypes()[ 11 ] );
     }
+
+  public void testResolveWithTypes()
+    {
+    Fields selector = new Fields( "ip" );
+    Fields fields[] = new Fields[]{new Fields( "ip" ).applyTypes( String.class ),
+                                   new Fields( "offset", "line" ).applyTypes( String.class, String.class )};
+
+    Fields resolved = Fields.resolve( selector, fields );
+    assertTrue( resolved.hasTypes() );
+    }
   }

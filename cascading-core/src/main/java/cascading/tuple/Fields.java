@@ -486,7 +486,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     Type[] types = null;
 
     if( size != -1 )
-      types = new Type[ size ];
+      types = new Type[ result.size() ];
 
     int offset = 0;
     for( Fields current : fields )
