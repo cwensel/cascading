@@ -87,8 +87,6 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
 
         String platformName = testPlatform.getName();
 
-        LOG.info( "installing platform: {}", platformName );
-
         String displayName = String.format( "%s[%s]", name, platformName );
 
         PlatformTestCase platformTest = (PlatformTestCase) type.getConstructors()[ 0 ].newInstance( properties, displayName, name, pipes.get( name ) );

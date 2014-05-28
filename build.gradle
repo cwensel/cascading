@@ -18,9 +18,18 @@
  * limitations under the License.
  */
 
+
+
 /*
  Using:
 
+ To run a single test w/ gradle 1.10 and above, works with :test and :platformTest tasks
+  > gradle :cascading-local:test --tests *LocalTapPlatformTest -i
+
+ or a single method
+  > gradle :cascading-local:test --tests *LocalTapPlatformTest.testIO -i
+
+ Prior to 1.10:
  To run a single test:
    > gradle -Dtest.single=LocalTapPlatformTest :cascading-local:test -i
 
@@ -86,6 +95,10 @@ subprojects {
     module {
       scopes.PROVIDED.plus += configurations.providedCompile
     }
+  }
+
+  check {
+    dependsOn << platformTest
   }
 
   javadoc {
@@ -196,7 +209,7 @@ subprojects {
     // confused, when reading the generated pom
     [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured { pom ->
       def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault { 100 }
-      pom.dependencies = pom.dependencies.sort { scopeOrder[it.scope] }
+      pom.dependencies = pom.dependencies.sort { scopeOrder[ it.scope ] }
     }
   }
 }

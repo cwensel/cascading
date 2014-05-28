@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * reasonable.
  */
 @RunWith(PlatformRunner.class)
-public class PlatformTestCase extends CascadingTestCase
+public abstract class PlatformTestCase extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PlatformTestCase.class );
 
@@ -79,19 +79,19 @@ public class PlatformTestCase extends CascadingTestCase
   private transient int numMapTasks;
   private transient int numReduceTasks;
 
-  public PlatformTestCase( boolean useCluster )
+  protected PlatformTestCase( boolean useCluster )
     {
     this.useCluster = useCluster;
     }
 
-  public PlatformTestCase( boolean useCluster, int numMapTasks, int numReduceTasks )
+  protected PlatformTestCase( boolean useCluster, int numMapTasks, int numReduceTasks )
     {
     this( useCluster );
     this.numMapTasks = numMapTasks;
     this.numReduceTasks = numReduceTasks;
     }
 
-  public PlatformTestCase()
+  protected PlatformTestCase()
     {
     this( false );
     }

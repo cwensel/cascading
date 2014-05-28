@@ -31,16 +31,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import cascading.PlatformTestCase;
 import junit.framework.Test;
+import org.junit.Ignore;
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.Filterable;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.ParentRunner;
@@ -88,16 +95,12 @@ public class PlatformRunner extends ParentRunner<Runner>
     String includesString = System.getProperty( PLATFORM_INCLUDES );
 
     if( includesString == null || includesString.isEmpty() )
-      {
       return;
-      }
 
     String[] split = includesString.split( "," );
 
     for( String include : split )
-      {
       includes.add( include.trim().toLowerCase() );
-      }
     }
 
   public static TestPlatform makeInstance( Class<? extends TestPlatform> type )
@@ -139,10 +142,10 @@ public class PlatformRunner extends ParentRunner<Runner>
     if( classes.isEmpty() )
       classes = getPlatformClassesFromClasspath( javaClass.getClassLoader() );
 
-    for( Class<? extends TestPlatform> platformClass : classes )
-      {
-      addPlatform( javaClass, platformClass );
-      }
+    int count = 0;
+    Iterator<Class<? extends TestPlatform>> iterator = classes.iterator();
+    while( iterator.hasNext() )
+      addPlatform( javaClass, iterator.next(), count++, classes.size() );
 
     return runners;
     }
@@ -161,9 +164,14 @@ public class PlatformRunner extends ParentRunner<Runner>
     return classes;
     }
 
-  protected static Set<Class<? extends TestPlatform>> getPlatformClassesFromClasspath( ClassLoader classLoader ) throws IOException, ClassNotFoundException
+  static Map<ClassLoader, Set<Class<? extends TestPlatform>>> cache = new WeakHashMap<>();
+
+  protected synchronized static Set<Class<? extends TestPlatform>> getPlatformClassesFromClasspath( ClassLoader classLoader ) throws IOException, ClassNotFoundException
     {
-    Set<Class<? extends TestPlatform>> classes = new LinkedHashSet<Class<? extends TestPlatform>>();
+    if( cache.containsKey( classLoader ) )
+      return cache.get( classLoader );
+
+    Set<Class<? extends TestPlatform>> classes = new LinkedHashSet<>();
     Properties properties = new Properties();
 
     LOG.debug( "classloader: {}", classLoader );
@@ -187,44 +195,43 @@ public class PlatformRunner extends ParentRunner<Runner>
       LOG.info( "found {} test platforms from classpath", classes.size() );
       }
 
+    cache.put( classLoader, classes );
     return classes;
     }
 
   private static Class<?> getPlatformClass( ClassLoader classLoader, Properties properties, InputStream stream ) throws IOException, ClassNotFoundException
     {
     if( stream == null )
-      {
       throw new IllegalStateException( "platform provider resource not found: " + PLATFORM_RESOURCE );
-      }
 
     properties.load( stream );
 
     String classname = properties.getProperty( PLATFORM_CLASSNAME );
 
     if( classname == null )
-      {
       throw new IllegalStateException( "platform provider value not found: " + PLATFORM_CLASSNAME );
-      }
 
     Class<?> type = classLoader.loadClass( classname );
 
     if( type == null )
-      {
       throw new IllegalStateException( "platform provider class not found: " + classname );
-      }
 
     return type;
     }
 
-  private void addPlatform( final Class<?> javaClass, Class<? extends TestPlatform> type ) throws Throwable
+  private void addPlatform( final Class<?> javaClass, Class<? extends TestPlatform> type, int ordinal, int size ) throws Throwable
     {
+    if( javaClass.getAnnotation( Ignore.class ) != null ) // ignore this class
+      {
+      LOG.info( "ignoring test class: {}", javaClass.getCanonicalName() );
+      return;
+      }
+
     final TestPlatform testPlatform = makeInstance( type );
 
     // test platform dependencies not installed, so skip
     if( testPlatform == null )
-      {
       return;
-      }
 
     final String platformName = testPlatform.getName();
 
@@ -234,18 +241,14 @@ public class PlatformRunner extends ParentRunner<Runner>
       return;
       }
 
-    LOG.info( "installing platform: {}", platformName );
-    LOG.info( "running test: {}", javaClass.getName() );
+    LOG.info( "adding test: {}, with platform: {}", javaClass.getName(), platformName );
 
     PlatformSuite suiteAnnotation = javaClass.getAnnotation( PlatformSuite.class );
+
     if( suiteAnnotation != null )
-      {
       runners.add( makeSuiteRunner( javaClass, suiteAnnotation.method(), testPlatform ) );
-      }
     else
-      {
-      runners.add( makeClassRunner( javaClass, testPlatform, platformName ) );
-      }
+      runners.add( makeClassRunner( javaClass, testPlatform, platformName, size != 1 ) );
     }
 
   private JUnit38ClassRunner makeSuiteRunner( Class<?> javaClass, String suiteMethod, final TestPlatform testPlatform ) throws Throwable
@@ -255,15 +258,18 @@ public class PlatformRunner extends ParentRunner<Runner>
     return new JUnit38ClassRunner( (Test) method.invoke( null, testPlatform ) );
     }
 
-  private BlockJUnit4ClassRunner makeClassRunner( final Class<?> javaClass, final TestPlatform testPlatform, final String platformName ) throws InitializationError
+  private BlockJUnit4ClassRunner makeClassRunner( final Class<?> javaClass, final TestPlatform testPlatform, final String platformName, final boolean useName ) throws InitializationError
     {
     return new BlockJUnit4ClassRunner( javaClass )
     {
     @Override
-    protected String getName()
-      {
+    protected String getName() // the runner name
+    {
+    if( useName )
       return String.format( "%s[%s]", super.getName(), platformName );
-      }
+    else
+      return super.getName();
+    }
 
 //        @Override
 //        protected String testName( FrameworkMethod method )
@@ -293,5 +299,15 @@ public class PlatformRunner extends ParentRunner<Runner>
   protected void runChild( Runner runner, RunNotifier runNotifier )
     {
     runner.run( runNotifier );
+    }
+
+  @Override
+  public void filter( Filter filter ) throws NoTestsRemainException
+    {
+    for( Runner runner : getChildren() )
+      {
+      if( runner instanceof Filterable )
+        ( (Filterable) runner ).filter( filter );
+      }
     }
   }

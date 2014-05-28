@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+
+
 rootProject.ext.testRoots = []
 
 project.ext.setTestingProperties = {
@@ -39,7 +41,7 @@ test {
   systemProperties = setTestingProperties()
 }
 
-task platformTest( type: Test, dependsOn: test ) {
+task platformTest( type: Test ) {
 
   if( System.properties[ 'platformTest.single' ] ) // test a single class from the command line
     include "**/${System.properties[ 'platformTest.single' ]}.class"
