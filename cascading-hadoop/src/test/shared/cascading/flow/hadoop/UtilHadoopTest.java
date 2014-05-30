@@ -22,7 +22,7 @@ package cascading.flow.hadoop;
 
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -35,7 +35,7 @@ public class UtilHadoopTest
   @Test
   public void testSetLogLevel()
     {
-    JobConf jobConf = new JobConf();
+    Configuration jobConf = new Configuration();
 
     jobConf.set( "log4j.logger", "cascading=DEBUG" );
 

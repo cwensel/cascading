@@ -56,7 +56,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
 import static cascading.ComparePlatformsTest.NONDETERMINISTIC;
@@ -67,7 +66,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
   {
   public FieldedPipesPlatformTest()
     {
-    super( true ); // leave cluster testing enabled
+    super( true, 5, 3 ); // leave cluster testing enabled
     }
 
   @Test
@@ -235,6 +234,8 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
   /**
    * Specifically tests GroupBy will return the correct grouping fields to the following Every
    *
+   * additionally tests secondary sorting during merging
+   *
    * @throws Exception
    */
   @Test
@@ -254,7 +255,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "upper", sourceUpper );
     sources.put( "offset", sourceLowerOffset );
 
-    Tap sink = getPlatform().getTextFile( getOutputPath( "simplemergethree" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile(Fields.ALL, "\t", getOutputPath( "simplemergethree" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -273,6 +274,15 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 6 );
+
+    List<Tuple> tuples = getSinkAsList( flow );
+
+    assertTrue( tuples.contains( new Tuple( "1", "A" ) ) );
+    assertTrue( tuples.contains( new Tuple( "2", "B" ) ) );
+    assertTrue( tuples.contains( new Tuple( "3", "C" ) ) );
+    assertTrue( tuples.contains( new Tuple( "4", "D" ) ) );
+    assertTrue( tuples.contains( new Tuple( "5", "E" ) ) );
+    assertTrue( tuples.contains( new Tuple( "6", "c" ) ) );
     }
 
   /**
@@ -377,11 +387,11 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    List<Tuple> tuples  = asList( flow, sink );
+    List<Tuple> tuples = asList( flow, sink );
     assertEquals( 10, tuples.size() );
 
-    List<Object> values = new ArrayList<Object>(  );
-    for (Tuple tuple: tuples)
+    List<Object> values = new ArrayList<Object>();
+    for( Tuple tuple : tuples )
       values.add( tuple.getObject( 1 ) );
 
     assertTrue( values.contains( "1\t1\ta" ) );
@@ -759,44 +769,6 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     validateLength( flow, 8 * 2 * 3, null );
     }
 
-  /**
-   * If the sinks have the same scheme as a temp tap, replace the temp tap
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testChainedTaps() throws Exception
-    {
-    getPlatform().copyFromLocal( inputFileApache );
-
-    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
-
-    Pipe pipe = new Each( new Pipe( "first" ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
-    pipe = new GroupBy( pipe, new Fields( "ip" ) );
-
-    pipe = new Each( new Pipe( "second", pipe ), new Fields( "ip" ), new RegexFilter( "7" ) );
-    pipe = new GroupBy( pipe, new Fields( "ip" ) );
-
-    pipe = new Each( new Pipe( "third", pipe ), new Fields( "ip" ), new RegexFilter( "6" ) );
-    pipe = new GroupBy( pipe, new Fields( "ip" ) );
-
-    Tap sinkFirst = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/first" ), SinkMode.REPLACE );
-    Tap sinkSecond = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/second" ), SinkMode.REPLACE );
-    Tap sinkThird = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( "chainedtaps/third" ), SinkMode.REPLACE );
-
-    Map<String, Tap> sinks = Cascades.tapsMap( new String[]{"first", "second",
-                                                            "third"}, Tap.taps( sinkFirst, sinkSecond, sinkThird ) );
-
-    Flow flow = getPlatform().getFlowConnector().connect( source, sinks, pipe );
-
-    if( getPlatform().isMapReduce() )
-      assertEquals( "wrong number of steps", 3, flow.getFlowSteps().size() );
-
-    flow.complete();
-
-    validateLength( flow, 3 );
-    }
-
   @Test
   public void testReplace() throws Exception
     {
@@ -924,7 +896,6 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     validateLength( flow, 8, null );
     }
 
-
   public static class LowerComparator implements Comparator<Comparable>, Hasher<Comparable>, Serializable
     {
     @Override
@@ -964,7 +935,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     Fields charFields = new Fields( "char" );
     charFields.setComparator( "char", new LowerComparator() );
 
-    Pipe splice = new GroupBy( merge, charFields );
+    Pipe splice = new GroupBy( "groupby", merge, charFields );
 
     splice = new Every( splice, new Fields( "char" ), new Count() );
 

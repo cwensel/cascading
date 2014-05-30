@@ -36,6 +36,7 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowElements;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
@@ -52,7 +53,7 @@ import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -261,7 +262,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return graph;
     }
 
-  protected MultiMap getAnnotations()
+  protected EnumMultiMap getAnnotations()
     {
     return ( (AnnotatedGraph) graph ).getAnnotations();
     }
@@ -340,13 +341,13 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     }
 
   @Override
-  public Set<Tap> getSources()
+  public Set<Tap> getSourceTaps()
     {
     return Collections.unmodifiableSet( new HashSet<Tap>( sources.keySet() ) );
     }
 
   @Override
-  public Set<Tap> getSinks()
+  public Set<Tap> getSinkTaps()
     {
     return Collections.unmodifiableSet( new HashSet<Tap>( sinks.keySet() ) );
     }
@@ -548,7 +549,14 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return throwable;
     }
 
-  protected abstract Config createInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
+  /**
+   * Public for testing.
+   *
+   * @param flowProcess
+   * @param parentConfig
+   * @return
+   */
+  public abstract Config createInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
 
   /**
    * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),
@@ -733,12 +741,12 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   protected abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
 
-  protected void initConfFromProcessConfigDef( ConfigDef.Setter setter )
+  protected void initConfFromProcessConfigDef( ElementGraph elementGraph, ConfigDef.Setter setter )
     {
     // applies each mode in order, topologically
     for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
       {
-      TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalOrderIterator();
+      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( elementGraph );
 
       while( iterator.hasNext() )
         {
@@ -832,6 +840,17 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       {
       if( Tap.id( tap ).equals( id ) )
         return tap;
+      }
+
+    return null;
+    }
+
+  public static FlowElement getFlowElementForID( Set<FlowElement> flowElements, String id )
+    {
+    for( FlowElement flowElement : flowElements )
+      {
+      if( FlowElements.id( flowElement ).equals( id ) )
+        return flowElement;
       }
 
     return null;

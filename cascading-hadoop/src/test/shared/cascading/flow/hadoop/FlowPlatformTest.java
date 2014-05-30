@@ -36,9 +36,8 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
 import cascading.flow.LockingFlowListener;
-import cascading.flow.hadoop.planner.HadoopFlowStepJob;
-import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.BaseOperation;
 import cascading.operation.Debug;
@@ -59,7 +58,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 import cascading.util.Util;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +89,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    Map<Object, Object> props = getProperties();
-    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -99,7 +97,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( (Configuration) ( (BaseFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), ( (BaseHadoopPlatform) getPlatform() ).getConfiguration() ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -114,8 +112,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    Map<Object, Object> props = getProperties();
-    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -123,7 +120,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( (Configuration) ( (BaseFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), ( (BaseHadoopPlatform) getPlatform() ).getConfiguration() ) );
 
     assertTrue( "is not local", isLocal );
     }
@@ -140,8 +137,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    Map<Object, Object> props = getProperties();
-    Flow flow = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     List<FlowStep> steps = flow.getFlowSteps();
 
@@ -149,7 +145,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( ( (HadoopFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), HadoopPlanner.createJobConf( props ) ) );
+    boolean isLocal = HadoopUtil.isLocal( (Configuration) ( (BaseFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), ( (BaseHadoopPlatform) getPlatform() ).getConfiguration() ) );
 
     assertTrue( "is local", !isLocal );
     }
@@ -212,7 +208,7 @@ public class FlowPlatformTest extends PlatformTestCase
       if( map == null || map.values().size() == 0 )
         continue;
 
-      if( ( (HadoopFlowStepJob) map.values().iterator().next() ).isStarted() )
+      if( ( map.values().iterator().next() ).isStarted() )
         break;
       }
 
@@ -403,7 +399,7 @@ public class FlowPlatformTest extends PlatformTestCase
         if( map == null || map.values().size() == 0 )
           continue;
 
-        if( ( (HadoopFlowStepJob) map.values().iterator().next() ).isStarted() )
+        if( map.values().iterator().next().isStarted() )
           break;
         }
 
@@ -440,7 +436,8 @@ public class FlowPlatformTest extends PlatformTestCase
 //    System.out.println( "flow.getID() = " + flow1.getID() );
 
     assertNotNull( "missing id", flow1.getID() );
-    assertNotNull( "missing id in conf", ( (HadoopFlow) flow1 ).getConfig().get( "cascading.flow.id" ) );
+
+    assertNotNull( "missing id in conf", flow1.getProperty( "cascading.flow.id" ) );
 
     Flow flow2 = getPlatform().getFlowConnector( props ).connect( source, sink, pipe );
 
@@ -455,7 +452,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    JobConf conf = (JobConf) ( (BaseHadoopPlatform) getPlatform() ).getConfiguration();
+    Configuration conf = ( (BaseHadoopPlatform) getPlatform() ).getConfiguration();
 
     conf.set( AppProps.APP_NAME, "testname" );
 

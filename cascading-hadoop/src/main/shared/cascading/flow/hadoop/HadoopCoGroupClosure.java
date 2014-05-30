@@ -37,7 +37,7 @@ import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory;
 import cascading.tuple.io.IndexTuple;
 import cascading.tuple.util.TupleViews;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,15 +103,15 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     }
 
   /** Field groups */
-  Collection<Tuple>[] collections;
-  private final int numSelfJoins;
+  protected Collection<Tuple>[] collections;
+  protected final int numSelfJoins;
 
   private Tuple[] joinedTuplesArray;
   private final Tuple emptyTuple;
   private TupleBuilder joinedBuilder;
   private Tuple joinedTuple = new Tuple(); // is discarded
 
-  private final TupleCollectionFactory<JobConf> tupleCollectionFactory;
+  private final TupleCollectionFactory<Configuration> tupleCollectionFactory;
 
   public HadoopCoGroupClosure( FlowProcess flowProcess, int numSelfJoins, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -162,30 +162,30 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     }
 
   @Override
-  public void reset( Tuple grouping, Iterator values )
+  public void reset( Tuple grouping, Iterator<Tuple>... values )
     {
     super.reset( grouping, values );
 
     build();
     }
 
-  private void build()
+  protected void build()
     {
     clearGroups();
 
     if( collections[ 0 ] instanceof FalseCollection ) // force reset on FalseCollection
-      ( (FalseCollection) collections[ 0 ] ).setIterator( null );
+      ( (FalseCollection) collections[ 0 ] ).reset( null );
 
-    while( values.hasNext() )
+    while( values[ 0 ].hasNext() )
       {
-      IndexTuple current = (IndexTuple) values.next();
+      IndexTuple current = (IndexTuple) values[ 0 ].next();
       int pos = current.getIndex();
 
       // if this is the first (lhs) co-group, just use values iterator
       // we are guaranteed all the remainder tuples in the iterator are from pos == 0
       if( numSelfJoins == 0 && pos == 0 )
         {
-        ( (FalseCollection) collections[ 0 ] ).setIterator( createIterator( current, values ) );
+        ( (FalseCollection) collections[ 0 ] ).reset( createIterator( current, values[ 0 ] ) );
         break;
         }
 
@@ -193,7 +193,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
       }
     }
 
-  private void clearGroups()
+  protected void clearGroups()
     {
     for( Collection<Tuple> collection : collections )
       {
@@ -204,7 +204,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
       }
     }
 
-  private void initLists()
+  protected void initLists()
     {
     collections = new Collection[ size() ];
 
@@ -249,7 +249,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     };
     }
 
-  private Collection<Tuple> createTupleCollection( Fields joinField )
+  protected Collection<Tuple> createTupleCollection( Fields joinField )
     {
     Collection<Tuple> collection = tupleCollectionFactory.create( flowProcess );
 

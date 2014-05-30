@@ -56,7 +56,6 @@ import static data.InputData.inputFileApache;
 @Ignore
 public class MapReduceFlowPlatformTest extends PlatformTestCase
   {
-
   public MapReduceFlowPlatformTest()
     {
     super( true );

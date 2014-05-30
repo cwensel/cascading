@@ -30,7 +30,7 @@ import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.SpillableTupleMap;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.collect.TupleMapFactory;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * HadoopSpillableTupleMap is responsible for spilling values to disk if the map threshold is reached.
@@ -40,11 +40,11 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class HadoopSpillableTupleMap extends SpillableTupleMap
   {
-  private final FlowProcess<JobConf> flowProcess;
+  private final FlowProcess<? extends Configuration> flowProcess;
   private final Spillable.SpillStrategy spillStrategy;
-  private final TupleCollectionFactory<JobConf> tupleCollectionFactory;
+  private final TupleCollectionFactory<Configuration> tupleCollectionFactory;
 
-  public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, FlowProcess<JobConf> flowProcess )
+  public HadoopSpillableTupleMap( int initialCapacity, float loadFactor, int mapThreshold, int listThreshold, FlowProcess<? extends Configuration> flowProcess )
     {
     super( initialCapacity, loadFactor, mapThreshold, listThreshold );
     this.flowProcess = flowProcess;

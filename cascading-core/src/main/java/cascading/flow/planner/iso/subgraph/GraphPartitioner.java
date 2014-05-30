@@ -34,7 +34,7 @@ import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 
 /**
  *
@@ -81,7 +81,7 @@ public class GraphPartitioner
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
-    Map<ElementGraph, MultiMap> annotatedSubGraphs = new LinkedHashMap<>();
+    Map<ElementGraph, EnumMultiMap> annotatedSubGraphs = new LinkedHashMap<>();
 
     if( expressionGraph == null )
       {
@@ -89,7 +89,7 @@ public class GraphPartitioner
       if( elementGraph.containsVertex( Extent.head ) )
         elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new MultiMap() );
+      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new EnumMultiMap() );
 
       return new Partitions( this, elementGraph, annotatedSubGraphs );
       }
@@ -101,7 +101,7 @@ public class GraphPartitioner
       {
       ElementSubGraph next = stepIterator.next();
 
-      MultiMap annotations = new MultiMap();
+      EnumMultiMap annotations = new EnumMultiMap();
 
       if( this.annotations.length != 0 )
         {

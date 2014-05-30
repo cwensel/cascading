@@ -40,9 +40,9 @@ public interface ProcessModel
 
   Collection<Group> getGroups();
 
-  Set<Tap> getSources();
+  Set<Tap> getSourceTaps();
 
-  Set<Tap> getSinks();
+  Set<Tap> getSinkTaps();
 
   int getSubmitPriority();
 

@@ -33,7 +33,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
@@ -47,7 +47,7 @@ public class Match
   protected final Map<ElementExpression, FlowElement> vertexMapping;
   protected final Collection<FlowElement> foundElements;
   protected final Collection<Scope> foundScopes;
-  protected MultiMap<FlowElement> captureMap;
+  protected EnumMultiMap<FlowElement> captureMap;
 
   private ElementSubGraph matchedGraph;
 
@@ -56,7 +56,7 @@ public class Match
     this( matchGraph, elementGraph, vertexMapping, foundElements, foundScopes, null );
     }
 
-  public Match( ExpressionGraph matchGraph, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping, Collection<FlowElement> foundElements, Collection<Scope> foundScopes, MultiMap<FlowElement> captureMap )
+  public Match( ExpressionGraph matchGraph, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping, Collection<FlowElement> foundElements, Collection<Scope> foundScopes, EnumMultiMap<FlowElement> captureMap )
     {
     this.matchGraph = matchGraph;
     this.elementGraph = elementGraph;
@@ -109,12 +109,12 @@ public class Match
     return getCaptureMap().getAllValues( captures );
     }
 
-  public MultiMap<FlowElement> getCaptureMap()
+  public EnumMultiMap<FlowElement> getCaptureMap()
     {
     if( captureMap != null )
       return captureMap;
 
-    captureMap = new MultiMap<>();
+    captureMap = new EnumMultiMap<>();
 
     Map<FlowElement, ElementExpression> reversed = new LinkedHashMap<>();
 

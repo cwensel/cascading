@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowElements;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
@@ -37,7 +38,7 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -83,7 +84,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     this.requireUniqueCheckpoints = flowElementGraph.requireUniqueCheckpoints;
 
     if( flowElementGraph.annotations != null )
-      this.annotations = new MultiMap( flowElementGraph.annotations );
+      this.annotations = new EnumMultiMap( flowElementGraph.annotations );
 
     Graphs.addAllVertices( this, flowElementGraph.vertexSet() );
     Graphs.addAllEdges( this, flowElementGraph, flowElementGraph.edgeSet() );
@@ -338,7 +339,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
 
         scope.setName( current.getName() );
 
-        setOrdinal( current, scope );
+        setOrdinal( source, current, scope );
         }
       }
 
@@ -355,18 +356,36 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
 
       scope.setName( previous.getName() ); // name scope after previous pipe
 
-      setOrdinal( current, scope );
+      setOrdinal( previous, current, scope );
       }
     }
 
-  private void setOrdinal( Pipe current, Scope scope )
+  private void setOrdinal( FlowElement previous, Pipe current, Scope scope )
     {
     if( current instanceof Splice )
       {
-      Integer ordinal = ( (Splice) current ).getPipePos().get( scope.getName() );
+      Splice splice = (Splice) current;
+
+      Integer ordinal;
+
+      if( previous instanceof Tap ) // revert to pipe name
+        ordinal = splice.getPipePos().get( scope.getName() );
+      else // GroupBy allows for duplicate pipe names, this guarantees correct ordinality
+        ordinal = FlowElements.findOrdinal( splice, (Pipe) previous );
+
       scope.setOrdinal( ordinal );
 
-      if( ( (Splice) current ).isJoin() && ordinal != 0 )
+      Set<Scope> scopes = new HashSet<>( incomingEdgesOf( current ) );
+
+      scopes.remove( scope );
+
+      for( Scope other : scopes )
+        {
+        if( other.getOrdinal() == scope.getOrdinal() )
+          throw new IllegalStateException( "duplicate ordinals" );
+        }
+
+      if( splice.isJoin() && ordinal != 0 )
         scope.setNonBlocking( false );
       }
     }

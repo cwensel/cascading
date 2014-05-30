@@ -197,8 +197,8 @@ public class StreamTest extends TestCase
     graph.addHead( source1 );
     graph.addHead( source2 );
 
-    graph.addPath( source1, gate );
-    graph.addPath( source2, gate );
+    graph.addPath( source1, 0, gate );
+    graph.addPath( source2, 1, gate );
     graph.addPath( gate, stage1 );
     graph.addPath( stage1, stage2 );
     graph.addPath( stage2, sink );

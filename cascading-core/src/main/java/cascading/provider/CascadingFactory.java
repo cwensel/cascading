@@ -37,7 +37,7 @@ public interface CascadingFactory<Config, Instance>
    *
    * @param flowProcess of type FlowProcess
    */
-  void initialize( FlowProcess<Config> flowProcess );
+  void initialize( FlowProcess<? extends Config> flowProcess );
 
   /**
    * Method create will return a new instance of the type create by this factory.
@@ -45,5 +45,5 @@ public interface CascadingFactory<Config, Instance>
    * @param flowProcess of type FlowProcess
    * @return of type Instance
    */
-  Instance create( FlowProcess<Config> flowProcess );
+  Instance create( FlowProcess<? extends Config> flowProcess );
   }

@@ -21,7 +21,7 @@
 package cascading.flow.planner.graph;
 
 import cascading.flow.FlowElement;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 
 /**
  *
@@ -30,5 +30,5 @@ public interface AnnotatedGraph
   {
   boolean hasAnnotations();
 
-  MultiMap<FlowElement> getAnnotations();
+  EnumMultiMap<FlowElement> getAnnotations();
   }

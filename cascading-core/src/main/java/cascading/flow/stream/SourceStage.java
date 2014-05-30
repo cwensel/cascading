@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class SourceStage extends ElementStage<Void, TupleEntry> implements Callable<Throwable>
+public class SourceStage extends ElementStage<Void, TupleEntry> implements Callable<Throwable>,InputSource
   {
   private static final Logger LOG = LoggerFactory.getLogger( SourceStage.class );
 
@@ -53,6 +53,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
     return map( null );
     }
 
+  @Override
   public void run( Object input ) throws Throwable
     {
     Throwable throwable = map( input );

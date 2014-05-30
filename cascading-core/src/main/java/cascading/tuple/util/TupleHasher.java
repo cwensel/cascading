@@ -23,7 +23,6 @@ package cascading.tuple.util;
 import java.util.Comparator;
 import java.util.List;
 
-import cascading.flow.stream.MemorySpliceGate;
 import cascading.tuple.Fields;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TupleHasher
   {
-  private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
+  private static final Logger LOG = LoggerFactory.getLogger( TupleHasher.class );
 
   private static Hasher DEFAULT = new ObjectHasher();
   private Hasher[] hashers;

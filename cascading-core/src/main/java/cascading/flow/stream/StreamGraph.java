@@ -23,10 +23,12 @@ package cascading.flow.stream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.util.Util;
@@ -222,6 +224,40 @@ public class StreamGraph
       }
 
     return predecessors.toArray( new Duct[ predecessors.size() ] );
+    }
+
+  public Duct[] findAllOrderedPreviousFor( Duct current, int expected )
+    {
+    Duct[] allPrevious = findAllPreviousFor( current );
+
+    if( expected == -1 && allPrevious.length < 2 )
+      return allPrevious;
+
+    Duct[] ordered = new Duct[ expected != -1 ? expected : allPrevious.length ];
+
+    for( Duct previous : allPrevious )
+      {
+      DuctGraph.Ordinal edge = ductGraph.getEdge( previous, current );
+
+      if( ordered[ edge.ordinal ] != null && ordered[ edge.ordinal ] != previous )
+        throw new IllegalStateException( "ordinal duplicated between " + previous + " and " + current );
+
+      ordered[ edge.ordinal ] = previous;
+      }
+
+    return ordered;
+    }
+
+  public Map<Duct, Integer> getOrdinalMap( Duct current )
+    {
+    Duct[] allPrevious = findAllPreviousFor( current );
+
+    Map<Duct, Integer> results = new IdentityHashMap<>();
+
+    for( Duct previous : allPrevious )
+      results.put( previous, ductGraph.getEdge( previous, current ).ordinal );
+
+    return results;
     }
 
   public Duct createNextFor( Duct current )

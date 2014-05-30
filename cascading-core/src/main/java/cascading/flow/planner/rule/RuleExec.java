@@ -45,7 +45,7 @@ import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.pipe.Pipe;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -445,7 +445,7 @@ public class RuleExec
         {
         List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
 
-        Map<ElementGraph, MultiMap> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
+        Map<ElementGraph, EnumMultiMap> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
 
         int pipelineCount = 0;
         for( ElementGraph pipelineGraph : pipelineGraphs )
@@ -502,7 +502,7 @@ public class RuleExec
 
 
   // use the final assembly graph so we can get Scopes for heads and tails
-  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, MultiMap> subGraphs )
+  private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, EnumMultiMap> subGraphs )
     {
     List<ElementGraph> results = new ArrayList<>( subGraphs.size() );
 

@@ -23,7 +23,6 @@ package cascading.flow.stream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -32,15 +31,10 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.FlowProps;
-import cascading.flow.planner.Scope;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.util.TupleBuilder;
-import cascading.tuple.util.TupleHasher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static cascading.tuple.util.TupleViews.createNarrow;
 
@@ -49,14 +43,7 @@ import static cascading.tuple.util.TupleViews.createNarrow;
  */
 public abstract class MemorySpliceGate extends SpliceGate
   {
-  private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
-
   protected final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
-
-  protected Comparator<Tuple>[] groupComparators;
-  protected Comparator<Tuple>[] valueComparators;
-  protected TupleHasher groupHasher;
-  protected boolean nullsAreNotEqual;
 
   protected Set<Tuple> keys;
   protected Map<Tuple, Collection<Tuple>>[] keyValues;
@@ -75,7 +62,7 @@ public abstract class MemorySpliceGate extends SpliceGate
   @Override
   public void bind( StreamGraph streamGraph )
     {
-    super.bind( streamGraph ); // finds allPrevious
+    super.bind( streamGraph );
 
     numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
 
@@ -102,70 +89,11 @@ public abstract class MemorySpliceGate extends SpliceGate
     {
     super.initialize();
 
-    Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( FlowProps.DEFAULT_ELEMENT_COMPARATOR ) );
-
-    Fields[] compareFields = new Fields[ orderedPrevious.length ];
-    groupComparators = new Comparator[ orderedPrevious.length ];
-
-    if( splice.isSorted() )
-      valueComparators = new Comparator[ orderedPrevious.length ];
-
-    int size = splice.isGroupBy() ? 1 : incomingScopes.size();
-
-    for( int i = 0; i < size; i++ )
-      {
-      Scope incomingScope = incomingScopes.get( i );
-
-      int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
-
-      // we want the comparators
-      Fields groupFields = splice.getKeySelectors().get( incomingScope.getName() );
-
-      compareFields[ pos ] = groupFields; // used for finding hashers
-
-      if( groupFields.size() == 0 )
-        groupComparators[ pos ] = groupFields;
-      else
-        groupComparators[ pos ] = new SparseTupleComparator( Fields.asDeclaration( groupFields ), defaultComparator );
-
-      groupComparators[ pos ] = splice.isSortReversed() ? Collections.reverseOrder( groupComparators[ pos ] ) : groupComparators[ pos ];
-
-      if( sortFields != null )
-        {
-        // we want the comparators, so don't use sortFields array
-        Fields sortFields = splice.getSortingSelectors().get( incomingScope.getName() );
-        valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields, defaultComparator );
-
-        if( splice.isSortReversed() )
-          valueComparators[ pos ] = Collections.reverseOrder( valueComparators[ pos ] );
-        }
-      }
-
-    nullsAreNotEqual = !areNullsEqual();
-
-    if( nullsAreNotEqual )
-      LOG.debug( "treating null values in Tuples at not equal during in memory grouping" );
-
-    Comparator[] hashers = TupleHasher.merge( compareFields );
-    groupHasher = defaultComparator != null || !TupleHasher.isNull( hashers ) ? new TupleHasher( defaultComparator, hashers ) : null;
+    initComparators();
 
     keys = createKeySet();
 
     count.set( numIncomingPaths ); // the number of paths incoming
-    }
-
-  private boolean areNullsEqual()
-    {
-    try
-      {
-      Tuple tupleWithNull = Tuple.size( 1 );
-
-      return groupComparators[ 0 ].compare( tupleWithNull, tupleWithNull ) == 0;
-      }
-    catch( Exception exception )
-      {
-      return true; // assume we have an npe or something and they don't expect to see nulls
-      }
     }
 
   @Override
@@ -183,21 +111,6 @@ public abstract class MemorySpliceGate extends SpliceGate
       grouping.joinerClosure = closure;
     }
 
-  protected Comparator getKeyComparator()
-    {
-    if( groupComparators.length > 0 && groupComparators[ 0 ] != null )
-      return groupComparators[ 0 ];
-
-    return new Comparator<Comparable>()
-    {
-    @Override
-    public int compare( Comparable lhs, Comparable rhs )
-      {
-      return lhs.compareTo( rhs );
-      }
-    };
-    }
-
   protected Set<Tuple> createKeySet()
     {
     return Collections.synchronizedSet( new TreeSet<Tuple>( getKeyComparator() ) );
@@ -211,13 +124,13 @@ public abstract class MemorySpliceGate extends SpliceGate
   protected Map<Tuple, Collection<Tuple>>[] createKeyValuesArray()
     {
     // Ducts use identity for equality
-    Map<Tuple, Collection<Tuple>>[] valueMap = new Map[ orderedPrevious.length ];
+    Map<Tuple, Collection<Tuple>>[] valueMap = new Map[ getNumIncomingBranches() ];
 
     int start = isBlockingStreamed() ? 0 : 1;
-    for( int i = start; i < orderedPrevious.length; i++ )
+    for( int i = start; i < getNumIncomingBranches(); i++ )
       {
-      if( orderedPrevious[ i ] == null ) // only true for local mode
-        continue;
+//      if( orderedPrevious[ i ] == null ) // only true for local mode
+//        continue;
 
       valueMap[ i ] = createTupleMap();
       }
@@ -246,46 +159,5 @@ public abstract class MemorySpliceGate extends SpliceGate
     };
     }
 
-  /**
-   * This allows the tuple to honor the hasher and comparators, if any
-   *
-   * @param object the tuple to wrap
-   * @return a DelegatedTuple instance
-   */
-  protected final Tuple getDelegatedTuple( Tuple object )
-    {
-    if( groupHasher == null )
-      return object;
-
-    return new DelegatedTuple( object );
-    }
-
   protected abstract boolean isBlockingStreamed();
-
-  protected class DelegatedTuple extends Tuple
-    {
-    public DelegatedTuple( Tuple wrapped )
-      {
-      // pass it in to prevent one being allocated
-      super( Tuple.elements( wrapped ) );
-      }
-
-    @Override
-    public boolean equals( Object object )
-      {
-      return compareTo( object ) == 0;
-      }
-
-    @Override
-    public int compareTo( Object other )
-      {
-      return groupComparators[ 0 ].compare( this, (Tuple) other );
-      }
-
-    @Override
-    public int hashCode()
-      {
-      return groupHasher.hashCode( this );
-      }
-    }
   }

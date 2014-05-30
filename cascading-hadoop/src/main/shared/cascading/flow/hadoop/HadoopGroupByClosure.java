@@ -33,7 +33,7 @@ import cascading.tuple.util.TupleViews;
 public class HadoopGroupByClosure extends JoinerClosure
   {
   protected Tuple grouping;
-  protected Iterator values;
+  protected Iterator[] values;
 
   public HadoopGroupByClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
     {
@@ -50,13 +50,18 @@ public class HadoopGroupByClosure extends JoinerClosure
     return 1;
     }
 
+  protected Iterator getValueIterator( int pos )
+    {
+    return values[ pos ];
+    }
+
   @Override
-  public Iterator getIterator( int pos )
+  public Iterator<Tuple> getIterator( int pos )
     {
     if( pos != 0 )
       throw new IllegalArgumentException( "invalid group position: " + pos );
 
-    return makeIterator( 0, values );
+    return makeIterator( 0, getValueIterator( 0 ) );
     }
 
   @Override
@@ -122,7 +127,7 @@ public class HadoopGroupByClosure extends JoinerClosure
     };
     }
 
-  public void reset( Tuple grouping, Iterator values )
+  public void reset( Tuple grouping, Iterator<Tuple>... values )
     {
     this.grouping = grouping;
     this.values = values;

@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -35,16 +36,13 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import cascading.flow.FlowException;
-import cascading.flow.hadoop.HadoopFlowProcess;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
+import cascading.flow.planner.Scope;
+import cascading.pipe.Group;
 import cascading.scheme.hadoop.TextLine;
-import cascading.tap.SinkMode;
 import cascading.tap.hadoop.Hfs;
-import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
 import cascading.util.LogUtil;
 import cascading.util.Util;
 import org.apache.commons.codec.binary.Base64;
@@ -395,89 +393,6 @@ public class HadoopUtil
     return new Hfs( new TextLine(), path ).deleteResource( conf );
     }
 
-  public static String writeStateToDistCache( JobConf conf, String id, String kind, String stepState )
-    {
-    if( stepState == null || stepState.isEmpty() )
-      return null;
-
-    LOG.info( "writing step state to dist cache, too large for job conf, size: {}", stepState.length() );
-
-    String statePath = Hfs.getTempPath( conf ) + "/" + kind + "-state-" + id;
-
-    Hfs temp = new Hfs( new TextLine(), statePath, SinkMode.REPLACE );
-
-    try
-      {
-      TupleEntryCollector writer = temp.openForWrite( new HadoopFlowProcess( conf ) );
-
-      writer.add( new Tuple( stepState ) );
-
-      writer.close();
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to write step state to Hadoop FS: " + temp.getIdentifier() );
-      }
-
-    URI uri = new Path( statePath ).toUri();
-    DistributedCache.addCacheFile( uri, conf );
-
-    LOG.info( "using step state path: {}", uri );
-
-    return statePath;
-    }
-
-  public static String readStateFromDistCache( JobConf jobConf, String id, String kind ) throws IOException
-    {
-    Path[] files = DistributedCache.getLocalCacheFiles( jobConf );
-
-    Path stepStatePath = null;
-
-    for( Path file : files )
-      {
-      if( !file.toString().contains( kind + "-state-" + id ) )
-        continue;
-
-      stepStatePath = file;
-      break;
-      }
-
-    if( stepStatePath == null )
-      throw new FlowException( "unable to find step state from distributed cache" );
-
-    LOG.info( "reading step state from local path: {}", stepStatePath );
-
-    Hfs temp = new Lfs( new TextLine( new Fields( "line" ) ), stepStatePath.toString() );
-
-    TupleEntryIterator reader = null;
-
-    try
-      {
-      reader = temp.openForRead( new HadoopFlowProcess( jobConf ) );
-
-      if( !reader.hasNext() )
-        throw new FlowException( "step state path is empty: " + temp.getIdentifier() );
-
-      return reader.next().getString( 0 );
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to find state path: " + temp.getIdentifier(), exception );
-      }
-    finally
-      {
-      try
-        {
-        if( reader != null )
-          reader.close();
-        }
-      catch( IOException exception )
-        {
-        LOG.warn( "error closing state path reader", exception );
-        }
-      }
-    }
-
   public static PlatformInfo getPlatformInfo()
     {
     if( platformInfo == null )
@@ -801,5 +716,44 @@ public class HadoopUtil
     {
     String name = conf.get( "mapred.output.dir" );
     return name == null ? null : new Path( name );
+    }
+
+  public static String pack( Object object, Configuration conf )
+    {
+    if( object == null )
+      return "";
+
+    try
+      {
+      return serializeBase64( object, conf, true );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to pack object: " + object.getClass().getCanonicalName(), exception );
+      }
+    }
+
+  public static void addComparators( Configuration conf, String property, Map<String, Fields> map, BaseFlowStep flowStep, Group group )
+    {
+    Iterator<Fields> fieldsIterator = map.values().iterator();
+
+    if( !fieldsIterator.hasNext() )
+      return;
+
+    Fields fields = fieldsIterator.next();
+
+    if( fields.hasComparators() )
+      {
+      conf.set( property, pack( fields, conf ) );
+      return;
+      }
+
+    // use resolved fields if there are no comparators.
+    Set<Scope> previousScopes = flowStep.getPreviousScopes( group );
+
+    fields = previousScopes.iterator().next().getOutValuesFields();
+
+    if( fields.size() != 0 ) // allows fields.UNKNOWN to be used
+      conf.setInt( property + ".size", fields.size() );
     }
   }

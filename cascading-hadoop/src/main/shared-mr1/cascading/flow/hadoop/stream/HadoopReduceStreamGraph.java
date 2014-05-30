@@ -76,12 +76,13 @@ public class HadoopReduceStreamGraph extends NodeStreamGraph
     return new HadoopSinkStage( flowProcess, element );
     }
 
-  protected Gate createCoGroupGate( CoGroup element )
+  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
     {
     throw new IllegalStateException( "should not happen" );
     }
 
-  protected Gate createGroupByGate( GroupBy element )
+  @Override
+  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role role )
     {
     throw new IllegalStateException( "should not happen" );
     }

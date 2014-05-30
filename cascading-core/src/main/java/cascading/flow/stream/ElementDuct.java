@@ -41,10 +41,6 @@ public interface ElementDuct
 
   boolean hasTrapHandler();
 
-  void addIncomingScope( Scope incomingScope );
-
-  void addOutgoingScope( Scope outgoingScope );
-
   List<Scope> getIncomingScopes();
 
   List<Scope> getOutgoingScopes();

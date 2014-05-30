@@ -31,11 +31,11 @@ import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.serializer.WritableSerialization;
-import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
 
 /**
@@ -52,7 +52,7 @@ public class HadoopSerializationPlatformTest extends PlatformTestCase
     {
     long time = System.currentTimeMillis();
 
-    JobConf jobConf = new JobConf();
+    Configuration jobConf = new Configuration();
 
     jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
     jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing

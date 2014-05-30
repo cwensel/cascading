@@ -23,7 +23,7 @@ package cascading.flow.planner.graph;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedMultigraph;
 
@@ -32,7 +32,7 @@ import org.jgrapht.graph.DirectedMultigraph;
  */
 public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
   {
-  protected MultiMap annotations;
+  protected EnumMultiMap annotations;
 
   public ElementMultiGraph( DirectedGraph<FlowElement, Scope> parent )
     {
@@ -57,7 +57,7 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
       }
     }
 
-  public ElementMultiGraph( ElementGraph parent, MultiMap annotations )
+  public ElementMultiGraph( ElementGraph parent, EnumMultiMap annotations )
     {
     this( parent );
 
@@ -88,10 +88,10 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
     }
 
   @Override
-  public MultiMap getAnnotations()
+  public EnumMultiMap getAnnotations()
     {
     if( annotations == null )
-      annotations = new MultiMap();
+      annotations = new EnumMultiMap();
 
     return annotations;
     }

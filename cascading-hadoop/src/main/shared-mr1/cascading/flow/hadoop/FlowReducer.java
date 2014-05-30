@@ -46,8 +46,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.flow.hadoop.util.HadoopMRUtil.readStateFromDistCache;
 import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
-import static cascading.flow.hadoop.util.HadoopUtil.readStateFromDistCache;
 
 /** Class FlowReducer is the Hadoop Reducer implementation. */
 public class FlowReducer extends MapReduceBase implements Reducer
@@ -132,7 +132,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     try
       {
-      group.run( (Tuple) key, timedIterator );
+      group.accept( (Tuple) key, timedIterator );
       }
     catch( OutOfMemoryError error )
       {

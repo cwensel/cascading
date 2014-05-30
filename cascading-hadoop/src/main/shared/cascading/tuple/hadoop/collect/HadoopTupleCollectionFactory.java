@@ -26,8 +26,8 @@ import cascading.flow.FlowProcess;
 import cascading.tuple.Tuple;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.TupleSerialization;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.JobConf;
 
 import static cascading.tuple.collect.SpillableProps.defaultListThreshold;
 import static cascading.tuple.collect.SpillableTupleList.getThreshold;
@@ -35,14 +35,14 @@ import static cascading.tuple.collect.SpillableTupleList.getThreshold;
 /**
  *
  */
-public class HadoopTupleCollectionFactory implements TupleCollectionFactory<JobConf>
+public class HadoopTupleCollectionFactory implements TupleCollectionFactory<Configuration>
   {
   private int spillThreshold;
   private CompressionCodec codec;
   private TupleSerialization tupleSerialization;
 
   @Override
-  public void initialize( FlowProcess<JobConf> flowProcess )
+  public void initialize( FlowProcess<? extends Configuration> flowProcess )
     {
     this.spillThreshold = getThreshold( flowProcess, defaultListThreshold );
     this.codec = HadoopSpillableTupleList.getCodec( flowProcess, HadoopSpillableTupleList.defaultCodecs );
@@ -51,7 +51,7 @@ public class HadoopTupleCollectionFactory implements TupleCollectionFactory<JobC
     }
 
   @Override
-  public Collection<Tuple> create( FlowProcess<JobConf> flowProcess )
+  public Collection<Tuple> create( FlowProcess<? extends Configuration> flowProcess )
     {
     return new HadoopSpillableTupleList( spillThreshold, tupleSerialization, codec );
     }

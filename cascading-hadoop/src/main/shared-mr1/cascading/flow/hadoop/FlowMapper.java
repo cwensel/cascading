@@ -44,8 +44,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.flow.hadoop.util.HadoopMRUtil.readStateFromDistCache;
 import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
-import static cascading.flow.hadoop.util.HadoopUtil.readStateFromDistCache;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
 public class FlowMapper implements MapRunnable
@@ -81,7 +81,7 @@ public class FlowMapper implements MapRunnable
 
       FlowNode node = deserializeBase64( mapNodeState, jobConf, FlowNode.class );
 
-      Tap source = BaseFlowStep.getTapForID( node.getSources(), jobConf.get( "cascading.step.source" ) );
+      Tap source = BaseFlowStep.getTapForID( node.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, node, source );
 

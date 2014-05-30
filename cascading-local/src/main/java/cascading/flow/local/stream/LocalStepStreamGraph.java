@@ -33,6 +33,7 @@ import cascading.flow.stream.MemoryCoGroupGate;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
+import cascading.flow.stream.SpliceGate;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
@@ -62,7 +63,7 @@ public class LocalStepStreamGraph extends NodeStreamGraph
 
   protected void buildGraph()
     {
-    for( Object rhsElement : node.getSources() )
+    for( Object rhsElement : node.getSourceTaps() )
       {
       Duct rhsDuct = new SourceStage( tapFlowProcess( (Tap) rhsElement ), (Tap) rhsElement );
 
@@ -72,12 +73,12 @@ public class LocalStepStreamGraph extends NodeStreamGraph
       }
     }
 
-  protected Gate createCoGroupGate( CoGroup element )
+  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
     {
     return new MemoryCoGroupGate( flowProcess, element );
     }
 
-  protected Gate createGroupByGate( GroupBy element )
+  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role source )
     {
     return new LocalGroupByGate( flowProcess, element );
     }

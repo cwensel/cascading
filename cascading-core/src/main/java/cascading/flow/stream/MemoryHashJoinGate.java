@@ -65,7 +65,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     super.prepare();
 
     streamedCollection = new ArrayList<Tuple>( Arrays.asList( new Tuple() ) ); // placeholder in collection
-    collections = new Collection[ orderedPrevious.length ];
+    collections = new Collection[ getNumIncomingBranches() ];
     collections[ 0 ] = streamedCollection;
 
     if( nullsAreNotEqual )

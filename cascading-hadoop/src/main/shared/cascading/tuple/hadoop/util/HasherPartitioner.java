@@ -24,23 +24,36 @@ import java.util.Comparator;
 
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.util.TupleHasher;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  *
  */
-public class HasherPartitioner extends TupleHasher implements JobConfigurable
+public class HasherPartitioner extends TupleHasher implements Configurable
   {
   private static Comparator defaultComparator;
   private Comparator[] comparators;
+  private Configuration conf;
 
-  public void configure( JobConf jobConf )
+  @Override
+  public void setConf( Configuration conf )
     {
-    defaultComparator = TupleSerialization.getDefaultComparator( defaultComparator, jobConf );
+    if( this.conf != null )
+      return;
 
-    comparators = DeserializerComparator.getFieldComparatorsFrom( jobConf, "cascading.group.comparator" );
+    this.conf = conf;
+
+    defaultComparator = TupleSerialization.getDefaultComparator( defaultComparator, conf );
+
+    comparators = DeserializerComparator.getFieldComparatorsFrom( conf, "cascading.group.comparator" );
 
     initialize( defaultComparator, comparators );
+    }
+
+  @Override
+  public Configuration getConf()
+    {
+    return conf;
     }
   }

@@ -30,9 +30,17 @@ public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing>
   private final LinkedList<Incoming> list = new LinkedList<Incoming>();
 
   int count = 0;
+  private int size;
 
   public TestGate()
     {
+    }
+
+  @Override
+  public void bind( StreamGraph streamGraph )
+    {
+    super.bind( streamGraph );
+    size = streamGraph.findAllPreviousFor( this ).length;
     }
 
   @Override
@@ -51,7 +59,7 @@ public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing>
     {
     count++;
 
-    if( count < allPrevious.length )
+    if( count < size )
       return;
 
     try

@@ -128,14 +128,16 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     return new HadoopSinkStage( flowProcess, element );
     }
 
-  protected Gate createCoGroupGate( CoGroup element )
+  @Override
+  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
     {
     return new HadoopCoGroupGate( flowProcess, element, SpliceGate.Role.sink );
     }
 
-  protected Gate createGroupByGate( GroupBy element )
+  @Override
+  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role role )
     {
-    return new HadoopGroupByGate( flowProcess, element, SpliceGate.Role.sink );
+    return new HadoopGroupByGate( flowProcess, element, role );
     }
 
   @Override
@@ -143,5 +145,4 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     {
     return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }
-
   }

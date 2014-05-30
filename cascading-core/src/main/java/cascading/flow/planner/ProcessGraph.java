@@ -23,16 +23,19 @@ package cascading.flow.planner;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowElements;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -46,7 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleDirectedGraph<Process, Integer>
+public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleDirectedGraph<Process, ProcessGraph.ProcessEdge>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( ProcessGraph.class );
@@ -59,7 +62,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
 
   public ProcessGraph()
     {
-    super( Integer.class );
+    super( ProcessEdge.class );
     }
 
   @Override
@@ -74,7 +77,6 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
 
   protected void bindEdges()
     {
-    int count = 0;
     for( Process sinkProcess : vertexSet() )
       {
       for( Process sourceProcess : vertexSet() )
@@ -82,13 +84,14 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
         if( sourceProcess == sinkProcess )
           continue;
 
+        // outer edge sources and sinks to this graph
         sourceElements.removeAll( sinkProcess.getSinkElements() );
         sinkElements.removeAll( sourceProcess.getSourceElements() );
 
-        for( Object sink : sinkProcess.getSinks() )
+        for( Object sink : sinkProcess.getSinkElements() )
           {
-          if( sourceProcess.getSources().contains( sink ) )
-            addEdge( sinkProcess, sourceProcess, count++ );
+          if( sourceProcess.getSourceElements().contains( sink ) )
+            addEdge( sinkProcess, sourceProcess, new ProcessEdge<>( sourceProcess, (FlowElement) sink, sinkProcess ) );
           }
         }
       }
@@ -109,13 +112,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = new HashSet<>();
-
-    for( FlowElement sourceElement : getSourceElements() )
-      {
-      if( sourceElement instanceof Tap )
-        sourceTaps.add( (Tap) sourceElement );
-      }
+    sourceTaps = Util.narrowSet( Tap.class, getSourceElements() );
 
     return sourceTaps;
     }
@@ -125,13 +122,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = new HashSet<>();
-
-    for( FlowElement sinkElement : getSinkElements() )
-      {
-      if( sinkElement instanceof Tap )
-        sinkTaps.add( (Tap) sinkElement );
-      }
+    sinkTaps = Util.narrowSet( Tap.class, getSinkElements() );
 
     return sinkTaps;
     }
@@ -143,14 +134,31 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
 
   public Iterator<Process> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, new Comparator<Process>()
+    return getOrderedTopologicalIterator( new Comparator<Process>()
     {
     @Override
     public int compare( Process lhs, Process rhs )
       {
       return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
       }
-    } ) );
+    } );
+    }
+
+  public Iterator<Process> getOrderedTopologicalIterator( Comparator<Process> comparator )
+    {
+    return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, comparator ) );
+    }
+
+  public List<Process> getElementSourceProcesses( FlowElement flowElement )
+    {
+    List<Process> sources = new ArrayList<>();
+    for( Process process : vertexSet() )
+      {
+      if( process.getSinkElements().contains( flowElement ) )
+        sources.add( process );
+      }
+
+    return sources;
     }
 
   /**
@@ -176,7 +184,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
         String name = "[" + process.getName() + "]";
 
         String sourceName = "";
-        Set<Tap> sources = process.getSources();
+        Set<Tap> sources = process.getSourceTaps();
         for( Tap source : sources )
           sourceName += "\\nsrc:[" + source.getIdentifier() + "]";
 
@@ -193,7 +201,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
             name += "\\ngrp:" + groupName;
           }
 
-        Set<Tap> sinks = process.getSinks();
+        Set<Tap> sinks = process.getSinkTaps();
         String sinkName = "";
         for( Tap sink : sinks )
           sinkName = "\\nsnk:[" + sink.getIdentifier() + "]";
@@ -210,6 +218,50 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     catch( IOException exception )
       {
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
+      }
+    }
+
+  static public class ProcessEdge<Process extends ProcessModel>
+    {
+    FlowElement flowElement;
+    Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
+    Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
+
+    public ProcessEdge(Process sourceProcess , FlowElement flowElement, Process sinkProcess )
+      {
+      this.flowElement = flowElement;
+      this.incomingOrdinals = createOrdinals( sinkProcess.getElementGraph().incomingEdgesOf( flowElement ) );
+      this.outgoingOrdinals = createOrdinals( sourceProcess.getElementGraph().outgoingEdgesOf( flowElement ) );
+      }
+
+    private Set<Integer> createOrdinals( Set<Scope> scopes )
+      {
+      Set<Integer> ordinals = new HashSet<>();
+
+      for( Scope scope : scopes )
+        ordinals.add( scope.getOrdinal() );
+
+      return ordinals;
+      }
+
+    public FlowElement getFlowElement()
+      {
+      return flowElement;
+      }
+
+    public String getID()
+      {
+      return FlowElements.id( flowElement );
+      }
+
+    public Set<Integer> getIncomingOrdinals()
+      {
+      return incomingOrdinals;
+      }
+
+    public Set<Integer> getOutgoingOrdinals()
+      {
+      return outgoingOrdinals;
       }
     }
   }

@@ -42,13 +42,13 @@ public class FlowStepListenersTest extends TestCase
     {
 
     @Override
-    protected Object createInitializedConfig( FlowProcess fp, Object config )
+    public Object createInitializedConfig( FlowProcess fp, Object config )
       {
       return null;
       }
 
     @Override
-    public void clean(Object config)
+    public void clean( Object config )
       {
       }
 
@@ -72,28 +72,28 @@ public class FlowStepListenersTest extends TestCase
     };
 
     FlowStepListener listener = new FlowStepListener()
+    {
+    public void onStepStarting( FlowStep flowStep )
       {
-      public void onStepStarting( FlowStep flowStep )
-        {
-        }
+      }
 
-      public void onStepStopping( FlowStep flowStep )
-        {
-        }
+    public void onStepStopping( FlowStep flowStep )
+      {
+      }
 
-      public void onStepCompleted( FlowStep flowStep )
-        {
-        }
+    public void onStepCompleted( FlowStep flowStep )
+      {
+      }
 
-      public boolean onStepThrowable( FlowStep flowStep, Throwable throwable )
-        {
-        return false;
-        }
+    public boolean onStepThrowable( FlowStep flowStep, Throwable throwable )
+      {
+      return false;
+      }
 
-      public void onStepRunning( FlowStep flowStep )
-        {
-        }
-      };
+    public void onStepRunning( FlowStep flowStep )
+      {
+      }
+    };
     step.addListener( listener );
 
     assertTrue( "no listener found", step.hasListeners() );

@@ -21,32 +21,11 @@
 package cascading.flow.stream;
 
 /**
- *
+ * Denotes there will be multiple input paths into this duct
  */
 public abstract class Gate<Incoming, Outgoing> extends Duct<Incoming, Outgoing>
   {
-  protected Duct[] allPrevious;
-
   public Gate()
     {
-    }
-
-  @Override
-  public void bind( StreamGraph streamGraph )
-    {
-    super.bind( streamGraph ); // sets next
-
-    allPrevious = getAllPreviousFor( streamGraph );
-    }
-
-  /**
-   * the actual previous in this context, not necessarily the declared previous
-   *
-   * @param streamGraph of type StreamGraph
-   * @return of type Duct[]
-   */
-  protected Duct[] getAllPreviousFor( StreamGraph streamGraph )
-    {
-    return streamGraph.findAllPreviousFor( this );
     }
   }

@@ -96,20 +96,10 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
     return trapHandler != null;
     }
 
-  public void addIncomingScope( Scope incomingScope )
-    {
-    incomingScopes.add( incomingScope );
-    }
-
   @Override
   public List<Scope> getOutgoingScopes()
     {
     return outgoingScopes;
-    }
-
-  public void addOutgoingScope( Scope outgoingScope )
-    {
-    outgoingScopes.add( outgoingScope );
     }
 
   protected Fields getOutgoingFields()

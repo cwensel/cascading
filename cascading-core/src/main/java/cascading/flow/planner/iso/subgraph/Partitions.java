@@ -30,7 +30,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.rule.Rule;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 
 /**
  *
@@ -40,14 +40,14 @@ public class Partitions extends GraphResult
   private final GraphPartitioner graphPartitioner;
   private final SubGraphIterator subGraphIterator;
   private final ElementGraph beginGraph;
-  private final Map<ElementGraph, MultiMap> annotatedSubGraphs;
+  private final Map<ElementGraph, EnumMultiMap> annotatedSubGraphs;
 
-  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, MultiMap> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, EnumMultiMap> annotatedSubGraphs )
     {
     this( graphPartitioner, null, beginGraph, annotatedSubGraphs );
     }
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, MultiMap> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, EnumMultiMap> annotatedSubGraphs )
     {
     this.graphPartitioner = graphPartitioner;
     this.subGraphIterator = subGraphIterator;
@@ -80,7 +80,7 @@ public class Partitions extends GraphResult
     return null;
     }
 
-  public Map<ElementGraph, MultiMap> getAnnotatedSubGraphs()
+  public Map<ElementGraph, EnumMultiMap> getAnnotatedSubGraphs()
     {
     return annotatedSubGraphs;
     }

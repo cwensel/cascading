@@ -22,6 +22,7 @@ package cascading.tuple.hadoop.util;
 
 import cascading.tuple.Tuple;
 import cascading.tuple.io.IndexTuple;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 
 /** Class GroupingPartitioner is an implementation of {@link org.apache.hadoop.mapred.Partitioner}. */
@@ -30,5 +31,11 @@ public class CoGroupingPartitioner extends HasherPartitioner implements Partitio
   public int getPartition( IndexTuple key, Tuple value, int numReduceTasks )
     {
     return ( hashCode( key.getTuple() ) & Integer.MAX_VALUE ) % numReduceTasks;
+    }
+
+  @Override
+  public void configure( JobConf job )
+    {
+    setConf( job );
     }
   }

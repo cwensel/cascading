@@ -53,7 +53,7 @@ public abstract class NodeStreamGraph extends StreamGraph
   {
   protected FlowProcess flowProcess;
   protected final FlowNode node;
-  private FlowElement streamedSource;
+  protected FlowElement streamedSource;
   protected final ElementGraph elementGraph;
 
   public NodeStreamGraph( FlowProcess flowProcess, FlowNode node )
@@ -120,7 +120,7 @@ public abstract class NodeStreamGraph extends StreamGraph
     if( allEdges.size() == 1 )
       return Util.getFirst( allEdges ).getOrdinal();
 
-    throw new IllegalStateException( "could not find ordinal" );
+    throw new IllegalStateException( "could not find ordinal, too many edges between elements" );
     }
 
   private Duct createDuctFor( FlowElement element )
@@ -158,9 +158,9 @@ public abstract class NodeStreamGraph extends StreamGraph
       Splice spliceElement = (Splice) element;
 
       if( spliceElement.isGroupBy() )
-        rhsDuct = createGroupByGate( (GroupBy) spliceElement );
+        rhsDuct = createGroupByGate( (GroupBy) spliceElement, SpliceGate.Role.sink );
       else if( spliceElement.isCoGroup() )
-        rhsDuct = createCoGroupGate( (CoGroup) spliceElement );
+        rhsDuct = createCoGroupGate( (CoGroup) spliceElement, SpliceGate.Role.sink );
       else if( spliceElement.isMerge() )
         rhsDuct = createMergeStage( (Merge) element );
       else
@@ -181,9 +181,9 @@ public abstract class NodeStreamGraph extends StreamGraph
     return new SinkStage( flowProcess, element );
     }
 
-  protected abstract Gate createCoGroupGate( CoGroup element );
+  protected abstract Gate createCoGroupGate( CoGroup element, SpliceGate.Role role );
 
-  protected abstract Gate createGroupByGate( GroupBy element );
+  protected abstract Gate createGroupByGate( GroupBy element, SpliceGate.Role role );
 
   protected Duct createMergeStage( Merge merge )
     {
@@ -284,9 +284,9 @@ public abstract class NodeStreamGraph extends StreamGraph
       return Collections.emptySet();
 
     if( duct instanceof SourceStage )
-      return node.getSourceNames( (Tap) ( (SourceStage) duct ).getFlowElement() );
+      return node.getSourceTapNames( (Tap) ( (SourceStage) duct ).getFlowElement() );
     else if( duct instanceof SinkStage )
-      return node.getSinkNames( (Tap) ( (SinkStage) duct ).getFlowElement() );
+      return node.getSinkTapNames( (Tap) ( (SinkStage) duct ).getFlowElement() );
     else
       throw new IllegalStateException( "duct does not wrap a Tap: " + duct.getClass().getCanonicalName() );
     }

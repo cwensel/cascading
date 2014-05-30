@@ -21,12 +21,15 @@
 package cascading.flow.stream;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProps;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -37,6 +40,7 @@ import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.Tuples;
 import cascading.tuple.util.TupleBuilder;
+import cascading.tuple.util.TupleHasher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +53,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   {
   private static final Logger LOG = LoggerFactory.getLogger( SpliceGate.class );
 
-  protected Duct[] orderedPrevious;
+  protected Duct[] orderedPrevious; // used to create posMap
 
   public enum Role
     {
@@ -68,6 +72,11 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   protected Fields[] keyFields;
   protected Fields[] sortFields;
   protected Fields[] valuesFields;
+
+  protected Comparator<Tuple>[] groupComparators;
+  protected Comparator<Tuple>[] valueComparators;
+  protected TupleHasher groupHasher;
+  protected boolean nullsAreNotEqual;
 
   protected TupleBuilder[] keyBuilder;
   protected TupleBuilder[] valuesBuilder;
@@ -240,7 +249,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     if( outgoingScopes.size() == 0 )
       throw new IllegalStateException( "outgoing scope may not be empty" );
 
-    int size = splice.isGroupBy() ? 1 : incomingScopes.size();
+    int size = splice.isGroupBy() ? 1 : incomingScopes.size(); // actual incoming paths
 
     keyFields = new Fields[ size ];
     valuesFields = new Fields[ size ];
@@ -261,28 +270,28 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       Scope incomingScope = incomingScopes.get( i );
 
       // for GroupBy, incoming may have same name, but guaranteed to have same key/value/sort fields for merge
-      int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
+      int ordinal = size == 1 ? 0 : incomingScope.getOrdinal();
 
-      keyFields[ pos ] = outgoingScope.getKeySelectors().get( incomingScope.getName() );
-      valuesFields[ pos ] = incomingScope.getIncomingSpliceFields();
+      keyFields[ ordinal ] = outgoingScope.getKeySelectors().get( incomingScope.getName() );
+      valuesFields[ ordinal ] = incomingScope.getIncomingSpliceFields();
 
-      keyBuilder[ pos ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ pos ] );
-      valuesBuilder[ pos ] = createNulledBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ pos ] );
+      keyBuilder[ ordinal ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ ordinal ] );
+      valuesBuilder[ ordinal ] = createNulledBuilder( incomingScope.getIncomingSpliceFields(), keyFields[ ordinal ] );
 
       if( sortFields != null )
         {
-        sortFields[ pos ] = outgoingScope.getSortingSelectors().get( incomingScope.getName() );
-        sortBuilder[ pos ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), sortFields[ pos ] );
+        sortFields[ ordinal ] = outgoingScope.getSortingSelectors().get( incomingScope.getName() );
+        sortBuilder[ ordinal ] = createNarrowBuilder( incomingScope.getIncomingSpliceFields(), sortFields[ ordinal ] );
         }
 
       if( LOG.isDebugEnabled() )
         {
-        LOG.debug( "incomingScope: {}, in pos: {}", incomingScope.getName(), pos );
-        LOG.debug( "keyFields: {}", printSafe( keyFields[ pos ] ) );
-        LOG.debug( "valueFields: {}", printSafe( valuesFields[ pos ] ) );
+        LOG.debug( "incomingScope: {}, in pos: {}", incomingScope.getName(), ordinal );
+        LOG.debug( "keyFields: {}", printSafe( keyFields[ ordinal ] ) );
+        LOG.debug( "valueFields: {}", printSafe( valuesFields[ ordinal ] ) );
 
         if( sortFields != null )
-          LOG.debug( "sortFields: {}", printSafe( sortFields[ pos ] ) );
+          LOG.debug( "sortFields: {}", printSafe( sortFields[ ordinal ] ) );
         }
       }
 
@@ -292,9 +301,74 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     keyEntry = new TupleEntry( outgoingScope.getOutGroupingFields(), true );
     tupleEntryIterator = new TupleEntryChainIterator( outgoingScope.getOutValuesFields() );
 
-    grouping = new Grouping<TupleEntry, TupleEntryIterator>();
+    grouping = new Grouping<>();
     grouping.key = keyEntry;
     grouping.joinIterator = tupleEntryIterator;
+    }
+
+  protected void initComparators()
+    {
+    Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( FlowProps.DEFAULT_ELEMENT_COMPARATOR ) );
+
+    Fields[] compareFields = new Fields[ getNumIncomingBranches() ];
+    groupComparators = new Comparator[ getNumIncomingBranches() ];
+
+    if( splice.isSorted() )
+      valueComparators = new Comparator[ getNumIncomingBranches() ];
+
+    int size = splice.isGroupBy() ? 1 : getNumIncomingBranches();
+
+    for( int i = 0; i < size; i++ )
+      {
+      Scope incomingScope = incomingScopes.get( i );
+
+      int pos = splice.isGroupBy() ? 0 : splice.getPipePos().get( incomingScope.getName() );
+
+      // we want the comparators
+      Fields groupFields = splice.getKeySelectors().get( incomingScope.getName() );
+
+      compareFields[ pos ] = groupFields; // used for finding hashers
+
+      if( groupFields.size() == 0 )
+        groupComparators[ pos ] = groupFields;
+      else
+        groupComparators[ pos ] = new SparseTupleComparator( Fields.asDeclaration( groupFields ), defaultComparator );
+
+      groupComparators[ pos ] = splice.isSortReversed() ? Collections.reverseOrder( groupComparators[ pos ] ) : groupComparators[ pos ];
+
+      if( sortFields != null )
+        {
+        // we want the comparators, so don't use sortFields array
+        Fields sortFields = splice.getSortingSelectors().get( incomingScope.getName() );
+        valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields, defaultComparator );
+
+        if( splice.isSortReversed() )
+          valueComparators[ pos ] = Collections.reverseOrder( valueComparators[ pos ] );
+        }
+      }
+
+    nullsAreNotEqual = !areNullsEqual();
+
+    if( nullsAreNotEqual )
+      LOG.debug( "treating null values in Tuples at not equal during grouping" );
+
+    Comparator[] hashers = TupleHasher.merge( compareFields );
+    groupHasher = defaultComparator != null || !TupleHasher.isNull( hashers ) ? new TupleHasher( defaultComparator, hashers ) : null;
+    }
+
+  protected Comparator getKeyComparator()
+    {
+    if( groupComparators.length > 0 && groupComparators[ 0 ] != null )
+      return groupComparators[ 0 ];
+
+    return new Comparator<Comparable>()
+    {
+    @Override
+    public int compare( Comparable lhs, Comparable rhs )
+      {
+      return lhs.compareTo( rhs );
+      }
+    };
     }
 
   @Override
@@ -315,16 +389,6 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     return incomingScopes;
     }
 
-  public void addIncomingScope( Scope incomingScope )
-    {
-    incomingScopes.add( incomingScope );
-    }
-
-  public void addOutgoingScope( Scope outgoingScope )
-    {
-    outgoingScopes.add( outgoingScope );
-    }
-
   @Override
   public void cleanup()
     {
@@ -337,16 +401,16 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
   protected synchronized void orderDucts( StreamGraph streamGraph )
     {
-    orderedPrevious = new Duct[ incomingScopes.size() ];
+    int incomingSize = incomingScopes.size();
 
-    if( incomingScopes.size() == 1 && splice.getPrevious().length == 1 )
-      {
-      orderedPrevious[ 0 ] = allPrevious[ 0 ];
-      return;
-      }
+    // either the values are ordered by their ordinal, or there is a single value and ordinal isn't relevant
+    Duct[] allPrevious = streamGraph.findAllOrderedPreviousFor( this, splice.isCoGroup() ? incomingSize : -1 );
 
-    for( Duct previous : allPrevious )
-      orderedPrevious[ streamGraph.ordinalBetween( previous, this ) ] = previous;
+    // if this node has a single incoming stream, don't rely on ordinality
+    if( incomingSize == 1 )
+      orderedPrevious = new Duct[]{allPrevious[ 0 ]};
+    else
+      orderedPrevious = allPrevious;
     }
 
   protected void makePosMap( Map<Duct, Integer> posMap )
@@ -356,6 +420,39 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       if( orderedPrevious[ i ] != null )
         posMap.put( orderedPrevious[ i ], i );
       }
+    }
+
+  private boolean areNullsEqual()
+    {
+    try
+      {
+      Tuple tupleWithNull = Tuple.size( 1 );
+
+      return groupComparators[ 0 ].compare( tupleWithNull, tupleWithNull ) == 0;
+      }
+    catch( Exception exception )
+      {
+      return true; // assume we have an npe or something and they don't expect to see nulls
+      }
+    }
+
+  protected int getNumIncomingBranches()
+    {
+    return incomingScopes.size();
+    }
+
+  /**
+   * This allows the tuple to honor the hasher and comparators, if any
+   *
+   * @param object the tuple to wrap
+   * @return a DelegatedTuple instance
+   */
+  protected final Tuple getDelegatedTuple( Tuple object )
+    {
+    if( groupHasher == null )
+      return object;
+
+    return new DelegatedTuple( object );
     }
 
   private String printSafe( Fields fields )
@@ -391,10 +488,37 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   @Override
   public String toString()
     {
-    final StringBuilder sb = new StringBuilder();
-    sb.append( getClass().getSimpleName() );
-    sb.append( "{splice=" ).append( splice );
+    final StringBuilder sb = new StringBuilder( "SpliceGate{" );
+    sb.append( "splice=" ).append( splice );
+    sb.append( ", role=" ).append( role );
     sb.append( '}' );
     return sb.toString();
+    }
+
+  protected class DelegatedTuple extends Tuple
+    {
+    public DelegatedTuple( Tuple wrapped )
+      {
+      // pass it in to prevent one being allocated
+      super( Tuple.elements( wrapped ) );
+      }
+
+    @Override
+    public boolean equals( Object object )
+      {
+      return compareTo( object ) == 0;
+      }
+
+    @Override
+    public int compareTo( Object other )
+      {
+      return groupComparators[ 0 ].compare( this, (Tuple) other );
+      }
+
+    @Override
+    public int hashCode()
+      {
+      return groupHasher.hashCode( this );
+      }
     }
   }

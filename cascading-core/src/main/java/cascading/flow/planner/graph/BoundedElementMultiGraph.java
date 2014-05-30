@@ -25,7 +25,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 
 import static cascading.flow.planner.Extent.head;
 import static cascading.flow.planner.Extent.tail;
@@ -35,7 +35,7 @@ import static cascading.flow.planner.Extent.tail;
  */
 public class BoundedElementMultiGraph extends ElementMultiGraph
   {
-  public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, MultiMap annotations )
+  public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, EnumMultiMap annotations )
     {
     copyFrom( subElementGraph );
 
@@ -58,13 +58,13 @@ public class BoundedElementMultiGraph extends ElementMultiGraph
 
     Set<FlowElement> vertexSet = vertexSet();
 
-    MultiMap parentAnnotations = ( (AnnotatedGraph) parentElementGraph ).getAnnotations();
+    EnumMultiMap parentAnnotations = ( (AnnotatedGraph) parentElementGraph ).getAnnotations();
 
-    Set<Enum> allKeys = parentAnnotations.getAllKeys();
+    Set<Enum> allKeys = parentAnnotations.getKeys();
 
     for( Enum annotation : allKeys )
       {
-      Set<FlowElement> flowElements = parentAnnotations.getValues( annotation );
+      Set<FlowElement> flowElements = (Set<FlowElement>) parentAnnotations.getValues( annotation );
 
       for( FlowElement flowElement : flowElements )
         {

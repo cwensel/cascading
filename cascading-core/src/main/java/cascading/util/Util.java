@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.security.MessageDigest;
@@ -54,6 +55,7 @@ import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
+import cascading.tuple.coerce.Coercions;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.ext.ComponentAttributeProvider;
 import org.jgrapht.ext.DOTExporter;
@@ -340,6 +342,23 @@ public class Util
 
       count++;
       }
+    }
+
+  public static <T> List<T> split( Class<T> type, String values )
+    {
+    return split( type, ",", values );
+    }
+
+  public static <T> List<T> split( Class<T> type, String delim, String values )
+    {
+    String[] split = values.split( delim );
+
+    List<T> results = new ArrayList<>();
+
+    for( String value : split )
+      results.add( Coercions.<T>coerce( value, type ) );
+
+    return results;
     }
 
   public static String[] removeNulls( String... strings )
@@ -927,6 +946,56 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to invoke instance method: " + target.getClass().getName() + "." + methodName, exception );
+      }
+    }
+
+  public static <R> R returnInstanceFieldIfExistsSafe( Object target, String fieldName )
+    {
+    try
+      {
+      return returnInstanceFieldIfExists( target, fieldName );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      return null;
+      }
+    }
+
+  public static <R> R returnInstanceFieldIfExists( Object target, String fieldName )
+    {
+    try
+      {
+      Class<?> type = target.getClass();
+      Field field = getDeclaredField( fieldName, type );
+
+      field.setAccessible( true );
+
+      return (R) field.get( target );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to get instance field: " + target.getClass().getName() + "." + fieldName, exception );
+      }
+    }
+
+  private static Field getDeclaredField( String fieldName, Class<?> type )
+    {
+    if( type == Object.class )
+      {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "did not find {} field on {}", fieldName, type.getName() );
+
+      return null;
+      }
+
+    try
+      {
+      return type.getDeclaredField( fieldName );
+      }
+    catch( NoSuchFieldException exception )
+      {
+      return getDeclaredField( fieldName, type.getSuperclass() );
       }
     }
 

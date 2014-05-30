@@ -23,7 +23,7 @@ package cascading.tuple.util;
 /**
  *
  */
-interface Resettable<V>
+public interface Resettable<V>
   {
   void reset( V... values );
   }

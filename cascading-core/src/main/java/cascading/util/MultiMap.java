@@ -23,100 +23,127 @@ package cascading.util;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
  *
  */
-public class MultiMap<V> implements Serializable
+public abstract class MultiMap<C extends Collection<V>, K, V> implements Serializable
   {
-  private Map<Enum, Set<V>> map = null;
+  private Map<K, C> map = null;
 
-  public MultiMap()
-    {
-    }
-
-  public MultiMap( MultiMap map )
-    {
-    addAll( map );
-    }
-
-  protected Map<Enum, Set<V>> getMap()
+  protected Map<K, C> getMap()
     {
     if( map == null )
-      map = new IdentityHashMap<>();
+      map = createMap();
 
     return map;
     }
 
-  public Set<Enum> getAllKeys()
+  protected abstract Map<K, C> createMap();
+
+  protected abstract C createCollection();
+
+  protected abstract C emptyCollection();
+
+  public boolean containsKey( K key )
+    {
+    return getMap().containsKey( key );
+    }
+
+  public Set<K> getKeys()
     {
     return getMap().keySet();
     }
 
-  public void addAll( MultiMap<V> annotations )
+  public Set<Map.Entry<K, C>> getEntries()
     {
-    if( annotations == null )
+    return getMap().entrySet();
+    }
+
+  public void addAll( MultiMap<C, K, V> sourceMap )
+    {
+    if( sourceMap == null )
       return;
 
-    for( Map.Entry<Enum, Set<V>> entry : annotations.getMap().entrySet() )
+    Map<K, C> destinationMap = sourceMap.getMap();
+
+    for( Map.Entry<K, C> entry : destinationMap.entrySet() )
       addAll( entry.getKey(), entry.getValue() );
     }
 
-  public void addAll( Enum key, V... values )
+  public void put( K key, V value )
+    {
+    getMultiValues( key ).add( value );
+    }
+
+  public C remove( K key )
+    {
+    return getMap().remove( key );
+    }
+
+  protected C getMultiValues( K key )
+    {
+    Map<K, C> map = getMap();
+    C values = map.get( key );
+
+    if( values == null )
+      {
+      values = createCollection();
+      map.put( key, values );
+      }
+
+    return values;
+    }
+
+  public void addAll( K key, V... values )
     {
     addAll( key, Arrays.asList( values ) );
     }
 
-  public void addAll( Enum key, Collection<V> values )
+  public void addAll( K key, Collection<V> values )
     {
-    if( !getMap().containsKey( key ) )
-      getMap().put( key, new LinkedHashSet<V>() );
-
-    getMap().get( key ).addAll( values );
+    getMultiValues( key ).addAll( values );
     }
 
-  public Set<V> getValues()
+  public C getValues()
     {
     if( getMap().isEmpty() )
-      return Collections.emptySet();
+      return emptyCollection();
 
-    Set<V> results = new HashSet<>();
+    C results = createCollection();
 
-    for( Set<V> values : getMap().values() )
+    for( C values : getMap().values() )
       results.addAll( values );
 
     return results;
     }
 
-  public Set<V> getValues( Enum key )
+  public C getValues( K key )
     {
-    Set<V> values = getMap().get( key );
+    C values = getMap().get( key );
 
     if( values == null )
-      return Collections.emptySet();
+      return emptyCollection();
 
     return values;
     }
 
-  public Set<V> getAllValues( Enum... keys )
+  public C getAllValues( K... keys )
     {
     if( keys.length == 0 )
-      return Collections.emptySet();
+      return emptyCollection();
 
     if( keys.length == 1 )
       return getValues( keys[ 0 ] );
 
-    Set<V> values = new LinkedHashSet<>();
+    C values = createCollection();
 
-    for( Enum key : keys )
+    for( K key : keys )
       {
-      Set<V> current = getMap().get( key );
+      C current = getMap().get( key );
 
       if( current != null )
         values.addAll( current );
@@ -125,11 +152,11 @@ public class MultiMap<V> implements Serializable
     return values;
     }
 
-  public Set<Enum> getKeysFor( V value )
+  public Set<K> getKeysFor( V value )
     {
-    Set<Enum> results = new HashSet<>();
+    Set<K> results = new HashSet<>();
 
-    for( Map.Entry<Enum, Set<V>> entry : getMap().entrySet() )
+    for( Map.Entry<K, C> entry : getMap().entrySet() )
       {
       if( entry.getValue().contains( value ) )
         results.add( entry.getKey() );
@@ -140,14 +167,14 @@ public class MultiMap<V> implements Serializable
 
   public boolean hasKey( V value )
     {
-    Set<Enum> keys = getKeysFor( value );
+    Set<K> keys = getKeysFor( value );
 
     return keys != null && !keys.isEmpty();
     }
 
-  public boolean hadKey( Enum key, V value )
+  public boolean hadKey( K key, V value )
     {
-    Set<V> values = getMap().get( key );
+    C values = getMap().get( key );
 
     return values != null && values.contains( value );
     }

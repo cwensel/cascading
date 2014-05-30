@@ -18,17 +18,22 @@
  * limitations under the License.
  */
 
-package cascading.tuple.hadoop.util;
+package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.tuple.Tuple;
-import cascading.tuple.io.TuplePair;
-import org.apache.hadoop.mapred.Partitioner;
+import cascading.flow.planner.iso.expression.MultiTapGroupExpressionGraph;
+import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
+import cascading.flow.planner.rule.RuleExpression;
 
-/** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
-public class GroupingPartitioner extends HasherPartitioner implements Partitioner<TuplePair, Tuple>
+/**
+ *
+ */
+public class MultiTapGroupPartitionExpression extends RuleExpression
   {
-  public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
+  public MultiTapGroupPartitionExpression()
     {
-    return ( hashCode( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
+    super(
+      new NoGroupTapExpressionGraph(),
+      new MultiTapGroupExpressionGraph()
+    );
     }
   }

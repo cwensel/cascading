@@ -27,9 +27,9 @@ import cascading.tap.Tap;
 /**
  *
  */
-public class TapGroupExpressionGraph extends ExpressionGraph
+public class MultiTapGroupExpressionGraph extends ExpressionGraph
   {
-  public TapGroupExpressionGraph()
+  public MultiTapGroupExpressionGraph()
     {
     super( SearchOrder.ReverseTopological );
 

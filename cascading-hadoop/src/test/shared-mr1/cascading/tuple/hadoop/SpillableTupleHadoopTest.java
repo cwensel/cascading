@@ -31,13 +31,13 @@ import cascading.tuple.Tuple;
 import cascading.tuple.collect.SpillableProps;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleMap;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.io.serializer.WritableSerialization;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Test;
 
@@ -70,7 +70,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
   @Test
   public void testSpillListCompressed()
     {
-    GzipCodec codec = ReflectionUtils.newInstance( GzipCodec.class, new JobConf() );
+    GzipCodec codec = ReflectionUtils.newInstance( GzipCodec.class, new Configuration() );
 
     long time = System.currentTimeMillis();
 
@@ -87,7 +87,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
 
   private void performListTest( int size, int threshold, CompressionCodec codec, int spills )
     {
-    JobConf jobConf = new JobConf();
+    Configuration jobConf = new Configuration();
 
     jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
     jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing
@@ -139,7 +139,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    JobConf jobConf = new JobConf();
+    Configuration jobConf = new Configuration();
 
     performMapTest( 5, 5, 100, 20, jobConf );
     performMapTest( 5, 50, 100, 20, jobConf );
@@ -154,7 +154,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     {
     long time = System.currentTimeMillis();
 
-    JobConf jobConf = new JobConf();
+    Configuration jobConf = new Configuration();
 
     jobConf.set( SpillableProps.SPILL_CODECS, "org.apache.hadoop.io.compress.GzipCodec" );
 
@@ -166,7 +166,7 @@ public class SpillableTupleHadoopTest extends CascadingTestCase
     System.out.println( "time = " + ( System.currentTimeMillis() - time ) );
     }
 
-  private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, JobConf jobConf )
+  private void performMapTest( int numKeys, int listSize, int mapThreshold, int listThreshold, Configuration jobConf )
     {
     jobConf.set( "io.serializations", TestSerialization.class.getName() + "," + WritableSerialization.class.getName() ); // disable/replace WritableSerialization class
     jobConf.set( "cascading.serialization.tokens", "1000=" + BooleanWritable.class.getName() + ",10001=" + Text.class.getName() ); // not using Text, just testing parsing

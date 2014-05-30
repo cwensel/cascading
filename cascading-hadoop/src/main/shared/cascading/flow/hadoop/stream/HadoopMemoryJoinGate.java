@@ -34,7 +34,7 @@ import cascading.tuple.collect.Spillable;
 import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleMapFactory;
 import cascading.tuple.hadoop.collect.HadoopTupleMapFactory;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +54,9 @@ public class HadoopMemoryJoinGate extends MemoryHashJoinGate
 
   private class SpillListener implements Spillable.SpillListener
     {
-    private final FlowProcess<JobConf> flowProcess;
+    private final FlowProcess<? extends Configuration> flowProcess;
 
-    public SpillListener( FlowProcess<JobConf> flowProcess )
+    public SpillListener( FlowProcess<? extends Configuration> flowProcess )
       {
       this.flowProcess = flowProcess;
       }
@@ -99,9 +99,9 @@ public class HadoopMemoryJoinGate extends MemoryHashJoinGate
     }
 
   private final SpillListener spillListener;
-  private TupleMapFactory<JobConf> tupleMapFactory;
+  private TupleMapFactory<Configuration> tupleMapFactory;
 
-  public HadoopMemoryJoinGate( FlowProcess<JobConf> flowProcess, HashJoin join )
+  public HadoopMemoryJoinGate( FlowProcess<? extends Configuration> flowProcess, HashJoin join )
     {
     super( flowProcess, join );
 

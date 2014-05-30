@@ -104,6 +104,7 @@ public class HadoopPlatform extends BaseHadoopPlatform<JobConf>
     return Integer.parseInt( properties.get( "mapred.reduce.tasks" ).toString() );
     }
 
+  @Override
   public JobConf getConfiguration()
     {
     return new JobConf( configuration );

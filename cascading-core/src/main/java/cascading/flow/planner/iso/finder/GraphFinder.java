@@ -37,7 +37,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.ScopeExpression;
-import cascading.util.MultiMap;
+import cascading.util.EnumMultiMap;
 import cascading.util.Pair;
 import cascading.util.Util;
 import org.jgrapht.graph.DirectedMultigraph;
@@ -160,7 +160,7 @@ public class GraphFinder
     {
     Match match = null;
 
-    MultiMap<FlowElement> captureMap = new MultiMap<>();
+    EnumMultiMap<FlowElement> captureMap = new EnumMultiMap<>();
 
     while( true )
       {

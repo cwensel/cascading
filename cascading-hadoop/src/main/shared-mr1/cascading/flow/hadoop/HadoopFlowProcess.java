@@ -36,6 +36,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
@@ -66,6 +67,11 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     {
     this.jobConf = new JobConf();
     this.isMapper = true;
+    }
+
+  public HadoopFlowProcess( Configuration jobConf )
+    {
+    this( new JobConf( jobConf ) );
     }
 
   public HadoopFlowProcess( JobConf jobConf )

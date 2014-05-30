@@ -29,12 +29,13 @@ import cascading.tuple.Tuple;
 /**
  *
  */
-public class FalseCollection implements Collection<Tuple>
+public class FalseCollection implements Collection<Tuple>, ResettableCollection<Iterator<Tuple>>
   {
   boolean returnedIterator = false;
   Iterator<Tuple> iterator;
 
-  public void setIterator( Iterator<Tuple> iterator )
+  @Override
+  public void reset( Iterator<Tuple> iterator )
     {
     this.returnedIterator = false;
     this.iterator = iterator;

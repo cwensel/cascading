@@ -43,6 +43,9 @@ import cascading.util.Util;
  */
 public class FlowNode implements ProcessModel, Serializable
   {
+  public static final String CASCADING_FLOW_NODE = "cascading.flow.node";
+  public static final String CASCADING_FLOW_NODE_STREAMED = "cascading.flow.node.streamed";
+
   private final String id;
   private final int ordinal;
   private final String name;
@@ -56,9 +59,8 @@ public class FlowNode implements ProcessModel, Serializable
   private Set<Tap> sourceTaps;
   private Set<Tap> sinkTaps;
 
-  // sources accumulated by join
-  private Map<Tap, Set<String>> reverseSource;
-  private Map<Tap, Set<String>> reverseSink;
+  private Map<Tap, Set<String>> reverseSourceTaps;
+  private Map<Tap, Set<String>> reverseSinkTaps;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
   public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<ElementGraph> pipelineGraphs )
@@ -99,6 +101,21 @@ public class FlowNode implements ProcessModel, Serializable
     return nodeSubGraph;
     }
 
+  public Set<String> getSourceElementNames()
+    {
+    Set<String> results = new HashSet<>();
+
+    for( FlowElement flowElement : getSourceElements() )
+      {
+      if( flowElement instanceof Tap )
+        results.addAll( getSourceTapNames( (Tap) flowElement ) );
+      else
+        results.add( ( (Pipe) flowElement ).getName() );
+      }
+
+    return results;
+    }
+
   public Set<FlowElement> getSourceElements()
     {
     if( sourceElements == null )
@@ -127,7 +144,7 @@ public class FlowNode implements ProcessModel, Serializable
     }
 
   @Override
-  public Set<Tap> getSources()
+  public Set<Tap> getSourceTaps()
     {
     if( sourceTaps != null )
       return sourceTaps;
@@ -144,7 +161,7 @@ public class FlowNode implements ProcessModel, Serializable
     }
 
   @Override
-  public Set<Tap> getSinks()
+  public Set<Tap> getSinkTaps()
     {
     if( sinkTaps != null )
       return sinkTaps;
@@ -166,22 +183,22 @@ public class FlowNode implements ProcessModel, Serializable
     return 0;
     }
 
-  public Set<String> getSourceNames( Tap source )
+  public Set<String> getSourceTapNames( Tap source )
     {
-    return reverseSource.get( source );
+    return reverseSourceTaps.get( source );
     }
 
-  public Set<String> getSinkNames( Tap sink )
+  public Set<String> getSinkTapNames( Tap sink )
     {
-    return reverseSink.get( sink );
+    return reverseSinkTaps.get( sink );
     }
 
   private void assignTrappableNames( FlowElementGraph flowElementGraph )
     {
-    reverseSource = new HashMap<>();
-    reverseSink = new HashMap<>();
+    reverseSourceTaps = new HashMap<>();
+    reverseSinkTaps = new HashMap<>();
 
-    Set<Tap> sources = getSources();
+    Set<Tap> sources = getSourceTaps();
 
     for( Tap source : sources )
       {
@@ -197,7 +214,7 @@ public class FlowNode implements ProcessModel, Serializable
         addSourceName( entry.getKey(), entry.getValue() );
       }
 
-    Set<Tap> sinks = getSinks();
+    Set<Tap> sinks = getSinkTaps();
 
     for( Tap sink : sinks )
       {
@@ -216,18 +233,18 @@ public class FlowNode implements ProcessModel, Serializable
 
   private void addSourceName( String name, Tap source )
     {
-    if( !reverseSource.containsKey( source ) )
-      reverseSource.put( source, new HashSet<String>() );
+    if( !reverseSourceTaps.containsKey( source ) )
+      reverseSourceTaps.put( source, new HashSet<String>() );
 
-    reverseSource.get( source ).add( name );
+    reverseSourceTaps.get( source ).add( name );
     }
 
   private void addSinkName( String name, Tap sink )
     {
-    if( !reverseSink.containsKey( sink ) )
-      reverseSink.put( sink, new HashSet<String>() );
+    if( !reverseSinkTaps.containsKey( sink ) )
+      reverseSinkTaps.put( sink, new HashSet<String>() );
 
-    reverseSink.get( sink ).add( name );
+    reverseSinkTaps.get( sink ).add( name );
     }
 
   @Override

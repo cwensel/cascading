@@ -20,19 +20,24 @@
 
 package cascading.flow.hadoop.stream;
 
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
+import cascading.flow.stream.DuctException;
 import cascading.flow.stream.SpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
 import cascading.pipe.joiner.BufferJoin;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.io.TuplePair;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -40,6 +45,8 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public abstract class HadoopGroupGate extends SpliceGate
   {
+  private final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
+
   protected HadoopGroupByClosure closure;
   protected OutputCollector collector;
 
@@ -51,17 +58,29 @@ public abstract class HadoopGroupGate extends SpliceGate
   @Override
   public void bind( StreamGraph streamGraph )
     {
-    allPrevious = getAllPreviousFor( streamGraph );
-
     if( role != Role.sink )
       next = getNextFor( streamGraph );
+
+    if( role == Role.sink )
+      orderDucts( streamGraph );
     }
 
   @Override
   public void prepare()
     {
-    collector = new MeasuredOutputCollector( flowProcess, SliceCounters.Write_Duration, ( (HadoopFlowProcess) flowProcess ).getOutputCollector() );
+    if( role != Role.source )
+      collector = new MeasuredOutputCollector( flowProcess, SliceCounters.Write_Duration, createOutputCollector() );
+
+    if( role != Role.sink )
+      closure = createClosure();
+    else
+      makePosMap( posMap );
+
+    if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )
+      grouping.joinerClosure = closure;
     }
+
+  protected abstract OutputCollector createOutputCollector();
 
   @Override
   public void start( Duct previous )
@@ -70,6 +89,35 @@ public abstract class HadoopGroupGate extends SpliceGate
       super.start( previous );
     }
 
+  public void receive( Duct previous, TupleEntry incomingEntry ) // todo: receive should receive the edge or ordinal so no lookup
+  {
+  Integer pos = posMap.get( previous ); // todo: when posMap size == 1, pos is always zero -- optimize #get() out
+
+  Tuple groupTuple = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+  Tuple sortTuple = sortFields == null ? null : sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+  Tuple valuesTuple = valuesBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+
+  Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
+
+  try
+    {
+    wrapGroupingAndCollect( previous, valuesTuple, groupKey );
+    flowProcess.increment( SliceCounters.Tuples_Written, 1 );
+    }
+  catch( OutOfMemoryError error )
+    {
+    handleReThrowableException( "out of memory, try increasing task memory allocation", error );
+    }
+  catch( CascadingException exception )
+    {
+    handleException( exception, incomingEntry );
+    }
+  catch( Throwable throwable )
+    {
+    handleException( new DuctException( "internal error: " + incomingEntry.getTuple().print(), throwable ), incomingEntry );
+    }
+  }
+
   @Override
   public void complete( Duct previous )
     {
@@ -77,7 +125,7 @@ public abstract class HadoopGroupGate extends SpliceGate
       super.complete( previous );
     }
 
-  public void run( Tuple key, Iterator values )
+  public void accept( Tuple key, Iterator<Tuple>... values )
     {
     key = unwrapGrouping( key );
 
@@ -85,13 +133,18 @@ public abstract class HadoopGroupGate extends SpliceGate
 
     // Buffer is using JoinerClosure directly
     if( !( splice.getJoiner() instanceof BufferJoin ) )
-      values = splice.getJoiner().getIterator( closure );
+      tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
+    else
+      tupleEntryIterator.reset( values );
 
     keyEntry.setTuple( closure.getGroupTuple( key ) );
-    tupleEntryIterator.reset( values );
 
     next.receive( this, grouping );
     }
+
+  protected abstract HadoopGroupByClosure createClosure();
+
+  protected abstract void wrapGroupingAndCollect( Duct previous, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException;
 
   protected abstract Tuple unwrapGrouping( Tuple key );
   }

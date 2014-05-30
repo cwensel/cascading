@@ -18,22 +18,24 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.expression;
+package cascading.tuple.hadoop.util;
 
-import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
-import cascading.flow.planner.iso.expression.TapGroupExpressionGraph;
-import cascading.flow.planner.rule.RuleExpression;
+import cascading.tuple.Tuple;
+import cascading.tuple.io.TuplePair;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Partitioner;
 
-/**
- *
- */
-public class TapGroupPartitionExpression extends RuleExpression
+/** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
+public class GroupingSortingPartitioner extends HasherPartitioner implements Partitioner<TuplePair, Tuple>
   {
-  public TapGroupPartitionExpression()
+  public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
     {
-    super(
-      new NoGroupTapExpressionGraph(),
-      new TapGroupExpressionGraph()
-    );
+    return ( hashCode( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
+    }
+
+  @Override
+  public void configure( JobConf job )
+    {
+    setConf( job );
     }
   }

@@ -50,8 +50,8 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     {
     Properties currentProperties = parentConfig == null ? new Properties() : new Properties( parentConfig );
 
-    initTaps( flowProcess, currentProperties, getSources(), false );
-    initTaps( flowProcess, currentProperties, getSinks(), true );
+    initTaps( flowProcess, currentProperties, getSourceTaps(), false );
+    initTaps( flowProcess, currentProperties, getSinkTaps(), true );
     initTaps( flowProcess, currentProperties, getTraps(), true );
 
     initFromProcessConfigDef( currentProperties );
@@ -78,7 +78,7 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
 
   private void initFromProcessConfigDef( final Properties properties )
     {
-    initConfFromProcessConfigDef( getSetterFor( properties ) );
+    initConfFromProcessConfigDef( getElementGraph(), getSetterFor( properties ) );
     }
 
   private ConfigDef.Setter getSetterFor( final Properties properties )

@@ -29,7 +29,6 @@ import java.io.OutputStream;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProcessWrapper;
-import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.tuple.TupleException;
 import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.hadoop.TupleSerialization;
@@ -37,11 +36,11 @@ import cascading.tuple.hadoop.io.HadoopTupleInputStream;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CodecPool;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.Compressor;
 import org.apache.hadoop.io.compress.Decompressor;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
   /** Field serializationElementWriter */
   private final TupleSerialization tupleSerialization;
 
-  public static synchronized CompressionCodec getCodec( FlowProcess flowProcess, String defaultCodecs )
+  public static synchronized CompressionCodec getCodec( FlowProcess<? extends Configuration> flowProcess, String defaultCodecs )
     {
     Class<? extends CompressionCodec> codecClass = getCodecClass( flowProcess, defaultCodecs, CompressionCodec.class );
 
@@ -77,7 +76,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
     if( flowProcess instanceof FlowProcessWrapper )
       flowProcess = ( (FlowProcessWrapper) flowProcess ).getDelegate();
 
-    return ReflectionUtils.newInstance( codecClass, ( (HadoopFlowProcess) flowProcess ).getJobConf() );
+    return ReflectionUtils.newInstance( codecClass, flowProcess.getConfigCopy() );
     }
 
   /**
@@ -87,15 +86,15 @@ public class HadoopSpillableTupleList extends SpillableTupleList
    * @param threshold of type long
    * @param codec     of type CompressionCodec
    */
-  public HadoopSpillableTupleList( int threshold, CompressionCodec codec, JobConf jobConf )
+  public HadoopSpillableTupleList( int threshold, CompressionCodec codec, Configuration configuration )
     {
     super( threshold );
     this.codec = codec;
 
-    if( jobConf == null )
+    if( configuration == null )
       this.tupleSerialization = new TupleSerialization();
     else
-      this.tupleSerialization = new TupleSerialization( jobConf );
+      this.tupleSerialization = new TupleSerialization( configuration );
     }
 
   public HadoopSpillableTupleList( int threshold, TupleSerialization tupleSerialization, CompressionCodec codec )

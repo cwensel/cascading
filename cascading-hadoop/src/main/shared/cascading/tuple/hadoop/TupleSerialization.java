@@ -57,7 +57,6 @@ import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.io.serializer.WritableSerialization;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZA
  * Class TupleSerialization is an implementation of Hadoop's {@link Serialization} interface.
  * <p/>
  * Typically developers will not use this implementation directly as it is automatically added
- * to any relevant MapReduce jobs via the {@link JobConf}.
+ * to any relevant MapReduce jobs via the {@link org.apache.hadoop.conf.Configuration}.
  * <p/>
  * By default, all primitive types are natively handled, and {@link org.apache.hadoop.io.BytesWritable}
  * has a pre-configured serialization token since byte arrays are not handled natively by {@link Tuple}.
@@ -233,7 +232,7 @@ public class TupleSerialization extends Configured implements Serialization
     {
     }
 
-  public TupleSerialization( final FlowProcess<JobConf> flowProcess )
+  public TupleSerialization( final FlowProcess<? extends Configuration> flowProcess )
     {
     super( new Configuration()
     {
@@ -275,7 +274,7 @@ public class TupleSerialization extends Configured implements Serialization
   public Configuration getConf()
     {
     if( super.getConf() == null )
-      setConf( new JobConf() );
+      setConf( new Configuration() );
 
     return super.getConf();
     }

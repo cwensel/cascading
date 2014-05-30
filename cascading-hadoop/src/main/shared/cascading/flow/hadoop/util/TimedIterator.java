@@ -20,29 +20,47 @@
 
 package cascading.flow.hadoop.util;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.util.CloseableIterator;
 
 /**
  *
  */
-public class TimedIterator implements Iterator
+public class TimedIterator<V> implements CloseableIterator<V>
   {
   private final FlowProcess flowProcess;
   private final Enum durationCounter;
   private final Enum countCounter;
+  private final int ordinal;
 
-  Iterator iterator;
+  Iterator<V> iterator;
 
   public TimedIterator( FlowProcess flowProcess, Enum durationCounter, Enum countCounter )
+    {
+    this( flowProcess, durationCounter, countCounter, 0 );
+    }
+
+  public TimedIterator( FlowProcess flowProcess, Enum durationCounter, Enum countCounter, int ordinal )
     {
     this.flowProcess = flowProcess;
     this.durationCounter = durationCounter;
     this.countCounter = countCounter;
+    this.ordinal = ordinal;
     }
 
-  public void reset( Iterator iterator )
+  public void reset( Iterable<V> iterable )
+    {
+    if( iterable == null )
+      this.iterator = null;
+    else
+      this.iterator = iterable.iterator();
+    }
+
+  public void reset( Iterator<V> iterator )
     {
     this.iterator = iterator;
     }
@@ -50,6 +68,9 @@ public class TimedIterator implements Iterator
   @Override
   public boolean hasNext()
     {
+    if( iterator == null )
+      return false;
+
     long start = System.currentTimeMillis();
 
     try
@@ -63,7 +84,7 @@ public class TimedIterator implements Iterator
     }
 
   @Override
-  public Object next()
+  public V next()
     {
     long start = System.currentTimeMillis();
 
@@ -83,5 +104,12 @@ public class TimedIterator implements Iterator
   public void remove()
     {
     iterator.remove();
+    }
+
+  @Override
+  public void close() throws IOException
+    {
+    if( iterator instanceof Closeable )
+      ( (Closeable) iterator ).close();
     }
   }

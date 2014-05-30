@@ -34,8 +34,6 @@ import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.HadoopFlowProcess;
-import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
@@ -61,9 +59,6 @@ import cascading.tuple.TupleEntryIterator;
 import data.InputData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Test;
@@ -84,11 +79,6 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     super( true );
     }
 
-  private JobConf getJobConf()
-    {
-    return ( (BaseHadoopPlatform<JobConf>) getPlatform() ).getConfiguration();
-    }
-
   @Test
   public void testDfs() throws URISyntaxException, IOException
     {
@@ -104,7 +94,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Tap tap = new Dfs( new SequenceFile( new Fields( "foo" ) ), "some/path" );
 
-    String path = tap.getFullIdentifier( HadoopPlanner.createJobConf( getProperties() ) );
+    String path = tap.getFullIdentifier( getPlatform().getFlowProcess() );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
 
     new Dfs( new SequenceFile( new Fields( "foo" ) ), "hdfs://localhost:5001/some/path" );
@@ -134,7 +124,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     {
     Tap tap = new Lfs( new SequenceFile( new Fields( "foo" ) ), "some/path" );
 
-    String path = tap.getFullIdentifier( HadoopPlanner.createJobConf( getProperties() ) );
+    String path = tap.getFullIdentifier( getPlatform().getFlowProcess() );
     assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Lfs( new SequenceFile( new Fields( "foo" ) ), "file:///some/path" );
@@ -432,16 +422,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "*" );
 
-    assertTrue( sourceExists.resourceExists( getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( getPlatform().getFlowProcess() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( getPlatform().getFlowProcess() );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
+      iterator = sourceNotExists.openForRead( getPlatform().getFlowProcess() );
       fail();
       }
     catch( IOException exception )
@@ -458,16 +448,16 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Hfs sourceExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "{*}" );
 
-    assertTrue( sourceExists.resourceExists( getJobConf() ) );
+    assertTrue( sourceExists.resourceExists( getPlatform().getFlowProcess() ) );
 
-    TupleEntryIterator iterator = sourceExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
+    TupleEntryIterator iterator = sourceExists.openForRead( getPlatform().getFlowProcess() );
     assertTrue( iterator.hasNext() );
     iterator.close();
 
     try
       {
       Hfs sourceNotExists = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputPath + "/blah/" );
-      iterator = sourceNotExists.openForRead( new HadoopFlowProcess( getJobConf() ) );
+      iterator = sourceNotExists.openForRead( getPlatform().getFlowProcess() );
       fail();
       }
     catch( IOException exception )
@@ -539,37 +529,6 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
-    }
-
-  @Test
-  public void testCombinedHfs() throws Exception
-    {
-    getPlatform().copyFromLocal( inputFileLower );
-    getPlatform().copyFromLocal( inputFileUpper );
-
-    Hfs sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputFileLower );
-    Hfs sourceUpper = new Hfs( new TextLine( new Fields( "offset", "line" ) ), InputData.inputFileUpper );
-
-    // create a CombinedHfs instance on these files
-    Tap source = new MultiSourceTap<Hfs, JobConf, RecordReader>( sourceLower, sourceUpper );
-
-    FlowProcess<JobConf> process = getPlatform().getFlowProcess();
-    JobConf conf = process.getConfigCopy();
-
-    // set the combine flag
-    conf.setBoolean( HfsProps.COMBINE_INPUT_FILES, true );
-
-    // test the input format and the split
-    source.sourceConfInit( process, conf );
-
-    InputFormat inputFormat = conf.getInputFormat();
-
-    assertEquals( Hfs.CombinedInputFormat.class, inputFormat.getClass() );
-    InputSplit[] splits = inputFormat.getSplits( conf, 1 );
-
-    assertEquals( 1, splits.length );
-
-    validateLength( source.openForRead( process ), 10 );
     }
 
   @Test

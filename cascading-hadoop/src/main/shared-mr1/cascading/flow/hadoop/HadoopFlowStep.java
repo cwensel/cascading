@@ -26,29 +26,26 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
+import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowStepJob;
-import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.hadoop.util.TempHfs;
-import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.util.CoGroupingComparator;
 import cascading.tuple.hadoop.util.CoGroupingPartitioner;
 import cascading.tuple.hadoop.util.GroupingComparator;
-import cascading.tuple.hadoop.util.GroupingPartitioner;
 import cascading.tuple.hadoop.util.GroupingSortingComparator;
+import cascading.tuple.hadoop.util.GroupingSortingPartitioner;
 import cascading.tuple.hadoop.util.IndexTupleCoGroupingComparator;
 import cascading.tuple.hadoop.util.ReverseGroupingSortingComparator;
 import cascading.tuple.hadoop.util.ReverseTupleComparator;
@@ -57,13 +54,12 @@ import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
 import cascading.util.Util;
 import cascading.util.Version;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 
-import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
-import static cascading.flow.hadoop.util.HadoopUtil.writeStateToDistCache;
+import static cascading.flow.hadoop.util.HadoopUtil.addComparators;
+import static cascading.flow.hadoop.util.HadoopUtil.pack;
 
 /**
  *
@@ -126,10 +122,10 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       if( getGroup().isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
 
-      addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors() );
+      addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors(), this, getGroup() );
 
       if( getGroup().isGroupBy() )
-        addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors() );
+        addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors(), this, getGroup() );
 
       if( !getGroup().isGroupBy() )
         {
@@ -142,7 +138,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
       if( getGroup().isSorted() )
         {
-        conf.setPartitionerClass( GroupingPartitioner.class );
+        conf.setPartitionerClass( GroupingSortingPartitioner.class );
         conf.setMapOutputKeyClass( TuplePair.class );
 
         if( getGroup().isSortReversed() )
@@ -181,8 +177,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
     else
       {
-      conf.set( "cascading.flow.step.node.map.path", writeStateToDistCache( conf, getID(), "map", mapState ) );
-      conf.set( "cascading.flow.step.node.reduce.path", writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
+      conf.set( "cascading.flow.step.node.map.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "map", mapState ) );
+      conf.set( "cascading.flow.step.node.reduce.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
       }
 
     return conf;
@@ -191,21 +187,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
   public boolean isHadoopLocalMode( JobConf conf )
     {
     return HadoopUtil.isLocal( conf );
-    }
-
-  private String pack( Object object, Configuration conf )
-    {
-    if( object == null )
-      return "";
-
-    try
-      {
-      return serializeBase64( object, conf, true );
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to pack object: " + object.getClass().getCanonicalName(), exception );
-      }
     }
 
   protected FlowStepJob<JobConf> createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
@@ -285,30 +266,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
     }
 
-  private void addComparators( JobConf conf, String property, Map<String, Fields> map )
-    {
-    Iterator<Fields> fieldsIterator = map.values().iterator();
-
-    if( !fieldsIterator.hasNext() )
-      return;
-
-    Fields fields = fieldsIterator.next();
-
-    if( fields.hasComparators() )
-      {
-      conf.set( property, pack( fields, conf ) );
-      return;
-      }
-
-    // use resolved fields if there are no comparators.
-    Set<Scope> previousScopes = getPreviousScopes( getGroup() );
-
-    fields = previousScopes.iterator().next().getOutValuesFields();
-
-    if( fields.size() != 0 ) // allows fields.UNKNOWN to be used
-      conf.setInt( property + ".size", fields.size() );
-    }
-
   private void initFromTraps( FlowProcess<JobConf> flowProcess, JobConf conf, Map<String, Tap> traps )
     {
     if( !traps.isEmpty() )
@@ -355,47 +312,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   private void initFromProcessConfigDef( final JobConf conf )
     {
-    initConfFromProcessConfigDef( getSetterFor( conf ) );
-    }
-
-  private ConfigDef.Setter getSetterFor( final JobConf conf )
-    {
-    return new ConfigDef.Setter()
-    {
-    @Override
-    public String set( String key, String value )
-      {
-      String oldValue = get( key );
-
-      conf.set( key, value );
-
-      return oldValue;
-      }
-
-    @Override
-    public String update( String key, String value )
-      {
-      String oldValue = get( key );
-
-      if( oldValue == null )
-        conf.set( key, value );
-      else if( !oldValue.contains( value ) )
-        conf.set( key, oldValue + "," + value );
-
-      return oldValue;
-      }
-
-    @Override
-    public String get( String key )
-      {
-      String value = conf.get( key );
-
-      if( value == null || value.isEmpty() )
-        return null;
-
-      return value;
-      }
-    };
+    initConfFromProcessConfigDef( getElementGraph(), new ConfigurationSetter( conf ) );
     }
 
   /**
@@ -432,4 +349,5 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     {
     initFromTraps( flowProcess, conf, getTrapMap() );
     }
+
   }
