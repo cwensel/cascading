@@ -28,6 +28,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
+import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.Duct;
@@ -78,6 +79,7 @@ public class FlowMapper implements MapRunnable
         stepState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ) );
 
       HadoopFlowStep step = deserializeBase64( stepState, jobConf, HadoopFlowStep.class );
+
       Tap source = step.getTapForID( step.getSources(), jobConf.get( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, step, source );
@@ -93,6 +95,8 @@ public class FlowMapper implements MapRunnable
       }
     catch( Throwable throwable )
       {
+      reportIfLocal( throwable );
+
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
@@ -128,14 +132,18 @@ public class FlowMapper implements MapRunnable
         }
       catch( OutOfMemoryError error )
         {
+        reportIfLocal( error );
         throw error;
         }
       catch( IOException exception )
         {
+        reportIfLocal( exception );
         throw exception;
         }
       catch( Throwable throwable )
         {
+        reportIfLocal( throwable );
+
         if( throwable instanceof CascadingException )
           throw (CascadingException) throwable;
 
@@ -153,5 +161,15 @@ public class FlowMapper implements MapRunnable
         currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
         }
       }
+    }
+
+  /**
+   * Report the error to HadoopFlowStepJob if we are running in Hadoops local mode.
+   * @param throwable The throwable that was thrown.
+   */
+  private void reportIfLocal( Throwable throwable )
+    {
+    if ( HadoopUtil.isLocal( currentProcess.getJobConf() ) )
+      HadoopFlowStepJob.reportLocalError( throwable );
     }
   }

@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Properly capture and report any Exception in c.f.h.FlowMapper and c.f.h.FlowReducer in Hadoop standalone mode.
+
   Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
   causing j.i.EOFExceptions.
 
