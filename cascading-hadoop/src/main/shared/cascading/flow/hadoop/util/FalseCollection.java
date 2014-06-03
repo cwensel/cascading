@@ -50,7 +50,7 @@ public class FalseCollection implements Collection<Tuple>, ResettableCollection<
   @Override
   public boolean isEmpty()
     {
-    return iterator == null;
+    return iterator == null || !iterator.hasNext();
     }
 
   @Override
@@ -68,7 +68,7 @@ public class FalseCollection implements Collection<Tuple>, ResettableCollection<
     try
       {
       if( iterator == null )
-        return Collections.EMPTY_LIST.iterator();
+        return Collections.emptyIterator();
 
       return iterator;
       }

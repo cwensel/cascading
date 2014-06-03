@@ -47,7 +47,7 @@ public class LazyCollection implements Collection<Tuple>, ResettableCollection<I
   @Override
   public boolean isEmpty()
     {
-    return parent.isEmpty();
+    return !iterator.hasNext() && parent.isEmpty();
     }
 
   @Override
